@@ -22,6 +22,7 @@ def helpMessage() {
 
     Mandatory arguments:
       --input [file]                  Comma-separated file containing information about the samples in the experiment (see docs/usage.md)
+      --protocol [str]                Specifies the type of protocol used for sequencing i.e. "metagenomics" or "amplicon". (Default: "metagenomics")
       --host_fasta [file]             Path to Fasta reference for host genome. Not mandatory when using reference in iGenomes config via --genome
       --viral_fasta [file]            Path to Fasta reference for viral genome
       -profile [str]                  Configuration profile to use. Can use multiple (comma separated)
@@ -39,6 +40,12 @@ def helpMessage() {
 
     Alignments
       --save_align_intermeds [bool]   Save the intermediate BAM files from the alignment step (Default: false)
+
+    Denovo Assembly
+      --skip_assembly [bool]          Skip assembly steps in the pipeline
+
+    Variant Calling
+      --skip_variants [bool]          Skip variant calling steps in the pipeline
 
     QC
       --skip_fastqc [bool]            Skip FastQC (Default: false)
@@ -98,6 +105,10 @@ params.host_bowtie2_index = params.genome ? params.genomes[ params.genome ].bowt
 ////////////////////////////////////////////////////
 
 if (params.input) { ch_input = file(params.input, checkIfExists: true) } else { exit 1, "Samplesheet file not specified!" }
+
+if (params.protocol != 'metagenomics' && params.protocol != 'amplicon') {
+    exit 1, "Invalid protocol option: ${params.protocol}. Valid options: 'metagenomics' or 'amplicon'"
+}
 
 // Host reference files
 if (params.host_fasta) {
@@ -173,15 +184,18 @@ if (workflow.revision) summary['Pipeline Release'] = workflow.revision
 summary['Run Name']         = custom_runName ?: workflow.runName
 // TODO nf-core: Report custom parameters here
 summary['Samplesheet']            = params.input
+summary['Protocol']               = params.protocol
 summary['Host Genome']            = params.genome ?: 'Not supplied'
 summary['Host Fasta File']        = params.host_fasta
 summary['Viral Fasta File']       = params.viral_fasta
 if (params.host_bowtie2_index)    summary['Host Bowtie2 Index'] = params.host_bowtie2_index
 if (params.viral_bowtie2_index)   summary['Viral Bowtie2 Index'] = params.viral_bowtie2_index
-summary['Save Genome Index']      = params.save_reference ? 'Yes' : 'No'
+summary['Save Genome Indices']    = params.save_reference ? 'Yes' : 'No'
 if (params.skip_trimming)         summary['Skip Trimming'] = 'Yes'
 if (params.save_trimmed)          summary['Save Trimmed'] = 'Yes'
 if (params.save_align_intermeds)  summary['Save Intermeds'] =  'Yes'
+if (params.skip_assembly)         summary['Skip Denovo Assembly'] =  'Yes'
+if (params.skip_variants)         summary['Skip Variant Calling'] =  'Yes'
 if (params.skip_qc)               summary['Skip QC'] = 'Yes'
 if (params.skip_fastqc)           summary['Skip FastQC'] = 'Yes'
 if (params.skip_multiqc)          summary['Skip MultiQC'] = 'Yes'
