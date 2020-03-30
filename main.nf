@@ -258,33 +258,38 @@ process CHECK_SAMPLESHEET {
     """
 }
 
-// // Function to get list of [ sample, single_end?, long_reads?, [ fastq_1, fastq_2 ] ]
-// def validate_input(LinkedHashMap sample) {
-//     def sample_id = sample.sample_id
-//     def single_end = sample.single_end.toBoolean()
-//     def long_reads = sample.long_reads.toBoolean()
-//     def fastq_1 = sample.fastq_1
-//     def fastq_2 = sample.fastq_2
-//
-//     def array = []
-//     if (single_end || long_reads) {
-//         array = [ sample_id, single_end, long_reads, [ file(fastq_1, checkIfExists: true) ] ]
-//     } else {
-//         array = [ sample_id, single_end, long_reads, [ file(fastq_1, checkIfExists: true), file(fastq_2, checkIfExists: true) ] ]
-//     }
-//     return array
-// }
-//
-// /*
-//  * Create channels for input fastq files
-//  */
-// ch_samplesheet_reformat
-//     .splitCsv(header:true, sep:',')
-//     .map { validate_input(it) }
-//     .into { ch_reads_nanoplot;
-//             ch_reads_fastqc;
-//             ch_reads_bwa;
-//             ch_reads_minimap2 }
+// Function to get list of [ sample, single_end?, is_sra?, [ fastq_1, fastq_2 ] ]
+def validate_input(LinkedHashMap sample) {
+    def sample_id = sample.sample_id
+    def single_end = sample.single_end.toBoolean()
+    def is_sra = sample.is_sra.toBoolean()
+    def fastq_1 = sample.fastq_1
+    def fastq_2 = sample.fastq_2
+
+    def array = []
+    if (!is_sra) {
+        if (single_end) {
+            array = [ sample_id, single_end, is_sra, [ file(fastq_1, checkIfExists: true) ] ]
+        } else {
+            array = [ sample_id, single_end, is_sra, [ file(fastq_1, checkIfExists: true), file(fastq_2, checkIfExists: true) ] ]
+        }
+    } else {
+        array = [ sample_id, single_end, is_sra, [ ] ]
+    }
+
+    return array
+}
+
+/*
+ * Create channels for input fastq files
+ */
+ch_samplesheet_reformat
+    .splitCsv(header:true, sep:',')
+    .map { validate_input(it) }
+    .into { ch_reads_fastqc;
+            ch_reads_bowtie2 }
+
+ch_reads_fastqc.println()
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -294,29 +299,29 @@ process CHECK_SAMPLESHEET {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * PREPROCESSING: Build Host Bowtie2 index
- */
-if (!params.host_bowtie2_index) {
-    process HOST_BOWTIE2_INDEX {
-        tag "$fasta"
-        label 'process_high'
-        publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-            saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
-
-        input:
-        file fasta from ch_host_fasta
-
-        output:
-        file "Bowtie2IndexHost" into ch_host_bowtie2_index
-
-        script:
-        """
-        bowtie2 index -a bwtsw $fasta
-        mkdir Bowtie2IndexHost && mv ${fasta}* Bowtie2IndexHost
-        """
-    }
-}
+// /*
+//  * PREPROCESSING: Build Host Bowtie2 index
+//  */
+// if (!params.host_bowtie2_index) {
+//     process HOST_BOWTIE2_INDEX {
+//         tag "$fasta"
+//         label 'process_high'
+//         publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
+//             saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+//
+//         input:
+//         file fasta from ch_host_fasta
+//
+//         output:
+//         file "Bowtie2IndexHost" into ch_host_bowtie2_index
+//
+//         script:
+//         """
+//         bowtie2 index -a bwtsw $fasta
+//         mkdir Bowtie2IndexHost && mv ${fasta}* Bowtie2IndexHost
+//         """
+//     }
+// }
 
 // /*
 //  * PREPROCESSING: Build Viral Bowtie2 index
