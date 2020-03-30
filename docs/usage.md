@@ -10,10 +10,17 @@
 * [Main arguments](#main-arguments)
   * [`-profile`](#-profile)
   * [`--input`](#--input)
+  * [`--protocol`](#--protocol)
 * [Reference genomes](#reference-genomes)
-  * [`--genome` (using iGenomes)](#--genome-using-igenomes)
-  * [`--fasta`](#--fasta)
-  * [`--bwa_index`](#--bwa_index)
+  * [`--host_genome` (using iGenomes)](#--host-genome-using-igenomes)
+  * [`--host_fasta`](#--host_fasta)
+  * [`--host_bowtie2_index`](#--host_bowtie2_index)
+  * [`--viral_genome` (using iGenomes)](#--viral-genome-using-igenomes)
+  * [`--viral_fasta`](#--viral_fasta)
+  * [`--viral_bowtie2_index`](#--viral_bowtie2_index)
+  * [`--viral_blast_db`](#--viral_blast_db)
+  * [`--viral_gff`](#--viral_gff)
+  * [`--kraken2_db`](#--kraken2_db)
   * [`--save_reference`](#--save_reference)
   * [`--igenomes_ignore`](#--igenomes_ignore)
 * [Adapter trimming](#adapter-trimming)
@@ -21,6 +28,10 @@
   * [`--save_trimmed`](#--save_trimmed)
 * [Alignments](#alignments)
   * [`--save_align_intermeds`](#--save_align_intermeds)
+* [De novo assembly](#de-novo-assembly)
+  * [`--skip_assembly`](#--skip_assembly)
+* [Variant calling](#variant-calling)
+  * [`--skip_variants`](#--skip_variants)
 * [Skipping QC steps](#skipping-qc-steps)
 * [Job resources](#job-resources)
   * [Automatic resubmission](#automatic-resubmission)
@@ -128,10 +139,10 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
 
 ### `--input`
 
-You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 5 columns, and a header row as shown in the examples below.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
 
 ```bash
---input '[path to design file]'
+--input '[path to samplesheet file]'
 ```
 
 #### Format
@@ -155,24 +166,24 @@ SRR11177792,,
 | `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".  |
 | `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".  |
 
+### `--protocol`
+
+Specifies the type of protocol used for sequencing i.e. "metagenomic" or "amplicon". Default: "metagenomic".
+
 ## Reference genomes
 
 The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
 
-### `--genome` (using iGenomes)
+### `--host_genome` (using iGenomes)
 
-There are 31 different species supported in the iGenomes references. To run the pipeline, you must specify which to use with the `--genome` flag.
+There are 31 different species supported in the iGenomes references. To run the pipeline, you must specify which to use with the `--host_genome` flag.
 
 You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:
 
 * Human
-  * `--genome GRCh37`
+  * `--host_genome GRCh37`
 * Mouse
-  * `--genome GRCm38`
-* _Drosophila_
-  * `--genome BDGP6`
-* _S. cerevisiae_
-  * `--genome 'R64-1-1'`
+  * `--host_genome GRCm38`
 
 > There are numerous others - check the config file for more.
 
@@ -195,21 +206,55 @@ params {
 
 <!-- TODO nf-core: Describe reference path flags -->
 
-### `--fasta`
+### `--host_fasta`
 
-Full path to fasta file containing reference genome (*mandatory* if `--genome` is not specified). If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.
-
-```bash
---fasta '[path to FASTA reference]'
-```
-
-### `--bwa_index`
-
-Full path to an existing BWA index for the reference genome including the base name for the index.
+Full path to fasta file containing reference genome for the host species (*mandatory* if `--host_genome` is not specified). If you don't have a Bowtie2 index available this will be generated for you automatically. Combine with `--save_reference` to save Bowtie2 index for future runs.
 
 ```bash
---bwa_index '[directory containing BWA index]/genome.fa'
+--host_fasta '[path to FASTA reference]'
 ```
+
+### `--host_bowtie2_index`
+
+Full path to an existing Bowtie2 index for the host reference genome including the base name for the index.
+
+```bash
+--host_bowtie2_index '[directory containing Bowtie2 index]/genome.fa'
+```
+
+### `--viral_genome` (using iGenomes)
+
+Similar to providing the `--host_genome`](#--host-genome-using-igenomes) parameter you can also provide a key for the viral genome you would like to use with the pipeline. These have been uploaded manually to AWS iGenomes along with the relevant databases and indices so you don't have to obtain them individually! To run the pipeline, you must specify which to use with the `--viral_genome` flag.
+
+You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config).
+
+### `--viral_fasta`
+
+Full path to fasta file containing reference genome for the viral species (*mandatory* if `--viral_genome` is not specified). If you don't have a Bowtie2 index available this will be generated for you automatically. Combine with `--save_reference` to save Bowtie2 index for future runs.
+
+```bash
+--viral_fasta '[path to FASTA reference]'
+```
+
+### `--viral_bowtie2_index`
+
+Full path to an existing Bowtie2 index for the viral reference genome including the base name for the index.
+
+```bash
+--viral_bowtie2_index '[directory containing Bowtie2 index]/genome.fa'
+```
+
+### `--viral_blast_db`
+
+Full path to Blast database for viral genome
+
+### `--viral_gff`
+
+Full path to viral gff annotation file
+
+### `--kraken2_db`
+
+Full path to Kraken2 database built from both host and viral genomes
 
 ### `--save_reference`
 
@@ -234,6 +279,18 @@ By default, trimmed FastQ files will not be saved to the results directory. Spec
 ### `--save_align_intermeds`
 
 By default, intermediate BAM files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set to true to also save other intermediate BAM files.
+
+## De novo assembly
+
+### `--skip_assembly`
+
+Specify this parameter to skip all of the de novo assembly steps in the pipeline.
+
+## Variant calling
+
+### `--skip_variants`
+
+Specify this parameter to skip all of the variant calling steps in the pipeline.
 
 ## Skipping QC steps
 
