@@ -1,7 +1,5 @@
 # ![nf-core/viralrecon](docs/images/nf-core-viralrecon_logo.png)
 
-**Assembly and intrahost/low-frequency variant calling for viral samples**.
-
 [![GitHub Actions CI Status](https://github.com/nf-core/viralrecon/workflows/nf-core%20CI/badge.svg)](https://github.com/nf-core/viralrecon/actions)
 [![GitHub Actions Linting Status](https://github.com/nf-core/viralrecon/workflows/nf-core%20linting/badge.svg)](https://github.com/nf-core/viralrecon/actions)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
@@ -10,6 +8,12 @@
 [![Docker](https://img.shields.io/docker/automated/nfcore/viralrecon.svg)](https://hub.docker.com/r/nfcore/viralrecon)
 
 ## Introduction
+
+**nfcore/viralrecon** is a bioinformatics analysis pipeline used to perform assembly and intrahost/low-frequency variant calling for viral samples. The pipeline currently supports metagenomics and amplicon sequencing data derived from the Illumina sequencing platform.
+
+This pipeline is a re-implementation of the [SARS_Cov2_consensus-nf](https://github.com/BU-ISCIII/SARS_Cov2_consensus-nf) and [/SARS_Cov2_assembly-nf](https://github.com/BU-ISCIII/SARS_Cov2_assembly-nf) pipelines developed by [Sarai Varona](https://github.com/svarona) and [Sara Monzon](https://github.com/saramonzon) from [BU-ISCIII](https://github.com/BU-ISCIII).
+
+The implementation of nf-core/viralrecon is an international collaboration between numerous contributors and developers. We appreciated the need to have a portable, reproducible and scalable pipeline for the analysis of COVID-19 sequencing samples and so the Avengers Assembled! Please come and join us and add yourself to the contributor list :)
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
@@ -54,7 +58,21 @@ The nf-core/viralrecon pipeline comes with documentation about the pipeline, fou
 
 ## Credits
 
-nf-core/viralrecon was originally written by Sarai Varona and Sara Monzon.
+nf-core/viralrecon was originally written by Sarai Varona, Miguel Juliá and Sara Monzon from [BU-ISCIII](https://github.com/BU-ISCIII) and co-ordinated by Isabel Cuesta at [Institute of Health Carlos III](https://eng.isciii.es/eng.isciii.es/Paginas/Inicio.html), Spain.
+
+Many thanks to others who have helped out and contributed along the way too, including (but not limited to):
+
+| Name                                                      | Affiliation                                                                           |
+|-----------------------------------------------------------|---------------------------------------------------------------------------------------|
+| [Alexander Peltzer](https://github.com/apeltzer)          | [Boehringer Ingelheim, Germany](https://www.boehringer-ingelheim.de/)                 |
+| [Gisela Gabernet](https://github.com/ggabernet)           | [QBIC, University of Tubingen, Germany](https://portal.qbic.uni-tuebingen.de/portal/) |
+| [Harshil Patel](https://github.com/drpatelh)              | [The Francis Crick Institute, UK](https://www.crick.ac.uk/)                           |
+| [Maxime Garcia](https://github.com/MaxUlysse)             | [SciLifeLab, Sweden](https://www.scilifelab.se/)                                      |
+| [Michael Heuer](https://github.com/heuermh)               | [UC Berkeley, USA](https://https://rise.cs.berkeley.edu)                              |
+| [Olga Botvinnik](https://github.com/olgabot)              | [Chan Zuckerberg Biohub, USA](https://www.czbiohub.org/)                              |
+| [Phil Ewels](https://github.com/ewels)                    | [SciLifeLab, Sweden](https://www.scilifelab.se/)                                      |
+
+> Listed in alphabetical order
 
 ## Contributions and Support
 
