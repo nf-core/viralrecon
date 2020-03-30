@@ -44,10 +44,10 @@ def helpMessage() {
     Alignments
       --save_align_intermeds [bool]   Save the intermediate BAM files from the alignment step (Default: false)
 
-    Denovo Assembly
+    Denovo assembly
       --skip_assembly [bool]          Skip assembly steps in the pipeline
 
-    Variant Calling
+    Variant calling
       --skip_variants [bool]          Skip variant calling steps in the pipeline
 
     QC
