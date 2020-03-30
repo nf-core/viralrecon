@@ -348,6 +348,17 @@ ch_samplesheet_reformat
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
+/* --                     DOWNLOAD SRA FILES                              -- */
+/* --                                                                     -- */
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+// GET SRA FASTQ FILES HERE
+// MERGE WITH ORIGINAL CHANNELS BEFORE PASSING TO NEXT STEPS
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/* --                                                                     -- */
 /* --                        FASTQ QC                                     -- */
 /* --                                                                     -- */
 ///////////////////////////////////////////////////////////////////////////////
@@ -540,7 +551,7 @@ Channel.from(summary.collect{ [it.key, it.value] })
  * Parse software version numbers
  */
 process get_software_versions {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy',
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf(".csv") > 0) filename
                       else null
@@ -564,42 +575,41 @@ process get_software_versions {
     """
 }
 
-// /*
-// * STEP 10: MultiQC
-// */
-// process MULTIQC {
-//     publishDir "${params.outdir}/multiqc", mode: 'copy'
-//
-//     input:
-//     file (multiqc_config) from ch_multiqc_config
-//     file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
-//     // TODO nf-core: Add in log files from your new processes for MultiQC to find!
-//     //file ('fastqc/*') from ch_fastqc_reports_mqc.collect().ifEmpty([])
-//     //file ('samtools/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
-//     file ('software_versions/*') from ch_software_versions_yaml.collect()
-//     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
-//
-//     output:
-//     file "*multiqc_report.html" into ch_multiqc_report
-//     file "*_data"
-//     file "multiqc_plots"
-//
-//     script:
-//     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
-//     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
-//     custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
-//     // TODO nf-core: Specify which MultiQC modules to use with -m for a faster run time
-//     """
-//     multiqc . -f $rtitle $rfilename $custom_config_file \\
-//         -m custom_content -m fastqc -m samtools -m picard
-//     """
-// }
+/*
+* STEP 10: MultiQC
+*/
+process MULTIQC {
+    publishDir "${params.outdir}/multiqc", mode: params.publish_dir_mode
+
+    input:
+    file (multiqc_config) from ch_multiqc_config
+    file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
+    // TODO nf-core: Add in log files from your new processes for MultiQC to find!
+    file ('fastqc/*') from ch_fastqc_reports_mqc.collect().ifEmpty([])
+    file ('software_versions/*') from ch_software_versions_yaml.collect()
+    file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
+
+    output:
+    file "*multiqc_report.html" into ch_multiqc_report
+    file "*_data"
+    file "multiqc_plots"
+
+    script:
+    rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
+    rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
+    custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
+    // TODO nf-core: Specify which MultiQC modules to use with -m for a faster run time
+    """
+    multiqc . -f $rtitle $rfilename $custom_config_file \\
+        -m custom_content -m fastqc -m samtools -m picard
+    """
+}
 
 /*
 * STEP 11: Output Description HTML
 */
 process output_documentation {
-    publishDir "${params.outdir}/pipeline_info", mode: 'copy'
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode
 
     input:
     file output_docs from ch_output_docs
