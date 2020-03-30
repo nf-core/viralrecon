@@ -99,6 +99,7 @@ params.host_bowtie2_index = params.genome ? params.genomes[ params.genome ].bowt
 
 if (params.input) { ch_input = file(params.input, checkIfExists: true) } else { exit 1, "Samplesheet file not specified!" }
 
+// Host reference files
 if (params.host_fasta) {
     lastPath = params.host_fasta.lastIndexOf(File.separator)
     host_index_base = params.host_fasta.substring(lastPath+1)
@@ -109,11 +110,29 @@ if (params.host_fasta) {
 
 if (params.host_bowtie2_index) {
     lastPath = params.host_bowtie2_index.lastIndexOf(File.separator)
-    host_index_dir =  params.host_bowtie2_index.substring(0,lastPath+1)
+    host_index_dir = params.host_bowtie2_index.substring(0,lastPath+1)
     host_index_base = params.host_bowtie2_index.substring(lastPath+1)
     Channel
         .fromPath(host_index_dir, checkIfExists: true)
         .set { ch_host_bowtie2_index }
+}
+
+// Viral reference files
+if (params.viral_fasta) {
+    lastPath = params.viral_fasta.lastIndexOf(File.separator)
+    viral_index_base = params.viral_fasta.substring(lastPath+1)
+    ch_viral_fasta = file(params.viral_fasta, checkIfExists: true)
+} else {
+    exit 1, "Viral fasta file not specified!"
+}
+
+if (params.viral_bowtie2_index) {
+    lastPath = params.viral_bowtie2_index.lastIndexOf(File.separator)
+    viral_index_dir = params.viral_bowtie2_index.substring(0,lastPath+1)
+    viral_index_base = params.viral_bowtie2_index.substring(lastPath+1)
+    Channel
+        .fromPath(viral_index_dir, checkIfExists: true)
+        .set { ch_viral_bowtie2_index }
 }
 
 ////////////////////////////////////////////////////
@@ -214,39 +233,39 @@ process CHECK_SAMPLESHEET {
     output:
     file "*.csv" into ch_samplesheet_reformat
 
-    script:  // This script is bundled with the pipeline, in nf-core/covid19/bin/
+    script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     """
     check_samplesheet.py $samplesheet samplesheet_reformat.csv
     """
 }
 
-// Function to get list of [ sample, single_end?, long_reads?, [ fastq_1, fastq_2 ] ]
-def validate_input(LinkedHashMap sample) {
-    def sample_id = sample.sample_id
-    def single_end = sample.single_end.toBoolean()
-    def long_reads = sample.long_reads.toBoolean()
-    def fastq_1 = sample.fastq_1
-    def fastq_2 = sample.fastq_2
-
-    def array = []
-    if (single_end || long_reads) {
-        array = [ sample_id, single_end, long_reads, [ file(fastq_1, checkIfExists: true) ] ]
-    } else {
-        array = [ sample_id, single_end, long_reads, [ file(fastq_1, checkIfExists: true), file(fastq_2, checkIfExists: true) ] ]
-    }
-    return array
-}
-
-/*
- * Create channels for input fastq files
- */
-ch_samplesheet_reformat
-    .splitCsv(header:true, sep:',')
-    .map { validate_input(it) }
-    .into { ch_reads_nanoplot;
-            ch_reads_fastqc;
-            ch_reads_bwa;
-            ch_reads_minimap2 }
+// // Function to get list of [ sample, single_end?, long_reads?, [ fastq_1, fastq_2 ] ]
+// def validate_input(LinkedHashMap sample) {
+//     def sample_id = sample.sample_id
+//     def single_end = sample.single_end.toBoolean()
+//     def long_reads = sample.long_reads.toBoolean()
+//     def fastq_1 = sample.fastq_1
+//     def fastq_2 = sample.fastq_2
+//
+//     def array = []
+//     if (single_end || long_reads) {
+//         array = [ sample_id, single_end, long_reads, [ file(fastq_1, checkIfExists: true) ] ]
+//     } else {
+//         array = [ sample_id, single_end, long_reads, [ file(fastq_1, checkIfExists: true), file(fastq_2, checkIfExists: true) ] ]
+//     }
+//     return array
+// }
+//
+// /*
+//  * Create channels for input fastq files
+//  */
+// ch_samplesheet_reformat
+//     .splitCsv(header:true, sep:',')
+//     .map { validate_input(it) }
+//     .into { ch_reads_nanoplot;
+//             ch_reads_fastqc;
+//             ch_reads_bwa;
+//             ch_reads_minimap2 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -257,51 +276,52 @@ ch_samplesheet_reformat
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * PREPROCESSING: Build BWA index
+ * PREPROCESSING: Build Host Bowtie2 index
  */
-if (!params.bwa_index) {
-    process BWA_INDEX {
+if (!params.host_bowtie2_index) {
+    process BOWTIE2_INDEX_HOST {
         tag "$fasta"
         label 'process_high'
         publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
             saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
 
         input:
-        file fasta from ch_fasta
+        file fasta from ch_host_fasta
 
         output:
-        file "BWAIndex" into ch_bwa_index
+        file "Bowtie2IndexHost" into ch_host_bowtie2_index
 
         script:
         """
-        bwa index -a bwtsw $fasta
-        mkdir BWAIndex && mv ${fasta}* BWAIndex
+        bowtie2 index -a bwtsw $fasta
+        mkdir Bowtie2IndexHost && mv ${fasta}* Bowtie2IndexHost
         """
     }
 }
 
-/*
- * PREPROCESSING: Build Minimap2 index
- */
-if (!params.minimap2_index) {
-    process MINIMAP2_INDEX {
-        tag "$fasta"
-        label 'process_medium'
-        publishDir path: { params.save_reference ? "${params.outdir}/genome/Minimap2Index" : params.outdir },
-            saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
-
-        input:
-        file fasta from ch_fasta
-
-        output:
-        file "*.mmi" into ch_minimap2_index
-
-        script:
-        """
-        minimap2 -ax map-ont  -t $task.cpus -d ${fasta}.mmi $fasta
-        """
-    }
-}
+// /*
+//  * PREPROCESSING: Build Viral Bowtie2 index
+//  */
+// if (!params.host_bowtie2_index) {
+//     process BOWTIE2_INDEX_HOST {
+//         tag "$fasta"
+//         label 'process_high'
+//         publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
+//             saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+//
+//         input:
+//         file fasta from ch_host_fasta
+//
+//         output:
+//         file "Bowtie2IndexViral" into ch_host_bowtie2_index
+//
+//         script:
+//         """
+//         bowtie2 index -a bwtsw $fasta
+//         mkdir Bowtie2IndexViral && mv ${fasta}* Bowtie2IndexViral
+//         """
+//     }
+// }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -311,65 +331,42 @@ if (!params.minimap2_index) {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * STEP 1: Illumina and Nanopore FastQC before trimming
- */
-process FASTQC {
-    tag "$sample"
-    label 'process_medium'
-    publishDir "${params.outdir}/fastqc", mode: params.publish_dir_mode,
-        saveAs: { filename ->
-                      filename.endsWith(".zip") ? "zips/$filename" : "$filename"
-                }
-
-    when:
-    !params.skip_fastqc && !params.skip_qc
-
-    input:
-    set val(sample), val(single_end), val(long_reads), file(reads) from ch_reads_fastqc
-
-    output:
-    file "*.{zip,html}" into ch_fastqc_reports_mqc
-
-    script:
-    // Added soft-links to original fastqs for consistent naming in MultiQC
-    if (single_end || long_reads) {
-        """
-        [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
-        fastqc -q -t $task.cpus ${sample}.fastq.gz
-        """
-    } else {
-        """
-        [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
-        [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-        fastqc -q -t $task.cpus ${sample}_1.fastq.gz
-        fastqc -q -t $task.cpus ${sample}_2.fastq.gz
-        """
-    }
-}
-
-/*
- * STEP 2: Nanopore FastQ QC using NanoPlot
- */
-process NANOPLOT {
-    tag "$sample"
-    label 'process_low'
-    publishDir "${params.outdir}/nanoplot/${sample}", mode: params.publish_dir_mode
-
-    when:
-    !params.skip_nanoplot && !params.skip_qc && long_reads
-
-    input:
-    set val(sample), val(single_end), val(long_reads), file(reads) from ch_reads_nanoplot
-
-    output:
-    file "*.{png,html,txt,log}"
-
-    script:
-    """
-    NanoPlot -t $task.cpus --fastq $reads
-    """
-}
+// /*
+//  * STEP 1: Illumina and Nanopore FastQC before trimming
+//  */
+// process FASTQC {
+//     tag "$sample"
+//     label 'process_medium'
+//     publishDir "${params.outdir}/fastqc", mode: params.publish_dir_mode,
+//         saveAs: { filename ->
+//                       filename.endsWith(".zip") ? "zips/$filename" : "$filename"
+//                 }
+//
+//     when:
+//     !params.skip_fastqc && !params.skip_qc
+//
+//     input:
+//     set val(sample), val(single_end), val(long_reads), file(reads) from ch_reads_fastqc
+//
+//     output:
+//     file "*.{zip,html}" into ch_fastqc_reports_mqc
+//
+//     script:
+//     // Added soft-links to original fastqs for consistent naming in MultiQC
+//     if (single_end || long_reads) {
+//         """
+//         [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
+//         fastqc -q -t $task.cpus ${sample}.fastq.gz
+//         """
+//     } else {
+//         """
+//         [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
+//         [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
+//         fastqc -q -t $task.cpus ${sample}_1.fastq.gz
+//         fastqc -q -t $task.cpus ${sample}_2.fastq.gz
+//         """
+//     }
+// }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -392,103 +389,72 @@ process NANOPLOT {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * STEP 3.1: Map Illumina read(s) with bwa mem
- */
-process BWA_MEM {
-    tag "$sample"
-    label 'process_high'
-    if (params.save_align_intermeds) {
-        publishDir path: "${params.outdir}/bwa", mode: params.publish_dir_mode
-    }
+// /*
+//  * STEP 3.1: Map Illumina read(s) with bwa mem
+//  */
+// process BWA_MEM {
+//     tag "$sample"
+//     label 'process_high'
+//     if (params.save_align_intermeds) {
+//         publishDir path: "${params.outdir}/bwa", mode: params.publish_dir_mode
+//     }
+//
+//     when:
+//     !long_reads
+//
+//     input:
+//     set val(sample), val(single_end), val(long_reads), file(reads) from ch_reads_bwa
+//     file index from ch_bwa_index.collect()
+//
+//     output:
+//     set val(sample), val(single_end), val(long_reads), file("*.bam") into ch_bwa_bam
+//
+//     script:
+//     rg = "\'@RG\\tID:${sample}\\tSM:${sample.split('_')[0..-2].join('_')}\\tPL:ILLUMINA\\tLB:${sample}\\tPU:1\'"
+//     """
+//     bwa mem \\
+//         -t $task.cpus \\
+//         -M \\
+//         -R $rg \\
+//         ${index}/${bwa_base} \\
+//         $reads \\
+//         | samtools view -@ $task.cpus -b -h -F 0x0100 -O BAM -o ${sample}.bam -
+//     """
+// }
 
-    when:
-    !long_reads
-
-    input:
-    set val(sample), val(single_end), val(long_reads), file(reads) from ch_reads_bwa
-    file index from ch_bwa_index.collect()
-
-    output:
-    set val(sample), val(single_end), val(long_reads), file("*.bam") into ch_bwa_bam
-
-    script:
-    rg = "\'@RG\\tID:${sample}\\tSM:${sample.split('_')[0..-2].join('_')}\\tPL:ILLUMINA\\tLB:${sample}\\tPU:1\'"
-    """
-    bwa mem \\
-        -t $task.cpus \\
-        -M \\
-        -R $rg \\
-        ${index}/${bwa_base} \\
-        $reads \\
-        | samtools view -@ $task.cpus -b -h -F 0x0100 -O BAM -o ${sample}.bam -
-    """
-}
-
-/*
- * STEP 3.1: Map Nanopore read(s) with Minimap2
- */
-process MIMIMAP2_ALIGN {
-    tag "$sample"
-    label 'process_medium'
-    if (params.save_align_intermeds) {
-        publishDir path: "${params.outdir}/minimap2", mode: params.publish_dir_mode
-    }
-
-    when:
-    long_reads
-
-    input:
-    set val(sample), val(single_end), val(long_reads), file(reads) from ch_reads_minimap2
-    file index from ch_minimap2_index.collect()
-
-    output:
-    set val(sample), val(single_end), val(long_reads), file("*.bam") into ch_minimap2_bam
-
-    script:
-    """
-    minimap2 \\
-        -ax map-ont \\
-        -t $task.cpus \\
-        $index \\
-        $reads \\
-        | samtools view -@ $task.cpus -b -h -O BAM -o ${sample}.bam -
-    """
-}
-
-/*
- * STEP 3.2: Convert BAM to coordinate sorted BAM
- */
-process SORT_BAM {
-    tag "$sample"
-    label 'process_medium'
-    publishDir path: "${params.outdir}/${aligner}", mode: params.publish_dir_mode,
-        saveAs: { filename ->
-                      if (params.save_align_intermeds) {
-                          if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
-                          else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
-                          else if (filename.endsWith(".stats")) "samtools_stats/$filename"
-                          else filename
-                      }
-                }
-
-    input:
-    set val(sample), val(single_end), val(long_reads), file(bam) from ch_bwa_bam.concat(ch_minimap2_bam)
-
-    output:
-    set val(sample), val(single_end), val(long_reads), file("*.sorted.{bam,bam.bai}") into ch_sort_bam
-    file "*.{flagstat,idxstats,stats}" into ch_sort_bam_flagstat_mqc
-
-    script:
-    aligner = long_reads ? "minimap2" : "bwa"
-    """
-    samtools sort -@ $task.cpus -o ${sample}.sorted.bam -T $sample $bam
-    samtools index ${sample}.sorted.bam
-    samtools flagstat ${sample}.sorted.bam > ${sample}.sorted.bam.flagstat
-    samtools idxstats ${sample}.sorted.bam > ${sample}.sorted.bam.idxstats
-    samtools stats ${sample}.sorted.bam > ${sample}.sorted.bam.stats
-    """
-}
+// /*
+//  * STEP 3.2: Convert BAM to coordinate sorted BAM
+//  */
+// process SORT_BAM {
+//     tag "$sample"
+//     label 'process_medium'
+//     publishDir path: "${params.outdir}/${aligner}", mode: params.publish_dir_mode,
+//         saveAs: { filename ->
+//                       if (params.save_align_intermeds) {
+//                           if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
+//                           else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
+//                           else if (filename.endsWith(".stats")) "samtools_stats/$filename"
+//                           else filename
+//                       }
+//                 }
+//
+//     input:
+//     set val(sample), val(single_end), val(long_reads), file(bam) from ch_bwa_bam.concat(ch_minimap2_bam)
+//
+//     output:
+//     set val(sample), val(single_end), val(long_reads), file("*.sorted.{bam,bam.bai}") into ch_sort_bam
+//     file "*.{flagstat,idxstats,stats}" into ch_sort_bam_flagstat_mqc
+//
+//     script:
+//     aligner = long_reads ? "minimap2" : "bwa"
+//     """
+//     samtools sort -@ $task.cpus -o ${sample}.sorted.bam -T $sample $bam
+//     samtools index ${sample}.sorted.bam
+//     samtools flagstat ${sample}.sorted.bam > ${sample}.sorted.bam.flagstat
+//     samtools idxstats ${sample}.sorted.bam > ${sample}.sorted.bam.idxstats
+//     samtools stats ${sample}.sorted.bam > ${sample}.sorted.bam.stats
+//     """
+// }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -553,63 +519,40 @@ process get_software_versions {
     """
 }
 
-/*
- * STEP 1 - FastQC
- */
-process fastqc {
-    tag "$name"
-    label 'process_medium'
-    publishDir "${params.outdir}/fastqc", mode: 'copy',
-        saveAs: { filename ->
-                      filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"
-                }
-
-    input:
-    set val(name), file(reads) from ch_read_files_fastqc
-
-    output:
-    file "*_fastqc.{zip,html}" into ch_fastqc_results
-
-    script:
-    """
-    fastqc --quiet --threads $task.cpus $reads
-    """
-}
-
-/*
- * STEP 2 - MultiQC
- */
-process multiqc {
-    publishDir "${params.outdir}/MultiQC", mode: 'copy'
-
-    input:
-    file (multiqc_config) from ch_multiqc_config
-    file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
-    // TODO nf-core: Add in log files from your new processes for MultiQC to find!
-    //file ('fastqc/*') from ch_fastqc_reports_mqc.collect().ifEmpty([])
-    //file ('samtools/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
-    file ('software_versions/*') from ch_software_versions_yaml.collect()
-    file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
-
-    output:
-    file "*multiqc_report.html" into ch_multiqc_report
-    file "*_data"
-    file "multiqc_plots"
-
-    script:
-    rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
-    rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
-    custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
-    // TODO nf-core: Specify which MultiQC modules to use with -m for a faster run time
-    """
-    multiqc . -f $rtitle $rfilename $custom_config_file \\
-        -m custom_content -m fastqc -m samtools -m picard
-    """
-}
+// /*
+// * STEP 10: MultiQC
+// */
+// process MULTIQC {
+//     publishDir "${params.outdir}/multiqc", mode: 'copy'
+//
+//     input:
+//     file (multiqc_config) from ch_multiqc_config
+//     file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
+//     // TODO nf-core: Add in log files from your new processes for MultiQC to find!
+//     //file ('fastqc/*') from ch_fastqc_reports_mqc.collect().ifEmpty([])
+//     //file ('samtools/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
+//     file ('software_versions/*') from ch_software_versions_yaml.collect()
+//     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
+//
+//     output:
+//     file "*multiqc_report.html" into ch_multiqc_report
+//     file "*_data"
+//     file "multiqc_plots"
+//
+//     script:
+//     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
+//     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
+//     custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
+//     // TODO nf-core: Specify which MultiQC modules to use with -m for a faster run time
+//     """
+//     multiqc . -f $rtitle $rfilename $custom_config_file \\
+//         -m custom_content -m fastqc -m samtools -m picard
+//     """
+// }
 
 /*
- * STEP 3 - Output Description HTML
- */
+* STEP 11: Output Description HTML
+*/
 process output_documentation {
     publishDir "${params.outdir}/pipeline_info", mode: 'copy'
 
@@ -739,7 +682,6 @@ workflow.onComplete {
     }
 
 }
-
 
 def nfcoreHeader() {
     // Log colors ANSI codes
