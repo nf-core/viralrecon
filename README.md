@@ -36,7 +36,7 @@ iv. Start running your own analysis!
 <!-- TODO nf-core: Update the default command above used to run the pipeline -->
 
 ```bash
-nextflow run nf-core/viralrecon -profile <docker/singularity/conda/institute> --reads '*_R{1,2}.fastq.gz' --genome GRCh37
+nextflow run nf-core/viralrecon -profile <docker/singularity/conda/institute> --input samplesheet.csv --genome GRCh37
 ```
 
 See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
@@ -65,6 +65,7 @@ Many thanks to others who have helped out and contributed along the way too, inc
 | Name                                                      | Affiliation                                                                           |
 |-----------------------------------------------------------|---------------------------------------------------------------------------------------|
 | [Alexander Peltzer](https://github.com/apeltzer)          | [Boehringer Ingelheim, Germany](https://www.boehringer-ingelheim.de/)                 |
+| [Edgar Garriga Nogales](https://github.com/edgano)        | [Centre for Genomic Regulation, Spain](https://www.crg.eu/)                           |
 | [Gisela Gabernet](https://github.com/ggabernet)           | [QBIC, University of Tubingen, Germany](https://portal.qbic.uni-tuebingen.de/portal/) |
 | [Harshil Patel](https://github.com/drpatelh)              | [The Francis Crick Institute, UK](https://www.crick.ac.uk/)                           |
 | [Jose Espinosa-Carrasco](https://github.com/JoseEspinosa) | [Centre for Genomic Regulation, Spain](https://www.crg.eu/)                           |

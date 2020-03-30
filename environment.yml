@@ -6,10 +6,19 @@ channels:
   - bioconda
   - defaults
 dependencies:
+  ## conda-forge packages
   - conda-forge::python=3.7.3
   - conda-forge::markdown=3.1.1
   - conda-forge::pymdown-extensions=6.0
   - conda-forge::pygments=2.5.2
-  # TODO nf-core: Add required software dependencies here
-  - bioconda::fastqc=0.11.8
-  - bioconda::multiqc=1.7
+  - conda-forge::pigz=2.3.4
+  - conda-forge::r-base=3.6.2
+
+  ## bioconda packages
+  - bioconda::fastqc=0.11.9
+  - bioconda::bowtie2=2.3.5.1
+  - bioconda::samtools=1.9
+  - bioconda::picard=2.21.9
+  - bioconda::bedtools=2.29.2
+  - bioconda::preseq=2.0.3
+  - bioconda::multiqc=1.8
