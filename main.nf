@@ -289,8 +289,6 @@ ch_samplesheet_reformat
     .into { ch_reads_fastqc;
             ch_reads_bowtie2 }
 
-ch_reads_fastqc.println()
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
@@ -317,7 +315,7 @@ ch_reads_fastqc.println()
 //
 //         script:
 //         """
-//         bowtie2 index -a bwtsw $fasta
+//         bowtie2-build $fasta
 //         mkdir Bowtie2IndexHost && mv ${fasta}* Bowtie2IndexHost
 //         """
 //     }
@@ -341,7 +339,7 @@ ch_reads_fastqc.println()
 //
 //         script:
 //         """
-//         bowtie2 index -a bwtsw $fasta
+//         bowtie2-build $fasta
 //         mkdir Bowtie2IndexViral && mv ${fasta}* Bowtie2IndexViral
 //         """
 //     }
@@ -355,42 +353,42 @@ ch_reads_fastqc.println()
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-// /*
-//  * STEP 1: Illumina and Nanopore FastQC before trimming
-//  */
-// process FASTQC {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/fastqc", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       filename.endsWith(".zip") ? "zips/$filename" : "$filename"
-//                 }
-//
-//     when:
-//     !params.skip_fastqc && !params.skip_qc
-//
-//     input:
-//     set val(sample), val(single_end), val(long_reads), file(reads) from ch_reads_fastqc
-//
-//     output:
-//     file "*.{zip,html}" into ch_fastqc_reports_mqc
-//
-//     script:
-//     // Added soft-links to original fastqs for consistent naming in MultiQC
-//     if (single_end || long_reads) {
-//         """
-//         [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
-//         fastqc -q -t $task.cpus ${sample}.fastq.gz
-//         """
-//     } else {
-//         """
-//         [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
-//         [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-//         fastqc -q -t $task.cpus ${sample}_1.fastq.gz
-//         fastqc -q -t $task.cpus ${sample}_2.fastq.gz
-//         """
-//     }
-// }
+/*
+ * STEP 1: FastQC before trimming
+ */
+process FASTQC {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/fastqc", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      filename.endsWith(".zip") ? "zips/$filename" : "$filename"
+                }
+
+    when:
+    !params.skip_fastqc && !params.skip_qc && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_fastqc
+
+    output:
+    file "*.{zip,html}" into ch_fastqc_reports_mqc
+
+    script:
+    // Added soft-links to original fastqs for consistent naming in MultiQC
+    if (single_end) {
+        """
+        [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
+        fastqc -q -t $task.cpus ${sample}.fastq.gz
+        """
+    } else {
+        """
+        [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
+        [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
+        fastqc -q -t $task.cpus ${sample}_1.fastq.gz
+        fastqc -q -t $task.cpus ${sample}_2.fastq.gz
+        """
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
