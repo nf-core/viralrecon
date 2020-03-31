@@ -283,6 +283,7 @@ By default, trimmed FastQ files will not be saved to the results directory. Spec
 ## Alignments
 
 ### `--save_kraken2_fastq`
+
 Save the host and viral fastq files in the results directory (Default: false)
 
 ### `--save_align_intermeds`
