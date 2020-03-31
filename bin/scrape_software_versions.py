@@ -8,12 +8,26 @@ regexes = {
     'nf-core/viralrecon': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
     'FastQC': ['v_fastqc.txt', r"FastQC v(\S+)"],
-    'MultiQC': ['v_multiqc.txt', r"multiqc, version (\S+)"],
+    'Bowtie2': ['v_bowtie2.txt', r"bowtie2-align-s\sversion\s(\S+)"],
+    #'Kraken2': ['v_kraken2.txt', r"Kraken\sversion\s(\S+)"],
+    'Samtools': ['v_samtools.txt', r"samtools (\S+)"],
+    'BEDTools': ['v_bedtools.txt', r"bedtools v(\S+)"],
+    'Picard': ['v_picard.txt', r"([\d\.]+)-SNAPSHOT"],
+    'R': ['v_R.txt', r"R version (\S+)"],
+    'Preseq': ['v_preseq.txt', r"Version: (\S+)"],
+    'MultiQC': ['v_multiqc.txt', r"multiqc, version (\S+)"]
 }
 results = OrderedDict()
 results['nf-core/viralrecon'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['FastQC'] = '<span style="color:#999999;\">N/A</span>'
+results['Bowtie2'] = '<span style="color:#999999;\">N/A</span>'
+#results['Kraken2'] = '<span style="color:#999999;\">N/A</span>'
+results['Samtools'] = '<span style="color:#999999;\">N/A</span>'
+results['BEDTools'] = '<span style="color:#999999;\">N/A</span>'
+results['Picard'] = '<span style="color:#999999;\">N/A</span>'
+results['R'] = '<span style="color:#999999;\">N/A</span>'
+results['Preseq'] = '<span style="color:#999999;\">N/A</span>'
 results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
