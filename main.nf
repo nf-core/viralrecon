@@ -32,10 +32,10 @@ def helpMessage() {
 
     References                        If not specified in the configuration file or you wish to overwrite any of the references
       --host_genome [str]             Name of iGenomes reference for host genome
-      --host_bowtie2_index [file]     Full path to directory containing Bowtie2 index including base name for host genome i.e. /path/to/index/genome.fa
+      --host_index [file]             Full path to directory containing Bowtie2 index including base name for host genome i.e. /path/to/index/genome.fa
 
       --viral_genome [str]            Name of iGenomes reference for viral genome
-      --viral_bowtie2_index [file]    Full path to directory containing Bowtie2 index including base name for viral genome i.e. /path/to/index/genome.fa
+      --viral_index [file]            Full path to directory containing Bowtie2 index including base name for viral genome i.e. /path/to/index/genome.fa
       --viral_blast_db [file]         Full path to Blast database for viral genome
       --viral_gff [file]              Full path to viral gff annotation file
 
@@ -110,7 +110,7 @@ if (params.genomes && params.host_genome && !params.genomes.containsKey(params.h
    exit 1, "The provided genome '${params.host_genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
 }
 params.host_fasta = params.host_genome ? params.genomes[ params.host_genome ].fasta ?: false : false
-params.host_bowtie2_index = params.host_genome ? params.genomes[ params.host_genome ].bowtie2 ?: false : false
+params.host_index = params.host_genome ? params.genomes[ params.host_genome ].bowtie2 ?: false : false
 
 if (params.host_fasta) {
     lastPath = params.host_fasta.lastIndexOf(File.separator)
@@ -121,13 +121,13 @@ if (params.host_fasta) {
     exit 1, "Host fasta file not specified!"
 }
 
-if (params.host_bowtie2_index) {
-    lastPath = params.host_bowtie2_index.lastIndexOf(File.separator)
-    host_index_dir = params.host_bowtie2_index.substring(0,lastPath+1)
-    host_index_base = params.host_bowtie2_index.substring(lastPath+1)
+if (params.host_index) {
+    lastPath = params.host_index.lastIndexOf(File.separator)
+    host_index_dir = params.host_index.substring(0,lastPath+1)
+    host_index_base = params.host_index.substring(lastPath+1)
     Channel
         .fromPath(host_index_dir, checkIfExists: true)
-        .set { ch_host_bowtie2_index }
+        .set { ch_host_index }
 }
 
 // Viral reference files
@@ -135,7 +135,7 @@ if (params.genomes && params.viral_genome && !params.genomes.containsKey(params.
    exit 1, "The provided genome '${params.viral_genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
 }
 params.viral_fasta = params.viral_genome ? params.genomes[ params.viral_genome ].fasta ?: false : false
-params.viral_bowtie2_index = params.viral_genome ? params.genomes[ params.viral_genome ].bowtie2 ?: false : false
+params.viral_index = params.viral_genome ? params.genomes[ params.viral_genome ].bowtie2 ?: false : false
 
 if (params.viral_fasta) {
     lastPath = params.viral_fasta.lastIndexOf(File.separator)
@@ -146,13 +146,13 @@ if (params.viral_fasta) {
     exit 1, "Viral fasta file not specified!"
 }
 
-if (params.viral_bowtie2_index) {
-    lastPath = params.viral_bowtie2_index.lastIndexOf(File.separator)
-    viral_index_dir = params.viral_bowtie2_index.substring(0,lastPath+1)
-    viral_index_base = params.viral_bowtie2_index.substring(lastPath+1)
+if (params.viral_index) {
+    lastPath = params.viral_index.lastIndexOf(File.separator)
+    viral_index_dir = params.viral_index.substring(0,lastPath+1)
+    viral_index_base = params.viral_index.substring(lastPath+1)
     Channel
         .fromPath(viral_index_dir, checkIfExists: true)
-        .set { ch_viral_bowtie2_index }
+        .set { ch_viral_index }
 }
 
 if (params.viral_blast_db) { ch_viral_blast_db = file(params.viral_blast_db, checkIfExists: true) }
@@ -194,17 +194,17 @@ if (workflow.profile.contains('awsbatch')) {
 // Header log info
 log.info nfcoreHeader()
 def summary = [:]
-if (workflow.revision) summary['Pipeline Release'] = workflow.revision
-summary['Run Name']         = custom_runName ?: workflow.runName
+if (workflow.revision)            summary['Pipeline Release'] = workflow.revision
+summary['Run Name']               = custom_runName ?: workflow.runName
 // TODO nf-core: Report custom parameters here
 summary['Samplesheet']            = params.input
 summary['Protocol']               = params.protocol
 summary['Host Genome']            = params.host_genome ?: 'Not supplied'
 summary['Host Fasta File']        = params.host_fasta
-if (params.host_bowtie2_index)    summary['Host Bowtie2 Index'] = params.host_bowtie2_index
+if (params.host_index)            summary['Host Bowtie2 Index'] = params.host_index
 summary['Viral Genome']           = params.viral_genome ?: 'Not supplied'
 summary['Viral Fasta File']       = params.viral_fasta
-if (params.viral_bowtie2_index)   summary['Viral Bowtie2 Index'] = params.viral_bowtie2_index
+if (params.viral_index)           summary['Viral Bowtie2 Index'] = params.viral_index
 if (params.viral_blast_db)        summary['Viral Blast DB'] = params.viral_blast_db
 if (params.viral_gff)             summary['Viral GFF'] = params.viral_gff
 if (params.kraken2_db)            summary['Kraken2 DB'] = params.kraken2_db
@@ -217,27 +217,27 @@ if (params.skip_variants)         summary['Skip Variant Calling'] =  'Yes'
 if (params.skip_qc)               summary['Skip QC'] = 'Yes'
 if (params.skip_fastqc)           summary['Skip FastQC'] = 'Yes'
 if (params.skip_multiqc)          summary['Skip MultiQC'] = 'Yes'
-summary['Max Resources']    = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
-if (workflow.containerEngine) summary['Container'] = "$workflow.containerEngine - $workflow.container"
-summary['Output dir']       = params.outdir
-summary['Publish dir mode'] = params.publish_dir_mode
-summary['Launch dir']       = workflow.launchDir
-summary['Working dir']      = workflow.workDir
-summary['Script dir']       = workflow.projectDir
-summary['User']             = workflow.userName
+summary['Max Resources']          = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
+if (workflow.containerEngine)     summary['Container'] = "$workflow.containerEngine - $workflow.container"
+summary['Output dir']             = params.outdir
+summary['Publish dir mode']       = params.publish_dir_mode
+summary['Launch dir']             = workflow.launchDir
+summary['Working dir']            = workflow.workDir
+summary['Script dir']             = workflow.projectDir
+summary['User']                   = workflow.userName
 if (workflow.profile.contains('awsbatch')) {
-    summary['AWS Region']   = params.awsregion
-    summary['AWS Queue']    = params.awsqueue
-    summary['AWS CLI']      = params.awscli
+    summary['AWS Region']         = params.awsregion
+    summary['AWS Queue']          = params.awsqueue
+    summary['AWS CLI']            = params.awscli
 }
 summary['Config Profile'] = workflow.profile
 if (params.config_profile_description) summary['Config Description'] = params.config_profile_description
 if (params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
 if (params.config_profile_url)         summary['Config URL']         = params.config_profile_url
 if (params.email || params.email_on_fail) {
-    summary['E-mail Address']    = params.email
-    summary['E-mail on failure'] = params.email_on_fail
-    summary['MultiQC maxsize']   = params.max_multiqc_email_size
+    summary['E-mail Address']     = params.email
+    summary['E-mail on failure']  = params.email_on_fail
+    summary['MultiQC maxsize']    = params.max_multiqc_email_size
 }
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
 log.info "-\033[2m--------------------------------------------------\033[0m-"
@@ -301,6 +301,7 @@ ch_samplesheet_reformat
     .splitCsv(header:true, sep:',')
     .map { validate_input(it) }
     .into { ch_reads_fastqc;
+            ch_reads_trimmomatic;
             ch_reads_bowtie2 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -314,8 +315,8 @@ ch_samplesheet_reformat
 /*
  * PREPROCESSING: Build Host Bowtie2 index
  */
-if (!params.host_bowtie2_index) {
-    process HOST_BOWTIE2_INDEX {
+if (!params.host_index) {
+    process BOWTIE2_INDEX_HOST {
         tag "$fasta"
         label 'process_high'
         publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
@@ -325,7 +326,7 @@ if (!params.host_bowtie2_index) {
         file fasta from ch_host_fasta
 
         output:
-        file "Bowtie2IndexHost" into ch_host_bowtie2_index
+        file "Bowtie2IndexHost" into ch_host_index
 
         script:
         """
@@ -342,8 +343,8 @@ if (!params.host_bowtie2_index) {
 /*
  * PREPROCESSING: Build Viral Bowtie2 index
  */
-if (!params.viral_bowtie2_index) {
-    process VIRAL_BOWTIE2_INDEX {
+if (!params.viral_index) {
+    process BOWTIE2_INDEX_VIRAL {
         tag "$fasta"
         label 'process_medium'
         publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
@@ -353,7 +354,7 @@ if (!params.viral_bowtie2_index) {
         file fasta from ch_viral_fasta
 
         output:
-        file "Bowtie2IndexViral" into ch_viral_bowtie2_index
+        file "Bowtie2IndexViral" into ch_viral_index
 
         script:
         """
@@ -389,7 +390,7 @@ if (!params.viral_bowtie2_index) {
 /*
  * STEP 1: FastQC before trimming
  */
-process FASTQC {
+process FASTQC_RAW {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/fastqc", mode: params.publish_dir_mode,
@@ -432,9 +433,8 @@ process FASTQC {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * STEP 2: Adapter trimming
- */
-
+* STEP 2: Adapter trimming
+*/
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -589,9 +589,13 @@ process get_software_versions {
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     fastqc --version > v_fastqc.txt
-    #samtools --version > v_samtools.txt
-    #picard MarkDuplicates --version &> v_picard.txt  || true
-    #echo \$(R --version 2>&1) > v_R.txt
+    bowtie2 --version > v_bowtie2.txt
+    #kraken2 --version > v_kraken2.txt
+    samtools --version > v_samtools.txt
+    bedtools --version > v_bedtools.txt
+    picard MarkDuplicates --version &> v_picard.txt  || true
+    preseq &> v_preseq.txt
+    echo \$(R --version 2>&1) > v_R.txt
     multiqc --version > v_multiqc.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
