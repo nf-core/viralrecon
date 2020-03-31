@@ -114,7 +114,8 @@ params.host_bowtie2_index = params.host_genome ? params.genomes[ params.host_gen
 
 if (params.host_fasta) {
     lastPath = params.host_fasta.lastIndexOf(File.separator)
-    host_index_base = params.host_fasta.substring(lastPath+1)
+    lastExt = params.host_fasta.lastIndexOf(".")
+    host_index_base = params.host_fasta.substring(lastPath+1,lastExt)
     ch_host_fasta = file(params.host_fasta, checkIfExists: true)
 } else {
     exit 1, "Host fasta file not specified!"
@@ -138,7 +139,8 @@ params.viral_bowtie2_index = params.viral_genome ? params.genomes[ params.viral_
 
 if (params.viral_fasta) {
     lastPath = params.viral_fasta.lastIndexOf(File.separator)
-    viral_index_base = params.viral_fasta.substring(lastPath+1)
+    lastExt = params.host_fasta.lastIndexOf(".")
+    viral_index_base = params.viral_fasta.substring(lastPath+1,lastExt)
     ch_viral_fasta = file(params.viral_fasta, checkIfExists: true)
 } else {
     exit 1, "Viral fasta file not specified!"
@@ -309,29 +311,29 @@ ch_samplesheet_reformat
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-// /*
-//  * PREPROCESSING: Build Host Bowtie2 index
-//  */
-// if (!params.host_bowtie2_index) {
-//     process HOST_BOWTIE2_INDEX {
-//         tag "$fasta"
-//         label 'process_high'
-//         publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-//             saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
-//
-//         input:
-//         file fasta from ch_host_fasta
-//
-//         output:
-//         file "Bowtie2IndexHost" into ch_host_bowtie2_index
-//
-//         script:
-//         """
-//         bowtie2-build $fasta
-//         mkdir Bowtie2IndexHost && mv ${fasta}* Bowtie2IndexHost
-//         """
-//     }
-// }
+/*
+ * PREPROCESSING: Build Host Bowtie2 index
+ */
+if (!params.host_bowtie2_index) {
+    process HOST_BOWTIE2_INDEX {
+        tag "$fasta"
+        label 'process_high'
+        publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
+            saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+
+        input:
+        file fasta from ch_host_fasta
+
+        output:
+        file "Bowtie2IndexHost" into ch_host_bowtie2_index
+
+        script:
+        """
+        bowtie2-build $fasta $host_index_base
+        mkdir Bowtie2IndexHost && mv ${host_index_base}* Bowtie2IndexHost
+        """
+    }
+}
 
 // /*
 //  * PREPROCESSING: Build Viral Bowtie2 index
@@ -351,8 +353,8 @@ ch_samplesheet_reformat
 //
 //         script:
 //         """
-//         bowtie2-build $fasta
-//         mkdir Bowtie2IndexViral && mv ${fasta}* Bowtie2IndexViral
+//         bowtie2-build $fasta $viral_index_base
+//         mkdir Bowtie2IndexViral && mv ${viral_index_base}* Bowtie2IndexViral
 //         """
 //     }
 // }
