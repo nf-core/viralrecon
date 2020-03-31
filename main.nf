@@ -321,7 +321,25 @@ ch_samplesheet_reformat
     .into { ch_reads_fastqc;
             ch_reads_trimmomatic;
             ch_reads_kraken2;
-            ch_reads_bowtie2 }
+            ch_reads_bowtie2;
+            ch_reads_sra }
+
+/*
+ * Download data using SRA ids using fromSRA
+ */
+// Get list of SRA ids that should be downloaded
+sra_ids_list = ch_reads_sra
+                .filter {
+                    it[2] == true
+                }.map {
+                    id = it[0].split("_")[0]
+                    id
+                }.toList().val
+
+SRA_pointers = Channel.fromSRA(sra_ids_list, apiKey: '5141bbaeaeea4edfabacbc1402ae8084ae0a')
+
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
