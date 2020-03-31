@@ -34,8 +34,7 @@ def helpMessage() {
       --host_genome [str]             Name of iGenomes reference for host genome
       --host_index [file]             Full path to directory containing Bowtie2 index including base name for host genome i.e. /path/to/index/genome.fa
       --host_kraken2_db [file]        Full path to Kraken2 database built from host genome
-      --host_kraken2_name [str]       Name of host genome for building Kraken2 database. (Default: "human")
-      --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
+      --host_kraken2_name [str]       Name of host genome for building Kraken2 database (Default: "human")
 
       --viral_genome [str]            Name of iGenomes reference for viral genome
       --viral_index [file]            Full path to directory containing Bowtie2 index including base name for viral genome i.e. /path/to/index/genome.fa
@@ -133,7 +132,7 @@ if (params.host_index) {
         .set { ch_host_index }
 }
 
-if (params.host_kraken2_db) { ch_host_kraken2_db = Channel.fromPath(params.host_kraken2_db, checkIfExists: true) }
+if (params.host_kraken2_db) { ch_host_kraken2_db = Channel.fromPath(params.host_kraken2_db, checkIfExists: true) } else { ch_host_kraken2_db = Channel.empty() }
 
 // Viral reference files
 if (params.genomes && params.viral_genome && !params.genomes.containsKey(params.viral_genome)) {
