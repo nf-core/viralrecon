@@ -17,6 +17,8 @@ The implementation of nf-core/viralrecon is an international collaboration betwe
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
+<!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
+
 ## Quick Start
 
 i. Install [`nextflow`](https://nf-co.re/usage/installation)
@@ -53,8 +55,6 @@ The nf-core/viralrecon pipeline comes with documentation about the pipeline, fou
 3. [Running the pipeline](docs/usage.md)
 4. [Output and how to interpret the results](docs/output.md)
 5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
-
-<!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
 
 ## Credits
 
