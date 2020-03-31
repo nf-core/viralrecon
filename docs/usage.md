@@ -14,10 +14,10 @@
 * [Reference genomes](#reference-genomes)
   * [`--host_genome` (using iGenomes)](#--host-genome-using-igenomes)
   * [`--host_fasta`](#--host_fasta)
-  * [`--host_bowtie2_index`](#--host_bowtie2_index)
+  * [`--host_index`](#--host_index)
   * [`--viral_genome` (using iGenomes)](#--viral-genome-using-igenomes)
   * [`--viral_fasta`](#--viral_fasta)
-  * [`--viral_bowtie2_index`](#--viral_bowtie2_index)
+  * [`--viral_index`](#--viral_index)
   * [`--viral_blast_db`](#--viral_blast_db)
   * [`--viral_gff`](#--viral_gff)
   * [`--kraken2_db`](#--kraken2_db)
@@ -214,12 +214,12 @@ Full path to fasta file containing reference genome for the host species (*manda
 --host_fasta '[path to FASTA reference]'
 ```
 
-### `--host_bowtie2_index`
+### `--host_index`
 
 Full path to an existing Bowtie2 index for the host reference genome including the base name for the index.
 
 ```bash
---host_bowtie2_index '[directory containing Bowtie2 index]/genome.fa'
+--host_index '[directory containing Bowtie2 index]/genome.fa'
 ```
 
 ### `--viral_genome` (using iGenomes)
@@ -236,12 +236,12 @@ Full path to fasta file containing reference genome for the viral species (*mand
 --viral_fasta '[path to FASTA reference]'
 ```
 
-### `--viral_bowtie2_index`
+### `--viral_index`
 
 Full path to an existing Bowtie2 index for the viral reference genome including the base name for the index.
 
 ```bash
---viral_bowtie2_index '[directory containing Bowtie2 index]/genome.fa'
+--viral_index '[directory containing Bowtie2 index]/genome.fa'
 ```
 
 ### `--viral_blast_db`
