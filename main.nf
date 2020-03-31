@@ -589,8 +589,9 @@ process get_software_versions {
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     fastqc --version > v_fastqc.txt
+    trimmomatic -version > v_trimmomatic.txt
     bowtie2 --version > v_bowtie2.txt
-    #kraken2 --version > v_kraken2.txt
+    kraken2 --version > v_kraken2.txt
     samtools --version > v_samtools.txt
     bedtools --version > v_bedtools.txt
     picard MarkDuplicates --version &> v_picard.txt  || true
