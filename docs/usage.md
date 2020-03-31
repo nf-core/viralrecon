@@ -74,7 +74,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/viralrecon --reads '*_R{1,2}.fastq.gz' -profile docker
+nextflow run nf-core/viralrecon --input samplesheet.csv --host_genome 'hg38' --viral_genome 'NC_045512.2' -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -149,7 +149,7 @@ You will need to create a samplesheet with information about the samples you wou
 
 The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once (e.g. to increase sequencing depth). The pipeline will perform the analysis in parallel, and subsequently merge them when required.
 
-A final design file may look something like the one below. `SRR10903401` was twice sequenced once in Illumina PE format, `SRR11241255` was sequenced once in Illumina SE format, and `SRR11092056` and `SRR11177792` need to be downloaded from the SRA before the main pipeline execution.
+A final design file may look something like the one below. `SRR10903401` was sequenced twice in Illumina PE format, `SRR11241255` was sequenced once in Illumina SE format, and `SRR11092056` and `SRR11177792` need to be downloaded from the SRA before the main pipeline execution.
 
 ```bash
 sample,fastq_1,fastq_2
@@ -160,11 +160,11 @@ SRR11092056,,
 SRR11177792,,
 ```
 
-| Column    | Description                                                                                                                 |
-|-----------|-----------------------------------------------------------------------------------------------------------------------------|
-| `sample`  | Sample identifier or SRA run accession. This will be identical for multiple sequencing libraries/runs from the same sample. |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".  |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".  |
+| Column    | Description                                                                                                                       |
+|-----------|-----------------------------------------------------------------------------------------------------------------------------------|
+| `sample`  | Sample identifier or SRA 'SRR' run accession. This will be identical for multiple sequencing libraries/runs from the same sample. |
+| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".        |
+| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".        |
 
 ### `--protocol`
 
