@@ -338,7 +338,27 @@ sra_ids_list = ch_reads_sra
 
 SRA_pointers = Channel.fromSRA(sra_ids_list, apiKey: '5141bbaeaeea4edfabacbc1402ae8084ae0a')
 
+process DW_FASTQ_SRA {
 
+    input:
+    set val(id), file(reads) from SRA_pointers
+
+    output:
+    set val(id), stdout, val('true'), file(reads) into ch_reads_
+
+    """
+    i=`ls $reads | wc -l`
+
+    if [[ \$i == 1 ]]
+    then
+        echo "true"
+    else
+        echo "false"
+    fi
+
+    """
+    // fastq_info $reads
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
