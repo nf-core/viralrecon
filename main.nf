@@ -161,7 +161,7 @@ if (params.viral_index) {
 if (params.viral_blast_db) { ch_viral_blast_db = file(params.viral_blast_db, checkIfExists: true) }
 if (params.viral_gff) { ch_viral_gff = file(params.viral_gff, checkIfExists: true) }
 
-if (params.host_kraken2_db) { ch_kraken_db = file(params.host_kraken2_db, checkIfExists: true) }
+if (params.host_kraken2_db) { ch_host_kraken2_db = file(params.host_kraken2_db, checkIfExists: true) }
 
 ////////////////////////////////////////////////////
 /* --          CONFIG FILES                    -- */
@@ -375,45 +375,32 @@ if (!params.viral_index) {
 /*
  * PREPROCESSING: Build Host Kraken2 database
  */
+// NEED TO FIND A WAY OF NOT RUNNING THIS PROCESS FOR TEST-DATA
+// OR PROVIDING A MUCH SMALLER DATABASE ON TEST-DATASETS IN ITS PLACE
 if (!params.host_kraken2_db) {
     process KRAKEN2_DB_HOST {
-        tag "$fasta"
+        tag "$db"
         label 'process_high'
         publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
             saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
 
-        //input:
-        //file fasta from ch_host_fasta
-
-        //output:
-        //file "Bowtie2IndexHost" into ch_host_index
+        output:
+        file "$db" into ch_host_kraken2_db
 
         script:
+        db = "kraken2_${params.host_kraken2_name}"
         """
-        kraken2-build --download-taxonomy --db $k2db
-        kraken2-build --download-library human --db $k2db
-        kraken2-build --build --db $k2db
+        kraken2-build --db $db --threads $task.cpus --download-taxonomy
+        kraken2-build --db $db --threads $task.cpus --download-library $params.host_kraken2_name
+        kraken2-build --db $db --threads $task.cpus --build
+
+        cd $db
+        if [ -d "taxonomy" ]; then rm -rf taxonomy; fi
+        if [ -d "library" ]; then rm -rf library; fi
+        if [ -f "seqid2taxid.map" ]; then rm seqid2taxid.map; fi
         """
     }
 }
-
-
-// #Build kraken2 human db if not existed
-// k2db="/home/ubuntu/kraken2_db/"
-// md $k2db
-// kraken2-build --download-taxonomy --db $k2db
-// kraken2-build --download-library human --db $k2db
-// kraken2-build --build --db $k2db
-// #Removing human dna
-// #PE reads
-// kraken2 \
-// --threads 8 \
-// --db $k2db \
-// --gzip-compressed \
-// --paired \
-// --unclassified-out non_human_#.fastq \
-// --classified-out human_#.fastq \
-// r1.fastq.gz r2.fastq.gz
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
