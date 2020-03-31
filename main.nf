@@ -329,35 +329,43 @@ if (!params.host_bowtie2_index) {
 
         script:
         """
-        bowtie2-build $fasta $host_index_base
+        bowtie2-build \\
+            --seed 1 \\
+            --threads $task.cpus \\
+            $fasta \\
+            $host_index_base
         mkdir Bowtie2IndexHost && mv ${host_index_base}* Bowtie2IndexHost
         """
     }
 }
 
-// /*
-//  * PREPROCESSING: Build Viral Bowtie2 index
-//  */
-// if (!params.viral_bowtie2_index) {
-//     process VIRAL_BOWTIE2_INDEX {
-//         tag "$fasta"
-//         label 'process_high'
-//         publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-//             saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
-//
-//         input:
-//         file fasta from ch_viral_fasta
-//
-//         output:
-//         file "Bowtie2IndexViral" into ch_viral_bowtie2_index
-//
-//         script:
-//         """
-//         bowtie2-build $fasta $viral_index_base
-//         mkdir Bowtie2IndexViral && mv ${viral_index_base}* Bowtie2IndexViral
-//         """
-//     }
-// }
+/*
+ * PREPROCESSING: Build Viral Bowtie2 index
+ */
+if (!params.viral_bowtie2_index) {
+    process VIRAL_BOWTIE2_INDEX {
+        tag "$fasta"
+        label 'process_medium'
+        publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
+            saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+
+        input:
+        file fasta from ch_viral_fasta
+
+        output:
+        file "Bowtie2IndexViral" into ch_viral_bowtie2_index
+
+        script:
+        """
+        bowtie2-build \\
+            --seed 1 \\
+            --threads $task.cpus \\
+            $fasta \\
+            $viral_index_base
+        mkdir Bowtie2IndexViral && mv ${viral_index_base}* Bowtie2IndexViral
+        """
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
