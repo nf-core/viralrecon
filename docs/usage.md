@@ -15,12 +15,13 @@
   * [`--host_genome` (using iGenomes)](#--host-genome-using-igenomes)
   * [`--host_fasta`](#--host_fasta)
   * [`--host_index`](#--host_index)
+  * [`--host_kraken2_db`](#--host_kraken2_db)
+  * [`--host_kraken2_name`](#--host_kraken2_name)
   * [`--viral_genome` (using iGenomes)](#--viral-genome-using-igenomes)
   * [`--viral_fasta`](#--viral_fasta)
   * [`--viral_index`](#--viral_index)
   * [`--viral_blast_db`](#--viral_blast_db)
   * [`--viral_gff`](#--viral_gff)
-  * [`--kraken2_db`](#--kraken2_db)
   * [`--save_reference`](#--save_reference)
   * [`--igenomes_ignore`](#--igenomes_ignore)
 * [Adapter trimming](#adapter-trimming)
@@ -246,15 +247,19 @@ Full path to an existing Bowtie2 index for the viral reference genome including 
 
 ### `--viral_blast_db`
 
-Full path to Blast database for viral genome
+Full path to Blast database for viral genome.
 
 ### `--viral_gff`
 
-Full path to viral gff annotation file
+Full path to viral gff annotation file.
 
-### `--kraken2_db`
+### `--host_kraken2_db`
 
-Full path to Kraken2 database built from both host and viral genomes
+Full path to Kraken2 database built from host genome.
+
+### `--host_kraken2_name`
+
+Name for host genome as recognised by Kraken2 when using the `kraken2 build` command. Default: 'human'.
 
 ### `--save_reference`
 
