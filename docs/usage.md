@@ -28,6 +28,7 @@
   * [`--skip_trimming`](#--skip_trimming)
   * [`--save_trimmed`](#--save_trimmed)
 * [Alignments](#alignments)
+  * [`--save_kraken2_fastq`](#--save_kraken2_fastq)
   * [`--save_align_intermeds`](#--save_align_intermeds)
 * [De novo assembly](#de-novo-assembly)
   * [`--skip_assembly`](#--skip_assembly)
@@ -280,6 +281,9 @@ Skip the adapter trimming step. Use this if your input FastQ files have already 
 By default, trimmed FastQ files will not be saved to the results directory. Specify this flag (or set to true in your config file) to copy these files to the results directory when complete.
 
 ## Alignments
+
+### `--save_kraken2_fastq`
+Save the host and viral fastq files in the results directory (Default: false)
 
 ### `--save_align_intermeds`
 
