@@ -16,7 +16,9 @@ dependencies:
 
   ## bioconda packages
   - bioconda::fastqc=0.11.9
+  - bioconda::trimmomatic=0.39
   - bioconda::bowtie2=2.3.5.1
+  - bioconda::kraken2=2.0.8_beta
   - bioconda::samtools=1.9
   - bioconda::picard=2.21.9
   - bioconda::bedtools=2.29.2
