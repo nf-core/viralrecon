@@ -8,8 +8,9 @@ regexes = {
     'nf-core/viralrecon': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
     'FastQC': ['v_fastqc.txt', r"FastQC v(\S+)"],
+    'Trimmomatic': ['v_trimmomatic.txt', r"(\S+)"],
     'Bowtie2': ['v_bowtie2.txt', r"bowtie2-align-s\sversion\s(\S+)"],
-    #'Kraken2': ['v_kraken2.txt', r"Kraken\sversion\s(\S+)"],
+    'Kraken2': ['v_kraken2.txt', r"Kraken\sversion\s(\S+)"],
     'Samtools': ['v_samtools.txt', r"samtools (\S+)"],
     'BEDTools': ['v_bedtools.txt', r"bedtools v(\S+)"],
     'Picard': ['v_picard.txt', r"([\d\.]+)-SNAPSHOT"],
@@ -21,8 +22,9 @@ results = OrderedDict()
 results['nf-core/viralrecon'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['FastQC'] = '<span style="color:#999999;\">N/A</span>'
+results['Trimmomatic'] = '<span style="color:#999999;\">N/A</span>'
 results['Bowtie2'] = '<span style="color:#999999;\">N/A</span>'
-#results['Kraken2'] = '<span style="color:#999999;\">N/A</span>'
+results['Kraken2'] = '<span style="color:#999999;\">N/A</span>'
 results['Samtools'] = '<span style="color:#999999;\">N/A</span>'
 results['BEDTools'] = '<span style="color:#999999;\">N/A</span>'
 results['Picard'] = '<span style="color:#999999;\">N/A</span>'
