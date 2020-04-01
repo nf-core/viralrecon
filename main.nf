@@ -315,6 +315,18 @@ def validate_input(LinkedHashMap sample) {
 /*
  * Create channels for input fastq files
  */
+ ch_samplesheet_reformat
+    .splitCsv(header:true, sep:',')
+    .map { validate_input(it) }
+    .into { ch_reads_no_sra;
+            ch_reads_sra }
+
+ch_reads_no_sra_filt = ch_reads_no_sra
+                        .filter {
+                            it[2] != true
+                        }
+
+/*
 ch_samplesheet_reformat
     .splitCsv(header:true, sep:',')
     .map { validate_input(it) }
@@ -322,7 +334,11 @@ ch_samplesheet_reformat
             ch_reads_trimmomatic;
             ch_reads_kraken2;
             ch_reads_bowtie2;
+            ch_reads_no_sra;
             ch_reads_sra }
+*/
+
+// Split channels between the one that have the files in the disk and those in that should be downloaded from SRA
 
 /*
  * Download data using SRA ids using fromSRA
@@ -336,30 +352,55 @@ sra_ids_list = ch_reads_sra
                     id
                 }.toList().val
 
-SRA_pointers = Channel.fromSRA(sra_ids_list, apiKey: '5141bbaeaeea4edfabacbc1402ae8084ae0a')
+SRA_pointers = Channel.fromSRA( sra_ids_list, apiKey: '5141bbaeaeea4edfabacbc1402ae8084ae0a', cache: false )
 
-process DW_FASTQ_SRA {
+/*
+    if: flag==null
+    """
+    """
+    else:
+    """
+    """
+*/
+process dw_fastq_sra {
 
     input:
     set val(id), file(reads) from SRA_pointers
 
     output:
-    set val(id), stdout, val('true'), file(reads) into ch_reads_
+    set val(id), stdout, val('true'), file(reads) into ch_reads_sra_dw
 
     """
     i=`ls $reads | wc -l`
-
+    echo \$i > text.txt
     if [[ \$i == 1 ]]
     then
-        echo "true"
+        printf 'true'
     else
-        echo "false"
+        printf 'false'
     fi
 
+    # filename=`printf ${reads[1].baseName}`
+    # extension="\${filename##*.}"
+    # filename="\${filename%.*}"
+    # mv "T1_\${filename}_v1" > text.txt
     """
+
     // fastq_info $reads
 }
+//ch_reads_sra_dw.view()
+//return
+ch_reads_sra_dw_to_mix = ch_reads_sra_dw.map {
+                                            [ it[0] + "_T1", it[1].toBoolean(), it[2], it[3] ]
+                                        }
 
+ch_reads_no_sra_filt.mix ( ch_reads_sra_dw_to_mix )
+                    .into {
+                        ch_reads_fastqc;
+                        ch_reads_trimmomatic;
+                        ch_reads_kraken2;
+                        ch_reads_bowtie2
+                    }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -490,7 +531,7 @@ process FASTQC_RAW {
                 }
 
     when:
-    !params.skip_fastqc && !params.skip_qc && !is_sra
+    !params.skip_fastqc && !params.skip_qc
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_fastqc
@@ -502,11 +543,13 @@ process FASTQC_RAW {
     // Added soft-links to original fastqs for consistent naming in MultiQC
     if (single_end) {
         """
+        echo "I was in single end"
         [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
         fastqc -q -t $task.cpus ${sample}.fastq.gz
         """
     } else {
         """
+        echo "I was not in double end"
         [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
         [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
         fastqc -q -t $task.cpus ${sample}_1.fastq.gz
@@ -549,7 +592,7 @@ process KRAKEN2 {
                     }
 
     when:
-    !is_sra && !workflow.profile.contains('test')
+    !workflow.profile.contains('test')
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_kraken2
