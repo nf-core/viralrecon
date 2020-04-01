@@ -71,6 +71,7 @@ Many thanks to others who have helped out and contributed along the way too, inc
 | [Michael Heuer](https://github.com/heuermh)               | [UC Berkeley, USA](https://https://rise.cs.berkeley.edu)                              |
 | [Olga Botvinnik](https://github.com/olgabot)              | [Chan Zuckerberg Biohub, USA](https://www.czbiohub.org/)                              |
 | [Phil Ewels](https://github.com/ewels)                    | [SciLifeLab, Sweden](https://www.scilifelab.se/)                                      |
+| [Thanh Le Viet](https://github.com/thanhleviet)           | [Quadram Institute, UK](https://quadram.ac.uk/)                                       |
 
 > Listed in alphabetical order
 
