@@ -699,7 +699,6 @@ process get_software_versions {
     samtools --version > v_samtools.txt
     bedtools --version > v_bedtools.txt
     picard MarkDuplicates --version &> v_picard.txt  || true
-    preseq &> v_preseq.txt
     echo \$(R --version 2>&1) > v_R.txt
     multiqc --version > v_multiqc.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
