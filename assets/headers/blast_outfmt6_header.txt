@@ -1,0 +1,1 @@
+stitle	qaccver	saccver	pident	length	mismatch	gapopen	qstart	qend	sstart	send	evalue	bitscore	slen	qlen	qcovs	%cgAligned	%refCovered

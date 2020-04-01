@@ -12,15 +12,11 @@
   * [`--input`](#--input)
   * [`--protocol`](#--protocol)
 * [Reference genomes](#reference-genomes)
-  * [`--host_genome` (using iGenomes)](#--host-genome-using-igenomes)
-  * [`--host_fasta`](#--host_fasta)
-  * [`--host_index`](#--host_index)
   * [`--host_kraken2_db`](#--host_kraken2_db)
   * [`--host_kraken2_name`](#--host_kraken2_name)
   * [`--viral_genome` (using iGenomes)](#--viral-genome-using-igenomes)
   * [`--viral_fasta`](#--viral_fasta)
-  * [`--viral_index`](#--viral_index)
-  * [`--viral_blast_db`](#--viral_blast_db)
+  * [`--viral_kraken2_db`](#--viral_kraken2_db)
   * [`--viral_gff`](#--viral_gff)
   * [`--save_reference`](#--save_reference)
   * [`--igenomes_ignore`](#--igenomes_ignore)
@@ -176,20 +172,13 @@ Specifies the type of protocol used for sequencing i.e. "metagenomic" or "amplic
 
 The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If running with docker or AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
 
-### `--host_genome` (using iGenomes)
+<!-- TODO nf-core: Describe reference path flags -->
 
-There are 31 different species supported in the iGenomes references. To run the pipeline, you must specify which to use with the `--host_genome` flag.
+### `--viral_genome` (using iGenomes)
 
-You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config). Common genomes that are supported are:
+This parameter allows you to provide a key for the viral genome you would like to use with the pipeline. To run the pipeline, you must specify which to use with the `--viral_genome` flag.
 
-* Human
-  * `--host_genome GRCh37`
-* Mouse
-  * `--host_genome GRCm38`
-
-> There are numerous others - check the config file for more.
-
-Note that you can use the same configuration setup to save sets of reference files for your own use, even if they are not part of the iGenomes resource. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.
+Note that you can use the same configuration setup to save sets of reference files for your own use. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.
 
 The syntax for this reference configuration is as follows:
 
@@ -206,29 +195,7 @@ params {
 }
 ```
 
-<!-- TODO nf-core: Describe reference path flags -->
-
-### `--host_fasta`
-
-Full path to fasta file containing reference genome for the host species (*mandatory* if `--host_genome` is not specified). If you don't have a Bowtie2 index available this will be generated for you automatically. Combine with `--save_reference` to save Bowtie2 index for future runs.
-
-```bash
---host_fasta '[path to FASTA reference]'
-```
-
-### `--host_index`
-
-Full path to an existing Bowtie2 index for the host reference genome including the base name for the index.
-
-```bash
---host_index '[directory containing Bowtie2 index]/genome.fa'
-```
-
-### `--viral_genome` (using iGenomes)
-
-Similar to providing the `--host_genome`](#--host-genome-using-igenomes) parameter you can also provide a key for the viral genome you would like to use with the pipeline. These have been uploaded manually to AWS iGenomes along with the relevant databases and indices so you don't have to obtain them individually! To run the pipeline, you must specify which to use with the `--viral_genome` flag.
-
-You can find the keys to specify the genomes in the [iGenomes config file](../conf/igenomes.config).
+You can find the keys to specify the genomes in the [Genomes config file](../conf/genomes.config).
 
 ### `--viral_fasta`
 
@@ -238,21 +205,13 @@ Full path to fasta file containing reference genome for the viral species (*mand
 --viral_fasta '[path to FASTA reference]'
 ```
 
-### `--viral_index`
-
-Full path to an existing Bowtie2 index for the viral reference genome including the base name for the index.
-
-```bash
---viral_index '[directory containing Bowtie2 index]/genome.fa'
-```
-
-### `--viral_blast_db`
-
-Full path to Blast database for viral genome.
-
 ### `--viral_gff`
 
 Full path to viral gff annotation file.
+
+### `--viral_kraken2_db`
+
+Full path to Kraken2 database built from viral genome.
 
 ### `--host_kraken2_db`
 
