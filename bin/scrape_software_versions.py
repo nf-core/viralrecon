@@ -15,7 +15,6 @@ regexes = {
     'BEDTools': ['v_bedtools.txt', r"bedtools v(\S+)"],
     'Picard': ['v_picard.txt', r"([\d\.]+)-SNAPSHOT"],
     'R': ['v_R.txt', r"R version (\S+)"],
-    'Preseq': ['v_preseq.txt', r"Version: (\S+)"],
     'MultiQC': ['v_multiqc.txt', r"multiqc, version (\S+)"]
 }
 results = OrderedDict()
@@ -29,7 +28,6 @@ results['Samtools'] = '<span style="color:#999999;\">N/A</span>'
 results['BEDTools'] = '<span style="color:#999999;\">N/A</span>'
 results['Picard'] = '<span style="color:#999999;\">N/A</span>'
 results['R'] = '<span style="color:#999999;\">N/A</span>'
-results['Preseq'] = '<span style="color:#999999;\">N/A</span>'
 results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
