@@ -67,10 +67,10 @@ def check_samplesheet(FileIn,FileOut):
             elif sample and fastq_1 and not fastq_2:        ## Single-end short reads
                 single_end = '1'
             elif sample and not fastq_1 and not fastq_2:    ## SRA accession
-                if sample[:3] == 'SRR':
+                if sample[:3] in ['SRR', 'SRP', 'SRX']:
                     is_sra = '1'
                 else:
-                    print_error("Please provide a valid SRA run accession starting with 'SRR'!",line)
+                    print_error("Please provide a valid SRA run accession starting with 'SRR', 'SRP' or 'SRX'!",line)
             else:
                 print_error("Invalid combination of columns provided!",line)
 
