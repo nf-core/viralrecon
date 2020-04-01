@@ -351,16 +351,46 @@ sra_ids_list = ch_reads_sra
 // Implement a switch to use the apiKey if present, otherwise send a warning
 SRA_pointers =  params.sra_api_key? Channel.fromSRA( sra_ids_list, apiKey: params.sra_api_key ) : Channel.fromSRA( sra_ids_list)
 
-process validate_fastq_sra {
+process dw_fastq_sra {
+    errorStrategy 'ignore'
 
     input:
     set val(id), file(reads) from SRA_pointers
 
-    output:
-    set val(id), stdout, val('true'), file(reads) into ch_reads_sra_dw
+    //output:
+    //set val(id), stdout, val('true'), file(reads) into ch_reads_sra_dw
+
+
+    //First check if the file is ok
+    // if ok :
+    //    run python to get info
+    // else :
+    //    run parallel-fastq-dump
+    //      if ok
+    //            run python to get info
+    //      else:
+    //            warning and continue without the file
+    //
 
     """
-    i=`ls $reads | wc -l`
+    fastq_info $reads > validation.tmp 2>&1
+
+    if grep -q "OK" validation.tmp
+    then
+        get_SRA_metainfo.py
+    elif grep -q "ERROR" validation.tmp
+    then
+        echo "IMPLEMENT how to run fasq-dump"
+    else
+        echo "Unknown output of fastq_info"
+    fi
+    """
+
+}
+
+return
+/*
+i=`ls $reads | wc -l`
     echo \$i > text.txt
     if [[ \$i == 1 ]]
     then
@@ -368,11 +398,7 @@ process validate_fastq_sra {
     else
         printf 'false'
     fi
-
-
-    """
-    //fastq_info $reads
-}
+*/
 
 ch_reads_sra_dw_to_mix = ch_reads_sra_dw.map {
                                             [ it[0] + "_T1", it[1].toBoolean(), it[2], it[3] ]
