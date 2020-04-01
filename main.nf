@@ -468,14 +468,14 @@ process FASTQC_RAW {
     if (single_end) {
         """
         [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
-        fastqc -q -t $task.cpus ${sample}.fastq.gz
+        fastqc --quiet --threads $task.cpus ${sample}.fastq.gz
         """
     } else {
         """
         [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
         [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-        fastqc -q -t $task.cpus ${sample}_1.fastq.gz
-        fastqc -q -t $task.cpus ${sample}_2.fastq.gz
+        fastqc --quiet --threads $task.cpus ${sample}_1.fastq.gz
+        fastqc --quiet --threads $task.cpus ${sample}_2.fastq.gz
         """
     }
 }
@@ -556,7 +556,7 @@ process FASTQC_TRIM {
 
     script:
     """
-    fastqc -q -t $task.cpus $reads
+    fastqc --quiet --threads $task.cpus $reads
     """
 }
 
@@ -771,7 +771,7 @@ process SPADES {
     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
     """
     spades.py \\
-        -t ${task.cpus} \\
+        --threads ${task.cpus} \\
         $input_reads \\
         -o ./
     mv scaffolds.fasta ${sample}".scaffolds.fasta"
@@ -801,7 +801,7 @@ process METASPADES {
     """
     spades.py \\
         --meta \\
-        -t ${task.cpus} \\
+        --threads ${task.cpus} \\
         -1 ${reads[0]} \\
         -2 ${reads[1]} \\
         -o ./
@@ -832,9 +832,9 @@ process UNICYCLER {
     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
     """
     unicycler \\
-        -t ${task.cpus} \\
+        --threads ${task.cpus} \\
         $input_reads \\
-        -o ./
+        --out ./
     mv assembly.fasta ${sample}".assembly.fasta"
     """
 }
@@ -874,8 +874,6 @@ process QUAST_SPADES {
         --features \$GFF \\
         --threads ${task.cpus} \\
         ${scaffolds.join(' ')}
-
-    #\$(find . -name "*scaffolds.fasta" | tr '\n' ' ')
     """
 }
 
@@ -914,7 +912,6 @@ process QUAST_METASPADES {
         --features \$GFF \\
         --threads ${task.cpus} \\
         ${scaffolds.join(' ')}
-    #\$(find . -name "*scaffolds.fasta" | tr '\n' ' ')
     """
 }
 
@@ -953,7 +950,6 @@ process QUAST_UNICYCLER {
         --features \$GFF \\
         --threads ${task.cpus} \\
         ${scaffolds.join(' ')}
-    #\$(find . -name "*assembly.fasta" | tr '\n' ' ')
     """
 }
 
@@ -1214,7 +1210,11 @@ process get_software_versions {
     bedtools --version > v_bedtools.txt
     picard MarkDuplicates --version &> v_picard.txt  || true
     echo \$(R --version 2>&1) > v_R.txt
+    spades.py --version > v_spades.txt
+    unicycler --version > v_unicycler.txt
     quast.py --version > v_quast.txt
+    blastn -version > v_blast.txt
+    abacas.pl > v_abacas.txt
     multiqc --version > v_multiqc.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
