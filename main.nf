@@ -1208,13 +1208,13 @@ process get_software_versions {
     kraken2 --version > v_kraken2.txt
     samtools --version > v_samtools.txt
     bedtools --version > v_bedtools.txt
-    picard MarkDuplicates --version &> v_picard.txt  || true
+    picard MarkDuplicates --version &> v_picard.txt || true
     echo \$(R --version 2>&1) > v_R.txt
     spades.py --version > v_spades.txt
     unicycler --version > v_unicycler.txt
     quast.py --version > v_quast.txt
     blastn -version > v_blast.txt
-    abacas.pl > v_abacas.txt
+    abacas.pl -v &> v_abacas.txt || true
     multiqc --version > v_multiqc.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
