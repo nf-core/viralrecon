@@ -13,7 +13,7 @@ regexes = {
     'Kraken2': ['v_kraken2.txt', r"Kraken\sversion\s(\S+)"],
     'Samtools': ['v_samtools.txt', r"samtools (\S+)"],
     'BEDTools': ['v_bedtools.txt', r"bedtools v(\S+)"],
-    'Picard': ['v_picard.txt', r"([\d\.]+)-SNAPSHOT"],
+    'Picard': ['v_picard.txt', r"\n(\S+)"],
     'R': ['v_R.txt', r"R version (\S+)"],
     'SPAdes': ['v_spades.txt', r"SPAdes genome assembler v(\S+)"],
     'Unicycler': ['v_unicycler.txt', r"Unicycler v(\S+)"],
