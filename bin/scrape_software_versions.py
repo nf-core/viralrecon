@@ -15,6 +15,11 @@ regexes = {
     'BEDTools': ['v_bedtools.txt', r"bedtools v(\S+)"],
     'Picard': ['v_picard.txt', r"([\d\.]+)-SNAPSHOT"],
     'R': ['v_R.txt', r"R version (\S+)"],
+    'SPAdes': ['v_spades.txt', r"SPAdes genome assembler v(\S+)"],
+    'Unicycler': ['v_unicycler.txt', r"Unicycler v(\S+)"],
+    'QUAST': ['v_quast.txt', r"QUAST v(\S+)"],
+    'BLAST': ['v_blast.txt', r"blastn: (\S+)"],
+    'ABACAS': ['v_abacus.txt', r"ABACAS.(\S+)"],
     'MultiQC': ['v_multiqc.txt', r"multiqc, version (\S+)"]
 }
 results = OrderedDict()
@@ -28,6 +33,11 @@ results['Samtools'] = '<span style="color:#999999;\">N/A</span>'
 results['BEDTools'] = '<span style="color:#999999;\">N/A</span>'
 results['Picard'] = '<span style="color:#999999;\">N/A</span>'
 results['R'] = '<span style="color:#999999;\">N/A</span>'
+results['SPAdes'] = '<span style="color:#999999;\">N/A</span>'
+results['Unicycler'] = '<span style="color:#999999;\">N/A</span>'
+results['QUAST'] = '<span style="color:#999999;\">N/A</span>'
+results['BLAST'] = '<span style="color:#999999;\">N/A</span>'
+results['ABACAS'] = '<span style="color:#999999;\">N/A</span>'
 results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
