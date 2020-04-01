@@ -789,7 +789,7 @@ process SPADES {
  */
 process QUAST_SPADES {
     label 'process_medium'
-    publishDir "${params.outdir}/quast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && !is_sra
@@ -800,11 +800,10 @@ process QUAST_SPADES {
     file gff from ch_viral_gff
 
     output:
-    file "$outdir" into ch_quast_spades_results
-    file "${outdir}/report.tsv" into ch_quast_spades_mqc
+    file "quast" into ch_quast_spades_results
+    file "quast/report.tsv" into ch_quast_spades_mqc
 
     script:
-    outdir = 'spades'
     """
     GFF=$gff
     if [[ \$GFF == *.gz ]]
@@ -814,7 +813,7 @@ process QUAST_SPADES {
     fi
 
     quast.py \\
-        --output-dir $outdir \\
+        --output-dir quast \\
         -r $fasta \\
         --features \$GFF \\
         --threads ${task.cpus} \\
@@ -828,7 +827,7 @@ process QUAST_SPADES {
 process BLAST_SPADES {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/blast/spades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/spades/blast", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && !is_sra
@@ -896,7 +895,7 @@ process METASPADES {
  */
 process QUAST_METASPADES {
     label 'process_medium'
-    publishDir "${params.outdir}/quast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && !is_sra
@@ -907,11 +906,10 @@ process QUAST_METASPADES {
     file gff from ch_viral_gff
 
     output:
-    file "$outdir" into ch_quast_metaspades_results
-    file "${outdir}/report.tsv" into ch_quast_metaspades_mqc
+    file "quast" into ch_quast_metaspades_results
+    file "quast/report.tsv" into ch_quast_metaspades_mqc
 
     script:
-    outdir = 'metaspades'
     """
     GFF=$gff
     if [[ \$GFF == *.gz ]]
@@ -921,7 +919,7 @@ process QUAST_METASPADES {
     fi
 
     quast.py \\
-        --output-dir $outdir \\
+        --output-dir quast \\
         -r $fasta \\
         --features \$GFF \\
         --threads ${task.cpus} \\
@@ -935,7 +933,7 @@ process QUAST_METASPADES {
 process BLAST_METASPADES {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/blast/metaspades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/metaspades/blast", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && !is_sra
@@ -1002,7 +1000,7 @@ process UNICYCLER {
  */
 process QUAST_UNICYCLER {
     label 'process_medium'
-    publishDir "${params.outdir}/quast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && !is_sra
@@ -1013,11 +1011,10 @@ process QUAST_UNICYCLER {
     file gff from ch_viral_gff
 
     output:
-    file "$outdir" into ch_quast_unicycler_results
-    file "${outdir}/report.tsv" into ch_quast_unicycler_mqc
+    file "quast" into ch_quast_unicycler_results
+    file "quast/report.tsv" into ch_quast_unicycler_mqc
 
     script:
-    outdir = 'unicycler'
     """
     GFF=$gff
     if [[ \$GFF == *.gz ]]
@@ -1027,7 +1024,7 @@ process QUAST_UNICYCLER {
     fi
 
     quast.py \\
-        --output-dir $outdir \\
+        --output-dir quast \\
         -r $fasta \\
         --features \$GFF \\
         --threads ${task.cpus} \\
@@ -1041,7 +1038,7 @@ process QUAST_UNICYCLER {
 process BLAST_UNICYCLER {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/blast/unicycler", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/unicycler/blast", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && !is_sra
