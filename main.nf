@@ -344,7 +344,9 @@ process BLAST_DB_VIRAL {
     file fasta from ch_viral_fasta
 
     output:
-    file "BlastDBViral" into ch_viral_blast_db
+    file "BlastDBViral" into ch_viral_blast_db_spades,
+                             ch_viral_blast_db_metaspades,
+                             ch_viral_blast_db_unicycler
 
     script:
     """
@@ -748,8 +750,12 @@ process KRAKEN2_VIRAL {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////
+/* --                SPADES                    -- */
+////////////////////////////////////////////////////
+
 /*
- * STEPS 4.2 De novo assembly with SPAdes
+ * STEPS 6.1 De novo assembly with SPAdes
  */
 process SPADES {
     tag "$sample"
@@ -774,73 +780,12 @@ process SPADES {
         --threads ${task.cpus} \\
         $input_reads \\
         -o ./
-    mv scaffolds.fasta ${sample}".scaffolds.fasta"
+    mv scaffolds.fasta ${sample}.scaffolds.fasta
     """
 }
 
 /*
- * STEPS 4.2 De novo assembly with MetaSPAdes
- */
-process METASPADES {
-    tag "$sample"
-    label 'process_medium'
-    publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
-
-    when:
-    !params.skip_assembly && !single_end && !is_sra
-
-    input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_metaspades
-
-    output:
-    set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_metaspades_quast,
-                                                                                 ch_metaspades_abacus,
-                                                                                 ch_metaspades_blast
-
-    script:
-    """
-    spades.py \\
-        --meta \\
-        --threads ${task.cpus} \\
-        -1 ${reads[0]} \\
-        -2 ${reads[1]} \\
-        -o ./
-    mv scaffolds.fasta ${sample}".meta.scaffolds.fasta"
-    """
-}
-
-/*
- * STEPS 4.3 De novo assembly with Unicycler
- */
-process UNICYCLER {
-    tag "$sample"
-    label 'process_medium'
-    publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
-
-    when:
-    !params.skip_assembly && !is_sra
-
-    input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_unicycler
-
-    output:
-    set val(sample), val(single_end), val(is_sra), file("*assembly.fasta") into ch_unicycler_quast,
-                                                                                ch_unicycler_abacus,
-                                                                                ch_unicycler_blast
-
-    script:
-    input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
-    """
-    unicycler \\
-        --threads ${task.cpus} \\
-        $input_reads \\
-        --out ./
-    mv assembly.fasta ${sample}".assembly.fasta"
-    """
-}
-
-/*
- * STEPS 4.2 Run Quast on SPAdes de novo assembly
+ * STEPS 6.2 Run Quast on SPAdes de novo assembly
  */
 process QUAST_SPADES {
     label 'process_medium'
@@ -878,7 +823,76 @@ process QUAST_SPADES {
 }
 
 /*
- * STEPS 4.2 Run Quast on MetaSPAdes de novo assembly
+ * STEPS 6.3 Run Blast on SPAdes de novo assembly
+ */
+process BLAST_SPADES {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/blast/spades", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_blast
+    file db from ch_viral_blast_db_spades.collect()
+    file header from ch_blast_outfmt6_header
+
+    output:
+    file "*.blast.txt" into ch_blast_spades_results
+    file "*.blast.filt.header.txt" into ch_blast_spades_filt_results
+
+    script:
+    """
+    blastn \\
+        -num_threads ${task.cpus} \\
+        -db $db/$viral_fasta_base \\
+        -query $scaffold \\
+        -outfmt \'6 stitle std slen qlen qcovs\' \\
+        -out ${sample}.blast.txt
+
+    awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
+    cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
+    """
+}
+
+////////////////////////////////////////////////////
+/* --               METASPADES                 -- */
+////////////////////////////////////////////////////
+
+/*
+ * STEPS 7.1 De novo assembly with MetaSPAdes
+ */
+process METASPADES {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && !single_end && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_metaspades
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_metaspades_quast,
+                                                                                 ch_metaspades_abacus,
+                                                                                 ch_metaspades_blast
+
+    script:
+    """
+    spades.py \\
+        --meta \\
+        --threads ${task.cpus} \\
+        -1 ${reads[0]} \\
+        -2 ${reads[1]} \\
+        -o ./
+    mv scaffolds.fasta ${sample}.meta.scaffolds.fasta
+    """
+}
+
+/*
+ * STEPS 7.2 Run Quast on MetaSPAdes de novo assembly
  */
 process QUAST_METASPADES {
     label 'process_medium'
@@ -916,7 +930,75 @@ process QUAST_METASPADES {
 }
 
 /*
- * STEPS 4.2 Run Quast on Unicycler de novo assembly
+ * STEPS 7.3 Run Blast on MetaSPAdes de novo assembly
+ */
+process BLAST_METASPADES {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/blast/metaspades", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_blast
+    file db from ch_viral_blast_db_metaspades.collect()
+    file header from ch_blast_outfmt6_header
+
+    output:
+    file "*.blast.txt" into ch_blast_metaspades_results
+    file "*.blast.filt.header.txt" into ch_blast_metaspades_filt_results
+
+    script:
+    """
+    blastn \\
+        -num_threads ${task.cpus} \\
+        -db $db/$viral_fasta_base \\
+        -query $scaffold \\
+        -outfmt \'6 stitle std slen qlen qcovs\' \\
+        -out ${sample}.blast.txt
+
+    awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
+    cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
+    """
+}
+
+////////////////////////////////////////////////////
+/* --               UNICYCLER                  -- */
+////////////////////////////////////////////////////
+
+/*
+ * STEPS 8.1 De novo assembly with Unicycler
+ */
+process UNICYCLER {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_unicycler
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*assembly.fasta") into ch_unicycler_quast,
+                                                                                ch_unicycler_abacus,
+                                                                                ch_unicycler_blast
+
+    script:
+    input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
+    """
+    unicycler \\
+        --threads ${task.cpus} \\
+        $input_reads \\
+        --out ./
+    mv assembly.fasta ${sample}.assembly.fasta
+    """
+}
+
+/*
+ * STEPS 8.2 Run Quast on Unicycler de novo assembly
  */
 process QUAST_UNICYCLER {
     label 'process_medium'
@@ -953,69 +1035,40 @@ process QUAST_UNICYCLER {
     """
 }
 
-// /*
-//  * STEPS 4.2 Run Blast on SPAdes de novo assembly
-//  */
-// process BLAST_SPADES {
-//     label 'process_medium'
-//     publishDir "${params.outdir}/blast", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && !is_sra
-//
-//     input:
-//     file scaffolds from ch_spades_blast
-//     file db from ch_viral_blast_db.collect()
-//     file header from ch_blast_outfmt6_header
-//
-//     //output:
-//     //file "*_blast_filt_header.txt" into ch_blast_spades_results
-//
-//     script:
-//     prefix = 'spades'
-//     """
-//     blastn \\
-//         -num_threads ${task.cpus} \\
-//         -db $db/$viral_fasta_base \\
-//         -query $scaffolds \\
-//         -outfmt \'6 stitle std slen qlen qcovs\' \\
-//         -out ${prefix}"_blast.txt"
-//     awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${prefix}"_blast.txt" | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${prefix}"_blast_filt.txt"; cat $header ${prefix}"_blast_filt.txt" > ${prefix}"_blast_filt_header.txt"
-//     """
-// }
+/*
+ * STEPS 8.3 Run Blast on MetaSPAdes de novo assembly
+ */
+process BLAST_UNICYCLER {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/blast/unicycler", mode: params.publish_dir_mode
 
-// /*
-//  * STEPS 5.1 BLAST
-//  */
-// process blast {
-//   label "small"
-//   tag "$prefix"
-//   publishDir path: { "${params.outdir}/11-blast" }, mode: 'copy'
-//
-//   input:
-//   file scaffolds from spades_scaffold_blast
-//   file refvirus from viral_fasta_file
-//   file blast_db from blast_db_files.collect()
-//   file header from blast_header
-//
-//   output:
-//   file "*_blast_filt_header.txt" into blast_results
-//
-//   script:
-//   prefix = scaffolds.baseName - ~/(_scaffolds)?(_paired)?(\.fasta)?(\.gz)?$/
-//   """
-//   blastn -num_threads ${task.cpus} -db $refvirus -query $scaffolds -outfmt \'6 stitle std slen qlen qcovs\' -out $prefix"_blast.txt"
-//   awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' $prefix"_blast.txt" | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > $prefix"_blast_filt.txt"; cat $header $prefix"_blast_filt.txt" > $prefix"_blast_filt_header.txt"
-//   """
-// }
+    when:
+    !params.skip_assembly && !is_sra
 
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_blast
+    file db from ch_viral_blast_db_unicycler.collect()
+    file header from ch_blast_outfmt6_header
 
+    output:
+    file "*.blast.txt" into ch_blast_unicycler_results
+    file "*.blast.filt.header.txt" into ch_blast_unicycler_filt_results
 
+    script:
+    """
+    blastn \\
+        -num_threads ${task.cpus} \\
+        -db $db/$viral_fasta_base \\
+        -query $scaffold \\
+        -outfmt \'6 stitle std slen qlen qcovs\' \\
+        -out ${sample}.blast.txt
 
+    awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
+    cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
+    """
+}
 
-
-
-//
 // /*
 //  * STEPS 4.6 ABACAS
 //  */
@@ -1052,31 +1105,6 @@ process QUAST_UNICYCLER {
 //   mv nucmer.filtered.delta $prefix"_abacas_nucmer.filtered.delta"
 //   mv nucmer.tiling $prefix"_abacas_nucmer.tiling"
 //   mv unused_contigs.out $prefix"_abacas_unused_contigs.out"
-//   """
-// }
-//
-// /*
-//  * STEPS 5.1 BLAST
-//  */
-// process blast {
-//   label "small"
-//   tag "$prefix"
-//   publishDir path: { "${params.outdir}/11-blast" }, mode: 'copy'
-//
-//   input:
-//   file scaffolds from spades_scaffold_blast
-//   file refvirus from viral_fasta_file
-//   file blast_db from blast_db_files.collect()
-//   file header from blast_header
-//
-//   output:
-//   file "*_blast_filt_header.txt" into blast_results
-//
-//   script:
-//   prefix = scaffolds.baseName - ~/(_scaffolds)?(_paired)?(\.fasta)?(\.gz)?$/
-//   """
-//   blastn -num_threads ${task.cpus} -db $refvirus -query $scaffolds -outfmt \'6 stitle std slen qlen qcovs\' -out $prefix"_blast.txt"
-//   awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' $prefix"_blast.txt" | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > $prefix"_blast_filt.txt"; cat $header $prefix"_blast_filt.txt" > $prefix"_blast_filt_header.txt"
 //   """
 // }
 //
