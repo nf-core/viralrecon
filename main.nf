@@ -507,7 +507,8 @@ process TRIMMOMATIC {
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*trimmed*") into ch_trimmomatic_fastqc,
-                                                                          ch_trimmomatic_kraken2,
+                                                                          ch_trimmomatic_kraken2_host,
+                                                                          ch_trimmomatic_kraken2_viral,
                                                                           ch_trimmomatic_spades,
                                                                           ch_trimmomatic_metaspades,
                                                                           ch_trimmomatic_unicycler
@@ -567,13 +568,13 @@ process FASTQC_TRIM {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
-* STEP 3: Remove host reads with Kraken2
+* STEP 3.1: Remove host reads with Kraken2
 */
 // CHECK IF USER-PROVIDED DATABASE IS ZIPPED OR IN A TAR ARCHIVE
-process KRAKEN2 {
+process KRAKEN2_HOST {
     tag "$db"
     label 'process_high'
-    publishDir "${params.outdir}/kraken2", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/kraken2/host", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith(".txt")) filename
                           else params.save_kraken2_fastq ? filename : null
@@ -583,13 +584,56 @@ process KRAKEN2 {
     !is_sra && !workflow.profile.contains('test')
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_kraken2
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_kraken2_host
     file db from ch_host_kraken2_db.collect()
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_viral_reads
-    set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_host_reads
-    file "*.report.txt" into ch_kraken2_report
+    set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_host_viral_reads
+    set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_host_host_reads
+    file "*.report.txt" into ch_kraken2_host_report
+
+    script:
+    pe = single_end ? "" : "--paired"
+    classified = single_end ? "${sample}.host.fastq" : "${sample}.host#.fastq"
+    unclassified = single_end ? "${sample}.viral.fastq" : "${sample}.viral#.fastq"
+    """
+    kraken2 \\
+        --db $db \\
+        --threads $task.cpus \\
+        --unclassified-out $unclassified \\
+        --classified-out $classified \\
+        --report ${sample}.kraken2.report.txt \\
+        $pe \\
+        --gzip-compressed \\
+        $reads
+    gzip *.fastq
+    """
+}
+
+/*
+* STEP 3.2: Extract viral reads with Kraken2
+*/
+// CHECK IF USER-PROVIDED DATABASE IS ZIPPED OR IN A TAR ARCHIVE
+process KRAKEN2_VIRAL {
+    tag "$db"
+    label 'process_high'
+    publishDir "${params.outdir}/kraken2/viral", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith(".txt")) filename
+                          else params.save_kraken2_fastq ? filename : null
+                    }
+
+    when:
+    !is_sra && !workflow.profile.contains('test')
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_kraken2_viral
+    file db from ch_viral_kraken2_db.collect()
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_viral_viral_reads
+    set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_viral_host_reads
+    file "*.report.txt" into ch_kraken2_viral_report
 
     script:
     pe = single_end ? "" : "--paired"
