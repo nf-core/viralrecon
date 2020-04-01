@@ -164,7 +164,7 @@ SRR11177792,,
 
 | Column    | Description                                                                                                                       |
 |-----------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `sample`  | Sample identifier or SRA 'SRR' run accession. This will be identical for multiple sequencing libraries/runs from the same sample. |
+| `sample`  | Sample identifier or SRA 'SRR', 'SRP' or 'SRX' run accession. This will be identical for multiple sequencing libraries/runs from the same sample. |
 | `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".        |
 | `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".        |
 
@@ -284,7 +284,7 @@ By default, trimmed FastQ files will not be saved to the results directory. Spec
 
 ### `--save_kraken2_fastq`
 
-Save the host and viral fastq files in the results directory (Default: false)
+Save the host and viral fastq files in the results directory (Default: false).
 
 ### `--save_align_intermeds`
 
