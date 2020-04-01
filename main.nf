@@ -127,6 +127,7 @@ if (params.viral_fasta) {
     lastPath = params.viral_fasta.lastIndexOf(File.separator)
     lastExt = params.host_fasta.lastIndexOf(".")
     viral_fasta_base = params.viral_fasta.substring(lastPath+1)
+    viral_index_base = params.viral_fasta.substring(lastPath+1,lastExt)
     ch_viral_fasta = file(params.viral_fasta, checkIfExists: true)
 } else {
     exit 1, "Viral fasta file not specified!"
@@ -872,7 +873,7 @@ process QUAST_SPADES {
         -r $fasta \\
         --features \$GFF \\
         --threads ${task.cpus} \\
-        ${scaffolds.join('\n')}
+        ${scaffolds.join(' ')}
 
     #\$(find . -name "*scaffolds.fasta" | tr '\n' ' ')
     """
@@ -912,7 +913,7 @@ process QUAST_METASPADES {
         -r $fasta \\
         --features \$GFF \\
         --threads ${task.cpus} \\
-        ${scaffolds.join('\n')}
+        ${scaffolds.join(' ')}
     #\$(find . -name "*scaffolds.fasta" | tr '\n' ' ')
     """
 }
@@ -951,7 +952,7 @@ process QUAST_UNICYCLER {
         -r $fasta \\
         --features \$GFF \\
         --threads ${task.cpus} \\
-        ${scaffolds.join('\n')}
+        ${scaffolds.join(' ')}
     #\$(find . -name "*assembly.fasta" | tr '\n' ' ')
     """
 }
