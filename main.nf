@@ -124,7 +124,11 @@ if (params.protocol != 'metagenomic' && params.protocol != 'amplicon') {
 if (params.protocol == 'amplicon' && !params.amplicon_fasta) {
     exit 1, "If protocol is set to 'amplicon' then please provide a valid amplicon fasta file"
 }
+if (params.protocol == 'amplicon' && !params.skip_mapping && !params.amplicon_bed) {
+    exit 1, "If protocol is set to 'amplicon' and mapping is not skipped, then please provide a valid amplicon BED file"
+}
 if (params.amplicon_fasta) { ch_amplicon_fasta = Channel.fromPath(params.amplicon_fasta, checkIfExists: true) } else { ch_amplicon_fasta = Channel.empty() }
+if (params.amplicon_bed) { ch_amplicon_bed = Channel.fromPath(params.amplicon_bed, checkIfExists: true) } else { ch_amplicon_bed = Channel.empty() }
 if (params.adapter_file) { ch_adapter_file = Channel.fromPath(params.adapter_file, checkIfExists: true) } else { exit 1, "Adapter file not specified!" }
 
 assemblerList = [ 'spades', 'metaspades', 'unicycler' ]
@@ -133,9 +137,6 @@ if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
 }
 
-if (params.protocol == 'amplicon' && !params.skip_mapping && !params.amplicon_bed) {
-    exit 1, "If protocol is set to 'amplicon' and mapping is not skipped, then please provide a valid amplicon BED file"
-}
 
 // Host reference files
 if (params.genomes && params.host_genome && !params.genomes.containsKey(params.host_genome)) {
@@ -550,7 +551,8 @@ process TRIMMOMATIC {
     output:
     set val(sample), val(single_end), val(is_sra), file("*trimmed*") into ch_trimmomatic_fastqc,
                                                                           ch_trimmomatic_kraken2_host,
-                                                                          ch_trimmomatic_kraken2_viral
+                                                                          ch_trimmomatic_kraken2_viral,
+                                                                          ch_trimmomatic_bowtie
     set val(sample), val(single_end), val(is_sra), file("*orphan*") into ch_trimmomatic_orphan
     file '*.log' into ch_trimmomatic_mqc
 
@@ -830,7 +832,7 @@ if (params.protocol == 'amplicon'){
       input:
       set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_ivar
       file bamindex from ch_sort_bamindex_ivar
-      file amplicons_bed from amplicons_bed_file
+      file amplicons_bed from ch_amplicon_bed
       file fasta from ch_viral_fasta
       file index from ch_viral_index
 
@@ -846,7 +848,7 @@ if (params.protocol == 'amplicon'){
       """
       samtools view -b -F 4 ${sample}.sorted.bam > ${sample}.onlymapped.bam"
       samtools index ${sample}.onlymapped.bam"
-      ivar trim -e -i ${sample}.onlymapped.bam" -b ${params.amplicon_bed} -p ${sample}.primertrimmed" -q 15 -m 50 -s 4
+      ivar trim -e -i ${sample}.onlymapped.bam" -b $amplicons_bed -p ${sample}.primertrimmed" -q 15 -m 50 -s 4
       samtools sort -o ${sample}.primertrimmed_sorted.bam -O bam -T $sample ${sample}.primertrimmed.bam
       samtools index ${sample}.primertrimmed.sorted.bam
       samtools flagstat ${sample}.primertrimmed.sorted.bam > ${sample}.primertrimmed.sorted.bam.flagstat
