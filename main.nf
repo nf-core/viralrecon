@@ -55,13 +55,11 @@ def helpMessage() {
       --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
     Mapping
       --skip_mapping [bool]           Skip Mapping and undergoing steps in the pipeline
-      --save_map_intermeds [bool]     Save the intermediate BAM files from the mapping step (Default: false)
+      --save_map_intermeds [bool]     Save the intermediate BAM files from the mapping steps (Default: false)
+      --save_ivar_intermeds [bool]    Save the intermediate BAM files from iVar step (Default: false)
 
     De novo assembly
       --skip_assembly [bool]          Skip assembly steps in the pipeline
-
-    Variant calling
-      --skip_variants [bool]          Skip variant calling steps in the pipeline
 
     QC
       --skip_qc [bool]                Skip all QC steps apart from MultiQC (Default: false)
@@ -766,6 +764,63 @@ process KRAKEN2_VIRAL {
 /* --                                                                     -- */
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * STEP 4.1: Remove amplicon's primers with iVar
+ */
+if (params.protocol == 'amplicon'){
+  process IVAR {
+      tag "$sample"
+      label 'process_medium'
+      publishDir "${params.outdir}/ivar", mode: params.publish_dir_mode,
+          saveAs: { filename ->
+                        if (params.save_ivar_intermeds) {
+                            if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
+                            else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
+                            else if (filename.endsWith(".bam.stats")) "samtools_stats/$filename"
+                            else if (filename.endsWith(".picard.stats")) "picard_stats/$filename"
+                            else filename
+                        }
+                  }
+
+      when:
+      !params.skip_mapping && !is_sra
+
+      input:
+      set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_ivar
+      file amplicons_bed from amplicons_bed_file
+      file fasta from ch_viral_fasta
+      file index from ch_viral_index
+
+      output:
+      set val(sample), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_bam_variantcalling,
+                                                                        ch_bam_consensus
+      file "*.{flagstat,idxstats,bam.stats}" into ch_ivar_flagstat_mqc
+      file "*picard.stats" into ch_ivar_picardstat_mqc
+
+      script:
+      """
+      samtools view -b -F 4 ${sample}.sorted.bam > ${sample}.onlymapped.bam"
+      samtools index ${sample}.onlymapped.bam"
+      ivar trim -e -i ${sample}.onlymapped.bam" -b ${params.amplicon_bed} -p ${sample}.primertrimmed" -q 15 -m 50 -s 4
+      samtools sort -o ${sample}.primertrimmed_sorted.bam -O bam -T $sample ${sample}.primertrimmed.bam
+      samtools index ${sample}.primertrimmed.sorted.bam
+      samtools flagstat ${sample}.primertrimmed.sorted.bam > ${sample}.primertrimmed.sorted.bam.flagstat
+      samtools idxstats ${sample}.primertrimmed.sorted.bam > ${sample}.primertrimmed.sorted.bam.idxstats
+      samtools stats ${sample}.primertrimmed.sorted.bam > ${sample}.primertrimmed.sorted.bam.stats
+      picard CollectWgsMetrics \\
+       COVERAGE_CAP=1000000 \\
+       INPUT=${sample}.primertrimmed_sorted.bam \\
+       OUTPUT=${sample}.primertrimmed.sorted.bam.picard.stats \\
+       REFERENCE_SEQUENCE=$fasta
+      """
+    }
+} else {
+  ch_sort_bam_variantcalling
+    .set { ch_bam_variantcalling }
+  ch_sort_bam_consensus
+    .set { ch_bam_consensus }
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
