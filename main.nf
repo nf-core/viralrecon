@@ -113,7 +113,9 @@ if (params.protocol == 'amplicon' && !params.amplicon_fasta) {
 }
 
 // Host reference files
-if (params.host_kraken2_db) { ch_host_kraken2_db = Channel.fromPath(params.host_kraken2_db, checkIfExists: true) } else { ch_host_kraken2_db = Channel.empty() }
+if (params.host_kraken2_db) { ch_host_kraken2_db = Channel.fromPath(params.host_kraken2_db, checkIfExists: true) }
+
+//else { ch_host_kraken2_db = Channel.empty() }
 
 // Viral reference files
 if (params.genomes && params.viral_genome && !params.genomes.containsKey(params.viral_genome)) {
@@ -121,11 +123,13 @@ if (params.genomes && params.viral_genome && !params.genomes.containsKey(params.
 }
 params.viral_fasta = params.viral_genome ? params.genomes[ params.viral_genome ].fasta ?: false : false
 
-if (params.viral_kraken2_db) { ch_viral_kraken2_db = Channel.fromPath(params.viral_kraken2_db, checkIfExists: true) } else { ch_viral_kraken2_db = Channel.empty() }
+if (params.viral_kraken2_db) { ch_viral_kraken2_db = Channel.fromPath(params.viral_kraken2_db, checkIfExists: true) }
+
+//else { ch_viral_kraken2_db = Channel.empty() }
 
 if (params.viral_fasta) {
     lastPath = params.viral_fasta.lastIndexOf(File.separator)
-    lastExt = params.host_fasta.lastIndexOf(".")
+    lastExt = params.viral_fasta.lastIndexOf(".")
     viral_fasta_base = params.viral_fasta.substring(lastPath+1)
     viral_index_base = params.viral_fasta.substring(lastPath+1,lastExt)
     ch_viral_fasta = file(params.viral_fasta, checkIfExists: true)
