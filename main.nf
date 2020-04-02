@@ -896,7 +896,6 @@ if (params.protocol == 'amplicon'){
       file bamindex from ch_sort_bamindex_ivar
       file amplicons_bed from ch_amplicon_bed
       file fasta from ch_viral_fasta
-      file index from ch_viral_index
 
       output:
       set val(sample), val(is_sra), file("*.sorted.bam") into ch_bam_variantcalling,
@@ -911,14 +910,14 @@ if (params.protocol == 'amplicon'){
       samtools view -b -F 4 ${sample}.sorted.bam > ${sample}.onlymapped.bam
       samtools index ${sample}.onlymapped.bam
       ivar trim -e -i ${sample}.onlymapped.bam -b $amplicons_bed -p ${sample}.primertrimmed -q 15 -m 50 -s 4
-      samtools sort -o ${sample}.primertrimmed_sorted.bam -O bam -T $sample ${sample}.primertrimmed.bam
+      samtools sort -o ${sample}.primertrimmed.sorted.bam -O bam -T $sample ${sample}.primertrimmed.bam
       samtools index ${sample}.primertrimmed.sorted.bam
       samtools flagstat ${sample}.primertrimmed.sorted.bam > ${sample}.primertrimmed.sorted.bam.flagstat
       samtools idxstats ${sample}.primertrimmed.sorted.bam > ${sample}.primertrimmed.sorted.bam.idxstats
       samtools stats ${sample}.primertrimmed.sorted.bam > ${sample}.primertrimmed.sorted.bam.stats
       picard CollectWgsMetrics \\
        COVERAGE_CAP=1000000 \\
-       INPUT=${sample}.primertrimmed_sorted.bam \\
+       INPUT=${sample}.primertrimmed.sorted.bam \\
        OUTPUT=${sample}.primertrimmed.sorted.bam.picard.stats \\
        REFERENCE_SEQUENCE=$fasta
       """
