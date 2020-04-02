@@ -670,7 +670,7 @@ process KRAKEN2_VIRAL {
   */
  process BOWTIE {
      tag "$sample"
-     label 'process_high'
+     label 'process_low'
      if (params.save_align_intermeds) {
          publishDir "${params.outdir}/bowtie", mode: params.publish_dir_mode
      }
@@ -760,7 +760,7 @@ process KRAKEN2_VIRAL {
  */
 process SPADES {
     tag "$sample"
-    label 'process_low'
+    label 'process_medium'
     publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
 
     when:
