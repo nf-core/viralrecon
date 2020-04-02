@@ -512,6 +512,7 @@ process TRIMMOMATIC {
     set val(sample), val(single_end), val(is_sra), file("*trimmed*") into ch_trimmomatic_fastqc,
                                                                           ch_trimmomatic_kraken2_host,
                                                                           ch_trimmomatic_kraken2_viral,
+                                                                          ch_trimmomatic_bowtie,
                                                                           ch_trimmomatic_spades,
                                                                           ch_trimmomatic_metaspades,
                                                                           ch_trimmomatic_unicycler
@@ -659,43 +660,44 @@ process KRAKEN2_VIRAL {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
-/* --                        ALIGN                                        -- */
+/* --                        MAPPING                                      -- */
 /* --                                                                     -- */
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-// /*
-//  * STEP 3.1: Map Illumina read(s) with bwa mem
-//  */
-// process BWA_MEM {
-//     tag "$sample"
-//     label 'process_high'
-//     if (params.save_align_intermeds) {
-//         publishDir "${params.outdir}/bwa", mode: params.publish_dir_mode
-//     }
-//
-//     when:
-//     !long_reads
-//
-//     input:
-//     set val(sample), val(single_end), val(long_reads), file(reads) from ch_reads_bwa
-//     file index from ch_bwa_index.collect()
-//
-//     output:
-//     set val(sample), val(single_end), val(long_reads), file("*.bam") into ch_bwa_bam
-//
-//     script:
-//     rg = "\'@RG\\tID:${sample}\\tSM:${sample.split('_')[0..-2].join('_')}\\tPL:ILLUMINA\\tLB:${sample}\\tPU:1\'"
-//     """
-//     bwa mem \\
-//         -t $task.cpus \\
-//         -M \\
-//         -R $rg \\
-//         ${index}/${bwa_base} \\
-//         $reads \\
-//         | samtools view -@ $task.cpus -b -h -F 0x0100 -O BAM -o ${sample}.bam -
-//     """
-// }
+ /*
+  * STEP 3.1: Map Illumina read(s) with bowtie2
+  */
+ process BOWTIE {
+     tag "$sample"
+     label 'process_high'
+     if (params.save_align_intermeds) {
+         publishDir "${params.outdir}/bowtie", mode: params.publish_dir_mode
+     }
+
+     when:
+     !params.skip_mapping && !is_sra
+
+     input:
+     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_bowtie
+     file fasta from ch_viral_fasta
+     file index from ch_viral_index
+
+     output:
+     set val(sample), val(single_end), val(is_sra), file("*.bam") into ch_bowtie_bam
+
+     script:
+     input_reads = single_end ? "-U $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
+     """
+     bowtie2 \\
+     --threads ${task.cpus} \\
+     --local \\
+     -x ${index}/${viral_index_base}
+     $input_reads
+     --very-sensitive-local
+     -S ${sample}.sam
+     """
+ }
 
 // /*
 //  * STEP 3.2: Convert BAM to coordinate sorted BAM
@@ -703,7 +705,7 @@ process KRAKEN2_VIRAL {
 // process SORT_BAM {
 //     tag "$sample"
 //     label 'process_medium'
-//     publishDir "${params.outdir}/${aligner}", mode: params.publish_dir_mode,
+//     publishDir "${params.outdir}/bowtie", mode: params.publish_dir_mode,
 //         saveAs: { filename ->
 //                       if (params.save_align_intermeds) {
 //                           if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
@@ -726,8 +728,7 @@ process KRAKEN2_VIRAL {
 //     samtools sort -@ $task.cpus -o ${sample}.sorted.bam -T $sample $bam
 //     samtools index ${sample}.sorted.bam
 //     samtools flagstat ${sample}.sorted.bam > ${sample}.sorted.bam.flagstat
-//     samtools idxstats ${sample}.sorted.bam > ${sample}.sorted.bam.idxstats
-//     samtools stats ${sample}.sorted.bam > ${sample}.sorted.bam.stats
+
 //     """
 // }
 
