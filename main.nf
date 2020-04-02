@@ -27,10 +27,10 @@ def helpMessage() {
 
     Generic
       --protocol [str]                Specifies the type of protocol used for sequencing i.e. "metagenomic" or "amplicon". (Default: "metagenomic")
-      --amplicon_fasta                Path to fasta file containing amplicon sequences
+      --amplicon_fasta [file]         Path to fasta file containing amplicon sequences
 
     References                        If not specified in the configuration file or you wish to overwrite any of the references
-      --host_genome                   Name of genome reference key for human genome
+      --host_genome [str]             Name of genome reference key for human genome
 
       --viral_genome [str]            Name of genome reference key for viral genome
       --viral_fasta [file]            Path to fasta reference for viral genome
@@ -40,20 +40,20 @@ def helpMessage() {
 
     Kraken2
       --host_kraken2_db [file]        Full path to Kraken2 database built from host genome
-      --host_kraken2_name [str]       Name of host genome for building Kraken2 database (Default: "human")
+      --host_kraken2_name [str]       Name of host genome for building Kraken2 database
 
       --viral_kraken2_db [file]       Full path to Kraken2 database built from viral genome
-      --viral_kraken2_name [str]      Name of viral genome for building Kraken2 database (Default: "virus")
+      --viral_kraken2_name [str]      Name of viral genome for building Kraken2 database
 
-      --kraken2_use_ftp               Use FTP instead of rsync when building kraken2 databases
+      --kraken2_use_ftp [bool]        Use FTP instead of rsync when building kraken2 databases (Default: false)
       --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
 
     Trimming
-      --adapter_file                  Adapters index for adapter removal
-      --adapter_params                Trimming parameters for adapters. <seed mismatches>:<palindrome clip threshold>:<simple clip threshold>. Default 2:30:10
-      --trim_window_length            Window size. Default 4
-      --trim_window_value             Window average quality requiered. Default 20
-      --trim_min_length               Minimum length of reads
+      --adapter_file [file]           Adapters index for adapter removal
+      --adapter_params [str]          Trimming parameters for adapters. <seed mismatches>:<palindrome clip threshold>:<simple clip threshold> (Default: 2:30:10)
+      --trim_window_length [int]      Window size. (Default: 4)
+      --trim_window_value [int]       Window average quality required (Default: 20)
+      --trim_min_length [int]         Minimum length of reads (Default: 50)
       --skip_trimming [bool]          Skip the adapter trimming step (Default: false)
       --save_trimmed [bool]           Save the trimmed FastQ files in the results directory (Default: false)
 
@@ -61,10 +61,11 @@ def helpMessage() {
       --save_align_intermeds [bool]   Save the intermediate BAM files from the alignment step (Default: false)
 
     De novo assembly
-      --skip_assembly [bool]          Skip assembly steps in the pipeline
+      --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler')
+      --skip_assembly [bool]          Skip assembly steps in the pipeline (Default: false)
 
     Variant calling
-      --skip_variants [bool]          Skip variant calling steps in the pipeline
+      --skip_variants [bool]          Skip variant calling steps in the pipeline (Default: false)
 
     QC
       --skip_qc [bool]                Skip all QC steps apart from MultiQC (Default: false)
@@ -117,6 +118,12 @@ if (params.protocol != 'metagenomic' && params.protocol != 'amplicon') {
 }
 if (params.protocol == 'amplicon' && !params.amplicon_fasta) {
     exit 1, "If protocol is set to 'amplicon' then please provide a valid amplicon fasta file"
+}
+
+assemblerList = [ 'spades', 'metaspades', 'unicycler' ]
+assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
+if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
+    exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
 }
 
 // Host reference files
@@ -791,7 +798,7 @@ process SPADES {
     publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && !is_sra
+    !params.skip_assembly && 'spades' in assemblers && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_spades
@@ -820,7 +827,7 @@ process QUAST_SPADES {
     publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && !is_sra
+    !params.skip_assembly && 'spades' in assemblers && !is_sra
 
     input:
     file scaffolds from ch_spades_quast.collect{ it[3] }
@@ -858,7 +865,7 @@ process BLAST_SPADES {
     publishDir "${params.outdir}/spades/blast", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && !is_sra
+    !params.skip_assembly && 'spades' in assemblers && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_blast
@@ -896,7 +903,7 @@ process METASPADES {
     publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && !single_end && !is_sra
+    !params.skip_assembly && 'metaspades' in assemblers && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_metaspades
@@ -926,7 +933,7 @@ process QUAST_METASPADES {
     publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && !is_sra
+    !params.skip_assembly && 'metaspades' in assemblers && !is_sra
 
     input:
     file scaffolds from ch_metaspades_quast.collect{ it[3] }
@@ -964,7 +971,7 @@ process BLAST_METASPADES {
     publishDir "${params.outdir}/metaspades/blast", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && !is_sra
+    !params.skip_assembly && 'metaspades' in assemblers && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_blast
@@ -1002,7 +1009,7 @@ process UNICYCLER {
     publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && !is_sra
+    !params.skip_assembly && 'unicycler' in assemblers && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_unicycler
@@ -1031,7 +1038,7 @@ process QUAST_UNICYCLER {
     publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && !is_sra
+    !params.skip_assembly && 'unicycler' in assemblers && !is_sra
 
     input:
     file scaffolds from ch_unicycler_quast.collect{ it[3] }
@@ -1069,7 +1076,7 @@ process BLAST_UNICYCLER {
     publishDir "${params.outdir}/unicycler/blast", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && !is_sra
+    !params.skip_assembly && 'unicycler' in assemblers && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_blast
