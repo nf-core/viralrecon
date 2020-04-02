@@ -1438,13 +1438,13 @@ process VARIANT_ANNOTATION {
 		saveAs: {filename ->
 			if (filename.endsWith("majority.ann.vcf")) "majority/$filename"
 			else if (filename.endsWith("majority.csv")) "majority/$filename"
-      else if (filename.endsWith("majority_snpEff_genes.txt")) "majority/$filename"
-      else if (filename.endsWith("majority_snpEff_summary.html")) "majority/$filename"
+      else if (filename.endsWith("majority.genes.txt")) "majority/$filename"
+      else if (filename.endsWith("majority.snpEff.summary.html")) "majority/$filename"
       else if (filename.endsWith("majority.ann.table.txt")) "majority/$filename"
       else if (filename.endsWith("lowfreq.ann.vcf")) "lowfreq/$filename"
       else if (filename.endsWith("lowfreq.csv")) "lowfreq/$filename"
-      else if (filename.endsWith("lowfreq_snpEff_genes.txt")) "lowfreq/$filename"
-      else if (filename.endsWith("lowfreq_snpEff_summary.html")) "lowfreq/$filename"
+      else if (filename.endsWith("lowfreq.genes.txt")) "lowfreq/$filename"
+      else if (filename.endsWith("lowfreq.snpEff.summary.html")) "lowfreq/$filename"
       else if (filename.endsWith("lowfreq.ann.table.txt")) "lowfreq/$filename"
       else filename
 	}
