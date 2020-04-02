@@ -836,8 +836,8 @@ process QUAST_SPADES {
     GFF=$gff
     if [[ \$GFF == *.gz ]]
     then
+        gunzip -f \$GFF
         GFF=\${GFF%.*}
-        zcat $gff > \$GFF
     fi
 
     quast.py \\
@@ -942,8 +942,8 @@ process QUAST_METASPADES {
     GFF=$gff
     if [[ \$GFF == *.gz ]]
     then
-        zcat $gff > features.gff
-        GFF=features.gff
+        gunzip -f \$GFF
+        GFF=\${GFF%.*}
     fi
 
     quast.py \\
@@ -1047,8 +1047,8 @@ process QUAST_UNICYCLER {
     GFF=$gff
     if [[ \$GFF == *.gz ]]
     then
-        zcat $gff > features.gff
-        GFF=features.gff
+        gunzip -f \$GFF
+        GFF=\${GFF%.*}
     fi
 
     quast.py \\
