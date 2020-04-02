@@ -358,7 +358,7 @@ process validate_fastq_fromSRA {
 
     output:
     set val(id), env (single_end), val("true"), file(reads) optional true into ch_fromSRA_dw_validated, ch_validated_fromSRA_to_check
-    // set val(sample), env(single_end), val(is_sra), file(reads) from ch_reads_fastqc
+
     """
     fastq_info $reads > validation.tmp 2>&1 || true
     single_end=""
@@ -375,13 +375,9 @@ process validate_fastq_fromSRA {
             touch "${id}_1.fastq.gz"
             touch "${id}_2.fastq.gz"
         fi
-
-        # echo -e "${id},\$single_end,1,\$PWD\\${id}_1.fastq.gz," >> ${id}_metainfo.csv
     else
         single_end="failed"
         echo "fastq file couldn't be validated by fastq_info!" # del the else if not used anymore
-        # echo -e "sample_id,single_end,is_sra,fastq_1,fastq_2" > ${id}_metainfo.csv
-        # echo -e "${id},0,1,," >> ${id}_metainfo.csv
     fi
     """
 }
@@ -417,19 +413,32 @@ process dump_fastq_to_production {
     output:
     set val(id), env (single_end), val("true"), file("*_{1,2}.fastq.gz") optional true into ch_fastdump_dw_validated, ch_fastdump_dw_validated_to_check
 
+    // checked with -X 5 parameter (fastq file subsampled but still validated by fastq_info)
     """
     single_end=""
     single_end=`get_SRA_metainfo.py $id --is_single`
 
     if [[ \$single_end == "true" ]]
     then
+        parallel-fastq-dump \\
+            -X 5 \\
+            --threads ${task.cpus} \\
+            --sra-id ${id} \\
+            --gzip
+
+
         fastq_info ${id}_1.fastq.gz > validation.tmp 2>&1 || true
+
     elif [[ \$single_end == "false" ]]
     then
         parallel-fastq-dump \\
+            -X 5 \\
+            --sra-id ${id} \\
+            --split-files \\
             --threads ${task.cpus} \\
-            --sra-id ${id}
-            fastq_info ${id}_1.fastq.gz ${id}_2.fastq.gz > validation.tmp 2>&1 || true
+            --gzip
+
+        fastq_info ${id}_1.fastq.gz ${id}_2.fastq.gz > validation.tmp 2>&1 || true
     else
        single_end="failed"
     fi
@@ -440,45 +449,6 @@ process dump_fastq_to_production {
     fi
     """
 }
-
-/*
-process dump_fastq_to_test {
-    input:
-    val(id) from ch_fromSRA_ids_missing
-
-    output:
-    set val(id), env (single_end), val("true"), file("*_{1,2}.fastq.gz") optional true into ch_fastdump_dw_validated, ch_fastdump_dw_validated_to_check
-
-    """
-    single_end=""
-    single_end=`get_SRA_metainfo.py $id --is_single`
-    ## Development code
-    tag_val="ERROR"
-
-    if [[ \$single_end == "true" ]]
-    then
-        ## Development code
-        touch "${id}_1.fastq.gz"
-        echo -e "\$tag_val"  > validation.tmp 2>&1 || true
-    elif [[ \$single_end == "false" ]]
-    then
-        ## Development code
-        touch "${id}_1.fastq.gz"
-        touch "${id}_2.fastq.gz"
-        echo -e "\$tag_val" > validation.tmp 2>&1 || true
-    else
-       single_end="failed"
-    fi
-
-    if grep -q "OK" validation.tmp
-    then
-        single_end="failed"
-    fi
-    """
-}
-*/
-
-// checked with touch!!!
 
 ch_fromSRA_ids_missing_to_check
     .join ( ch_fastdump_dw_validated_to_check, remainder: true )
