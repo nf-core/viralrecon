@@ -121,7 +121,7 @@ if (params.input) { ch_input = file(params.input, checkIfExists: true) } else { 
 if (params.protocol != 'metagenomic' && params.protocol != 'amplicon') {
     exit 1, "Invalid protocol option: ${params.protocol}. Valid options: 'metagenomic' or 'amplicon'"
 }
-if (params.protocol == 'amplicon' && !params.amplicon_fasta) {
+if (params.protocol == 'amplicon' && !params.skip_assembly && !params.amplicon_fasta) {
     exit 1, "If protocol is set to 'amplicon' then please provide a valid amplicon fasta file"
 }
 if (params.protocol == 'amplicon' && !params.skip_mapping && !params.amplicon_bed) {
