@@ -1460,9 +1460,9 @@ process VARIANT_ANNOTATION {
  	output:
   set val(sample), val(is_sra), file("*majority.ann.vcf") into ch_majority_annotated_consensus
   file "*majority.csv" into ch_snpeff_majority_mqc
-  file "*majority.snpEff.{genes.txt,summary.html}" into ch_majority_snpeff_summaries
+  file "*majority.{genes.txt,snpEff.summary.html}" into ch_majority_snpeff_summaries
   file "*lowfreq.ann.vcf" into ch_lowfreq_annotated_variants
-  file "*lowfreq.snpEff.{genes.txt,summary.html}" into ch_lowfreq_snpeff_summaries
+  file "*lowfreq.{genes.txt,snpEff.summary.html}" into ch_lowfreq_snpeff_summaries
   file "*lowfreq.csv" into ch_snpeff_lowfreq_mqc
   file "*majority.ann.table.txt" into ch_snpsift_majority_table
   file "*lowfreq.ann.table.txt" into ch_snpsift_lowfreq_table
@@ -1470,10 +1470,8 @@ process VARIANT_ANNOTATION {
  	script:
  	"""
   snpEff sars-cov-2 $majority_variants -csvStats ${sample}.majority.csv > ${sample}.majority.ann.vcf
-  mv snpEff_genes.txt ${sample}.majority.snpEff.genes.txt
   mv snpEff_summary.html ${sample}.majority.snpEff.summary.html
   snpEff sars-cov-2 $low_variants -csvStats ${sample}.lowfreq.csv > ${sample}.lowfreq.ann.vcf
-  mv snpEff_genes.txt ${sample}.lowfreq.snpEff.genes.txt
   mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
   SnpSift extractFields --set "," \\
         --exprFile "." \\
