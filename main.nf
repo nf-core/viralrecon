@@ -613,7 +613,9 @@ process KRAKEN2_HOST {
     file db from ch_host_kraken2_db.collect()
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_host_viral_reads
+    set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_host_viral_spades,
+                                                                         ch_kraken2_host_viral_metaspades,
+                                                                         ch_kraken2_host_viral_unicycler
     set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_host_host_reads
     file "*.report.txt" into ch_kraken2_host_report
 
@@ -662,10 +664,7 @@ process KRAKEN2_VIRAL {
     file db from ch_viral_kraken2_db.collect()
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_viral_viral_spades,
-                                                                         ch_kraken2_viral_viral_metaspades,
-                                                                         ch_kraken2_viral_viral_unicycler
-
+    set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_viral_viral_reads
     set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_viral_host_reads
     file "*.report.txt" into ch_kraken2_viral_report
 
@@ -804,7 +803,7 @@ process SPADES {
     !params.skip_assembly && 'spades' in assemblers && !is_sra
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_viral_viral_spades
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_spades
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_spades_quast,
@@ -909,7 +908,7 @@ process METASPADES {
     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_viral_viral_metaspades
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_metaspades
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_metaspades_quast,
@@ -1015,7 +1014,7 @@ process UNICYCLER {
     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_viral_viral_unicycler
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_unicycler
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*assembly.fasta") into ch_unicycler_quast,
