@@ -1473,8 +1473,8 @@ process VARIANT_ANNOTATION {
   mv snpEff_summary.html ${sample}.majority.snpEff.summary.html
   snpEff sars-cov-2 $low_variants -csvStats ${sample}.lowfreq.csv > ${sample}.lowfreq.ann.vcf
   mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
-  SnpSift extractFields --set "," \\
-        --exprFile "." \\
+  SnpSift extractFields -s "," \\
+        -e "." \\
         ${sample}.majority.ann.vcf \\
         CHROM POS REF ALT \\
         "ANN[*].GENE" "ANN[*].GENEID" \\
@@ -1486,8 +1486,8 @@ process VARIANT_ANNOTATION {
         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
         > ${sample}.majority.ann.table.txt
-  SnpSift extractFields --set "," \\
-        --exprFile "." \\
+  SnpSift extractFields -s "," \\
+        -e "." \\
         ${sample}.lowfreq.ann.vcf \\
         CHROM POS REF ALT \\
         "ANN[*].GENE" "ANN[*].GENEID" \\
