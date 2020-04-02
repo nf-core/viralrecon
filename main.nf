@@ -40,10 +40,10 @@ def helpMessage() {
 
     Kraken2
       --host_kraken2_db [file]        Full path to Kraken2 database built from host genome
-      --host_kraken2_name [str]       Name of host genome for building Kraken2 database
+      --host_kraken2_name [str]       Name of host genome for building Kraken2 database e.g. 'human'
 
       --viral_kraken2_db [file]       Full path to Kraken2 database built from viral genome
-      --viral_kraken2_name [str]      Name of viral genome for building Kraken2 database
+      --viral_kraken2_name [str]      Name of viral genome for building Kraken2 database e.g. 'viral'
 
       --kraken2_use_ftp [bool]        Use FTP instead of rsync when building kraken2 databases (Default: false)
       --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
