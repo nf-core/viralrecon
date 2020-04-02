@@ -129,7 +129,9 @@ if (params.protocol == 'amplicon' && !params.skip_mapping && !params.amplicon_be
 }
 if (params.amplicon_fasta) { ch_amplicon_fasta = Channel.fromPath(params.amplicon_fasta, checkIfExists: true) } else { ch_amplicon_fasta = Channel.empty() }
 if (params.amplicon_bed) { ch_amplicon_bed = Channel.fromPath(params.amplicon_bed, checkIfExists: true) } else { ch_amplicon_bed = Channel.empty() }
-if (params.adapter_file) { ch_adapter_file = Channel.fromPath(params.adapter_file, checkIfExists: true) } else { exit 1, "Adapter file not specified!" }
+if (params.adapter_file) {
+	Channel.fromPath(params.adapter_file, checkIfExists: true).into{ ch_adapter_assembly_file; ch_adapter_mapping_file }
+} else { exit 1, "Adapter file not specified!" }
 
 assemblerList = [ 'spades', 'metaspades', 'unicycler' ]
 assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
@@ -335,7 +337,8 @@ ch_samplesheet_reformat
     .splitCsv(header:true, sep:',')
     .map { validate_input(it) }
     .into { ch_reads_fastqc;
-            ch_reads_trimmomatic }
+            ch_reads_trimmomatic_assembly;
+            ch_reads_trimmomatic_mapping}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -531,30 +534,29 @@ process FASTQC_RAW {
 /*
 * STEP 2.1: Adapter trimming with Trimmomatic
 */
-process TRIMMOMATIC {
+process TRIMMOMATIC_ASSEMBLY {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/trimmomatic", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/trimmomatic_assembly", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".log")) filename
                       else params.save_trimmed ? filename : null
                 }
 
     when:
-    !params.skip_trimming && !is_sra
+    !params.skip_trimming && !is_sra && !params.skip_assembly
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic
-    file adapters from ch_adapter_file.collect()
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic_assembly
+    file adapters from ch_adapter_assembly_file.collect()
     file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*trimmed*") into ch_trimmomatic_fastqc,
-                                                                          ch_trimmomatic_kraken2_host,
-                                                                          ch_trimmomatic_kraken2_viral,
-                                                                          ch_trimmomatic_bowtie
-    set val(sample), val(single_end), val(is_sra), file("*orphan*") into ch_trimmomatic_orphan
-    file '*.log' into ch_trimmomatic_mqc
+    set val(sample), val(single_end), val(is_sra), file("*trimmed*") into ch_trimmomatic_assembly_fastqc,
+                                                                          ch_trimmomatic_assembly_kraken2_host,
+                                                                          ch_trimmomatic_assembly_kraken2_viral
+    set val(sample), val(single_end), val(is_sra), file("*orphan*") into ch_trimmomatic_assembly_orphan
+    file '*.log' into ch_trimmomatic_assembly_mqc
 
     script:
     pe = single_end ? "SE" : "PE"
@@ -573,25 +575,63 @@ process TRIMMOMATIC {
     """
 }
 
+process TRIMMOMATIC_MAPPING {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/trimmomatic_mapping", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".log")) filename
+                      else params.save_trimmed ? filename : null
+                }
+
+    when:
+    !params.skip_trimming && !is_sra && !params.skip_mapping
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic_mapping
+    file adapters from ch_adapter_mapping_file.collect()
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*trimmed*") into ch_trimmomatic_mapping_fastqc,
+                                                                          ch_trimmomatic_mapping_bowtie
+    set val(sample), val(single_end), val(is_sra), file("*orphan*") into ch_trimmomatic_mapping_orphan
+    file '*.log' into ch_trimmomatic_mapping_mqc
+
+    script:
+    pe = single_end ? "SE" : "PE"
+    adapters = "${adapters}"
+    trimmed_reads = single_end ? "${sample}.trimmed.fastq.gz" : "${sample}.trimmed_1.fastq.gz ${sample}.orphan_1.fastq.gz ${sample}.trimmed_2.fastq.gz ${sample}.orphan_2.fastq.gz"
+    orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
+    """
+    trimmomatic $pe \\
+        -threads ${task.cpus} \\
+        $reads \\
+        $trimmed_reads \\
+        ILLUMINACLIP:${adapters}:${params.adapter_params} \\
+        SLIDINGWINDOW:${params.trim_window_length}:${params.trim_window_value} \\
+        MINLEN:${params.trim_min_length} 2> ${sample}.trimmomatic.log
+    $orphan
+    """
+}
 /*
  * STEP 2.2: FastQC after trimming
  */
-process FASTQC_TRIM {
+process FASTQC_TRIM_ASSEMBLY {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/fastqc/trim", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/fastqc/trim_assembly", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       filename.endsWith(".zip") ? "zips/$filename" : "$filename"
                 }
 
     when:
-    !params.skip_fastqc && !params.skip_qc && !is_sra
+    !params.skip_fastqc && !params.skip_qc && !is_sra && !params.skip_assembly
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_fastqc
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_fastqc
 
     output:
-    file "*.{zip,html}" into ch_fastqc_trim_reports_mqc
+    file "*.{zip,html}" into ch_fastqc_trim_assembly_reports_mqc
 
     script:
     """
@@ -599,6 +639,28 @@ process FASTQC_TRIM {
     """
 }
 
+process FASTQC_TRIM_MAPPING {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/fastqc/trim_mapping", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      filename.endsWith(".zip") ? "zips/$filename" : "$filename"
+                }
+
+    when:
+    !params.skip_fastqc && !params.skip_qc && !is_sra && !params.skip_assembly
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_mapping_fastqc
+
+    output:
+    file "*.{zip,html}" into ch_fastqc_trim_mapping_reports_mqc
+
+    script:
+    """
+    fastqc --quiet --threads $task.cpus $reads
+    """
+}
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
@@ -623,7 +685,7 @@ process KRAKEN2_HOST {
     !is_sra
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_kraken2_host
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_kraken2_host
     file db from ch_host_kraken2_db.collect()
 
     output:
@@ -674,7 +736,7 @@ process KRAKEN2_VIRAL {
     !is_sra
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_kraken2_viral
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_kraken2_viral
     file db from ch_viral_kraken2_db.collect()
 
     output:
@@ -729,7 +791,7 @@ process KRAKEN2_VIRAL {
      !params.skip_mapping && !is_sra
 
      input:
-     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_bowtie
+     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_mapping_bowtie
      file fasta from ch_viral_fasta
      file index from ch_viral_index
 
@@ -846,9 +908,9 @@ if (params.protocol == 'amplicon'){
 
       script:
       """
-      samtools view -b -F 4 ${sample}.sorted.bam > ${sample}.onlymapped.bam"
-      samtools index ${sample}.onlymapped.bam"
-      ivar trim -e -i ${sample}.onlymapped.bam" -b $amplicons_bed -p ${sample}.primertrimmed" -q 15 -m 50 -s 4
+      samtools view -b -F 4 ${sample}.sorted.bam > ${sample}.onlymapped.bam
+      samtools index ${sample}.onlymapped.bam
+      ivar trim -e -i ${sample}.onlymapped.bam -b $amplicons_bed -p ${sample}.primertrimmed -q 15 -m 50 -s 4
       samtools sort -o ${sample}.primertrimmed_sorted.bam -O bam -T $sample ${sample}.primertrimmed.bam
       samtools index ${sample}.primertrimmed.sorted.bam
       samtools flagstat ${sample}.primertrimmed.sorted.bam > ${sample}.primertrimmed.sorted.bam.flagstat
@@ -1558,8 +1620,10 @@ process MULTIQC {
     file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
     // TODO nf-core: Add in log files from your new processes for MultiQC to find!
     file ('fastqc/raw/*') from ch_fastqc_raw_reports_mqc.collect().ifEmpty([])
-    file ('fastqc/trim/*') from ch_fastqc_trim_reports_mqc.collect().ifEmpty([])
-    file ('trimmomatic/*') from ch_trimmomatic_mqc.collect().ifEmpty([])
+    file ('fastqc/trim_assembly/*') from ch_fastqc_trim_assembly_reports_mqc.collect().ifEmpty([])
+    file ('fastqc/trim_mapping/*') from ch_fastqc_trim_mapping_reports_mqc.collect().ifEmpty([])
+    file ('trimmomatic_assembly/*') from ch_trimmomatic_assembly_mqc.collect().ifEmpty([])
+    file ('trimmomatic_mapping/*') from ch_trimmomatic_mapping_mqc.collect().ifEmpty([])
     file ('quast/spades/*') from ch_quast_spades_mqc.collect().ifEmpty([])
     file ('quast/metaspades/*') from ch_quast_metaspades_mqc.collect().ifEmpty([])
     file ('quast/unicycler/*') from ch_quast_unicycler_mqc.collect().ifEmpty([])
