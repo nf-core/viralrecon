@@ -1384,8 +1384,8 @@ process VARSCAN {
 		saveAs: {filename ->
 			if (filename.endsWith("pileup") > 0) "pileup/$filename"
 			else if (filename.endsWith("majority.vcf") > 0) "majority_allele/$filename"
-      else if (filename.endsWith("vcf") > 0) "lowfreq_vars/$filename"
-      else filename
+      		else if (filename.endsWith("lowfreq.vcf") > 0) "lowfreq_vars/$filename"
+      		else filename
 	}
 
   when:
