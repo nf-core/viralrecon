@@ -51,7 +51,9 @@ def helpMessage() {
 
     Alignments
       --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
-      --save_align_intermeds [bool]   Save the intermediate BAM files from the alignment step (Default: false)
+    Mapping
+      --skip_mapping [bool]           Skip Mapping and undergoing steps in the pipeline
+      --save_map_intermeds [bool]     Save the intermediate BAM files from the mapping step (Default: false)
 
     De novo assembly
       --skip_assembly [bool]          Skip assembly steps in the pipeline
@@ -209,7 +211,7 @@ summary['Save Genome Indices']    = params.save_reference ? 'Yes' : 'No'
 if (params.skip_trimming)         summary['Skip Trimming'] = 'Yes'
 if (params.save_trimmed)          summary['Save Trimmed'] = 'Yes'
 if (params.save_kraken2_fastq)    summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
-if (params.save_align_intermeds)  summary['Save Intermeds'] =  'Yes'
+if (params.save_map_intermeds)  summary['Save Intermeds'] =  'Yes'
 if (params.skip_assembly)         summary['Skip De novo Assembly'] =  'Yes'
 if (params.skip_variants)         summary['Skip Variant Calling'] =  'Yes'
 if (params.skip_qc)               summary['Skip QC'] = 'Yes'
@@ -675,7 +677,7 @@ process KRAKEN2_VIRAL {
  process BOWTIE {
      tag "$sample"
      label 'process_low'
-     if (params.save_align_intermeds) {
+     if (params.save_map_intermeds) {
          publishDir "${params.outdir}/bowtie", mode: params.publish_dir_mode
      }
 
@@ -711,7 +713,7 @@ process KRAKEN2_VIRAL {
      label 'process_medium'
      publishDir "${params.outdir}/bowtie", mode: params.publish_dir_mode,
          saveAs: { filename ->
-                       if (params.save_align_intermeds) {
+                       if (params.save_map_intermeds) {
                            if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                            else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
                            else if (filename.endsWith(".bam.stats")) "samtools_stats/$filename"
@@ -752,7 +754,6 @@ process KRAKEN2_VIRAL {
 /* --                                                                     -- */
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
-
 
 
 
