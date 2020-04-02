@@ -1455,7 +1455,7 @@ process VARIANT_ANNOTATION {
 
  	input:
 	set val(sample), val(is_sra), file(majority_variants) from ch_variantcalling_major_annotation
-  file low_variants from ch_variantcalling_low_annotation
+  set val(sample), val(is_sra), file(low_variants) from ch_variantcalling_low_annotation
 
  	output:
   set val(sample), val(is_sra), file("*majority.ann.vcf") into ch_majority_annotated_consensus
