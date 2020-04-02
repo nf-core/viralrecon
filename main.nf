@@ -893,7 +893,7 @@ if (params.protocol == 'amplicon'){
 
       input:
       set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_ivar
-      file bamindex from ch_sort_bamindex_ivar
+      set val(sample), val(single_end), val(is_sra), file(bamindex) from ch_sort_bamindex_ivar
       file amplicons_bed from ch_amplicon_bed
       file fasta from ch_viral_fasta
 
