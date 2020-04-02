@@ -1413,7 +1413,7 @@ process CONSENSUS_GENOME {
   publishDir "${params.outdir}/mapping_consensus", mode: params.publish_dir_mode,
 		saveAs: {filename ->
 			if (filename.endsWith("consensus.fasta") > 0) "consensus/$filename"
-			else if (filename.endsWith("consensus_masked.fasta") > 0) "masked/$filename"
+			else if (filename.endsWith("consensus.masked.fasta") > 0) "masked/$filename"
 	}
 
   when:
