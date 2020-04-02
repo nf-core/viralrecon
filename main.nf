@@ -30,9 +30,9 @@ def helpMessage() {
       --amplicon_fasta [file]         Path to fasta file containing amplicon sequences
 
     References                        If not specified in the configuration file or you wish to overwrite any of the references
-      --host_genome [str]             Name of genome reference key for human genome
+      --host_genome [str]             Name of genome reference key for human genome e.g. 'human'
 
-      --viral_genome [str]            Name of genome reference key for viral genome
+      --viral_genome [str]            Name of genome reference key for viral genome e.g. 'NC_045512.2'
       --viral_fasta [file]            Path to fasta reference for viral genome
       --viral_gff [file]              Full path to viral gff annotation file
 
