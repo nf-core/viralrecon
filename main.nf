@@ -720,14 +720,17 @@ process KRAKEN2_VIRAL {
                        }
                  }
 
+     when:
+     !params.skip_mapping && !is_sra
+
      input:
-     set val(sample), val(single_end), val(long_reads), file(bam) from ch_bowtie_bam
+     set val(sample), val(single_end), val(is_sra), file(bam) from ch_bowtie_bam
      file fasta from ch_viral_fasta
      file index from ch_viral_index
 
      output:
-     set val(sample), val(single_end), val(long_reads), file("*.sorted.{bam,bam.bai}") into ch_sort_bam_variantcalling,
-                                                                                            ch_sort_bam_ivar
+     set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_sort_bam_variantcalling,
+                                                                                        ch_sort_bam_ivar
      file "*.{flagstat,idxstats,bam.stats}" into ch_sort_bam_flagstat_mqc
      file "*picard.stats" into ch_sort_bam_picardstat_mqc
 
