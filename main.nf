@@ -119,6 +119,8 @@ if (params.protocol != 'metagenomic' && params.protocol != 'amplicon') {
 if (params.protocol == 'amplicon' && !params.amplicon_fasta) {
     exit 1, "If protocol is set to 'amplicon' then please provide a valid amplicon fasta file"
 }
+if (params.amplicon_fasta) { ch_amplicon_fasta = Channel.fromPath(params.amplicon_fasta, checkIfExists: true) } else { ch_amplicon_fasta = Channel.empty() }
+if (params.adapter_file) { ch_adapter_file = Channel.fromPath(params.adapter_file, checkIfExists: true) } else { ch_adapter_file = Channel.empty() }
 
 assemblerList = [ 'spades', 'metaspades', 'unicycler' ]
 assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
@@ -530,6 +532,8 @@ process TRIMMOMATIC {
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic
+    file adapters from ch_adapter_file.collect().ifEmpty([])
+    file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*trimmed*") into ch_trimmomatic_fastqc,
@@ -543,7 +547,8 @@ process TRIMMOMATIC {
 
     script:
     pe = single_end ? "SE" : "PE"
-    adapters = params.protocol == 'amplicon' ? "${params.amplicon_fasta}" : "${params.adapter_file}"
+    def adapters = params.adapter_file ? "${adapters}" : ""
+    adapters = (params.amplicon_fasta && params.protocol == 'amplicon') ? "${amplicons}" : ""
     trimmed_reads = single_end ? "${sample}.trimmed.fastq.gz" : "${sample}.trimmed_1.fastq.gz ${sample}.orphan_1.fastq.gz ${sample}.trimmed_2.fastq.gz ${sample}.orphan_2.fastq.gz"
     orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
     """
@@ -625,7 +630,7 @@ process KRAKEN2_HOST {
     DB=$db
     if [[ \$DB == *.tar.gz ]]
     then
-        tar -xvf $DB
+        tar -xvf \$DB
         DB=\${DB%.*.*}
     fi
 
@@ -674,7 +679,7 @@ process KRAKEN2_VIRAL {
     DB=$db
     if [[ \$DB == *.tar.gz ]]
     then
-        tar -xvf $DB
+        tar -xvf \$DB
         DB=\${DB%.*.*}
     fi
 
@@ -903,7 +908,7 @@ process METASPADES {
     publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'metaspades' in assemblers && !is_sra
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_metaspades
@@ -933,7 +938,7 @@ process QUAST_METASPADES {
     publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'metaspades' in assemblers && !is_sra
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
 
     input:
     file scaffolds from ch_metaspades_quast.collect{ it[3] }
@@ -971,7 +976,7 @@ process BLAST_METASPADES {
     publishDir "${params.outdir}/metaspades/blast", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'metaspades' in assemblers && !is_sra
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_blast
