@@ -1198,6 +1198,167 @@ process BLAST_UNICYCLER {
 ///////////////////////////////////////////////////////////////////////////////
 
 
+/*
+ * STEPS 3.1 Variant Calling
+ */
+process VARIANT_CALLING {
+	tag "$sample"
+  label 'process_medium'
+	publishDir "${params.outdir}/variant_calling", mode: params.publish_dir_mode,
+		saveAs: {filename ->
+			if (filename.indexOf(".pileup") > 0) "pileup/$filename"
+			else if (filename.indexOf("_majority.vcf") > 0) "majority_allele/$filename"
+      else if (filename.indexOf(".vcf") > 0) "lowfreq_vars/$filename"
+			else params.params.save_trimmed ? filename : null
+	}
+
+	input:
+	file sorted_bam from ch_bamsorted_variantcalling
+  file bam_index from ch_bambai_variantcalling
+  file refvirus from ch_viral_fasta
+  file index from ch_viral_index
+
+	output:
+	file '*.pileup' into ch_variantcalling_pileup
+  file '*_majority.vcf' into ch_majority_allele_vcf,ch_majority_allele_vcf_annotation,ch_majority_allele_vcf_consensus
+	file '*_lowfreq.vcf' into ch_lowfreq_variants_vcf,ch_lowfreq_variants_vcf_annotation
+
+	script:
+	"""
+  samtools mpileup \\
+        --count-orphans \\
+        --max-depth 20000 \\
+        --min-BQ 0 \\
+        --fasta-ref $refvirus/$viral_index_base \\
+        $sorted_bam \\
+        > $sample".pileup"
+  varscan mpileup2cns \\
+        $sample".pileup" \\
+        --min-var-freq 0.02 \\
+        --p-value 0.99 \\
+        --variants \\
+        --output-vcf 1 \\
+        > $sample"_lowfreq.vcf"
+  varscan mpileup2cns \\
+        $sample".pileup" \\
+        --min-var-freq 0.8 \\
+        --p-value 0.05 \\
+        --variants \\
+        --output-vcf 1 \\
+        > $sample"_majority.vcf"
+	"""
+}
+
+/*
+ * STEPS 3.2 Variant Calling annotation
+ */
+process VARIANT_ANNOTATION {
+ 	tag "$sample"
+  label 'process_medium'
+  publishDir "${params.outdir}/annotation", mode: params.publish_dir_mode,
+		saveAs: {filename ->
+			if (filename.indexOf("majority.ann.vcf") > 0) "majority/$filename"
+			else if (filename.indexOf("majority_snpEff_genes.txt") > 0) "majority/$filename"
+      else if (filename.indexOf("majority_snpEff_summary.html") > 0) "majority/$filename"
+      else if (filename.indexOf("majority.ann.table.txt") > 0) "majority/$filename"
+      else if (filename.indexOf("lowfreq.ann.vcf") > 0) "lowfreq/$filename"
+      else if (filename.indexOf("lowfreq_snpEff_genes.txt") > 0) "lowfreq/$filename"
+      else if (filename.indexOf("lowfreq_snpEff_summary.html") > 0) "lowfreq/$filename"
+      else if (filename.indexOf("lowfreq.ann.table.txt") > 0) "lowfreq/$filename"
+	}
+
+ 	input:
+ 	file majority_variants from ch_majority_allele_vcf_annotation
+  file low_variants from ch_lowfreq_variants_vcf_annotation
+
+ 	output:
+ 	file '*_majority.ann.vcf' into ch_majority_annotated_variants
+  file '*_majority_snpEff_genes.txt' into ch_majority_snpeff_genes
+ 	file '*_majority_snpEff_summary.html' into ch_majority_snpeff_summary
+  file '*_lowfreq.ann.vcf' into ch_lowfreq_annotated_variants
+  file '*_lowfreq_snpEff_genes.txt' into ch_lowfreq_snpeff_genes
+ 	file '*_lowfreq_snpEff_summary.html' into ch_lowfreq_snpeff_summary
+  file '*_majority.ann.table.txt' into ch_snpsift_majority_table
+  file '*_lowfreq.ann.table.txt' into ch_snpsift_lowfreq_table
+
+ 	script:
+ 	"""
+  snpEff sars-cov-2 $majority_variants > $sample"_majority.ann.vcf"
+  mv snpEff_genes.txt $sample"_majority_snpEff_genes.txt"
+  mv snpEff_summary.html $sample"_majority_snpEff_summary.html"
+  snpEff sars-cov-2 $low_variants > $sample"_lowfreq.ann.vcf"
+  mv snpEff_genes.txt $sample"_lowfreq_snpEff_genes.txt"
+  mv snpEff_summary.html $sample"_lowfreq_snpEff_summary.html"
+  SnpSift extractFields --set "," \\
+        --exprFile "." \\
+        $sample"_majority.ann.vcf" \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > $prefix"_majority.ann.table.txt"
+  SnpSift extractFields --set "," \\
+        --exprFile "." \\
+        $sample"_lowfreq.ann.vcf" \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > $prefix"_lowfreq.ann.table.txt"
+ 	"""
+}
+
+/*
+ * STEPS 3.3 Consensus Genome
+ */
+process CONSENSUS_GENOME {
+  tag "$sample"
+  label 'process_medium'
+  publishDir "${params.outdir}/mapping_consensus", mode: params.publish_dir_mode,
+		saveAs: {filename ->
+			if (filename.indexOf("_consensus.fasta") > 0) "consensus/$filename"
+			else if (filename.indexOf("_consensus_masked.fasta") > 0) "masked/$filename"
+	}
+
+  input:
+  file variants from ch_majority_allele_vcf_consensus
+  file refvirus from ch_viral_fasta
+  file sorted_bam from ch_sorted_bam_consensus
+  file sorted_bai from ch_bai_consensus
+
+  output:
+  file '*_consensus.fasta' into ch_consensus_fasta
+  file '*_consensus_masked.fasta' into ch_masked_fasta
+
+  script:
+  refname = refvirus.baseName - ~/(\.2)?(\.fasta)?$/
+  """
+  bgzip -c $variants > $sample"_"$refname".vcf.gz"
+  bcftools index $sample"_"$refname".vcf.gz"
+  cat $refvirus | bcftools consensus $sample"_"$refname".vcf.gz" > $sample"_"$refname"_consensus.fasta"
+  bedtools genomecov \\
+        -bga \\
+        -ibam $sorted_bam \\
+        -g $refvirus | awk '\$4 < 20' | bedtools merge > $sample"_"$refname"_bed4mask.bed"
+  bedtools maskfasta \\
+        -fi $sample"_"$refname"_consensus.fasta" \\
+        -bed $sample"_"$refname"_bed4mask.bed" \\
+        -fo $sample"_"$refname"_consensus_masked.fasta"
+  sed -i 's/$refname/$sample/g' $sample"_"$refname"_consensus_masked.fasta"
+  """
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -1276,6 +1437,12 @@ process MULTIQC {
     file ('quast/spades/*') from ch_quast_spades_mqc.collect().ifEmpty([])
     file ('quast/metaspades/*') from ch_quast_metaspades_mqc.collect().ifEmpty([])
     file ('quast/unicycler/*') from ch_quast_unicycler_mqc.collect().ifEmpty([])
+    file ('mapping/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
+    file ('mapping/*') from ch_sort_bam_picardstat_mqc.collect().ifEmpty([])
+    //file ('ivar/*') from ivar_flagstat.collect().ifEmpty([])
+    //file ('ivar/*') from ivar_picardstats.collect().ifEmpty([])
+    file ('snpeff/majority*') from majority_snpeff_summary.collect()
+    file ('snpeff/lowfreq*') from lowfreq_snpeff_summary.collect()
     file ('software_versions/*') from ch_software_versions_yaml.collect()
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
