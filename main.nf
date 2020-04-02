@@ -684,7 +684,7 @@ process KRAKEN2_VIRAL {
      file index from ch_viral_index
 
      output:
-     set val(sample), val(single_end), val(is_sra), file("*.bam") into ch_bowtie_bam
+     set val(sample), val(single_end), val(is_sra), file("*.sam") into ch_bowtie_bam
 
      script:
      input_reads = single_end ? "-U $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
@@ -692,9 +692,9 @@ process KRAKEN2_VIRAL {
      bowtie2 \\
      --threads ${task.cpus} \\
      --local \\
-     -x ${index}/${viral_index_base}
-     $input_reads
-     --very-sensitive-local
+     -x ${index}/${viral_index_base} \\
+     $input_reads \\
+     --very-sensitive-local \\
      -S ${sample}.sam
      """
  }
