@@ -28,6 +28,7 @@ def helpMessage() {
     Generic
       --protocol [str]                Specifies the type of protocol used for sequencing i.e. "metagenomic" or "amplicon". (Default: "metagenomic")
       --amplicon_fasta                Path to fasta file containing amplicon sequences
+      --kraken2_use_ftp               Use FTP instead of rsync when building kraken2 databases
 
     References                        If not specified in the configuration file or you wish to overwrite any of the references
       --host_genome                   Name of genome reference key for human genome
@@ -205,6 +206,7 @@ summary['Run Name']               = custom_runName ?: workflow.runName
 summary['Samplesheet']            = params.input
 summary['Protocol']               = params.protocol
 if (params.protocol == 'amplicon') summary['Amplicon Fasta file'] = params.amplicon_fasta
+if (params.kraken2_use_ftp)       summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
 if (params.host_kraken2_db)       summary['Host Kraken2 DB'] = params.host_kraken2_db
 if (params.host_kraken2_name)     summary['Host Kraken2 Name'] = params.host_kraken2_name
 summary['Viral Genome']           = params.viral_genome ?: 'Not supplied'
@@ -385,10 +387,11 @@ if (!isOffline()) {
 
             script:
             db = "kraken2_${params.host_kraken2_name}"
+            ftp = params.kraken2_use_ftp ? "--use-ftp" : ""
             """
-            kraken2-build --db $db --threads $task.cpus --download-taxonomy
-            kraken2-build --db $db --threads $task.cpus --download-library $params.host_kraken2_name
-            kraken2-build --db $db --threads $task.cpus --build
+            kraken2-build --db $db --threads $task.cpus $ftp --download-taxonomy
+            kraken2-build --db $db --threads $task.cpus $ftp --download-library $params.host_kraken2_name
+            kraken2-build --db $db --threads $task.cpus $ftp --build
 
             cd $db
             if [ -d "taxonomy" ]; then rm -rf taxonomy; fi
@@ -417,10 +420,11 @@ if (!isOffline()) {
 
             script:
             db = "kraken2_${params.viral_kraken2_name}"
+            ftp = params.kraken2_use_ftp ? "--use-ftp" : ""
             """
-            kraken2-build --db $db --threads $task.cpus --download-taxonomy
-            kraken2-build --db $db --threads $task.cpus --download-library $params.viral_kraken2_name
-            kraken2-build --db $db --threads $task.cpus --build
+            kraken2-build --db $db --threads $task.cpus $ftp --download-taxonomy
+            kraken2-build --db $db --threads $task.cpus $ftp --download-library $params.viral_kraken2_name
+            kraken2-build --db $db --threads $task.cpus $ftp --build
 
             cd $db
             if [ -d "taxonomy" ]; then rm -rf taxonomy; fi
@@ -607,8 +611,15 @@ process KRAKEN2_HOST {
     classified = single_end ? "${sample}.host.fastq" : "${sample}.host#.fastq"
     unclassified = single_end ? "${sample}.viral.fastq" : "${sample}.viral#.fastq"
     """
+    DB=$db
+    if [[ \$DB == *.tar.gz ]]
+    then
+        tar -xvf $DB
+        DB=\${DB%.*.*}
+    fi
+
     kraken2 \\
-        --db $db \\
+        --db \$DB \\
         --threads $task.cpus \\
         --unclassified-out $unclassified \\
         --classified-out $classified \\
@@ -650,8 +661,15 @@ process KRAKEN2_VIRAL {
     classified = single_end ? "${sample}.viral.fastq" : "${sample}.viral#.fastq"
     unclassified = single_end ? "${sample}.host.fastq" : "${sample}.host#.fastq"
     """
+    DB=$db
+    if [[ \$DB == *.tar.gz ]]
+    then
+        tar -xvf $DB
+        DB=\${DB%.*.*}
+    fi
+    
     kraken2 \\
-        --db $db \\
+        --db \$DB \\
         --threads $task.cpus \\
         --unclassified-out $unclassified \\
         --classified-out $classified \\
@@ -815,8 +833,8 @@ process QUAST_SPADES {
     GFF=$gff
     if [[ \$GFF == *.gz ]]
     then
-        zcat $gff > features.gff
-        GFF=features.gff
+        GFF=\${GFF%.*}
+        zcat $gff > \$GFF
     fi
 
     quast.py \\
