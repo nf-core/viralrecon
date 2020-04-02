@@ -699,38 +699,44 @@ process KRAKEN2_VIRAL {
      """
  }
 
-// /*
-//  * STEP 3.2: Convert BAM to coordinate sorted BAM
-//  */
-// process SORT_BAM {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/bowtie", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (params.save_align_intermeds) {
-//                           if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
-//                           else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
-//                           else if (filename.endsWith(".stats")) "samtools_stats/$filename"
-//                           else filename
-//                       }
-//                 }
-//
-//     input:
-//     set val(sample), val(single_end), val(long_reads), file(bam) from ch_bwa_bam.concat(ch_minimap2_bam)
-//
-//     output:
-//     set val(sample), val(single_end), val(long_reads), file("*.sorted.{bam,bam.bai}") into ch_sort_bam
-//     file "*.{flagstat,idxstats,stats}" into ch_sort_bam_flagstat_mqc
-//
-//     script:
-//     aligner = long_reads ? "minimap2" : "bwa"
-//     """
-//     samtools sort -@ $task.cpus -o ${sample}.sorted.bam -T $sample $bam
-//     samtools index ${sample}.sorted.bam
-//     samtools flagstat ${sample}.sorted.bam > ${sample}.sorted.bam.flagstat
+ /*
+  * STEP 3.2: Convert BAM to coordinate sorted BAM
+  */
+ process SORT_BAM {
+     tag "$sample"
+     label 'process_medium'
+     publishDir "${params.outdir}/bowtie", mode: params.publish_dir_mode,
+         saveAs: { filename ->
+                       if (params.save_align_intermeds) {
+                           if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
+                           else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
+                           else if (filename.endsWith(".bam.stats")) "samtools_stats/$filename"
+                           else if (filename.endsWith(".picard.stats")) "picard_stats/$filename"
+                           else filename
+                       }
+                 }
 
-//     """
-// }
+     input:
+     set val(sample), val(single_end), val(long_reads), file(bam) from ch_bowtie_bam
+     file fasta from ch_viral_fasta
+     file index from ch_viral_index
+
+     output:
+     set val(sample), val(single_end), val(long_reads), file("*.sorted.{bam,bam.bai}") into ch_sort_bam_variantcalling,
+                                                                                            ch_sort_bam_ivar
+     file "*.{flagstat,idxstats,bam.stats}" into ch_sort_bam_flagstat_mqc
+     file "*picard.stats" into ch_sort_bam_picardstat_mqc
+
+     script:
+     """
+     samtools sort -@ $task.cpus -o ${sample}.sorted.bam -O bam -T $sample $bam
+     samtools index ${sample}.sorted.bam
+     samtools flagstat ${sample}.sorted.bam > ${sample}.sorted.bam.flagstat
+     samtools idxstats ${sample}.sorted.bam > ${sample}.sorted.bam.idxstats
+     samtools stats ${sample}.sorted.bam > ${sample}.sorted.bam.stats
+     picard CollectWgsMetrics COVERAGE_CAP=1000000 I=${sample}.sorted.bam O=${sample}.sorted.bam.picard.stats R=$fasta
+     """
+ }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
