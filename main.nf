@@ -760,7 +760,7 @@ process KRAKEN2_VIRAL {
  */
 process SPADES {
     tag "$sample"
-    label 'process_medium'
+    label 'process_low'
     publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
 
     when:
