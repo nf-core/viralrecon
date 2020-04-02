@@ -736,9 +736,13 @@ process KRAKEN2_VIRAL {
      file index from ch_viral_index
 
      output:
-     set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_sort_bam_variantcalling,
-                                                                                        ch_sort_bam_consensus,
-                                                                                        ch_sort_bam_ivar
+     set val(sample), val(single_end), val(is_sra), file("*.sorted.bam") into ch_sort_bam_variantcalling,
+                                                                              ch_sort_bam_consensus,
+                                                                              ch_sort_bam_ivar
+     set val(sample), val(single_end), val(is_sra), file("*.sorted.bam.bai") into ch_sort_bamindex_variantcalling,
+                                                                                  ch_sort_bamindex_consensus,
+                                                                                  ch_sort_bamindex_ivar
+
      file "*.{flagstat,idxstats,bam.stats}" into ch_sort_bam_flagstat_mqc
      file "*picard.stats" into ch_sort_bam_picardstat_mqc
 
@@ -788,13 +792,16 @@ if (params.protocol == 'amplicon'){
 
       input:
       set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_ivar
+      file bamindex from ch_sort_bamindex_ivar
       file amplicons_bed from amplicons_bed_file
       file fasta from ch_viral_fasta
       file index from ch_viral_index
 
       output:
-      set val(sample), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_bam_variantcalling,
-                                                                        ch_bam_consensus
+      set val(sample), val(is_sra), file("*.sorted.bam") into ch_bam_variantcalling,
+                                                              ch_bam_consensus
+      set val(sample), val(is_sra), file("*.sorted.bam.bai") into ch_bamindex_variantcalling,
+                                                                  ch_bamindex_consensus
       file "*.{flagstat,idxstats,bam.stats}" into ch_ivar_flagstat_mqc
       file "*picard.stats" into ch_ivar_picardstat_mqc
 
@@ -820,6 +827,10 @@ if (params.protocol == 'amplicon'){
     .set { ch_bam_variantcalling }
   ch_sort_bam_consensus
     .set { ch_bam_consensus }
+  ch_sort_bamindex_variantcalling
+    .set { ch_bamindex_variantcalling }
+  ch_sort_bamindex_consensus
+    .set { ch_bamindex_consensus }
 }
 
 
@@ -1264,29 +1275,32 @@ process BLAST_UNICYCLER {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * STEPS 9.1 Variant Calling
+ * STEPS 9.1 Variant Calling with VarScan
  */
-process VARIANT_CALLING {
+process VARSCAN {
 	tag "$sample"
   label 'process_medium'
-	publishDir "${params.outdir}/variant_calling", mode: params.publish_dir_mode,
+	publishDir "${params.outdir}/varscan", mode: params.publish_dir_mode,
 		saveAs: {filename ->
-			if (filename.indexOf(".pileup") > 0) "pileup/$filename"
-			else if (filename.indexOf("_majority.vcf") > 0) "majority_allele/$filename"
-      else if (filename.indexOf(".vcf") > 0) "lowfreq_vars/$filename"
-			else params.params.save_trimmed ? filename : null
+			if (filename.endsWith("pileup") > 0) "pileup/$filename"
+			else if (filename.endsWith("majority.vcf") > 0) "majority_allele/$filename"
+      else if (filename.endsWith("vcf") > 0) "lowfreq_vars/$filename"
+      else filename
 	}
 
+  when:
+  !params.skip_mapping && !is_sra
+
 	input:
-	file sorted_bam from ch_bamsorted_variantcalling
-  file bam_index from ch_bambai_variantcalling
-  file refvirus from ch_viral_fasta
+	set val(sample), val(is_sra), file(bam) from ch_bam_variantcalling
+  file bamindex from ch_bamindex_variantcalling
+  file fasta from ch_viral_fasta
   file index from ch_viral_index
 
 	output:
-	file '*.pileup' into ch_variantcalling_pileup
-  file '*_majority.vcf' into ch_majority_allele_vcf,ch_majority_allele_vcf_annotation,ch_majority_allele_vcf_consensus
-	file '*_lowfreq.vcf' into ch_lowfreq_variants_vcf,ch_lowfreq_variants_vcf_annotation
+	file "*pileup" into ch_variantcalling_pileup
+  set val(sample), val(is_sra), file("*majority.vcf") into ch_variantcalling_major_annotation,ch_variantcalling_major_consensus
+	set val(sample), val(is_sra), file("*lowfreq.vcf") into ch_variantcalling_low_annotation
 
 	script:
 	"""
@@ -1294,69 +1308,76 @@ process VARIANT_CALLING {
         --count-orphans \\
         --max-depth 20000 \\
         --min-BQ 0 \\
-        --fasta-ref $refvirus/$viral_index_base \\
-        $sorted_bam \\
-        > $sample".pileup"
+        --fasta-ref $fasta \\
+        $bam \\
+        > ${sample}.pileup
   varscan mpileup2cns \\
-        $sample".pileup" \\
+        ${sample}.pileup \\
         --min-var-freq 0.02 \\
         --p-value 0.99 \\
         --variants \\
         --output-vcf 1 \\
-        > $sample"_lowfreq.vcf"
+        > ${sample}.lowfreq.vcf
   varscan mpileup2cns \\
-        $sample".pileup" \\
+        ${sample}.pileup \\
         --min-var-freq 0.8 \\
         --p-value 0.05 \\
         --variants \\
         --output-vcf 1 \\
-        > $sample"_majority.vcf"
+        > ${sample}.majority.vcf
 	"""
 }
 
 /*
- * STEPS 9.2 Variant Calling annotation
+ * STEPS 9.2 Variant Calling annotation with SnpEff and SnpSift
  */
 process VARIANT_ANNOTATION {
  	tag "$sample"
   label 'process_medium'
   publishDir "${params.outdir}/annotation", mode: params.publish_dir_mode,
 		saveAs: {filename ->
-			if (filename.indexOf("majority.ann.vcf") > 0) "majority/$filename"
-			else if (filename.indexOf("majority_snpEff_genes.txt") > 0) "majority/$filename"
-      else if (filename.indexOf("majority_snpEff_summary.html") > 0) "majority/$filename"
-      else if (filename.indexOf("majority.ann.table.txt") > 0) "majority/$filename"
-      else if (filename.indexOf("lowfreq.ann.vcf") > 0) "lowfreq/$filename"
-      else if (filename.indexOf("lowfreq_snpEff_genes.txt") > 0) "lowfreq/$filename"
-      else if (filename.indexOf("lowfreq_snpEff_summary.html") > 0) "lowfreq/$filename"
-      else if (filename.indexOf("lowfreq.ann.table.txt") > 0) "lowfreq/$filename"
+			if (filename.endsWith("majority.ann.vcf") > 0) "majority/$filename"
+			else if (filename.endsWith("majority.csv") > 0) "majority/$filename"
+      else if (filename.endsWith("majority_snpEff_genes.txt") > 0) "majority/$filename"
+      else if (filename.endsWith("majority_snpEff_summary.html") > 0) "majority/$filename"
+      else if (filename.endsWith("majority.ann.table.txt") > 0) "majority/$filename"
+      else if (filename.endsWith("lowfreq.ann.vcf") > 0) "lowfreq/$filename"
+      else if (filename.endsWith("lowfreq.csv") > 0) "lowfreq/$filename"
+      else if (filename.endsWith("lowfreq_snpEff_genes.txt") > 0) "lowfreq/$filename"
+      else if (filename.endsWith("lowfreq_snpEff_summary.html") > 0) "lowfreq/$filename"
+      else if (filename.endsWith("lowfreq.ann.table.txt") > 0) "lowfreq/$filename"
+      else filename
 	}
 
+  when:
+  !params.skip_mapping && !is_sra
+
+
  	input:
- 	file majority_variants from ch_majority_allele_vcf_annotation
-  file low_variants from ch_lowfreq_variants_vcf_annotation
+	set val(sample), val(is_sra), file(majority_variants) from ch_variantcalling_major_annotation
+  file low_variants from ch_variantcalling_low_annotation
 
  	output:
- 	file '*_majority.ann.vcf' into ch_majority_annotated_variants
-  file '*_majority_snpEff_genes.txt' into ch_majority_snpeff_genes
- 	file '*_majority_snpEff_summary.html' into ch_majority_snpeff_summary
-  file '*_lowfreq.ann.vcf' into ch_lowfreq_annotated_variants
-  file '*_lowfreq_snpEff_genes.txt' into ch_lowfreq_snpeff_genes
- 	file '*_lowfreq_snpEff_summary.html' into ch_lowfreq_snpeff_summary
-  file '*_majority.ann.table.txt' into ch_snpsift_majority_table
-  file '*_lowfreq.ann.table.txt' into ch_snpsift_lowfreq_table
+  set val(sample), val(is_sra), file("*majority.ann.vcf") into ch_majority_annotated_consensus
+  file "*majority.csv" into ch_snpeff_majority_mqc
+  file "*majority.snpEff.{genes.txt,summary.html}" into ch_majority_snpeff_summaries
+  file "*lowfreq.ann.vcf" into ch_lowfreq_annotated_variants
+  file "*lowfreq.snpEff.{genes.txt,summary.html}" into ch_lowfreq_snpeff_summaries
+  file "*lowfreq.csv" into ch_snpeff_lowfreq_mqc
+  file "*majority.ann.table.txt" into ch_snpsift_majority_table
+  file "*lowfreq.ann.table.txt" into ch_snpsift_lowfreq_table
 
  	script:
  	"""
-  snpEff sars-cov-2 $majority_variants > $sample"_majority.ann.vcf"
-  mv snpEff_genes.txt $sample"_majority_snpEff_genes.txt"
-  mv snpEff_summary.html $sample"_majority_snpEff_summary.html"
-  snpEff sars-cov-2 $low_variants > $sample"_lowfreq.ann.vcf"
-  mv snpEff_genes.txt $sample"_lowfreq_snpEff_genes.txt"
-  mv snpEff_summary.html $sample"_lowfreq_snpEff_summary.html"
+  snpEff sars-cov-2 $majority_variants -csvStats ${sample}.majority.csv > ${sample}.majority.ann.vcf
+  mv snpEff_genes.txt ${sample}.majority.snpEff.genes.txt
+  mv snpEff_summary.html ${sample}.majority.snpEff.summary.html
+  snpEff sars-cov-2 $low_variants -csvStats ${sample}.lowfreq.csv > ${sample}.lowfreq.ann.vcf
+  mv snpEff_genes.txt ${sample}.lowfreq.snpEff.genes.txt
+  mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
   SnpSift extractFields --set "," \\
         --exprFile "." \\
-        $sample"_majority.ann.vcf" \\
+        ${sample}.majority.ann.vcf \\
         CHROM POS REF ALT \\
         "ANN[*].GENE" "ANN[*].GENEID" \\
         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
@@ -1366,10 +1387,10 @@ process VARIANT_ANNOTATION {
         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-        > $prefix"_majority.ann.table.txt"
+        > ${sample}.majority.ann.table.txt
   SnpSift extractFields --set "," \\
         --exprFile "." \\
-        $sample"_lowfreq.ann.vcf" \\
+        ${sample}.lowfreq.ann.vcf \\
         CHROM POS REF ALT \\
         "ANN[*].GENE" "ANN[*].GENEID" \\
         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
@@ -1379,47 +1400,50 @@ process VARIANT_ANNOTATION {
         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-        > $prefix"_lowfreq.ann.table.txt"
+        > ${sample}.lowfreq.ann.table.txt
  	"""
 }
 
 /*
- * STEPS 9.3 Consensus Genome
+ * STEPS 9.3 Consensus Genome generation with Bcftools and masking with Bedtools
  */
 process CONSENSUS_GENOME {
   tag "$sample"
   label 'process_medium'
   publishDir "${params.outdir}/mapping_consensus", mode: params.publish_dir_mode,
 		saveAs: {filename ->
-			if (filename.indexOf("_consensus.fasta") > 0) "consensus/$filename"
-			else if (filename.indexOf("_consensus_masked.fasta") > 0) "masked/$filename"
+			if (filename.endsWith("consensus.fasta") > 0) "consensus/$filename"
+			else if (filename.endsWith("consensus_masked.fasta") > 0) "masked/$filename"
 	}
 
+  when:
+  !params.skip_mapping && !is_sra
+
+
   input:
-  file variants from ch_majority_allele_vcf_consensus
-  file refvirus from ch_viral_fasta
-  file sorted_bam from ch_sorted_bam_consensus
-  file sorted_bai from ch_bai_consensus
+  file variants ch_majority_annotated_consensus
+  file fasta from ch_viral_fasta
+  set val(sample), val(is_sra) file(sorted_bam) from ch_bam_consensus
+  file sorted_bai from ch_bamindex_consensus
 
   output:
-  file '*_consensus.fasta' into ch_consensus_fasta
-  file '*_consensus_masked.fasta' into ch_masked_fasta
+  file "*consensus.fasta" into ch_consensus_fasta
+  file "*consensus.masked.fasta" into ch_masked_fasta
 
   script:
-  refname = refvirus.baseName - ~/(\.2)?(\.fasta)?$/
   """
-  bgzip -c $variants > $sample"_"$refname".vcf.gz"
-  bcftools index $sample"_"$refname".vcf.gz"
-  cat $refvirus | bcftools consensus $sample"_"$refname".vcf.gz" > $sample"_"$refname"_consensus.fasta"
+  bgzip -c $variants > ${sample}.${viral_fasta_base}.vcf.gz
+  bcftools index ${sample}.${viral_fasta_base}.vcf.gz
+  cat $fasta | bcftools consensus ${sample}.${viral_fasta_base}.vcf.gz > ${sample}.${viral_fasta_base}.consensus.fasta
   bedtools genomecov \\
         -bga \\
         -ibam $sorted_bam \\
-        -g $refvirus | awk '\$4 < 20' | bedtools merge > $sample"_"$refname"_bed4mask.bed"
+        -g $fasta | awk '\$4 < 20' | bedtools merge > ${sample}.${viral_fasta_base}.bed4mask.bed
   bedtools maskfasta \\
-        -fi $sample"_"$refname"_consensus.fasta" \\
-        -bed $sample"_"$refname"_bed4mask.bed" \\
-        -fo $sample"_"$refname"_consensus_masked.fasta"
-  sed -i 's/$refname/$sample/g' $sample"_"$refname"_consensus_masked.fasta"
+        -fi ${sample}.${viral_fasta_base}.consensus.fasta \\
+        -bed ${sample}.${viral_fasta_base}.bed4mask.bed \\
+        -fo ${sample}.${viral_fasta_base}.consensus.masked.fasta
+  sed -i 's/${viral_fasta_base}/${sample}/g' ${sample}.${viral_fasta_base}.consensus.masked.fasta
   """
 }
 
@@ -1502,10 +1526,10 @@ process MULTIQC {
     file ('quast/unicycler/*') from ch_quast_unicycler_mqc.collect().ifEmpty([])
     file ('mapping/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
     file ('mapping/*') from ch_sort_bam_picardstat_mqc.collect().ifEmpty([])
-//  file ('ivar/*') from ivar_flagstat.collect().ifEmpty([])
-//  file ('ivar/*') from ivar_picardstats.collect().ifEmpty([])
-    file ('snpeff/majority*') from majority_snpeff_summary.collect()
-    file ('snpeff/lowfreq*') from lowfreq_snpeff_summary.collect()
+    file ('ivar/*') from ch_ivar_flagstat_mqc.collect().ifEmpty([])
+    file ('ivar/*') from ch_ivar_picardstat_mqc.collect().ifEmpty([])
+    file ('snpeff/majority*') from ch_snpeff_majority_mqc.collect()
+    file ('snpeff/lowfreq*') from ch_snpeff_lowfreq_mqc.collect()
     file ('software_versions/*') from ch_software_versions_yaml.collect()
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
