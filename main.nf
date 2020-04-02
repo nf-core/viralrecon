@@ -348,18 +348,19 @@ sra_ids_list = ch_reads_sra
 // esearch -db sra -query SRP249613 | efetch --format runinfo | cut -d "," -f 1 > SRR.numbers
 // parallel-fastq-dump --sra-id SRR11092056 --split-files --threads 4 --gzip
 
-// Implement a switch to use the apiKey if present, otherwise send a warning
+// Downloading fastq files using fromSRA nextflow function
 SRA_pointers =  params.sra_api_key? Channel.fromSRA( sra_ids_list, apiKey: params.sra_api_key ) : Channel.fromSRA( sra_ids_list)
 
-process dw_fastq_sra {
-    errorStrategy 'ignore'
-
+/*
+ * Validates whether fastq files obtained using fromSRA are OK
+ * Obtains metadata
+ */
+process validate_fastq_fromSRA {
     input:
     set val(id), file(reads) from SRA_pointers
 
-    //output:
-    //set val(id), stdout, val('true'), file(reads) into ch_reads_sra_dw
-
+    output:
+    file "*.csv" optional true into ch_sra_dw_validated
 
     //First check if the file is ok
     // if ok :
@@ -373,20 +374,32 @@ process dw_fastq_sra {
     //
 
     """
-    fastq_info $reads > validation.tmp 2>&1
+    fastq_info $reads > validation.tmp 2>&1 || true
 
     if grep -q "OK" validation.tmp
     then
-        get_SRA_metainfo.py
-    elif grep -q "ERROR" validation.tmp
-    then
-        echo "IMPLEMENT how to run fasq-dump"
-    else
-        echo "Unknown output of fastq_info"
+        get_SRA_metainfo.py $id
     fi
     """
-
 }
+
+/*
+ * Create channels for input fastq files
+ */
+ch_sra_dw_validated
+    .splitCsv(header:true, sep:',')
+    .map { validate_input(it) }
+    .into { ch_validated_sra_to_mix;
+            ch_validated_sra_to_check }
+
+sra_ids_list_to_check = Channel.from( sra_ids_list )
+ch_sra_ids_missing =  ch_validated_sra_to_check
+                        .join ( sra_ids_list_to_check, remainder: true )
+                        .filter {
+                            it[1] == null
+                        }.map {
+                            it[0]
+                        }
 
 return
 /*
@@ -397,6 +410,16 @@ i=`ls $reads | wc -l`
         printf 'true'
     else
         printf 'false'
+    fi
+
+if grep -q "OK" validation.tmp
+    then
+        get_SRA_metainfo.py $id
+    elif grep -q "ERROR" validation.tmp
+    then
+        parallel-fastq-dump --sra-id $id --split-files --threads $task.cpus --gzip
+    else
+        echo "Unknown output of fastq_info"
     fi
 */
 

@@ -62,9 +62,9 @@ def get_sra_metainfo(sra_id):
         elif row['LibraryLayout'] == "PAIRED":
             single_end = '0'; fastq_1 = sra_id + "_1.fastq.gz"; fastq_2 = sra_id + "_2.fastq.gz"
 
-        # print row['Platform']
-        print row['download_path']
-        # print row['LibraryLayout']
+        # print (row['Platform'])
+        print (row['download_path'])
+        # print (row['LibraryLayout'])
 
         sampleInfoList = [single_end, is_sra, fastq_1, fastq_2]
         sampleRunDict[sra_id] = []
