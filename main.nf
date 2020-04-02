@@ -648,7 +648,7 @@ process FASTQC_TRIM_MAPPING {
                 }
 
     when:
-    !params.skip_fastqc && !params.skip_qc && !is_sra && !params.skip_assembly
+    !params.skip_fastqc && !params.skip_qc && !is_sra && !params.skip_mapping
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_mapping_fastqc
