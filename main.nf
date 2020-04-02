@@ -1423,7 +1423,7 @@ process CONSENSUS_GENOME {
   input:
   file variants from ch_majority_annotated_consensus
   file fasta from ch_viral_fasta
-  set val(sample), val(is_sra) file(sorted_bam) from ch_bam_consensus
+  set val(sample), val(is_sra), file(sorted_bam) from ch_bam_consensus
   file sorted_bai from ch_bamindex_consensus
 
   output:
