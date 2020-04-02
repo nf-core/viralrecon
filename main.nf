@@ -34,7 +34,7 @@ def helpMessage() {
       --host_kraken2_db [file]        Full path to Kraken2 database built from host genome
       --host_kraken2_name [str]       Name of host genome for building Kraken2 database (Default: "human")
 
-      --viral_genome [str]            Name of iGenomes reference for viral genome
+      --viral_genome [str]            Name of genome reference key for viral genome
       --viral_kraken2_db [file]       Full path to Kraken2 database built from viral genome
       --viral_gff [file]              Full path to viral gff annotation file
 
@@ -117,7 +117,7 @@ if (params.host_kraken2_db) { ch_host_kraken2_db = Channel.fromPath(params.host_
 
 // Viral reference files
 if (params.genomes && params.viral_genome && !params.genomes.containsKey(params.viral_genome)) {
-   exit 1, "The provided genome '${params.viral_genome}' is not available in the iGenomes file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
+   exit 1, "The provided genome '${params.viral_genome}' is not available in the Genome file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
 }
 params.viral_fasta = params.viral_genome ? params.genomes[ params.viral_genome ].fasta ?: false : false
 
