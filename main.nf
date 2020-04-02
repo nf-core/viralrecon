@@ -120,7 +120,7 @@ if (params.protocol == 'amplicon' && !params.amplicon_fasta) {
     exit 1, "If protocol is set to 'amplicon' then please provide a valid amplicon fasta file"
 }
 if (params.amplicon_fasta) { ch_amplicon_fasta = Channel.fromPath(params.amplicon_fasta, checkIfExists: true) } else { ch_amplicon_fasta = Channel.empty() }
-if (params.adapter_file) { ch_adapter_file = Channel.fromPath(params.adapter_file, checkIfExists: true) } else { ch_adapter_file = Channel.empty() }
+if (params.adapter_file) { ch_adapter_file = Channel.fromPath(params.adapter_file, checkIfExists: true) } else { exit 1, "Adapter file not specified!" }
 
 assemblerList = [ 'spades', 'metaspades', 'unicycler' ]
 assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
@@ -532,29 +532,24 @@ process TRIMMOMATIC {
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic
-    file adapters from ch_adapter_file.collect().ifEmpty([])
+    file adapters from ch_adapter_file.collect()
     file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*trimmed*") into ch_trimmomatic_fastqc,
                                                                           ch_trimmomatic_kraken2_host,
-                                                                          ch_trimmomatic_kraken2_viral,
-                                                                          ch_trimmomatic_spades,
-                                                                          ch_trimmomatic_metaspades,
-                                                                          ch_trimmomatic_unicycler
+                                                                          ch_trimmomatic_kraken2_viral
     set val(sample), val(single_end), val(is_sra), file("*orphan*") into ch_trimmomatic_orphan
     file '*.log' into ch_trimmomatic_mqc
 
     script:
     pe = single_end ? "SE" : "PE"
-    def adapters = params.adapter_file ? "${adapters}" : ""
-    adapters = (params.amplicon_fasta && params.protocol == 'amplicon') ? "${amplicons}" : ""
+    adapters = (params.amplicon_fasta && params.protocol == 'amplicon') ? "${amplicons}" : "${adapters}"
     trimmed_reads = single_end ? "${sample}.trimmed.fastq.gz" : "${sample}.trimmed_1.fastq.gz ${sample}.orphan_1.fastq.gz ${sample}.trimmed_2.fastq.gz ${sample}.orphan_2.fastq.gz"
     orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
     """
     trimmomatic $pe \\
         -threads ${task.cpus} \\
-        -phred33 \\
         $reads \\
         $trimmed_reads \\
         ILLUMINACLIP:${adapters}:${params.adapter_params} \\
@@ -667,7 +662,10 @@ process KRAKEN2_VIRAL {
     file db from ch_viral_kraken2_db.collect()
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_viral_viral_reads
+    set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_viral_viral_spades,
+                                                                         ch_kraken2_viral_viral_metaspades,
+                                                                         ch_kraken2_viral_viral_unicycler
+
     set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_viral_host_reads
     file "*.report.txt" into ch_kraken2_viral_report
 
@@ -806,7 +804,7 @@ process SPADES {
     !params.skip_assembly && 'spades' in assemblers && !is_sra
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_spades
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_viral_viral_spades
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_spades_quast,
@@ -911,7 +909,7 @@ process METASPADES {
     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_metaspades
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_viral_viral_metaspades
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_metaspades_quast,
@@ -1017,7 +1015,7 @@ process UNICYCLER {
     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_unicycler
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_viral_viral_unicycler
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*assembly.fasta") into ch_unicycler_quast,
