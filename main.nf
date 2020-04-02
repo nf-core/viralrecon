@@ -1382,9 +1382,9 @@ process VARSCAN {
   label 'process_medium'
 	publishDir "${params.outdir}/varscan", mode: params.publish_dir_mode,
 		saveAs: {filename ->
-			if (filename.endsWith("pileup") > 0) "pileup/$filename"
-			else if (filename.endsWith("majority.vcf") > 0) "majority_allele/$filename"
-      		else if (filename.endsWith("lowfreq.vcf") > 0) "lowfreq_vars/$filename"
+			if (filename.endsWith("pileup")) "pileup/$filename"
+			else if (filename.endsWith("majority.vcf")) "majority_allele/$filename"
+      		else if (filename.endsWith("lowfreq.vcf")) "lowfreq_vars/$filename"
       		else filename
 	}
 
@@ -1436,16 +1436,16 @@ process VARIANT_ANNOTATION {
   label 'process_medium'
   publishDir "${params.outdir}/annotation", mode: params.publish_dir_mode,
 		saveAs: {filename ->
-			if (filename.endsWith("majority.ann.vcf") > 0) "majority/$filename"
-			else if (filename.endsWith("majority.csv") > 0) "majority/$filename"
-      else if (filename.endsWith("majority_snpEff_genes.txt") > 0) "majority/$filename"
-      else if (filename.endsWith("majority_snpEff_summary.html") > 0) "majority/$filename"
-      else if (filename.endsWith("majority.ann.table.txt") > 0) "majority/$filename"
-      else if (filename.endsWith("lowfreq.ann.vcf") > 0) "lowfreq/$filename"
-      else if (filename.endsWith("lowfreq.csv") > 0) "lowfreq/$filename"
-      else if (filename.endsWith("lowfreq_snpEff_genes.txt") > 0) "lowfreq/$filename"
-      else if (filename.endsWith("lowfreq_snpEff_summary.html") > 0) "lowfreq/$filename"
-      else if (filename.endsWith("lowfreq.ann.table.txt") > 0) "lowfreq/$filename"
+			if (filename.endsWith("majority.ann.vcf")) "majority/$filename"
+			else if (filename.endsWith("majority.csv")) "majority/$filename"
+      else if (filename.endsWith("majority_snpEff_genes.txt")) "majority/$filename"
+      else if (filename.endsWith("majority_snpEff_summary.html")) "majority/$filename"
+      else if (filename.endsWith("majority.ann.table.txt")) "majority/$filename"
+      else if (filename.endsWith("lowfreq.ann.vcf")) "lowfreq/$filename"
+      else if (filename.endsWith("lowfreq.csv")) "lowfreq/$filename"
+      else if (filename.endsWith("lowfreq_snpEff_genes.txt")) "lowfreq/$filename"
+      else if (filename.endsWith("lowfreq_snpEff_summary.html")) "lowfreq/$filename"
+      else if (filename.endsWith("lowfreq.ann.table.txt")) "lowfreq/$filename"
       else filename
 	}
 
@@ -1512,8 +1512,8 @@ process CONSENSUS_GENOME {
   label 'process_medium'
   publishDir "${params.outdir}/mapping_consensus", mode: params.publish_dir_mode,
 		saveAs: {filename ->
-			if (filename.endsWith("consensus.fasta") > 0) "consensus/$filename"
-			else if (filename.endsWith("consensus.masked.fasta") > 0) "masked/$filename"
+			if (filename.endsWith("consensus.fasta")) "consensus/$filename"
+			else if (filename.endsWith("consensus.masked.fasta")) "masked/$filename"
 	}
 
   when:
