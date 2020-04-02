@@ -894,7 +894,7 @@ if (params.protocol == 'amplicon'){
       input:
       set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_ivar
       set val(sample), val(single_end), val(is_sra), file(bamindex) from ch_sort_bamindex_ivar
-      file amplicons_bed from ch_amplicon_bed
+      file amplicons_bed from ch_amplicon_bed.collect().ifEmpty([])
       file fasta from ch_viral_fasta
 
       output:
