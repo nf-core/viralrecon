@@ -400,7 +400,7 @@ Channel
 sra_ids_list_to_check_fromSRA
     .join ( ch_validated_fromSRA_to_check, remainder: true )
     .filter {
-        //println (it)
+        //println (it) //del
         it[1]== null | it[1] =="failed"
     }.map {
         it[0]
@@ -409,8 +409,8 @@ sra_ids_list_to_check_fromSRA
         ch_fromSRA_ids_missing_to_check
     }
 
-/*
 process dump_fastq_to_production {
+
     input:
     val(id) from ch_fromSRA_ids_missing
 
@@ -427,8 +427,8 @@ process dump_fastq_to_production {
     elif [[ \$single_end == "false" ]]
     then
         parallel-fastq-dump \\
-            --threads \${task.cpus} \\
-            --sra-id ${reads}
+            --threads ${task.cpus} \\
+            --sra-id ${id}
             fastq_info ${id}_1.fastq.gz ${id}_2.fastq.gz > validation.tmp 2>&1 || true
     else
        single_end="failed"
@@ -440,8 +440,8 @@ process dump_fastq_to_production {
     fi
     """
 }
-*/
 
+/*
 process dump_fastq_to_test {
     input:
     val(id) from ch_fromSRA_ids_missing
@@ -476,6 +476,7 @@ process dump_fastq_to_test {
     fi
     """
 }
+*/
 
 // checked with touch!!!
 
