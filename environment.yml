@@ -5,25 +5,46 @@ channels:
   - conda-forge
   - bioconda
   - defaults
+  - hcc
+  - pedroscampoy
 dependencies:
-  ## conda-forge packages
-  - conda-forge::python=3.7.3
+ ## conda-forge packages
+  - conda-forge::python=3.6.10
   - conda-forge::markdown=3.1.1
   - conda-forge::pymdown-extensions=6.0
-  - conda-forge::pygments=2.5.2
+  - conda-forge::pygments=2.6.1
   - conda-forge::pigz=2.3.4
   - conda-forge::r-base=3.6.2
+  - conda-forge::wkhtmltopdf=0.12.4
 
   ## bioconda packages
+  ## common
   - bioconda::fastqc=0.11.9
+  - bioconda::fastq_utils=0.23.0
   - bioconda::trimmomatic=0.39
   - bioconda::bowtie2=2.3.5.1
   - bioconda::kraken2=2.0.8_beta
   - bioconda::samtools=1.9
-  - bioconda::picard=2.21.9
+  - bioconda::picard=2.22.2
   - bioconda::bedtools=2.29.2
-  - bioconda::preseq=2.0.3
   - bioconda::multiqc=1.8
+
+  ## mapping
+  - bioconda::ivar=1.1_beta
+  - bioconda::bcftools=1.9
+  - bioconda::varscan=2.4.4
+  - bioconda::snpeff=4.3.1t
+  - bioconda::snpsift=4.3.1t
+
+  ## assembly
+  - bioconda::spades=3.14.0
+  - bioconda::unicycler=0.4.7
+  - bioconda::quast=5.0.2
+  - bioconda::blast=2.9.0
+  - hcc::abacas=1.3.1
+  - pedroscampoy::plasmidid=1.5.0
+
+  ## download
   - bioconda::fastq_utils=0.23.0
   - bioconda::parallel-fastq-dump=0.6.6
   - bioconda::sra-tools=2.10.3
