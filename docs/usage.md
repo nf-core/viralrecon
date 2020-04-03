@@ -181,21 +181,28 @@ SRR11177792,,
 Specifies the type of protocol used for sequencing i.e. "metagenomic" or "amplicon". Default: "metagenomic".
 
 ### `--amplicon_bed`
+
 Viral genome location of primers. Mandatory when `--protocol amplicon` and not `--skip_mapping`.
 
 #### Format
 
 It must be in bed format, with this fields:
 
-```
+```Bash
+
 chr\tstart_primer\tend_primer\tname\tqual\tstrand
+
 ```
+
 Example:
-```
+
+```Bash
+
 NC_045512.2	30	54	nCoV-2019_1_LEFT	60	-
 NC_045512.2	385	410	nCoV-2019_1_RIGHT	60	+
 NC_045512.2	320	342	nCoV-2019_2_LEFT	60	-
 NC_045512.2	704	726	nCoV-2019_2_RIGHT	60	+
+
 ```
 
 ### `--amplicon_fasta`
@@ -203,7 +210,8 @@ NC_045512.2	704	726	nCoV-2019_2_RIGHT	60	+
 Primer sequences in fasta format. Mandatory when `--protocol amplicon` and not `--skip_assembly`.
 Example:
 
-```
+```Bash
+
 >nCoV-2019_1_LEFT
 ACCAACCAACTTTCGATCTCTTGT
 >nCoV-2019_1_RIGHT
@@ -216,6 +224,7 @@ TAAGGATCAGTGCCAAGCTCGT
 CGGTAATAAAGGAGCTGGTGGC
 >nCoV-2019_3_RIGHT
 AAGGTGTCTGCAATTCATAGCTCT
+
 ```
 
 ## Reference genomes
@@ -233,6 +242,7 @@ The syntax for this reference configuration is as follows:
 <!-- TODO nf-core: Update reference genome example according to what is needed -->
 
 ```nextflow
+
 params {
   genomes {
     'GRCh37' {
@@ -241,6 +251,7 @@ params {
     // Any number of additional genomes, key is used with --genome
   }
 }
+
 ```
 
 You can find the keys to specify the genomes in the [Genomes config file](../conf/genomes.config).
