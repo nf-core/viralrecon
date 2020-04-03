@@ -1456,7 +1456,7 @@ process VARIANT_ANNOTATION {
 	}
 
   when:
-  !params.skip_mapping && !is_sra && !workflow.profile.contains('test')
+  !params.skip_mapping && !is_sra
 
 
  	input:
