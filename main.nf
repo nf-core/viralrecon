@@ -837,10 +837,10 @@ process KRAKEN2_VIRAL {
      file index from ch_viral_index
 
      output:
-     set val(sample), val(single_end), val(is_sra), file("*.sorted.bam") into ch_sort_bam_variantcalling,
+     set val(sample), val(is_sra), file("*.sorted.bam") into ch_sort_bam_variantcalling,
                                                                               ch_sort_bam_consensus,
                                                                               ch_sort_bam_ivar
-     set val(sample), val(single_end), val(is_sra), file("*.sorted.bam.bai") into ch_sort_bamindex_variantcalling,
+     set val(sample), val(is_sra), file("*.sorted.bam.bai") into ch_sort_bamindex_variantcalling,
                                                                                   ch_sort_bamindex_consensus,
                                                                                   ch_sort_bamindex_ivar
 
@@ -892,8 +892,8 @@ if (params.protocol == 'amplicon'){
       !params.skip_mapping && !is_sra
 
       input:
-      set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_ivar
-      set val(sample), val(single_end), val(is_sra), file(bamindex) from ch_sort_bamindex_ivar
+      set val(sample), val(is_sra), file(bam) from ch_sort_bam_ivar
+      set val(sample), val(is_sra), file(bamindex) from ch_sort_bamindex_ivar
       file amplicons_bed from ch_amplicon_bed.collect().ifEmpty([])
       file fasta from ch_viral_fasta
 
@@ -1397,7 +1397,6 @@ process VARSCAN {
 	set val(sample), val(is_sra), file(bam) from ch_bam_variantcalling
   set val(sample), val(is_sra), file(bamindex) from ch_bamindex_variantcalling
   file fasta from ch_viral_fasta
-  file index from ch_viral_index
 
 	output:
 	file "*pileup" into ch_variantcalling_pileup
