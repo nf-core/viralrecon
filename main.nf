@@ -472,7 +472,7 @@ ch_reads_no_sra_filt = ch_reads_no_sra
                         }
 
 /*
- * Get list of SRA ids that should be downloaded
+ * Get list of SRA ids that should be downloaded, if any
  */
 sra_ids_list = ch_reads_sra
                 .filter {
@@ -485,14 +485,21 @@ sra_ids_list = ch_reads_sra
 /*
  * Downloading fastq files using fromSRA nextflow function
  */
-SRA_pointers =  params.sra_api_key? Channel.fromSRA( sra_ids_list, apiKey: params.sra_api_key ) : Channel.fromSRA( sra_ids_list)
+SRA_pointers = Channel.empty()
+
+if ( !sra_ids_list.isEmpty() ) {
+    SRA_pointers =  params.sra_api_key? Channel.fromSRA( sra_ids_list, apiKey: params.sra_api_key ) : Channel.fromSRA( sra_ids_list)
+}
+
 SRA_pointers.into { SRA_pointers; SRA_pointers_to_check }
 
 /*
  * Validates if fastq files obtained using fromSRA are OK
  * Obtains fastq files metadata if OK
  */
-process validate_fastq_fromSRA {
+process VALIDATE_FASTQ_FROM_NF_SRA {
+    tag "$sample"
+    label 'process_low'
     input:
     set val(id), file(reads) from SRA_pointers
 
@@ -545,7 +552,9 @@ sra_ids_list_to_check_fromSRA
 /*
  * Prefetch fastq files
  */
-process prefetch_fastq {
+process PREFETCH_FASTQ {
+    tag "$sample"
+    label 'process_medium'
 
     input:
     val(id) from ch_fromSRA_ids_missing
@@ -562,8 +571,9 @@ process prefetch_fastq {
 /*
  * Download fastq files using parallel-fastq-dump
  */
-process dump_fastq {
-
+process DUMP_FASTQ {
+    tag "$id"
+    label 'process_medium'
     input:
     set val(id), file(fetch_fastq_sra) from fetch_fastq_sra
 
