@@ -62,8 +62,7 @@ def helpMessage() {
       --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
     Mapping
       --skip_mapping [bool]           Skip Mapping and undergoing steps in the pipeline
-      --save_map_intermeds [bool]     Save the intermediate BAM files from the mapping steps (Default: false)
-      --save_ivar_intermeds [bool]    Save the intermediate BAM files from iVar step (Default: false)
+      --save_align_intermeds [bool]     Save the intermediate BAM files from the mapping steps (Default: false)
 
     De novo assembly
       --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler')
@@ -247,8 +246,9 @@ if (params.save_kraken2_fastq)    summary['Save Kraken2 FastQ'] = params.save_kr
 if (params.save_reference)        summary['Save Genome Indices'] = 'Yes'
 if (params.skip_trimming)         summary['Skip Trimming'] = 'Yes'
 if (params.save_trimmed)          summary['Save Trimmed'] = 'Yes'
-if (params.save_map_intermeds)  summary['Save Intermeds'] =  'Yes'
+if (params.save_align_intermeds)  summary['Save Intermeds'] =  'Yes'
 if (params.skip_assembly)         summary['Skip De novo Assembly'] =  'Yes'
+if (params.skip_mapping)          summary['Skip Mapping'] =  'Yes'
 if (params.skip_variants)         summary['Skip Variant Calling'] =  'Yes'
 if (params.skip_qc)               summary['Skip QC'] = 'Yes'
 if (params.skip_fastqc)           summary['Skip FastQC'] = 'Yes'
@@ -783,7 +783,7 @@ process KRAKEN2_VIRAL {
  process BOWTIE {
      tag "$sample"
      label 'process_low'
-     if (params.save_map_intermeds) {
+     if (params.save_align_intermeds) {
          publishDir "${params.outdir}/bowtie", mode: params.publish_dir_mode
      }
 
@@ -819,7 +819,7 @@ process KRAKEN2_VIRAL {
      label 'process_medium'
      publishDir "${params.outdir}/bowtie", mode: params.publish_dir_mode,
          saveAs: { filename ->
-                       if (params.save_map_intermeds) {
+                       if (params.save_align_intermeds) {
                            if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                            else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
                            else if (filename.endsWith(".bam.stats")) "samtools_stats/$filename"
@@ -837,10 +837,10 @@ process KRAKEN2_VIRAL {
      file index from ch_viral_index
 
      output:
-     set val(sample), val(single_end), val(is_sra), file("*.sorted.bam") into ch_sort_bam_variantcalling,
+     set val(sample), val(is_sra), file("*.sorted.bam") into ch_sort_bam_variantcalling,
                                                                               ch_sort_bam_consensus,
                                                                               ch_sort_bam_ivar
-     set val(sample), val(single_end), val(is_sra), file("*.sorted.bam.bai") into ch_sort_bamindex_variantcalling,
+     set val(sample), val(is_sra), file("*.sorted.bam.bai") into ch_sort_bamindex_variantcalling,
                                                                                   ch_sort_bamindex_consensus,
                                                                                   ch_sort_bamindex_ivar
 
@@ -879,7 +879,7 @@ if (params.protocol == 'amplicon'){
       label 'process_medium'
       publishDir "${params.outdir}/ivar", mode: params.publish_dir_mode,
           saveAs: { filename ->
-                        if (params.save_ivar_intermeds) {
+                        if (params.save_align_intermeds) {
                             if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                             else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
                             else if (filename.endsWith(".bam.stats")) "samtools_stats/$filename"
@@ -892,8 +892,8 @@ if (params.protocol == 'amplicon'){
       !params.skip_mapping && !is_sra
 
       input:
-      set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_ivar
-      set val(sample), val(single_end), val(is_sra), file(bamindex) from ch_sort_bamindex_ivar
+      set val(sample), val(is_sra), file(bam) from ch_sort_bam_ivar
+      set val(sample), val(is_sra), file(bamindex) from ch_sort_bamindex_ivar
       file amplicons_bed from ch_amplicon_bed.collect().ifEmpty([])
       file fasta from ch_viral_fasta
 
@@ -931,6 +931,8 @@ if (params.protocol == 'amplicon'){
     .set { ch_bamindex_variantcalling }
   ch_sort_bamindex_consensus
     .set { ch_bamindex_consensus }
+  ch_ivar_flagstat_mqc = Channel.empty()
+  ch_ivar_picardstat_mqc = Channel.empty()
 }
 
 
@@ -1393,9 +1395,8 @@ process VARSCAN {
 
 	input:
 	set val(sample), val(is_sra), file(bam) from ch_bam_variantcalling
-  file bamindex from ch_bamindex_variantcalling
+  set val(sample), val(is_sra), file(bamindex) from ch_bamindex_variantcalling
   file fasta from ch_viral_fasta
-  file index from ch_viral_index
 
 	output:
 	file "*pileup" into ch_variantcalling_pileup
@@ -1450,12 +1451,15 @@ process VARIANT_ANNOTATION {
 	}
 
   when:
-  !params.skip_mapping && !is_sra && !workflow.profile.contains('test')
+  !params.skip_mapping && !is_sra
 
 
  	input:
 	set val(sample), val(is_sra), file(majority_variants) from ch_variantcalling_major_annotation
   set val(sample), val(is_sra), file(low_variants) from ch_variantcalling_low_annotation
+  file ('data/genomes/virus.fa') from ch_viral_fasta
+  file ('data/virus/genes.gff') from ch_viral_gff
+
 
  	output:
   set val(sample), val(is_sra), file("*majority.ann.vcf") into ch_majority_annotated_consensus
@@ -1469,9 +1473,11 @@ process VARIANT_ANNOTATION {
 
  	script:
  	"""
-  snpEff sars-cov-2 $majority_variants -csvStats ${sample}.majority.csv > ${sample}.majority.ann.vcf
+ 	echo "virus.genome : virus" > snpeff.config
+  snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v virus
+  snpEff virus -config ./snpeff.config -dataDir ./data $majority_variants -csvStats ${sample}.majority.csv > ${sample}.majority.ann.vcf
   mv snpEff_summary.html ${sample}.majority.snpEff.summary.html
-  snpEff sars-cov-2 $low_variants -csvStats ${sample}.lowfreq.csv > ${sample}.lowfreq.ann.vcf
+  snpEff virus -config ./snpeff.config -dataDir ./data $low_variants -csvStats ${sample}.lowfreq.csv > ${sample}.lowfreq.ann.vcf
   mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
   SnpSift extractFields -s "," \\
         -e "." \\
