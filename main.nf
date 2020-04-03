@@ -931,6 +931,8 @@ if (params.protocol == 'amplicon'){
     .set { ch_bamindex_variantcalling }
   ch_sort_bamindex_consensus
     .set { ch_bamindex_consensus }
+  ch_ivar_flagstat_mqc = Channel.empty()
+  ch_ivar_picardstat_mqc = Channel.empty()
 }
 
 
