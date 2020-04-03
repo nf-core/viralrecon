@@ -185,6 +185,12 @@ ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
 
 ch_blast_outfmt6_header = file("$baseDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
 
+/////////////////////////////////////////////////////
+/* --          PIPELINE CONFIG FILES            -- */
+/////////////////////////////////////////////////////
+
+ch_snpeff_config = file("$baseDir/assets/snpeff.config", checkIfExists: true)
+
 ////////////////////////////////////////////////////
 /* --                   AWS                    -- */
 ////////////////////////////////////////////////////
@@ -1456,6 +1462,10 @@ process VARIANT_ANNOTATION {
  	input:
 	set val(sample), val(is_sra), file(majority_variants) from ch_variantcalling_major_annotation
   set val(sample), val(is_sra), file(low_variants) from ch_variantcalling_low_annotation
+  file config from ch_snpeff_config
+  file ('data/genomes/sars-cov-2.fa') from ch_viral_fasta.first()
+  file ('data/sars-cov-2/genes.gff') from ch_viral_gff.first()
+
 
  	output:
   set val(sample), val(is_sra), file("*majority.ann.vcf") into ch_majority_annotated_consensus
@@ -1469,9 +1479,10 @@ process VARIANT_ANNOTATION {
 
  	script:
  	"""
-  snpEff sars-cov-2 $majority_variants -csvStats ${sample}.majority.csv > ${sample}.majority.ann.vcf
+  snpEff build -config $config -dataDir ./data -gff3 -v sars-cov-2
+  snpEff sars-cov-2 -config $config -dataDir ./data $majority_variants -csvStats ${sample}.majority.csv > ${sample}.majority.ann.vcf
   mv snpEff_summary.html ${sample}.majority.snpEff.summary.html
-  snpEff sars-cov-2 $low_variants -csvStats ${sample}.lowfreq.csv > ${sample}.lowfreq.ann.vcf
+  snpEff sars-cov-2 -c config $config -dataDir ./data $low_variants -csvStats ${sample}.lowfreq.csv > ${sample}.lowfreq.ann.vcf
   mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
   SnpSift extractFields -s "," \\
         -e "." \\
