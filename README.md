@@ -20,7 +20,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 1. Raw read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 2. Adapter trimming ([`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
 3. Removal of host reads ([`Kraken2`](http://ccb.jhu.edu/software/kraken2/))
-4. Amplicon removal ([iVar](https://github.com/andersen-lab/ivar); *amplicon data only*)
+4. Amplicon removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
 5. De novo assembly
     1. Choice of multiple assemblers ([`SPAdes`](http://cab.spbu.ru/software/spades/), [`metaSPAdes`](http://cab.spbu.ru/software/meta-spades/), [`Unicycler`](https://github.com/rrwick/Unicycler))
     2. Contiguate contigs assembly ([`ABACUS`](https://www.sanger.ac.uk/science/tools/pagit))
@@ -29,7 +29,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     5. Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))
 6. Variant calling
     1. Read alignment ([`Bowtie 2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml))
-    2. Sort, index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
+    2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
     3. Alignment-level QC ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/), [`picard`](https://broadinstitute.github.io/picard/))
     4. Call variants ([`VarScan 2`](http://dkoboldt.github.io/varscan/), [`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
     5. Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
