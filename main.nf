@@ -59,7 +59,7 @@ def helpMessage() {
       --save_trimmed [bool]           Save the trimmed FastQ files in the results directory (Default: false)
 
     Alignment
-      --save_align_intermeds [bool]   Save the intermediate BAM files from the mapping steps (Default: false)
+      --save_align_intermeds [bool]   Save the intermediate BAM files from the alignment steps (Default: false)
 
     De novo assembly
       --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler')
@@ -241,8 +241,8 @@ summary['Run Name']                = custom_runName ?: workflow.runName
 // TODO nf-core: Report custom parameters here
 summary['Samplesheet']             = params.input
 summary['Protocol']                = params.protocol
-if (params.protocol == 'amplicon') summary['Amplicon Fasta file'] = params.amplicon_fasta
-if (params.protocol == 'amplicon') summary['Amplicon BED file'] = params.amplicon_bed
+if (params.protocol == 'amplicon') summary['Amplicon Fasta File'] = params.amplicon_fasta
+if (params.protocol == 'amplicon') summary['Amplicon BED File'] = params.amplicon_bed
 summary['Host Genome']             = params.host_genome ?: 'Not supplied'
 if (params.host_kraken2_db)        summary['Host Kraken2 DB'] = params.host_kraken2_db
 if (params.host_kraken2_name)      summary['Host Kraken2 Name'] = params.host_kraken2_name
@@ -293,7 +293,7 @@ if (params.email || params.email_on_fail) {
     summary['E-mail on failure']   = params.email_on_fail
     summary['MultiQC maxsize']     = params.max_multiqc_email_size
 }
-log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
+log.info summary.collect { k,v -> "${k.padRight(19)}: $v" }.join("\n")
 log.info "-\033[2m--------------------------------------------------\033[0m-"
 
 // Check the hostnames against configured profiles
@@ -356,7 +356,7 @@ ch_samplesheet_reformat
     .map { validate_input(it) }
     .into { ch_reads_fastqc;
             ch_reads_trimmomatic_assembly;
-            ch_reads_trimmomatic_mapping}
+            ch_reads_trimmomatic_mapping }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -550,7 +550,7 @@ process FASTQC_RAW {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
-* STEP 2.1: Adapter trimming with Trimmomatic
+* STEP 2.1: Adapter trimming with Trimmomatic for de novo assembly
 */
 process TRIMMOMATIC_ASSEMBLY {
     tag "$sample"
@@ -593,10 +593,13 @@ process TRIMMOMATIC_ASSEMBLY {
     """
 }
 
+/*
+* STEP 2.2: Adapter trimming with Trimmomatic for read alignment
+*/
 process TRIMMOMATIC_MAPPING {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/trimmomatic_mapping", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/trimmomatic/mapping", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".log")) filename
                       else params.save_trimmed ? filename : null
@@ -643,7 +646,7 @@ process FASTQC_TRIM_ASSEMBLY {
                 }
 
     when:
-    !params.skip_fastqc && !params.skip_qc && !is_sra && !params.skip_assembly
+    !params.skip_fastqc && !params.skip_qc && !is_sra && !params.skip_assembly && !params.skip_trimming
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_fastqc
@@ -666,7 +669,7 @@ process FASTQC_TRIM_MAPPING {
                 }
 
     when:
-    !params.skip_fastqc && !params.skip_qc && !is_sra && !params.skip_variants
+    !params.skip_fastqc && !params.skip_qc && !is_sra && !params.skip_variants && !params.skip_trimming
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_mapping_fastqc
