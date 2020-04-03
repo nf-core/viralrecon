@@ -1601,6 +1601,11 @@ process get_software_versions {
     quast.py --version > v_quast.txt
     blastn -version > v_blast.txt
     abacas.pl -v &> v_abacas.txt || true
+    ivar -v > v_ivar.txt
+    varscan 2>&1 | head -1 > v_varscan.txt
+    snpEff -version > v_snpEff.txt
+    SnpSift 2>&1 | head -1 > v_SnipSift.txt
+    bcftools -v > v_bcftools.txt
     multiqc --version > v_multiqc.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
