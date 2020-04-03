@@ -20,10 +20,10 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 1. Raw read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 2. Adapter trimming ([`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
 3. Removal of host reads ([`Kraken2`](http://ccb.jhu.edu/software/kraken2/))
-4. Amplicon removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
+4. Primer removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
 5. De novo assembly
     1. Choice of multiple assemblers ([`SPAdes`](http://cab.spbu.ru/software/spades/), [`metaSPAdes`](http://cab.spbu.ru/software/meta-spades/), [`Unicycler`](https://github.com/rrwick/Unicycler))
-    2. Contiguate contigs assembly ([`ABACUS`](https://www.sanger.ac.uk/science/tools/pagit))
+    2. Contiguate contigs assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
     3. Blast to reference assembly ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch))
     4. Assembly assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
     5. Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))

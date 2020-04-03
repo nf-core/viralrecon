@@ -7,7 +7,7 @@
 
 ## Pipeline tools
 
-* [ABACUS](https://www.ncbi.nlm.nih.gov/pubmed/19497936/)
+* [ABACAS](https://www.ncbi.nlm.nih.gov/pubmed/19497936/)
   > Assefa S, Keane TM, Otto TD, Newbold C, Berriman M. ABACAS: algorithm-based automatic contiguation of assembled sequences. Bioinformatics. 2009 Aug 1;25(15):1968-9. doi: 10.1093/bioinformatics/btp347. Epub 2009 Jun 3. PubMed PMID: 19497936; PubMed Central PMCID: PMC2712343.
 
 * [BCFtools](https://www.ncbi.nlm.nih.gov/pubmed/21903627/)
