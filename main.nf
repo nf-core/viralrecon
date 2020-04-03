@@ -27,7 +27,7 @@ def helpMessage() {
 
     Generic
       --protocol [str]                Specifies the type of protocol used for sequencing i.e. "metagenomic" or "amplicon". (Default: "metagenomic")
-      --amplicon_bed [file]           Path to BED file containing amplicon position
+      --amplicon_bed [file]           Path to BED file containing amplicon positions
       --amplicon_fasta [file]         Path to fasta file containing amplicon sequences
 
     References                        If not specified in the configuration file or you wish to overwrite any of the references
@@ -51,18 +51,15 @@ def helpMessage() {
 
     Trimming
       --adapter_file [file]           Adapters index for adapter removal
-      --adapter_params [str]          Trimming parameters for adapters. <seed mismatches>:<palindrome clip threshold>:<simple clip threshold> (Default: 2:30:10)
+      --trim_params [str]             Trimming parameters for adapters. <seed mismatches>:<palindrome clip threshold>:<simple clip threshold> (Default: 2:30:10)
       --trim_window_length [int]      Window size. (Default: 4)
       --trim_window_value [int]       Window average quality required (Default: 20)
       --trim_min_length [int]         Minimum length of reads (Default: 50)
       --skip_trimming [bool]          Skip the adapter trimming step (Default: false)
       --save_trimmed [bool]           Save the trimmed FastQ files in the results directory (Default: false)
 
-    Alignments
-      --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
-    Mapping
-      --skip_mapping [bool]           Skip Mapping and undergoing steps in the pipeline
-      --save_align_intermeds [bool]     Save the intermediate BAM files from the mapping steps (Default: false)
+    Alignment
+      --save_align_intermeds [bool]   Save the intermediate BAM files from the mapping steps (Default: false)
 
     De novo assembly
       --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler')
@@ -115,22 +112,37 @@ if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
 
-if (params.input) { ch_input = file(params.input, checkIfExists: true) } else { exit 1, "Samplesheet file not specified!" }
+if (params.input) { ch_input = file(params.input, checkIfExists: true) } else { exit 1, "Input samplesheet file not specified!" }
 
 if (params.protocol != 'metagenomic' && params.protocol != 'amplicon') {
-    exit 1, "Invalid protocol option: ${params.protocol}. Valid options: 'metagenomic' or 'amplicon'"
+    exit 1, "Invalid protocol option: ${params.protocol}. Valid options: 'metagenomic' or 'amplicon'!"
 }
 if (params.protocol == 'amplicon' && !params.skip_assembly && !params.amplicon_fasta) {
-    exit 1, "If protocol is set to 'amplicon' then please provide a valid amplicon fasta file"
+    exit 1, "To perform de novo assembly in 'amplicon' mode please provide a valid amplicon fasta file!"
 }
-if (params.protocol == 'amplicon' && !params.skip_mapping && !params.amplicon_bed) {
-    exit 1, "If protocol is set to 'amplicon' and mapping is not skipped, then please provide a valid amplicon BED file"
+if (params.protocol == 'amplicon' && !params.skip_variants && !params.amplicon_bed) {
+    exit 1, "To perform variant calling in 'amplicon' mode please provide a valid amplicon BED file!"
 }
-if (params.amplicon_fasta) { ch_amplicon_fasta = Channel.fromPath(params.amplicon_fasta, checkIfExists: true) } else { ch_amplicon_fasta = Channel.empty() }
-if (params.amplicon_bed) { ch_amplicon_bed = Channel.fromPath(params.amplicon_bed, checkIfExists: true) } else { ch_amplicon_bed = Channel.empty() }
+
+if (params.amplicon_fasta) {
+    ch_amplicon_fasta = Channel.fromPath(params.amplicon_fasta, checkIfExists: true)
+} else {
+    ch_amplicon_fasta = Channel.empty()
+}
+if (params.amplicon_bed) {
+    ch_amplicon_bed = Channel.fromPath(params.amplicon_bed, checkIfExists: true)
+} else {
+    ch_amplicon_bed = Channel.empty()
+}
+
 if (params.adapter_file) {
-	Channel.fromPath(params.adapter_file, checkIfExists: true).into{ ch_adapter_assembly_file; ch_adapter_mapping_file }
-} else { exit 1, "Adapter file not specified!" }
+    Channel
+        .fromPath(params.adapter_file, checkIfExists: true)
+        .into { ch_adapter_assembly_file;
+                ch_adapter_mapping_file }
+} else {
+    exit 1, "Adapter file not specified!"
+}
 
 assemblerList = [ 'spades', 'metaspades', 'unicycler' ]
 assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
@@ -138,15 +150,15 @@ if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
 }
 
-
 // Host reference files
 if (params.genomes && params.host_genome && !params.genomes.containsKey(params.host_genome)) {
-   exit 1, "The provided genome '${params.host_genome}' is not available in the Genome file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
+    exit 1, "The provided genome '${params.host_genome}' is not available in the Genome file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
 }
 params.host_kraken2_db = params.host_genome ? params.genomes[ params.host_genome ].kraken2 ?: false : false
 params.host_kraken2_name = params.host_genome ? params.genomes[ params.host_genome ].kraken2_name ?: false : false
+
 if (params.host_kraken2_db) { ch_host_kraken2_db = Channel.fromPath(params.host_kraken2_db, checkIfExists: true) }
-if (!params.host_kraken2_db && !params.host_kraken2_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. human!" }
+if (!params.host_kraken2_db && !params.host_kraken2_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
 
 // Viral reference files
 if (params.genomes && params.viral_genome && !params.genomes.containsKey(params.viral_genome)) {
@@ -168,7 +180,7 @@ if (params.viral_fasta) {
 }
 if (params.viral_gff) { ch_viral_gff = file(params.viral_gff, checkIfExists: true) }
 if (params.viral_kraken2_db) { ch_viral_kraken2_db = Channel.fromPath(params.viral_kraken2_db, checkIfExists: true) }
-if (!params.viral_kraken2_db && !params.viral_kraken2_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. virus!" }
+if (!params.viral_kraken2_db && !params.viral_kraken2_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'viral'!" }
 
 ////////////////////////////////////////////////////
 /* --          CONFIG FILES                    -- */
@@ -224,56 +236,62 @@ def isOffline() {
 // Header log info
 log.info nfcoreHeader()
 def summary = [:]
-if (workflow.revision)            summary['Pipeline Release'] = workflow.revision
-summary['Run Name']               = custom_runName ?: workflow.runName
+if (workflow.revision)             summary['Pipeline Release'] = workflow.revision
+summary['Run Name']                = custom_runName ?: workflow.runName
 // TODO nf-core: Report custom parameters here
-summary['Samplesheet']            = params.input
-summary['Protocol']               = params.protocol
+summary['Samplesheet']             = params.input
+summary['Protocol']                = params.protocol
 if (params.protocol == 'amplicon') summary['Amplicon Fasta file'] = params.amplicon_fasta
 if (params.protocol == 'amplicon') summary['Amplicon BED file'] = params.amplicon_bed
-if (params.host_kraken2_db)       summary['Host Kraken2 DB'] = params.host_kraken2_db
-summary['Host Kraken2 Name']      = params.host_kraken2_name
-summary['Host Genome']            = params.host_genome ?: 'Not supplied'
-summary['Viral Genome']           = params.viral_genome ?: 'Not supplied'
-summary['Viral Fasta File']       = params.viral_fasta
-if (params.viral_gff)             summary['Viral GFF'] = params.viral_gff
-if (params.host_kraken2_db)       summary['Host Kraken2 DB'] = params.host_kraken2_db
-if (params.host_kraken2_name)     summary['Host Kraken2 Name'] = params.host_kraken2_name
-if (params.viral_kraken2_db)      summary['Viral Kraken2 DB'] = params.viral_kraken2_db
-if (params.viral_kraken2_name)    summary['Viral Kraken2 Name'] = params.viral_kraken2_name
-if (params.kraken2_use_ftp)       summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
-if (params.save_kraken2_fastq)    summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
-if (params.save_reference)        summary['Save Genome Indices'] = 'Yes'
-if (params.skip_trimming)         summary['Skip Trimming'] = 'Yes'
-if (params.save_trimmed)          summary['Save Trimmed'] = 'Yes'
-if (params.save_align_intermeds)  summary['Save Intermeds'] =  'Yes'
-if (params.skip_assembly)         summary['Skip De novo Assembly'] =  'Yes'
-if (params.skip_mapping)          summary['Skip Mapping'] =  'Yes'
-if (params.skip_variants)         summary['Skip Variant Calling'] =  'Yes'
-if (params.skip_qc)               summary['Skip QC'] = 'Yes'
-if (params.skip_fastqc)           summary['Skip FastQC'] = 'Yes'
-if (params.skip_multiqc)          summary['Skip MultiQC'] = 'Yes'
-summary['Max Resources']          = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
-if (workflow.containerEngine)     summary['Container'] = "$workflow.containerEngine - $workflow.container"
-summary['Output dir']             = params.outdir
-summary['Publish dir mode']       = params.publish_dir_mode
-summary['Launch dir']             = workflow.launchDir
-summary['Working dir']            = workflow.workDir
-summary['Script dir']             = workflow.projectDir
-summary['User']                   = workflow.userName
-if (workflow.profile.contains('awsbatch')) {
-    summary['AWS Region']         = params.awsregion
-    summary['AWS Queue']          = params.awsqueue
-    summary['AWS CLI']            = params.awscli
+summary['Host Genome']             = params.host_genome ?: 'Not supplied'
+if (params.host_kraken2_db)        summary['Host Kraken2 DB'] = params.host_kraken2_db
+if (params.host_kraken2_name)      summary['Host Kraken2 Name'] = params.host_kraken2_name
+summary['Viral Genome']            = params.viral_genome ?: 'Not supplied'
+summary['Viral Fasta File']        = params.viral_fasta
+if (params.viral_gff)              summary['Viral GFF'] = params.viral_gff
+if (params.viral_kraken2_db)       summary['Viral Kraken2 DB'] = params.viral_kraken2_db
+if (params.viral_kraken2_name)     summary['Viral Kraken2 Name'] = params.viral_kraken2_name
+if (!params.skip_trimming) {
+    summary['Adapter File']        = params.adapter_file
+    summary['Trim Parameters']     = params.trim_params
+    summary['Trim Window Length']  = params.trim_window_length
+    summary['Trim Window Value']   = params.trim_window_value
+    summary['Trim Min Length']     = params.trim_min_length
+    if (params.save_trimmed)       summary['Save Trimmed'] = 'Yes'
+} else {
+    summary['Skip Trimming']       = 'Yes'
 }
-summary['Config Profile'] = workflow.profile
+summary['Assembly Tools']          = params.assemblers
+if (params.kraken2_use_ftp)        summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
+if (params.save_kraken2_fastq)     summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
+if (params.save_reference)         summary['Save Genome Indices'] = 'Yes'
+if (params.save_align_intermeds)   summary['Save Align Intermeds'] =  'Yes'
+if (params.skip_assembly)          summary['Skip De novo Assembly'] =  'Yes'
+if (params.skip_variants)          summary['Skip Variant Calling'] =  'Yes'
+if (params.skip_qc)                summary['Skip QC'] = 'Yes'
+if (params.skip_fastqc)            summary['Skip FastQC'] = 'Yes'
+if (params.skip_multiqc)           summary['Skip MultiQC'] = 'Yes'
+summary['Max Resources']           = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
+if (workflow.containerEngine)      summary['Container'] = "$workflow.containerEngine - $workflow.container"
+summary['Output dir']              = params.outdir
+summary['Publish dir mode']        = params.publish_dir_mode
+summary['Launch dir']              = workflow.launchDir
+summary['Working dir']             = workflow.workDir
+summary['Script dir']              = workflow.projectDir
+summary['User']                    = workflow.userName
+if (workflow.profile.contains('awsbatch')) {
+    summary['AWS Region']          = params.awsregion
+    summary['AWS Queue']           = params.awsqueue
+    summary['AWS CLI']             = params.awscli
+}
+summary['Config Profile']          = workflow.profile
 if (params.config_profile_description) summary['Config Description'] = params.config_profile_description
 if (params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
 if (params.config_profile_url)         summary['Config URL']         = params.config_profile_url
 if (params.email || params.email_on_fail) {
-    summary['E-mail Address']     = params.email
-    summary['E-mail on failure']  = params.email_on_fail
-    summary['MultiQC maxsize']    = params.max_multiqc_email_size
+    summary['E-mail Address']      = params.email
+    summary['E-mail on failure']   = params.email_on_fail
+    summary['MultiQC maxsize']     = params.max_multiqc_email_size
 }
 log.info summary.collect { k,v -> "${k.padRight(18)}: $v" }.join("\n")
 log.info "-\033[2m--------------------------------------------------\033[0m-"
@@ -568,7 +586,7 @@ process TRIMMOMATIC_ASSEMBLY {
         -threads ${task.cpus} \\
         $reads \\
         $trimmed_reads \\
-        ILLUMINACLIP:${adapters}:${params.adapter_params} \\
+        ILLUMINACLIP:${adapters}:${params.trim_params} \\
         SLIDINGWINDOW:${params.trim_window_length}:${params.trim_window_value} \\
         MINLEN:${params.trim_min_length} 2> ${sample}.trimmomatic.log
     $orphan
@@ -585,7 +603,7 @@ process TRIMMOMATIC_MAPPING {
                 }
 
     when:
-    !params.skip_trimming && !is_sra && !params.skip_mapping
+    !params.skip_trimming && !is_sra && !params.skip_variants
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic_mapping
@@ -607,7 +625,7 @@ process TRIMMOMATIC_MAPPING {
         -threads ${task.cpus} \\
         $reads \\
         $trimmed_reads \\
-        ILLUMINACLIP:${adapters}:${params.adapter_params} \\
+        ILLUMINACLIP:${adapters}:${params.trim_params} \\
         SLIDINGWINDOW:${params.trim_window_length}:${params.trim_window_value} \\
         MINLEN:${params.trim_min_length} 2> ${sample}.trimmomatic.log
     $orphan
@@ -648,7 +666,7 @@ process FASTQC_TRIM_MAPPING {
                 }
 
     when:
-    !params.skip_fastqc && !params.skip_qc && !is_sra && !params.skip_mapping
+    !params.skip_fastqc && !params.skip_qc && !is_sra && !params.skip_variants
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_mapping_fastqc
@@ -788,7 +806,7 @@ process KRAKEN2_VIRAL {
      }
 
      when:
-     !params.skip_mapping && !is_sra
+     !params.skip_variants && !is_sra
 
      input:
      set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_mapping_bowtie
@@ -829,7 +847,7 @@ process KRAKEN2_VIRAL {
                  }
 
      when:
-     !params.skip_mapping && !is_sra
+     !params.skip_variants && !is_sra
 
      input:
      set val(sample), val(single_end), val(is_sra), file(bam) from ch_bowtie_bam
@@ -889,7 +907,7 @@ if (params.protocol == 'amplicon'){
                   }
 
       when:
-      !params.skip_mapping && !is_sra
+      !params.skip_variants && !is_sra
 
       input:
       set val(sample), val(is_sra), file(bam) from ch_sort_bam_ivar
@@ -1391,7 +1409,7 @@ process VARSCAN {
 	}
 
   when:
-  !params.skip_mapping && !is_sra
+  !params.skip_variants && !is_sra
 
 	input:
 	set val(sample), val(is_sra), file(bam) from ch_bam_variantcalling
@@ -1451,7 +1469,7 @@ process VARIANT_ANNOTATION {
 	}
 
   when:
-  !params.skip_mapping && !is_sra
+  !params.skip_variants && !is_sra
 
 
  	input:
@@ -1521,8 +1539,7 @@ process CONSENSUS_GENOME {
 	}
 
   when:
-  !params.skip_mapping && !is_sra
-
+  !params.skip_variants && !is_sra
 
   input:
   set val(sample), val(is_sra), file(variants) from ch_majority_annotated_consensus
