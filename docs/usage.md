@@ -26,7 +26,7 @@
   * [`--save_kraken2_fastq`](#--save_kraken2_fastq)
 * [Adapter trimming](#adapter-trimming)
   * [`--adapter_file`](#--adapter_file)
-  *	[`--trim_params`](#--trim_params)
+  * [`--trim_params`](#--trim_params)
   * [`--trim_window_length`](--trim_window_length)
   * [`--trim_window_value`](--trim_window_value)
   * [`--trim_min_length`](--trim_min_length)
@@ -198,10 +198,10 @@ Example:
 
 ```Bash
 
-NC_045512.2	30	54	nCoV-2019_1_LEFT	60	-
-NC_045512.2	385	410	nCoV-2019_1_RIGHT	60	+
-NC_045512.2	320	342	nCoV-2019_2_LEFT	60	-
-NC_045512.2	704	726	nCoV-2019_2_RIGHT	60	+
+NC_045512.2 30 54 nCoV-2019_1_LEFT 60	-
+NC_045512.2 385 410	nCoV-2019_1_RIGHT 60 +
+NC_045512.2 320 342 nCoV-2019_2_LEFT 60 -
+NC_045512.2 704 726 nCoV-2019_2_RIGHT 60 +
 
 ```
 
