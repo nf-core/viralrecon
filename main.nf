@@ -1462,9 +1462,8 @@ process VARIANT_ANNOTATION {
  	input:
 	set val(sample), val(is_sra), file(majority_variants) from ch_variantcalling_major_annotation
   set val(sample), val(is_sra), file(low_variants) from ch_variantcalling_low_annotation
-  file config from ch_snpeff_config
-  file ('data/genomes/sars-cov-2.fa') from ch_viral_fasta.first()
-  file ('data/sars-cov-2/genes.gff') from ch_viral_gff.first()
+  file ('data/genomes/sars-cov-2.fa') from ch_viral_fasta
+  file ('data/sars-cov-2/genes.gff') from ch_viral_gff
 
 
  	output:
@@ -1479,10 +1478,11 @@ process VARIANT_ANNOTATION {
 
  	script:
  	"""
-  snpEff build -config $config -dataDir ./data -gff3 -v sars-cov-2
-  snpEff sars-cov-2 -config $config -dataDir ./data $majority_variants -csvStats ${sample}.majority.csv > ${sample}.majority.ann.vcf
+ 	echo "virus.genome : virus" > snpeff.config
+  snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v sars-cov-2
+  snpEff virus -config ./snpeff.config -dataDir ./data $majority_variants -csvStats ${sample}.majority.csv > ${sample}.majority.ann.vcf
   mv snpEff_summary.html ${sample}.majority.snpEff.summary.html
-  snpEff sars-cov-2 -c config $config -dataDir ./data $low_variants -csvStats ${sample}.lowfreq.csv > ${sample}.lowfreq.ann.vcf
+  snpEff virus -config ./snpeff.config -dataDir ./data $low_variants -csvStats ${sample}.lowfreq.csv > ${sample}.lowfreq.ann.vcf
   mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
   SnpSift extractFields -s "," \\
         -e "." \\
