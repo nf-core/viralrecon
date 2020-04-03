@@ -62,8 +62,7 @@ def helpMessage() {
       --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
     Mapping
       --skip_mapping [bool]           Skip Mapping and undergoing steps in the pipeline
-      --save_map_intermeds [bool]     Save the intermediate BAM files from the mapping steps (Default: false)
-      --save_ivar_intermeds [bool]    Save the intermediate BAM files from iVar step (Default: false)
+      --save_align_intermeds [bool]     Save the intermediate BAM files from the mapping steps (Default: false)
 
     De novo assembly
       --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler')
@@ -247,8 +246,9 @@ if (params.save_kraken2_fastq)    summary['Save Kraken2 FastQ'] = params.save_kr
 if (params.save_reference)        summary['Save Genome Indices'] = 'Yes'
 if (params.skip_trimming)         summary['Skip Trimming'] = 'Yes'
 if (params.save_trimmed)          summary['Save Trimmed'] = 'Yes'
-if (params.save_map_intermeds)  summary['Save Intermeds'] =  'Yes'
+if (params.save_align_intermeds)  summary['Save Intermeds'] =  'Yes'
 if (params.skip_assembly)         summary['Skip De novo Assembly'] =  'Yes'
+if (params.skip_mapping)          summary['Skip Mapping'] =  'Yes'
 if (params.skip_variants)         summary['Skip Variant Calling'] =  'Yes'
 if (params.skip_qc)               summary['Skip QC'] = 'Yes'
 if (params.skip_fastqc)           summary['Skip FastQC'] = 'Yes'
@@ -783,7 +783,7 @@ process KRAKEN2_VIRAL {
  process BOWTIE {
      tag "$sample"
      label 'process_low'
-     if (params.save_map_intermeds) {
+     if (params.save_align_intermeds) {
          publishDir "${params.outdir}/bowtie", mode: params.publish_dir_mode
      }
 
@@ -819,7 +819,7 @@ process KRAKEN2_VIRAL {
      label 'process_medium'
      publishDir "${params.outdir}/bowtie", mode: params.publish_dir_mode,
          saveAs: { filename ->
-                       if (params.save_map_intermeds) {
+                       if (params.save_align_intermeds) {
                            if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                            else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
                            else if (filename.endsWith(".bam.stats")) "samtools_stats/$filename"
@@ -879,7 +879,7 @@ if (params.protocol == 'amplicon'){
       label 'process_medium'
       publishDir "${params.outdir}/ivar", mode: params.publish_dir_mode,
           saveAs: { filename ->
-                        if (params.save_ivar_intermeds) {
+                        if (params.save_align_intermeds) {
                             if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                             else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
                             else if (filename.endsWith(".bam.stats")) "samtools_stats/$filename"
