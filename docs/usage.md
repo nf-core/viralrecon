@@ -303,7 +303,7 @@ Default: `${baseDir}/assets/adapters.fa`
 
 ### `--trim_params`
 
-Trimming parameters for adapters. <seed mismatches>:<palindrome clip threshold>:<simple clip threshold> i
+Trimming parameters for adapters. `<seed mismatches>:<palindrome clip threshold>:<simple clip threshold>`
 Default: 2:30:10
 
 ### `--trim_window_length`
