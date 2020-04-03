@@ -571,7 +571,8 @@ process TRIMMOMATIC {
     output:
     set val(sample), val(single_end), val(is_sra), file("*trimmed*") into ch_trimmomatic_fastqc,
                                                                           ch_trimmomatic_kraken2_host,
-                                                                          ch_trimmomatic_kraken2_viral
+                                                                          ch_trimmomatic_kraken2_viral,
+                                                                          ch_trimmomatic_kraken2_bowtie2
     set val(sample), val(single_end), val(is_sra), file("*orphan*") into ch_trimmomatic_orphan
     file '*.log' into ch_trimmomatic_mqc
 
@@ -646,8 +647,7 @@ process KRAKEN2_HOST {
     file db from ch_host_kraken2_db.collect()
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_host_viral_bowtie2,
-                                                                         ch_kraken2_host_viral_spades,
+    set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_host_viral_spades,
                                                                          ch_kraken2_host_viral_metaspades,
                                                                          ch_kraken2_host_viral_unicycler
     set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_host_host_reads
@@ -736,7 +736,7 @@ process KRAKEN2_VIRAL {
 ///////////////////////////////////////////////////////////////////////////////
 
 if (params.protocol == 'amplicon') {
-    ch_kraken2_host_viral_bowtie2 = ch_reads_bowtie2
+    ch_trimmomatic_kraken2_bowtie2 = ch_reads_bowtie2
 }
 
 /*
@@ -753,7 +753,7 @@ process BOWTIE2 {
     !params.skip_variants && !is_sra
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_bowtie2
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_kraken2_bowtie2
     file index from ch_viral_index.collect()
 
     output:
