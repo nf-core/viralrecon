@@ -1452,12 +1452,15 @@ process VARIANT_ANNOTATION {
 	}
 
   when:
-  !params.skip_mapping && !is_sra && !workflow.profile.contains('test')
+  !params.skip_mapping && !is_sra
 
 
  	input:
 	set val(sample), val(is_sra), file(majority_variants) from ch_variantcalling_major_annotation
   set val(sample), val(is_sra), file(low_variants) from ch_variantcalling_low_annotation
+  file ('data/genomes/virus.fa') from ch_viral_fasta
+  file ('data/virus/genes.gff') from ch_viral_gff
+
 
  	output:
   set val(sample), val(is_sra), file("*majority.ann.vcf") into ch_majority_annotated_consensus
@@ -1471,9 +1474,11 @@ process VARIANT_ANNOTATION {
 
  	script:
  	"""
-  snpEff sars-cov-2 $majority_variants -csvStats ${sample}.majority.csv > ${sample}.majority.ann.vcf
+ 	echo "virus.genome : virus" > snpeff.config
+  snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v virus
+  snpEff virus -config ./snpeff.config -dataDir ./data $majority_variants -csvStats ${sample}.majority.csv > ${sample}.majority.ann.vcf
   mv snpEff_summary.html ${sample}.majority.snpEff.summary.html
-  snpEff sars-cov-2 $low_variants -csvStats ${sample}.lowfreq.csv > ${sample}.lowfreq.ann.vcf
+  snpEff virus -config ./snpeff.config -dataDir ./data $low_variants -csvStats ${sample}.lowfreq.csv > ${sample}.lowfreq.ann.vcf
   mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
   SnpSift extractFields -s "," \\
         -e "." \\
