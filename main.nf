@@ -645,7 +645,7 @@ ch_fromSRA_dw_validated
     .mix ( ch_reads_no_sra_filt )
     .into {
         ch_reads_fastqc;
-        ch_reads_trimmomatic }
+        ch_reads_trimmomatic
     }
 
 ///////////////////////////////////////////////////////////////////////////////
