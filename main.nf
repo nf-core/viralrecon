@@ -325,169 +325,6 @@ def validate_input(LinkedHashMap sample) {
     .into { ch_reads_no_sra;
             ch_reads_sra }
 
-ch_reads_no_sra_filt = ch_reads_no_sra
-                        .filter {
-                            it[2] != true
-                        }
-
-// Split channels between the one that have the files in the disk and those in that should be downloaded from SRA
-
-/*
- * Download data using SRA ids using fromSRA
- */
-// Get list of SRA ids that should be downloaded
-sra_ids_list = ch_reads_sra
-                .filter {
-                    it[2] == true
-                }.map {
-                    id = it[0].split("_")[0]
-                    id
-                }.toList().val
-
-// Downloading fastq files using fromSRA nextflow function
-SRA_pointers =  params.sra_api_key? Channel.fromSRA( sra_ids_list, apiKey: params.sra_api_key ) : Channel.fromSRA( sra_ids_list)
-SRA_pointers.into { SRA_pointers; SRA_pointers_to_check }
-
-/*
- * Validates whether fastq files obtained using fromSRA are OK
- * Obtains metadata
- */
-process validate_fastq_fromSRA {
-    input:
-    set val(id), file(reads) from SRA_pointers
-
-    output:
-    set val(id), env (single_end), val("true"), file(reads) optional true into ch_fromSRA_dw_validated, ch_validated_fromSRA_to_check
-
-    """
-    fastq_info $reads > validation.tmp 2>&1 || true
-    single_end=""
-
-    if grep -q "OK" validation.tmp
-    then
-        single_end=`get_SRA_metainfo.py $id --is_single`
-
-        if [[ \$single_end == "true" ]]
-        then
-            touch "${id}_1.fastq.gz"
-        elif [[ \$single_end == "false" ]]
-        then
-            touch "${id}_1.fastq.gz"
-            touch "${id}_2.fastq.gz"
-        fi
-    else
-        single_end="failed"
-        echo "fastq file couldn't be validated by fastq_info!" # del the else if not used anymore
-    fi
-    """
-}
-
-
-/*
- * Create channel with target fastq files to be downloaded
- */
-Channel
-    .from( sra_ids_list )
-    .into {
-        sra_ids_list_to_check_fromSRA;
-        sra_ids_list_to_check_fastqdump;
-    }
-
-sra_ids_list_to_check_fromSRA
-    .join ( ch_validated_fromSRA_to_check, remainder: true )
-    .filter {
-        //println (it) //del
-        it[1]== null | it[1] =="failed"
-    }.map {
-        it[0]
-    }.into {
-        ch_fromSRA_ids_missing;
-        ch_fromSRA_ids_missing_to_check
-    }
-
-process dump_fastq_to_production {
-
-    input:
-    val(id) from ch_fromSRA_ids_missing
-
-    output:
-    set val(id), env (single_end), val("true"), file("*_{1,2}.fastq.gz") optional true into ch_fastdump_dw_validated, ch_fastdump_dw_validated_to_check
-
-    // checked with -X 5 parameter (fastq file subsampled but still validated by fastq_info)
-    """
-    single_end=""
-    single_end=`get_SRA_metainfo.py $id --is_single`
-
-    if [[ \$single_end == "true" ]]
-    then
-        parallel-fastq-dump \\
-            -X 5 \\
-            --threads ${task.cpus} \\
-            --sra-id ${id} \\
-            --gzip
-
-
-        fastq_info ${id}_1.fastq.gz > validation.tmp 2>&1 || true
-
-    elif [[ \$single_end == "false" ]]
-    then
-        parallel-fastq-dump \\
-            -X 5 \\
-            --sra-id ${id} \\
-            --split-files \\
-            --threads ${task.cpus} \\
-            --gzip
-
-        fastq_info ${id}_1.fastq.gz ${id}_2.fastq.gz > validation.tmp 2>&1 || true
-    else
-       single_end="failed"
-    fi
-
-    if grep -q "OK" validation.tmp
-    then
-        single_end="failed"
-    fi
-    """
-}
-
-ch_fromSRA_ids_missing_to_check
-    .join ( ch_fastdump_dw_validated_to_check, remainder: true )
-    .filter {
-        // println (it) //del
-        it[1] == null | it[1] == "failed"
-    }.map {
-        it[0]
-    }.set {
-        ch_unreachable_fastq_files
-    }
-
-ch_unreachable_fastq_files
-    .collect()
-    .map {
-        // println it //del
-        if (it) {
-            exit 1, "Some fastq file/s couldn't be downloaded please check its SRA ID/s: " + it.join(', ')
-        }
-    }
-
-ch_fromSRA_dw_validated
-    .mix ( ch_fastdump_dw_validated )
-    .filter {
-        it[1] != "failed"
-    }
-    .map {
-        [ it[0] + "_T1", it[1].toBoolean(), it[2], it[3] ]
-    }
-    .mix ( ch_reads_no_sra_filt )
-    .into {
-        ch_reads_fastqc;
-        ch_reads_trimmomatic;
-        ch_reads_kraken2;
-        ch_reads_bowtie2
-    }
-
-ch_reads_bowtie2.view()
-return
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
@@ -594,8 +431,192 @@ if (!isOffline()) {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-// GET SRA FASTQ FILES HERE
-// MERGE WITH ORIGINAL CHANNELS BEFORE PASSING TO NEXT STEPS
+/*
+ * Split channels between the one that have the files in the disk and those that should be downloaded
+ */
+ch_reads_no_sra_filt = ch_reads_no_sra
+                        .filter {
+                            it[2] != true
+                        }
+
+/*
+ * Get list of SRA ids that should be downloaded
+ */
+sra_ids_list = ch_reads_sra
+                .filter {
+                    it[2] == true
+                }.map {
+                    id = it[0].split("_")[0]
+                    id
+                }.toList().val
+
+/*
+ * Downloading fastq files using fromSRA nextflow function
+ */
+SRA_pointers =  params.sra_api_key? Channel.fromSRA( sra_ids_list, apiKey: params.sra_api_key ) : Channel.fromSRA( sra_ids_list)
+SRA_pointers.into { SRA_pointers; SRA_pointers_to_check }
+
+/*
+ * Validates if fastq files obtained using fromSRA are OK
+ * Obtains fastq files metadata if OK
+ */
+process validate_fastq_fromSRA {
+    input:
+    set val(id), file(reads) from SRA_pointers
+
+    output:
+    set val(id), env (single_end), val("true"), file(reads) optional true into ch_fromSRA_dw_validated, ch_validated_fromSRA_to_check
+
+    """
+    fastq_info $reads > validation.tmp 2>&1 || true
+    single_end=""
+
+    if grep -q "OK" validation.tmp
+    then
+        single_end=`get_SRA_metainfo.py $id --is_single`
+
+        if [[ \$single_end == "true" ]]
+        then
+            touch "${id}_1.fastq.gz"
+        elif [[ \$single_end == "false" ]]
+        then
+            touch "${id}_1.fastq.gz"
+            touch "${id}_2.fastq.gz"
+        fi
+    else
+        single_end="failed"
+        echo "fastq file couldn't be validated by fastq_info!" # del the else if not used anymore
+    fi
+    """
+}
+
+/*
+ * Create channel with target fastq files to be downloaded to check which were correctly downloaded
+ */
+Channel
+    .from( sra_ids_list )
+    .set {
+        sra_ids_list_to_check_fromSRA
+    }
+
+sra_ids_list_to_check_fromSRA
+    .join ( ch_validated_fromSRA_to_check, remainder: true )
+    .filter {
+        it[1]== null | it[1] =="failed"
+    }.map {
+        it[0]
+    }.into {
+        ch_fromSRA_ids_missing;
+        ch_fromSRA_ids_missing_to_check
+    }
+
+/*
+ * Prefetch fastq files
+ */
+process prefetch_fastq {
+
+    input:
+    val(id) from ch_fromSRA_ids_missing
+
+    output:
+    set val(id), file ("${id}.sra") into fetch_fastq_sra
+
+    """
+    prefetch -O ./ -X 999999999 ${id}
+    mv ${id}/${id}.sra ./
+    """
+}
+
+/*
+ * Download fastq files using parallel-fastq-dump
+ */
+process dump_fastq {
+
+    input:
+    set val(id), file(fetch_fastq_sra) from fetch_fastq_sra
+
+    output:
+    set val(id), env (single_end), val("true"), file("*_{1,2}.fastq.gz") optional true into ch_fastdump_dw_validated, ch_fastdump_dw_validated_to_check
+
+    """
+    single_end=""
+    single_end=`get_SRA_metainfo.py $id --is_single`
+
+    if [[ \$single_end == "true" ]]
+    then
+        parallel-fastq-dump \\
+            -s ${id}.sra \\
+            -t  ${task.cpus} \\
+            -O ./ \\
+            --tmpdir ./ \\
+            ---gzip && rm ${id}.sra
+
+        fastq_info ${id}_1.fastq.gz > validation.tmp 2>&1 || true
+
+    elif [[ \$single_end == "false" ]]
+    then
+        parallel-fastq-dump \\
+            -s ${id}.sra \\
+            -t  ${task.cpus} \\
+            -O ./ \\
+            --tmpdir ./ \\
+            --split-files \\
+            --gzip && rm ${id}.sra
+
+        fastq_info ${id}_1.fastq.gz ${id}_2.fastq.gz > validation.tmp 2>&1 || true
+    else
+       single_end="failed"
+    fi
+
+    if grep -q "OK" validation.tmp
+    then
+        single_end="failed"
+    fi
+    """
+}
+
+/*
+ * Double-check if there is any fastq file that still has not been downloaded
+ */
+ch_fromSRA_ids_missing_to_check
+    .join ( ch_fastdump_dw_validated_to_check, remainder: true )
+    .filter {
+        it[1] == null | it[1] == "failed"
+    }.map {
+        it[0]
+    }.set {
+        ch_unreachable_fastq_files
+    }
+
+/*
+ * If any fastq file could not be downloaded stop pipeline
+ */
+ch_unreachable_fastq_files
+    .collect()
+    .map {
+        if (it) {
+            exit 1, "Some fastq file/s couldn't be downloaded please check its SRA ID/s: " + it.join(', ')
+        }
+    }
+
+/*
+ * Mix channels with downloaded fastq files with channel of local fastq files
+ */
+ch_fromSRA_dw_validated
+    .mix ( ch_fastdump_dw_validated )
+    .filter {
+        it[1] != "failed"
+    }
+    .map {
+        [ it[0] + "_T1", it[1].toBoolean(), it[2], it[3] ]
+    }
+    .mix ( ch_reads_no_sra_filt )
+    .into {
+        ch_reads_fastqc;
+        ch_reads_trimmomatic;
+        ch_reads_kraken2;
+        ch_reads_bowtie2
+    }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
