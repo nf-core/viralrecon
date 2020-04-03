@@ -279,7 +279,7 @@ Full path to Kraken2 database built from host genome.
 
 Name for host genome as recognised by Kraken2 when using the `kraken2 build` command. Default: 'human'.
 
-### `--kraken2_use_ftp
+### `--kraken2_use_ftp`
 
 Option for kraken using ftp download instead of rsync. Default=false
 
