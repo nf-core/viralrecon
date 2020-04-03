@@ -1395,7 +1395,7 @@ process VARSCAN {
 
 	input:
 	set val(sample), val(is_sra), file(bam) from ch_bam_variantcalling
-  file bamindex from ch_bamindex_variantcalling
+  set val(sample), val(is_sra), file(bamindex) from ch_bamindex_variantcalling
   file fasta from ch_viral_fasta
   file index from ch_viral_index
 
