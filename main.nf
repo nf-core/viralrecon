@@ -504,7 +504,7 @@ process VALIDATE_FASTQ_NF_FROMSRA {
     set val(id), file(reads) from SRA_pointers
 
     output:
-    set val(id), env (single_end), val("true"), file(reads) optional true into ch_fromSRA_dw_validated, ch_validated_fromSRA_to_check
+    set val(id), env (single_end), val("true"), file(reads) optional true into ch_fromSRA_dw_validated, ch_validated_fromSRA_to_empty, ch_validated_fromSRA_to_check
 
     """
     fastq_info $reads > validation.tmp 2>&1 || true
@@ -532,9 +532,10 @@ Channel
 sra_ids_list_to_check_fromSRA
     .join ( ch_validated_fromSRA_to_check, remainder: true )
     .filter {
-        it[1]== null | it[1] =="failed"
+        it[1]== null | it[1] =="failed" | it instanceof String
     }.map {
-        it[0]
+        sample = it instanceof String ? it : it[0]
+        sample
     }.into {
         ch_fromSRA_ids_missing;
         ch_fromSRA_ids_missing_to_check
@@ -651,10 +652,6 @@ ch_fromSRA_dw_validated
         ch_reads_to_print
     }
 
-// ch_reads_to_print.view()
-
-return
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
@@ -721,7 +718,7 @@ process TRIMMOMATIC {
                 }
 
     when:
-    !params.skip_trimming && !is_sra
+    !params.skip_trimming
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic
@@ -764,7 +761,7 @@ process FASTQC_TRIM {
                 }
 
     when:
-    !params.skip_fastqc && !params.skip_qc && !is_sra
+    !params.skip_fastqc && !params.skip_qc
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_fastqc
@@ -798,8 +795,8 @@ process KRAKEN2_HOST {
                           else params.save_kraken2_fastq ? filename : null
                     }
 
-    when:
-    !is_sra
+    //when:
+    //!is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_kraken2_host
@@ -849,8 +846,8 @@ process KRAKEN2_VIRAL {
                           else params.save_kraken2_fastq ? filename : null
                     }
 
-    when:
-    !is_sra
+    //when:
+    //!is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_kraken2_viral
@@ -993,7 +990,7 @@ process SPADES {
     publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'spades' in assemblers && !is_sra
+    !params.skip_assembly && 'spades' in assemblers // && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_spades
@@ -1022,7 +1019,7 @@ process QUAST_SPADES {
     publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'spades' in assemblers && !is_sra
+    !params.skip_assembly && 'spades' in assemblers // && !is_sra
 
     input:
     file scaffolds from ch_spades_quast.collect{ it[3] }
@@ -1060,7 +1057,7 @@ process BLAST_SPADES {
     publishDir "${params.outdir}/spades/blast", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'spades' in assemblers && !is_sra
+    !params.skip_assembly && 'spades' in assemblers // && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_blast
@@ -1098,7 +1095,7 @@ process METASPADES {
     publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end // && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_metaspades
@@ -1128,7 +1125,7 @@ process QUAST_METASPADES {
     publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end // && !is_sra
 
     input:
     file scaffolds from ch_metaspades_quast.collect{ it[3] }
@@ -1166,7 +1163,7 @@ process BLAST_METASPADES {
     publishDir "${params.outdir}/metaspades/blast", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end // && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_blast
@@ -1204,7 +1201,7 @@ process UNICYCLER {
     publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'unicycler' in assemblers && !is_sra
+    !params.skip_assembly && 'unicycler' in assemblers // && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_unicycler
@@ -1233,7 +1230,7 @@ process QUAST_UNICYCLER {
     publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'unicycler' in assemblers && !is_sra
+    !params.skip_assembly && 'unicycler' in assemblers // && !is_sra
 
     input:
     file scaffolds from ch_unicycler_quast.collect{ it[3] }
@@ -1271,7 +1268,7 @@ process BLAST_UNICYCLER {
     publishDir "${params.outdir}/unicycler/blast", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'unicycler' in assemblers && !is_sra
+    !params.skip_assembly && 'unicycler' in assemblers // && !is_sra
 
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_blast
