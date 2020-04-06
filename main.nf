@@ -1197,7 +1197,7 @@ process BLAST_METASPADES {
 }
 
 /*
- * STEPS 6.4 Run Abacas on MetaSPAdes de novo assembly
+ * STEPS 7.4 Run Abacas on MetaSPAdes de novo assembly
  */
 
 process ABACAS_METASPADES {
@@ -1256,7 +1256,7 @@ process UNICYCLER {
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*assembly.fasta") into ch_unicycler_quast,
-                                                                                ch_unicycler_abacus,
+                                                                                ch_unicycler_abacas,
                                                                                 ch_unicycler_blast
 
     script:
@@ -1339,6 +1339,45 @@ process BLAST_UNICYCLER {
     awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
     cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
     """
+}
+
+/*
+ * STEPS 8.4 Run Abacas on Unicycler de novo assembly
+ */
+
+process ABACAS_UNICYCLER {
+  label "process_medium"
+  tag "$sample"
+  publishDir "${params.outdir}/unicycler/abacas", mode: 'copy',
+   saveAs: {filename ->
+     if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
+      else if (filename.indexOf(".tab") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
+      else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
+      else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
+      else if (filename.indexOf(".out") > 0) "nucmer/$filename"
+      else filename
+ }
+  input:
+  set val(sample), val(single_end), val(is_sra), file (scaffolds) from ch_unicycler_abacas
+  file fasta from ch_viral_fasta
+
+  output:
+  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_unicycler_plasmidid
+  file "*.abacas*" into ch_abacas_unicycler_results
+
+  script:
+  """
+  abacas.pl -r $fasta -q $scaffolds -m -p nucmer -o ${sample}.abacas
+  mv nucmer.delta ${sample}.abacas.nucmer.delta
+  mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
+  mv nucmer.tiling ${sample}.abacas.nucmer.tiling
+  mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+  """
 }
 
 
