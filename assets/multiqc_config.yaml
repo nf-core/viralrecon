@@ -14,7 +14,7 @@ fn_clean_exts:
     - '.highfreq'
     - '.lowfreq'
     - '.scaffolds'
-    - '.meta.scaffolds'
+    - '.meta'
     - '.assembly'
 
 module_order:
