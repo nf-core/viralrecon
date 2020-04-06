@@ -8,8 +8,10 @@ export_plots: true
 fn_clean_exts:
     - 'fastq.gz'
     - '.trimmed'
-    - 'sorted.bam'
-    - 'ivar'
+    - '.sorted.bam'
+    - '.ivar'
+    - '.highfreq'
+    - '.lowfreq'
 
 module_order:
     - fastqc:
