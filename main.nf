@@ -209,20 +209,6 @@ if (workflow.profile.contains('awsbatch')) {
     if (params.tracedir.startsWith('s3:')) exit 1, "Specify a local tracedir or run without trace! S3 cannot be used for tracefiles."
 }
 
-////////////////////////////////////////////////////
-/* --                FUNCTIONS                 -- */
-////////////////////////////////////////////////////
-
-// Function to check if running offline
-def isOffline() {
-    try {
-        return NXF_OFFLINE as Boolean
-    }
-    catch( Exception e ) {
-        return false
-    }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
@@ -423,6 +409,17 @@ process BLAST_DB_VIRAL {
 /*
  * PREPROCESSING: Build Kraken2 database
  */
+
+// Function to check if running offline
+def isOffline() {
+    try {
+        return NXF_OFFLINE as Boolean
+    }
+    catch( Exception e ) {
+        return false
+    }
+}
+
 if (!isOffline()) {
     if (params.kraken2_use_host_db) {
         if (!params.host_kraken2_db) {
@@ -435,7 +432,7 @@ if (!isOffline()) {
                     saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
 
                 output:
-                file "$db" into ch_host_kraken2_db
+                file "$db" into ch_kraken2_db
 
                 script:
                 db = "kraken2_${params.host_kraken2_name}"
@@ -452,7 +449,7 @@ if (!isOffline()) {
                 """
             }
         } else {
-            ch_host_kraken2_db = Channel.fromPath(params.host_kraken2_db, checkIfExists: true)
+            ch_kraken2_db = Channel.fromPath(params.host_kraken2_db, checkIfExists: true)
         }
     } else {
         if (!params.viral_kraken2_db) {
@@ -465,7 +462,7 @@ if (!isOffline()) {
                     saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
 
                 output:
-                file "$db" into ch_viral_kraken2_db
+                file "$db" into ch_kraken2_db
 
                 script:
                 db = "kraken2_${params.viral_kraken2_name}"
@@ -482,7 +479,7 @@ if (!isOffline()) {
                 """
             }
         } else {
-            ch_viral_kraken2_db = Channel.fromPath(params.viral_kraken2_db, checkIfExists: true)
+            ch_kraken2_db = Channel.fromPath(params.viral_kraken2_db, checkIfExists: true)
         }
     }
 } else {
@@ -738,7 +735,7 @@ if (params.kraken2_use_host_db) {
 
         input:
         set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_kraken2
-        file db from ch_host_kraken2_db.collect()
+        file db from ch_kraken2_db.collect()
 
         output:
         set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_spades,
@@ -786,7 +783,7 @@ if (params.kraken2_use_host_db) {
 
         input:
         set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_kraken2
-        file db from ch_viral_kraken2_db.collect()
+        file db from ch_kraken2_db.collect()
 
         output:
         set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_spades,
