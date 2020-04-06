@@ -530,19 +530,17 @@ process FASTQC_RAW {
 
     script:
     // Added soft-links to original fastqs for consistent naming in MultiQC
-    if (single_end) {
-        """
+    """
+    if $single_end; then
         [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
         fastqc --quiet --threads $task.cpus ${sample}.fastq.gz
-        """
-    } else {
-        """
+    else
         [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
         [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
         fastqc --quiet --threads $task.cpus ${sample}_1.fastq.gz
         fastqc --quiet --threads $task.cpus ${sample}_2.fastq.gz
-        """
-    }
+    fi
+    """
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -583,16 +581,28 @@ process TRIMMOMATIC_ASSEMBLY {
     script:
     pe = single_end ? "SE" : "PE"
     adapters = (params.amplicon_fasta && params.protocol == 'amplicon') ? "${amplicons}" : "${adapters}"
-    trimmed_reads = single_end ? "${sample}.trimmed.fastq.gz" : "${sample}.trimmed_1.fastq.gz ${sample}.orphan_1.fastq.gz ${sample}.trimmed_2.fastq.gz ${sample}.orphan_2.fastq.gz"
     orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
+    // Added soft-links to original fastqs for consistent naming in MultiQC
     """
+    IN_READS='${sample}.fastq.gz'
+    OUT_READS='${sample}.trimmed.fastq.gz'
+    if $single_end; then
+        [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
+    else
+        [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
+        [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
+        IN_READS='${sample}_1.fastq.gz ${sample}_2.fastq.gz'
+        OUT_READS='${sample}_1.trimmed.fastq.gz ${sample}_1.orphan.fastq.gz ${sample}_2.trimmed.fastq.gz ${sample}_2.orphan.fastq.gz'
+    fi
+
     trimmomatic $pe \\
         -threads ${task.cpus} \\
-        $reads \\
-        $trimmed_reads \\
+        \$IN_READS \\
+        \$OUT_READS \\
         ILLUMINACLIP:${adapters}:${params.trim_params} \\
         SLIDINGWINDOW:${params.trim_window_length}:${params.trim_window_value} \\
-        MINLEN:${params.trim_min_length} 2> ${sample}.trimmomatic.log
+        MINLEN:${params.trim_min_length} \\
+        2> ${sample}.trimmomatic.log
     $orphan
     """
 }
@@ -625,19 +635,32 @@ process TRIMMOMATIC_MAPPING {
     script:
     pe = single_end ? "SE" : "PE"
     adapters = "${adapters}"
-    trimmed_reads = single_end ? "${sample}.trimmed.fastq.gz" : "${sample}.trimmed_1.fastq.gz ${sample}.orphan_1.fastq.gz ${sample}.trimmed_2.fastq.gz ${sample}.orphan_2.fastq.gz"
     orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
+    // Added soft-links to original fastqs for consistent naming in MultiQC
     """
+    IN_READS='${sample}.fastq.gz'
+    OUT_READS='${sample}.trimmed.fastq.gz'
+    if $single_end; then
+        [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
+    else
+        [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
+        [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
+        IN_READS='${sample}_1.fastq.gz ${sample}_2.fastq.gz'
+        OUT_READS='${sample}_1.trimmed.fastq.gz ${sample}_1.orphan.fastq.gz ${sample}_2.trimmed.fastq.gz ${sample}_2.orphan.fastq.gz'
+    fi
+
     trimmomatic $pe \\
         -threads ${task.cpus} \\
-        $reads \\
-        $trimmed_reads \\
+        \$IN_READS \\
+        \$OUT_READS \\
         ILLUMINACLIP:${adapters}:${params.trim_params} \\
         SLIDINGWINDOW:${params.trim_window_length}:${params.trim_window_value} \\
-        MINLEN:${params.trim_min_length} 2> ${sample}.trimmomatic.log
+        MINLEN:${params.trim_min_length} \\
+        2> ${sample}.trimmomatic.log
     $orphan
     """
 }
+
 /*
  * STEP 2.2: FastQC after trimming
  */
@@ -664,6 +687,9 @@ process FASTQC_TRIM_ASSEMBLY {
     """
 }
 
+/*
+ * STEP 2.2: FastQC after trimming
+ */
 process FASTQC_TRIM_MAPPING {
     tag "$sample"
     label 'process_medium'
@@ -1081,6 +1107,8 @@ process SNPEFF {
     file "*.vcf.gz*" into ch_snpeff_vcf
     file "*.{txt,html}" into ch_snpeff_reports
     file "*.csv" into ch_snpeff_mqc
+    file "*.highfreq.snpEff.csv" into ch_snpeff_highfreq_mqc
+    file "*.lowfreq.snpEff.csv" into ch_snpeff_lowfreq_mqc
 
     script:
     """
@@ -1687,10 +1715,11 @@ process MULTIQC {
     file ('flagstat/bowtie2/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
     file ('flagstat/ivar/*') from ch_ivar_flagstat_mqc.collect().ifEmpty([])
     file ('picard/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
-    file ('snpeff/*') from ch_snpeff_mqc.collect()
-    file ('quast/spades/*') from ch_quast_spades_mqc.collect().ifEmpty([])
-    file ('quast/metaspades/*') from ch_quast_metaspades_mqc.collect().ifEmpty([])
-    file ('quast/unicycler/*') from ch_quast_unicycler_mqc.collect().ifEmpty([])
+    file ('snpeff/highfreq/*') from ch_snpeff_highfreq_mqc.collect().ifEmpty([])
+    file ('snpeff/lowfreq/*') from ch_snpeff_lowfreq_mqc.collect().ifEmpty([])
+    // file ('quast/spades/*') from ch_quast_spades_mqc.collect().ifEmpty([])
+    // file ('quast/metaspades/*') from ch_quast_metaspades_mqc.collect().ifEmpty([])
+    // file ('quast/unicycler/*') from ch_quast_unicycler_mqc.collect().ifEmpty([])
     file ('software_versions/*') from ch_software_versions_yaml.collect()
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
