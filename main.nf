@@ -906,9 +906,9 @@ if (params.protocol != 'amplicon') {
         file bed from ch_amplicon_bed.collect()
 
         output:
-        set val(sample), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_ivar_metrics,
-                                                                          ch_ivar_variants,
-                                                                          ch_ivar_consensus
+        set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_ivar_metrics,
+                                                                                           ch_ivar_variants,
+                                                                                           ch_ivar_consensus
         file "*.{flagstat,idxstats,stats}" into ch_ivar_flagstat_mqc
         file "*.log" into ch_ivar_log
 
@@ -939,48 +939,48 @@ if (params.protocol != 'amplicon') {
     ch_sort_bam_consensus = ch_ivar_consensus
 }
 
-// /*
-//  * STEP 5.2: Picard CollectMultipleMetrics and CollectWgsMetrics
-//  */
-// process PICARD_METRICS {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir path: "${params.outdir}/bowtie2/picard_metrics", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_variants && !is_sra && !params.skip_picard_metrics && !params.skip_qc
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_metrics
-//     file fasta from ch_viral_fasta
-//
-//     output:
-//     file "*metrics" into ch_picard_metrics_mqc
-//     file "*.pdf" into ch_picard_metrics_pdf
-//
-//     script:
-//     def avail_mem = 3
-//     if (!task.memory) {
-//         log.info "[Picard CollectMultipleMetrics] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this."
-//     } else {
-//         avail_mem = task.memory.toGiga()
-//     }
-//     """
-//     picard -Xmx${avail_mem}g CollectMultipleMetrics \\
-//         INPUT=${bam[0]} \\
-//         OUTPUT=${sample}.CollectMultipleMetrics \\
-//         REFERENCE_SEQUENCE=$fasta \\
-//         VALIDATION_STRINGENCY=LENIENT \\
-//         TMP_DIR=tmp
-//
-//     picard -Xmx${avail_mem}g CollectWgsMetrics \\
-//         COVERAGE_CAP=1000000 \\
-//         INPUT=${bam[0]} \\
-//         OUTPUT=${sample}.CollectWgsMetrics.coverage_metrics \\
-//         REFERENCE_SEQUENCE=$fasta \\
-//         TMP_DIR=tmp
-//     """
-// }
+/*
+ * STEP 5.2: Picard CollectMultipleMetrics and CollectWgsMetrics
+ */
+process PICARD_METRICS {
+    tag "$sample"
+    label 'process_medium'
+    publishDir path: "${params.outdir}/bowtie2/picard_metrics", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants && !is_sra && !params.skip_picard_metrics && !params.skip_qc
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_metrics
+    file fasta from ch_viral_fasta
+
+    output:
+    file "*metrics" into ch_picard_metrics_mqc
+    file "*.pdf" into ch_picard_metrics_pdf
+
+    script:
+    def avail_mem = 3
+    if (!task.memory) {
+        log.info "[Picard CollectMultipleMetrics] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this."
+    } else {
+        avail_mem = task.memory.toGiga()
+    }
+    """
+    picard -Xmx${avail_mem}g CollectMultipleMetrics \\
+        INPUT=${bam[0]} \\
+        OUTPUT=${sample}.CollectMultipleMetrics \\
+        REFERENCE_SEQUENCE=$fasta \\
+        VALIDATION_STRINGENCY=LENIENT \\
+        TMP_DIR=tmp
+
+    picard -Xmx${avail_mem}g CollectWgsMetrics \\
+        COVERAGE_CAP=1000000 \\
+        INPUT=${bam[0]} \\
+        OUTPUT=${sample}.CollectWgsMetrics.coverage_metrics \\
+        REFERENCE_SEQUENCE=$fasta \\
+        TMP_DIR=tmp
+    """
+}
 
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
