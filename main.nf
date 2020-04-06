@@ -1663,10 +1663,6 @@ process get_software_versions {
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
-//results['SnpEff'] = '<span style="color:#999999;\">N/A</span>'
-//results['SnpSift'] = '<span style="color:#999999;\">N/A</span>'
-//results['ABACAS'] = '<span style="color:#999999;\">N/A</span>'
-
 //
 // /*
 // * STEP 10: MultiQC
