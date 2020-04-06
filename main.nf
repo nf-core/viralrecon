@@ -118,22 +118,21 @@ if (params.input) { ch_input = file(params.input, checkIfExists: true) } else { 
 if (params.protocol != 'metagenomic' && params.protocol != 'amplicon') {
     exit 1, "Invalid protocol option: ${params.protocol}. Valid options: 'metagenomic' or 'amplicon'!"
 }
+
 if (params.protocol == 'amplicon' && !params.skip_assembly && !params.amplicon_fasta) {
     exit 1, "To perform de novo assembly in 'amplicon' mode please provide a valid amplicon fasta file!"
 }
-if (params.protocol == 'amplicon' && !params.skip_variants && !params.amplicon_bed) {
-    exit 1, "To perform variant calling in 'amplicon' mode please provide a valid amplicon BED file!"
-}
-
 if (params.amplicon_fasta) {
     ch_amplicon_fasta = Channel.fromPath(params.amplicon_fasta, checkIfExists: true)
 } else {
     ch_amplicon_fasta = Channel.empty()
 }
+
+if (params.protocol == 'amplicon' && !params.skip_variants && !params.amplicon_bed) {
+    exit 1, "To perform variant calling in 'amplicon' mode please provide a valid amplicon BED file!"
+}
 if (params.amplicon_bed) {
     ch_amplicon_bed = Channel.fromPath(params.amplicon_bed, checkIfExists: true)
-} else {
-    ch_amplicon_bed = Channel.empty()
 }
 
 if (params.adapter_file) {
@@ -740,7 +739,7 @@ process KRAKEN2_HOST {
         $pe \\
         --gzip-compressed \\
         $reads
-    gzip *.fastq
+    pigz -p $task.cpus *.fastq
     """
 }
 
@@ -789,7 +788,7 @@ process KRAKEN2_VIRAL {
         $pe \\
         --gzip-compressed \\
         $reads
-    gzip *.fastq
+    pigz -p $task.cpus *.fastq
     """
 }
 
@@ -845,8 +844,8 @@ process SORT_BAM {
                       if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                       else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
                       else if (filename.endsWith(".stats")) "samtools_stats/$filename"
-                      else params.save_align_intermeds ? filename : null
-        }
+                      else filename
+                }
 
     when:
     !params.skip_variants && !is_sra
@@ -855,10 +854,10 @@ process SORT_BAM {
     set val(sample), val(single_end), val(is_sra), file(bam) from ch_bowtie2_bam
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_sort_bam_metrics,
+    set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_sort_bam_ivar,
+                                                                                       ch_sort_bam_metrics,
                                                                                        ch_sort_bam_variants,
-                                                                                       ch_sort_bam_consensus,
-                                                                                       ch_sort_bam_ivar
+                                                                                       ch_sort_bam_consensus
     file "*.{flagstat,idxstats,stats}" into ch_sort_bam_flagstat_mqc
 
     script:
@@ -871,131 +870,118 @@ process SORT_BAM {
     """
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/* --                                                                     -- */
+/* --                        BAM POST-ANALYSIS                            -- */
+/* --                                                                     -- */
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 /*
- * STEP 4.3: Picard CollectMultipleMetrics and CollectWgsMetrics
+ * STEP 5.1: Remove amplicon primers with iVar
  */
-process MergedLibMetrics {
-    tag "$name"
-    label 'process_medium'
-    publishDir path: "${params.outdir}/bowtie2/picard_metrics", mode: params.publish_dir_mode
-        // saveAs: { filename ->
-        //               if (filename.endsWith("_metrics")) "picard_metrics/$filename"
-        //               else if (filename.endsWith(".pdf")) "picard_metrics/pdf/$filename"
-        //               else null
-        //         }
+// Add Ivar log output to MultiQC
+if (params.protocol != 'amplicon') {
+    ch_ivar_flagstat_mqc = Channel.empty()
+    ch_ivar_log = Channel.empty()
+} else {
+    process IVAR {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/bowtie2", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
+                          else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
+                          else if (filename.endsWith(".stats")) "samtools_stats/$filename"
+                          else if (filename.endsWith(".log")) "log/$filename"
+                          else filename
+                    }
 
-    when:
-    !params.skip_variants && !is_sra && !params.skip_picard_metrics && !params.skip_qc
+        when:
+        !params.skip_variants && !is_sra
 
-    input:
+        input:
+        set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_ivar
+        file bed from ch_amplicon_bed.collect()
 
-    set val(name), file(bam) from ch_mlib_rm_orphan_bam_metrics
-    file fasta from ch_fasta
+        output:
+        set val(sample), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_ivar_metrics,
+                                                                          ch_ivar_variants,
+                                                                          ch_ivar_consensus
+        file "*.{flagstat,idxstats,stats}" into ch_ivar_flagstat_mqc
+        file "*.log" into ch_ivar_log
 
-    output:
-    file "*_metrics" into ch_mlib_collectmetrics_mqc
-    file "*.pdf" into ch_mlib_collectmetrics_pdf
+        script:
+        prefix = "${sample}.ivar"
+        """
+        samtools view -b -F 4 ${bam[0]} > ${sample}.mapped.bam
+        samtools index ${sample}.mapped.bam
 
-    script:
-    prefix = "${name}.mLb.clN"
-    def avail_mem = 3
-    if (!task.memory) {
-        log.info "[Picard MarkDuplicates] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this."
-    } else {
-        avail_mem = task.memory.toGiga()
+        ivar trim \\
+            -i ${sample}.mapped.bam \\
+            -b $bed \\
+            -m 50 \\
+            -q 15 \\
+            -s 4 \\
+            -e \\
+            -p ${prefix} > ${prefix}.log
+
+        samtools sort -@ $task.cpus -o ${prefix}.sorted.bam -T $prefix ${prefix}.bam
+        samtools index ${prefix}.sorted.bam
+        samtools flagstat ${prefix}.sorted.bam > ${prefix}.sorted.bam.flagstat
+        samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
+        samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
+        """
     }
-    """
-    picard -Xmx${avail_mem}g CollectMultipleMetrics \\
-        INPUT=${bam[0]} \\
-        OUTPUT=${prefix}.CollectMultipleMetrics \\
-        REFERENCE_SEQUENCE=$fasta \\
-        VALIDATION_STRINGENCY=LENIENT \\
-        TMP_DIR=tmp
-    """
+    ch_sort_bam_metrics = ch_ivar_metrics
+    ch_sort_bam_variants = ch_ivar_variants
+    ch_sort_bam_consensus = ch_ivar_consensus
 }
 
-//else if (filename.endsWith(".picard.stats")) "picard_stats/$filename"
-//file "*picard.stats" into ch_sort_bam_picardstat_mqc
-// picard CollectWgsMetrics \\
-// COVERAGE_CAP=1000000 \\
-// INPUT=${sample}.sorted.bam \\
-// OUTPUT=${sample}.sorted.bam.picard.stats \\
-// REFERENCE_SEQUENCE=$fasta
-
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                        BAM POST-ANALYSIS                            -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-//
 // /*
-//  * STEP 4.1: Remove amplicon's primers with iVar
+//  * STEP 5.2: Picard CollectMultipleMetrics and CollectWgsMetrics
 //  */
-// if (params.protocol == 'amplicon'){
-//   process IVAR {
-//       tag "$sample"
-//       label 'process_medium'
-//       publishDir "${params.outdir}/ivar", mode: params.publish_dir_mode,
-//           saveAs: { filename ->
-//                         if (params.save_align_intermeds) {
-//                             if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
-//                             else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
-//                             else if (filename.endsWith(".bam.stats")) "samtools_stats/$filename"
-//                             else if (filename.endsWith(".picard.stats")) "picard_stats/$filename"
-//                             else filename
-//                         }
-//                   }
+// process PICARD_METRICS {
+//     tag "$sample"
+//     label 'process_medium'
+//     publishDir path: "${params.outdir}/bowtie2/picard_metrics", mode: params.publish_dir_mode
 //
-//       when:
-//       !params.skip_variants && !is_sra
+//     when:
+//     !params.skip_variants && !is_sra && !params.skip_picard_metrics && !params.skip_qc
 //
-//       input:
-//       set val(sample), val(is_sra), file(bam) from ch_sort_bam_ivar
-//       set val(sample), val(is_sra), file(bamindex) from ch_sort_bamindex_ivar
-//       file amplicons_bed from ch_amplicon_bed.collect().ifEmpty([])
-//       file fasta from ch_viral_fasta
+//     input:
+//     set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_metrics
+//     file fasta from ch_viral_fasta
 //
-//       output:
-//       set val(sample), val(is_sra), file("*.sorted.bam") into ch_bam_variantcalling,
-//                                                               ch_bam_consensus
-//       set val(sample), val(is_sra), file("*.sorted.bam.bai") into ch_bamindex_variantcalling,
-//                                                                   ch_bamindex_consensus
-//       file "*.{flagstat,idxstats,bam.stats}" into ch_ivar_flagstat_mqc
-//       file "*picard.stats" into ch_ivar_picardstat_mqc
+//     output:
+//     file "*metrics" into ch_picard_metrics_mqc
+//     file "*.pdf" into ch_picard_metrics_pdf
 //
-//       script:
-//       """
-//       samtools view -b -F 4 ${sample}.sorted.bam > ${sample}.onlymapped.bam
-//       samtools index ${sample}.onlymapped.bam
-//       ivar trim -e -i ${sample}.onlymapped.bam -b $amplicons_bed -p ${sample}.primertrimmed -q 15 -m 50 -s 4
-//       samtools sort -o ${sample}.primertrimmed.sorted.bam -O bam -T $sample ${sample}.primertrimmed.bam
-//       samtools index ${sample}.primertrimmed.sorted.bam
-//       samtools flagstat ${sample}.primertrimmed.sorted.bam > ${sample}.primertrimmed.sorted.bam.flagstat
-//       samtools idxstats ${sample}.primertrimmed.sorted.bam > ${sample}.primertrimmed.sorted.bam.idxstats
-//       samtools stats ${sample}.primertrimmed.sorted.bam > ${sample}.primertrimmed.sorted.bam.stats
-//       picard CollectWgsMetrics \\
-//        COVERAGE_CAP=1000000 \\
-//        INPUT=${sample}.primertrimmed.sorted.bam \\
-//        OUTPUT=${sample}.primertrimmed.sorted.bam.picard.stats \\
-//        REFERENCE_SEQUENCE=$fasta
-//       """
+//     script:
+//     def avail_mem = 3
+//     if (!task.memory) {
+//         log.info "[Picard CollectMultipleMetrics] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this."
+//     } else {
+//         avail_mem = task.memory.toGiga()
 //     }
-// } else {
-//   ch_sort_bam_variantcalling
-//     .set { ch_bam_variantcalling }
-//   ch_sort_bam_consensus
-//     .set { ch_bam_consensus }
-//   ch_sort_bamindex_variantcalling
-//     .set { ch_bamindex_variantcalling }
-//   ch_sort_bamindex_consensus
-//     .set { ch_bamindex_consensus }
-//   ch_ivar_flagstat_mqc = Channel.empty()
-//   ch_ivar_picardstat_mqc = Channel.empty()
+//     """
+//     picard -Xmx${avail_mem}g CollectMultipleMetrics \\
+//         INPUT=${bam[0]} \\
+//         OUTPUT=${sample}.CollectMultipleMetrics \\
+//         REFERENCE_SEQUENCE=$fasta \\
+//         VALIDATION_STRINGENCY=LENIENT \\
+//         TMP_DIR=tmp
+//
+//     picard -Xmx${avail_mem}g CollectWgsMetrics \\
+//         COVERAGE_CAP=1000000 \\
+//         INPUT=${bam[0]} \\
+//         OUTPUT=${sample}.CollectWgsMetrics.coverage_metrics \\
+//         REFERENCE_SEQUENCE=$fasta \\
+//         TMP_DIR=tmp
+//     """
 // }
-//
-//
+
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
 // /* --                                                                     -- */
@@ -1695,7 +1681,7 @@ process MergedLibMetrics {
 //     file ('quast/metaspades/*') from ch_quast_metaspades_mqc.collect().ifEmpty([])
 //     file ('quast/unicycler/*') from ch_quast_unicycler_mqc.collect().ifEmpty([])
 //     file ('mapping/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
-//     file ('mapping/*') from ch_sort_bam_picardstat_mqc.collect().ifEmpty([])
+//     file ('picard/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
 //     file ('ivar/*') from ch_ivar_flagstat_mqc.collect().ifEmpty([])
 //     file ('ivar/*') from ch_ivar_picardstat_mqc.collect().ifEmpty([])
 //     file ('snpeff/majority*') from ch_snpeff_majority_mqc.collect()
@@ -1715,7 +1701,7 @@ process MergedLibMetrics {
 //     // TODO nf-core: Specify which MultiQC modules to use with -m for a faster run time
 //     """
 //     multiqc . -f $rtitle $rfilename $custom_config_file \\
-//         -m custom_content -m fastqc -m trimmomatic -m samtools -m picard -m quast
+//         -m custom_content -m fastqc -m trimmomatic -m kraken -m samtools -m picard -m quast
 //     """
 // }
 //
