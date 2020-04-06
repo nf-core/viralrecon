@@ -964,7 +964,7 @@ process SPADES {
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_spades_quast,
-                                                                                 ch_spades_abacus,
+                                                                                 ch_spades_abacas,
                                                                                  ch_spades_blast
 
     script:
@@ -1048,6 +1048,47 @@ process BLAST_SPADES {
     cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
     """
 }
+
+
+/*
+ * STEPS 6.4 Run Abacas on SPAdes de novo assembly
+ */
+
+process ABACAS_SPADES {
+  label "process_medium"
+  tag "$sample"
+  publishDir "${params.outdir}/spades/abacas", mode: 'copy',
+   saveAs: {filename ->
+     if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
+      else if (filename.indexOf(".tab") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
+      else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
+      else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
+      else if (filename.indexOf(".out") > 0) "nucmer/$filename"
+      else filename
+ }
+  input:
+  set val(sample), val(single_end), val(is_sra), file (scaffolds) from ch_spades_abacas
+  file fasta from ch_viral_fasta
+
+  output:
+  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_spades_plasmidid
+  file "*.abacas*" into ch_abacas_spades_results
+
+  script:
+  """
+  abacas.pl -r $fasta -q $scaffolds -m -p nucmer -o ${sample}.abacas
+  mv nucmer.delta ${sample}.abacas.nucmer.delta
+  mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
+  mv nucmer.tiling ${sample}.abacas.nucmer.tiling
+  mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+  """
+}
+
 
 ////////////////////////////////////////////////////
 /* --               METASPADES                 -- */
@@ -1260,45 +1301,7 @@ process BLAST_UNICYCLER {
     """
 }
 
-// /*
-//  * STEPS 4.6 ABACAS
-//  */
-// process abacas {
-//   label "small"
-//   tag "$prefix"
-//   publishDir "${params.outdir}/10-abacas", mode: 'copy',
-// 		saveAs: {filename ->
-// 			if (filename.indexOf("_abacas.bin") > 0) "abacas/$filename"
-// 			else if (filename.indexOf("_abacas.crunch") > 0) "abacas/$filename"
-//       else if (filename.indexOf("_abacas.fasta") > 0) "abacas/$filename"
-//       else if (filename.indexOf("_abacas.gaps") > 0) "abacas/$filename"
-//       else if (filename.indexOf(".tab") > 0) "abacas/$filename"
-//       else if (filename.indexOf("_abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
-//       else if (filename.indexOf("_abacas.gaps.tab") > 0) "abacas/$filename"
-//       else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
-//       else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
-//       else if (filename.indexOf(".out") > 0) "nucmer/$filename"
-// 			else filename
-// 	}
-//   input:
-//   file scaffolds from spades_scaffold_abacas
-//   file refvirus from viral_fasta_file
-//
-//   output:
-//   file "*_abacas.fasta" into abacas_fasta
-//   file "*_abacas*" into abacas_results
-//
-//   script:
-//   prefix = scaffolds.baseName - ~/(_scaffolds)?(_paired)?(\.fasta)?(\.gz)?$/
-//   """
-//   abacas.pl -r $refvirus -q $scaffolds -m -p nucmer -o $prefix"_abacas"
-//   mv nucmer.delta $prefix"_abacas_nucmer.delta"
-//   mv nucmer.filtered.delta $prefix"_abacas_nucmer.filtered.delta"
-//   mv nucmer.tiling $prefix"_abacas_nucmer.tiling"
-//   mv unused_contigs.out $prefix"_abacas_unused_contigs.out"
-//   """
-// }
-//
+
 // /*
 //  * STEPS 6.1 plasmidID SPADES
 //  */
