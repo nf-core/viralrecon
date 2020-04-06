@@ -809,9 +809,11 @@ process KRAKEN2_VIRAL {
 process BOWTIE2 {
     tag "$sample"
     label 'process_medium'
-    if (params.save_align_intermeds) {
-        publishDir "${params.outdir}/bowtie2", mode: params.publish_dir_mode
-    }
+    publishDir "${params.outdir}/bowtie2", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".log")) "log/$filename"
+                      else params.save_align_intermeds ? filename : null
+                }
 
     when:
     !params.skip_variants && !is_sra
@@ -822,6 +824,7 @@ process BOWTIE2 {
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*.bam") into ch_bowtie2_bam
+    file "*.log" into ch_bowtie2_mqc
 
     script:
     input_reads = single_end ? "-U $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
@@ -832,6 +835,7 @@ process BOWTIE2 {
         --very-sensitive-local \\
         -x ${index}/${viral_index_base} \\
         $input_reads \\
+        2> ${sample}.bowtie2.log \\
         | samtools view -@ $task.cpus -b -h -O BAM -o ${sample}.bam -
     """
 }
@@ -1211,7 +1215,7 @@ process SPADES {
 /*
  * STEP 7.2: Run Quast on SPAdes de novo assembly
  */
-process QUAST_SPADES {
+process SPADES_QUAST {
     label 'process_medium'
     publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
 
@@ -1248,7 +1252,7 @@ process QUAST_SPADES {
 /*
  * STEP 7.3: Run Blast on SPAdes de novo assembly
  */
-process BLAST_SPADES {
+process SPADES_BLAST {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/spades/blast", mode: params.publish_dir_mode
@@ -1317,7 +1321,7 @@ process METASPADES {
 /*
  * STEP 8.2: Run Quast on MetaSPAdes de novo assembly
  */
-process QUAST_METASPADES {
+process METASPADES_QUAST {
     label 'process_medium'
     publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
 
@@ -1354,7 +1358,7 @@ process QUAST_METASPADES {
 /*
  * STEP 8.3: Run Blast on MetaSPAdes de novo assembly
  */
-process BLAST_METASPADES {
+process METASPADES_BLAST {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/metaspades/blast", mode: params.publish_dir_mode
@@ -1422,7 +1426,7 @@ process UNICYCLER {
 /*
  * STEP 9.2: Run Quast on Unicycler de novo assembly
  */
-process QUAST_UNICYCLER {
+process UNICYCLER_QUAST {
     label 'process_medium'
     publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
 
@@ -1459,7 +1463,7 @@ process QUAST_UNICYCLER {
 /*
  * STEP 9.3: Run Blast on MetaSPAdes de novo assembly
  */
-process BLAST_UNICYCLER {
+process UNICYCLER_BLAST {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/unicycler/blast", mode: params.publish_dir_mode
@@ -1663,67 +1667,73 @@ process get_software_versions {
     scrape_software_versions.py &> software_versions_mqc.yaml
     """
 }
-//
-// /*
-// * STEP 10: MultiQC
-// */
-// process MULTIQC {
-//     publishDir "${params.outdir}/multiqc", mode: params.publish_dir_mode
-//
-//     input:
-//     file (multiqc_config) from ch_multiqc_config
-//     file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
-//     // TODO nf-core: Add in log files from your new processes for MultiQC to find!
-//     file ('fastqc/raw/*') from ch_fastqc_raw_reports_mqc.collect().ifEmpty([])
-//     file ('fastqc/trim_assembly/*') from ch_fastqc_trim_assembly_reports_mqc.collect().ifEmpty([])
-//     file ('fastqc/trim_mapping/*') from ch_fastqc_trim_mapping_reports_mqc.collect().ifEmpty([])
-//     file ('trimmomatic_assembly/*') from ch_trimmomatic_assembly_mqc.collect().ifEmpty([])
-//     file ('trimmomatic_mapping/*') from ch_trimmomatic_mapping_mqc.collect().ifEmpty([])
-//     file ('quast/spades/*') from ch_quast_spades_mqc.collect().ifEmpty([])
-//     file ('quast/metaspades/*') from ch_quast_metaspades_mqc.collect().ifEmpty([])
-//     file ('quast/unicycler/*') from ch_quast_unicycler_mqc.collect().ifEmpty([])
-//     file ('mapping/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
-//     file ('picard/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
-//     file ('ivar/*') from ch_ivar_flagstat_mqc.collect().ifEmpty([])
-//     file ('ivar/*') from ch_ivar_picardstat_mqc.collect().ifEmpty([])
-////     file ('snpeff/majority*') from ch_snpeff_majority_mqc.collect()
-//     file ('snpeff*') from ch_snpeff_mqc.collect()
-//     file ('software_versions/*') from ch_software_versions_yaml.collect()
-//     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
-//
-//     output:
-//     file "*multiqc_report.html" into ch_multiqc_report
-//     file "*_data"
-//     file "multiqc_plots"
-//
-//     script:
-//     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
-//     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
-//     custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
-//     // TODO nf-core: Specify which MultiQC modules to use with -m for a faster run time
-//     """
-//     multiqc . -f $rtitle $rfilename $custom_config_file \\
-//         -m custom_content -m fastqc -m trimmomatic -m kraken -m samtools -m picard -m quast
-//     """
-// }
-//
-// /*
-// * STEP 11: Output Description HTML
-// */
-// process output_documentation {
-//     publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode
-//
-//     input:
-//     file output_docs from ch_output_docs
-//
-//     output:
-//     file "results_description.html"
-//
-//     script:
-//     """
-//     markdown_to_html.py $output_docs -o results_description.html
-//     """
-// }
+
+/*
+* STEP 10: MultiQC
+*/
+process MULTIQC {
+    publishDir "${params.outdir}/multiqc", mode: params.publish_dir_mode
+
+    input:
+    file (multiqc_config) from ch_multiqc_config
+    file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
+    // TODO nf-core: Add in log files from your new processes for MultiQC to find!
+    file ('fastqc/raw/*') from ch_fastqc_raw_reports_mqc.collect().ifEmpty([])
+    file ('fastqc/trim_assembly/*') from ch_fastqc_trim_assembly_reports_mqc.collect().ifEmpty([])
+    file ('fastqc/trim_mapping/*') from ch_fastqc_trim_mapping_reports_mqc.collect().ifEmpty([])
+    file ('trimmomatic/assembly/*') from ch_trimmomatic_assembly_mqc.collect().ifEmpty([])
+    file ('trimmomatic/mapping/*') from ch_trimmomatic_mapping_mqc.collect().ifEmpty([])
+    file ('bowtie2/*') from ch_bowtie2_mqc.collect().ifEmpty([])
+    file ('flagstat/bowtie2/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
+    file ('flagstat/ivar/*') from ch_ivar_flagstat_mqc.collect().ifEmpty([])
+    file ('picard/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
+    file ('snpeff/*') from ch_snpeff_mqc.collect()
+    file ('quast/spades/*') from ch_quast_spades_mqc.collect().ifEmpty([])
+    file ('quast/metaspades/*') from ch_quast_metaspades_mqc.collect().ifEmpty([])
+    file ('quast/unicycler/*') from ch_quast_unicycler_mqc.collect().ifEmpty([])
+    file ('software_versions/*') from ch_software_versions_yaml.collect()
+    file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
+
+    output:
+    file "*multiqc_report.html" into ch_multiqc_report
+    file "*_data"
+    file "multiqc_plots"
+
+    script:
+    rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
+    rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
+    custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
+    // TODO nf-core: Specify which MultiQC modules to use with -m for a faster run time
+    """
+    multiqc . -f $rtitle $rfilename $custom_config_file \\
+        -m custom_content \\
+        -m fastqc \\
+        -m trimmomatic \\
+        -m bowtie2 \\
+        -m samtools \\
+        -m picard \\
+        -m snpeff \\
+        -m quast
+    """
+}
+
+/*
+* STEP 11: Output Description HTML
+*/
+process output_documentation {
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode
+
+    input:
+    file output_docs from ch_output_docs
+
+    output:
+    file "results_description.html"
+
+    script:
+    """
+    markdown_to_html.py $output_docs -o results_description.html
+    """
+}
 
 /*
  * Completion e-mail notification
