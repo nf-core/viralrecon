@@ -1717,9 +1717,9 @@ process MULTIQC {
     file ('picard/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
     file ('snpeff/highfreq/*') from ch_snpeff_highfreq_mqc.collect().ifEmpty([])
     file ('snpeff/lowfreq/*') from ch_snpeff_lowfreq_mqc.collect().ifEmpty([])
-    // file ('quast/spades/*') from ch_quast_spades_mqc.collect().ifEmpty([])
-    // file ('quast/metaspades/*') from ch_quast_metaspades_mqc.collect().ifEmpty([])
-    // file ('quast/unicycler/*') from ch_quast_unicycler_mqc.collect().ifEmpty([])
+    file ('quast/spades/*') from ch_quast_spades_mqc.collect().ifEmpty([])
+    file ('quast/metaspades/*') from ch_quast_metaspades_mqc.collect().ifEmpty([])
+    file ('quast/unicycler/*') from ch_quast_unicycler_mqc.collect().ifEmpty([])
     file ('software_versions/*') from ch_software_versions_yaml.collect()
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
