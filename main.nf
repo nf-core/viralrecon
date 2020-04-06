@@ -1226,9 +1226,9 @@ process SPADES {
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fa") into ch_spades_quast,
-                                                                                 ch_spades_abacas,
-                                                                                 ch_spades_blast,
-                                                                                 ch_spades_plasmidid
+                                                                              ch_spades_blast,
+                                                                              ch_spades_abacas,
+                                                                              ch_spades_plasmidid
 
     script:
     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
@@ -1312,66 +1312,65 @@ process SPADES_BLAST {
     """
 }
 
-
 /*
- * STEPS 6.4 Run Abacas on SPAdes de novo assembly
+ * STEP 7.4: Run ABACAS on SPAdes de novo assembly
  */
+process SPADES_ABACAS {
+    tag "$sample"
+    label "process_medium"
+    // publishDir "${params.outdir}/spades/abacas", mode: params.publish_dir_mode,
+    //     saveAs: { filename ->
+    //                   if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf(".tab") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
+    //                   else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
+    //                   else if (filename.indexOf(".out") > 0) "nucmer/$filename"
+    //                   else filename
+    //             }
 
-process ABACAS_SPADES {
-  label "process_medium"
-  tag "$sample"
-  publishDir "${params.outdir}/spades/abacas", mode: 'copy',
-   saveAs: {filename ->
-     if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
-      else if (filename.indexOf(".tab") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
-      else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
-      else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
-      else if (filename.indexOf(".out") > 0) "nucmer/$filename"
-      else filename
- }
-  input:
-  set val(sample), val(single_end), val(is_sra), file (scaffolds) from ch_spades_abacas
-  file fasta from ch_viral_fasta
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_abacas
+    file fasta from ch_viral_fasta
 
-  output:
-  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_spades_fasta
-  file "*.abacas*" into ch_abacas_spades_results
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_spades_abacas_fasta
+    file "*.abacas*" into ch_spades_abacas_results
 
-  script:
-  """
-  abacas.pl -r $fasta -q $scaffolds -m -p nucmer -o ${sample}.abacas
-  mv nucmer.delta ${sample}.abacas.nucmer.delta
-  mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
-  mv nucmer.tiling ${sample}.abacas.nucmer.tiling
-  mv unused_contigs.out ${sample}.abacas.unused.contigs.out
-  """
+    script:
+    """
+    abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
+    mv nucmer.delta ${sample}.abacas.nucmer.delta
+    mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
+    mv nucmer.tiling ${sample}.abacas.nucmer.tiling
+    mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+    """
 }
 
 /*
- * STEPS 6.5 Run plasmidID on SPAdes de novo assembly
+ * STEP 7.5: Run plasmidID on SPAdes de novo assembly
  */
-process PLASMIDID_SPADES {
-  label "process_medium"
-  tag "$sample"
-  publishDir path: { "${params.outdir}/spades/plasmidID" }, mode: 'copy'
+process SPADES_PLASMIDID {
+    tag "$sample"
+    label "process_medium"
+    publishDir "${params.outdir}/spades/plasmidid", mode: params.publish_dir_mode
 
-  input:
-  set val(sample), val(single_end), val(is_sra), file(scaffolds) from ch_spades_plasmidid.filter{ it.size()>0 }
-  file fasta from ch_viral_fasta
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
+    file fasta from ch_viral_fasta
 
-  output:
-  file "$sample" into ch_plasmid_spades_results
+    output:
+    file "$sample" into ch_spades_plasmidid_results
 
-  script:
-  """
-  plasmidID -d $fasta -s $sample -c $scaffolds --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-  mv NO_GROUP/$sample ./$sample
-  """
+    script:
+    """
+    plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+    mv NO_GROUP/$sample ./$sample
+    """
 }
 
 ////////////////////////////////////////////////////
@@ -1394,9 +1393,9 @@ process METASPADES {
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fa") into ch_metaspades_quast,
-                                                                                 ch_metaspades_abacas,
-                                                                                 ch_metaspades_blast,
-                                                                                 ch_metaspades_plasmidid
+                                                                              ch_metaspades_blast,
+                                                                              ch_metaspades_abacas,
+                                                                              ch_metaspades_plasmidid
 
     script:
     """
@@ -1482,64 +1481,64 @@ process METASPADES_BLAST {
 }
 
 /*
- * STEPS 7.4 Run Abacas on MetaSPAdes de novo assembly
+ * STEP 8.4: Run ABACAS on MetaSPAdes de novo assembly
  */
+process METASPADES_ABACAS {
+    tag "$sample"
+    label "process_medium"
+    // publishDir "${params.outdir}/metaspades/abacas", mode: params.publish_dir_mode,
+    // saveAs: { filename ->
+    //               if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
+    //               else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
+    //               else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
+    //               else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
+    //               else if (filename.indexOf(".tab") > 0) "abacas/$filename"
+    //               else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
+    //               else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
+    //               else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
+    //               else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
+    //               else if (filename.indexOf(".out") > 0) "nucmer/$filename"
+    //               else filename
+    //         }
 
-process ABACAS_METASPADES {
-  label "process_medium"
-  tag "$sample"
-  publishDir "${params.outdir}/metaspades/abacas", mode: 'copy',
-   saveAs: {filename ->
-     if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
-      else if (filename.indexOf(".tab") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
-      else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
-      else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
-      else if (filename.indexOf(".out") > 0) "nucmer/$filename"
-      else filename
- }
-  input:
-  set val(sample), val(single_end), val(is_sra), file (scaffolds) from ch_metaspades_abacas
-  file fasta from ch_viral_fasta
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_abacas
+    file fasta from ch_viral_fasta
 
-  output:
-  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_metaspades_fasta
-  file "*.abacas*" into ch_abacas_metaspades_results
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_metaspades_abacus_fasta
+    file "*.abacas*" into ch_metaspades_abacus_results
 
-  script:
-  """
-  abacas.pl -r $fasta -q $scaffolds -m -p nucmer -o ${sample}.abacas
-  mv nucmer.delta ${sample}.abacas.nucmer.delta
-  mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
-  mv nucmer.tiling ${sample}.abacas.nucmer.tiling
-  mv unused_contigs.out ${sample}.abacas.unused.contigs.out
-  """
+    script:
+    """
+    abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
+    mv nucmer.delta ${sample}.abacas.nucmer.delta
+    mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
+    mv nucmer.tiling ${sample}.abacas.nucmer.tiling
+    mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+    """
 }
 
 /*
- * STEPS 7.5 Run plasmidID on MetaSPAdes de novo assembly
+ * STEP 8.5: Run plasmidID on MetaSPAdes de novo assembly
  */
-process PLASMIDID_METASPADES {
-  label "process_medium"
-  tag "$sample"
-  publishDir path: { "${params.outdir}/metaspades/plasmidID" }, mode: 'copy'
+process METASPADES_PLASMIDID {
+    tag "$sample"
+    label "process_medium"
+    publishDir "${params.outdir}/metaspades/plasmidid", mode: params.publish_dir_mode
 
-  input:
-  set val(sample), val(single_end), val(is_sra), file(scaffolds) from ch_metaspades_plasmidid.filter{ it.size()>0 }
-  file fasta from ch_viral_fasta
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_plasmidid.filter { it.size() > 0 }
+    file fasta from ch_viral_fasta
 
-  output:
-  file "$sample" into ch_plasmid_metaspades_results
+    output:
+    file "$sample" into ch_metaspades_plasmidid_results
 
-  script:
-  """
-  plasmidID -d $fasta -s $sample -c $scaffolds --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-  mv NO_GROUP/$sample ./$sample
-  """
+    script:
+    """
+    plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+    mv NO_GROUP/$sample ./$sample
+    """
 }
 
 ////////////////////////////////////////////////////
@@ -1562,9 +1561,9 @@ process UNICYCLER {
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*assembly.fa") into ch_unicycler_quast,
-                                                                                ch_unicycler_abacas,
-                                                                                ch_unicycler_blast,
-                                                                                ch_unicycler_plasmidid
+                                                                             ch_unicycler_blast,
+                                                                             ch_unicycler_abacas,
+                                                                             ch_unicycler_plasmidid
 
     script:
     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
@@ -1649,66 +1648,65 @@ process UNICYCLER_BLAST {
 }
 
 /*
- * STEPS 8.4 Run Abacas on Unicycler de novo assembly
+ * STEP 9.4: Run ABACAS on Unicycler de novo assembly
  */
+process UNICYCLER_ABACAS {
+    tag "$sample"
+    label "process_medium"
+    // publishDir "${params.outdir}/unicycler/abacas", mode: params.publish_dir_mode,
+    //     saveAs: { filename ->
+    //                   if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf(".tab") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
+    //                   else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
+    //                   else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
+    //                   else if (filename.indexOf(".out") > 0) "nucmer/$filename"
+    //                   else filename
+    //             }
 
-process ABACAS_UNICYCLER {
-  label "process_medium"
-  tag "$sample"
-  publishDir "${params.outdir}/unicycler/abacas", mode: 'copy',
-   saveAs: {filename ->
-     if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
-      else if (filename.indexOf(".tab") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
-      else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
-      else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
-      else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
-      else if (filename.indexOf(".out") > 0) "nucmer/$filename"
-      else filename
- }
-  input:
-  set val(sample), val(single_end), val(is_sra), file (scaffolds) from ch_unicycler_abacas
-  file fasta from ch_viral_fasta
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_abacas
+    file fasta from ch_viral_fasta
 
-  output:
-  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_unicycler_fasta
-  file "*.abacas*" into ch_abacas_unicycler_results
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_unicycler_abacas_fasta
+    file "*.abacas*" into ch_unicycler_abacas_results
 
-  script:
-  """
-  abacas.pl -r $fasta -q $scaffolds -m -p nucmer -o ${sample}.abacas
-  mv nucmer.delta ${sample}.abacas.nucmer.delta
-  mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
-  mv nucmer.tiling ${sample}.abacas.nucmer.tiling
-  mv unused_contigs.out ${sample}.abacas.unused.contigs.out
-  """
+    script:
+    """
+    abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
+    mv nucmer.delta ${sample}.abacas.nucmer.delta
+    mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
+    mv nucmer.tiling ${sample}.abacas.nucmer.tiling
+    mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+    """
 }
 
 /*
- * STEPS 8.5 Run plasmidID on Unicycler de novo assembly
+ * STEP 9.5: Run plasmidID on Unicycler de novo assembly
  */
-process PLASMIDID_UNICYCLER {
-  label "process_medium"
-  tag "$sample"
-  publishDir path: { "${params.outdir}/unicycler/plasmidID" }, mode: 'copy'
+process UNICYCLER_PLASMIDID {
+    tag "$sample"
+    label "process_medium"
+    publishDir "${params.outdir}/unicycler/plasmidid", mode: params.publish_dir_mode
 
-  input:
-  set val(sample), val(single_end), val(is_sra), file(scaffolds) from ch_unicycler_plasmidid.filter{ it.size()>0 }
-  file fasta from ch_viral_fasta
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
+    file fasta from ch_viral_fasta
 
-  output:
-  file "$sample" into ch_plasmid_unicycler_results
+    output:
+    file "$sample" into ch_unicycler_plasmidid_results
 
-  script:
-  """
-  plasmidID -d $fasta -s $sample -c $scaffolds --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-  mv NO_GROUP/$sample ./$sample
-  """
+    script:
+    """
+    plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+    mv NO_GROUP/$sample ./$sample
+    """
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
