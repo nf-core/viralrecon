@@ -1003,7 +1003,8 @@ process VARSCAN2 {
     label 'process_medium'
     publishDir "${params.outdir}/varscan2", mode: params.publish_dir_mode,
         saveAs: { filename ->
-            		      if (filename.endsWith("vcf")) "$filename"
+            		      if (filename.endsWith("vcf.gz")) "$filename"
+                      if (filename.endsWith("vcf.gz.tbi")) "$filename"
                       else if (filename.endsWith(".log")) "log/$filename"
                       else params.save_pileup ? filename : null
                 }
@@ -1016,9 +1017,9 @@ process VARSCAN2 {
     file fasta from ch_viral_fasta
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*.highfreq.vcf") into ch_varscan2_highfreq_snpeff,
-                                                                               ch_varscan2_highfreq_consensus
-    set val(sample), val(single_end), val(is_sra), file("*.lowfreq.vcf") into ch_varscan2_lowfreq_snpeff
+    set val(sample), val(single_end), val(is_sra), file("*.highfreq.vcf.gz*") into ch_varscan2_highfreq_snpeff,
+                                                                                   ch_varscan2_highfreq_consensus
+    set val(sample), val(single_end), val(is_sra), file("*.lowfreq.vcf.gz*") into ch_varscan2_lowfreq_snpeff
     file "*.pileup" into ch_varscan2_pileup
     file "*.log" into ch_varscan2_log
 
@@ -1038,8 +1039,9 @@ process VARSCAN2 {
         --p-value 0.99 \\
         --variants \\
         --output-vcf 1 \\
-        > ${sample}.lowfreq.vcf \\
-        2> ${sample}.lowfreq.varscan2.log
+        2> ${sample}.lowfreq.varscan2.log \\
+        | bgzip -c > ${sample}.lowfreq.vcf.gz
+    tabix -p vcf -f ${sample}.lowfreq.vcf.gz
 
     varscan mpileup2cns \\
         ${sample}.pileup \\
@@ -1047,113 +1049,115 @@ process VARSCAN2 {
         --p-value 0.05 \\
         --variants \\
         --output-vcf 1 \\
-        > ${sample}.highfreq.vcf \\
-        2> ${sample}.highfreq.varscan2.log
+        2> ${sample}.highfreq.varscan2.log \\
+        | bgzip -c > ${sample}.highfreq.vcf.gz
+    tabix -p vcf -f ${sample}.highfreq.vcf.gz
     """
 }
 
-/*
- * STEPS 6.2 Variant calling annotation with SnpEff and SnpSift
- */
-process SNPEFF {
-    tag "$sample"
-    label 'process_medium'
-    publishDir "${params.outdir}/varscan2/snpeff", mode: params.publish_dir_mode
-
-    when:
-    !params.skip_variants && !is_sra
-
-    input:
-    set val(sample), val(single_end), val(is_sra), file(highfreq_vcf) from ch_varscan2_highfreq_snpeff
-    set val(sample), val(single_end), val(is_sra), file(lowfreq_vcf) from ch_varscan2_lowfreq_snpeff
-    file ('data/genomes/virus.fa') from ch_viral_fasta
-    file ('data/virus/genes.gff') from ch_viral_gff
-
-    output:
-    set val(sample), val(single_end), val(is_sra), file("*.highfreq.snpEff.vcf") into ch_snpeff_consensus
-    file "*.vcf" into ch_snpeff_vcf
-    file "*.{txt,html}" into ch_snpeff_reports
-    file "*.csv" into ch_snpeff_mqc
-
-    script:
-    """
-    echo "virus.genome : virus" > snpeff.config
-    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v virus
-
-    snpEff virus -config ./snpeff.config -dataDir ./data $highfreq_vcf -csvStats ${sample}.highfreq.snpEff.csv > ${sample}.highfreq.snpEff.vcf
-    mv snpEff_summary.html ${sample}.highfreq.snpEff.summary.html
-    SnpSift extractFields -s "," \\
-        -e "." \\
-        ${sample}.highfreq.snpEff.vcf \\
-        CHROM POS REF ALT \\
-        "ANN[*].GENE" "ANN[*].GENEID" \\
-        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-        > ${sample}.highfreq.snpSift.table.txt
-
-    snpEff virus -config ./snpeff.config -dataDir ./data $lowfreq_vcf -csvStats ${sample}.lowfreq.snpEff.csv > ${sample}.lowfreq.snpEff.vcf
-    mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
-    SnpSift extractFields -s "," \\
-        -e "." \\
-        ${sample}.lowfreq.snpEff.vcf \\
-        CHROM POS REF ALT \\
-        "ANN[*].GENE" "ANN[*].GENEID" \\
-        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-        > ${sample}.lowfreq.snpSift.table.txt
-    	"""
-}
-//
 // /*
-//  * STEPS 6.3 Consensus Genome generation with Bcftools and masking with Bedtools
+//  * STEPS 6.2 Variant calling annotation with SnpEff and SnpSift
 //  */
-// process CONSENSUS_GENOME {
-//   tag "$sample"
-//   label 'process_medium'
-//   publishDir "${params.outdir}/mapping_consensus", mode: params.publish_dir_mode,
-// 		saveAs: {filename ->
-// 			if (filename.endsWith("consensus.fasta")) "consensus/$filename"
-// 			else if (filename.endsWith("consensus.masked.fasta")) "masked/$filename"
-// 	}
+// process SNPEFF {
+//     tag "$sample"
+//     label 'process_medium'
+//     publishDir "${params.outdir}/varscan2/snpeff", mode: params.publish_dir_mode
 //
-//   when:
-//   !params.skip_variants && !is_sra
+//     when:
+//     !params.skip_variants && !is_sra
 //
-//   input:
-//   set val(sample), val(is_sra), file(variants) from ch_majority_annotated_consensus
-//   file fasta from ch_viral_fasta
-//   set val(sample), val(is_sra), file(sorted_bam) from ch_bam_consensus
-//   file sorted_bai from ch_bamindex_consensus
+//     input:
+//     set val(sample), val(single_end), val(is_sra), file(highfreq_vcf) from ch_varscan2_highfreq_snpeff
+//     set val(sample), val(single_end), val(is_sra), file(lowfreq_vcf) from ch_varscan2_lowfreq_snpeff
+//     file ('data/genomes/virus.fa') from ch_viral_fasta
+//     file ('data/virus/genes.gff') from ch_viral_gff
 //
-//   output:
-//   file "*consensus.fasta" into ch_consensus_fasta
-//   file "*consensus.masked.fasta" into ch_masked_fasta
+//     output:
+//     set val(sample), val(single_end), val(is_sra), file("*.highfreq.snpEff.vcf") into ch_snpeff_consensus
+//     file "*.vcf" into ch_snpeff_vcf
+//     file "*.{txt,html}" into ch_snpeff_reports
+//     file "*.csv" into ch_snpeff_mqc
 //
-//   script:
-//   """
-//   bgzip -c $variants > ${sample}.${viral_fasta_base}.vcf.gz
-//   bcftools index ${sample}.${viral_fasta_base}.vcf.gz
-//   cat $fasta | bcftools consensus ${sample}.${viral_fasta_base}.vcf.gz > ${sample}.${viral_fasta_base}.consensus.fasta
-//   bedtools genomecov \\
+//     script:
+//     """
+//     echo "virus.genome : virus" > snpeff.config
+//     snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v virus
+//
+//     snpEff virus -config ./snpeff.config -dataDir ./data $highfreq_vcf -csvStats ${sample}.highfreq.snpEff.csv > ${sample}.highfreq.snpEff.vcf
+//     mv snpEff_summary.html ${sample}.highfreq.snpEff.summary.html
+//     SnpSift extractFields -s "," \\
+//         -e "." \\
+//         ${sample}.highfreq.snpEff.vcf \\
+//         CHROM POS REF ALT \\
+//         "ANN[*].GENE" "ANN[*].GENEID" \\
+//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+//         > ${sample}.highfreq.snpSift.table.txt
+//
+//     snpEff virus -config ./snpeff.config -dataDir ./data $lowfreq_vcf -csvStats ${sample}.lowfreq.snpEff.csv > ${sample}.lowfreq.snpEff.vcf
+//     mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
+//     SnpSift extractFields -s "," \\
+//         -e "." \\
+//         ${sample}.lowfreq.snpEff.vcf \\
+//         CHROM POS REF ALT \\
+//         "ANN[*].GENE" "ANN[*].GENEID" \\
+//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+//         > ${sample}.lowfreq.snpSift.table.txt
+//     	"""
+// }
+
+// /*
+//  * STEPS 6.3 Genome consensus generation with BCFtools and masking with Bedtools
+//  */
+// process BCFTOOLS {
+//     tag "$sample"
+//     label 'process_medium'
+//     publishDir "${params.outdir}/bcftools", mode: params.publish_dir_mode
+//     //     saveAs: { filename ->
+//     // 		              if (filename.endsWith("consensus.fasta")) "$filename"
+//     // 		               else if (filename.endsWith("consensus.masked.fasta")) "masked/$filename"
+//     // }
+//
+//     when:
+//     !params.skip_variants && !is_sra
+//
+//     input:
+//     set val(sample), val(single_end), val(is_sra), file(vcf) from ch_snpeff_consensus
+//     set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_consensus
+//     file fasta from ch_viral_fasta
+//
+//     output:
+//     file "*consensus.fasta" into ch_bcftools_unmasked_consensus
+//     file "*consensus.masked.fasta" into ch_bcftools_masked_consensus
+//
+//     script:
+//     """
+//     bgzip -c $vcf > ${sample}.${viral_fasta_base}.vcf.gz
+//     bcftools index ${sample}.${viral_fasta_base}.vcf.gz
+//     cat $fasta | bcftools consensus ${sample}.${viral_fasta_base}.vcf.gz > ${sample}.${viral_fasta_base}.consensus.fasta
+//
+//     bedtools genomecov \\
 //         -bga \\
 //         -ibam $sorted_bam \\
 //         -g $fasta | awk '\$4 < 20' | bedtools merge > ${sample}.${viral_fasta_base}.bed4mask.bed
-//   bedtools maskfasta \\
+//
+//     bedtools maskfasta \\
 //         -fi ${sample}.${viral_fasta_base}.consensus.fasta \\
 //         -bed ${sample}.${viral_fasta_base}.bed4mask.bed \\
 //         -fo ${sample}.${viral_fasta_base}.consensus.masked.fasta
-//   sed -i 's/${viral_fasta_base}/${sample}/g' ${sample}.${viral_fasta_base}.consensus.masked.fasta
-//   """
+//     sed -i 's/${viral_fasta_base}/${sample}/g' ${sample}.${viral_fasta_base}.consensus.masked.fasta
+//     """
 // }
 
 // ///////////////////////////////////////////////////////////////////////////////
