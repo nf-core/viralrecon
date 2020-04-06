@@ -8,14 +8,8 @@ export_plots: true
 fn_clean_exts:
     - 'fastq.gz'
     - '.trimmed'
-    # - '_val'
-    # - 'sorted.bam'
-    # - '.Lb'
-    # - 'mkD'
-    # - 'clN'
-    # - 'mLb'
-    # - 'mRp'
-    # - '_peaks'
+    - 'sorted.bam'
+    - 'ivar'
 
 module_order:
     - fastqc:
