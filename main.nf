@@ -1004,7 +1004,7 @@ process VARSCAN2 {
     publishDir "${params.outdir}/varscan2", mode: params.publish_dir_mode,
         saveAs: { filename ->
             		      if (filename.endsWith("vcf.gz")) "$filename"
-                      if (filename.endsWith("vcf.gz.tbi")) "$filename"
+                      else if (filename.endsWith("vcf.gz.tbi")) "$filename"
                       else if (filename.endsWith(".log")) "log/$filename"
                       else params.save_pileup ? filename : null
                 }
@@ -1055,67 +1055,79 @@ process VARSCAN2 {
     """
 }
 
-// /*
-//  * STEPS 6.2 Variant calling annotation with SnpEff and SnpSift
-//  */
-// process SNPEFF {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/varscan2/snpeff", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_variants && !is_sra
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(highfreq_vcf) from ch_varscan2_highfreq_snpeff
-//     set val(sample), val(single_end), val(is_sra), file(lowfreq_vcf) from ch_varscan2_lowfreq_snpeff
-//     file ('data/genomes/virus.fa') from ch_viral_fasta
-//     file ('data/virus/genes.gff') from ch_viral_gff
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.highfreq.snpEff.vcf") into ch_snpeff_consensus
-//     file "*.vcf" into ch_snpeff_vcf
-//     file "*.{txt,html}" into ch_snpeff_reports
-//     file "*.csv" into ch_snpeff_mqc
-//
-//     script:
-//     """
-//     echo "virus.genome : virus" > snpeff.config
-//     snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v virus
-//
-//     snpEff virus -config ./snpeff.config -dataDir ./data $highfreq_vcf -csvStats ${sample}.highfreq.snpEff.csv > ${sample}.highfreq.snpEff.vcf
-//     mv snpEff_summary.html ${sample}.highfreq.snpEff.summary.html
-//     SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${sample}.highfreq.snpEff.vcf \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${sample}.highfreq.snpSift.table.txt
-//
-//     snpEff virus -config ./snpeff.config -dataDir ./data $lowfreq_vcf -csvStats ${sample}.lowfreq.snpEff.csv > ${sample}.lowfreq.snpEff.vcf
-//     mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
-//     SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${sample}.lowfreq.snpEff.vcf \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${sample}.lowfreq.snpSift.table.txt
-//     	"""
-// }
+/*
+ * STEPS 6.2 Variant calling annotation with SnpEff and SnpSift
+ */
+process SNPEFF {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/varscan2/snpeff", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(highfreq_vcf) from ch_varscan2_highfreq_snpeff
+    set val(sample), val(single_end), val(is_sra), file(lowfreq_vcf) from ch_varscan2_lowfreq_snpeff
+    file ('data/genomes/virus.fa') from ch_viral_fasta
+    file ('data/virus/genes.gff') from ch_viral_gff
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.highfreq.snpEff.vcf.gz*") into ch_snpeff_consensus
+    file "*.vcf.gz*" into ch_snpeff_vcf
+    file "*.{txt,html}" into ch_snpeff_reports
+    file "*.csv" into ch_snpeff_mqc
+
+    script:
+    """
+    echo "virus.genome : virus" > snpeff.config
+    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v virus
+
+    snpEff virus \\
+        -config ./snpeff.config \\
+        -dataDir ./data ${highfreq_vcf[0]} \\
+        -csvStats ${sample}.highfreq.snpEff.csv \\
+        | bgzip -c > ${sample}.highfreq.snpEff.vcf.gz
+    tabix -p vcf -f ${sample}.highfreq.snpEff.vcf.gz
+    mv snpEff_summary.html ${sample}.highfreq.snpEff.summary.html
+
+    SnpSift extractFields -s "," \\
+        -e "." \\
+        ${sample}.highfreq.snpEff.vcf.gz \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > ${sample}.highfreq.snpSift.table.txt
+
+    snpEff virus \\
+        -config ./snpeff.config \\
+        -dataDir ./data ${lowfreq_vcf[0]} \\
+        -csvStats ${sample}.lowfreq.snpEff.csv \\
+        | bgzip -c > ${sample}.lowfreq.snpEff.vcf.gz
+    tabix -p vcf -f ${sample}.lowfreq.snpEff.vcf.gz
+    mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
+
+    SnpSift extractFields -s "," \\
+        -e "." \\
+        ${sample}.lowfreq.snpEff.vcf.gz \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > ${sample}.lowfreq.snpSift.table.txt  
+    	"""
+}
 
 // /*
 //  * STEPS 6.3 Genome consensus generation with BCFtools and masking with Bedtools
