@@ -1110,7 +1110,7 @@ process METASPADES {
 
     output:
     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_metaspades_quast,
-                                                                                 ch_metaspades_abacus,
+                                                                                 ch_metaspades_abacas,
                                                                                  ch_metaspades_blast
 
     script:
@@ -1195,6 +1195,46 @@ process BLAST_METASPADES {
     cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
     """
 }
+
+/*
+ * STEPS 6.4 Run Abacas on MetaSPAdes de novo assembly
+ */
+
+process ABACAS_METASPADES {
+  label "process_medium"
+  tag "$sample"
+  publishDir "${params.outdir}/metaspades/abacas", mode: 'copy',
+   saveAs: {filename ->
+     if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
+      else if (filename.indexOf(".tab") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
+      else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
+      else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
+      else if (filename.indexOf(".out") > 0) "nucmer/$filename"
+      else filename
+ }
+  input:
+  set val(sample), val(single_end), val(is_sra), file (scaffolds) from ch_metaspades_abacas
+  file fasta from ch_viral_fasta
+
+  output:
+  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_metaspades_plasmidid
+  file "*.abacas*" into ch_abacas_metaspades_results
+
+  script:
+  """
+  abacas.pl -r $fasta -q $scaffolds -m -p nucmer -o ${sample}.abacas
+  mv nucmer.delta ${sample}.abacas.nucmer.delta
+  mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
+  mv nucmer.tiling ${sample}.abacas.nucmer.tiling
+  mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+  """
+}
+
 
 ////////////////////////////////////////////////////
 /* --               UNICYCLER                  -- */
