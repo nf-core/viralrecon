@@ -995,7 +995,7 @@ process PICARD_METRICS {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * STEPS 6.1 Variant calling with VarScan 2
+ * STEP 6.1: Variant calling with VarScan 2
  */
 // TODO nf-core: Add Varscan 2 log output to MultiQC
 process VARSCAN2 {
@@ -1056,7 +1056,7 @@ process VARSCAN2 {
 }
 
 /*
- * STEPS 6.2 Variant calling annotation with SnpEff and SnpSift
+ * STEP 6.2: Variant calling annotation with SnpEff and SnpSift
  */
 process SNPEFF {
     tag "$sample"
@@ -1130,7 +1130,7 @@ process SNPEFF {
 }
 
 /*
- * STEPS 6.3 Genome consensus generation with BCFtools and masked with BEDTools
+ * STEP 6.3: Genome consensus generation with BCFtools and masked with BEDTools
  */
 process BCFTOOLS_CONSENSUS {
     tag "$sample"
@@ -1166,330 +1166,330 @@ process BCFTOOLS_CONSENSUS {
     """
 }
 
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                        DENOVO ASSEMBLY                              -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-//
-// ////////////////////////////////////////////////////
-// /* --                SPADES                    -- */
-// ////////////////////////////////////////////////////
-//
-// /*
-//  * STEPS 6.1 De novo assembly with SPAdes
-//  */
-// process SPADES {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'spades' in assemblers && !is_sra
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_spades
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_spades_quast,
-//                                                                                  ch_spades_abacus,
-//                                                                                  ch_spades_blast
-//
-//     script:
-//     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
-//     """
-//     spades.py \\
-//         --threads ${task.cpus} \\
-//         $input_reads \\
-//         -o ./
-//     mv scaffolds.fasta ${sample}.scaffolds.fasta
-//     """
-// }
-//
-// /*
-//  * STEPS 6.2 Run Quast on SPAdes de novo assembly
-//  */
-// process QUAST_SPADES {
-//     label 'process_medium'
-//     publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'spades' in assemblers && !is_sra
-//
-//     input:
-//     file scaffolds from ch_spades_quast.collect{ it[3] }
-//     file fasta from ch_viral_fasta
-//     file gff from ch_viral_gff
-//
-//     output:
-//     file "quast" into ch_quast_spades_results
-//     file "quast/report.tsv" into ch_quast_spades_mqc
-//
-//     script:
-//     """
-//     GFF=$gff
-//     if [[ \$GFF == *.gz ]]
-//     then
-//         gunzip -f \$GFF
-//         GFF=\${GFF%.*}
-//     fi
-//
-//     quast.py \\
-//         --output-dir quast \\
-//         -r $fasta \\
-//         --features \$GFF \\
-//         --threads ${task.cpus} \\
-//         ${scaffolds.join(' ')}
-//     """
-// }
-//
-// /*
-//  * STEPS 6.3 Run Blast on SPAdes de novo assembly
-//  */
-// process BLAST_SPADES {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/spades/blast", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'spades' in assemblers && !is_sra
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_blast
-//     file db from ch_viral_blast_db_spades.collect()
-//     file header from ch_blast_outfmt6_header
-//
-//     output:
-//     file "*.blast.txt" into ch_blast_spades_results
-//     file "*.blast.filt.header.txt" into ch_blast_spades_filt_results
-//
-//     script:
-//     """
-//     blastn \\
-//         -num_threads ${task.cpus} \\
-//         -db $db/$viral_fasta_base \\
-//         -query $scaffold \\
-//         -outfmt \'6 stitle std slen qlen qcovs\' \\
-//         -out ${sample}.blast.txt
-//
-//     awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
-//     cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
-//     """
-// }
-//
-// ////////////////////////////////////////////////////
-// /* --               METASPADES                 -- */
-// ////////////////////////////////////////////////////
-//
-// /*
-//  * STEPS 7.1 De novo assembly with MetaSPAdes
-//  */
-// process METASPADES {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_metaspades
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_metaspades_quast,
-//                                                                                  ch_metaspades_abacus,
-//                                                                                  ch_metaspades_blast
-//
-//     script:
-//     """
-//     spades.py \\
-//         --meta \\
-//         --threads ${task.cpus} \\
-//         -1 ${reads[0]} \\
-//         -2 ${reads[1]} \\
-//         -o ./
-//     mv scaffolds.fasta ${sample}.meta.scaffolds.fasta
-//     """
-// }
-//
-// /*
-//  * STEPS 7.2 Run Quast on MetaSPAdes de novo assembly
-//  */
-// process QUAST_METASPADES {
-//     label 'process_medium'
-//     publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
-//
-//     input:
-//     file scaffolds from ch_metaspades_quast.collect{ it[3] }
-//     file fasta from ch_viral_fasta
-//     file gff from ch_viral_gff
-//
-//     output:
-//     file "quast" into ch_quast_metaspades_results
-//     file "quast/report.tsv" into ch_quast_metaspades_mqc
-//
-//     script:
-//     """
-//     GFF=$gff
-//     if [[ \$GFF == *.gz ]]
-//     then
-//         gunzip -f \$GFF
-//         GFF=\${GFF%.*}
-//     fi
-//
-//     quast.py \\
-//         --output-dir quast \\
-//         -r $fasta \\
-//         --features \$GFF \\
-//         --threads ${task.cpus} \\
-//         ${scaffolds.join(' ')}
-//     """
-// }
-//
-// /*
-//  * STEPS 7.3 Run Blast on MetaSPAdes de novo assembly
-//  */
-// process BLAST_METASPADES {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/metaspades/blast", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_blast
-//     file db from ch_viral_blast_db_metaspades.collect()
-//     file header from ch_blast_outfmt6_header
-//
-//     output:
-//     file "*.blast.txt" into ch_blast_metaspades_results
-//     file "*.blast.filt.header.txt" into ch_blast_metaspades_filt_results
-//
-//     script:
-//     """
-//     blastn \\
-//         -num_threads ${task.cpus} \\
-//         -db $db/$viral_fasta_base \\
-//         -query $scaffold \\
-//         -outfmt \'6 stitle std slen qlen qcovs\' \\
-//         -out ${sample}.blast.txt
-//
-//     awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
-//     cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
-//     """
-// }
-//
-// ////////////////////////////////////////////////////
-// /* --               UNICYCLER                  -- */
-// ////////////////////////////////////////////////////
-//
-// /*
-//  * STEPS 8.1 De novo assembly with Unicycler
-//  */
-// process UNICYCLER {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_unicycler
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*assembly.fasta") into ch_unicycler_quast,
-//                                                                                 ch_unicycler_abacus,
-//                                                                                 ch_unicycler_blast
-//
-//     script:
-//     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
-//     """
-//     unicycler \\
-//         --threads ${task.cpus} \\
-//         $input_reads \\
-//         --out ./
-//     mv assembly.fasta ${sample}.assembly.fasta
-//     """
-// }
-//
-// /*
-//  * STEPS 8.2 Run Quast on Unicycler de novo assembly
-//  */
-// process QUAST_UNICYCLER {
-//     label 'process_medium'
-//     publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
-//
-//     input:
-//     file scaffolds from ch_unicycler_quast.collect{ it[3] }
-//     file fasta from ch_viral_fasta
-//     file gff from ch_viral_gff
-//
-//     output:
-//     file "quast" into ch_quast_unicycler_results
-//     file "quast/report.tsv" into ch_quast_unicycler_mqc
-//
-//     script:
-//     """
-//     GFF=$gff
-//     if [[ \$GFF == *.gz ]]
-//     then
-//         gunzip -f \$GFF
-//         GFF=\${GFF%.*}
-//     fi
-//
-//     quast.py \\
-//         --output-dir quast \\
-//         -r $fasta \\
-//         --features \$GFF \\
-//         --threads ${task.cpus} \\
-//         ${scaffolds.join(' ')}
-//     """
-// }
-//
-// /*
-//  * STEPS 8.3 Run Blast on MetaSPAdes de novo assembly
-//  */
-// process BLAST_UNICYCLER {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/unicycler/blast", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_blast
-//     file db from ch_viral_blast_db_unicycler.collect()
-//     file header from ch_blast_outfmt6_header
-//
-//     output:
-//     file "*.blast.txt" into ch_blast_unicycler_results
-//     file "*.blast.filt.header.txt" into ch_blast_unicycler_filt_results
-//
-//     script:
-//     """
-//     blastn \\
-//         -num_threads ${task.cpus} \\
-//         -db $db/$viral_fasta_base \\
-//         -query $scaffold \\
-//         -outfmt \'6 stitle std slen qlen qcovs\' \\
-//         -out ${sample}.blast.txt
-//
-//     awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
-//     cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
-//     """
-// }
-//
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/* --                                                                     -- */
+/* --                        DENOVO ASSEMBLY                              -- */
+/* --                                                                     -- */
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////
+/* --                SPADES                    -- */
+////////////////////////////////////////////////////
+
+/*
+ * STEP 7.1: De novo assembly with SPAdes
+ */
+process SPADES {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'spades' in assemblers && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_spades
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*scaffolds.fa") into ch_spades_quast,
+                                                                              ch_spades_abacus,
+                                                                              ch_spades_blast
+
+    script:
+    input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
+    """
+    spades.py \\
+        --threads ${task.cpus} \\
+        $input_reads \\
+        -o ./
+    mv scaffolds.fasta ${sample}.scaffolds.fa
+    """
+}
+
+/*
+ * STEP 7.2: Run Quast on SPAdes de novo assembly
+ */
+process QUAST_SPADES {
+    label 'process_medium'
+    publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'spades' in assemblers && !is_sra
+
+    input:
+    file scaffolds from ch_spades_quast.collect{ it[3] }
+    file fasta from ch_viral_fasta
+    file gff from ch_viral_gff
+
+    output:
+    file "quast" into ch_quast_spades_results
+    file "quast/report.tsv" into ch_quast_spades_mqc
+
+    script:
+    """
+    GFF=$gff
+    if [[ \$GFF == *.gz ]]
+    then
+        gunzip -f \$GFF
+        GFF=\${GFF%.*}
+    fi
+
+    quast.py \\
+        --output-dir quast \\
+        -r $fasta \\
+        --features \$GFF \\
+        --threads ${task.cpus} \\
+        ${scaffolds.join(' ')}
+    """
+}
+
+/*
+ * STEP 7.3: Run Blast on SPAdes de novo assembly
+ */
+process BLAST_SPADES {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/spades/blast", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'spades' in assemblers && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_blast
+    file db from ch_viral_blast_db_spades.collect()
+    file header from ch_blast_outfmt6_header
+
+    output:
+    file "*.blast.txt" into ch_blast_spades_results
+    file "*.blast.filt.header.txt" into ch_blast_spades_filt_results
+
+    script:
+    """
+    blastn \\
+        -num_threads ${task.cpus} \\
+        -db $db/$viral_fasta_base \\
+        -query $scaffold \\
+        -outfmt \'6 stitle std slen qlen qcovs\' \\
+        -out ${sample}.blast.txt
+
+    awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
+    cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
+    """
+}
+
+////////////////////////////////////////////////////
+/* --               METASPADES                 -- */
+////////////////////////////////////////////////////
+
+/*
+ * STEP 8.1: De novo assembly with MetaSPAdes
+ */
+process METASPADES {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_metaspades
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*scaffolds.fa") into ch_metaspades_quast,
+                                                                              ch_metaspades_abacus,
+                                                                              ch_metaspades_blast
+
+    script:
+    """
+    spades.py \\
+        --meta \\
+        --threads ${task.cpus} \\
+        -1 ${reads[0]} \\
+        -2 ${reads[1]} \\
+        -o ./
+    mv scaffolds.fasta ${sample}.meta.scaffolds.fa
+    """
+}
+
+/*
+ * STEP 8.2: Run Quast on MetaSPAdes de novo assembly
+ */
+process QUAST_METASPADES {
+    label 'process_medium'
+    publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
+
+    input:
+    file scaffolds from ch_metaspades_quast.collect{ it[3] }
+    file fasta from ch_viral_fasta
+    file gff from ch_viral_gff
+
+    output:
+    file "quast" into ch_quast_metaspades_results
+    file "quast/report.tsv" into ch_quast_metaspades_mqc
+
+    script:
+    """
+    GFF=$gff
+    if [[ \$GFF == *.gz ]]
+    then
+        gunzip -f \$GFF
+        GFF=\${GFF%.*}
+    fi
+
+    quast.py \\
+        --output-dir quast \\
+        -r $fasta \\
+        --features \$GFF \\
+        --threads ${task.cpus} \\
+        ${scaffolds.join(' ')}
+    """
+}
+
+/*
+ * STEP 8.3: Run Blast on MetaSPAdes de novo assembly
+ */
+process BLAST_METASPADES {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/metaspades/blast", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_blast
+    file db from ch_viral_blast_db_metaspades.collect()
+    file header from ch_blast_outfmt6_header
+
+    output:
+    file "*.blast.txt" into ch_blast_metaspades_results
+    file "*.blast.filt.header.txt" into ch_blast_metaspades_filt_results
+
+    script:
+    """
+    blastn \\
+        -num_threads ${task.cpus} \\
+        -db $db/$viral_fasta_base \\
+        -query $scaffold \\
+        -outfmt \'6 stitle std slen qlen qcovs\' \\
+        -out ${sample}.blast.txt
+
+    awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
+    cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
+    """
+}
+
+////////////////////////////////////////////////////
+/* --               UNICYCLER                  -- */
+////////////////////////////////////////////////////
+
+/*
+ * STEP 9.1: De novo assembly with Unicycler
+ */
+process UNICYCLER {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'unicycler' in assemblers && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_unicycler
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*assembly.fa") into ch_unicycler_quast,
+                                                                             ch_unicycler_abacus,
+                                                                             ch_unicycler_blast
+
+    script:
+    input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
+    """
+    unicycler \\
+        --threads ${task.cpus} \\
+        $input_reads \\
+        --out ./
+    mv assembly.fasta ${sample}.assembly.fa
+    """
+}
+
+/*
+ * STEP 9.2: Run Quast on Unicycler de novo assembly
+ */
+process QUAST_UNICYCLER {
+    label 'process_medium'
+    publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'unicycler' in assemblers && !is_sra
+
+    input:
+    file scaffolds from ch_unicycler_quast.collect{ it[3] }
+    file fasta from ch_viral_fasta
+    file gff from ch_viral_gff
+
+    output:
+    file "quast" into ch_quast_unicycler_results
+    file "quast/report.tsv" into ch_quast_unicycler_mqc
+
+    script:
+    """
+    GFF=$gff
+    if [[ \$GFF == *.gz ]]
+    then
+        gunzip -f \$GFF
+        GFF=\${GFF%.*}
+    fi
+
+    quast.py \\
+        --output-dir quast \\
+        -r $fasta \\
+        --features \$GFF \\
+        --threads ${task.cpus} \\
+        ${scaffolds.join(' ')}
+    """
+}
+
+/*
+ * STEP 9.3: Run Blast on MetaSPAdes de novo assembly
+ */
+process BLAST_UNICYCLER {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/unicycler/blast", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'unicycler' in assemblers && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_blast
+    file db from ch_viral_blast_db_unicycler.collect()
+    file header from ch_blast_outfmt6_header
+
+    output:
+    file "*.blast.txt" into ch_blast_unicycler_results
+    file "*.blast.filt.header.txt" into ch_blast_unicycler_filt_results
+
+    script:
+    """
+    blastn \\
+        -num_threads ${task.cpus} \\
+        -db $db/$viral_fasta_base \\
+        -query $scaffold \\
+        -outfmt \'6 stitle std slen qlen qcovs\' \\
+        -out ${sample}.blast.txt
+
+    awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
+    cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
+    """
+}
+
 // // /*
 // //  * STEPS 4.6 ABACAS
 // //  */
