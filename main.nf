@@ -1197,7 +1197,7 @@ process SPADES {
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_spades
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_spades_quast,
+    set val(sample), val(single_end), val(is_sra), file("*scaffolds.fa") into ch_spades_quast,
                                                                                  ch_spades_abacas,
                                                                                  ch_spades_blast,
                                                                                  ch_spades_plasmidid
@@ -1365,7 +1365,7 @@ process METASPADES {
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_metaspades
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_metaspades_quast,
+    set val(sample), val(single_end), val(is_sra), file("*scaffolds.fa") into ch_metaspades_quast,
                                                                                  ch_metaspades_abacas,
                                                                                  ch_metaspades_blast,
                                                                                  ch_metaspades_plasmidid
@@ -1533,7 +1533,7 @@ process UNICYCLER {
     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_host_viral_unicycler
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*assembly.fasta") into ch_unicycler_quast,
+    set val(sample), val(single_end), val(is_sra), file("*assembly.fa") into ch_unicycler_quast,
                                                                                 ch_unicycler_abacas,
                                                                                 ch_unicycler_blast,
                                                                                 ch_unicycler_plasmidid
