@@ -259,11 +259,12 @@ Specify this parameter to skip all of the variant calling steps in the pipeline.
 The pipeline contains a large number of quality control steps. Sometimes, it may not be desirable to run all of them if time and compute resources are limited.
 The following options make this easy:
 
-| Step                      | Description                          |
-|---------------------------|--------------------------------------|
-| `--skip_fastqc`           | Skip FastQC                          |
-| `--skip_multiqc`          | Skip MultiQC                         |
-| `--skip_qc`               | Skip all QC steps except for MultiQC |
+| Step                      | Description                                              |
+|---------------------------|----------------------------------------------------------|
+| `--skip_qc`               | Skip all QC steps except for MultiQC                     |
+| `--skip_fastqc`           | Skip FastQC                                              |
+| `--skip_picard_metrics`   | Skip Picard CollectMultipleMetrics and CollectWgsMetrics |
+| `--skip_multiqc`          | Skip MultiQC                                             |
 
 ## Job resources
 
