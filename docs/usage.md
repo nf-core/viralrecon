@@ -38,11 +38,13 @@
   * [`--assemblers`](#--assemblers)
   * [`--skip_assembly`](#--skip_assembly)
 * [Variant calling](#variant-calling)
+  * [`--save_pileup`](#--save_pileup)
   * [`--skip_variants`](#--skip_variants)
 * [Skipping QC steps](#skipping-qc-steps)
-  * [`--skip_qc`](#--skip_qc)
-  * [`--skip_fastqc`](#--skip_fastqc)
-  * [`--skip_multiqc`](#--skip_multiqc)
+  * `--skip_qc`
+  * `--skip_fastqc`
+  * `--skip_picard_metrics`
+  * `--skip_multiqc`
 * [Job resources](#job-resources)
   * [Automatic resubmission](#automatic-resubmission)
   * [Custom resource requests](#custom-resource-requests)
@@ -352,6 +354,10 @@ Specify this parameter to skip all of the de novo assembly steps in the pipeline
 
 ## Variant calling
 
+### `--save_pileup`
+
+Save pileup files in the results directory (Default: false). These tend to be quite large so are not saved by default.
+
 ### `--skip_variants`
 
 Specify this parameter to skip all of the variant calling and mapping steps in the pipeline.
@@ -361,11 +367,12 @@ Specify this parameter to skip all of the variant calling and mapping steps in t
 The pipeline contains a large number of quality control steps. Sometimes, it may not be desirable to run all of them if time and compute resources are limited.
 The following options make this easy:
 
-| Step                      | Description                          |
-|---------------------------|--------------------------------------|
-| `--skip_fastqc`           | Skip FastQC                          |
-| `--skip_multiqc`          | Skip MultiQC                         |
-| `--skip_qc`               | Skip all QC steps except for MultiQC |
+| Step                      | Description                                              |
+|---------------------------|----------------------------------------------------------|
+| `--skip_qc`               | Skip all QC steps except for MultiQC                     |
+| `--skip_fastqc`           | Skip FastQC                                              |
+| `--skip_picard_metrics`   | Skip Picard CollectMultipleMetrics and CollectWgsMetrics |
+| `--skip_multiqc`          | Skip MultiQC                                             |
 
 ## Job resources
 

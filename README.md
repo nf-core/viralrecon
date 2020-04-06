@@ -20,21 +20,21 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 1. Raw read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 2. Adapter trimming ([`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
 3. Removal of host reads ([`Kraken2`](http://ccb.jhu.edu/software/kraken2/))
-4. Primer removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
+4. Variant calling
+    1. Primer removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
+    2. Read alignment ([`Bowtie 2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml))
+    3. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
+    4. Alignment-level QC ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/), [`picard`](https://broadinstitute.github.io/picard/))
+    5. Call variants ([`VarScan 2`](http://dkoboldt.github.io/varscan/), [`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
+    6. Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
+    7. Consensus sequence generation ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
 5. De novo assembly
     1. Choice of multiple assemblers ([`SPAdes`](http://cab.spbu.ru/software/spades/), [`metaSPAdes`](http://cab.spbu.ru/software/meta-spades/), [`Unicycler`](https://github.com/rrwick/Unicycler))
     2. Contiguate contigs assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
     3. Blast to reference assembly ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch))
     4. Assembly assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
     5. Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))
-6. Variant calling
-    1. Read alignment ([`Bowtie 2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml))
-    2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
-    3. Alignment-level QC ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/), [`picard`](https://broadinstitute.github.io/picard/))
-    4. Call variants ([`VarScan 2`](http://dkoboldt.github.io/varscan/), [`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
-    5. Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
-    6. Consensus sequence generation ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
-7. Present QC for raw read, alignment, assembly, variant annotation results ([`MultiQC`](http://multiqc.info/), [`R`](https://www.r-project.org/))
+6. Present QC for raw read, alignment, assembly, variant annotation results ([`MultiQC`](http://multiqc.info/), [`R`](https://www.r-project.org/))
 
 <!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
 
