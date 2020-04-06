@@ -1620,114 +1620,68 @@ process UNICYCLER_BLAST {
     """
 }
 
-// // /*
-// //  * STEPS 4.6 ABACAS
-// //  */
-// // process abacas {
-// //   label "small"
-// //   tag "$prefix"
-// //   publishDir "${params.outdir}/10-abacas", mode: params.publish_dir_mode,
-// // 		saveAs: {filename ->
-// // 			if (filename.indexOf("_abacas.bin") > 0) "abacas/$filename"
-// // 			else if (filename.indexOf("_abacas.crunch") > 0) "abacas/$filename"
-// //       else if (filename.indexOf("_abacas.fasta") > 0) "abacas/$filename"
-// //       else if (filename.indexOf("_abacas.gaps") > 0) "abacas/$filename"
-// //       else if (filename.indexOf(".tab") > 0) "abacas/$filename"
-// //       else if (filename.indexOf("_abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
-// //       else if (filename.indexOf("_abacas.gaps.tab") > 0) "abacas/$filename"
-// //       else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
-// //       else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
-// //       else if (filename.indexOf(".out") > 0) "nucmer/$filename"
-// // 			else filename
-// // 	}
-// //   input:
-// //   file scaffolds from spades_scaffold_abacas
-// //   file refvirus from viral_fasta_file
-// //
-// //   output:
-// //   file "*_abacas.fasta" into abacas_fasta
-// //   file "*_abacas*" into abacas_results
-// //
-// //   script:
-// //   prefix = scaffolds.baseName - ~/(_scaffolds)?(_paired)?(\.fasta)?(\.gz)?$/
-// //   """
-// //   abacas.pl -r $refvirus -q $scaffolds -m -p nucmer -o $prefix"_abacas"
-// //   mv nucmer.delta $prefix"_abacas_nucmer.delta"
-// //   mv nucmer.filtered.delta $prefix"_abacas_nucmer.filtered.delta"
-// //   mv nucmer.tiling $prefix"_abacas_nucmer.tiling"
-// //   mv unused_contigs.out $prefix"_abacas_unused_contigs.out"
-// //   """
-// // }
-// //
-// // /*
-// //  * STEPS 6.1 plasmidID SPADES
-// //  */
-// // process plasmidID_spades {
-// //   label "small"
-// //   tag "$prefix"
-// //   publishDir path: { "${params.outdir}/12-plasmidID/SPADES" }, mode: params.publish_dir_mode
-// //
-// //   input:
-// //   file spades_scaffolds from spades_scaffold_plasmid.filter{ it.size()>0 }
-// //   file refvirus from viral_fasta_file
-// //
-// //   output:
-// //   file "$prefix" into plasmid_SPADES
-// //
-// //   script:
-// //   prefix = spades_scaffolds.baseName - ~/(_scaffolds)?(_paired)?(\.fasta)?(\.gz)?$/
-// //   """
-// //   bash plasmidID.sh -d $refvirus -s $prefix -c $spades_scaffolds --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-// //   mv NO_GROUP/$prefix ./$prefix
-// //   """
-// // }
-// //
-// // /*
-// //  * STEPS 6.1 plasmidID METASPADES
-// //  */
-// // process plasmidID_metaspades {
-// //   label "small"
-// //   tag "$prefix"
-// //   publishDir path: { "${params.outdir}/12-plasmidID/META_SPADES" }, mode: params.publish_dir_mode
-// //
-// //   input:
-// //   file meta_scaffolds from metas_pades_scaffold_plasmid.filter{ it.size()>0 }
-// //   file refvirus from viral_fasta_file
-// //
-// //   output:
-// //   file "$prefix" into plasmid_METASPADES
-// //
-// //   script:
-// //   prefix = meta_scaffolds.baseName - ~/(_meta_scaffolds)?(\.fasta)?(\.gz)?$/
-// //   """
-// //   bash plasmidID.sh -d $refvirus -s $prefix -c $meta_scaffolds --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-// //   mv NO_GROUP/$prefix ./$prefix
-// //   """
-// // }
-// //
-// // /*
-// //  * STEPS 6.1 plasmidID UNICYCLER
-// //  */
-// // process plasmidID_unicycler {
-// //   label "small"
-// //   tag "$prefix"
-// //   publishDir path: { "${params.outdir}/12-plasmidID/UNICYCLER" }, mode: params.publish_dir_mode
-// //
-// //   input:
-// //   file unicycler_assembly from unicycler_assembly_plasmid.filter{ it.size()>0 }
-// //   file refvirus from viral_fasta_file
-// //
-// //   output:
-// //   file "$prefix" into plasmid_UNICYCLER
-// //
-// //   script:
-// //   prefix = unicycler_assembly.baseName - ~/(_assembly)?(_paired)?(\.fasta)?(\.gz)?$/
-// //   """
-// //   bash plasmidID.sh -d $refvirus -s $prefix -c $unicycler_assembly --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-// //   mv NO_GROUP/$prefix ./$prefix
-// //   """
-// // }
-//
+/*
+ * STEPS 8.4 Run Abacas on Unicycler de novo assembly
+ */
+
+process ABACAS_UNICYCLER {
+  label "process_medium"
+  tag "$sample"
+  publishDir "${params.outdir}/unicycler/abacas", mode: 'copy',
+   saveAs: {filename ->
+     if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
+      else if (filename.indexOf(".tab") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
+      else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
+      else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
+      else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
+      else if (filename.indexOf(".out") > 0) "nucmer/$filename"
+      else filename
+ }
+  input:
+  set val(sample), val(single_end), val(is_sra), file (scaffolds) from ch_unicycler_abacas
+  file fasta from ch_viral_fasta
+
+  output:
+  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_unicycler_fasta
+  file "*.abacas*" into ch_abacas_unicycler_results
+
+  script:
+  """
+  abacas.pl -r $fasta -q $scaffolds -m -p nucmer -o ${sample}.abacas
+  mv nucmer.delta ${sample}.abacas.nucmer.delta
+  mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
+  mv nucmer.tiling ${sample}.abacas.nucmer.tiling
+  mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+  """
+}
+
+/*
+ * STEPS 8.5 Run plasmidID on Unicycler de novo assembly
+ */
+process PLASMIDID_UNICYCLER {
+  label "process_medium"
+  tag "$sample"
+  publishDir path: { "${params.outdir}/unicycler/plasmidID" }, mode: 'copy'
+
+  input:
+  set val(sample), val(single_end), val(is_sra), file(scaffolds) from ch_unicycler_plasmidid.filter{ it.size()>0 }
+  file fasta from ch_viral_fasta
+
+  output:
+  file "$sample" into ch_plasmid_unicycler_results
+
+  script:
+  """
+  plasmidID -d $fasta -s $sample -c $scaffolds --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+  mv NO_GROUP/$sample ./$sample
+  """
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
