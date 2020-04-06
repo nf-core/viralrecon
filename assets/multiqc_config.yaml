@@ -9,9 +9,13 @@ fn_clean_exts:
     - 'fastq.gz'
     - '.trimmed'
     - '.sorted.bam'
+    - '.bowtie2'
     - '.ivar'
     - '.highfreq'
     - '.lowfreq'
+    - '.scaffolds'
+    - '.meta.scaffolds'
+    - '.assembly'
 
 module_order:
     - fastqc:
