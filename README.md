@@ -34,7 +34,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     3. Blast to reference assembly ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch))
     4. Assembly assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
     5. Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))
-7. Present QC for raw read, alignment, assembly, variant annotation results ([`MultiQC`](http://multiqc.info/), [`R`](https://www.r-project.org/))
+6. Present QC for raw read, alignment, assembly, variant annotation results ([`MultiQC`](http://multiqc.info/), [`R`](https://www.r-project.org/))
 
 <!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
 
