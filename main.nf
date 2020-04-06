@@ -1598,71 +1598,71 @@ process BLAST_UNICYCLER {
 // //   """
 // // }
 //
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                          MULTIQC                                    -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-//
-// Channel.from(summary.collect{ [it.key, it.value] })
-//     .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
-//     .reduce { a, b -> return [a, b].join("\n            ") }
-//     .map { x -> """
-//     id: 'nf-core-viralrecon-summary'
-//     description: " - this information is collected when the pipeline is started."
-//     section_name: 'nf-core/viralrecon Workflow Summary'
-//     section_href: 'https://github.com/nf-core/viralrecon'
-//     plot_type: 'html'
-//     data: |
-//         <dl class=\"dl-horizontal\">
-//             $x
-//         </dl>
-//     """.stripIndent() }
-//     .set { ch_workflow_summary }
-//
-// /*
-//  * Parse software version numbers
-//  */
-// process get_software_versions {
-//     publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.indexOf(".csv") > 0) filename
-//                       else null
-//                 }
-//
-//     output:
-//     file 'software_versions_mqc.yaml' into ch_software_versions_yaml
-//     file "software_versions.csv"
-//
-//     script:
-//     // TODO nf-core: Get all tools to print their version number here
-//     """
-//     echo $workflow.manifest.version > v_pipeline.txt
-//     echo $workflow.nextflow.version > v_nextflow.txt
-//     fastqc --version > v_fastqc.txt
-//     trimmomatic -version > v_trimmomatic.txt
-//     bowtie2 --version > v_bowtie2.txt
-//     kraken2 --version > v_kraken2.txt
-//     samtools --version > v_samtools.txt
-//     bedtools --version > v_bedtools.txt
-//     picard MarkDuplicates --version &> v_picard.txt || true
-//     echo \$(R --version 2>&1) > v_R.txt
-//     spades.py --version > v_spades.txt
-//     unicycler --version > v_unicycler.txt
-//     quast.py --version > v_quast.txt
-//     blastn -version > v_blast.txt
-//     abacas.pl -v &> v_abacas.txt || true
-//     ivar -v > v_ivar.txt
-//     echo \$(varscan 2>&1 | head -1) > v_varscan.txt
-//     snpEff -version > v_snpEff.txt
-//     echo \$(SnpSift 2>&1 | head -1) > v_SnipSift.txt
-//     bcftools -v > v_bcftools.txt
-//     multiqc --version > v_multiqc.txt
-//     scrape_software_versions.py &> software_versions_mqc.yaml
-//     """
-// }
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/* --                                                                     -- */
+/* --                          MULTIQC                                    -- */
+/* --                                                                     -- */
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+Channel.from(summary.collect{ [it.key, it.value] })
+    .map { k,v -> "<dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }
+    .reduce { a, b -> return [a, b].join("\n            ") }
+    .map { x -> """
+    id: 'nf-core-viralrecon-summary'
+    description: " - this information is collected when the pipeline is started."
+    section_name: 'nf-core/viralrecon Workflow Summary'
+    section_href: 'https://github.com/nf-core/viralrecon'
+    plot_type: 'html'
+    data: |
+        <dl class=\"dl-horizontal\">
+            $x
+        </dl>
+    """.stripIndent() }
+    .set { ch_workflow_summary }
+
+/*
+ * Parse software version numbers
+ */
+process get_software_versions {
+    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.indexOf(".csv") > 0) filename
+                      else null
+                }
+
+    output:
+    file 'software_versions_mqc.yaml' into ch_software_versions_yaml
+    file "software_versions.csv"
+
+    script:
+    // TODO nf-core: Get all tools to print their version number here
+    """
+    echo $workflow.manifest.version > v_pipeline.txt
+    echo $workflow.nextflow.version > v_nextflow.txt
+    fastqc --version > v_fastqc.txt
+    trimmomatic -version > v_trimmomatic.txt
+    bowtie2 --version > v_bowtie2.txt
+    kraken2 --version > v_kraken2.txt
+    samtools --version > v_samtools.txt
+    bedtools --version > v_bedtools.txt
+    picard MarkDuplicates --version &> v_picard.txt || true
+    echo \$(R --version 2>&1) > v_R.txt
+    spades.py --version > v_spades.txt
+    unicycler --version > v_unicycler.txt
+    quast.py --version > v_quast.txt
+    blastn -version > v_blast.txt
+    abacas.pl -v &> v_abacas.txt || true
+    ivar -v > v_ivar.txt
+    echo \$(varscan 2>&1 | head -1) > v_varscan.txt
+    snpEff -version > v_snpEff.txt
+    echo \$(SnpSift 2>&1 | head -1) > v_SnipSift.txt
+    bcftools -v > v_bcftools.txt
+    multiqc --version > v_multiqc.txt
+    scrape_software_versions.py &> software_versions_mqc.yaml
+    """
+}
 //
 // /*
 // * STEP 10: MultiQC
