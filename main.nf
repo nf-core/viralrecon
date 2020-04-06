@@ -1125,52 +1125,46 @@ process SNPEFF {
         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-        > ${sample}.lowfreq.snpSift.table.txt  
+        > ${sample}.lowfreq.snpSift.table.txt
     	"""
 }
 
-// /*
-//  * STEPS 6.3 Genome consensus generation with BCFtools and masking with Bedtools
-//  */
-// process BCFTOOLS {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/bcftools", mode: params.publish_dir_mode
-//     //     saveAs: { filename ->
-//     // 		              if (filename.endsWith("consensus.fasta")) "$filename"
-//     // 		               else if (filename.endsWith("consensus.masked.fasta")) "masked/$filename"
-//     // }
-//
-//     when:
-//     !params.skip_variants && !is_sra
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(vcf) from ch_snpeff_consensus
-//     set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_consensus
-//     file fasta from ch_viral_fasta
-//
-//     output:
-//     file "*consensus.fasta" into ch_bcftools_unmasked_consensus
-//     file "*consensus.masked.fasta" into ch_bcftools_masked_consensus
-//
-//     script:
-//     """
-//     bgzip -c $vcf > ${sample}.${viral_fasta_base}.vcf.gz
-//     bcftools index ${sample}.${viral_fasta_base}.vcf.gz
-//     cat $fasta | bcftools consensus ${sample}.${viral_fasta_base}.vcf.gz > ${sample}.${viral_fasta_base}.consensus.fasta
-//
-//     bedtools genomecov \\
-//         -bga \\
-//         -ibam $sorted_bam \\
-//         -g $fasta | awk '\$4 < 20' | bedtools merge > ${sample}.${viral_fasta_base}.bed4mask.bed
-//
-//     bedtools maskfasta \\
-//         -fi ${sample}.${viral_fasta_base}.consensus.fasta \\
-//         -bed ${sample}.${viral_fasta_base}.bed4mask.bed \\
-//         -fo ${sample}.${viral_fasta_base}.consensus.masked.fasta
-//     sed -i 's/${viral_fasta_base}/${sample}/g' ${sample}.${viral_fasta_base}.consensus.masked.fasta
-//     """
-// }
+/*
+ * STEPS 6.3 Genome consensus generation with BCFtools and masked with BEDTools
+ */
+process BCFTOOLS_CONSENSUS {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/bcftools", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(bam), file(vcf) from ch_sort_bam_consensus.join(ch_snpeff_consensus, by: [0,1,2])
+    file fasta from ch_viral_fasta
+
+    output:
+    file "*consensus.fa" into ch_bcftools_unmasked_consensus
+    file "*consensus.masked.fa" into ch_bcftools_masked_consensus
+
+    script:
+    """
+    cat $fasta | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
+
+    bedtools genomecov \\
+        -bga \\
+        -ibam ${bam[0]} \\
+        -g $fasta \\
+        | awk '\$4 < 20' | bedtools merge > ${sample}.mask.bed
+
+    bedtools maskfasta \\
+        -fi ${sample}.consensus.fa \\
+        -bed ${sample}.mask.bed \\
+        -fo ${sample}.consensus.masked.fa
+    sed -i 's/${viral_index_base}/${sample}/g' ${sample}.consensus.masked.fa
+    """
+}
 
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
