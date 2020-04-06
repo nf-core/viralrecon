@@ -835,7 +835,7 @@ process KRAKEN2_VIRAL {
 process BOWTIE2 {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/bowtie2", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".log")) "log/$filename"
                       else params.save_align_intermeds ? filename : null
@@ -872,7 +872,7 @@ process BOWTIE2 {
 process SORT_BAM {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/bowtie2", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                       else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
@@ -922,7 +922,7 @@ if (params.protocol != 'amplicon') {
     process IVAR {
         tag "$sample"
         label 'process_medium'
-        publishDir "${params.outdir}/bowtie2", mode: params.publish_dir_mode,
+        publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                           else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
@@ -978,7 +978,7 @@ if (params.protocol != 'amplicon') {
 process PICARD_METRICS {
     tag "$sample"
     label 'process_medium'
-    publishDir path: "${params.outdir}/bowtie2/picard_metrics", mode: params.publish_dir_mode
+    publishDir path: "${params.outdir}/variants/bowtie2/picard_metrics", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && !is_sra && !params.skip_picard_metrics && !params.skip_qc
@@ -1031,7 +1031,7 @@ process PICARD_METRICS {
 process VARSCAN2 {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/varscan2", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode,
         saveAs: { filename ->
             		      if (filename.endsWith("vcf.gz")) "$filename"
                       else if (filename.endsWith("vcf.gz.tbi")) "$filename"
@@ -1091,7 +1091,7 @@ process VARSCAN2 {
 process SNPEFF {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/varscan2/snpeff", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/varscan2/snpeff", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && !is_sra
@@ -1167,7 +1167,7 @@ process SNPEFF {
 process BCFTOOLS_CONSENSUS {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/bcftools", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && !is_sra
@@ -1216,7 +1216,7 @@ process BCFTOOLS_CONSENSUS {
 process SPADES {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/denovo/spades", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'spades' in assemblers && !is_sra
@@ -1246,7 +1246,7 @@ process SPADES {
  */
 process SPADES_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/spades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/denovo/spades", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'spades' in assemblers && !is_sra
@@ -1284,7 +1284,7 @@ process SPADES_QUAST {
 process SPADES_BLAST {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/spades/blast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/denovo/spades/blast", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'spades' in assemblers && !is_sra
@@ -1318,20 +1318,11 @@ process SPADES_BLAST {
 process SPADES_ABACAS {
     tag "$sample"
     label "process_medium"
-    // publishDir "${params.outdir}/spades/abacas", mode: params.publish_dir_mode,
-    //     saveAs: { filename ->
-    //                   if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf(".tab") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
-    //                   else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
-    //                   else if (filename.indexOf(".out") > 0) "nucmer/$filename"
-    //                   else filename
-    //             }
+    publishDir "${params.outdir}/denovo/spades/abacas", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
+                      else filename
+                }
 
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_abacas
@@ -1351,27 +1342,27 @@ process SPADES_ABACAS {
     """
 }
 
-/*
- * STEP 7.5: Run plasmidID on SPAdes de novo assembly
- */
-process SPADES_PLASMIDID {
-    tag "$sample"
-    label "process_medium"
-    publishDir "${params.outdir}/spades/plasmidid", mode: params.publish_dir_mode
-
-    input:
-    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
-    file fasta from ch_viral_fasta
-
-    output:
-    file "$sample" into ch_spades_plasmidid_results
-
-    script:
-    """
-    plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-    mv NO_GROUP/$sample ./$sample
-    """
-}
+// /*
+//  * STEP 7.5: Run plasmidID on SPAdes de novo assembly
+//  */
+// process SPADES_PLASMIDID {
+//     tag "$sample"
+//     label "process_medium"
+//     publishDir "${params.outdir}/denovo/spades/plasmidid", mode: params.publish_dir_mode
+//
+//     input:
+//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
+//     file fasta from ch_viral_fasta
+//
+//     output:
+//     file "$sample" into ch_spades_plasmidid_results
+//
+//     script:
+//     """
+//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+//     mv NO_GROUP/$sample ./$sample
+//     """
+// }
 
 ////////////////////////////////////////////////////
 /* --               METASPADES                 -- */
@@ -1383,7 +1374,7 @@ process SPADES_PLASMIDID {
 process METASPADES {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/denovo/metaspades", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
@@ -1414,7 +1405,7 @@ process METASPADES {
  */
 process METASPADES_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/metaspades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/denovo/metaspades", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
@@ -1452,7 +1443,7 @@ process METASPADES_QUAST {
 process METASPADES_BLAST {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/metaspades/blast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/denovo/metaspades/blast", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
@@ -1486,20 +1477,11 @@ process METASPADES_BLAST {
 process METASPADES_ABACAS {
     tag "$sample"
     label "process_medium"
-    // publishDir "${params.outdir}/metaspades/abacas", mode: params.publish_dir_mode,
-    // saveAs: { filename ->
-    //               if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
-    //               else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
-    //               else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
-    //               else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
-    //               else if (filename.indexOf(".tab") > 0) "abacas/$filename"
-    //               else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
-    //               else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
-    //               else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
-    //               else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
-    //               else if (filename.indexOf(".out") > 0) "nucmer/$filename"
-    //               else filename
-    //         }
+    publishDir "${params.outdir}/denovo/metaspades/abacas", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
+                      else filename
+                }
 
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_abacas
@@ -1519,27 +1501,27 @@ process METASPADES_ABACAS {
     """
 }
 
-/*
- * STEP 8.5: Run plasmidID on MetaSPAdes de novo assembly
- */
-process METASPADES_PLASMIDID {
-    tag "$sample"
-    label "process_medium"
-    publishDir "${params.outdir}/metaspades/plasmidid", mode: params.publish_dir_mode
-
-    input:
-    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_plasmidid.filter { it.size() > 0 }
-    file fasta from ch_viral_fasta
-
-    output:
-    file "$sample" into ch_metaspades_plasmidid_results
-
-    script:
-    """
-    plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-    mv NO_GROUP/$sample ./$sample
-    """
-}
+// /*
+//  * STEP 8.5: Run plasmidID on MetaSPAdes de novo assembly
+//  */
+// process METASPADES_PLASMIDID {
+//     tag "$sample"
+//     label "process_medium"
+//     publishDir "${params.outdir}/denovo/metaspades/plasmidid", mode: params.publish_dir_mode
+//
+//     input:
+//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_plasmidid.filter { it.size() > 0 }
+//     file fasta from ch_viral_fasta
+//
+//     output:
+//     file "$sample" into ch_metaspades_plasmidid_results
+//
+//     script:
+//     """
+//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+//     mv NO_GROUP/$sample ./$sample
+//     """
+// }
 
 ////////////////////////////////////////////////////
 /* --               UNICYCLER                  -- */
@@ -1551,7 +1533,7 @@ process METASPADES_PLASMIDID {
 process UNICYCLER {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/denovo/unicycler", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
@@ -1581,7 +1563,7 @@ process UNICYCLER {
  */
 process UNICYCLER_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/unicycler", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/denovo/unicycler", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
@@ -1619,7 +1601,7 @@ process UNICYCLER_QUAST {
 process UNICYCLER_BLAST {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/unicycler/blast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/denovo/unicycler/blast", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
@@ -1653,20 +1635,11 @@ process UNICYCLER_BLAST {
 process UNICYCLER_ABACAS {
     tag "$sample"
     label "process_medium"
-    // publishDir "${params.outdir}/unicycler/abacas", mode: params.publish_dir_mode,
-    //     saveAs: { filename ->
-    //                   if (filename.indexOf("abacas.bin") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf("abacas.crunch") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf("abacas.fasta") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf("abacas.gaps") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf(".tab") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf("abacas.MULTIFASTA.fa") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf("abacas.gaps.tab") > 0) "abacas/$filename"
-    //                   else if (filename.indexOf(".delta") > 0) "nucmer/$filename"
-    //                   else if (filename.indexOf(".tiling") > 0) "nucmer/$filename"
-    //                   else if (filename.indexOf(".out") > 0) "nucmer/$filename"
-    //                   else filename
-    //             }
+    publishDir "${params.outdir}/denovo/unicycler/abacas", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
+                      else filename
+                }
 
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_abacas
@@ -1686,27 +1659,27 @@ process UNICYCLER_ABACAS {
     """
 }
 
-/*
- * STEP 9.5: Run plasmidID on Unicycler de novo assembly
- */
-process UNICYCLER_PLASMIDID {
-    tag "$sample"
-    label "process_medium"
-    publishDir "${params.outdir}/unicycler/plasmidid", mode: params.publish_dir_mode
-
-    input:
-    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
-    file fasta from ch_viral_fasta
-
-    output:
-    file "$sample" into ch_unicycler_plasmidid_results
-
-    script:
-    """
-    plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-    mv NO_GROUP/$sample ./$sample
-    """
-}
+// /*
+//  * STEP 9.5: Run plasmidID on Unicycler de novo assembly
+//  */
+// process UNICYCLER_PLASMIDID {
+//     tag "$sample"
+//     label "process_medium"
+//     publishDir "${params.outdir}/denovo/unicycler/plasmidid", mode: params.publish_dir_mode
+//
+//     input:
+//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
+//     file fasta from ch_viral_fasta
+//
+//     output:
+//     file "$sample" into ch_unicycler_plasmidid_results
+//
+//     script:
+//     """
+//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+//     mv NO_GROUP/$sample ./$sample
+//     """
+// }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
