@@ -965,7 +965,8 @@ process SPADES {
     output:
     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_spades_quast,
                                                                                  ch_spades_abacas,
-                                                                                 ch_spades_blast
+                                                                                 ch_spades_blast,
+                                                                                 ch_spades_plasmidid
 
     script:
     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
@@ -1076,7 +1077,7 @@ process ABACAS_SPADES {
   file fasta from ch_viral_fasta
 
   output:
-  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_spades_plasmidid
+  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_spades_fasta
   file "*.abacas*" into ch_abacas_spades_results
 
   script:
@@ -1089,6 +1090,27 @@ process ABACAS_SPADES {
   """
 }
 
+/*
+ * STEPS 6.5 Run plasmidID on SPAdes de novo assembly
+ */
+process PLASMIDID_SPADES {
+  label "process_medium"
+  tag "$sample"
+  publishDir path: { "${params.outdir}/spades/plasmidID" }, mode: 'copy'
+
+  input:
+  set val(sample), val(single_end), val(is_sra), file(abacas_fasta) from ch_spades_plasmidid.filter{ it.size()>0 }
+  file fasta from ch_viral_fasta
+
+  output:
+  file "$sample" into ch_plasmid_spades_results
+
+  script:
+  """
+  plasmidID -d $fasta -s $sample -c $abacas_fasta --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+  mv NO_GROUP/$sample ./$sample
+  """
+}
 
 ////////////////////////////////////////////////////
 /* --               METASPADES                 -- */
@@ -1111,7 +1133,8 @@ process METASPADES {
     output:
     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fasta") into ch_metaspades_quast,
                                                                                  ch_metaspades_abacas,
-                                                                                 ch_metaspades_blast
+                                                                                 ch_metaspades_blast,
+                                                                                 ch_metaspades_plasmidid
 
     script:
     """
@@ -1222,7 +1245,7 @@ process ABACAS_METASPADES {
   file fasta from ch_viral_fasta
 
   output:
-  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_metaspades_plasmidid
+  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_metaspades_fasta
   file "*.abacas*" into ch_abacas_metaspades_results
 
   script:
@@ -1235,6 +1258,27 @@ process ABACAS_METASPADES {
   """
 }
 
+/*
+ * STEPS 7.5 Run plasmidID on MetaSPAdes de novo assembly
+ */
+process PLASMIDID_METASPADES {
+  label "process_medium"
+  tag "$sample"
+  publishDir path: { "${params.outdir}/metaspades/plasmidID" }, mode: 'copy'
+
+  input:
+  set val(sample), val(single_end), val(is_sra), file(abacas_fasta) from ch_metaspades_plasmidid.filter{ it.size()>0 }
+  file fasta from ch_viral_fasta
+
+  output:
+  file "$sample" into ch_plasmid_metaspades_results
+
+  script:
+  """
+  plasmidID -d $fasta -s $sample -c $abacas_fasta --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+  mv NO_GROUP/$sample ./$sample
+  """
+}
 
 ////////////////////////////////////////////////////
 /* --               UNICYCLER                  -- */
@@ -1381,74 +1425,6 @@ process ABACAS_UNICYCLER {
 }
 
 
-// /*
-//  * STEPS 6.1 plasmidID SPADES
-//  */
-// process plasmidID_spades {
-//   label "small"
-//   tag "$prefix"
-//   publishDir path: { "${params.outdir}/12-plasmidID/SPADES" }, mode: 'copy'
-//
-//   input:
-//   file spades_scaffolds from spades_scaffold_plasmid.filter{ it.size()>0 }
-//   file refvirus from viral_fasta_file
-//
-//   output:
-//   file "$prefix" into plasmid_SPADES
-//
-//   script:
-//   prefix = spades_scaffolds.baseName - ~/(_scaffolds)?(_paired)?(\.fasta)?(\.gz)?$/
-//   """
-//   bash plasmidID.sh -d $refvirus -s $prefix -c $spades_scaffolds --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-//   mv NO_GROUP/$prefix ./$prefix
-//   """
-// }
-//
-// /*
-//  * STEPS 6.1 plasmidID METASPADES
-//  */
-// process plasmidID_metaspades {
-//   label "small"
-//   tag "$prefix"
-//   publishDir path: { "${params.outdir}/12-plasmidID/META_SPADES" }, mode: 'copy'
-//
-//   input:
-//   file meta_scaffolds from metas_pades_scaffold_plasmid.filter{ it.size()>0 }
-//   file refvirus from viral_fasta_file
-//
-//   output:
-//   file "$prefix" into plasmid_METASPADES
-//
-//   script:
-//   prefix = meta_scaffolds.baseName - ~/(_meta_scaffolds)?(\.fasta)?(\.gz)?$/
-//   """
-//   bash plasmidID.sh -d $refvirus -s $prefix -c $meta_scaffolds --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-//   mv NO_GROUP/$prefix ./$prefix
-//   """
-// }
-//
-// /*
-//  * STEPS 6.1 plasmidID UNICYCLER
-//  */
-// process plasmidID_unicycler {
-//   label "small"
-//   tag "$prefix"
-//   publishDir path: { "${params.outdir}/12-plasmidID/UNICYCLER" }, mode: 'copy'
-//
-//   input:
-//   file unicycler_assembly from unicycler_assembly_plasmid.filter{ it.size()>0 }
-//   file refvirus from viral_fasta_file
-//
-//   output:
-//   file "$prefix" into plasmid_UNICYCLER
-//
-//   script:
-//   prefix = unicycler_assembly.baseName - ~/(_assembly)?(_paired)?(\.fasta)?(\.gz)?$/
-//   """
-//   bash plasmidID.sh -d $refvirus -s $prefix -c $unicycler_assembly --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-//   mv NO_GROUP/$prefix ./$prefix
-//   """
-// }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
