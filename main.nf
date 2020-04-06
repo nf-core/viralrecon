@@ -1099,7 +1099,7 @@ process PLASMIDID_SPADES {
   publishDir path: { "${params.outdir}/spades/plasmidID" }, mode: 'copy'
 
   input:
-  set val(sample), val(single_end), val(is_sra), file(abacas_fasta) from ch_spades_plasmidid.filter{ it.size()>0 }
+  set val(sample), val(single_end), val(is_sra), file(scaffolds) from ch_spades_plasmidid.filter{ it.size()>0 }
   file fasta from ch_viral_fasta
 
   output:
@@ -1107,7 +1107,7 @@ process PLASMIDID_SPADES {
 
   script:
   """
-  plasmidID -d $fasta -s $sample -c $abacas_fasta --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+  plasmidID -d $fasta -s $sample -c $scaffolds --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
   mv NO_GROUP/$sample ./$sample
   """
 }
@@ -1267,7 +1267,7 @@ process PLASMIDID_METASPADES {
   publishDir path: { "${params.outdir}/metaspades/plasmidID" }, mode: 'copy'
 
   input:
-  set val(sample), val(single_end), val(is_sra), file(abacas_fasta) from ch_metaspades_plasmidid.filter{ it.size()>0 }
+  set val(sample), val(single_end), val(is_sra), file(scaffolds) from ch_metaspades_plasmidid.filter{ it.size()>0 }
   file fasta from ch_viral_fasta
 
   output:
@@ -1275,7 +1275,7 @@ process PLASMIDID_METASPADES {
 
   script:
   """
-  plasmidID -d $fasta -s $sample -c $abacas_fasta --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+  plasmidID -d $fasta -s $sample -c $scaffolds --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
   mv NO_GROUP/$sample ./$sample
   """
 }
@@ -1301,7 +1301,8 @@ process UNICYCLER {
     output:
     set val(sample), val(single_end), val(is_sra), file("*assembly.fasta") into ch_unicycler_quast,
                                                                                 ch_unicycler_abacas,
-                                                                                ch_unicycler_blast
+                                                                                ch_unicycler_blast,
+                                                                                ch_unicycler_plasmidid
 
     script:
     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
@@ -1411,7 +1412,7 @@ process ABACAS_UNICYCLER {
   file fasta from ch_viral_fasta
 
   output:
-  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_unicycler_plasmidid
+  set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_abacas_unicycler_fasta
   file "*.abacas*" into ch_abacas_unicycler_results
 
   script:
@@ -1424,7 +1425,27 @@ process ABACAS_UNICYCLER {
   """
 }
 
+/*
+ * STEPS 8.5 Run plasmidID on Unicycler de novo assembly
+ */
+process PLASMIDID_UNICYCLER {
+  label "process_medium"
+  tag "$sample"
+  publishDir path: { "${params.outdir}/unicycler/plasmidID" }, mode: 'copy'
 
+  input:
+  set val(sample), val(single_end), val(is_sra), file(scaffolds) from ch_unicycler_plasmidid.filter{ it.size()>0 }
+  file fasta from ch_viral_fasta
+
+  output:
+  file "$sample" into ch_plasmid_unicycler_results
+
+  script:
+  """
+  plasmidID -d $fasta -s $sample -c $scaffolds --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+  mv NO_GROUP/$sample ./$sample
+  """
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
