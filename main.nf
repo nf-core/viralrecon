@@ -179,6 +179,7 @@ if (params.viral_fasta) {
 } else {
     exit 1, "Viral fasta file not specified!"
 }
+// TODO nf-core: Make viral_gff mandatory?
 if (params.viral_gff) { ch_viral_gff = file(params.viral_gff, checkIfExists: true) }
 if (params.viral_kraken2_db) { ch_viral_kraken2_db = Channel.fromPath(params.viral_kraken2_db, checkIfExists: true) }
 if (!params.viral_kraken2_db && !params.viral_kraken2_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'viral'!" }
@@ -573,10 +574,10 @@ process TRIMMOMATIC_ASSEMBLY {
     file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*trimmed*") into ch_trimmomatic_assembly_fastqc,
-                                                                          ch_trimmomatic_assembly_kraken2_host,
-                                                                          ch_trimmomatic_assembly_kraken2_viral
-    set val(sample), val(single_end), val(is_sra), file("*orphan*") into ch_trimmomatic_assembly_orphan
+    set val(sample), val(single_end), val(is_sra), file("*.trimmed*") into ch_trimmomatic_assembly_fastqc,
+                                                                           ch_trimmomatic_assembly_kraken2_host,
+                                                                           ch_trimmomatic_assembly_kraken2_viral
+    set val(sample), val(single_end), val(is_sra), file("*.orphan*") into ch_trimmomatic_assembly_orphan
     file '*.log' into ch_trimmomatic_assembly_mqc
 
     script:
@@ -616,9 +617,9 @@ process TRIMMOMATIC_MAPPING {
     file adapters from ch_adapter_mapping_file.collect()
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*trimmed*") into ch_trimmomatic_mapping_fastqc,
-                                                                          ch_trimmomatic_mapping_bowtie
-    set val(sample), val(single_end), val(is_sra), file("*orphan*") into ch_trimmomatic_mapping_orphan
+    set val(sample), val(single_end), val(is_sra), file("*.trimmed*") into ch_trimmomatic_mapping_fastqc,
+                                                                           ch_trimmomatic_mapping_bowtie
+    set val(sample), val(single_end), val(is_sra), file("*.orphan*") into ch_trimmomatic_mapping_orphan
     file '*.log' into ch_trimmomatic_mapping_mqc
 
     script:
@@ -883,7 +884,7 @@ process SORT_BAM {
 /*
  * STEP 5.1: Remove amplicon primers with iVar
  */
-// Add Ivar log output to MultiQC
+// TODO nf-core: Add IVar log output to MultiQC
 if (params.protocol != 'amplicon') {
     ch_ivar_flagstat_mqc = Channel.empty()
     ch_ivar_log = Channel.empty()
@@ -927,7 +928,7 @@ if (params.protocol != 'amplicon') {
             -q 15 \\
             -s 4 \\
             -e \\
-            -p ${prefix} > ${prefix}.log
+            -p ${prefix} > ${prefix}.ivar.log
 
         samtools sort -@ $task.cpus -o ${prefix}.sorted.bam -T $prefix ${prefix}.bam
         samtools index ${prefix}.sorted.bam
@@ -994,14 +995,16 @@ process PICARD_METRICS {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * STEPS 6.1 Variant Calling with VarScan 2
+ * STEPS 6.1 Variant calling with VarScan 2
  */
+// TODO nf-core: Add Varscan 2 log output to MultiQC
 process VARSCAN2 {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/varscan2", mode: params.publish_dir_mode,
         saveAs: { filename ->
             		      if (filename.endsWith("vcf")) "$filename"
+                      else if (filename.endsWith(".log")) "log/$filename"
                       else params.save_pileup ? filename : null
                 }
 
@@ -1013,10 +1016,11 @@ process VARSCAN2 {
     file fasta from ch_viral_fasta
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*highfreq.vcf") into ch_varscan2_highfreq_annotation,
-                                                                              ch_varscan2_highfreq_consensus
-    set val(sample), val(single_end), val(is_sra), file("*lowfreq.vcf") into ch_varscan2_lowfreq_annotation
-    file "*pileup" into ch_varscan2_pileup
+    set val(sample), val(single_end), val(is_sra), file("*.highfreq.vcf") into ch_varscan2_highfreq_snpeff,
+                                                                               ch_varscan2_highfreq_consensus
+    set val(sample), val(single_end), val(is_sra), file("*.lowfreq.vcf") into ch_varscan2_lowfreq_snpeff
+    file "*.pileup" into ch_varscan2_pileup
+    file "*.log" into ch_varscan2_log
 
     script:
     """
@@ -1034,7 +1038,8 @@ process VARSCAN2 {
         --p-value 0.99 \\
         --variants \\
         --output-vcf 1 \\
-        > ${sample}.lowfreq.vcf
+        > ${sample}.lowfreq.vcf \\
+        2> ${sample}.lowfreq.varscan2.log
 
     varscan mpileup2cns \\
         ${sample}.pileup \\
@@ -1042,88 +1047,72 @@ process VARSCAN2 {
         --p-value 0.05 \\
         --variants \\
         --output-vcf 1 \\
-        > ${sample}.highfreq.vcf
+        > ${sample}.highfreq.vcf \\
+        2> ${sample}.highfreq.varscan2.log
     """
 }
 
-// /*
-//  * STEPS 6.2 Variant Calling annotation with SnpEff and SnpSift
-//  */
-// process VARIANT_ANNOTATION {
-//  	tag "$sample"
-//   label 'process_medium'
-//   publishDir "${params.outdir}/annotation", mode: params.publish_dir_mode,
-// 		saveAs: {filename ->
-// 			if (filename.endsWith("majority.ann.vcf")) "majority/$filename"
-// 			else if (filename.endsWith("majority.csv")) "majority/$filename"
-//       else if (filename.endsWith("majority.genes.txt")) "majority/$filename"
-//       else if (filename.endsWith("majority.snpEff.summary.html")) "majority/$filename"
-//       else if (filename.endsWith("majority.ann.table.txt")) "majority/$filename"
-//       else if (filename.endsWith("lowfreq.ann.vcf")) "lowfreq/$filename"
-//       else if (filename.endsWith("lowfreq.csv")) "lowfreq/$filename"
-//       else if (filename.endsWith("lowfreq.genes.txt")) "lowfreq/$filename"
-//       else if (filename.endsWith("lowfreq.snpEff.summary.html")) "lowfreq/$filename"
-//       else if (filename.endsWith("lowfreq.ann.table.txt")) "lowfreq/$filename"
-//       else filename
-// 	}
-//
-//   when:
-//   !params.skip_variants && !is_sra
-//
-//
-//  	input:
-// 	set val(sample), val(is_sra), file(majority_variants) from ch_variantcalling_major_annotation
-//   set val(sample), val(is_sra), file(low_variants) from ch_variantcalling_low_annotation
-//   file ('data/genomes/virus.fa') from ch_viral_fasta
-//   file ('data/virus/genes.gff') from ch_viral_gff
-//
-//
-//  	output:
-//   set val(sample), val(is_sra), file("*majority.ann.vcf") into ch_majority_annotated_consensus
-//   file "*majority.csv" into ch_snpeff_majority_mqc
-//   file "*majority.{genes.txt,snpEff.summary.html}" into ch_majority_snpeff_summaries
-//   file "*lowfreq.ann.vcf" into ch_lowfreq_annotated_variants
-//   file "*lowfreq.{genes.txt,snpEff.summary.html}" into ch_lowfreq_snpeff_summaries
-//   file "*lowfreq.csv" into ch_snpeff_lowfreq_mqc
-//   file "*majority.ann.table.txt" into ch_snpsift_majority_table
-//   file "*lowfreq.ann.table.txt" into ch_snpsift_lowfreq_table
-//
-//  	script:
-//  	"""
-//  	echo "virus.genome : virus" > snpeff.config
-//   snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v virus
-//   snpEff virus -config ./snpeff.config -dataDir ./data $majority_variants -csvStats ${sample}.majority.csv > ${sample}.majority.ann.vcf
-//   mv snpEff_summary.html ${sample}.majority.snpEff.summary.html
-//   snpEff virus -config ./snpeff.config -dataDir ./data $low_variants -csvStats ${sample}.lowfreq.csv > ${sample}.lowfreq.ann.vcf
-//   mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
-//   SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${sample}.majority.ann.vcf \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${sample}.majority.ann.table.txt
-//   SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${sample}.lowfreq.ann.vcf \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${sample}.lowfreq.ann.table.txt
-//  	"""
-// }
+/*
+ * STEPS 6.2 Variant calling annotation with SnpEff and SnpSift
+ */
+process SNPEFF {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/varscan2/snpeff", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants && !is_sra
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(highfreq_vcf) from ch_varscan2_highfreq_snpeff
+    set val(sample), val(single_end), val(is_sra), file(lowfreq_vcf) from ch_varscan2_lowfreq_snpeff
+    file ('data/genomes/virus.fa') from ch_viral_fasta
+    file ('data/virus/genes.gff') from ch_viral_gff
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.highfreq.snpEff.vcf") into ch_snpeff_consensus
+    file "*.vcf" into ch_snpeff_vcf
+    file "*.{txt,html}" into ch_snpeff_reports
+    file "*.csv" into ch_snpeff_mqc
+
+    script:
+    """
+    echo "virus.genome : virus" > snpeff.config
+    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v virus
+
+    snpEff virus -config ./snpeff.config -dataDir ./data $highfreq_vcf -csvStats ${sample}.highfreq.snpEff.csv > ${sample}.highfreq.snpEff.vcf
+    mv snpEff_summary.html ${sample}.highfreq.snpEff.summary.html
+    SnpSift extractFields -s "," \\
+        -e "." \\
+        ${sample}.highfreq.snpEff.vcf \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > ${sample}.highfreq.snpSift.table.txt
+
+    snpEff virus -config ./snpeff.config -dataDir ./data $lowfreq_vcf -csvStats ${sample}.lowfreq.snpEff.csv > ${sample}.lowfreq.snpEff.vcf
+    mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
+    SnpSift extractFields -s "," \\
+        -e "." \\
+        ${sample}.lowfreq.snpEff.vcf \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > ${sample}.lowfreq.snpSift.table.txt
+    	"""
+}
 //
 // /*
 //  * STEPS 6.3 Consensus Genome generation with Bcftools and masking with Bedtools
@@ -1687,8 +1676,8 @@ process VARSCAN2 {
 //     file ('picard/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
 //     file ('ivar/*') from ch_ivar_flagstat_mqc.collect().ifEmpty([])
 //     file ('ivar/*') from ch_ivar_picardstat_mqc.collect().ifEmpty([])
-//     file ('snpeff/majority*') from ch_snpeff_majority_mqc.collect()
-//     file ('snpeff/lowfreq*') from ch_snpeff_lowfreq_mqc.collect()
+////     file ('snpeff/majority*') from ch_snpeff_majority_mqc.collect()
+//     file ('snpeff*') from ch_snpeff_mqc.collect()
 //     file ('software_versions/*') from ch_software_versions_yaml.collect()
 //     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 //
