@@ -250,6 +250,10 @@ Specify this parameter to skip all of the de novo assembly steps in the pipeline
 
 ## Variant calling
 
+### `--save_pileup`
+
+Save pileup files in the results directory (Default: false). These tend to be quite large so are not saved by default.
+
 ### `--skip_variants`
 
 Specify this parameter to skip all of the variant calling steps in the pipeline.
