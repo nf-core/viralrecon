@@ -43,7 +43,7 @@ module_order:
         name: 'Bowtie2 (quality trimming)'
         info: 'This section of the report shows Bowtie2 mapping results for reads after quality trimming only.'
         path_filters:
-            - '.bowtie2/*'
+            - './bowtie2/*'
     - samtools:
         name: 'SAMTools (raw)'
         info: 'This section of the report shows SAMTools results after mapping with Bowtie2.'
