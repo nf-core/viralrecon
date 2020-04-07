@@ -339,7 +339,7 @@ ch_samplesheet_reformat
 /*
  * PREPROCESSING: Build Viral Bowtie2 index
  */
-process BOWTIE2_INDEX {
+process BUILD_BOWTIE2_INDEX {
     tag "$fasta"
     label 'process_medium'
     publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
@@ -362,112 +362,81 @@ process BOWTIE2_INDEX {
     """
 }
 
-// /*
-//  * PREPROCESSING: Build Viral Blast database
-//  */
-// process BLAST_DB_VIRAL {
-//     tag "$fasta"
-//     label 'process_medium'
-//     publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-//         saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
-//
-//     input:
-//     file fasta from ch_fasta
-//
-//     output:
-//     file "BlastDBViral" into ch_viral_blast_db_spades,
-//                              ch_viral_blast_db_metaspades,
-//                              ch_viral_blast_db_unicycler
-//
-//     script:
-//     """
-//     makeblastdb \\
-//         -in $fasta \\
-//         -parse_seqids \\
-//         -dbtype nucl
-//     mkdir BlastDBViral && mv ${fasta}* BlastDBViral
-//     """
-// }
-//
-// /*
-//  * PREPROCESSING: Build Kraken2 database
-//  */
-// // Function to check if running offline
-// def isOffline() {
-//     try {
-//         return NXF_OFFLINE as Boolean
-//     }
-//     catch( Exception e ) {
-//         return false
-//     }
-// }
-//
-// if (!isOffline()) {
-//     if (params.kraken2_use_host_db) {
-//         if (!params.host_kraken2_db) {
-//             if (!params.host_kraken2_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
-//
-//             process KRAKEN2_DB_HOST {
-//                 tag "$db"
-//                 label 'process_high'
-//                 publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-//                     saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
-//
-//                 output:
-//                 file "$db" into ch_kraken2_db
-//
-//                 script:
-//                 db = "kraken2_${params.host_kraken2_name}"
-//                 ftp = params.kraken2_use_ftp ? "--use-ftp" : ""
-//                 """
-//                 kraken2-build --db $db --threads $task.cpus $ftp --download-taxonomy
-//                 kraken2-build --db $db --threads $task.cpus $ftp --download-library $params.host_kraken2_name
-//                 kraken2-build --db $db --threads $task.cpus $ftp --build
-//
-//                 cd $db
-//                 if [ -d "taxonomy" ]; then rm -rf taxonomy; fi
-//                 if [ -d "library" ]; then rm -rf library; fi
-//                 if [ -f "seqid2taxid.map" ]; then rm seqid2taxid.map; fi
-//                 """
-//             }
-//         } else {
-//             ch_kraken2_db = Channel.fromPath(params.host_kraken2_db, checkIfExists: true)
-//         }
-//     } else {
-//         if (!params.viral_kraken2_db) {
-//             if (!params.viral_kraken2_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'viral'!" }
-//
-//             process KRAKEN2_DB_VIRAL {
-//                 tag "$db"
-//                 label 'process_high'
-//                 publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-//                     saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
-//
-//                 output:
-//                 file "$db" into ch_kraken2_db
-//
-//                 script:
-//                 db = "kraken2_${params.viral_kraken2_name}"
-//                 ftp = params.kraken2_use_ftp ? "--use-ftp" : ""
-//                 """
-//                 kraken2-build --db $db --threads $task.cpus $ftp --download-taxonomy
-//                 kraken2-build --db $db --threads $task.cpus $ftp --download-library $params.viral_kraken2_name
-//                 kraken2-build --db $db --threads $task.cpus $ftp --build
-//
-//                 cd $db
-//                 if [ -d "taxonomy" ]; then rm -rf taxonomy; fi
-//                 if [ -d "library" ]; then rm -rf library; fi
-//                 if [ -f "seqid2taxid.map" ]; then rm seqid2taxid.map; fi
-//                 """
-//             }
-//         } else {
-//             ch_kraken2_db = Channel.fromPath(params.viral_kraken2_db, checkIfExists: true)
-//         }
-//     }
-// } else {
-//     exit 1, "NXF_OFFLINE=true or -offline has been set so cannot download files required to build Kraken2 database!"
-// }
-//
+/*
+ * PREPROCESSING: Build Viral Blast database
+ */
+process BUILD_BLAST_DB {
+    tag "$fasta"
+    label 'process_medium'
+    publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
+        saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+
+    input:
+    file fasta from ch_fasta
+
+    output:
+    file "BlastDB" into ch_blast_db_spades,
+                        ch_blast_db_metaspades,
+                        ch_blast_db_unicycler
+
+    script:
+    """
+    makeblastdb \\
+        -in $fasta \\
+        -parse_seqids \\
+        -dbtype nucl
+    mkdir BlastDB && mv ${fasta}* BlastDB
+    """
+}
+
+/*
+ * PREPROCESSING: Build Kraken2 database
+ */
+// Function to check if running offline
+def isOffline() {
+    try {
+        return NXF_OFFLINE as Boolean
+    }
+    catch( Exception e ) {
+        return false
+    }
+}
+
+if (!isOffline()) {
+    if (!params.kraken2_db) {
+        if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
+
+        process BUILD_KRAKEN2_DB {
+            tag "$db"
+            label 'process_high'
+            publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
+                saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+
+            output:
+            file "$db" into ch_kraken2_db
+
+            script:
+            db = "kraken2_${params.kraken2_db_name}"
+            ftp = params.kraken2_use_ftp ? "--use-ftp" : ""
+            """
+            kraken2-build --db $db --threads $task.cpus $ftp --download-taxonomy
+            kraken2-build --db $db --threads $task.cpus $ftp --download-library $params.kraken2_db_name
+            kraken2-build --db $db --threads $task.cpus $ftp --build
+
+            cd $db
+            if [ -d "taxonomy" ]; then rm -rf taxonomy; fi
+            if [ -d "library" ]; then rm -rf library; fi
+            if [ -f "seqid2taxid.map" ]; then rm seqid2taxid.map; fi
+            """
+        }
+    } else {
+        ch_kraken2_db = Channel.fromPath(params.kraken2_db, checkIfExists: true)
+    }
+
+} else {
+    exit 1, "NXF_OFFLINE=true or -offline has been set so cannot download files required to build Kraken2 database!"
+}
+
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
 // /* --                                                                     -- */
@@ -1273,7 +1242,7 @@ process BOWTIE2_INDEX {
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_blast
-//     file db from ch_viral_blast_db_spades.collect()
+//     file db from ch_blast_db_spades.collect()
 //     file header from ch_blast_outfmt6_header
 //
 //     output:
@@ -1432,7 +1401,7 @@ process BOWTIE2_INDEX {
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_blast
-//     file db from ch_viral_blast_db_metaspades.collect()
+//     file db from ch_blast_db_metaspades.collect()
 //     file header from ch_blast_outfmt6_header
 //
 //     output:
@@ -1590,7 +1559,7 @@ process BOWTIE2_INDEX {
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_blast
-//     file db from ch_viral_blast_db_unicycler.collect()
+//     file db from ch_blast_db_unicycler.collect()
 //     file header from ch_blast_outfmt6_header
 //
 //     output:
