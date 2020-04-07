@@ -46,4 +46,4 @@ jobs:
           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
       - name: Run pipeline with test SISPA data
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker
+          nextflow run ${GITHUB_WORKSPACE} -profile test_download,docker
