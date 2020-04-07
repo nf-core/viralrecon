@@ -1151,6 +1151,9 @@ process SPADES_ABACAS {
                       else filename
                 }
 
+    when:
+    !params.skip_assembly && 'spades' in assemblers
+
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_abacas
     file fasta from ch_fasta
@@ -1169,27 +1172,30 @@ process SPADES_ABACAS {
     """
 }
 
-// /*
-//  * STEP 4.2.3: Run PlasmidID on SPAdes de novo assembly
-//  */
-// process SPADES_PLASMIDID {
-//     tag "$sample"
-//     label "process_medium"
-//     publishDir "${params.outdir}/assembly/spades/plasmidid", mode: params.publish_dir_mode
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
-//     file fasta from ch_fasta
-//
-//     output:
-//     file "$sample" into ch_spades_plasmidid_results
-//
-//     script:
-//     """
-//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-//     mv NO_GROUP/$sample ./$sample
-//     """
-// }
+/*
+ * STEP 4.2.3: Run PlasmidID on SPAdes de novo assembly
+ */
+process SPADES_PLASMIDID {
+    tag "$sample"
+    label "process_medium"
+    publishDir "${params.outdir}/assembly/spades/plasmidid", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'spades' in assemblers
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
+    file fasta from ch_fasta
+
+    output:
+    file "$sample" into ch_spades_plasmidid_results
+
+    script:
+    """
+    plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+    mv NO_GROUP/$sample ./$sample
+    """
+}
 
 /*
  * STEP 4.2.4: Run Quast on SPAdes de novo assembly
@@ -1307,6 +1313,9 @@ process METASPADES_ABACAS {
                       else filename
                 }
 
+    when:
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end
+
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_abacas
     file fasta from ch_fasta
@@ -1325,27 +1334,30 @@ process METASPADES_ABACAS {
     """
 }
 
-// /*
-//  * STEP 4.2.3: Run PlasmidID on MetaSPAdes de novo assembly
-//  */
-// process METASPADES_PLASMIDID {
-//     tag "$sample"
-//     label "process_medium"
-//     publishDir "${params.outdir}/assembly/metaspades/plasmidid", mode: params.publish_dir_mode
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_plasmidid.filter { it.size() > 0 }
-//     file fasta from ch_fasta
-//
-//     output:
-//     file "$sample" into ch_metaspades_plasmidid_results
-//
-//     script:
-//     """
-//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-//     mv NO_GROUP/$sample ./$sample
-//     """
-// }
+/*
+ * STEP 4.2.3: Run PlasmidID on MetaSPAdes de novo assembly
+ */
+process METASPADES_PLASMIDID {
+    tag "$sample"
+    label "process_medium"
+    publishDir "${params.outdir}/assembly/metaspades/plasmidid", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_plasmidid.filter { it.size() > 0 }
+    file fasta from ch_fasta
+
+    output:
+    file "$sample" into ch_metaspades_plasmidid_results
+
+    script:
+    """
+    plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+    mv NO_GROUP/$sample ./$sample
+    """
+}
 
 /*
  * STEP 4.2.4: Run Quast on MetaSPAdes de novo assembly
@@ -1462,6 +1474,9 @@ process UNICYCLER_ABACAS {
                       else filename
                 }
 
+    when:
+    !params.skip_assembly && 'unicycler' in assemblers
+
     input:
     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_abacas
     file fasta from ch_fasta
@@ -1480,27 +1495,30 @@ process UNICYCLER_ABACAS {
     """
 }
 
-// /*
-//  * STEP 4.2.3: Run PlasmidID on Unicycler de novo assembly
-//  */
-// process UNICYCLER_PLASMIDID {
-//     tag "$sample"
-//     label "process_medium"
-//     publishDir "${params.outdir}/assembly/unicycler/plasmidid", mode: params.publish_dir_mode
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
-//     file fasta from ch_fasta
-//
-//     output:
-//     file "$sample" into ch_unicycler_plasmidid_results
-//
-//     script:
-//     """
-//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-//     mv NO_GROUP/$sample ./$sample
-//     """
-// }
+/*
+ * STEP 4.2.3: Run PlasmidID on Unicycler de novo assembly
+ */
+process UNICYCLER_PLASMIDID {
+    tag "$sample"
+    label "process_medium"
+    publishDir "${params.outdir}/assembly/unicycler/plasmidid", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'unicycler' in assemblers
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
+    file fasta from ch_fasta
+
+    output:
+    file "$sample" into ch_unicycler_plasmidid_results
+
+    script:
+    """
+    plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+    mv NO_GROUP/$sample ./$sample
+    """
+}
 
 /*
  * STEP 4.2.4: Run Quast on Unicycler de novo assembly
@@ -1607,6 +1625,9 @@ process get_software_versions {
  */
 process MULTIQC {
     publishDir "${params.outdir}/multiqc", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_multiqc
 
     input:
     file (multiqc_config) from ch_multiqc_config
