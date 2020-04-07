@@ -20,9 +20,9 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 1. Raw read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 2. Adapter trimming ([`Trimmomatic`](http://www.usadellab.org/cms/?page=trimmomatic))
 3. Variant calling
-    1. Primer removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
-    2. Read alignment ([`Bowtie 2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml))
-    3. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
+    1. Read alignment ([`Bowtie 2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml))
+    2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
+    3. Primer removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
     4. Alignment-level QC ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/), [`picard`](https://broadinstitute.github.io/picard/))
     5. Call variants ([`VarScan 2`](http://dkoboldt.github.io/varscan/), [`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
     6. Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
@@ -30,10 +30,10 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 4. De novo assembly
     1. Removal of host reads ([`Kraken2`](http://ccb.jhu.edu/software/kraken2/))
     2. Choice of multiple assembly tools ([`SPAdes`](http://cab.spbu.ru/software/spades/), [`metaSPAdes`](http://cab.spbu.ru/software/meta-spades/), [`Unicycler`](https://github.com/rrwick/Unicycler))
-    3. Contiguate contigs assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
-    4. Blast to reference assembly ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch))
-    5. Assembly assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
-    6. Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))
+        1. Blast to reference assembly ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch))
+        2. Contiguate contigs assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
+        3. Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))
+        4. Assembly assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
 5. Present QC for raw read, alignment, assembly, variant annotation results ([`MultiQC`](http://multiqc.info/), [`R`](https://www.r-project.org/))
 
 <!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
