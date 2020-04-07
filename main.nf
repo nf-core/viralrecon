@@ -152,6 +152,7 @@ if (params.genomes && params.genome && !params.genomes.containsKey(params.genome
 params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
 params.gff = params.genome ? params.genomes[ params.genome ].gff ?: false : false
 
+// TODO nf-core: Refactor to accept gzip fasta as input
 if (params.fasta) {
     lastPath = params.fasta.lastIndexOf(File.separator)
     lastExt = params.fasta.lastIndexOf(".")
@@ -823,8 +824,8 @@ process SNPEFF {
 
     input:
     set val(sample), val(single_end), val(is_sra), file(highfreq_vcf), file(lowfreq_vcf) from ch_varscan2_highfreq_snpeff.join(ch_varscan2_lowfreq_snpeff, by: [0,1,2])
-    file ('data/genomes/virus.fa') from ch_fasta
-    file ('data/virus/genes.gff') from ch_gff_snpeff.collect().ifEmpty([])
+    file fasta from ch_fasta
+    file gff from ch_gff_snpeff.collect()
 
     output:
     file "*.vcf.gz*" into ch_snpeff_vcf
@@ -834,10 +835,19 @@ process SNPEFF {
 
     script:
     """
-    echo "virus.genome : virus" > snpeff.config
-    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v virus
+    mkdir -p ./data/genomes/ && cd ./data/genomes/
+    FASTA=${index_base}.fa; if [[ $fasta == *.gz ]]; then FASTA=${index_base}.fa.gz; fi
+    ln -s ../../$fasta \$FASTA
+    cd ../../
 
-    snpEff virus \\
+    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
+    GFF=genes.gff; if [[ $gff == *.gz ]]; then GFF=genes.gff.gz; fi
+    ln -s ../../$gff \$GFF
+    cd ../../
+    echo "${index_base}.genome : ${index_base}" > snpeff.config
+    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
+
+    snpEff ${index_base} \\
         -config ./snpeff.config \\
         -dataDir ./data ${highfreq_vcf[0]} \\
         -csvStats ${sample}.highfreq.snpEff.csv \\
@@ -859,7 +869,7 @@ process SNPEFF {
         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
         > ${sample}.highfreq.snpSift.table.txt
 
-    snpEff virus \\
+    snpEff ${index_base} \\
         -config ./snpeff.config \\
         -dataDir ./data ${lowfreq_vcf[0]} \\
         -csvStats ${sample}.lowfreq.snpEff.csv \\
