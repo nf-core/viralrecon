@@ -152,6 +152,9 @@ if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
 }
 
+// TODO nf-core: Refactor Kraken2 variables to be simpler
+// TODO nf-core: Add igenomes.config back in and upload Kraken db and COVID-19 genome from UCSC to AWS iGenomes
+
 // Host reference files
 if (params.genomes && params.host_genome && !params.genomes.containsKey(params.host_genome)) {
     exit 1, "The provided genome '${params.host_genome}' is not available in the Genome file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
@@ -314,6 +317,7 @@ process CHECK_SAMPLESHEET {
 }
 
 // Function to get list of [ sample, single_end?, is_sra?, [ fastq_1, fastq_2 ] ]
+// TODO nf-core: Remove _T1 extension from SRA ids
 def validate_input(LinkedHashMap sample) {
     def sample_id = sample.sample_id
     def single_end = sample.single_end.toBoolean()
@@ -409,7 +413,6 @@ process BLAST_DB_VIRAL {
 /*
  * PREPROCESSING: Build Kraken2 database
  */
-
 // Function to check if running offline
 def isOffline() {
     try {
@@ -551,6 +554,7 @@ process FASTQC_RAW {
 /*
 * STEP 2.1: Adapter trimming with Trimmomatic for de novo assembly
 */
+// TODO nf-core: Use fastp instead of Trimmomatic
 process TRIMMOMATIC_ASSEMBLY {
     tag "$sample"
     label 'process_medium'
@@ -720,6 +724,7 @@ process FASTQC_TRIM_MAPPING {
 /*
 * STEP 3: Filter reads with Kraken2
 */
+// TODO nf-core: Add Kraken2 log output to MultiQC
 if (params.kraken2_use_host_db) {
     process KRAKEN2_HOST {
         tag "$db"
@@ -829,6 +834,7 @@ if (params.kraken2_use_host_db) {
 /*
 * STEP 4.1: Map read(s) with Bowtie 2
 */
+// TODO nf-core: Add another option for BAM to fastq to assemble mapped reads
 process BOWTIE2 {
     tag "$sample"
     label 'process_medium'
@@ -1024,7 +1030,7 @@ process PICARD_METRICS {
 /*
  * STEP 6.1: Variant calling with VarScan 2
  */
-// TODO nf-core: Add Varscan 2 log output to MultiQC
+// TODO nf-core: Add Varscan 2/BCFTools log output to MultiQC
 process VARSCAN2 {
     tag "$sample"
     label 'process_medium'
