@@ -6,7 +6,6 @@ channels:
   - bioconda
   - defaults
   - hcc
-  - pedroscampoy
 dependencies:
  ## conda-forge packages
   - conda-forge::python=3.6.10
@@ -45,5 +44,5 @@ dependencies:
   - bioconda::quast=5.0.2
   - bioconda::blast=2.9.0
   - bioconda::pilon=1.23
-  - hcc::abacas=1.3.1
   - bioconda::plasmidid=1.5.2
+  - hcc::abacas=1.3.1
