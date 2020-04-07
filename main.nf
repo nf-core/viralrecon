@@ -1213,7 +1213,7 @@ process BCFTOOLS_CONSENSUS {
 process SPADES {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/denovo/spades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'spades' in assemblers && !is_sra
@@ -1243,7 +1243,7 @@ process SPADES {
  */
 process SPADES_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/denovo/spades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'spades' in assemblers && !is_sra
@@ -1281,7 +1281,7 @@ process SPADES_QUAST {
 process SPADES_BLAST {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/denovo/spades/blast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/spades/blast", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'spades' in assemblers && !is_sra
@@ -1315,7 +1315,7 @@ process SPADES_BLAST {
 process SPADES_ABACAS {
     tag "$sample"
     label "process_medium"
-    publishDir "${params.outdir}/denovo/spades/abacas", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/assembly/spades/abacas", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
                       else filename
@@ -1345,7 +1345,7 @@ process SPADES_ABACAS {
 // process SPADES_PLASMIDID {
 //     tag "$sample"
 //     label "process_medium"
-//     publishDir "${params.outdir}/denovo/spades/plasmidid", mode: params.publish_dir_mode
+//     publishDir "${params.outdir}/assembly/spades/plasmidid", mode: params.publish_dir_mode
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
@@ -1371,7 +1371,7 @@ process SPADES_ABACAS {
 process METASPADES {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/denovo/metaspades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
@@ -1402,7 +1402,7 @@ process METASPADES {
  */
 process METASPADES_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/denovo/metaspades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
@@ -1440,7 +1440,7 @@ process METASPADES_QUAST {
 process METASPADES_BLAST {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/denovo/metaspades/blast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/metaspades/blast", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
@@ -1474,7 +1474,7 @@ process METASPADES_BLAST {
 process METASPADES_ABACAS {
     tag "$sample"
     label "process_medium"
-    publishDir "${params.outdir}/denovo/metaspades/abacas", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/assembly/metaspades/abacas", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
                       else filename
@@ -1504,7 +1504,7 @@ process METASPADES_ABACAS {
 // process METASPADES_PLASMIDID {
 //     tag "$sample"
 //     label "process_medium"
-//     publishDir "${params.outdir}/denovo/metaspades/plasmidid", mode: params.publish_dir_mode
+//     publishDir "${params.outdir}/assembly/metaspades/plasmidid", mode: params.publish_dir_mode
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_plasmidid.filter { it.size() > 0 }
@@ -1530,7 +1530,7 @@ process METASPADES_ABACAS {
 process UNICYCLER {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/denovo/unicycler", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
@@ -1560,7 +1560,7 @@ process UNICYCLER {
  */
 process UNICYCLER_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/denovo/unicycler", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
@@ -1598,7 +1598,7 @@ process UNICYCLER_QUAST {
 process UNICYCLER_BLAST {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/denovo/unicycler/blast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/unicycler/blast", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
@@ -1632,7 +1632,7 @@ process UNICYCLER_BLAST {
 process UNICYCLER_ABACAS {
     tag "$sample"
     label "process_medium"
-    publishDir "${params.outdir}/denovo/unicycler/abacas", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/assembly/unicycler/abacas", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
                       else filename
@@ -1662,7 +1662,7 @@ process UNICYCLER_ABACAS {
 // process UNICYCLER_PLASMIDID {
 //     tag "$sample"
 //     label "process_medium"
-//     publishDir "${params.outdir}/denovo/unicycler/plasmidid", mode: params.publish_dir_mode
+//     publishDir "${params.outdir}/assembly/unicycler/plasmidid", mode: params.publish_dir_mode
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
