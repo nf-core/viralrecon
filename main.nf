@@ -163,6 +163,7 @@ if (params.fasta) {
     exit 1, "Viral fasta file not specified!"
 }
 // TODO nf-core: Make viral_gff mandatory?
+// TODO nf-core: Zip fasta and gff on test-datasets
 if (params.gff) { ch_gff = Channel.fromPath(params.gff, checkIfExists: true) } else { ch_gff = Channel.empty() }
 ch_gff
     .into { ch_gff_snpeff;
