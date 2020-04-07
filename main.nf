@@ -545,28 +545,28 @@ sra_ids_list_to_check_fromSRA
  * Downloading fastq files using fasterq-dump
  */
 process FASTERQ_DUMP {
-    tag "$id"
+    tag "$sample"
     label 'process_medium'
 
     input:
-    val(id) from ch_fromSRA_ids_missing
+    val(sample) from ch_fromSRA_ids_missing
 
     output:
-    set val(id), env(single_end), val("true"), file("*.fastq") optional true into ch_fasterq_dump
+    set val(sample), env(single_end), val("true"), file("*.fastq") optional true into ch_fasterq_dump
 
     """
     single_end=""
-    single_end=`get_SRA_metainfo.py $id --is_single`
+    single_end=`get_SRA_metainfo.py $sample --is_single`
 
     if [[ \$single_end == "true" ]]
     then
-        fasterq-dump ${id} \\
+        fasterq-dump ${sample} \\
             -O ./ \\
             -t ./ \\
             -e ${task.cpus}
     elif [[ \$single_end == "false" ]]
     then
-        fasterq-dump ${id} \\
+        fasterq-dump ${sample} \\
             -O ./ \\
             -t ./ \\
             -e ${task.cpus} \\
@@ -582,28 +582,28 @@ process FASTERQ_DUMP {
  * Validates and compresses fastq files
  */
 process VALIDATE_GZIP_FASTQ_FASTERQ_DUMP {
-    tag "$id"
+    tag "$sample"
     label 'process_medium'
 
     input:
-    set val(id), val(single_end), val(is_sra), file(fastq_reads) from ch_fasterq_dump
+    set val(sample), val(single_end), val(is_sra), file(fastq_reads) from ch_fasterq_dump
 
     output:
-    set val(id), val(single_end), val(is_sra), file("*.fastq.gz") optional true into ch_fasterq_gz_validated, ch_fasterq_gz_validated_to_check, ch_fasterq_gz_validated_to_print
+    set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") optional true into ch_fasterq_gz_validated, ch_fasterq_gz_validated_to_check, ch_fasterq_gz_validated_to_print
 
     script:
     if (single_end.toBoolean()) {
         """
-        fastq_info ${id}.fastq
-        gzip -fc ${id}.fastq > ${id}.fastq.gz
+        fastq_info ${sample}.fastq
+        gzip -fc ${sample}.fastq > ${sample}.fastq.gz
         """
     } else {
         """
-        fastq_info ${id}_1.fastq
-        fastq_info ${id}_2.fastq
+        fastq_info ${sample}_1.fastq
+        fastq_info ${sample}_2.fastq
 
-        gzip -fc ${id}_1.fastq > ${id}_1.fastq.gz
-        gzip -fc ${id}_2.fastq > ${id}_2.fastq.gz
+        gzip -fc ${sample}_1.fastq > ${sample}_1.fastq.gz
+        gzip -fc ${sample}_2.fastq > ${sample}_2.fastq.gz
         """
     }
 }
