@@ -7,37 +7,47 @@ import re
 regexes = {
     'nf-core/viralrecon': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
-    'FastQC': ['v_fastqc.txt', r"FastQC v(\S+)"],
+    'FastQC': ['v_fastqc.txt', r"FastQC\sv(\S+)"],
     'Trimmomatic': ['v_trimmomatic.txt', r"(\S+)"],
-    'Bowtie2': ['v_bowtie2.txt', r"bowtie2-align-s\sversion\s(\S+)"],
     'Kraken2': ['v_kraken2.txt', r"Kraken\sversion\s(\S+)"],
-    'Samtools': ['v_samtools.txt', r"samtools (\S+)"],
-    'BEDTools': ['v_bedtools.txt', r"bedtools v(\S+)"],
+    'Bowtie 2': ['v_bowtie2.txt', r"bowtie2-align-s\sversion\s(\S+)"],
+    'Samtools': ['v_samtools.txt', r"samtools\s(\S+)"],
+    'BEDTools': ['v_bedtools.txt', r"bedtools\sv(\S+)"],
     'Picard': ['v_picard.txt', r"\n(\S+)"],
-    'R': ['v_R.txt', r"R version (\S+)"],
-    'SPAdes': ['v_spades.txt', r"SPAdes genome assembler v(\S+)"],
-    'Unicycler': ['v_unicycler.txt', r"Unicycler v(\S+)"],
-    'QUAST': ['v_quast.txt', r"QUAST v(\S+)"],
-    'BLAST': ['v_blast.txt', r"blastn: (\S+)"],
-    'ABACAS': ['v_abacus.txt', r"ABACAS.(\S+)"],
-    'MultiQC': ['v_multiqc.txt', r"multiqc, version (\S+)"]
+    'iVar': ['v_ivar.txt', r"iVar\sversion\s(\S+)"],
+    'VarScan 2': ['v_varscan.txt', r"VarScan\sv(\S+)"],
+    'SnpEff': ['v_snpeff.txt', r"SnpEff\s(\S+)"],
+    'SnpSift': ['v_snpsift.txt', r"SnpSift\sversion\s(\S+)"],
+    'BCFTools': ['v_bcftools.txt', r"bcftools\s(\S+)"],
+    'SPAdes': ['v_spades.txt', r"SPAdes\sgenome\sassembler\sv(\S+)"],
+    'Unicycler': ['v_unicycler.txt', r"Unicycler\sv(\S+)"],
+    'QUAST': ['v_quast.txt', r"QUAST\sv(\S+)"],
+    'BLAST': ['v_blast.txt', r"blastn:\s(\S+)"],
+    'ABACAS': ['v_abacas.txt', r"ABACAS.(\S+)"],
+    'R': ['v_R.txt', r"R\sversion\s(\S+)"],
+    'MultiQC': ['v_multiqc.txt', r"multiqc,\sversion\s(\S+)"]
 }
 results = OrderedDict()
 results['nf-core/viralrecon'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['FastQC'] = '<span style="color:#999999;\">N/A</span>'
 results['Trimmomatic'] = '<span style="color:#999999;\">N/A</span>'
-results['Bowtie2'] = '<span style="color:#999999;\">N/A</span>'
 results['Kraken2'] = '<span style="color:#999999;\">N/A</span>'
+results['Bowtie 2'] = '<span style="color:#999999;\">N/A</span>'
 results['Samtools'] = '<span style="color:#999999;\">N/A</span>'
 results['BEDTools'] = '<span style="color:#999999;\">N/A</span>'
 results['Picard'] = '<span style="color:#999999;\">N/A</span>'
-results['R'] = '<span style="color:#999999;\">N/A</span>'
+results['iVar'] = '<span style="color:#999999;\">N/A</span>'
+results['VarScan 2'] = '<span style="color:#999999;\">N/A</span>'
+results['SnpEff'] = '<span style="color:#999999;\">N/A</span>'
+results['SnpSift'] = '<span style="color:#999999;\">N/A</span>'
+results['BCFTools'] = '<span style="color:#999999;\">N/A</span>'
 results['SPAdes'] = '<span style="color:#999999;\">N/A</span>'
 results['Unicycler'] = '<span style="color:#999999;\">N/A</span>'
 results['QUAST'] = '<span style="color:#999999;\">N/A</span>'
 results['BLAST'] = '<span style="color:#999999;\">N/A</span>'
 results['ABACAS'] = '<span style="color:#999999;\">N/A</span>'
+results['R'] = '<span style="color:#999999;\">N/A</span>'
 results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
 
 # Search each file using its regex
