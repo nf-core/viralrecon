@@ -345,6 +345,9 @@ process BUILD_BOWTIE2_INDEX {
     publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
         saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
 
+    when:
+    !params.skip_variants
+
     input:
     file fasta from ch_fasta
 
@@ -370,6 +373,9 @@ process BUILD_BLAST_DB {
     label 'process_medium'
     publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
         saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly
 
     input:
     file fasta from ch_fasta
@@ -401,7 +407,6 @@ def isOffline() {
         return false
     }
 }
-
 if (!isOffline()) {
     if (!params.kraken2_db) {
         if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
@@ -411,6 +416,9 @@ if (!isOffline()) {
             label 'process_high'
             publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
                 saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+
+            when:
+            !params.skip_assembly
 
             output:
             file "$db" into ch_kraken2_db
@@ -432,128 +440,108 @@ if (!isOffline()) {
     } else {
         ch_kraken2_db = Channel.fromPath(params.kraken2_db, checkIfExists: true)
     }
-
 } else {
     exit 1, "NXF_OFFLINE=true or -offline has been set so cannot download files required to build Kraken2 database!"
 }
 
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                     DOWNLOAD SRA FILES                              -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-//
-// // GET SRA FASTQ FILES HERE
-// // MERGE WITH ORIGINAL CHANNELS BEFORE PASSING TO NEXT STEPS
-//
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                        FASTQ QC                                     -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-//
-// /*
-//  * STEP 1: FastQC before trimming
-//  */
-// process FASTQC_RAW {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/preprocess/fastqc/raw", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       filename.endsWith(".zip") ? "zips/$filename" : "$filename"
-//                 }
-//
-//     when:
-//     !params.skip_fastqc && !params.skip_qc && !is_sra
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_fastqc
-//
-//     output:
-//     file "*.{zip,html}" into ch_fastqc_raw_reports_mqc
-//
-//     script:
-//     // Added soft-links to original fastqs for consistent naming in MultiQC
-//     """
-//     if $single_end; then
-//         [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
-//         fastqc --quiet --threads $task.cpus ${sample}.fastq.gz
-//     else
-//         [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
-//         [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-//         fastqc --quiet --threads $task.cpus ${sample}_1.fastq.gz
-//         fastqc --quiet --threads $task.cpus ${sample}_2.fastq.gz
-//     fi
-//     """
-// }
-//
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                        ADAPTER TRIMMING                             -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-//
-// /*
-// * STEP 2.1: Adapter trimming with Trimmomatic for de novo assembly
-// */
-// // TODO nf-core: Use fastp instead of Trimmomatic
-// process TRIMMOMATIC_ASSEMBLY {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/preprocess/trimmomatic/assembly", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".log")) filename
-//                       else params.save_trimmed ? filename : null
-//                 }
-//
-//     when:
-//     !params.skip_trimming && !is_sra && !params.skip_assembly
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic_assembly
-//     file adapters from ch_adapter_assembly_file.collect()
-//     file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.trimmed*") into ch_trimmomatic_assembly_fastqc,
-//                                                                            ch_trimmomatic_assembly_kraken2
-//     set val(sample), val(single_end), val(is_sra), file("*.orphan*") into ch_trimmomatic_assembly_orphan
-//     file '*.log' into ch_trimmomatic_assembly_mqc
-//
-//     script:
-//     pe = single_end ? "SE" : "PE"
-//     adapters = (params.amplicon_fasta && params.protocol == 'amplicon') ? "${amplicons}" : "${adapters}"
-//     orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
-//     // Added soft-links to original fastqs for consistent naming in MultiQC
-//     """
-//     IN_READS='${sample}.fastq.gz'
-//     OUT_READS='${sample}.trimmed.fastq.gz'
-//     if $single_end; then
-//         [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
-//     else
-//         [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
-//         [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-//         IN_READS='${sample}_1.fastq.gz ${sample}_2.fastq.gz'
-//         OUT_READS='${sample}_1.trimmed.fastq.gz ${sample}_1.orphan.fastq.gz ${sample}_2.trimmed.fastq.gz ${sample}_2.orphan.fastq.gz'
-//     fi
-//
-//     trimmomatic $pe \\
-//         -threads ${task.cpus} \\
-//         \$IN_READS \\
-//         \$OUT_READS \\
-//         ILLUMINACLIP:${adapters}:${params.trim_params} \\
-//         SLIDINGWINDOW:${params.trim_window_length}:${params.trim_window_value} \\
-//         MINLEN:${params.trim_min_length} \\
-//         2> ${sample}.trimmomatic.log
-//     $orphan
-//     """
-// }
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/* --                                                                     -- */
+/* --                     DOWNLOAD SRA FILES                              -- */
+/* --                                                                     -- */
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+// GET SRA FASTQ FILES HERE
+// MERGE WITH ORIGINAL CHANNELS BEFORE PASSING TO NEXT STEPS
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/* --                                                                     -- */
+/* --                        FASTQ QC                                     -- */
+/* --                                                                     -- */
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * STEP 1: FastQC before trimming
+ */
+process FASTQC_RAW {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/preprocess/fastqc/raw", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      filename.endsWith(".zip") ? "zips/$filename" : "$filename"
+                }
+
+    when:
+    !params.skip_fastqc && !params.skip_qc
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_fastqc
+
+    output:
+    file "*.{zip,html}" into ch_fastqc_raw_reports_mqc
+
+    script:
+    // Added soft-links to original fastqs for consistent naming in MultiQC
+    """
+    if $single_end; then
+        [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
+        fastqc --quiet --threads $task.cpus ${sample}.fastq.gz
+    else
+        [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
+        [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
+        fastqc --quiet --threads $task.cpus ${sample}_1.fastq.gz
+        fastqc --quiet --threads $task.cpus ${sample}_2.fastq.gz
+    fi
+    """
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/* --                                                                     -- */
+/* --                        ADAPTER TRIMMING                             -- */
+/* --                                                                     -- */
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+* STEP 2.1: Adapter trimming with Trimmomatic for de novo assembly
+*/
+// TODO nf-core: Use fastp instead of Trimmomatic
+process FASTP_ADAPTER {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/preprocess/trimmomatic/assembly", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".log")) filename
+                      else params.save_trimmed ? filename : null
+                }
+
+    when:
+    !params.skip_trimming && !params.skip_assembly
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic_assembly
+    file adapters from ch_adapter_assembly_file.collect()
+    file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.trimmed*") into ch_trimmomatic_assembly_fastqc,
+                                                                           ch_trimmomatic_assembly_kraken2
+    set val(sample), val(single_end), val(is_sra), file("*.orphan*") into ch_trimmomatic_assembly_orphan
+    file '*.log' into ch_trimmomatic_assembly_mqc
+
+    script:
+    pe = single_end ? "SE" : "PE"
+    adapters = (params.amplicon_fasta && params.protocol == 'amplicon') ? "${amplicons}" : "${adapters}"
+    orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
+    // Added soft-links to original fastqs for consistent naming in MultiQC
+    """
+
+    """
+}
 //
 // /*
 // * STEP 2.2: Adapter trimming with Trimmomatic for read alignment
@@ -568,7 +556,7 @@ if (!isOffline()) {
 //                 }
 //
 //     when:
-//     !params.skip_trimming && !is_sra && !params.skip_variants
+//     !params.skip_trimming && !params.skip_variants
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic_mapping
@@ -621,7 +609,7 @@ if (!isOffline()) {
 //                 }
 //
 //     when:
-//     !params.skip_fastqc && !params.skip_qc && !is_sra && !params.skip_assembly && !params.skip_trimming
+//     !params.skip_fastqc && !params.skip_qc && !params.skip_assembly && !params.skip_trimming
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_fastqc
@@ -647,7 +635,7 @@ if (!isOffline()) {
 //                 }
 //
 //     when:
-//     !params.skip_fastqc && !params.skip_qc && !is_sra && !params.skip_variants && !params.skip_trimming
+//     !params.skip_fastqc && !params.skip_qc && !params.skip_variants && !params.skip_trimming
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_mapping_fastqc
@@ -684,7 +672,7 @@ if (!isOffline()) {
 //                     }
 //
 //         when:
-//         !is_sra
+//         !params.skip_assembly
 //
 //         input:
 //         set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_kraken2
@@ -730,9 +718,6 @@ if (!isOffline()) {
 //                           if (filename.endsWith(".txt")) filename
 //                           else params.save_kraken2_fastq ? filename : null
 //                     }
-//
-//         when:
-//         !is_sra
 //
 //         input:
 //         set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_kraken2
@@ -793,7 +778,7 @@ if (!isOffline()) {
 //                 }
 //
 //     when:
-//     !params.skip_variants && !is_sra
+//     !params.skip_variants
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_mapping_bowtie
@@ -832,7 +817,7 @@ if (!isOffline()) {
 //                 }
 //
 //     when:
-//     !params.skip_variants && !is_sra
+//     !params.skip_variants
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(bam) from ch_bowtie2_bam
@@ -883,7 +868,7 @@ if (!isOffline()) {
 //                     }
 //
 //         when:
-//         !params.skip_variants && !is_sra
+//         !params.skip_variants
 //
 //         input:
 //         set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_ivar
@@ -932,7 +917,7 @@ if (!isOffline()) {
 //     publishDir path: "${params.outdir}/variants/bowtie2/picard_metrics", mode: params.publish_dir_mode
 //
 //     when:
-//     !params.skip_variants && !is_sra && !params.skip_picard_metrics && !params.skip_qc
+//     !params.skip_variants && !params.skip_picard_metrics && !params.skip_qc
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_metrics
@@ -991,7 +976,7 @@ if (!isOffline()) {
 //                 }
 //
 //     when:
-//     !params.skip_variants && !is_sra
+//     !params.skip_variants
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_varscan2
@@ -1045,7 +1030,7 @@ if (!isOffline()) {
 //     publishDir "${params.outdir}/variants/varscan2/snpeff", mode: params.publish_dir_mode
 //
 //     when:
-//     !params.skip_variants && !is_sra
+//     !params.skip_variants
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(highfreq_vcf) from ch_varscan2_highfreq_snpeff
@@ -1121,7 +1106,7 @@ if (!isOffline()) {
 //     publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode
 //
 //     when:
-//     !params.skip_variants && !is_sra
+//     !params.skip_variants
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(bam), file(vcf) from ch_sort_bam_consensus.join(ch_snpeff_consensus, by: [0,1,2])
@@ -1170,7 +1155,7 @@ if (!isOffline()) {
 //     publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
 //
 //     when:
-//     !params.skip_assembly && 'spades' in assemblers && !is_sra
+//     !params.skip_assembly && 'spades' in assemblers
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_spades
@@ -1200,7 +1185,7 @@ if (!isOffline()) {
 //     publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
 //
 //     when:
-//     !params.skip_assembly && 'spades' in assemblers && !is_sra
+//     !params.skip_assembly && 'spades' in assemblers
 //
 //     input:
 //     file scaffolds from ch_spades_quast.collect{ it[3] }
@@ -1238,7 +1223,7 @@ if (!isOffline()) {
 //     publishDir "${params.outdir}/assembly/spades/blast", mode: params.publish_dir_mode
 //
 //     when:
-//     !params.skip_assembly && 'spades' in assemblers && !is_sra
+//     !params.skip_assembly && 'spades' in assemblers
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_blast
@@ -1328,7 +1313,7 @@ if (!isOffline()) {
 //     publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
 //
 //     when:
-//     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
+//     !params.skip_assembly && 'metaspades' in assemblers && !single_end
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_metaspades
@@ -1359,7 +1344,7 @@ if (!isOffline()) {
 //     publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
 //
 //     when:
-//     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
+//     !params.skip_assembly && 'metaspades' in assemblers && !single_end
 //
 //     input:
 //     file scaffolds from ch_metaspades_quast.collect{ it[3] }
@@ -1397,7 +1382,7 @@ if (!isOffline()) {
 //     publishDir "${params.outdir}/assembly/metaspades/blast", mode: params.publish_dir_mode
 //
 //     when:
-//     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !is_sra
+//     !params.skip_assembly && 'metaspades' in assemblers && !single_end
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_blast
@@ -1487,7 +1472,7 @@ if (!isOffline()) {
 //     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
 //
 //     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
+//     !params.skip_assembly && 'unicycler' in assemblers
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_unicycler
@@ -1517,7 +1502,7 @@ if (!isOffline()) {
 //     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
 //
 //     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
+//     !params.skip_assembly && 'unicycler' in assemblers
 //
 //     input:
 //     file scaffolds from ch_unicycler_quast.collect{ it[3] }
@@ -1555,7 +1540,7 @@ if (!isOffline()) {
 //     publishDir "${params.outdir}/assembly/unicycler/blast", mode: params.publish_dir_mode
 //
 //     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !is_sra
+//     !params.skip_assembly && 'unicycler' in assemblers
 //
 //     input:
 //     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_blast
