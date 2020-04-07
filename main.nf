@@ -44,7 +44,7 @@ def helpMessage() {
       --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
 
     Trimming
-      --adapter_file [file]           Adapters index for adapter removal
+      --adapter_fasta [file]          Fasta file containing sequences for adapter removal
       --trim_params [str]             Trimming parameters for adapters. <seed mismatches>:<palindrome clip threshold>:<simple clip threshold> (Default: 2:30:10)
       --trim_window_length [int]      Window size. (Default: 4)
       --trim_window_value [int]       Window average quality required (Default: 20)
@@ -130,11 +130,11 @@ if (params.amplicon_bed) {
     ch_amplicon_bed = Channel.fromPath(params.amplicon_bed, checkIfExists: true)
 }
 
-if (params.adapter_file) {
+if (params.adapter_fasta) {
     Channel
-        .fromPath(params.adapter_file, checkIfExists: true)
-        .into { ch_adapter_assembly_file;
-                ch_adapter_mapping_file }
+        .fromPath(params.adapter_fasta, checkIfExists: true)
+        .into { ch_adapter_fasta_trimmomatic_default;
+                ch_adapter_fasta_trimmomatic_amplicon }
 } else {
     exit 1, "Adapter file not specified!"
 }
@@ -146,7 +146,6 @@ if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
 }
 
 // TODO nf-core: Refactor Kraken2 variables to be simpler
-// TODO nf-core: Add igenomes.config back in and upload Kraken db and COVID-19 genome from UCSC to AWS iGenomes
 // Viral reference files
 if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
    exit 1, "The provided genome '${params.genome}' is not available in the Genome file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
@@ -219,7 +218,7 @@ summary['Viral Genome']            = params.genome ?: 'Not supplied'
 summary['Viral Fasta File']        = params.fasta
 if (params.gff)                    summary['Viral GFF'] = params.gff
 if (!params.skip_trimming) {
-    summary['Adapter File']        = params.adapter_file
+    summary['Adapter Fasta File']  = params.adapter_fasta
     summary['Trim Parameters']     = params.trim_params
     summary['Trim Window Length']  = params.trim_window_length
     summary['Trim Window Value']   = params.trim_window_value
@@ -325,124 +324,8 @@ ch_samplesheet_reformat
     .splitCsv(header:true, sep:',')
     .map { validate_input(it) }
     .into { ch_reads_fastqc;
-            ch_reads_trimmomatic_assembly;
-            ch_reads_trimmomatic_mapping }
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-/* --                                                                     -- */
-/* --                     PREPARE REFERENCE FILES                         -- */
-/* --                                                                     -- */
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-/*
- * PREPROCESSING: Build Viral Bowtie2 index
- */
-process BUILD_BOWTIE2_INDEX {
-    tag "$fasta"
-    label 'process_medium'
-    publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-        saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
-
-    when:
-    !params.skip_variants
-
-    input:
-    file fasta from ch_fasta
-
-    output:
-    file "Bowtie2Index" into ch_index
-
-    script:
-    """
-    bowtie2-build \\
-        --seed 1 \\
-        --threads $task.cpus \\
-        $fasta \\
-        $index_base
-    mkdir Bowtie2Index && mv ${index_base}* Bowtie2Index
-    """
-}
-
-/*
- * PREPROCESSING: Build Viral Blast database
- */
-process BUILD_BLAST_DB {
-    tag "$fasta"
-    label 'process_medium'
-    publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-        saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
-
-    when:
-    !params.skip_assembly
-
-    input:
-    file fasta from ch_fasta
-
-    output:
-    file "BlastDB" into ch_blast_db_spades,
-                        ch_blast_db_metaspades,
-                        ch_blast_db_unicycler
-
-    script:
-    """
-    makeblastdb \\
-        -in $fasta \\
-        -parse_seqids \\
-        -dbtype nucl
-    mkdir BlastDB && mv ${fasta}* BlastDB
-    """
-}
-
-/*
- * PREPROCESSING: Build Kraken2 database
- */
-// Function to check if running offline
-def isOffline() {
-    try {
-        return NXF_OFFLINE as Boolean
-    }
-    catch( Exception e ) {
-        return false
-    }
-}
-if (!isOffline()) {
-    if (!params.kraken2_db) {
-        if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
-
-        process BUILD_KRAKEN2_DB {
-            tag "$db"
-            label 'process_high'
-            publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-                saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
-
-            when:
-            !params.skip_assembly
-
-            output:
-            file "$db" into ch_kraken2_db
-
-            script:
-            db = "kraken2_${params.kraken2_db_name}"
-            ftp = params.kraken2_use_ftp ? "--use-ftp" : ""
-            """
-            kraken2-build --db $db --threads $task.cpus $ftp --download-taxonomy
-            kraken2-build --db $db --threads $task.cpus $ftp --download-library $params.kraken2_db_name
-            kraken2-build --db $db --threads $task.cpus $ftp --build
-
-            cd $db
-            if [ -d "taxonomy" ]; then rm -rf taxonomy; fi
-            if [ -d "library" ]; then rm -rf library; fi
-            if [ -f "seqid2taxid.map" ]; then rm seqid2taxid.map; fi
-            """
-        }
-    } else {
-        ch_kraken2_db = Channel.fromPath(params.kraken2_db, checkIfExists: true)
-    }
-} else {
-    exit 1, "NXF_OFFLINE=true or -offline has been set so cannot download files required to build Kraken2 database!"
-}
+            ch_reads_trimmomatic_default;
+            ch_reads_trimmomatic_amplicon }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -464,12 +347,12 @@ if (!isOffline()) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * STEP 1: FastQC before trimming
+ * STEP 1: FastQC on raw input reads
  */
-process FASTQC_RAW {
+process FASTQC {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/preprocess/fastqc/raw", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/preprocess/fastqc", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       filename.endsWith(".zip") ? "zips/$filename" : "$filename"
                 }
@@ -506,264 +389,183 @@ process FASTQC_RAW {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
+if (!params.skip_trimming) {
+    /*
+    * STEP 2.1: Adapter trimming with Trimmomatic for adapter/amplicon removal and quality trimming
+    */
+    process TRIMMOMATIC {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/preprocess/trimmomatic/default/", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith(".html")) "fastqc/$filename"
+                          else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
+                          else if (filename.endsWith(".log")) "log/$filename"
+                          else params.save_trimmed ? "$filename" : null
+                    }
+
+        when:
+        !params.skip_variants || !params.skip_assembly
+
+        input:
+        set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic_default
+        file adapters from ch_adapter_fasta_trimmomatic_default.collect()
+        file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
+
+        output:
+        set val(sample), val(single_end), val(is_sra), file("*.trimmed.fastq.gz") into ch_trimmomatic_default_bowtie2,
+                                                                                       ch_trimmomatic_default_kraken2
+        set val(sample), val(single_end), val(is_sra), file("*.orphan.fastq.gz") into ch_trimmomatic_default_orphan
+        file '*.log' into ch_trimmomatic_default_mqc
+        file "*.{zip,html}" into ch_trimmomatic_default_fastqc_mqc
+
+        script:
+        pe = single_end ? "SE" : "PE"
+        adapter = (params.amplicon_fasta && params.protocol == 'amplicon') ? "${amplicons}" : "${adapters}"
+        orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
+        // Added soft-links to original fastqs for consistent naming in MultiQC
+        """
+        IN_READS='${sample}.fastq.gz'
+        OUT_READS='${sample}.trimmed.fastq.gz'
+        FASTQC_READS='${sample}.trimmed.fastq.gz'
+        if $single_end; then
+            [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
+        else
+            [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
+            [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
+            IN_READS='${sample}_1.fastq.gz ${sample}_2.fastq.gz'
+            OUT_READS='${sample}_1.trimmed.fastq.gz ${sample}_1.orphan.fastq.gz ${sample}_2.trimmed.fastq.gz ${sample}_2.orphan.fastq.gz'
+            FASTQC_READS='${sample}_1.trimmed.fastq.gz ${sample}_2.trimmed.fastq.gz'
+        fi
+
+        trimmomatic $pe \\
+            -threads ${task.cpus} \\
+            \$IN_READS \\
+            \$OUT_READS \\
+            ILLUMINACLIP:${adapter}:${params.trim_params} \\
+            SLIDINGWINDOW:${params.trim_window_length}:${params.trim_window_value} \\
+            MINLEN:${params.trim_min_length} \\
+            2> ${sample}.trimmomatic.log
+        $orphan
+
+        fastqc --quiet --threads $task.cpus \$FASTQC_READS
+        """
+    }
+
+    if (params.protocol == 'amplicon') {
+        /*
+        * STEP 2.2: Adapter trimming with Trimmomatic to keep amplicon primers but to remove adapters and quality trimming
+        */
+        process TRIMMOMATIC_AMPLICON {
+            tag "$sample"
+            label 'process_medium'
+            publishDir "${params.outdir}/preprocess/trimmomatic/amplicon/", mode: params.publish_dir_mode,
+                saveAs: { filename ->
+                              if (filename.endsWith(".html")) "fastqc/$filename"
+                              else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
+                              else if (filename.endsWith(".log")) "log/$filename"
+                              else params.save_trimmed ? "$filename" : null
+                        }
+
+            when:
+            !params.skip_variants
+
+            input:
+            set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic_amplicon
+            file adapters from ch_adapter_fasta_trimmomatic_amplicon.collect()
+
+            output:
+            set val(sample), val(single_end), val(is_sra), file("*.trimmed.fastq.gz") into ch_trimmomatic_amplicon_bowtie2
+            set val(sample), val(single_end), val(is_sra), file("*.orphan.fastq.gz") into ch_trimmomatic_amplicon_orphan
+            file '*.log' into ch_trimmomatic_amplicon_mqc
+            file "*.{zip,html}" into ch_trimmomatic_amplicon_fastqc_mqc
+
+            script:
+            pe = single_end ? "SE" : "PE"
+            orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
+            // Added soft-links to original fastqs for consistent naming in MultiQC
+            """
+            IN_READS='${sample}.fastq.gz'
+            OUT_READS='${sample}.trimmed.fastq.gz'
+            FASTQC_READS='${sample}.trimmed.fastq.gz'
+            if $single_end; then
+                [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
+            else
+                [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
+                [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
+                IN_READS='${sample}_1.fastq.gz ${sample}_2.fastq.gz'
+                OUT_READS='${sample}_1.trimmed.fastq.gz ${sample}_1.orphan.fastq.gz ${sample}_2.trimmed.fastq.gz ${sample}_2.orphan.fastq.gz'
+                FASTQC_READS='${sample}_1.trimmed.fastq.gz ${sample}_2.trimmed.fastq.gz'
+            fi
+
+            trimmomatic $pe \\
+                -threads ${task.cpus} \\
+                \$IN_READS \\
+                \$OUT_READS \\
+                ILLUMINACLIP:${adapters}:${params.trim_params} \\
+                SLIDINGWINDOW:${params.trim_window_length}:${params.trim_window_value} \\
+                MINLEN:${params.trim_min_length} \\
+                2> ${sample}.trimmomatic.log
+            $orphan
+
+            fastqc --quiet --threads $task.cpus \$FASTQC_READS
+            """
+        }
+        ch_trimmomatic_default_bowtie2 = ch_trimmomatic_amplicon_bowtie2
+
+    } else {
+        ch_trimmomatic_amplicon_mqc = Channel.empty()
+        ch_trimmomatic_amplicon_fastqc_mqc = Channel.empty()
+    }
+} else {
+    ch_reads_trimmomatic_default
+        .into { ch_trimmomatic_default_bowtie2;
+                ch_trimmomatic_default_kraken2 }
+
+    ch_trimmomatic_default_mqc = Channel.empty()
+    ch_trimmomatic_default_fastqc_mqc = Channel.empty()
+
+    ch_trimmomatic_amplicon_mqc = Channel.empty()
+    ch_trimmomatic_amplicon_fastqc_mqc = Channel.empty()
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/* --                                                                     -- */
+/* --                  VARIANT CALLING PROCESSES                          -- */
+/* --                                                                     -- */
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 /*
-* STEP 2.1: Adapter trimming with Trimmomatic for de novo assembly
-*/
-// TODO nf-core: Use fastp instead of Trimmomatic
-process FASTP_ADAPTER {
-    tag "$sample"
+ * PREPROCESSING: Build Bowtie2 index
+ */
+process BUILD_BOWTIE2_INDEX {
+    tag "$fasta"
     label 'process_medium'
-    publishDir "${params.outdir}/preprocess/trimmomatic/assembly", mode: params.publish_dir_mode,
-        saveAs: { filename ->
-                      if (filename.endsWith(".log")) filename
-                      else params.save_trimmed ? filename : null
-                }
+    publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
+        saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
 
     when:
-    !params.skip_trimming && !params.skip_assembly
+    !params.skip_variants
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic_assembly
-    file adapters from ch_adapter_assembly_file.collect()
-    file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
+    file fasta from ch_fasta
 
     output:
-    set val(sample), val(single_end), val(is_sra), file("*.trimmed*") into ch_trimmomatic_assembly_fastqc,
-                                                                           ch_trimmomatic_assembly_kraken2
-    set val(sample), val(single_end), val(is_sra), file("*.orphan*") into ch_trimmomatic_assembly_orphan
-    file '*.log' into ch_trimmomatic_assembly_mqc
+    file "Bowtie2Index" into ch_index
 
     script:
-    pe = single_end ? "SE" : "PE"
-    adapters = (params.amplicon_fasta && params.protocol == 'amplicon') ? "${amplicons}" : "${adapters}"
-    orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
-    // Added soft-links to original fastqs for consistent naming in MultiQC
     """
-
+    bowtie2-build \\
+        --seed 1 \\
+        --threads $task.cpus \\
+        $fasta \\
+        $index_base
+    mkdir Bowtie2Index && mv ${index_base}* Bowtie2Index
     """
 }
-//
-// /*
-// * STEP 2.2: Adapter trimming with Trimmomatic for read alignment
-// */
-// process TRIMMOMATIC_MAPPING {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/preprocess/trimmomatic/mapping", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".log")) filename
-//                       else params.save_trimmed ? filename : null
-//                 }
-//
-//     when:
-//     !params.skip_trimming && !params.skip_variants
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic_mapping
-//     file adapters from ch_adapter_mapping_file.collect()
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.trimmed*") into ch_trimmomatic_mapping_fastqc,
-//                                                                            ch_trimmomatic_mapping_bowtie
-//     set val(sample), val(single_end), val(is_sra), file("*.orphan*") into ch_trimmomatic_mapping_orphan
-//     file '*.log' into ch_trimmomatic_mapping_mqc
-//
-//     script:
-//     pe = single_end ? "SE" : "PE"
-//     adapters = "${adapters}"
-//     orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
-//     // Added soft-links to original fastqs for consistent naming in MultiQC
-//     """
-//     IN_READS='${sample}.fastq.gz'
-//     OUT_READS='${sample}.trimmed.fastq.gz'
-//     if $single_end; then
-//         [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
-//     else
-//         [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
-//         [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-//         IN_READS='${sample}_1.fastq.gz ${sample}_2.fastq.gz'
-//         OUT_READS='${sample}_1.trimmed.fastq.gz ${sample}_1.orphan.fastq.gz ${sample}_2.trimmed.fastq.gz ${sample}_2.orphan.fastq.gz'
-//     fi
-//
-//     trimmomatic $pe \\
-//         -threads ${task.cpus} \\
-//         \$IN_READS \\
-//         \$OUT_READS \\
-//         ILLUMINACLIP:${adapters}:${params.trim_params} \\
-//         SLIDINGWINDOW:${params.trim_window_length}:${params.trim_window_value} \\
-//         MINLEN:${params.trim_min_length} \\
-//         2> ${sample}.trimmomatic.log
-//     $orphan
-//     """
-// }
-//
-// /*
-//  * STEP 2.3: FastQC after trimming
-//  */
-// process FASTQC_TRIM_ASSEMBLY {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/preprocess/fastqc/trim_assembly", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       filename.endsWith(".zip") ? "zips/$filename" : "$filename"
-//                 }
-//
-//     when:
-//     !params.skip_fastqc && !params.skip_qc && !params.skip_assembly && !params.skip_trimming
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_fastqc
-//
-//     output:
-//     file "*.{zip,html}" into ch_fastqc_trim_assembly_reports_mqc
-//
-//     script:
-//     """
-//     fastqc --quiet --threads $task.cpus $reads
-//     """
-// }
-//
-// /*
-//  * STEP 2.4: FastQC after trimming
-//  */
-// process FASTQC_TRIM_MAPPING {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/preprocess/fastqc/trim_mapping", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       filename.endsWith(".zip") ? "zips/$filename" : "$filename"
-//                 }
-//
-//     when:
-//     !params.skip_fastqc && !params.skip_qc && !params.skip_variants && !params.skip_trimming
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_mapping_fastqc
-//
-//     output:
-//     file "*.{zip,html}" into ch_fastqc_trim_mapping_reports_mqc
-//
-//     script:
-//     """
-//     fastqc --quiet --threads $task.cpus $reads
-//     """
-// }
-//
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                        FILTER HOST READS                            -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-//
-// /*
-// * STEP 3: Filter reads with Kraken2
-// */
-// // TODO nf-core: Add Kraken2 log output to MultiQC
-// if (params.kraken2_use_host_db) {
-//     process KRAKEN2_HOST {
-//         tag "$db"
-//         label 'process_high'
-//         publishDir "${params.outdir}/preprocess/kraken2", mode: params.publish_dir_mode,
-//             saveAs: { filename ->
-//                           if (filename.endsWith(".txt")) filename
-//                           else params.save_kraken2_fastq ? filename : null
-//                     }
-//
-//         when:
-//         !params.skip_assembly
-//
-//         input:
-//         set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_kraken2
-//         file db from ch_kraken2_db.collect()
-//
-//         output:
-//         set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_spades,
-//                                                                              ch_kraken2_metaspades,
-//                                                                              ch_kraken2_unicycler
-//         set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_reads
-//         file "*.report.txt" into ch_kraken2_report
-//
-//         script:
-//         pe = single_end ? "" : "--paired"
-//         classified = single_end ? "${sample}.host.fastq" : "${sample}.host#.fastq"
-//         unclassified = single_end ? "${sample}.viral.fastq" : "${sample}.viral#.fastq"
-//         """
-//         DB=$db
-//         if [[ \$DB == *.tar.gz ]]
-//         then
-//             tar -xvf \$DB
-//             DB=\${DB%.*.*}
-//         fi
-//
-//         kraken2 \\
-//             --db \$DB \\
-//             --threads $task.cpus \\
-//             --unclassified-out $unclassified \\
-//             --classified-out $classified \\
-//             --report ${sample}.kraken2.report.txt \\
-//             $pe \\
-//             --gzip-compressed \\
-//             $reads
-//         pigz -p $task.cpus *.fastq
-//         """
-//     }
-// } else {
-//     process KRAKEN2_VIRAL {
-//         tag "$db"
-//         label 'process_high'
-//         publishDir "${params.outdir}/preprocess/kraken2", mode: params.publish_dir_mode,
-//             saveAs: { filename ->
-//                           if (filename.endsWith(".txt")) filename
-//                           else params.save_kraken2_fastq ? filename : null
-//                     }
-//
-//         input:
-//         set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_kraken2
-//         file db from ch_kraken2_db.collect()
-//
-//         output:
-//         set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_spades,
-//                                                                              ch_kraken2_metaspades,
-//                                                                              ch_kraken2_unicycler
-//         set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_reads
-//         file "*.report.txt" into ch_kraken2_report
-//
-//         script:
-//         pe = single_end ? "" : "--paired"
-//         classified = single_end ? "${sample}.viral.fastq" : "${sample}.viral#.fastq"
-//         unclassified = single_end ? "${sample}.host.fastq" : "${sample}.host#.fastq"
-//         """
-//         DB=$db
-//         if [[ \$DB == *.tar.gz ]]
-//         then
-//             tar -xvf \$DB
-//             DB=\${DB%.*.*}
-//         fi
-//
-//         kraken2 \\
-//             --db \$DB \\
-//             --threads $task.cpus \\
-//             --unclassified-out $unclassified \\
-//             --classified-out $classified \\
-//             --report ${sample}.kraken2.report.txt \\
-//             $pe \\
-//             --gzip-compressed \\
-//             $reads
-//         pigz -p $task.cpus *.fastq
-//         """
-//     }
-// }
-//
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                        MAPPING                                      -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-//
+
 // /*
 // * STEP 4.1: Map read(s) with Bowtie 2
 // */
@@ -1134,14 +936,146 @@ process FASTP_ADAPTER {
 //     """
 // }
 //
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                        DENOVO ASSEMBLY                              -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/* --                                                                     -- */
+/* --                        DENOVO ASSEMBLY                              -- */
+/* --                                                                     -- */
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+// /*
+//  * PREPROCESSING: Build Viral Blast database
+//  */
+// process BUILD_BLAST_DB {
+//     tag "$fasta"
+//     label 'process_medium'
+//     publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
+//         saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
 //
+//     when:
+//     !params.skip_assembly
+//
+//     input:
+//     file fasta from ch_fasta
+//
+//     output:
+//     file "BlastDB" into ch_blast_db_spades,
+//                         ch_blast_db_metaspades,
+//                         ch_blast_db_unicycler
+//
+//     script:
+//     """
+//     makeblastdb \\
+//         -in $fasta \\
+//         -parse_seqids \\
+//         -dbtype nucl
+//     mkdir BlastDB && mv ${fasta}* BlastDB
+//     """
+// }
+//
+// /*
+//  * PREPROCESSING: Build Kraken2 database
+//  */
+// // Function to check if running offline
+// def isOffline() {
+//     try {
+//         return NXF_OFFLINE as Boolean
+//     }
+//     catch( Exception e ) {
+//         return false
+//     }
+// }
+// if (!isOffline()) {
+//     if (!params.kraken2_db) {
+//         if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
+//
+//         process BUILD_KRAKEN2_DB {
+//             tag "$db"
+//             label 'process_high'
+//             publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
+//                 saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+//
+//             when:
+//             !params.skip_assembly
+//
+//             output:
+//             file "$db" into ch_kraken2_db
+//
+//             script:
+//             db = "kraken2_${params.kraken2_db_name}"
+//             ftp = params.kraken2_use_ftp ? "--use-ftp" : ""
+//             """
+//             kraken2-build --db $db --threads $task.cpus $ftp --download-taxonomy
+//             kraken2-build --db $db --threads $task.cpus $ftp --download-library $params.kraken2_db_name
+//             kraken2-build --db $db --threads $task.cpus $ftp --build
+//
+//             cd $db
+//             if [ -d "taxonomy" ]; then rm -rf taxonomy; fi
+//             if [ -d "library" ]; then rm -rf library; fi
+//             if [ -f "seqid2taxid.map" ]; then rm seqid2taxid.map; fi
+//             """
+//         }
+//     } else {
+//         ch_kraken2_db = Channel.fromPath(params.kraken2_db, checkIfExists: true)
+//     }
+// } else {
+//     exit 1, "NXF_OFFLINE=true or -offline has been set so cannot download files required to build Kraken2 database!"
+// }
+//
+// /*
+// * STEP 3: Filter reads with Kraken2
+// */
+// // TODO nf-core: Add Kraken2 log output to MultiQC
+// // TODO nf-core: Add shell script to trim file extensions and return appropriate file name
+// process KRAKEN2 {
+//     tag "$db"
+//     label 'process_high'
+//     publishDir "${params.outdir}/preprocess/kraken2", mode: params.publish_dir_mode,
+//         saveAs: { filename ->
+//                       if (filename.endsWith(".txt")) filename
+//                       else params.save_kraken2_fastq ? filename : null
+//                 }
+//
+//     when:
+//     !params.skip_assembly
+//
+//     input:
+//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_kraken2
+//     file db from ch_kraken2_db.collect()
+//
+//     output:
+//     set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_spades,
+//                                                                          ch_kraken2_metaspades,
+//                                                                          ch_kraken2_unicycler
+//     set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_host_reads
+//     file "*.report.txt" into ch_kraken2_report
+//
+//     script:
+//     pe = single_end ? "" : "--paired"
+//     classified = single_end ? "${sample}.host.fastq" : "${sample}.host#.fastq"
+//     unclassified = single_end ? "${sample}.viral.fastq" : "${sample}.viral#.fastq"
+//     """
+//     DB=$db
+//     if [[ \$DB == *.tar.gz ]]
+//     then
+//         tar -xvf \$DB
+//         DB=\${DB%.*.*}
+//     fi
+//
+//     kraken2 \\
+//         --db \$DB \\
+//         --threads $task.cpus \\
+//         --unclassified-out $unclassified \\
+//         --classified-out $classified \\
+//         --report ${sample}.kraken2.report.txt \\
+//         $pe \\
+//         --gzip-compressed \\
+//         $reads
+//     pigz -p $task.cpus *.fastq
+//     """
+// }
+
 // ////////////////////////////////////////////////////
 // /* --                SPADES                    -- */
 // ////////////////////////////////////////////////////
