@@ -6,7 +6,6 @@ channels:
   - bioconda
   - defaults
   - hcc
-  - pedroscampoy
 dependencies:
  ## conda-forge packages
   - conda-forge::python=3.6.10
