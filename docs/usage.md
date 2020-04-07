@@ -24,7 +24,7 @@
   * [`--kraken2_use_ftp`](#--kraken2_use_ftp)
   * [`--save_kraken2_fastq`](#--save_kraken2_fastq)  
 * [Adapter trimming](#adapter-trimming)
-  * [`--adapter_file`](#--adapter_file)
+  * [`--adapter_fasta`](#--adapter_fasta)
   * [`--trim_params`](#--trim_params)
   * [`--trim_window_length`](--trim_window_length)
   * [`--trim_window_value`](--trim_window_value)
@@ -293,7 +293,7 @@ Save the host and viral fastq files in the results directory (Default: false).
 
 ## Adapter trimming
 
-### `--adapter_file`
+### `--adapter_fasta`
 
 Adapter file in fasta format needed to remove adaptes with Trimmomatic. By default it's used the commonly used in illumina.
 Default: `${baseDir}/assets/adapters.fa`
