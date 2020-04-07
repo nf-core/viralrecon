@@ -1345,27 +1345,27 @@ process SPADES_ABACAS {
     """
 }
 
-// /*
-//  * STEP 7.5: Run PlasmidID on SPAdes de novo assembly
-//  */
-// process SPADES_PLASMIDID {
-//     tag "$sample"
-//     label "process_medium"
-//     publishDir "${params.outdir}/assembly/spades/plasmidid", mode: params.publish_dir_mode
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
-//     file fasta from ch_viral_fasta
-//
-//     output:
-//     file "$sample" into ch_spades_plasmidid_results
-//
-//     script:
-//     """
-//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-//     mv NO_GROUP/$sample ./$sample
-//     """
-// }
+ /*
+  * STEP 7.5: Run PlasmidID on SPAdes de novo assembly
+  */
+ process SPADES_PLASMIDID {
+     tag "$sample"
+     label "process_medium"
+     publishDir "${params.outdir}/assembly/spades/plasmidid", mode: params.publish_dir_mode
+
+     input:
+     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
+     file fasta from ch_viral_fasta
+
+     output:
+     file "$sample" into ch_spades_plasmidid_results
+
+     script:
+     """
+     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+     mv NO_GROUP/$sample ./$sample
+     """
+ }
 
 ////////////////////////////////////////////////////
 /* --               METASPADES                 -- */
