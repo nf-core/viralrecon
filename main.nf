@@ -454,8 +454,8 @@ if (!params.skip_trimming) {
 
     if (params.protocol == 'amplicon') {
         /*
-        * STEP 2.2: Adapter trimming with Trimmomatic to keep amplicon primers but to remove adapters and quality trimming
-        */
+         * STEP 2.2: Adapter trimming with Trimmomatic to keep amplicon primers but to remove adapters and quality trimming
+         */
         process TRIMMOMATIC_AMPLICON {
             tag "$sample"
             label 'process_medium'
@@ -538,7 +538,7 @@ if (!params.skip_trimming) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * PREPROCESSING: Build Bowtie2 index
+ * PREPROCESSING: Build Bowtie2 index for viral genome
  */
 process BUILD_BOWTIE2_INDEX {
     tag "$fasta"
@@ -566,991 +566,972 @@ process BUILD_BOWTIE2_INDEX {
     """
 }
 
-// /*
-// * STEP 4.1: Map read(s) with Bowtie 2
-// */
-// // TODO nf-core: Add another option for BAM to fastq to assemble mapped reads
-// process BOWTIE2 {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".log")) "log/$filename"
-//                       else params.save_align_intermeds ? filename : null
-//                 }
-//
-//     when:
-//     !params.skip_variants
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_mapping_bowtie
-//     file index from ch_index.collect()
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.bam") into ch_bowtie2_bam
-//     file "*.log" into ch_bowtie2_mqc
-//
-//     script:
-//     input_reads = single_end ? "-U $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
-//     """
-//     bowtie2 \\
-//         --threads ${task.cpus} \\
-//         --local \\
-//         --very-sensitive-local \\
-//         -x ${index}/${index_base} \\
-//         $input_reads \\
-//         2> ${sample}.bowtie2.log \\
-//         | samtools view -@ $task.cpus -b -h -O BAM -o ${sample}.bam -
-//     """
-// }
-//
-// /*
-// * STEP 4.2: Convert BAM to coordinate sorted BAM
-// */
-// process SORT_BAM {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
-//                       else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
-//                       else if (filename.endsWith(".stats")) "samtools_stats/$filename"
-//                       else filename
-//                 }
-//
-//     when:
-//     !params.skip_variants
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(bam) from ch_bowtie2_bam
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_sort_bam_ivar,
-//                                                                                        ch_sort_bam_metrics,
-//                                                                                        ch_sort_bam_varscan2,
-//                                                                                        ch_sort_bam_consensus
-//     file "*.{flagstat,idxstats,stats}" into ch_sort_bam_flagstat_mqc
-//
-//     script:
-//     """
-//     samtools sort -@ $task.cpus -o ${sample}.sorted.bam -T $sample $bam
-//     samtools index ${sample}.sorted.bam
-//     samtools flagstat ${sample}.sorted.bam > ${sample}.sorted.bam.flagstat
-//     samtools idxstats ${sample}.sorted.bam > ${sample}.sorted.bam.idxstats
-//     samtools stats ${sample}.sorted.bam > ${sample}.sorted.bam.stats
-//     """
-// }
-//
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                        BAM POST-ANALYSIS                            -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-//
-// /*
-//  * STEP 5.1: Remove amplicon primers with iVar
-//  */
-// // TODO nf-core: Add IVar log output to MultiQC
-// if (params.protocol != 'amplicon') {
-//     ch_ivar_flagstat_mqc = Channel.empty()
-//     ch_ivar_log = Channel.empty()
-// } else {
-//     process IVAR {
-//         tag "$sample"
-//         label 'process_medium'
-//         publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
-//             saveAs: { filename ->
-//                           if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
-//                           else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
-//                           else if (filename.endsWith(".stats")) "samtools_stats/$filename"
-//                           else if (filename.endsWith(".log")) "log/$filename"
-//                           else filename
-//                     }
-//
-//         when:
-//         !params.skip_variants
-//
-//         input:
-//         set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_ivar
-//         file bed from ch_amplicon_bed.collect()
-//
-//         output:
-//         set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_ivar_metrics,
-//                                                                                            ch_ivar_varscan2,
-//                                                                                            ch_ivar_consensus
-//         file "*.{flagstat,idxstats,stats}" into ch_ivar_flagstat_mqc
-//         file "*.log" into ch_ivar_log
-//
-//         script:
-//         prefix = "${sample}.ivar"
-//         """
-//         samtools view -b -F 4 ${bam[0]} > ${sample}.mapped.bam
-//         samtools index ${sample}.mapped.bam
-//
-//         ivar trim \\
-//             -i ${sample}.mapped.bam \\
-//             -b $bed \\
-//             -m 50 \\
-//             -q 15 \\
-//             -s 4 \\
-//             -e \\
-//             -p ${prefix} > ${prefix}.ivar.log
-//
-//         samtools sort -@ $task.cpus -o ${prefix}.sorted.bam -T $prefix ${prefix}.bam
-//         samtools index ${prefix}.sorted.bam
-//         samtools flagstat ${prefix}.sorted.bam > ${prefix}.sorted.bam.flagstat
-//         samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
-//         samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
-//         """
-//     }
-//     ch_sort_bam_metrics = ch_ivar_metrics
-//     ch_sort_bam_varscan2 = ch_ivar_varscan2
-//     ch_sort_bam_consensus = ch_ivar_consensus
-// }
-//
-// /*
-//  * STEP 5.2: Picard CollectMultipleMetrics and CollectWgsMetrics
-//  */
-// process PICARD_METRICS {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir path: "${params.outdir}/variants/bowtie2/picard_metrics", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_variants && !params.skip_picard_metrics && !params.skip_qc
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_metrics
-//     file fasta from ch_fasta
-//
-//     output:
-//     file "*metrics" into ch_picard_metrics_mqc
-//     file "*.pdf" into ch_picard_metrics_pdf
-//
-//     script:
-//     def avail_mem = 3
-//     if (!task.memory) {
-//         log.info "[Picard CollectMultipleMetrics] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this."
-//     } else {
-//         avail_mem = task.memory.toGiga()
-//     }
-//     prefix = params.protocol == 'amplicon' ? "${sample}.ivar" : "${sample}"
-//     """
-//     picard -Xmx${avail_mem}g CollectMultipleMetrics \\
-//         INPUT=${bam[0]} \\
-//         OUTPUT=${prefix}.CollectMultipleMetrics \\
-//         REFERENCE_SEQUENCE=$fasta \\
-//         VALIDATION_STRINGENCY=LENIENT \\
-//         TMP_DIR=tmp
-//
-//     picard -Xmx${avail_mem}g CollectWgsMetrics \\
-//         COVERAGE_CAP=1000000 \\
-//         INPUT=${bam[0]} \\
-//         OUTPUT=${prefix}.CollectWgsMetrics.coverage_metrics \\
-//         REFERENCE_SEQUENCE=$fasta \\
-//         TMP_DIR=tmp
-//     """
-// }
-//
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                        VARIANT CALLING                              -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-//
-// /*
-//  * STEP 6.1: Variant calling with VarScan 2
-//  */
-// // TODO nf-core: Add Varscan 2/BCFTools log output to MultiQC
-// process VARSCAN2 {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//             		      if (filename.endsWith("vcf.gz")) "$filename"
-//                       else if (filename.endsWith("vcf.gz.tbi")) "$filename"
-//                       else if (filename.endsWith(".log")) "log/$filename"
-//                       else params.save_pileup ? filename : null
-//                 }
-//
-//     when:
-//     !params.skip_variants
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_varscan2
-//     file fasta from ch_fasta
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.highfreq.vcf.gz*") into ch_varscan2_highfreq_snpeff,
-//                                                                                    ch_varscan2_highfreq_consensus
-//     set val(sample), val(single_end), val(is_sra), file("*.lowfreq.vcf.gz*") into ch_varscan2_lowfreq_snpeff
-//     file "*.pileup" into ch_varscan2_pileup
-//     file "*.log" into ch_varscan2_log
-//
-//     script:
-//     """
-//     samtools mpileup \\
-//         --count-orphans \\
-//         --max-depth 20000 \\
-//         --min-BQ 0 \\
-//         --fasta-ref $fasta \\
-//         ${bam[0]} \\
-//         > ${sample}.pileup
-//
-//     varscan mpileup2cns \\
-//         ${sample}.pileup \\
-//         --min-var-freq 0.02 \\
-//         --p-value 0.99 \\
-//         --variants \\
-//         --output-vcf 1 \\
-//         2> ${sample}.lowfreq.varscan2.log \\
-//         | bgzip -c > ${sample}.lowfreq.vcf.gz
-//     tabix -p vcf -f ${sample}.lowfreq.vcf.gz
-//
-//     varscan mpileup2cns \\
-//         ${sample}.pileup \\
-//         --min-var-freq 0.8 \\
-//         --p-value 0.05 \\
-//         --variants \\
-//         --output-vcf 1 \\
-//         2> ${sample}.highfreq.varscan2.log \\
-//         | bgzip -c > ${sample}.highfreq.vcf.gz
-//     tabix -p vcf -f ${sample}.highfreq.vcf.gz
-//     """
-// }
-//
-// /*
-//  * STEP 6.2: Variant calling annotation with SnpEff and SnpSift
-//  */
-// process SNPEFF {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/varscan2/snpeff", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_variants
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(highfreq_vcf) from ch_varscan2_highfreq_snpeff
-//     set val(sample), val(single_end), val(is_sra), file(lowfreq_vcf) from ch_varscan2_lowfreq_snpeff
-//     file ('data/genomes/virus.fa') from ch_fasta
-//     file ('data/virus/genes.gff') from ch_gff
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.highfreq.snpEff.vcf.gz*") into ch_snpeff_consensus
-//     file "*.vcf.gz*" into ch_snpeff_vcf
-//     file "*.{txt,html}" into ch_snpeff_reports
-//     file "*.csv" into ch_snpeff_mqc
-//     file "*.highfreq.snpEff.csv" into ch_snpeff_highfreq_mqc
-//     file "*.lowfreq.snpEff.csv" into ch_snpeff_lowfreq_mqc
-//
-//     script:
-//     """
-//     echo "virus.genome : virus" > snpeff.config
-//     snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v virus
-//
-//     snpEff virus \\
-//         -config ./snpeff.config \\
-//         -dataDir ./data ${highfreq_vcf[0]} \\
-//         -csvStats ${sample}.highfreq.snpEff.csv \\
-//         | bgzip -c > ${sample}.highfreq.snpEff.vcf.gz
-//     tabix -p vcf -f ${sample}.highfreq.snpEff.vcf.gz
-//     mv snpEff_summary.html ${sample}.highfreq.snpEff.summary.html
-//
-//     SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${sample}.highfreq.snpEff.vcf.gz \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${sample}.highfreq.snpSift.table.txt
-//
-//     snpEff virus \\
-//         -config ./snpeff.config \\
-//         -dataDir ./data ${lowfreq_vcf[0]} \\
-//         -csvStats ${sample}.lowfreq.snpEff.csv \\
-//         | bgzip -c > ${sample}.lowfreq.snpEff.vcf.gz
-//     tabix -p vcf -f ${sample}.lowfreq.snpEff.vcf.gz
-//     mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
-//
-//     SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${sample}.lowfreq.snpEff.vcf.gz \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${sample}.lowfreq.snpSift.table.txt
-//     	"""
-// }
-//
-// /*
-//  * STEP 6.3: Genome consensus generation with BCFtools and masked with BEDTools
-//  */
-// process BCFTOOLS_CONSENSUS {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_variants
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(bam), file(vcf) from ch_sort_bam_consensus.join(ch_snpeff_consensus, by: [0,1,2])
-//     file fasta from ch_fasta
-//
-//     output:
-//     file "*consensus.fa" into ch_bcftools_unmasked_consensus
-//     file "*consensus.masked.fa" into ch_bcftools_masked_consensus
-//
-//     script:
-//     """
-//     cat $fasta | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
-//
-//     bedtools genomecov \\
-//         -bga \\
-//         -ibam ${bam[0]} \\
-//         -g $fasta \\
-//         | awk '\$4 < 20' | bedtools merge > ${sample}.mask.bed
-//
-//     bedtools maskfasta \\
-//         -fi ${sample}.consensus.fa \\
-//         -bed ${sample}.mask.bed \\
-//         -fo ${sample}.consensus.masked.fa
-//     sed -i 's/${index_base}/${sample}/g' ${sample}.consensus.masked.fa
-//     """
-// }
-//
+/*
+ * STEP 3.1: Map read(s) with Bowtie 2
+ */
+process BOWTIE2 {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".log")) "log/$filename"
+                      else params.save_align_intermeds ? filename : null
+                }
+
+    when:
+    !params.skip_variants
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_default_bowtie2
+    file index from ch_index.collect()
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.bam") into ch_bowtie2_bam
+    file "*.log" into ch_bowtie2_mqc
+
+    script:
+    input_reads = single_end ? "-U $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
+    """
+    bowtie2 \\
+        --threads ${task.cpus} \\
+        --local \\
+        --very-sensitive-local \\
+        -x ${index}/${index_base} \\
+        $input_reads \\
+        2> ${sample}.bowtie2.log \\
+        | samtools view -@ $task.cpus -b -h -O BAM -o ${sample}.bam -
+    """
+}
+
+/*
+ * STEP 3.2: Convert BAM to coordinate sorted BAM
+ */
+process SORT_BAM {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
+                      else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
+                      else if (filename.endsWith(".stats")) "samtools_stats/$filename"
+                      else filename
+                }
+
+    when:
+    !params.skip_variants
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(bam) from ch_bowtie2_bam
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_sort_bam_ivar,
+                                                                                       ch_sort_bam_metrics,
+                                                                                       ch_sort_bam_varscan2,
+                                                                                       ch_sort_bam_consensus
+    file "*.{flagstat,idxstats,stats}" into ch_sort_bam_flagstat_mqc
+
+    script:
+    """
+    samtools sort -@ $task.cpus -o ${sample}.sorted.bam -T $sample $bam
+    samtools index ${sample}.sorted.bam
+    samtools flagstat ${sample}.sorted.bam > ${sample}.sorted.bam.flagstat
+    samtools idxstats ${sample}.sorted.bam > ${sample}.sorted.bam.idxstats
+    samtools stats ${sample}.sorted.bam > ${sample}.sorted.bam.stats
+    """
+}
+
+/*
+ * STEP 3.3: Remove amplicon primers with iVar
+ */
+// TODO nf-core: Add IVar log output to MultiQC
+if (params.protocol != 'amplicon') {
+    ch_ivar_flagstat_mqc = Channel.empty()
+    ch_ivar_log = Channel.empty()
+} else {
+    process IVAR {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
+                          else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
+                          else if (filename.endsWith(".stats")) "samtools_stats/$filename"
+                          else if (filename.endsWith(".log")) "log/$filename"
+                          else filename
+                    }
+
+        when:
+        !params.skip_variants
+
+        input:
+        set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_ivar
+        file bed from ch_amplicon_bed.collect()
+
+        output:
+        set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_ivar_metrics,
+                                                                                           ch_ivar_varscan2,
+                                                                                           ch_ivar_consensus
+        file "*.{flagstat,idxstats,stats}" into ch_ivar_flagstat_mqc
+        file "*.log" into ch_ivar_log
+
+        script:
+        prefix = "${sample}.ivar"
+        """
+        samtools view -b -F 4 ${bam[0]} > ${sample}.mapped.bam
+        samtools index ${sample}.mapped.bam
+
+        ivar trim \\
+            -i ${sample}.mapped.bam \\
+            -b $bed \\
+            -m 50 \\
+            -q 15 \\
+            -s 4 \\
+            -e \\
+            -p ${prefix} > ${prefix}.ivar.log
+
+        samtools sort -@ $task.cpus -o ${prefix}.sorted.bam -T $prefix ${prefix}.bam
+        samtools index ${prefix}.sorted.bam
+        samtools flagstat ${prefix}.sorted.bam > ${prefix}.sorted.bam.flagstat
+        samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
+        samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
+        """
+    }
+    ch_sort_bam_metrics = ch_ivar_metrics
+    ch_sort_bam_varscan2 = ch_ivar_varscan2
+    ch_sort_bam_consensus = ch_ivar_consensus
+}
+
+/*
+ * STEP 3.4: Picard CollectMultipleMetrics and CollectWgsMetrics
+ */
+process PICARD_METRICS {
+    tag "$sample"
+    label 'process_medium'
+    publishDir path: "${params.outdir}/variants/bowtie2/picard_metrics", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants && !params.skip_picard_metrics && !params.skip_qc
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_metrics
+    file fasta from ch_fasta
+
+    output:
+    file "*metrics" into ch_picard_metrics_mqc
+    file "*.pdf" into ch_picard_metrics_pdf
+
+    script:
+    def avail_mem = 3
+    if (!task.memory) {
+        log.info "[Picard CollectMultipleMetrics] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this."
+    } else {
+        avail_mem = task.memory.toGiga()
+    }
+    prefix = params.protocol == 'amplicon' ? "${sample}.ivar" : "${sample}"
+    """
+    picard -Xmx${avail_mem}g CollectMultipleMetrics \\
+        INPUT=${bam[0]} \\
+        OUTPUT=${prefix}.CollectMultipleMetrics \\
+        REFERENCE_SEQUENCE=$fasta \\
+        VALIDATION_STRINGENCY=LENIENT \\
+        TMP_DIR=tmp
+
+    picard -Xmx${avail_mem}g CollectWgsMetrics \\
+        COVERAGE_CAP=1000000 \\
+        INPUT=${bam[0]} \\
+        OUTPUT=${prefix}.CollectWgsMetrics.coverage_metrics \\
+        REFERENCE_SEQUENCE=$fasta \\
+        TMP_DIR=tmp
+    """
+}
+
+/*
+ * STEP 3.5: Variant calling with VarScan 2
+ */
+// TODO nf-core: Add Varscan 2/BCFTools log output to MultiQC
+process VARSCAN2 {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+            		      if (filename.endsWith("vcf.gz")) "$filename"
+                      else if (filename.endsWith("vcf.gz.tbi")) "$filename"
+                      else if (filename.endsWith(".log")) "log/$filename"
+                      else params.save_pileup ? filename : null
+                }
+
+    when:
+    !params.skip_variants
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_varscan2
+    file fasta from ch_fasta
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.highfreq.vcf.gz*") into ch_varscan2_highfreq_snpeff,
+                                                                                   ch_varscan2_highfreq_consensus
+    set val(sample), val(single_end), val(is_sra), file("*.lowfreq.vcf.gz*") into ch_varscan2_lowfreq_snpeff
+    file "*.pileup" into ch_varscan2_pileup
+    file "*.log" into ch_varscan2_log
+
+    script:
+    """
+    samtools mpileup \\
+        --count-orphans \\
+        --max-depth 20000 \\
+        --min-BQ 0 \\
+        --fasta-ref $fasta \\
+        ${bam[0]} \\
+        > ${sample}.pileup
+
+    varscan mpileup2cns \\
+        ${sample}.pileup \\
+        --min-var-freq 0.02 \\
+        --p-value 0.99 \\
+        --variants \\
+        --output-vcf 1 \\
+        2> ${sample}.lowfreq.varscan2.log \\
+        | bgzip -c > ${sample}.lowfreq.vcf.gz
+    tabix -p vcf -f ${sample}.lowfreq.vcf.gz
+
+    varscan mpileup2cns \\
+        ${sample}.pileup \\
+        --min-var-freq 0.8 \\
+        --p-value 0.05 \\
+        --variants \\
+        --output-vcf 1 \\
+        2> ${sample}.highfreq.varscan2.log \\
+        | bgzip -c > ${sample}.highfreq.vcf.gz
+    tabix -p vcf -f ${sample}.highfreq.vcf.gz
+    """
+}
+
+/*
+ * STEP 3.6: Variant calling annotation with SnpEff and SnpSift
+ */
+process SNPEFF {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/varscan2/snpeff", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants && params.gff
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(highfreq_vcf), file(lowfreq_vcf) from ch_varscan2_highfreq_snpeff.join(ch_varscan2_lowfreq_snpeff, by: [0,1,2])
+    file ('data/genomes/virus.fa') from ch_fasta
+    file ('data/virus/genes.gff') from ch_gff
+
+    output:
+    file "*.vcf.gz*" into ch_snpeff_vcf
+    file "*.{txt,html}" into ch_snpeff_reports
+    file "*.csv" into ch_snpeff_mqc
+    file "*.highfreq.snpEff.csv" into ch_snpeff_highfreq_mqc
+    file "*.lowfreq.snpEff.csv" into ch_snpeff_lowfreq_mqc
+
+    script:
+    """
+    echo "virus.genome : virus" > snpeff.config
+    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v virus
+
+    snpEff virus \\
+        -config ./snpeff.config \\
+        -dataDir ./data ${highfreq_vcf[0]} \\
+        -csvStats ${sample}.highfreq.snpEff.csv \\
+        | bgzip -c > ${sample}.highfreq.snpEff.vcf.gz
+    tabix -p vcf -f ${sample}.highfreq.snpEff.vcf.gz
+    mv snpEff_summary.html ${sample}.highfreq.snpEff.summary.html
+
+    SnpSift extractFields -s "," \\
+        -e "." \\
+        ${sample}.highfreq.snpEff.vcf.gz \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > ${sample}.highfreq.snpSift.table.txt
+
+    snpEff virus \\
+        -config ./snpeff.config \\
+        -dataDir ./data ${lowfreq_vcf[0]} \\
+        -csvStats ${sample}.lowfreq.snpEff.csv \\
+        | bgzip -c > ${sample}.lowfreq.snpEff.vcf.gz
+    tabix -p vcf -f ${sample}.lowfreq.snpEff.vcf.gz
+    mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
+
+    SnpSift extractFields -s "," \\
+        -e "." \\
+        ${sample}.lowfreq.snpEff.vcf.gz \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > ${sample}.lowfreq.snpSift.table.txt
+    	"""
+}
+
+/*
+ * STEP 3.7: Genome consensus generation with BCFtools and masked with BEDTools
+ */
+process BCFTOOLS_CONSENSUS {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(bam), file(vcf) from ch_sort_bam_consensus.join(ch_varscan2_highfreq_consensus, by: [0,1,2])
+    file fasta from ch_fasta
+
+    output:
+    file "*consensus.fa" into ch_bcftools_unmasked_consensus
+    file "*consensus.masked.fa" into ch_bcftools_masked_consensus
+
+    script:
+    """
+    cat $fasta | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
+
+    bedtools genomecov \\
+        -bga \\
+        -ibam ${bam[0]} \\
+        -g $fasta \\
+        | awk '\$4 < 20' | bedtools merge > ${sample}.mask.bed
+
+    bedtools maskfasta \\
+        -fi ${sample}.consensus.fa \\
+        -bed ${sample}.mask.bed \\
+        -fo ${sample}.consensus.masked.fa
+    sed -i 's/${index_base}/${sample}/g' ${sample}.consensus.masked.fa
+    """
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
-/* --                        DENOVO ASSEMBLY                              -- */
+/* --                    DENOVO ASSEMBLY PROCESSES                        -- */
 /* --                                                                     -- */
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * PREPROCESSING: Build Blast database for viral genome
+ */
+process BUILD_BLAST_DB {
+    tag "$fasta"
+    label 'process_medium'
+    publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
+        saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly
+
+    input:
+    file fasta from ch_fasta
+
+    output:
+    file "BlastDB" into ch_blast_db_spades,
+                        ch_blast_db_metaspades,
+                        ch_blast_db_unicycler
+
+    script:
+    """
+    makeblastdb \\
+        -in $fasta \\
+        -parse_seqids \\
+        -dbtype nucl
+    mkdir BlastDB && mv ${fasta}* BlastDB
+    """
+}
+
+/*
+ * PREPROCESSING: Build Kraken2 database for host genome
+ */
+// Function to check if running offline
+def isOffline() {
+    try {
+        return NXF_OFFLINE as Boolean
+    }
+    catch( Exception e ) {
+        return false
+    }
+}
+if (!isOffline()) {
+    if (!params.kraken2_db) {
+        if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
+
+        process BUILD_KRAKEN2_DB {
+            tag "$db"
+            label 'process_high'
+            publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
+                saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+
+            when:
+            !params.skip_assembly
+
+            output:
+            file "$db" into ch_kraken2_db
+
+            script:
+            db = "kraken2_${params.kraken2_db_name}"
+            ftp = params.kraken2_use_ftp ? "--use-ftp" : ""
+            """
+            kraken2-build --db $db --threads $task.cpus $ftp --download-taxonomy
+            kraken2-build --db $db --threads $task.cpus $ftp --download-library $params.kraken2_db_name
+            kraken2-build --db $db --threads $task.cpus $ftp --build
+
+            cd $db
+            if [ -d "taxonomy" ]; then rm -rf taxonomy; fi
+            if [ -d "library" ]; then rm -rf library; fi
+            if [ -f "seqid2taxid.map" ]; then rm seqid2taxid.map; fi
+            """
+        }
+    } else {
+        ch_kraken2_db = Channel.fromPath(params.kraken2_db, checkIfExists: true)
+    }
+} else {
+    exit 1, "NXF_OFFLINE=true or -offline has been set so cannot download files required to build Kraken2 database!"
+}
+
+/*
+ * STEP 4.1: Filter reads with Kraken2
+ */
+// TODO nf-core: Add Kraken2 log output to MultiQC
+// TODO nf-core: Add shell script to trim file extensions and return appropriate file name
+process KRAKEN2 {
+    tag "$db"
+    label 'process_high'
+    publishDir "${params.outdir}/preprocess/kraken2", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".txt")) filename
+                      else params.save_kraken2_fastq ? filename : null
+                }
+
+    when:
+    !params.skip_assembly
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_default_kraken2
+    file db from ch_kraken2_db.collect()
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_spades,
+                                                                         ch_kraken2_metaspades,
+                                                                         ch_kraken2_unicycler
+    set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_host_reads
+    file "*.report.txt" into ch_kraken2_report
+
+    script:
+    pe = single_end ? "" : "--paired"
+    classified = single_end ? "${sample}.host.fastq" : "${sample}.host#.fastq"
+    unclassified = single_end ? "${sample}.viral.fastq" : "${sample}.viral#.fastq"
+    """
+    DB=$db
+    if [[ \$DB == *.tar.gz ]]
+    then
+        tar -xvf \$DB
+        DB=\${DB%.*.*}
+    fi
+
+    kraken2 \\
+        --db \$DB \\
+        --threads $task.cpus \\
+        --unclassified-out $unclassified \\
+        --classified-out $classified \\
+        --report ${sample}.kraken2.report.txt \\
+        $pe \\
+        --gzip-compressed \\
+        $reads
+    pigz -p $task.cpus *.fastq
+    """
+}
+
+////////////////////////////////////////////////////
+/* --                SPADES                    -- */
+////////////////////////////////////////////////////
+
+/*
+ * STEP 4.2: De novo assembly with SPAdes
+ */
+process SPADES {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'spades' in assemblers
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_spades
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*scaffolds.fa") into ch_spades_quast,
+                                                                              ch_spades_blast,
+                                                                              ch_spades_abacas,
+                                                                              ch_spades_plasmidid
+
+    script:
+    input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
+    """
+    spades.py \\
+        --threads ${task.cpus} \\
+        $input_reads \\
+        -o ./
+    mv scaffolds.fasta ${sample}.scaffolds.fa
+    """
+}
+
+/*
+ * STEP 4.2.1: Run Blast on SPAdes de novo assembly
+ */
+process SPADES_BLAST {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/spades/blast", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'spades' in assemblers
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_blast
+    file db from ch_blast_db_spades.collect()
+    file header from ch_blast_outfmt6_header
+
+    output:
+    file "*.blast.txt" into ch_blast_spades_results
+    file "*.blast.filt.header.txt" into ch_blast_spades_filt_results
+
+    script:
+    """
+    blastn \\
+        -num_threads ${task.cpus} \\
+        -db $db/$fasta_base \\
+        -query $scaffold \\
+        -outfmt \'6 stitle std slen qlen qcovs\' \\
+        -out ${sample}.blast.txt
+
+    awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
+    cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
+    """
+}
+
+/*
+ * STEP 4.2.2: Run ABACAS on SPAdes de novo assembly
+ */
+process SPADES_ABACAS {
+    tag "$sample"
+    label "process_medium"
+    publishDir "${params.outdir}/assembly/spades/abacas", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
+                      else filename
+                }
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_abacas
+    file fasta from ch_fasta
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_spades_abacas_fasta
+    file "*.abacas*" into ch_spades_abacas_results
+
+    script:
+    """
+    abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
+    mv nucmer.delta ${sample}.abacas.nucmer.delta
+    mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
+    mv nucmer.tiling ${sample}.abacas.nucmer.tiling
+    mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+    """
+}
+
 // /*
-//  * PREPROCESSING: Build Viral Blast database
+//  * STEP 4.2.3: Run PlasmidID on SPAdes de novo assembly
 //  */
-// process BUILD_BLAST_DB {
-//     tag "$fasta"
-//     label 'process_medium'
-//     publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-//         saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly
+// process SPADES_PLASMIDID {
+//     tag "$sample"
+//     label "process_medium"
+//     publishDir "${params.outdir}/assembly/spades/plasmidid", mode: params.publish_dir_mode
 //
 //     input:
+//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
 //     file fasta from ch_fasta
 //
 //     output:
-//     file "BlastDB" into ch_blast_db_spades,
-//                         ch_blast_db_metaspades,
-//                         ch_blast_db_unicycler
+//     file "$sample" into ch_spades_plasmidid_results
 //
 //     script:
 //     """
-//     makeblastdb \\
-//         -in $fasta \\
-//         -parse_seqids \\
-//         -dbtype nucl
-//     mkdir BlastDB && mv ${fasta}* BlastDB
-//     """
-// }
-//
-// /*
-//  * PREPROCESSING: Build Kraken2 database
-//  */
-// // Function to check if running offline
-// def isOffline() {
-//     try {
-//         return NXF_OFFLINE as Boolean
-//     }
-//     catch( Exception e ) {
-//         return false
-//     }
-// }
-// if (!isOffline()) {
-//     if (!params.kraken2_db) {
-//         if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
-//
-//         process BUILD_KRAKEN2_DB {
-//             tag "$db"
-//             label 'process_high'
-//             publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-//                 saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
-//
-//             when:
-//             !params.skip_assembly
-//
-//             output:
-//             file "$db" into ch_kraken2_db
-//
-//             script:
-//             db = "kraken2_${params.kraken2_db_name}"
-//             ftp = params.kraken2_use_ftp ? "--use-ftp" : ""
-//             """
-//             kraken2-build --db $db --threads $task.cpus $ftp --download-taxonomy
-//             kraken2-build --db $db --threads $task.cpus $ftp --download-library $params.kraken2_db_name
-//             kraken2-build --db $db --threads $task.cpus $ftp --build
-//
-//             cd $db
-//             if [ -d "taxonomy" ]; then rm -rf taxonomy; fi
-//             if [ -d "library" ]; then rm -rf library; fi
-//             if [ -f "seqid2taxid.map" ]; then rm seqid2taxid.map; fi
-//             """
-//         }
-//     } else {
-//         ch_kraken2_db = Channel.fromPath(params.kraken2_db, checkIfExists: true)
-//     }
-// } else {
-//     exit 1, "NXF_OFFLINE=true or -offline has been set so cannot download files required to build Kraken2 database!"
-// }
-//
-// /*
-// * STEP 3: Filter reads with Kraken2
-// */
-// // TODO nf-core: Add Kraken2 log output to MultiQC
-// // TODO nf-core: Add shell script to trim file extensions and return appropriate file name
-// process KRAKEN2 {
-//     tag "$db"
-//     label 'process_high'
-//     publishDir "${params.outdir}/preprocess/kraken2", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".txt")) filename
-//                       else params.save_kraken2_fastq ? filename : null
-//                 }
-//
-//     when:
-//     !params.skip_assembly
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_assembly_kraken2
-//     file db from ch_kraken2_db.collect()
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_spades,
-//                                                                          ch_kraken2_metaspades,
-//                                                                          ch_kraken2_unicycler
-//     set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_host_reads
-//     file "*.report.txt" into ch_kraken2_report
-//
-//     script:
-//     pe = single_end ? "" : "--paired"
-//     classified = single_end ? "${sample}.host.fastq" : "${sample}.host#.fastq"
-//     unclassified = single_end ? "${sample}.viral.fastq" : "${sample}.viral#.fastq"
-//     """
-//     DB=$db
-//     if [[ \$DB == *.tar.gz ]]
-//     then
-//         tar -xvf \$DB
-//         DB=\${DB%.*.*}
-//     fi
-//
-//     kraken2 \\
-//         --db \$DB \\
-//         --threads $task.cpus \\
-//         --unclassified-out $unclassified \\
-//         --classified-out $classified \\
-//         --report ${sample}.kraken2.report.txt \\
-//         $pe \\
-//         --gzip-compressed \\
-//         $reads
-//     pigz -p $task.cpus *.fastq
+//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+//     mv NO_GROUP/$sample ./$sample
 //     """
 // }
 
-// ////////////////////////////////////////////////////
-// /* --                SPADES                    -- */
-// ////////////////////////////////////////////////////
-//
+/*
+ * STEP 4.2.4: Run Quast on SPAdes de novo assembly
+ */
+process SPADES_QUAST {
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'spades' in assemblers
+
+    input:
+    file scaffolds from ch_spades_quast.collect{ it[3] }
+    file fasta from ch_fasta
+    file gff from ch_gff
+
+    output:
+    file "quast" into ch_quast_spades_results
+    file "quast/report.tsv" into ch_quast_spades_mqc
+
+    script:
+    """
+    GFF=$gff
+    if [[ \$GFF == *.gz ]]
+    then
+        gunzip -f \$GFF
+        GFF=\${GFF%.*}
+    fi
+
+    quast.py \\
+        --output-dir quast \\
+        -r $fasta \\
+        --features \$GFF \\
+        --threads ${task.cpus} \\
+        ${scaffolds.join(' ')}
+    """
+}
+
+////////////////////////////////////////////////////
+/* --               METASPADES                 -- */
+////////////////////////////////////////////////////
+
+/*
+ * STEP 4.2: De novo assembly with MetaSPAdes
+ */
+process METASPADES {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_metaspades
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*scaffolds.fa") into ch_metaspades_quast,
+                                                                              ch_metaspades_blast,
+                                                                              ch_metaspades_abacas,
+                                                                              ch_metaspades_plasmidid
+
+    script:
+    """
+    spades.py \\
+        --meta \\
+        --threads ${task.cpus} \\
+        -1 ${reads[0]} \\
+        -2 ${reads[1]} \\
+        -o ./
+    mv scaffolds.fasta ${sample}.meta.scaffolds.fa
+    """
+}
+
+/*
+ * STEP 4.2.1: Run Blast on MetaSPAdes de novo assembly
+ */
+process METASPADES_BLAST {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/metaspades/blast", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_blast
+    file db from ch_blast_db_metaspades.collect()
+    file header from ch_blast_outfmt6_header
+
+    output:
+    file "*.blast.txt" into ch_blast_metaspades_results
+    file "*.blast.filt.header.txt" into ch_blast_metaspades_filt_results
+
+    script:
+    """
+    blastn \\
+        -num_threads ${task.cpus} \\
+        -db $db/$fasta_base \\
+        -query $scaffold \\
+        -outfmt \'6 stitle std slen qlen qcovs\' \\
+        -out ${sample}.blast.txt
+
+    awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
+    cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
+    """
+}
+
+/*
+ * STEP 4.2.2: Run ABACAS on MetaSPAdes de novo assembly
+ */
+process METASPADES_ABACAS {
+    tag "$sample"
+    label "process_medium"
+    publishDir "${params.outdir}/assembly/metaspades/abacas", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
+                      else filename
+                }
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_abacas
+    file fasta from ch_fasta
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_metaspades_abacus_fasta
+    file "*.abacas*" into ch_metaspades_abacus_results
+
+    script:
+    """
+    abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
+    mv nucmer.delta ${sample}.abacas.nucmer.delta
+    mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
+    mv nucmer.tiling ${sample}.abacas.nucmer.tiling
+    mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+    """
+}
+
 // /*
-//  * STEP 7.1: De novo assembly with SPAdes
+//  * STEP 4.2.3: Run PlasmidID on MetaSPAdes de novo assembly
 //  */
-// process SPADES {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'spades' in assemblers
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_spades
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fa") into ch_spades_quast,
-//                                                                               ch_spades_blast,
-//                                                                               ch_spades_abacas,
-//                                                                               ch_spades_plasmidid
-//
-//     script:
-//     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
-//     """
-//     spades.py \\
-//         --threads ${task.cpus} \\
-//         $input_reads \\
-//         -o ./
-//     mv scaffolds.fasta ${sample}.scaffolds.fa
-//     """
-// }
-//
-// /*
-//  * STEP 7.2: Run Quast on SPAdes de novo assembly
-//  */
-// process SPADES_QUAST {
-//     label 'process_medium'
-//     publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'spades' in assemblers
-//
-//     input:
-//     file scaffolds from ch_spades_quast.collect{ it[3] }
-//     file fasta from ch_fasta
-//     file gff from ch_gff
-//
-//     output:
-//     file "quast" into ch_quast_spades_results
-//     file "quast/report.tsv" into ch_quast_spades_mqc
-//
-//     script:
-//     """
-//     GFF=$gff
-//     if [[ \$GFF == *.gz ]]
-//     then
-//         gunzip -f \$GFF
-//         GFF=\${GFF%.*}
-//     fi
-//
-//     quast.py \\
-//         --output-dir quast \\
-//         -r $fasta \\
-//         --features \$GFF \\
-//         --threads ${task.cpus} \\
-//         ${scaffolds.join(' ')}
-//     """
-// }
-//
-// /*
-//  * STEP 7.3: Run Blast on SPAdes de novo assembly
-//  */
-// process SPADES_BLAST {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/assembly/spades/blast", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'spades' in assemblers
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_blast
-//     file db from ch_blast_db_spades.collect()
-//     file header from ch_blast_outfmt6_header
-//
-//     output:
-//     file "*.blast.txt" into ch_blast_spades_results
-//     file "*.blast.filt.header.txt" into ch_blast_spades_filt_results
-//
-//     script:
-//     """
-//     blastn \\
-//         -num_threads ${task.cpus} \\
-//         -db $db/$fasta_base \\
-//         -query $scaffold \\
-//         -outfmt \'6 stitle std slen qlen qcovs\' \\
-//         -out ${sample}.blast.txt
-//
-//     awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
-//     cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
-//     """
-// }
-//
-// /*
-//  * STEP 7.4: Run ABACAS on SPAdes de novo assembly
-//  */
-// process SPADES_ABACAS {
-//     tag "$sample"
-//     label "process_medium"
-//     publishDir "${params.outdir}/assembly/spades/abacas", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
-//                       else filename
-//                 }
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_abacas
-//     file fasta from ch_fasta
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_spades_abacas_fasta
-//     file "*.abacas*" into ch_spades_abacas_results
-//
-//     script:
-//     """
-//     abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
-//     mv nucmer.delta ${sample}.abacas.nucmer.delta
-//     mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
-//     mv nucmer.tiling ${sample}.abacas.nucmer.tiling
-//     mv unused_contigs.out ${sample}.abacas.unused.contigs.out
-//     """
-// }
-//
-// // /*
-// //  * STEP 7.5: Run PlasmidID on SPAdes de novo assembly
-// //  */
-// // process SPADES_PLASMIDID {
-// //     tag "$sample"
-// //     label "process_medium"
-// //     publishDir "${params.outdir}/assembly/spades/plasmidid", mode: params.publish_dir_mode
-// //
-// //     input:
-// //     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
-// //     file fasta from ch_fasta
-// //
-// //     output:
-// //     file "$sample" into ch_spades_plasmidid_results
-// //
-// //     script:
-// //     """
-// //     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-// //     mv NO_GROUP/$sample ./$sample
-// //     """
-// // }
-//
-// ////////////////////////////////////////////////////
-// /* --               METASPADES                 -- */
-// ////////////////////////////////////////////////////
-//
-// /*
-//  * STEP 8.1: De novo assembly with MetaSPAdes
-//  */
-// process METASPADES {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'metaspades' in assemblers && !single_end
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_metaspades
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fa") into ch_metaspades_quast,
-//                                                                               ch_metaspades_blast,
-//                                                                               ch_metaspades_abacas,
-//                                                                               ch_metaspades_plasmidid
-//
-//     script:
-//     """
-//     spades.py \\
-//         --meta \\
-//         --threads ${task.cpus} \\
-//         -1 ${reads[0]} \\
-//         -2 ${reads[1]} \\
-//         -o ./
-//     mv scaffolds.fasta ${sample}.meta.scaffolds.fa
-//     """
-// }
-//
-// /*
-//  * STEP 8.2: Run Quast on MetaSPAdes de novo assembly
-//  */
-// process METASPADES_QUAST {
-//     label 'process_medium'
-//     publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'metaspades' in assemblers && !single_end
-//
-//     input:
-//     file scaffolds from ch_metaspades_quast.collect{ it[3] }
-//     file fasta from ch_fasta
-//     file gff from ch_gff
-//
-//     output:
-//     file "quast" into ch_quast_metaspades_results
-//     file "quast/report.tsv" into ch_quast_metaspades_mqc
-//
-//     script:
-//     """
-//     GFF=$gff
-//     if [[ \$GFF == *.gz ]]
-//     then
-//         gunzip -f \$GFF
-//         GFF=\${GFF%.*}
-//     fi
-//
-//     quast.py \\
-//         --output-dir quast \\
-//         -r $fasta \\
-//         --features \$GFF \\
-//         --threads ${task.cpus} \\
-//         ${scaffolds.join(' ')}
-//     """
-// }
-//
-// /*
-//  * STEP 8.3: Run Blast on MetaSPAdes de novo assembly
-//  */
-// process METASPADES_BLAST {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/assembly/metaspades/blast", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'metaspades' in assemblers && !single_end
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_blast
-//     file db from ch_blast_db_metaspades.collect()
-//     file header from ch_blast_outfmt6_header
-//
-//     output:
-//     file "*.blast.txt" into ch_blast_metaspades_results
-//     file "*.blast.filt.header.txt" into ch_blast_metaspades_filt_results
-//
-//     script:
-//     """
-//     blastn \\
-//         -num_threads ${task.cpus} \\
-//         -db $db/$fasta_base \\
-//         -query $scaffold \\
-//         -outfmt \'6 stitle std slen qlen qcovs\' \\
-//         -out ${sample}.blast.txt
-//
-//     awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
-//     cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
-//     """
-// }
-//
-// /*
-//  * STEP 8.4: Run ABACAS on MetaSPAdes de novo assembly
-//  */
-// process METASPADES_ABACAS {
+// process METASPADES_PLASMIDID {
 //     tag "$sample"
 //     label "process_medium"
-//     publishDir "${params.outdir}/assembly/metaspades/abacas", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
-//                       else filename
-//                 }
+//     publishDir "${params.outdir}/assembly/metaspades/plasmidid", mode: params.publish_dir_mode
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_abacas
+//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_plasmidid.filter { it.size() > 0 }
 //     file fasta from ch_fasta
 //
 //     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_metaspades_abacus_fasta
-//     file "*.abacas*" into ch_metaspades_abacus_results
+//     file "$sample" into ch_metaspades_plasmidid_results
 //
 //     script:
 //     """
-//     abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
-//     mv nucmer.delta ${sample}.abacas.nucmer.delta
-//     mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
-//     mv nucmer.tiling ${sample}.abacas.nucmer.tiling
-//     mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+//     mv NO_GROUP/$sample ./$sample
 //     """
 // }
-//
-// // /*
-// //  * STEP 8.5: Run PlasmidID on MetaSPAdes de novo assembly
-// //  */
-// // process METASPADES_PLASMIDID {
-// //     tag "$sample"
-// //     label "process_medium"
-// //     publishDir "${params.outdir}/assembly/metaspades/plasmidid", mode: params.publish_dir_mode
-// //
-// //     input:
-// //     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_plasmidid.filter { it.size() > 0 }
-// //     file fasta from ch_fasta
-// //
-// //     output:
-// //     file "$sample" into ch_metaspades_plasmidid_results
-// //
-// //     script:
-// //     """
-// //     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-// //     mv NO_GROUP/$sample ./$sample
-// //     """
-// // }
-//
-// ////////////////////////////////////////////////////
-// /* --               UNICYCLER                  -- */
-// ////////////////////////////////////////////////////
-//
+
+/*
+ * STEP 4.2.4: Run Quast on MetaSPAdes de novo assembly
+ */
+process METASPADES_QUAST {
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end
+
+    input:
+    file scaffolds from ch_metaspades_quast.collect{ it[3] }
+    file fasta from ch_fasta
+    file gff from ch_gff
+
+    output:
+    file "quast" into ch_quast_metaspades_results
+    file "quast/report.tsv" into ch_quast_metaspades_mqc
+
+    script:
+    """
+    GFF=$gff
+    if [[ \$GFF == *.gz ]]
+    then
+        gunzip -f \$GFF
+        GFF=\${GFF%.*}
+    fi
+
+    quast.py \\
+        --output-dir quast \\
+        -r $fasta \\
+        --features \$GFF \\
+        --threads ${task.cpus} \\
+        ${scaffolds.join(' ')}
+    """
+}
+
+////////////////////////////////////////////////////
+/* --               UNICYCLER                  -- */
+////////////////////////////////////////////////////
+
+/*
+ * STEP 4.2: De novo assembly with Unicycler
+ */
+process UNICYCLER {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'unicycler' in assemblers
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_unicycler
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*assembly.fa") into ch_unicycler_quast,
+                                                                             ch_unicycler_blast,
+                                                                             ch_unicycler_abacas,
+                                                                             ch_unicycler_plasmidid
+
+    script:
+    input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
+    """
+    unicycler \\
+        --threads ${task.cpus} \\
+        $input_reads \\
+        --out ./
+    mv assembly.fasta ${sample}.assembly.fa
+    """
+}
+
+/*
+ * STEP 4.2.1: Run Blast on MetaSPAdes de novo assembly
+ */
+process UNICYCLER_BLAST {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/unicycler/blast", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'unicycler' in assemblers
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_blast
+    file db from ch_blast_db_unicycler.collect()
+    file header from ch_blast_outfmt6_header
+
+    output:
+    file "*.blast.txt" into ch_blast_unicycler_results
+    file "*.blast.filt.header.txt" into ch_blast_unicycler_filt_results
+
+    script:
+    """
+    blastn \\
+        -num_threads ${task.cpus} \\
+        -db $db/$fasta_base \\
+        -query $scaffold \\
+        -outfmt \'6 stitle std slen qlen qcovs\' \\
+        -out ${sample}.blast.txt
+
+    awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
+    cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
+    """
+}
+
+/*
+ * STEP 4.2.2: Run ABACAS on Unicycler de novo assembly
+ */
+process UNICYCLER_ABACAS {
+    tag "$sample"
+    label "process_medium"
+    publishDir "${params.outdir}/assembly/unicycler/abacas", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
+                      else filename
+                }
+
+    input:
+    set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_abacas
+    file fasta from ch_fasta
+
+    output:
+    set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_unicycler_abacas_fasta
+    file "*.abacas*" into ch_unicycler_abacas_results
+
+    script:
+    """
+    abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
+    mv nucmer.delta ${sample}.abacas.nucmer.delta
+    mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
+    mv nucmer.tiling ${sample}.abacas.nucmer.tiling
+    mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+    """
+}
+
 // /*
-//  * STEP 9.1: De novo assembly with Unicycler
+//  * STEP 4.2.3: Run PlasmidID on Unicycler de novo assembly
 //  */
-// process UNICYCLER {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_unicycler
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*assembly.fa") into ch_unicycler_quast,
-//                                                                              ch_unicycler_blast,
-//                                                                              ch_unicycler_abacas,
-//                                                                              ch_unicycler_plasmidid
-//
-//     script:
-//     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
-//     """
-//     unicycler \\
-//         --threads ${task.cpus} \\
-//         $input_reads \\
-//         --out ./
-//     mv assembly.fasta ${sample}.assembly.fa
-//     """
-// }
-//
-// /*
-//  * STEP 9.2: Run Quast on Unicycler de novo assembly
-//  */
-// process UNICYCLER_QUAST {
-//     label 'process_medium'
-//     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers
-//
-//     input:
-//     file scaffolds from ch_unicycler_quast.collect{ it[3] }
-//     file fasta from ch_fasta
-//     file gff from ch_gff
-//
-//     output:
-//     file "quast" into ch_quast_unicycler_results
-//     file "quast/report.tsv" into ch_quast_unicycler_mqc
-//
-//     script:
-//     """
-//     GFF=$gff
-//     if [[ \$GFF == *.gz ]]
-//     then
-//         gunzip -f \$GFF
-//         GFF=\${GFF%.*}
-//     fi
-//
-//     quast.py \\
-//         --output-dir quast \\
-//         -r $fasta \\
-//         --features \$GFF \\
-//         --threads ${task.cpus} \\
-//         ${scaffolds.join(' ')}
-//     """
-// }
-//
-// /*
-//  * STEP 9.3: Run Blast on MetaSPAdes de novo assembly
-//  */
-// process UNICYCLER_BLAST {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/assembly/unicycler/blast", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_blast
-//     file db from ch_blast_db_unicycler.collect()
-//     file header from ch_blast_outfmt6_header
-//
-//     output:
-//     file "*.blast.txt" into ch_blast_unicycler_results
-//     file "*.blast.filt.header.txt" into ch_blast_unicycler_filt_results
-//
-//     script:
-//     """
-//     blastn \\
-//         -num_threads ${task.cpus} \\
-//         -db $db/$fasta_base \\
-//         -query $scaffold \\
-//         -outfmt \'6 stitle std slen qlen qcovs\' \\
-//         -out ${sample}.blast.txt
-//
-//     awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
-//     cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
-//     """
-// }
-//
-// /*
-//  * STEP 9.4: Run ABACAS on Unicycler de novo assembly
-//  */
-// process UNICYCLER_ABACAS {
+// process UNICYCLER_PLASMIDID {
 //     tag "$sample"
 //     label "process_medium"
-//     publishDir "${params.outdir}/assembly/unicycler/abacas", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
-//                       else filename
-//                 }
+//     publishDir "${params.outdir}/assembly/unicycler/plasmidid", mode: params.publish_dir_mode
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_abacas
+//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
 //     file fasta from ch_fasta
 //
 //     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_unicycler_abacas_fasta
-//     file "*.abacas*" into ch_unicycler_abacas_results
+//     file "$sample" into ch_unicycler_plasmidid_results
 //
 //     script:
 //     """
-//     abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
-//     mv nucmer.delta ${sample}.abacas.nucmer.delta
-//     mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
-//     mv nucmer.tiling ${sample}.abacas.nucmer.tiling
-//     mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+//     mv NO_GROUP/$sample ./$sample
 //     """
 // }
-//
-// // /*
-// //  * STEP 9.5: Run PlasmidID on Unicycler de novo assembly
-// //  */
-// // process UNICYCLER_PLASMIDID {
-// //     tag "$sample"
-// //     label "process_medium"
-// //     publishDir "${params.outdir}/assembly/unicycler/plasmidid", mode: params.publish_dir_mode
-// //
-// //     input:
-// //     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
-// //     file fasta from ch_fasta
-// //
-// //     output:
-// //     file "$sample" into ch_unicycler_plasmidid_results
-// //
-// //     script:
-// //     """
-// //     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-// //     mv NO_GROUP/$sample ./$sample
-// //     """
-// // }
-//
+
+/*
+ * STEP 4.2.4: Run Quast on Unicycler de novo assembly
+ */
+process UNICYCLER_QUAST {
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'unicycler' in assemblers
+
+    input:
+    file scaffolds from ch_unicycler_quast.collect{ it[3] }
+    file fasta from ch_fasta
+    file gff from ch_gff
+
+    output:
+    file "quast" into ch_quast_unicycler_results
+    file "quast/report.tsv" into ch_quast_unicycler_mqc
+
+    script:
+    """
+    GFF=$gff
+    if [[ \$GFF == *.gz ]]
+    then
+        gunzip -f \$GFF
+        GFF=\${GFF%.*}
+    fi
+
+    quast.py \\
+        --output-dir quast \\
+        -r $fasta \\
+        --features \$GFF \\
+        --threads ${task.cpus} \\
+        ${scaffolds.join(' ')}
+    """
+}
+
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
 // /* --                                                                     -- */
@@ -1618,8 +1599,8 @@ process BUILD_BOWTIE2_INDEX {
 // }
 //
 // /*
-// * STEP 10: MultiQC
-// */
+//  * STEP 10: MultiQC
+//  */
 // process MULTIQC {
 //     publishDir "${params.outdir}/multiqc", mode: params.publish_dir_mode
 //
@@ -1668,8 +1649,8 @@ process BUILD_BOWTIE2_INDEX {
 // }
 
 /*
-* STEP 11: Output Description HTML
-*/
+ * STEP 11: Output Description HTML
+ */
 process output_documentation {
     publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode
 
