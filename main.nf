@@ -151,20 +151,74 @@ if (params.genomes && params.genome && !params.genomes.containsKey(params.genome
 }
 params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
 params.gff = params.genome ? params.genomes[ params.genome ].gff ?: false : false
+//println(params.fasta)
 
-// TODO nf-core: Refactor to accept gzip fasta as input
+/*
+ * Create channel from fasta accepting gunzip input
+ */
 if (params.fasta) {
-    lastPath = params.fasta.lastIndexOf(File.separator)
-    lastExt = params.fasta.lastIndexOf(".")
-    fasta_base = params.fasta.substring(lastPath+1)
-    index_base = params.fasta.substring(lastPath+1,lastExt)
-    ch_fasta = file(params.fasta, checkIfExists: true)
+    if("${params.fasta}".endsWith(".gz")){
+        zipped_fasta = file("${params.fasta}")
+        rm_gz = params.fasta - '.gz'
+        lastPath = rm_gz.lastIndexOf(File.separator)
+        lastExt = rm_gz.lastIndexOf(".")
+        fasta_base = rm_gz.substring(lastPath+1)
+        index_base = rm_gz.substring(lastPath+1,lastExt)
+
+        process unzip_reference {
+            tag "${zipped_fasta}"
+
+            input:
+            file zipped_fasta
+
+            output:
+            file "*.{fa,fn,fna,fasta}" into ch_fasta
+
+            """
+            pigz -f -d -p ${task.cpus} $zipped_fasta
+            """
+        }
+
+    } else {
+        lastPath = params.fasta.lastIndexOf(File.separator)
+        lastExt = params.fasta.lastIndexOf(".")
+        fasta_base = params.fasta.substring(lastPath+1)
+        index_base = params.fasta.substring(lastPath+1,lastExt)
+        ch_fasta = file(params.fasta, checkIfExists: true)
+    }
 } else {
     exit 1, "Viral fasta file not specified!"
 }
+
 // TODO nf-core: Make viral_gff mandatory?
-// TODO nf-core: Zip fasta and gff on test-datasets
-if (params.gff) { ch_gff = Channel.fromPath(params.gff, checkIfExists: true) } else { ch_gff = Channel.empty() }
+/*
+ * Create channel from gff accepting gunzip input
+ */
+if (params.gff) {
+    if("${params.gff}".endsWith(".gz")) {
+        zipped_gff = file("${params.gff}")
+        rm_gz = params.gff - '.gz'
+
+        process unzip_gff {
+            tag "${zipped_gff}"
+
+            input:
+            file zipped_gff
+
+            output:
+            file "*.gff" into ch_gff
+
+            """
+            pigz -f -d -p ${task.cpus} $zipped_gff
+            """
+        }
+    } else {
+        ch_gff = Channel.fromPath(params.gff, checkIfExists: true)
+    }
+} else {
+        ch_gff = Channel.empty()
+}
+
 ch_gff
     .into { ch_gff_snpeff;
             ch_gff_spades;
