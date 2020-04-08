@@ -10,7 +10,6 @@
 */
 
 def helpMessage() {
-    // TODO nf-core: Add to this help message with new command line parameters
     log.info nfcoreHeader()
     log.info"""
 
@@ -147,7 +146,6 @@ if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
 }
 
-// TODO nf-core: Refactor Kraken2 variables to be simpler
 // Viral reference files
 if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
    exit 1, "The provided genome '${params.genome}' is not available in the Genome file. Currently the available genomes are ${params.genomes.keySet().join(", ")}"
@@ -210,7 +208,6 @@ log.info nfcoreHeader()
 def summary = [:]
 if (workflow.revision)             summary['Pipeline Release'] = workflow.revision
 summary['Run Name']                = custom_runName ?: workflow.runName
-// TODO nf-core: Report custom parameters here
 summary['Samplesheet']             = params.input
 summary['Protocol']                = params.protocol
 if (params.protocol == 'amplicon') summary['Amplicon Fasta File'] = params.amplicon_fasta
@@ -1308,7 +1305,6 @@ if (!isOffline()) {
  * STEP 4.1: Filter reads with Kraken2
  */
 // TODO nf-core: Add Kraken2 log output to MultiQC
-// TODO nf-core: Add shell script to trim file extensions and return appropriate file name
 process KRAKEN2 {
     tag "$db"
     label 'process_high'
@@ -1866,7 +1862,6 @@ process get_software_versions {
     file "software_versions.csv"
 
     script:
-    // TODO nf-core: Get all tools to print their version number here
     """
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
@@ -1905,7 +1900,6 @@ process MULTIQC {
     input:
     file (multiqc_config) from ch_multiqc_config
     file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
-    // TODO nf-core: Add in log files from your new processes for MultiQC to find!
     file ('fastqc/raw/*') from ch_fastqc_raw_reports_mqc.collect().ifEmpty([])
     file ('fastqc/trimmomatic/default/*') from ch_trimmomatic_default_fastqc_mqc.collect().ifEmpty([])
     file ('fastqc/trimmomatic/amplicon/*') from ch_trimmomatic_amplicon_fastqc_mqc.collect().ifEmpty([])
@@ -1932,7 +1926,6 @@ process MULTIQC {
     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
     custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
-    // TODO nf-core: Specify which MultiQC modules to use with -m for a faster run time
     """
     multiqc . -f $rtitle $rfilename $custom_config_file \\
         -m custom_content \\
@@ -1997,7 +1990,6 @@ workflow.onComplete {
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
 
-    // TODO nf-core: If not using MultiQC, strip out this code (including params.max_multiqc_email_size)
     // On success try attach the multiqc report
     def mqc_report = null
     try {
