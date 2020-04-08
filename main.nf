@@ -571,7 +571,7 @@ process VALIDATE_GZIP_FASTQ_FASTERQ_DUMP {
     if (single_end.toBoolean()) {
         """
         fastq_info ${sample}.fastq
-        # gzip -fc ${sample}.fastq > ${sample}.fastq.gz
+
         pigz -cp ${task.cpus} ${sample}.fastq > ${sample}.fastq.gz
         """
     } else {
@@ -579,8 +579,6 @@ process VALIDATE_GZIP_FASTQ_FASTERQ_DUMP {
         fastq_info ${sample}_1.fastq
         fastq_info ${sample}_2.fastq
 
-        # gzip -fc ${sample}_1.fastq > ${sample}_1.fastq.gz
-        # gzip -fc ${sample}_2.fastq > ${sample}_2.fastq.gz
         pigz -cp ${task.cpus} ${sample}_1.fastq > ${sample}_1.fastq.gz
         pigz -cp ${task.cpus} -fc ${sample}_2.fastq > ${sample}_2.fastq.gz
         """
@@ -629,8 +627,6 @@ ch_fromSRA_dw_validated
             ch_reads_trimmomatic_default;
             ch_reads_trimmomatic_amplicon }
 
-ch_reads_trimmomatic_mapping.view()
-return
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
