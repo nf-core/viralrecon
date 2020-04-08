@@ -87,7 +87,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/viralrecon --input samplesheet.csv --host_genome 'hg38' --viral_genome 'NC_045512.2' -profile docker
+nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'NC_045512.2' -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
