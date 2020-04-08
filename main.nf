@@ -167,7 +167,8 @@ if (params.fasta) {
 
         process unzip_reference {
             tag "${zipped_fasta}"
-
+	    label 'process_low'
+	
             input:
             file zipped_fasta
 
@@ -201,6 +202,7 @@ if (params.gff) {
 
         process unzip_gff {
             tag "${zipped_gff}"
+            label 'process_low'
 
             input:
             file zipped_gff
