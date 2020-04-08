@@ -24,7 +24,6 @@ dependencies:
   - bioconda::sra-tools=2.10.3
   - bioconda::fastq_utils=0.23.0
   - bioconda::trimmomatic=0.39
-  - bioconda::fastp=0.20.0
   - bioconda::bowtie2=2.3.5.1
   - bioconda::kraken2=2.0.8_beta
   - bioconda::samtools=1.9

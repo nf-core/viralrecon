@@ -25,15 +25,16 @@ jobs:
           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
       - name: Run pipeline with test data
         run: |
-          # TODO nf-core: You can customise CI pipeline run tests as required
-          # (eg. adding multiple test runs with different parameters)
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker
 
-  test_sispa:
+  parameters:
     env:
       NXF_VER: '19.10.0'
       NXF_ANSI_LOG: false
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        parameters: [--skip_trimming, --skip_assembly, --skip_variants]
     steps:
       - uses: actions/checkout@v2
       - name: Install Nextflow
@@ -44,6 +45,28 @@ jobs:
         run: |
           docker pull nfcore/viralrecon:dev
           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
-      - name: Run pipeline with test SISPA data
+      - name: Run pipeline with test amplicon data with various options
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }}
+
+  test_sispa:
+    env:
+      NXF_VER: '19.10.0'
+      NXF_ANSI_LOG: false
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        parameters: [--skip_trimming, --skip_assembly, --skip_variants]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Nextflow
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+      - name: Pull docker image
+        run: |
+          docker pull nfcore/viralrecon:dev
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+      - name: Run pipeline with test SISPA data with various options
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }}

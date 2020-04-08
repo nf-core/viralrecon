@@ -57,7 +57,7 @@ iv. Start running your own analysis!
 <!-- TODO nf-core: Update the default command above used to run the pipeline -->
 
 ```bash
-nextflow run nf-core/viralrecon -profile <docker/singularity/conda/institute> --input samplesheet.csv --host_genome 'hg38' --viral_genome 'NC_045512.2'
+nextflow run nf-core/viralrecon -profile <docker/singularity/conda/institute> --input samplesheet.csv --genome 'NC_045512.2' -profile docker
 ```
 
 See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
