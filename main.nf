@@ -480,7 +480,7 @@ process VALIDATE_FASTQ_NF_FROMSRA {
     set val(id), file(reads) from SRA_pointers
 
     output:
-    set val(id), env (single_end), val("true"), file(reads) optional true into ch_fromSRA_dw_validated, ch_validated_fromSRA_to_empty, ch_validated_fromSRA_to_check
+    set val(id), stdout, val("true"), file(reads) optional true into ch_fromSRA_dw_validated, ch_validated_fromSRA_to_empty, ch_validated_fromSRA_to_check
 
     """
     fastq_info $reads > validation.tmp 2>&1 || true
@@ -491,8 +491,9 @@ process VALIDATE_FASTQ_NF_FROMSRA {
         single_end=`get_SRA_metainfo.py $id --is_single`
     else
         single_end="failed"
-        echo "fastq files downloaded by \"fromSRA\" are corrupted, pipeline will try to download again with \"fasterq-dump\"!"
+        1>&2 echo "fastq files downloaded by \"fromSRA\" are corrupted, pipeline will try to download again with \"fasterq-dump\"!"
     fi
+    echo \${single_end}
     """
 }
 
@@ -528,7 +529,7 @@ process FASTERQ_DUMP {
     val(sample) from ch_fromSRA_ids_missing
 
     output:
-    set val(sample), env(single_end), val("true"), file("*.fastq") optional true into ch_fasterq_dump
+    set val(sample), stdout, val("true"), file("*.fastq") optional true into ch_fasterq_dump
 
     """
     single_end=""
@@ -548,9 +549,10 @@ process FASTERQ_DUMP {
             -e ${task.cpus} \\
             --split-files
     else
-        echo -e "Problem getting metainfo of fastq files, hence \"fasterq-dump\" not run"
+        1>&2 echo -e "Problem getting metainfo of fastq files, hence \"fasterq-dump\" not run"
         exit 1
     fi
+    echo \${single_end}
     """
 }
 
