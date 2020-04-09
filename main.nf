@@ -492,12 +492,12 @@ process FASTQC {
 
 if (!params.skip_trimming) {
     /*
-    * STEP 2.1: Adapter trimming with Trimmomatic for adapter/amplicon removal and quality trimming
+    * STEP 2.1: Adapter trimming with Trimmomatic for adapter removal and quality trimming
     */
     process TRIMMOMATIC {
         tag "$sample"
         label 'process_medium'
-        publishDir "${params.outdir}/preprocess/trimmomatic/default/", mode: params.publish_dir_mode,
+        publishDir "${params.outdir}/preprocess/trimmomatic/", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith(".html")) "fastqc/$filename"
                           else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
@@ -511,11 +511,10 @@ if (!params.skip_trimming) {
         input:
         set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic_default
         file adapters from ch_adapter_fasta_trimmomatic_default.collect()
-        file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
 
         output:
         set val(sample), val(single_end), val(is_sra), file("*.trimmed.fastq.gz") into ch_trimmomatic_default_bowtie2,
-                                                                                       ch_trimmomatic_default_kraken2
+                                                                                       ch_trimmomatic_default_cutadapt
         set val(sample), val(single_end), val(is_sra), file("*.orphan.fastq.gz") into ch_trimmomatic_default_orphan
         file '*.log' into ch_trimmomatic_default_mqc
         file "*.{zip,html}" into ch_trimmomatic_default_fastqc_mqc
@@ -553,82 +552,83 @@ if (!params.skip_trimming) {
         """
     }
 
-    if (params.protocol == 'amplicon') {
-        /*
-         * STEP 2.2: Adapter trimming with Trimmomatic to keep amplicon primers but to remove adapters and quality trimming
-         */
-        process TRIMMOMATIC_AMPLICON {
-            tag "$sample"
-            label 'process_medium'
-            publishDir "${params.outdir}/preprocess/trimmomatic/amplicon/", mode: params.publish_dir_mode,
-                saveAs: { filename ->
-                              if (filename.endsWith(".html")) "fastqc/$filename"
-                              else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
-                              else if (filename.endsWith(".log")) "log/$filename"
-                              else params.save_trimmed ? "$filename" : null
-                        }
-
-            when:
-            !params.skip_variants
-
-            input:
-            set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_trimmomatic_amplicon
-            file adapters from ch_adapter_fasta_trimmomatic_amplicon.collect()
-
-            output:
-            set val(sample), val(single_end), val(is_sra), file("*.trimmed.fastq.gz") into ch_trimmomatic_amplicon_bowtie2
-            set val(sample), val(single_end), val(is_sra), file("*.orphan.fastq.gz") into ch_trimmomatic_amplicon_orphan
-            file '*.log' into ch_trimmomatic_amplicon_mqc
-            file "*.{zip,html}" into ch_trimmomatic_amplicon_fastqc_mqc
-
-            script:
-            pe = single_end ? "SE" : "PE"
-            orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
-            // Added soft-links to original fastqs for consistent naming in MultiQC
-            """
-            IN_READS='${sample}.fastq.gz'
-            OUT_READS='${sample}.trimmed.fastq.gz'
-            FASTQC_READS='${sample}.trimmed.fastq.gz'
-            if $single_end; then
-                [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
-            else
-                [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
-                [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-                IN_READS='${sample}_1.fastq.gz ${sample}_2.fastq.gz'
-                OUT_READS='${sample}_1.trimmed.fastq.gz ${sample}_1.orphan.fastq.gz ${sample}_2.trimmed.fastq.gz ${sample}_2.orphan.fastq.gz'
-                FASTQC_READS='${sample}_1.trimmed.fastq.gz ${sample}_2.trimmed.fastq.gz'
-            fi
-
-            trimmomatic $pe \\
-                -threads ${task.cpus} \\
-                \$IN_READS \\
-                \$OUT_READS \\
-                ILLUMINACLIP:${adapters}:${params.trim_params} \\
-                SLIDINGWINDOW:${params.trim_window_length}:${params.trim_window_value} \\
-                MINLEN:${params.trim_min_length} \\
-                2> ${sample}.trimmomatic.log
-            $orphan
-
-            fastqc --quiet --threads $task.cpus \$FASTQC_READS
-            """
-        }
-        ch_trimmomatic_default_bowtie2 = ch_trimmomatic_amplicon_bowtie2
-
-    } else {
-        ch_trimmomatic_amplicon_mqc = Channel.empty()
-        ch_trimmomatic_amplicon_fastqc_mqc = Channel.empty()
-    }
 } else {
     ch_reads_trimmomatic_default
         .into { ch_trimmomatic_default_bowtie2;
-                ch_trimmomatic_default_kraken2 }
+                ch_trimmomatic_default_cutadapt }
 
     ch_trimmomatic_default_mqc = Channel.empty()
     ch_trimmomatic_default_fastqc_mqc = Channel.empty()
-
-    ch_trimmomatic_amplicon_mqc = Channel.empty()
-    ch_trimmomatic_amplicon_fastqc_mqc = Channel.empty()
 }
+
+
+if (params.protocol == 'amplicon') {
+    /*
+     * STEP 2.2: Amplicon trimming with Cutadapt
+     */
+    process CUTADAPT {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/preprocess/cutadapt/", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith(".html")) "fastqc/$filename"
+                          else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
+                          else if (filename.endsWith(".log")) "log/$filename"
+                          else $filename
+                    }
+
+        when:
+        !params.skip_assembly
+
+        input:
+        set val(sample), val(single_end), val(is_sra), file(reads) from ch_trimmomatic_default_cutadapt
+        file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
+
+        output:
+        set val(sample), val(single_end), val(is_sra), file("*.primertrimmed.fastq.gz") into ch_trimmomatic_default_kraken2
+        file "*.{zip,html}" into ch_cutadapt_amplicon_fastqc_mqc
+        file "*.log" into ch_cutadapt_amplicon_mqc
+
+        script:
+        """
+        sed -r '/^[ACTGactg]+$/ s/$/X/g' $amplicons > primers.fasta
+        IN_READS='${sample}.trimmed.fastq.gz'
+        ADAPTERS='-a file:primers.fasta'
+        OUT_READS='-o ${sample}.primertrimmed.fastq.gz'
+        FASTQC_READS='${sample}.primertrimmed.fastq.gz'
+        if $single_end; then
+            [ ! -f  ${sample}.trimmed.fastq.gz ] && ln -s $reads ${sample}.trimmed.fastq.gz
+        else
+            [ ! -f  ${sample}_1.trimmed.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.trimmed.fastq.gz
+            [ ! -f  ${sample}_2.trimmed.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.trimmed.fastq.gz
+            IN_READS='${sample}_1.trimmed.fastq.gz ${sample}_2.trimmed.fastq.gz'
+            ADAPTERS='-a file:primers.fasta -A file:primers.fasta'
+            OUT_READS='-o ${sample}_1.primertrimmed.fastq.gz -p ${sample}_2.primertrimmed.fastq.gz'
+            FASTQC_READS='${sample}_1.primertrimmed.fastq.gz ${sample}_2.primertrimmed.fastq.gz'
+        fi
+
+        cutadapt \\
+            --cores=${task.cpus} \\
+            --overlap 5 \\
+            --minimum-length 30 \\
+            --error-rate 0.1 \\
+            \$ADAPTERS \\
+            \$OUT_READS \\
+            \$IN_READS \\
+            2> ${sample}.cutadapt.log
+        fastqc --quiet --threads $task.cpus \$FASTQC_READS
+        """
+    }
+
+} else {
+    ch_trimmomatic_default_cutadapt
+        .set { ch_trimmomatic_default_kraken2 }
+
+    ch_cutadapt_amplicon_mqc = Channel.empty()
+    ch_cutadapt_amplicon_fastqc_mqc = Channel.empty()
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -1675,6 +1675,7 @@ process get_software_versions {
     echo $workflow.nextflow.version > v_nextflow.txt
     fastqc --version > v_fastqc.txt
     trimmomatic -version > v_trimmomatic.txt
+    cutadapt --version > v_cutadapt.txt
     kraken2 --version > v_kraken2.txt
     bowtie2 --version > v_bowtie2.txt
     samtools --version > v_samtools.txt
@@ -1709,10 +1710,10 @@ process MULTIQC {
     file (multiqc_config) from ch_multiqc_config
     file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
     file ('fastqc/raw/*') from ch_fastqc_raw_reports_mqc.collect().ifEmpty([])
-    file ('fastqc/trimmomatic/default/*') from ch_trimmomatic_default_fastqc_mqc.collect().ifEmpty([])
-    file ('fastqc/trimmomatic/amplicon/*') from ch_trimmomatic_amplicon_fastqc_mqc.collect().ifEmpty([])
+    file ('fastqc/trimmomatic/*') from ch_trimmomatic_default_fastqc_mqc.collect().ifEmpty([])
+    file ('fastqc/cutadapt/*') from ch_cutadapt_amplicon_fastqc_mqc.collect().ifEmpty([])
     file ('trimmomatic/default/*') from ch_trimmomatic_default_mqc.collect().ifEmpty([])
-    file ('trimmomatic/amplicon/*') from ch_trimmomatic_amplicon_mqc.collect().ifEmpty([])
+    file ('cutadapt/*') from ch_cutadapt_amplicon_mqc.collect().ifEmpty([])
     file ('bowtie2/*') from ch_bowtie2_mqc.collect().ifEmpty([])
     file ('flagstat/bowtie2/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
     file ('flagstat/ivar/*') from ch_ivar_flagstat_mqc.collect().ifEmpty([])
