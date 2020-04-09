@@ -521,7 +521,6 @@ if (!params.skip_trimming) {
 
         script:
         pe = single_end ? "SE" : "PE"
-        adapter = (params.amplicon_fasta && params.protocol == 'amplicon') ? "${amplicons}" : "${adapters}"
         orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
         // Added soft-links to original fastqs for consistent naming in MultiQC
         """
@@ -542,7 +541,7 @@ if (!params.skip_trimming) {
             -threads ${task.cpus} \\
             \$IN_READS \\
             \$OUT_READS \\
-            ILLUMINACLIP:${adapter}:${params.trim_params} \\
+            ILLUMINACLIP:$adapters:${params.trim_params} \\
             SLIDINGWINDOW:${params.trim_window_length}:${params.trim_window_value} \\
             MINLEN:${params.trim_min_length} \\
             2> ${sample}.trimmomatic.log
@@ -591,7 +590,7 @@ if (params.protocol == 'amplicon') {
 
         script:
         """
-        sed -r '/^[ACTGactg]+$/ s/$/X/g' $amplicons > primers.fasta
+        sed -r '/^[ACTGactg]+\$/ s/\$/X/g' $amplicons > primers.fasta
         IN_READS='${sample}.trimmed.fastq.gz'
         ADAPTERS='-a file:primers.fasta'
         OUT_READS='-o ${sample}.primertrimmed.fastq.gz'
@@ -615,7 +614,7 @@ if (params.protocol == 'amplicon') {
             \$ADAPTERS \\
             \$OUT_READS \\
             \$IN_READS \\
-            2> ${sample}.cutadapt.log
+            > ${sample}.cutadapt.log
         fastqc --quiet --threads $task.cpus \$FASTQC_READS
         """
     }
