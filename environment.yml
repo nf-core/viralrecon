@@ -39,6 +39,7 @@ dependencies:
   - bioconda::snpsift=4.3.1t
 
   ## assembly
+  - bioconda::cutadapt=2.9
   - bioconda::spades=3.14.0
   - bioconda::unicycler=0.4.7
   - bioconda::quast=5.0.2
