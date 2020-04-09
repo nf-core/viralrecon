@@ -13,6 +13,7 @@
   * [`--protocol`](#--protocol)
   * [`--amplicon_bed`](#--amplicon_bed)
   * [`--amplicon_fasta`](#--amplicon_fasta)
+  * [`--ncbi_api_key`](#--ncbi_api_key)
 * [Reference genomes](#reference-genomes)
   * [`--genome`](#--genome)
   * [`--fasta`](#--fasta)
@@ -227,6 +228,10 @@ CGGTAATAAAGGAGCTGGTGGC
 AAGGTGTCTGCAATTCATAGCTCT
 
 ```
+
+### `--ncbi_api_key`
+
+Set the NCBI API key to query the NCBI search services when downloading `fastq` files from public DBs. Increases the number of request that can be launched to this service you can read more about it and learn how to obtain the key following this [link](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/)
 
 ## Reference genomes
 
