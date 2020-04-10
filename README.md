@@ -22,7 +22,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
 3. Variant calling
     1. Read alignment ([`Bowtie 2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml))
     2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
-    3. Primer removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
+    3. Amplicon data primer removal, variant calling and consensus sequence generation ([`iVar`](https://github.com/andersen-lab/ivar))
     4. Alignment-level QC ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/), [`picard`](https://broadinstitute.github.io/picard/))
     5. Call variants ([`VarScan 2`](http://dkoboldt.github.io/varscan/), [`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
     6. Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
