@@ -676,7 +676,7 @@ if (!params.skip_trimming) {
         set val(sample), val(single_end), val(is_sra), file("*.trimmed.fastq.gz") into ch_fastp_default_bowtie2,
                                                                                        ch_fastp_default_cutadapt
         set val(sample), val(single_end), val(is_sra), file("*.orphan.fastq.gz") into ch_fastp_default_orphan
-        file '*.{log,fastp.html,json}' into ch_fastp_default_mqc
+        file "*.{log,fastp.html,json}" into ch_fastp_default_mqc
         file "*.{zip,fastqc.html}" into ch_fastp_default_fastqc_mqc
 
 		script:
@@ -1957,6 +1957,7 @@ process MULTIQC {
         -m custom_content \\
         -m fastqc \\
         -m fastp \\
+        -m cutadapt \\
         -m bowtie2 \\
         -m samtools \\
         -m picard \\
