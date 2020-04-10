@@ -660,8 +660,7 @@ if (!params.skip_trimming) {
 		tag "$name"
         publishDir "${params.outdir}/preprocess/fastp/", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.endsWith("fastqc.html")) "fastqc/$filename"
-                          else if (filename.endsWith("fastp.html")) "$filename"
+                          if (filename.endsWith(".html")) "$filename"
                           else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
                           else if (filename.endsWith(".log")) "log/$filename"
                           else params.save_trimmed ? "$filename" : null
