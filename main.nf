@@ -686,15 +686,17 @@ if (!params.skip_trimming) {
         else
             [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
             [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-            IN_READS='-i ${sample}_1.fastq.gz -I ${sample}_2.fastq.gz'
-            OUT_READS='-o ${sample}_1.trimmed.fastq.gz -unpaired1 ${sample}_1.orphan.fastq.gz -O ${sample}_2.trimmed.fastq.gz -unpaired2 ${sample}_2.orphan.fastq.gz'
+            IN_READS='--in1 ${sample}_1.fastq.gz --in2 ${sample}_2.fastq.gz'
+            OUT_READS='--out1 ${sample}_1.trimmed.fastq.gz --unpaired1 ${sample}_1.orphan.fastq.gz --out2 ${sample}_2.trimmed.fastq.gz --unpaired2 ${sample}_2.orphan.fastq.gz'
             FASTQC_READS='${sample}_1.trimmed.fastq.gz ${sample}_2.trimmed.fastq.gz'
         fi
 
 		fastp -w "${task.cpus}" -q "${qual}" --cut_by_quality5 \
-		--cut_by_quality3 --cut_mean_quality "${trim_qual}"\
-		--detect_adapter_for_pe $IN_READS $OUT_READS \
+		--cut_front --cut_tail "${trim_qual}"\
+		--detect_adapter_for_pe \$IN_READS \$OUT_READS \
 		--json ${sample}_fastp.json --html ${sample}_fastp.html 2> ${sample}_fastp.log
+
+		$orphan
 
         fastqc --quiet --threads $task.cpus \$FASTQC_READS
 		"""
