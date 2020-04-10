@@ -661,7 +661,8 @@ if (!params.skip_trimming) {
 		tag "$name"
         publishDir "${params.outdir}/preprocess/fastp/", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.endsWith(".html")) "fastqc/$filename"
+                          if (filename.endsWith("fastqc.html")) "fastqc/$filename"
+                          else if (filename.endsWith("fastp.html")) "$filename"
                           else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
                           else if (filename.endsWith(".log")) "log/$filename"
                           else params.save_trimmed ? "$filename" : null
@@ -676,8 +677,8 @@ if (!params.skip_trimming) {
         set val(sample), val(single_end), val(is_sra), file("*.trimmed.fastq.gz") into ch_fastp_default_bowtie2,
                                                                                        ch_fastp_default_cutadapt
         set val(sample), val(single_end), val(is_sra), file("*.orphan.fastq.gz") into ch_fastp_default_orphan
-        file '*.{log,html,json}' into ch_fastp_default_mqc
-        file "*.{zip,html}" into ch_fastp_default_fastqc_mqc
+        file '*.{log,fastp.html,json}' into ch_fastp_default_mqc
+        file "*.{zip,fastqc.html}" into ch_fastp_default_fastqc_mqc
 
 		script:
         orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
@@ -698,7 +699,8 @@ if (!params.skip_trimming) {
 
 		fastp -w "${task.cpus}" -q "${qual}" --cut_by_quality5 \
 		--cut_by_quality3 --cut_mean_quality "${trim_qual}"\
-		--detect_adapter_for_pe $IN_READS $OUT_READS
+		--detect_adapter_for_pe $IN_READS $OUT_READS \
+		--json ${sample}_fastp.json --html ${sample}_fastp.html 2> ${sample}_fastp.log
 
         fastqc --quiet --threads $task.cpus \$FASTQC_READS
 		"""
