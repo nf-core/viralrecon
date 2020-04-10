@@ -297,6 +297,8 @@ if (params.fasta.endsWith('.gz')) {
 
 ch_fasta
     .into { ch_fasta_bowtie2
+            ch_fasta_ivar_variants
+            ch_fasta_ivar_consensus
             ch_fasta_picard
             ch_fasta_varscan2
             ch_fasta_snpeff
@@ -338,9 +340,10 @@ if (params.gff) {
 }
 
 ch_gff
-    .into { ch_gff_snpeff;
-            ch_gff_spades;
-            ch_gff_metaspades;
+    .into { ch_gff_ivar_variants
+            ch_gff_snpeff
+            ch_gff_spades
+            ch_gff_metaspades
             ch_gff_unicycler }
 
 /*
@@ -899,7 +902,7 @@ process SORT_BAM {
     set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_sort_bam_ivar,
                                                                                        ch_sort_bam_metrics,
                                                                                        ch_sort_bam_varscan2,
-                                                                                       ch_sort_bam_consensus
+                                                                                       ch_sort_bam_bcftools
     file "*.{flagstat,idxstats,stats}" into ch_sort_bam_flagstat_mqc
 
     script:
@@ -913,17 +916,19 @@ process SORT_BAM {
 }
 
 /*
- * STEP 3.3: Remove amplicon primers with iVar
+ * STEP 3.3: Trim amplicons, call variants, and generate consensus with IVar
  */
 // TODO nf-core: Add IVar log output to MultiQC
+// TODO nf-core: quast {sample}.consensus.fa -r $fasta --features %gff --ref-bam $bam --output-dir quast/{$sample}
+// TODO nf-core: samtools coverage {sample}.sorted.bam -o {sample}.samcov.txt
 if (params.protocol != 'amplicon') {
     ch_ivar_flagstat_mqc = Channel.empty()
     ch_ivar_log = Channel.empty()
 } else {
-    process IVAR {
+    process IVAR_TRIM {
         tag "$sample"
         label 'process_medium'
-        publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
+        publishDir "${params.outdir}/variants/ivar", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                           else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
@@ -940,14 +945,16 @@ if (params.protocol != 'amplicon') {
         file bed from ch_amplicon_bed.collect()
 
         output:
-        set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_ivar_metrics,
+        set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_ivar_variants,
+                                                                                           ch_ivar_consensus,
+                                                                                           ch_ivar_metrics,
                                                                                            ch_ivar_varscan2,
-                                                                                           ch_ivar_consensus
+                                                                                           ch_ivar_bcftools
         file "*.{flagstat,idxstats,stats}" into ch_ivar_flagstat_mqc
         file "*.log" into ch_ivar_log
 
         script:
-        prefix = "${sample}.ivar"
+        prefix="${sample}.trim"
         """
         samtools view -b -F 4 ${bam[0]} > ${sample}.mapped.bam
         samtools index ${sample}.mapped.bam
@@ -955,10 +962,6 @@ if (params.protocol != 'amplicon') {
         ivar trim \\
             -i ${sample}.mapped.bam \\
             -b $bed \\
-            -m 50 \\
-            -q 15 \\
-            -s 4 \\
-            -e \\
             -p ${prefix} > ${prefix}.ivar.log
 
         samtools sort -@ $task.cpus -o ${prefix}.sorted.bam -T $prefix ${prefix}.bam
@@ -970,7 +973,65 @@ if (params.protocol != 'amplicon') {
     }
     ch_sort_bam_metrics = ch_ivar_metrics
     ch_sort_bam_varscan2 = ch_ivar_varscan2
-    ch_sort_bam_consensus = ch_ivar_consensus
+    ch_sort_bam_bcftools = ch_ivar_bcftools
+
+    process IVAR_VARIANTS {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/variants/ivar/variants", mode: params.publish_dir_mode
+
+        when:
+        !params.skip_variants
+
+        input:
+        set val(sample), val(single_end), val(is_sra), file(bam) from ch_ivar_variants
+        file fasta from ch_fasta_ivar_variants.collect()
+        file gff from ch_gff_ivar_variants.collect().ifEmpty([])
+
+        output:
+        set val(sample), val(single_end), val(is_sra), file("*.tsv") into ch_ivar_variants_tsv
+
+        script:
+        features = params.gff ? "-g $gff" : ""
+        """
+        samtools mpileup \\
+            -A \\
+            -d 6000000 \\
+            -B \\
+            -Q 0 \\
+            ${bam[0]} \\
+            | ivar variants -p ${sample} -r $fasta $features
+        """
+    }
+
+    process IVAR_CONSENSUS {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/variants/ivar/consensus", mode: params.publish_dir_mode
+
+        when:
+        !params.skip_variants
+
+        input:
+        set val(sample), val(single_end), val(is_sra), file(bam) from ch_ivar_consensus
+        file fasta from ch_fasta_ivar_consensus.collect()
+
+        output:
+        set val(sample), val(single_end), val(is_sra), file("*.fa") into ch_ivar_consensus_fasta
+        set val(sample), val(single_end), val(is_sra), file("*.txt") into ch_ivar_consensus_qual
+
+        script:
+        """
+        samtools mpileup \\
+            -A \\
+            -d 6000000 \\
+            -B \\
+            -Q 0 \\
+            --reference $fasta \\
+            ${bam[0]} \\
+            | ivar consensus -p ${sample}.consensus -n N
+        """
+    }
 }
 
 /*
@@ -979,7 +1040,7 @@ if (params.protocol != 'amplicon') {
 process PICARD_METRICS {
     tag "$sample"
     label 'process_medium'
-    publishDir path: "${params.outdir}/variants/bowtie2/picard_metrics", mode: params.publish_dir_mode
+    publishDir path: "${params.outdir}/variants/${program}/picard_metrics", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && !params.skip_picard_metrics && !params.skip_qc
@@ -999,7 +1060,8 @@ process PICARD_METRICS {
     } else {
         avail_mem = task.memory.toGiga()
     }
-    prefix = params.protocol == 'amplicon' ? "${sample}.ivar" : "${sample}"
+    program = params.protocol == 'amplicon' ? "ivar" : "bowtie2"
+    prefix = params.protocol == 'amplicon' ? "${sample}.trim" : "${sample}"
     """
     picard -Xmx${avail_mem}g CollectMultipleMetrics \\
         INPUT=${bam[0]} \\
@@ -1013,6 +1075,7 @@ process PICARD_METRICS {
         INPUT=${bam[0]} \\
         OUTPUT=${prefix}.CollectWgsMetrics.coverage_metrics \\
         REFERENCE_SEQUENCE=$fasta \\
+        VALIDATION_STRINGENCY=LENIENT \\
         TMP_DIR=tmp
     """
 }
@@ -1170,7 +1233,7 @@ process BCFTOOLS_CONSENSUS {
     !params.skip_variants
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(bam), file(vcf) from ch_sort_bam_consensus.join(ch_varscan2_highfreq_consensus, by: [0,1,2])
+    set val(sample), val(single_end), val(is_sra), file(bam), file(vcf) from ch_sort_bam_bcftools.join(ch_varscan2_highfreq_consensus, by: [0,1,2])
     file fasta from ch_fasta_bcftools.collect()
 
     output:
