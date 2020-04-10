@@ -707,7 +707,7 @@ if (!params.skip_trimming) {
 	}
 
 } else {
-    ch_reads_fastp_default
+    ch_reads_fastp
         .into { ch_fastp_default_bowtie2;
                 ch_fastp_default_cutadapt }
 
