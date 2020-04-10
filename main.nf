@@ -42,12 +42,9 @@ def helpMessage() {
       --kraken2_use_ftp [bool]        Use FTP instead of rsync when building kraken2 databases (Default: false)
       --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
 
-    Trimming
-      --adapter_fasta [file]          Fasta file containing sequences for adapter removal (Default: './assets/adapters.fa')
-      --trim_params [str]             Trimming parameters for adapters. <seed mismatches>:<palindrome clip threshold>:<simple clip threshold> (Default: 2:30:10)
-      --trim_window_length [int]      Window size. (Default: 4)
-      --trim_window_value [int]       Window average quality required (Default: 20)
-      --trim_min_length [int]         Minimum length of reads (Default: 50)
+    Quality filtering and trimming
+      --qual [int]					  Phed mean quality for quality filtering (Default: 20)
+      --trim_qual [int]               Phred mean quality for end trimming with fastp (Default: 15)
       --skip_trimming [bool]          Skip the adapter trimming step (Default: false)
       --save_trimmed [bool]           Save the trimmed FastQ files in the results directory (Default: false)
 
@@ -208,11 +205,8 @@ summary['Viral Genome']            = params.genome ?: 'Not supplied'
 summary['Viral Fasta File']        = params.fasta
 if (params.gff)                    summary['Viral GFF'] = params.gff
 if (!params.skip_trimming) {
-    summary['Adapter Fasta File']  = params.adapter_fasta
-    summary['Trim Parameters']     = params.trim_params
-    summary['Trim Window Length']  = params.trim_window_length
-    summary['Trim Window Value']   = params.trim_window_value
-    summary['Trim Min Length']     = params.trim_min_length
+    summary['Trim mean qual']     = params.trim_qual
+    summary['Mean qual filtering']= params.qual
     if (params.save_trimmed)       summary['Save Trimmed'] = 'Yes'
 } else {
     summary['Skip Trimming']       = 'Yes'
