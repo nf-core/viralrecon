@@ -945,9 +945,9 @@ if (params.protocol != 'amplicon') {
         file bed from ch_amplicon_bed.collect()
 
         output:
-        set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_ivar_metrics,
-                                                                                           ch_ivar_variants,
+        set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_ivar_variants,
                                                                                            ch_ivar_consensus,
+                                                                                           ch_ivar_metrics,
                                                                                            ch_ivar_varscan2,
                                                                                            ch_ivar_bcftools
         file "*.{flagstat,idxstats,stats}" into ch_ivar_flagstat_mqc
