@@ -694,9 +694,9 @@ if (!params.skip_trimming) {
             FASTQC_READS='${sample}_1.trimmed.fastq.gz ${sample}_2.trimmed.fastq.gz'
         fi
 
-		fastp -w "${task.cpus}" -q "${qual}" --cut_by_quality5 \
-		--cut_front --cut_tail "${trim_qual}"\
-		--detect_adapter_for_pe \$IN_READS \$OUT_READS \
+		fastp -w "${task.cpus}" -q "${qual}" --cut_by_quality5 \\
+		--cut_front --cut_tail "${trim_qual}"\\
+		--detect_adapter_for_pe \$IN_READS \$OUT_READS \\
 		--json ${sample}_fastp.json --html ${sample}_fastp.html 2> ${sample}_fastp.log
 
 		$orphan
@@ -933,6 +933,7 @@ if (params.protocol != 'amplicon') {
         file "*.log" into ch_ivar_log
 
         script:
+        switchoffe=i params.ivarnokeepreads ? "" : "-e"
         prefix="${sample}.trim"
         """
         samtools view -b -F 4 ${bam[0]} > ${sample}.mapped.bam
@@ -940,6 +941,7 @@ if (params.protocol != 'amplicon') {
 
         ivar trim \\
             -i ${sample}.mapped.bam \\
+            ${switchoffe} \\
             -b $bed \\
             -p ${prefix} > ${prefix}.ivar.log
 
