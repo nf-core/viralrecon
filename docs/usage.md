@@ -23,16 +23,14 @@
   * [`--kraken2_db`](#--kraken2_db)
   * [`--kraken2_db_name`](#--kraken2_db_name)
   * [`--kraken2_use_ftp`](#--kraken2_use_ftp)
-  * [`--save_kraken2_fastq`](#--save_kraken2_fastq)  
-* [Adapter trimming](#adapter-trimming)
-  * [`--adapter_fasta`](#--adapter_fasta)
-  * [`--trim_params`](#--trim_params)
-  * [`--trim_window_length`](--trim_window_length)
-  * [`--trim_window_value`](--trim_window_value)
-  * [`--trim_min_length`](--trim_min_length)
+  * [`--save_kraken2_fastq`](#--save_kraken2_fastq)
+* [Quality filtering and adapter trimming](#quality-filtering-and-adapter-trimming)
+  * [`--trimming_quality`](--trimming_quality)
+  * [`--mean_quality`](--mean_quality)
   * [`--skip_trimming`](#--skip_trimming)
   * [`--save_trimmed`](#--save_trimmed)
 * [Alignments](#alignments)
+  * [`--ivarnokeepreads`](#--ivarnokeepreads)
   * [`--save_align_intermeds`](#--save_align_intermeds)
 * [De novo assembly](#de-novo-assembly)
   * [`--assemblers`](#--assemblers)
@@ -296,32 +294,17 @@ Option for kraken using ftp download instead of rsync. Default=false
 
 Save the host and viral fastq files in the results directory (Default: false).
 
-## Adapter trimming
+## Quality filtering and adapter trimming
 
-### `--adapter_fasta`
+### `--trimming_quality`
 
-Adapter file in fasta format needed to remove adaptes with Trimmomatic. By default it's used the commonly used in illumina.
-Default: `${baseDir}/assets/adapters.fa`
+Mean phred quality for end 3' and 5' for quality filtering using fastp.
+Default: 15
 
-### `--trim_params`
+### `--mean_quality`
 
-Trimming parameters for adapters. `<seed mismatches>:<palindrome clip threshold>:<simple clip threshold>`
-Default: 2:30:10
-
-### `--trim_window_length`
-
-Window size for sliding window in trimmomatic.
-Default: 4
-
-### `--trim_window_value`
-
-Window average quality for trimming.
+Mean phred quality for read filtering using fastp.
 Default: 20
-
-### `--trim_min_length`
-
-Minimum length of reads.
-Default: 50
 
 ### `--skip_trimming`
 
@@ -332,6 +315,11 @@ Skip the adapter trimming step. Use this if your input FastQ files have already 
 By default, trimmed FastQ files will not be saved to the results directory. Specify this flag (or set to true in your config file) to copy these files to the results directory when complete.
 
 ## Alignments
+
+### `--ivarnokeepreads`
+
+This option switches off the -e parameter in ivar trim. It makes to discard all reads with no primers.
+Default: false
 
 ### `--save_align_intermeds`
 

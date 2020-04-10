@@ -23,9 +23,7 @@ dependencies:
   - bioconda::parallel-fastq-dump=0.6.6
   - bioconda::sra-tools=2.10.3
   - bioconda::fastq_utils=0.23.0
-  - bioconda::trimmomatic=0.39
   - bioconda::fastp=0.20.1
-  - bioconda::cutadapt=2.9
   - bioconda::bowtie2=2.3.5.1
   - bioconda::kraken2=2.0.8_beta
   - bioconda::samtools=1.9
@@ -41,6 +39,7 @@ dependencies:
   - bioconda::snpsift=4.3.1t
 
   ## assembly
+  - bioconda::cutadapt=2.9
   - bioconda::spades=3.14.0
   - bioconda::unicycler=0.4.7
   - bioconda::quast=5.0.2
