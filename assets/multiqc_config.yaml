@@ -10,7 +10,7 @@ fn_clean_exts:
     - '.trimmed'
     - '.sorted.bam'
     - '.bowtie2'
-    - '.ivar'
+    - '.trim'
     - '.highfreq'
     - '.lowfreq'
     - '.scaffolds'
