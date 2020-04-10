@@ -30,6 +30,7 @@
   * [`--skip_trimming`](#--skip_trimming)
   * [`--save_trimmed`](#--save_trimmed)
 * [Alignments](#alignments)
+  * [`--ivarnokeepreads`](#--ivarnokeepreads)
   * [`--save_align_intermeds`](#--save_align_intermeds)
 * [De novo assembly](#de-novo-assembly)
   * [`--assemblers`](#--assemblers)
@@ -296,10 +297,12 @@ Save the host and viral fastq files in the results directory (Default: false).
 ## Quality filtering and adapter trimming
 
 ### `--trimming_quality`
+
 Mean phred quality for end 3' and 5' for quality filtering using fastp.
 Default: 15
 
 ### `--mean_quality`
+
 Mean phred quality for read filtering using fastp.
 Default: 20
 
@@ -312,6 +315,11 @@ Skip the adapter trimming step. Use this if your input FastQ files have already 
 By default, trimmed FastQ files will not be saved to the results directory. Specify this flag (or set to true in your config file) to copy these files to the results directory when complete.
 
 ## Alignments
+
+### `--ivarnokeepreads`
+
+This option switches off the -e parameter in ivar trim. It makes to discard all reads with no primers.
+Default: false
 
 ### `--save_align_intermeds`
 

@@ -49,6 +49,7 @@ def helpMessage() {
       --save_trimmed [bool]           Save the trimmed FastQ files in the results directory (Default: false)
 
     Alignment
+      --ivarnokeepreads [bool]		  Switches off -e parameter for ivar trim. Don't keep reads with no primers. (Default: false)
       --save_align_intermeds [bool]   Save the intermediate BAM files from the alignment steps (Default: false)
 
     De novo assembly
@@ -204,6 +205,7 @@ if (params.kraken2_db_name)        summary['Host Kraken2 Name'] = params.kraken2
 summary['Viral Genome']            = params.genome ?: 'Not supplied'
 summary['Viral Fasta File']        = params.fasta
 if (params.gff)                    summary['Viral GFF'] = params.gff
+if(params.ivarnokeepreads)		   summary['Ivar no keep reads']  = 'Yes'
 if (!params.skip_trimming) {
     summary['Trim mean qual']     = params.trimming_quality
     summary['Mean qual filtering']= params.mean_quality
@@ -933,7 +935,7 @@ if (params.protocol != 'amplicon') {
         file "*.log" into ch_ivar_log
 
         script:
-        switchoffe=i params.ivarnokeepreads ? "" : "-e"
+        switchoffe= params.ivarnokeepreads ? "" : "-e"
         prefix="${sample}.trim"
         """
         samtools view -b -F 4 ${bam[0]} > ${sample}.mapped.bam
