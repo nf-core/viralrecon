@@ -43,8 +43,8 @@ def helpMessage() {
       --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
 
     Quality filtering and trimming
-      --qual [int]					  Phed mean quality for quality filtering (Default: 20)
-      --trim_qual [int]               Phred mean quality for end trimming with fastp (Default: 15)
+      --mean_quality [int]   		  Phed mean quality for quality filtering (Default: 20)
+      --trimming_quality [int]        Phred mean quality for end trimming with fastp (Default: 15)
       --skip_trimming [bool]          Skip the adapter trimming step (Default: false)
       --save_trimmed [bool]           Save the trimmed FastQ files in the results directory (Default: false)
 
@@ -205,8 +205,8 @@ summary['Viral Genome']            = params.genome ?: 'Not supplied'
 summary['Viral Fasta File']        = params.fasta
 if (params.gff)                    summary['Viral GFF'] = params.gff
 if (!params.skip_trimming) {
-    summary['Trim mean qual']     = params.trim_qual
-    summary['Mean qual filtering']= params.qual
+    summary['Trim mean qual']     = params.trimming_quality
+    summary['Mean qual filtering']= params.mean_quality
     if (params.save_trimmed)       summary['Save Trimmed'] = 'Yes'
 } else {
     summary['Skip Trimming']       = 'Yes'

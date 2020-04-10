@@ -25,8 +25,8 @@
   * [`--kraken2_use_ftp`](#--kraken2_use_ftp)
   * [`--save_kraken2_fastq`](#--save_kraken2_fastq)
 * [Quality filtering and adapter trimming](#quality-filtering-and-adapter-trimming)
-  * [`--trim_qual`](--trim_qual)
-  * [`--qual`](--qual)
+  * [`--trimming_quality`](--trimming_quality)
+  * [`--mean_quality`](--mean_quality)
   * [`--skip_trimming`](#--skip_trimming)
   * [`--save_trimmed`](#--save_trimmed)
 * [Alignments](#alignments)
@@ -295,11 +295,11 @@ Save the host and viral fastq files in the results directory (Default: false).
 
 ## Quality filtering and adapter trimming
 
-### `--trim_qual`
+### `--trimming_quality`
 Mean phred quality for end 3' and 5' for quality filtering using fastp.
 Default: 15
 
-### `--qual`
+### `--mean_quality`
 Mean phred quality for read filtering using fastp.
 Default: 20
 
