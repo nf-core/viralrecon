@@ -1877,9 +1877,7 @@ process get_software_versions {
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     fastqc --version > v_fastqc.txt
-    fastp --version > v_fastp.txt
-    cutadapt --version > v_cutadapt.txt
-    kraken2 --version > v_kraken2.txt
+    fastp --version 2> v_fastp.txt
     bowtie2 --version > v_bowtie2.txt
     samtools --version > v_samtools.txt
     bedtools --version > v_bedtools.txt
@@ -1889,6 +1887,8 @@ process get_software_versions {
     snpEff -version > v_snpeff.txt
     echo \$(SnpSift 2>&1) > v_snpsift.txt
     bcftools -v > v_bcftools.txt
+    cutadapt --version > v_cutadapt.txt
+    kraken2 --version > v_kraken2.txt
     spades.py --version > v_spades.txt
     unicycler --version > v_unicycler.txt
     quast.py --version > v_quast.txt
