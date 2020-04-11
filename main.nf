@@ -1913,10 +1913,10 @@ process MULTIQC {
     file (multiqc_config) from ch_multiqc_config
     file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
     file ('fastqc/raw/*') from ch_fastqc_raw_reports_mqc.collect().ifEmpty([])
-    file ('fastqc/fastp/*') from ch_fastp_fastqc_mqc.collect().ifEmpty([])
-    file ('fastqc/cutadapt/*') from ch_cutadapt_fastqc_mqc.collect().ifEmpty([])
     file ('fastp/*') from ch_fastp_mqc.collect().ifEmpty([])
+    file ('fastp/fastqc/*') from ch_fastp_fastqc_mqc.collect().ifEmpty([])
     file ('cutadapt/*') from ch_cutadapt_mqc.collect().ifEmpty([])
+    file ('cutadapt/fastqc/*') from ch_cutadapt_fastqc_mqc.collect().ifEmpty([])
     file ('bowtie2/*') from ch_bowtie2_mqc.collect().ifEmpty([])
     file ('flagstat/bowtie2/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
     file ('flagstat/ivar/*') from ch_ivar_flagstat_mqc.collect().ifEmpty([])
