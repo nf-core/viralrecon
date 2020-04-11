@@ -24,13 +24,11 @@
   * [`--kraken2_db_name`](#--kraken2_db_name)
   * [`--kraken2_use_ftp`](#--kraken2_use_ftp)
   * [`--save_kraken2_fastq`](#--save_kraken2_fastq)
-* [Quality filtering and adapter trimming](#quality-filtering-and-adapter-trimming)
-  * [`--trimming_quality`](--trimming_quality)
-  * [`--mean_quality`](--mean_quality)
+* [Adapter trimming](#Adapter-trimming)
   * [`--skip_trimming`](#--skip_trimming)
   * [`--save_trimmed`](#--save_trimmed)
 * [Alignments](#alignments)
-  * [`--ivarnokeepreads`](#--ivarnokeepreads)
+  * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
   * [`--save_align_intermeds`](#--save_align_intermeds)
 * [De novo assembly](#de-novo-assembly)
   * [`--assemblers`](#--assemblers)
@@ -178,7 +176,7 @@ SRR11177792,,
 
 ### `--protocol`
 
-Specifies the type of protocol used for sequencing i.e. "metagenomic" or "amplicon". Default: "metagenomic".
+Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplicon' (Default: 'metagenomic').
 
 ### `--amplicon_bed`
 
@@ -246,19 +244,23 @@ The syntax for this reference configuration is as follows:
 <!-- TODO nf-core: Update reference genome example according to what is needed -->
 
 ```nextflow
-
 params {
+  // Genome reference file paths
   genomes {
-    'GRCh37' {
-      fasta   = '<path to the genome fasta file>' // Used if no star index given
+    'NC_045512.2' {
+      fasta = "<path to the genome fasta file>"
+      gff   = "<path to the genome annotation file>"
+    }
+    'MN908947.3' {
+      fasta = "<path to the genome fasta file>"
+      gff   = "<path to the genome annotation file>"
     }
     // Any number of additional genomes, key is used with --genome
   }
 }
-
 ```
 
-You can find the keys to specify the genomes in the [Genomes config file](../conf/genomes.config).
+You can find the keys to specify the genomes in the [Genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config).
 
 ### `--fasta`
 
@@ -284,27 +286,17 @@ Full path to Kraken2 database built from host genome.
 
 ### `--kraken2_db_name`
 
-Name for host genome as recognised by Kraken2 when using the `kraken2 build` command. Default: 'human'.
+Name for host genome as recognised by Kraken2 when using the `kraken2 build` command (Default: 'human').
 
 ### `--kraken2_use_ftp`
 
-Option for kraken using ftp download instead of rsync. Default=false
+Option for kraken using ftp download instead of rsync (Default: false).
 
 ### `--save_kraken2_fastq`
 
 Save the host and viral fastq files in the results directory (Default: false).
 
-## Quality filtering and adapter trimming
-
-### `--trimming_quality`
-
-Mean phred quality for end 3' and 5' for quality filtering using fastp.
-Default: 15
-
-### `--mean_quality`
-
-Mean phred quality for read filtering using fastp.
-Default: 20
+## Adapter trimming
 
 ### `--skip_trimming`
 
@@ -316,10 +308,9 @@ By default, trimmed FastQ files will not be saved to the results directory. Spec
 
 ## Alignments
 
-### `--ivarnokeepreads`
+### `--ivar_exclude_reads`
 
-This option switches off the -e parameter in ivar trim. It makes to discard all reads with no primers.
-Default: false
+This option unsets the `-e` parameter in `ivar trim` to discard reads without primers (Default: false).
 
 ### `--save_align_intermeds`
 
@@ -329,8 +320,7 @@ By default, intermediate BAM files will not be saved. The final BAM files create
 
 ### `--assemblers`
 
-Specify which assembly algorithms you would like to use. Spades, metaspades and Unicycler available.
-Default:'spades,metaspades,unicycler'
+Specify which assembly algorithms you would like to use. Available options are `spades`, `metaspades` and `unicycler` (Default: 'spades,metaspades,unicycler').
 
 ### `--skip_assembly`
 
@@ -340,7 +330,7 @@ Specify this parameter to skip all of the de novo assembly steps in the pipeline
 
 ### `--save_pileup`
 
-Save pileup files in the results directory (Default: false). These tend to be quite large so are not saved by default.
+Save Pileup files in the results directory. These tend to be quite large so are not saved by default (Default: false).
 
 ### `--skip_variants`
 
@@ -386,7 +376,7 @@ The AWS region in which to run your job. Default is set to `eu-west-1` but can b
 
 ### `--awscli`
 
-The [AWS CLI](https://www.nextflow.io/docs/latest/awscloud.html#aws-cli-installation) path in your custom AMI. Default: `/home/ec2-user/miniconda/bin/aws`.
+The [AWS CLI](https://www.nextflow.io/docs/latest/awscloud.html#aws-cli-installation) path in your custom AMI (Default: `/home/ec2-user/miniconda/bin/aws`).
 
 Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a S3 storage bucket of your choice - you'll get an error message notifying you if you didn't.
 
@@ -436,7 +426,7 @@ Note - you can use this to override pipeline defaults.
 
 ### `--custom_config_version`
 
-Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default: `master`.
+Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes (Default: `master`).
 
 ```bash
 ## Download and use config file with following git commid id
