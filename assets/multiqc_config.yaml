@@ -8,9 +8,10 @@ export_plots: true
 fn_clean_exts:
     - 'fastq.gz'
     - '.trimmed'
+    - '.trim'
+    - '.fastp'
     - '.sorted.bam'
     - '.bowtie2'
-    - '.trim'
     - '.ptrim'
     - '.highfreq'
     - '.lowfreq'
