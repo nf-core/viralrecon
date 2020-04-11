@@ -11,6 +11,7 @@ fn_clean_exts:
     - '.sorted.bam'
     - '.bowtie2'
     - '.trim'
+    - '.ptrim'
     - '.highfreq'
     - '.lowfreq'
     - '.scaffolds'
