@@ -42,23 +42,21 @@ def helpMessage() {
       --kraken2_use_ftp [bool]        Use FTP instead of rsync when building kraken2 databases (Default: false)
       --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
 
-    Quality filtering and trimming
-      --mean_quality [int]   		  Phed mean quality for quality filtering (Default: 20)
-      --trimming_quality [int]        Phred mean quality for end trimming with fastp (Default: 15)
+    Adapter trimming
       --skip_trimming [bool]          Skip the adapter trimming step (Default: false)
       --save_trimmed [bool]           Save the trimmed FastQ files in the results directory (Default: false)
 
     Alignment
-      --ivarnokeepreads [bool]		  Switches off -e parameter for ivar trim. Don't keep reads with no primers. (Default: false)
+      --ivar_exclude_reads [bool]		  Unset -e parameter for IVar trim. Reads with primers are included by default (Default: false)
       --save_align_intermeds [bool]   Save the intermediate BAM files from the alignment steps (Default: false)
-
-    De novo assembly
-      --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler')
-      --skip_assembly [bool]          Skip assembly steps in the pipeline (Default: false)
 
     Variant calling
       --save_pileup [bool]            Save Pileup files generated during variant calling (Default: false)
       --skip_variants [bool]          Skip variant calling steps in the pipeline (Default: false)
+
+    De novo assembly
+      --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler')
+      --skip_assembly [bool]          Skip assembly steps in the pipeline (Default: false)
 
     QC
       --skip_qc [bool]                Skip all QC steps apart from MultiQC (Default: false)
@@ -205,10 +203,7 @@ if (params.kraken2_db_name)        summary['Host Kraken2 Name'] = params.kraken2
 summary['Viral Genome']            = params.genome ?: 'Not supplied'
 summary['Viral Fasta File']        = params.fasta
 if (params.gff)                    summary['Viral GFF'] = params.gff
-if(params.ivarnokeepreads)		   summary['Ivar no keep reads']  = 'Yes'
 if (!params.skip_trimming) {
-    summary['Trim mean qual']     = params.trimming_quality
-    summary['Mean qual filtering']= params.mean_quality
     if (params.save_trimmed)       summary['Save Trimmed'] = 'Yes'
 } else {
     summary['Skip Trimming']       = 'Yes'
@@ -218,10 +213,11 @@ if (params.ncbi_api_key)           summary['NCBI API Key'] = params.ncbi_api_key
 if (params.kraken2_use_ftp)        summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
 if (params.save_kraken2_fastq)     summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
 if (params.save_reference)         summary['Save Genome Indices'] = 'Yes'
+if (params.ivar_exclude_reads)		 summary['IVar Trim Exclude Reads']  = 'Yes'
 if (params.save_align_intermeds)   summary['Save Align Intermeds'] =  'Yes'
-if (params.skip_assembly)          summary['Skip De novo Assembly'] =  'Yes'
 if (params.save_pileup)            summary['Save Pileup'] = 'Yes'
 if (params.skip_variants)          summary['Skip Variant Calling'] =  'Yes'
+if (params.skip_assembly)          summary['Skip De novo Assembly'] =  'Yes'
 if (params.skip_qc)                summary['Skip QC'] = 'Yes'
 if (params.skip_fastqc)            summary['Skip FastQC'] = 'Yes'
 if (params.skip_picard_metrics)    summary['Skip Picard Metrics'] = 'Yes'
@@ -651,138 +647,75 @@ process FASTQC {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+* STEP 2: Fastp adapter trimming and quality filtering
+*/
 if (!params.skip_trimming) {
-    /*
-    * STEP 2.1: Quality filtering and adapter trimming
-    */
+    process FASTP {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/preprocess/fastp", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".json")) "$filename"
+                      else if (filename.endsWith(".fastp.html")) "$filename"
+                      else if (filename.endsWith("_fastqc.html")) "fastqc/$filename"
+                      else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
+                      else if (filename.endsWith(".log")) "log/$filename"
+                      else params.save_trimmed ? "$filename" : null
+                }
 
-	process FASTP {
-		tag "$name"
-        publishDir "${params.outdir}/preprocess/fastp/", mode: params.publish_dir_mode,
-            saveAs: { filename ->
-                          if (filename.endsWith(".html")) "$filename"
-                          else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
-                          else if (filename.endsWith(".log")) "log/$filename"
-                          else params.save_trimmed ? "$filename" : null
-                    }
+        when:
+        !params.skip_variants || !params.skip_assembly
 
-		input:
+        input:
         set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_fastp
-		val qual from params.mean_quality
-		val trim_qual from params.trimming_quality
 
-		output:
-        set val(sample), val(single_end), val(is_sra), file("*.trimmed.fastq.gz") into ch_fastp_default_bowtie2,
-                                                                                       ch_fastp_default_cutadapt
-        set val(sample), val(single_end), val(is_sra), file("*.orphan.fastq.gz") into ch_fastp_default_orphan
-        file "*.{log,fastp.html,json}" into ch_fastp_default_mqc
-        file "*.{zip,fastqc.html}" into ch_fastp_default_fastqc_mqc
+        output:
+        set val(sample), val(single_end), val(is_sra), file("*.trim.fastq.gz") into ch_fastp_cutadapt,
+                                                                                    ch_fastp_bowtie2,
+                                                                                    ch_fastp_kraken2
+        set val(sample), val(single_end), val(is_sra), file("*.fail.fastq.gz") into ch_fastp_orphan
+        file "*.{log,fastp.html,json}" into ch_fastp_mqc
+        file "*_fastqc.{zip,html}" into ch_fastp_fastqc_mqc
 
-		script:
-        orphan = single_end ? "touch ${sample}.orphan.fastq.gz" : ""
+        script:
         // Added soft-links to original fastqs for consistent naming in MultiQC
-		"""
-        IN_READS='-i ${sample}.fastq.gz'
-        OUT_READS='-o ${sample}.trimmed.fastq.gz'
-        FASTQC_READS='${sample}.trimmed.fastq.gz'
+        autodetect = single_end ? "" : "--detect_adapter_for_pe"
+        """
+        IN_READS='--in1 ${sample}.fastq.gz'
+        OUT_READS='--out1 ${sample}.trim.fastq.gz --failed_out ${sample}.fail.fastq.gz'
         if $single_end; then
             [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
         else
             [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
             [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
             IN_READS='--in1 ${sample}_1.fastq.gz --in2 ${sample}_2.fastq.gz'
-            OUT_READS='--out1 ${sample}_1.trimmed.fastq.gz --unpaired1 ${sample}_1.orphan.fastq.gz --out2 ${sample}_2.trimmed.fastq.gz --unpaired2 ${sample}_2.orphan.fastq.gz'
-            FASTQC_READS='${sample}_1.trimmed.fastq.gz ${sample}_2.trimmed.fastq.gz'
+            OUT_READS='--out1 ${sample}_1.trim.fastq.gz --out2 ${sample}_2.trim.fastq.gz --unpaired1 ${sample}_1.fail.fastq.gz --unpaired2 ${sample}_2.fail.fastq.gz'
         fi
 
-		fastp -w "${task.cpus}" -q "${qual}" --cut_by_quality5 \\
-		--cut_front --cut_tail "${trim_qual}"\\
-		--detect_adapter_for_pe \$IN_READS \$OUT_READS \\
-		--json ${sample}_fastp.json --html ${sample}_fastp.html 2> ${sample}_fastp.log
-
-		$orphan
-
-        fastqc --quiet --threads $task.cpus \$FASTQC_READS
-		"""
-	}
-
-} else {
-    ch_reads_fastp
-        .into { ch_fastp_default_bowtie2;
-                ch_fastp_default_cutadapt }
-
-    ch_fastp_default_mqc = Channel.empty()
-    ch_fastp_default_fastqc_mqc = Channel.empty()
-}
-
-
-if (params.protocol == 'amplicon') {
-    /*
-     * STEP 2.2: Amplicon trimming with Cutadapt
-     */
-    process CUTADAPT {
-        tag "$sample"
-        label 'process_medium'
-        publishDir "${params.outdir}/preprocess/cutadapt/", mode: params.publish_dir_mode,
-            saveAs: { filename ->
-                          if (filename.endsWith(".html")) "fastqc/$filename"
-                          else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
-                          else if (filename.endsWith(".log")) "log/$filename"
-                          else $filename
-                    }
-
-        when:
-        !params.skip_assembly
-
-        input:
-        set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastp_default_cutadapt
-        file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
-
-        output:
-        set val(sample), val(single_end), val(is_sra), file("*.primertrimmed.fastq.gz") into ch_fastp_default_kraken2
-        file "*.{zip,html}" into ch_cutadapt_amplicon_fastqc_mqc
-        file "*.log" into ch_cutadapt_amplicon_mqc
-
-        script:
-        """
-        sed -r '/^[ACTGactg]+\$/ s/\$/X/g' $amplicons > primers.fasta
-        IN_READS='${sample}.trimmed.fastq.gz'
-        ADAPTERS='-a file:primers.fasta'
-        OUT_READS='-o ${sample}.primertrimmed.fastq.gz'
-        FASTQC_READS='${sample}.primertrimmed.fastq.gz'
-        if $single_end; then
-            [ ! -f  ${sample}.trimmed.fastq.gz ] && ln -s $reads ${sample}.trimmed.fastq.gz
-        else
-            [ ! -f  ${sample}_1.trimmed.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.trimmed.fastq.gz
-            [ ! -f  ${sample}_2.trimmed.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.trimmed.fastq.gz
-            IN_READS='${sample}_1.trimmed.fastq.gz ${sample}_2.trimmed.fastq.gz'
-            ADAPTERS='-a file:primers.fasta -A file:primers.fasta'
-            OUT_READS='-o ${sample}_1.primertrimmed.fastq.gz -p ${sample}_2.primertrimmed.fastq.gz'
-            FASTQC_READS='${sample}_1.primertrimmed.fastq.gz ${sample}_2.primertrimmed.fastq.gz'
-        fi
-
-        cutadapt \\
-            --cores=${task.cpus} \\
-            --overlap 5 \\
-            --minimum-length 30 \\
-            --error-rate 0.1 \\
-            \$ADAPTERS \\
-            \$OUT_READS \\
+        fastp \\
             \$IN_READS \\
-            > ${sample}.cutadapt.log
-        fastqc --quiet --threads $task.cpus \$FASTQC_READS
+            \$OUT_READS \\
+            $autodetect \\
+            --cut_front \\
+            --cut_tail \\
+            --thread $task.cpus \\
+            --json ${sample}.fastp.json \\
+            --html ${sample}.fastp.html \\
+            2> ${sample}.fastp.log
+
+        fastqc --quiet --threads $task.cpus *.trim.fastq.gz
         """
     }
-
 } else {
-    ch_fastp_default_cutadapt
-        .set { ch_fastp_default_kraken2 }
+    ch_reads_fastp
+        .into { ch_fastp_cutadapt
+                ch_fastp_bowtie2
+                ch_fastp_kraken2 }
 
-    ch_cutadapt_amplicon_mqc = Channel.empty()
-    ch_cutadapt_amplicon_fastqc_mqc = Channel.empty()
+    ch_fastp_mqc = Channel.empty()
+    ch_fastp_fastqc_mqc = Channel.empty()
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -837,7 +770,7 @@ process BOWTIE2 {
     !params.skip_variants
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastp_default_bowtie2
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastp_bowtie2
     file index from ch_index.collect()
 
     output:
@@ -934,15 +867,15 @@ if (params.protocol != 'amplicon') {
         file "*.log" into ch_ivar_log
 
         script:
-        switchoffe= params.ivarnokeepreads ? "" : "-e"
-        prefix="${sample}.trim"
+        exclude_reads = params.ivar_exclude_reads ? "" : "-e"
+        prefix = "${sample}.trim"
         """
         samtools view -b -F 4 ${bam[0]} > ${sample}.mapped.bam
         samtools index ${sample}.mapped.bam
 
         ivar trim \\
             -i ${sample}.mapped.bam \\
-            ${switchoffe} \\
+            $exclude_reads \\
             -b $bed \\
             -p ${prefix} > ${prefix}.ivar.log
 
@@ -1326,7 +1259,61 @@ if (!isOffline()) {
 }
 
 /*
- * STEP 4.1: Filter reads with Kraken2
+ * STEP 4.1: Amplicon trimming with Cutadapt
+ */
+// TODO nf-core: Logic isnt right here because this step should be skipped if --skip_trimming
+if (params.protocol == 'amplicon') {
+    process CUTADAPT {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/preprocess/cutadapt", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith(".html")) "fastqc/$filename"
+                          else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
+                          else if (filename.endsWith(".log")) "log/$filename"
+                          else params.save_trimmed ? "$filename" : null
+                    }
+
+        when:
+        !params.skip_assembly
+
+        input:
+        set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastp_cutadapt
+        file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
+
+        output:
+        set val(sample), val(single_end), val(is_sra), file("*.ptrim.fastq.gz") into ch_cutadapt_kraken2
+        file "*.{zip,html}" into ch_cutadapt_fastqc_mqc
+        file "*.log" into ch_cutadapt_mqc
+
+        script:
+        adapters = single_end ? "-a file:primers.fasta" : "-a file:primers.fasta -A file:primers.fasta"
+        out_reads = single_end ? "-o ${sample}.ptrim.fastq.gz" : "-o ${sample}_1.ptrim.fastq.gz -p ${sample}_2.ptrim.fastq.gz"
+        """
+        sed -r '/^[ACTGactg]+\$/ s/\$/X/g' $amplicons > primers.fasta
+
+        cutadapt \\
+            --cores ${task.cpus} \\
+            --overlap 5 \\
+            --minimum-length 30 \\
+            --error-rate 0.1 \\
+            $adapters \\
+            $out_reads \\
+            $reads \\
+            > ${sample}.cutadapt.log
+
+        fastqc --quiet --threads $task.cpus *.ptrim.fastq.gz
+        """
+    }
+    ch_fastp_kraken2 = ch_cutadapt_kraken2
+
+} else {
+    ch_cutadapt_mqc = Channel.empty()
+    ch_cutadapt_fastqc_mqc = Channel.empty()
+}
+
+/*
+ * STEP 4.2: Filter reads with Kraken2
  */
 // TODO nf-core: Add Kraken2 log output to MultiQC
 process KRAKEN2 {
@@ -1342,7 +1329,7 @@ process KRAKEN2 {
     !params.skip_assembly
 
     input:
-    set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastp_default_kraken2
+    set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastp_kraken2
     file db from ch_kraken2_db.collect()
 
     output:
@@ -1375,7 +1362,7 @@ process KRAKEN2 {
 ////////////////////////////////////////////////////
 
 /*
- * STEP 4.2: De novo assembly with SPAdes
+ * STEP 4.3: De novo assembly with SPAdes
  */
 // TODO nf-core: Output other files generated by the assemblers too?
 // TODO nf-core: Rename and output gfa files too?
@@ -1408,7 +1395,7 @@ process SPADES {
 }
 
 /*
- * STEP 4.2.1: Run Blast on SPAdes de novo assembly
+ * STEP 4.3.1: Run Blast on SPAdes de novo assembly
  */
 process SPADES_BLAST {
     tag "$sample"
@@ -1442,7 +1429,7 @@ process SPADES_BLAST {
 }
 
 /*
- * STEP 4.2.2: Run ABACAS on SPAdes de novo assembly
+ * STEP 4.3.2: Run ABACAS on SPAdes de novo assembly
  */
 process SPADES_ABACAS {
     tag "$sample"
@@ -1475,7 +1462,7 @@ process SPADES_ABACAS {
 }
 
 /*
- * STEP 4.2.3: Run PlasmidID on SPAdes de novo assembly
+ * STEP 4.3.3: Run PlasmidID on SPAdes de novo assembly
  */
 process SPADES_PLASMIDID {
     tag "$sample"
@@ -1500,7 +1487,7 @@ process SPADES_PLASMIDID {
 }
 
 /*
- * STEP 4.2.4: Run Quast on SPAdes de novo assembly
+ * STEP 4.3.4: Run Quast on SPAdes de novo assembly
  */
 process SPADES_QUAST {
     label 'process_medium'
@@ -1535,7 +1522,7 @@ process SPADES_QUAST {
 ////////////////////////////////////////////////////
 
 /*
- * STEP 4.2: De novo assembly with MetaSPAdes
+ * STEP 4.3: De novo assembly with MetaSPAdes
  */
 process METASPADES {
     tag "$sample"
@@ -1567,7 +1554,7 @@ process METASPADES {
 }
 
 /*
- * STEP 4.2.1: Run Blast on MetaSPAdes de novo assembly
+ * STEP 4.3.1: Run Blast on MetaSPAdes de novo assembly
  */
 process METASPADES_BLAST {
     tag "$sample"
@@ -1601,7 +1588,7 @@ process METASPADES_BLAST {
 }
 
 /*
- * STEP 4.2.2: Run ABACAS on MetaSPAdes de novo assembly
+ * STEP 4.3.2: Run ABACAS on MetaSPAdes de novo assembly
  */
 process METASPADES_ABACAS {
     tag "$sample"
@@ -1634,7 +1621,7 @@ process METASPADES_ABACAS {
 }
 
 /*
- * STEP 4.2.3: Run PlasmidID on MetaSPAdes de novo assembly
+ * STEP 4.3.3: Run PlasmidID on MetaSPAdes de novo assembly
  */
 process METASPADES_PLASMIDID {
     tag "$sample"
@@ -1659,7 +1646,7 @@ process METASPADES_PLASMIDID {
 }
 
 /*
- * STEP 4.2.4: Run Quast on MetaSPAdes de novo assembly
+ * STEP 4.3.4: Run Quast on MetaSPAdes de novo assembly
  */
 process METASPADES_QUAST {
     label 'process_medium'
@@ -1694,7 +1681,7 @@ process METASPADES_QUAST {
 ////////////////////////////////////////////////////
 
 /*
- * STEP 4.2: De novo assembly with Unicycler
+ * STEP 4.3: De novo assembly with Unicycler
  */
 process UNICYCLER {
     tag "$sample"
@@ -1725,7 +1712,7 @@ process UNICYCLER {
 }
 
 /*
- * STEP 4.2.1: Run Blast on MetaSPAdes de novo assembly
+ * STEP 4.3.1: Run Blast on MetaSPAdes de novo assembly
  */
 process UNICYCLER_BLAST {
     tag "$sample"
@@ -1759,7 +1746,7 @@ process UNICYCLER_BLAST {
 }
 
 /*
- * STEP 4.2.2: Run ABACAS on Unicycler de novo assembly
+ * STEP 4.3.2: Run ABACAS on Unicycler de novo assembly
  */
 process UNICYCLER_ABACAS {
     tag "$sample"
@@ -1792,7 +1779,7 @@ process UNICYCLER_ABACAS {
 }
 
 /*
- * STEP 4.2.3: Run PlasmidID on Unicycler de novo assembly
+ * STEP 4.3.3: Run PlasmidID on Unicycler de novo assembly
  */
 process UNICYCLER_PLASMIDID {
     tag "$sample"
@@ -1817,7 +1804,7 @@ process UNICYCLER_PLASMIDID {
 }
 
 /*
- * STEP 4.2.4: Run Quast on Unicycler de novo assembly
+ * STEP 4.3.4: Run Quast on Unicycler de novo assembly
  */
 process UNICYCLER_QUAST {
     label 'process_medium'
@@ -1914,7 +1901,7 @@ process get_software_versions {
 }
 
 /*
- * STEP 10: MultiQC
+ * STEP 5: MultiQC
  */
 process MULTIQC {
     publishDir "${params.outdir}/multiqc", mode: params.publish_dir_mode
@@ -1926,10 +1913,10 @@ process MULTIQC {
     file (multiqc_config) from ch_multiqc_config
     file (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
     file ('fastqc/raw/*') from ch_fastqc_raw_reports_mqc.collect().ifEmpty([])
-    file ('fastqc/fastp/*') from ch_fastp_default_fastqc_mqc.collect().ifEmpty([])
-    file ('fastqc/cutadapt/*') from ch_cutadapt_amplicon_fastqc_mqc.collect().ifEmpty([])
-    file ('fastp/*') from ch_fastp_default_mqc.collect().ifEmpty([])
-    file ('cutadapt/*') from ch_cutadapt_amplicon_mqc.collect().ifEmpty([])
+    file ('fastqc/fastp/*') from ch_fastp_fastqc_mqc.collect().ifEmpty([])
+    file ('fastqc/cutadapt/*') from ch_cutadapt_fastqc_mqc.collect().ifEmpty([])
+    file ('fastp/*') from ch_fastp_mqc.collect().ifEmpty([])
+    file ('cutadapt/*') from ch_cutadapt_mqc.collect().ifEmpty([])
     file ('bowtie2/*') from ch_bowtie2_mqc.collect().ifEmpty([])
     file ('flagstat/bowtie2/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
     file ('flagstat/ivar/*') from ch_ivar_flagstat_mqc.collect().ifEmpty([])
@@ -1965,9 +1952,6 @@ process MULTIQC {
     """
 }
 
-/*
- * STEP 11: Output Description HTML
- */
 process output_documentation {
     publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode
 
