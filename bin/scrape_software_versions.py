@@ -8,8 +8,7 @@ regexes = {
     'nf-core/viralrecon': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
     'FastQC': ['v_fastqc.txt', r"FastQC\sv(\S+)"],
-    'Trimmomatic': ['v_trimmomatic.txt', r"(\S+)"],
-    'Kraken2': ['v_kraken2.txt', r"Kraken\sversion\s(\S+)"],
+    'fastp': ['v_fastp.txt', r"fastp\s(\S+)"],
     'Bowtie 2': ['v_bowtie2.txt', r"bowtie2-align-s\sversion\s(\S+)"],
     'Samtools': ['v_samtools.txt', r"samtools\s(\S+)"],
     'BEDTools': ['v_bedtools.txt', r"bedtools\sv(\S+)"],
@@ -19,6 +18,8 @@ regexes = {
     'SnpEff': ['v_snpeff.txt', r"SnpEff\s(\S+)"],
     'SnpSift': ['v_snpsift.txt', r"SnpSift\sversion\s(\S+)"],
     'BCFTools': ['v_bcftools.txt', r"bcftools\s(\S+)"],
+    'Cutadapt': ['v_cutadapt.txt', r"(\S+)"],
+    'Kraken2': ['v_kraken2.txt', r"Kraken\sversion\s(\S+)"],
     'SPAdes': ['v_spades.txt', r"SPAdes\sgenome\sassembler\sv(\S+)"],
     'Unicycler': ['v_unicycler.txt', r"Unicycler\sv(\S+)"],
     'QUAST': ['v_quast.txt', r"QUAST\sv(\S+)"],
@@ -31,8 +32,7 @@ results = OrderedDict()
 results['nf-core/viralrecon'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['FastQC'] = '<span style="color:#999999;\">N/A</span>'
-results['Trimmomatic'] = '<span style="color:#999999;\">N/A</span>'
-results['Kraken2'] = '<span style="color:#999999;\">N/A</span>'
+results['fastp'] = '<span style="color:#999999;\">N/A</span>'
 results['Bowtie 2'] = '<span style="color:#999999;\">N/A</span>'
 results['Samtools'] = '<span style="color:#999999;\">N/A</span>'
 results['BEDTools'] = '<span style="color:#999999;\">N/A</span>'
@@ -42,6 +42,8 @@ results['VarScan 2'] = '<span style="color:#999999;\">N/A</span>'
 results['SnpEff'] = '<span style="color:#999999;\">N/A</span>'
 results['SnpSift'] = '<span style="color:#999999;\">N/A</span>'
 results['BCFTools'] = '<span style="color:#999999;\">N/A</span>'
+results['Cutadapt'] = '<span style="color:#999999;\">N/A</span>'
+results['Kraken2'] = '<span style="color:#999999;\">N/A</span>'
 results['SPAdes'] = '<span style="color:#999999;\">N/A</span>'
 results['Unicycler'] = '<span style="color:#999999;\">N/A</span>'
 results['QUAST'] = '<span style="color:#999999;\">N/A</span>'
