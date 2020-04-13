@@ -8,9 +8,11 @@ export_plots: true
 fn_clean_exts:
     - 'fastq.gz'
     - '.trimmed'
+    - '.trim'
+    - '.fastp'
     - '.sorted.bam'
     - '.bowtie2'
-    - '.trim'
+    - '.ptrim'
     - '.highfreq'
     - '.lowfreq'
     - '.scaffolds'
@@ -23,26 +25,26 @@ module_order:
         info: 'This section of the report shows FastQC results for the raw reads before adapter trimming.'
         path_filters:
             - './fastqc/raw/*'
-    - trimmomatic:
-        name: 'Trimmomatic (adapter trimming)'
-        info: 'This section of the report shows Trimmomatic results for reads after adapter/amplicon and quality trimming.'
+    - fastp:
+        name: 'fastp (adapter trimming)'
+        info: 'This section of the report shows fastp results for reads after adapter and quality trimming.'
         path_filters:
-            - './trimmomatic/default/*'
+            - './fastp/*'
     - fastqc:
         name: 'FastQC (adapter trimming)'
-        info: 'This section of the report shows FastQC results for reads after adapter/amplicon and quality trimming.'
+        info: 'This section of the report shows FastQC results for reads after adapter and quality trimming.'
         path_filters:
-            - './fastqc/trimmomatic/default/*'
-    - trimmomatic:
-        name: 'Trimmomatic (quality trimming)'
-        info: 'This section of the report shows Trimmomatic results for reads after quality trimming only.'
+            - './fastp/fastqc/*'
+    - cutadapt:
+        name: 'Cutadapt (amplicon trimming)'
+        info: 'This section of the report shows Cutadapt results for reads after amplicon trimming only.'
         path_filters:
-            - './trimmomatic/amplicon/*'
+            - './cutadapt/*'
     - fastqc:
-        name: 'FastQC (quality trimming)'
-        info: 'This section of the report shows FastQC results for reads after quality trimming only.'
+        name: 'FastQC (amplicon trimming)'
+        info: 'This section of the report shows FastQC results for reads after amplicon trimming only.'
         path_filters:
-            - './fastqc/trimmomatic/amplicon/*'
+            - './cutadapt/fastqc/*'
     - bowtie2:
         name: 'Bowtie2 (quality trimming)'
         info: 'This section of the report shows Bowtie2 mapping results for reads after quality trimming only.'
