@@ -44,9 +44,7 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 * `zips/sample_fastqc.zip`
   * zip file containing the FastQC report, tab-delimited data file and plot images
 
-### Trimming
-
-#### Quality trimming
+### Quality filtering and adaptor rrimming
 
 [Fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast all-in-one preprocessing for FastQ files. This tool is developed in C++ with multithreading supported to afford high performance.
 
@@ -66,7 +64,8 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
  * `logs/sample_T1.fastp.log`
   * Trimming log file.
 
-### kraken2
+### Kraken2
+
 [Kraken2](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual)<a name="kraken"> </a><a href="#Kraken_reference">[3]</a> is a taxonomic sequence classifier that assigns taxonomic labels to DNA sequences. Kraken examines the k-mers within a query sequence and uses the information within those k-mers to query a database. That database maps k-mers to the lowest common ancestor (LCA) of all genomes known to contain a given k-mer.
 
 We mapped the fastq file against the reference host genome.
@@ -82,7 +81,7 @@ We mapped the fastq file against the reference host genome.
     5. NCBI taxonomic ID number
     6. Indented scientific name
 
-## Mapping
+## Mapping + variant calling + consensus
 
 ### Bowtie and Samtools
 [Bowtie](http://bio-bwa.sourceforge.net/)<a name="bowtie"> </a><a href="#Bowtie_reference">[4]</a> is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small. Bowtie 2 supports gapped, local, and paired-end alignment modes.
