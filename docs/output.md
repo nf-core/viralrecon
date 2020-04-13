@@ -10,6 +10,14 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/)
 and processes data using the following steps:
 
 * [FastQC](#fastqc) - read quality control
+* [Kraken2](#kraken2) - Mapping to host genome.
+* [bowtie2](#bowtie2) - mapping against reference genomes.
+* [SAMtools](#samtools) - Mapping result processing and unmapped reads selection.
+* [Picard](#picard) - Enrichment and alignment metrics.
+* [VarScan](#varscan) - Variant calling.
+* [SnpEff and SnpSift] - Variant calling annotation.
+* [Bcftools](#bcftools) - Variant calling index and consensus genome generation.
+* [Bedtools](#bedtools) - Consensus genome masking.
 * [MultiQC](#multiqc) - aggregate report, describing results of the whole pipeline
 
 ## FastQC
