@@ -17,7 +17,7 @@ and processes data using the following steps:
   * [SAMtools](#samtools) - Mapping result processing and unmapped reads selection.
   * [Picard](#picard) - Enrichment and alignment metrics.
   * [VarScan](#varscan) - Variant calling.
-  * [SnpEff and SnpSift] - Variant calling annotation.
+  * [SnpEff and SnpSift](#snpeff-and-snpsift) - Variant calling annotation.
   * [Bcftools](#bcftools) - Variant calling index and consensus genome generation.
   * [Bedtools](#bedtools) - Consensus genome masking.
 * De novo assembly
