@@ -12,23 +12,26 @@ and processes data using the following steps:
 * [FastQC](#fastqc) - read quality control
 * [Fastp](#fastp) - read quality trimming
 * [Kraken2](#kraken2) - Mapping to host genome.
-* [bowtie2](#bowtie2) - mapping against reference genomes.
-* [SAMtools](#samtools) - Mapping result processing and unmapped reads selection.
-* [Picard](#picard) - Enrichment and alignment metrics.
-* [VarScan](#varscan) - Variant calling.
-* [SnpEff and SnpSift] - Variant calling annotation.
-* [Bcftools](#bcftools) - Variant calling index and consensus genome generation.
-* [Bedtools](#bedtools) - Consensus genome masking.
-* [SPADES](#spades) - Viral genome assembly.
-* [MetaSPADES](#metaspades) - Viral genome assembly.
-* [Unicycler](#unicycler) - Viral genome assembly.
-* [QUAST](#quast) - Assembly quality assessment.
-* [Blast](#blast) - Blast alignment.
-* [PlasmidID](#plasmidid) - Visualization of the alignment.
-* [ABACAS](#abacas) - Contig ordering according to reference.
+* Mapping + variant calling + consensus
+  * [bowtie2](#bowtie2) - mapping against reference genomes.
+  * [SAMtools](#samtools) - Mapping result processing and unmapped reads selection.
+  * [Picard](#picard) - Enrichment and alignment metrics.
+  * [VarScan](#varscan) - Variant calling.
+  * [SnpEff and SnpSift] - Variant calling annotation.
+  * [Bcftools](#bcftools) - Variant calling index and consensus genome generation.
+  * [Bedtools](#bedtools) - Consensus genome masking.
+* De novo assembly
+  * [SPADES](#spades) - Viral genome assembly.
+  * [MetaSPADES](#metaspades) - Viral genome assembly.
+  * [Unicycler](#unicycler) - Viral genome assembly.
+  * [QUAST](#quast) - Assembly quality assessment.
+  * [Blast](#blast) - Blast alignment.
+  * [PlasmidID](#plasmidid) - Visualization of the alignment.
+  * [ABACAS](#abacas) - Contig ordering according to reference.
 * [MultiQC](#multiqc) - aggregate report, describing results of the whole pipeline
 
 ## Preprocessing
+
 ### FastQC
 
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your reads. It provides information about the quality score distribution across your reads, the per base sequence content (%T/A/G/C). You get information about adapter contamination and other overrepresented sequences.
@@ -44,7 +47,7 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 * `zips/sample_fastqc.zip`
   * zip file containing the FastQC report, tab-delimited data file and plot images
 
-### Quality trimming
+### Quality filtering and adaptor rrimming
 
 [Fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast all-in-one preprocessing for FastQ files. This tool is developed in C++ with multithreading supported to afford high performance.
 
@@ -86,6 +89,8 @@ We mapped the fastq file against the reference host genome.
     5. NCBI taxonomic ID number
     6. Indented scientific name
 
+## Mapping + variant calling + consensus
+
 ### Bowtie and Samtools
 [Bowtie](http://bio-bwa.sourceforge.net/)<a name="bowtie"> </a><a href="#Bowtie_reference">[4]</a> is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small. Bowtie 2 supports gapped, local, and paired-end alignment modes.
 
@@ -117,10 +122,13 @@ If we are running the `--protocol amplicon`, [iVar](http://gensoft.pasteur.fr/do
 
 
 ## Variant calling
+
 In this pipeline to generate the consensus viral genome we use the approach of calling for variants between the mapped reads and the reference viral genome, and adding these variants to the reference viral genome.
 
 ### Variant calling
+
 #### VarScan
+
 First of all SAMtools is used to generate the variant calling VCF file. Then [VarScan](http://varscan.sourceforge.net/)<a name="varscan"> </a><a href="#VarScan_reference">[7]</a> is used to call for major and low frequency variants. VarScan is a platform-independent software tool developed at the Genome Institute at Washington University to detect variants in NGS data.
 
 **Output directory: `variants/varscan2`**
@@ -133,7 +141,9 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
   * VarScan2 log file.
 
 ### Annotation
+
 #### SnpEff and SnpSift
+
 [SnpEff](http://snpeff.sourceforge.net/SnpEff.html)<a name="snpeff"> </a><a href="#SnpEff_reference">[8]</a> is a genetic variant annotation and functional effect prediction toolbox. It annotates and predicts the effects of genetic variants on genes and proteins (such as amino acid changes). [SnpSift](http://snpeff.sourceforge.net/SnpSift.html)</a><a href="#SnpSift_reference">[9]</a> annotates genomic variants using databases, filters, and manipulates genomic annotated variants. Once you annotated your files using SnpEff, you can use SnpSift to help you filter large genomic datasets in order to find the most significant variants for your experiment.
 
 **Output directory: `variants/varscan2/snpeff`**
@@ -160,7 +170,9 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
   * High frequency variants summary html file.
 
 ## Consensus genome
+
 ### BCFtools
+
 [Bcftools](http://samtools.github.io/bcftools/bcftools.html)<a name="bcftools"> ftom the SAMtools project </a><a href="#SAMtools_reference">[4]</a> is a set of utilities that manipulate variant calls in the Variant Call Format (VCF) and its binary counterpart BCF. The resulting variant calling vcf for haploid genomes is indexed and then the consensus genome is created adding the variants to the reference viral genome. This consensus genome was obtained using the predominant variants (majority) of the mapping file.
 
 **Output directory: `variants/bcftools`**
@@ -169,6 +181,7 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
   * Consensus viral genome file generated from adding the variants called before to the viral reference genome. These variants are only the majoritarian variants, inlcuding only SNPs and small indels.
 
 ### Bedtools
+
 [Bedtools](https://bedtools.readthedocs.io/en/latest/)<a name="bedtools"> </a><a href="#Bedtools_reference">[10]</a> are a swiss-army knife of tools for a wide-range of genomics analysis tasks. In this case we use:
   * bedtools genomecov computes histograms (default), per-base reports (-d) and BEDGRAPH (-bg) summaries of feature coverage (e.g., aligned sequences) for a given genome.
   * bedtools maskfasta masks sequences in a FASTA file based on intervals defined in a feature file. This may be useful fro creating your own masked genome file based on custom annotations or for masking all but your target regions when aligning sequence data from a targeted capture experiment.
@@ -178,16 +191,27 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
 * `sample_{reference_virus_name}.consensus.masked.fasta`
   * Masked consensus fasta file.
 
-
 ## De novo assembly
 
 We selected the reads that didn't cluster using kraken2 with the host genome and assembled them to create a viral genome assembly.
+
+### Cutadapt (*only amplicon*)
+
+[Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) is used for clipping primer sequences from reads prior to assembly.
+
+**Output directory:** `preprocess/cutadapt`
+  * `fastqc`
+    * Fastqc reports for primer clipped reads.
+  * `logs`
+    * Cutadapt logs.
+  * `${sample}_[1,2].ptrim.fastq.gz`
+    * only if `--save_trimmed`. Fastq files with primer sequences trimmed.
 
 ### SPAdes
 
 [SPAdes](https://kbase.us/applist/apps/kb_SPAdes/run_SPAdes/release?gclid=Cj0KCQiAt_PuBRDcARIsAMNlBdroQS7y2hPFuhagq1QPvQ39FcvGxbhtZwhn8YbxIB4LrGIHKjJ-iPwaAn_lEALw_wcB) is a de Bruijn graph-based assembler. We selected the reads that didn't mapped with the host genome and assembled them using SPAdes to create a viral genome assembly.
 
-**Output directory: `assembly/spades`**
+**Output directory:** `assembly/spades`
 * `{sample_id}.scaffolds.fasta`
   * Assembled scaffolds.
 
