@@ -10,21 +10,24 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/)
 and processes data using the following steps:
 
 * [FastQC](#fastqc) - read quality control
+* [fastp](#fastp) - read quality filtering and adapter trimming.
 * [Kraken2](#kraken2) - Mapping to host genome.
-* [bowtie2](#bowtie2) - mapping against reference genomes.
-* [SAMtools](#samtools) - Mapping result processing and unmapped reads selection.
-* [Picard](#picard) - Enrichment and alignment metrics.
-* [VarScan](#varscan) - Variant calling.
-* [SnpEff and SnpSift] - Variant calling annotation.
-* [Bcftools](#bcftools) - Variant calling index and consensus genome generation.
-* [Bedtools](#bedtools) - Consensus genome masking.
-* [SPADES](#spades) - Viral genome assembly.
-* [MetaSPADES](#metaspades) - Viral genome assembly.
-* [Unicycler](#unicycler) - Viral genome assembly.
-* [QUAST](#quast) - Assembly quality assessment.
-* [Blast](#blast) - Blast alignment.
-* [PlasmidID](#plasmidid) - Visualization of the alignment.
-* [ABACAS](#abacas) - Contig ordering according to reference.
+* Mapping + variant calling + consensus
+  * [bowtie2](#bowtie2) - mapping against reference genomes.
+  * [SAMtools](#samtools) - Mapping result processing and unmapped reads selection.
+  * [Picard](#picard) - Enrichment and alignment metrics.
+  * [VarScan](#varscan) - Variant calling.
+  * [SnpEff and SnpSift] - Variant calling annotation.
+  * [Bcftools](#bcftools) - Variant calling index and consensus genome generation.
+  * [Bedtools](#bedtools) - Consensus genome masking.
+* De novo assembly
+  * [SPADES](#spades) - Viral genome assembly.
+  * [MetaSPADES](#metaspades) - Viral genome assembly.
+  * [Unicycler](#unicycler) - Viral genome assembly.
+  * [QUAST](#quast) - Assembly quality assessment.
+  * [Blast](#blast) - Blast alignment.
+  * [PlasmidID](#plasmidid) - Visualization of the alignment.
+  * [ABACAS](#abacas) - Contig ordering according to reference.
 * [MultiQC](#multiqc) - aggregate report, describing results of the whole pipeline
 
 ## Preprocessing
