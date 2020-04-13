@@ -68,10 +68,19 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
   
 ## De novo assembly
 
+We selected the reads that didn't cluster using kraken2 with the host genome and assembled them to create a viral genome assembly.
+
 ### SPAdes
 
 [SPAdes](https://kbase.us/applist/apps/kb_SPAdes/run_SPAdes/release?gclid=Cj0KCQiAt_PuBRDcARIsAMNlBdroQS7y2hPFuhagq1QPvQ39FcvGxbhtZwhn8YbxIB4LrGIHKjJ-iPwaAn_lEALw_wcB) is a de Bruijn graph-based assembler. We selected the reads that didn't mapped with the host genome and assembled them using SPAdes to create a viral genome assembly.
+ 
+**Output directory: `assembly/spades`**	
+* `{sample_id}.scaffolds.fasta`	
+  * Assembled scaffolds.	
   
+  
+### MetaSPAdes
+
 [MetaSPAdes](https://kbase.us/applist/apps/kb_SPAdes/run_SPAdes/release?gclid=Cj0KCQiAt_PuBRDcARIsAMNlBdroQS7y2hPFuhagq1QPvQ39FcvGxbhtZwhn8YbxIB4LrGIHKjJ-iPwaAn_lEALw_wcB) is a de Bruijn graph-based assembler, with the option `--meta` the assembler works for metagenomics date trying to reconstruct different genomes. 	
 
 **Output directory: `assembly/metaspades`**	
