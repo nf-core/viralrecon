@@ -10,6 +10,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/)
 and processes data using the following steps:
 
 * [FastQC](#fastqc) - read quality control
+* [Fastp](#fastp) - read quality trimming
 * [Kraken2](#kraken2) - Mapping to host genome.
 * [bowtie2](#bowtie2) - mapping against reference genomes.
 * [SAMtools](#samtools) - Mapping result processing and unmapped reads selection.
@@ -48,20 +49,21 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 [Fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast all-in-one preprocessing for FastQ files. This tool is developed in C++ with multithreading supported to afford high performance.
 
 **Output directory: `preprocess/fastp`**
-* `sample_T1_[12].trim.fastq.gz`
+* `sample.trim.fastq.gz`
   * Only with `--save_trimmed` param. Paired trimmed reads.
-* `sample_T1_[12].trim.fail.gz`
+* `sample.trim.fail.gz`
   * Only with `--save_trimmed` param. Unpaired trimmed reads.
-* `sample_T1_[12].fastp.html`
+* `sample.fastp.html`
   * Fastp report in html format.
-* `sample_T1_[12].fastp.json`
+* `sample.fastp.json`
   * Fastp report in json format.
-* `fastqc/sample_T1_[12].trim.fastqc.html`
+* `fastqc/sample.trim.fastqc.html`
   * FastQC report of the trimmed reads.
-* `fastqc/zips/sample_T1_[12].trim.fastqc.zip`
+* `fastqc/zips/sample.trim.fastqc.zip`
   * Zip file with the FastQC report.
-* `logs/sample_T1.fastp.log`
+* `logs/sample.fastp.log`
   * Trimming log file.
+
 
 ## Mapping
 ### kraken2
@@ -71,7 +73,11 @@ We mapped the fastq file against the reference host genome.
 
 **Output directory: `preprocess/kraken2`**
 
-* `{sample_id}_T1.kraken2.report.txt`
+* `sample.host.fastq.gz`
+  * Only with `--save_kraken2_fastq`. Reads that mapped with host taxon.
+* `sample.viral.fastq.gz`
+  * Only with `--save_kraken2_fastq`. Reads that mapped with viral taxon.
+* `sample.kraken2.report.txt`
   * Kraken taxonomic report. The report contains one line per taxonomic classification nd the following columns:
     1. Percentage of fragments covered by the clade rooted at this taxon
     2. Number of fragments covered by the clade rooted at this taxon
@@ -89,11 +95,11 @@ We mapped the fastq file against the reference viral genome.
 
 **Output directory: `variants/bowtie2`**
 
-* `{sample_id}_T1_sorted.bam`
+* `sample_sorted.bam`
   * Sorted aligned bam file.
-* `{sample_id}_T1_sorted.bam.bai`
+* `sample_sorted.bam.bai`
   * Index file for soreted aligned bam.
-* `samtools_stats/{sample_id}_T1.sorted.bam.flagstat`
+* `samtools_stats/sample.sorted.bam.flagstat`
   * Samtools flagstats mapping stats summary.
 
 ### Picard
@@ -101,10 +107,14 @@ We mapped the fastq file against the reference viral genome.
 
 **Output directory: `variants/bowtie2/picard_metrics`**
 
-* `{sample_id}_T1.CollectWgsMetrics.coverage_metrics`
+* `sample.CollectWgsMetrics.coverage_metrics`
   * Picard metrics summary file for evaluating coverage and performance.
 
 Picard documentation: [Picarddocs](https://broadinstitute.github.io/picard/command-line-overview.html)
+
+### Primer trimming
+If we are running the `--protocol amplicon`, [iVar](http://gensoft.pasteur.fr/docs/ivar/1.0/manualpage.html) is used to trim the amplicon primers.
+
 
 ## Variant calling
 In this pipeline to generate the consensus viral genome we use the approach of calling for variants between the mapped reads and the reference viral genome, and adding these variants to the reference viral genome.
@@ -115,11 +125,11 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
 
 **Output directory: `variants/varscan2`**
 
-* `{sample_id}_T1.highfreq.vcf.gz`
+* `sample.highfreq.vcf.gz`
   * High frequency variants VCF file.
-* `{sample_id}_T1.lowfreq.vcf.gz`
+* `sample.lowfreq.vcf.gz`
   * Low frequency variants VCF.
-* `logs/{sample_id}_T1.highfreq.varscan2.log`
+* `logs/sample.highfreq.varscan2.log`
   * VarScan2 log file.
 
 ### Annotation
@@ -128,25 +138,25 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
 
 **Output directory: `variants/varscan2/snpeff`**
 
-* `{sample_id}_T1.lowfreq.snpEff.csv`
+* `sample.lowfreq.snpEff.csv`
   * Low frequency variants annotation csv file.
-* `{sample_id}_T1.lowfreq.snpSift.table.txt`
+* `sample.lowfreq.snpSift.table.txt`
   * Low frequency variants SnpSift summary table.
-* `{sample_id}_T1.lowfreq.snpEff.vcf.gz`
+* `sample.lowfreq.snpEff.vcf.gz`
   * Low frequency variants annotated VCF table.
-* `{sample_id}_T1.lowfreq.snpEff.genes.txt`
+* `sample.lowfreq.snpEff.genes.txt`
   * Low frequency variants genes table.
-* `{sample_id}_T1.lowfreq.snpEff.summary.html`
+* `sample.lowfreq.snpEff.summary.html`
   * Low frequency variants summary html file.
-* `{sample_id}_T1.highfreq.snpEff.csv`
+* `sample.highfreq.snpEff.csv`
   * High frequency variants annotation csv file.
-* `{sample_id}_T1.highfreq.snpSift.table.txt`
+* `sample.highfreq.snpSift.table.txt`
   * High frequency variants SnpSift summary table.
-* `{sample_id}_T1.highfreq.snpEff.vcf.gz`
+* `sample.highfreq.snpEff.vcf.gz`
   * High frequency variants annotated VCF table.
-* `{sample_id}_T1.highfreq.snpEff.genes.txt`
+* `sample.highfreq.snpEff.genes.txt`
   * High frequency variants genes table.
-* `{sample_id}_T1.highfreq.snpEff.summary.html`
+* `sample.highfreq.snpEff.summary.html`
   * High frequency variants summary html file.
 
 ## Consensus genome
@@ -155,7 +165,7 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
 
 **Output directory: `variants/bcftools`**
 
-* `{sample_id}_T1.consensus.fa`
+* `sample.consensus.fa`
   * Consensus viral genome file generated from adding the variants called before to the viral reference genome. These variants are only the majoritarian variants, inlcuding only SNPs and small indels.
 
 ### Bedtools
@@ -165,7 +175,7 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
 
   **Output directory: `variants/bcftools`**
 
-* `{sample_id}_{reference_virus_name}.consensus.masked.fasta`
+* `sample_{reference_virus_name}.consensus.masked.fasta`
   * Masked consensus fasta file.
 
 
