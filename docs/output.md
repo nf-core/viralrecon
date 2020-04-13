@@ -18,6 +18,13 @@ and processes data using the following steps:
 * [SnpEff and SnpSift] - Variant calling annotation.
 * [Bcftools](#bcftools) - Variant calling index and consensus genome generation.
 * [Bedtools](#bedtools) - Consensus genome masking.
+* [SPADES](#spades) - Viral genome assembly.
+* [MetaSPADES](#metaspades) - Viral genome assembly.
+* [Unicycler](#unicycler) - Viral genome assembly.
+* [QUAST](#quast) - Assembly quality assessment.
+* [Blast](#blast) - Blast alignment.
+* [PlasmidID](#plasmidid) - Visualization of the alignment.
+* [ABACAS](#abacas) - Contig ordering according to reference.
 * [MultiQC](#multiqc) - aggregate report, describing results of the whole pipeline
 
 ## FastQC
