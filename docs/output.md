@@ -49,20 +49,39 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 
 ## De novo assembly
+
+We selected the reads that didn't cluster using kraken2 with the host genome and assembled them to create a viral genome assembly.
+
 ### SPAdes
+
 [SPAdes](https://kbase.us/applist/apps/kb_SPAdes/run_SPAdes/release?gclid=Cj0KCQiAt_PuBRDcARIsAMNlBdroQS7y2hPFuhagq1QPvQ39FcvGxbhtZwhn8YbxIB4LrGIHKjJ-iPwaAn_lEALw_wcB) is a de Bruijn graph-based assembler. We selected the reads that didn't mapped with the host genome and assembled them using SPAdes to create a viral genome assembly.
 
-**Output directory: `07-assembly`**
-* `{sample_id}/contigs.fasta`
-  * Assembled contigs. This file is also contained in the 10-final_results folder as {sample_id}_consensus.fasta.
-* `{sample_id}/scaffolds.fasta`
+**Output directory: `assembly/spades`**
+* `{sample_id}.scaffolds.fasta`
+  * Assembled scaffolds.
+  
+### MetaSPAdes
+
+[MetaSPAdes](https://kbase.us/applist/apps/kb_SPAdes/run_SPAdes/release?gclid=Cj0KCQiAt_PuBRDcARIsAMNlBdroQS7y2hPFuhagq1QPvQ39FcvGxbhtZwhn8YbxIB4LrGIHKjJ-iPwaAn_lEALw_wcB) is a de Bruijn graph-based assembler, with the option `--meta` the assembler works for metagenomics date trying to reconstruct different genomes. 
+
+**Output directory: `assembly/metaspades`**
+* `{sample_id}.meta.scaffolds.fasta`
+  * Assembled scaffolds.
+
+
+### Unicycler
+
+[Unicycler](https://github.com/rrwick/Unicycler) is an assembly pipeline that works as a spades optimiser.
+
+**Output directory: `assembly/unicycler`**
+* `{sample_id}.assembly.fasta`
   * Assembled scaffolds.
 
 ### QUAST
-[QUAST](http://bioinf.spbau.ru/quast) evaluates genome assemblies. We compared the reference genome with the contigs and scaffold assemblies. The html results can be opened with any browser (we recommend using Google Chrome).
+[QUAST](http://bioinf.spbau.ru/quast) evaluates genome assemblies. We compared the reference genome with the contigs and scaffold assemblies. The html results can be opened with any browser (we recommend using Google Chrome). We have a quast folder for each assembler selected.
 
-**Output directory: `07-assembly/quast_results`**
-* `quast_results/date/report.html`
+**Output directory: `assembly/${assembler}`**
+* `quast/report.html`
   * Compressed format of the indexed variants file.
   * The meaning of the different metrics:
     * Contigs (≥ x bp): is total number of contigs of length ≥ x bp.
@@ -79,23 +98,27 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
     * L50 (L75, LG50, LG75) is the number of contigs equal to or longer than N50 (N75, NG50, NG75). In other words, L50, for example, is the minimal number of contigs that cover half the assembly.
 
 ### Blast alignments
-[NCBI Blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi) is used for aligning the contigs against the reference virus genome and the refseq bacterial genomes from NCBI database (Updated 2017).
+[NCBI Blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi) is used for aligning the contigs against the reference virus genome.
 
-**Output directory:** `07-blast`
+**Output directory:** `assembly/${assembler}/blast`
 * {sample_id}_blast_filt_header.txt: blast results against the target virus.
 * {sample_id}_blast_bacteria_filt.txt: blast results for bacteria database.
 
 ### PlasmidID
 [PlasmidID](https://github.com/BU-ISCIII/plasmidID) was used to graphically represent the alignment of the reference genome with the assembly obtained with SPAdes. This helps to visualize the coverage of the reference genome in the assembly. To find more information about the output files go to: https://github.com/BU-ISCIII/plasmidID/wiki/Understanding-the-image:-track-by-track
 
-**Output directory: `10-final_results`**
-* `{sample_id}_{reference_viral_genome}.png`
+**Output directory:** `assembly/${assembler}/plasmidid
+* `${sample_id}/images/{sample_id}_{reference_viral_genome}.png`
   * PNG file with the visualization of the alignment between the assembled viral genome and the reference viral genome.
+* `${sample_id}/data/`
+  * Files used for drawing the circos images. 
+* `$sample_id/database`
+  * Annotation files used for drawing the circos images.
 
 ### ABACAS
 [Abacas](abacas.sourceforge.ne) intended to rapidly contiguate (align, order, orientate), visualize and design primers to close gaps on shotgun assembled contigs based on a reference sequence.
 
-**Output directory:** `13-abacas`
+**Output directory:** `assembly/${assembler}/abacas`
 * `{sample_id}`
   * {samples_id}_abacas.fasta: Ordered and orientated sequence file.
   * {sample_id}_abacas.tab: Feature file.
