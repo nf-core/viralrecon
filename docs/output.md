@@ -65,7 +65,121 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
  * Zip file with the FastQC report.
  * `logs/sample_T1.fastp.log`
   * Trimming log file.
-  
+
+### kraken2
+[Kraken2](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual)<a name="kraken"> </a><a href="#Kraken_reference">[3]</a> is a taxonomic sequence classifier that assigns taxonomic labels to DNA sequences. Kraken examines the k-mers within a query sequence and uses the information within those k-mers to query a database. That database maps k-mers to the lowest common ancestor (LCA) of all genomes known to contain a given k-mer.
+
+We mapped the fastq file against the reference host genome.
+
+**Output directory: `preprocess/kraken2`**
+
+* `{sample_id}_T1.kraken2.report.txt`
+  * Kraken taxonomic report. The report contains one line per taxonomic classification nd the following columns:
+    1. Percentage of fragments covered by the clade rooted at this taxon
+    2. Number of fragments covered by the clade rooted at this taxon
+    3. Number of fragments assigned directly to this taxon
+    4. A rank code, indicating (U)nclassified, (R)oot, (D)omain, (K)ingdom, (P)hylum, (C)lass, (O)rder, (F)amily, (G)enus, or (S)pecies. Taxa that are not at any of these 10 ranks have a rank code that is formed by using the rank code of the closest ancestor rank with a number indicating the distance from that rank.  E.g., "G2" is a rank code indicating a taxon is between genus and species and the grandparent taxon is at the genus rank.
+    5. NCBI taxonomic ID number
+    6. Indented scientific name
+
+## Mapping
+
+### Bowtie and Samtools
+[Bowtie](http://bio-bwa.sourceforge.net/)<a name="bowtie"> </a><a href="#Bowtie_reference">[4]</a> is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small. Bowtie 2 supports gapped, local, and paired-end alignment modes.
+
+The result mapping files are further processed with [SAMtools](http://samtools.sourceforge.net/)<a name="samtools"> </a><a href="#SAMtools_reference">[5]</a>, sam format is converted to bam, sorted and an index .bai is generated.
+
+We mapped the fastq file against the reference viral genome.
+
+**Output directory: `variants/bowtie2`**
+
+* `{sample_id}_T1_sorted.bam`
+  * Sorted aligned bam file.
+* `{sample_id}_T1_sorted.bam.bai`
+  * Index file for soreted aligned bam.
+* `samtools_stats/{sample_id}_T1.sorted.bam.flagstat`
+  * Samtools flagstats mapping stats summary.
+
+### Picard
+[Picard](https://broadinstitute.github.io/picard/index.html)<a name="picard"> </a><a href="#Picard_reference">[6]</a> is a set of command line tools for manipulating high-throughput sequencing (HTS) data. In this case we used it to obtain mapping stats.
+
+**Output directory: `variants/bowtie2/picard_metrics`**
+
+* `{sample_id}_T1.CollectWgsMetrics.coverage_metrics`
+  * Picard metrics summary file for evaluating coverage and performance.
+
+Picard documentation: [Picarddocs](https://broadinstitute.github.io/picard/command-line-overview.html)
+
+## Variant calling
+
+In this pipeline to generate the consensus viral genome we use the approach of calling for variants between the mapped reads and the reference viral genome, and adding these variants to the reference viral genome.
+
+### Variant calling
+
+#### VarScan
+
+First of all SAMtools is used to generate the variant calling VCF file. Then [VarScan](http://varscan.sourceforge.net/)<a name="varscan"> </a><a href="#VarScan_reference">[7]</a> is used to call for major and low frequency variants. VarScan is a platform-independent software tool developed at the Genome Institute at Washington University to detect variants in NGS data.
+
+**Output directory: `variants/varscan2`**
+
+* `{sample_id}_T1.highfreq.vcf.gz`
+  * High frequency variants VCF file.
+* `{sample_id}_T1.lowfreq.vcf.gz`
+  * Low frequency variants VCF.
+* `logs/{sample_id}_T1.highfreq.varscan2.log`
+  * VarScan2 log file.
+
+### Annotation
+
+#### SnpEff and SnpSift
+
+[SnpEff](http://snpeff.sourceforge.net/SnpEff.html)<a name="snpeff"> </a><a href="#SnpEff_reference">[8]</a> is a genetic variant annotation and functional effect prediction toolbox. It annotates and predicts the effects of genetic variants on genes and proteins (such as amino acid changes). [SnpSift](http://snpeff.sourceforge.net/SnpSift.html)</a><a href="#SnpSift_reference">[9]</a> annotates genomic variants using databases, filters, and manipulates genomic annotated variants. Once you annotated your files using SnpEff, you can use SnpSift to help you filter large genomic datasets in order to find the most significant variants for your experiment.
+
+**Output directory: `variants/varscan2/snpeff`**
+
+* `{sample_id}_T1.lowfreq.snpEff.csv`
+  * Low frequency variants annotation csv file.
+* `{sample_id}_T1.lowfreq.snpSift.table.txt`
+  * Low frequency variants SnpSift summary table.
+* `{sample_id}_T1.lowfreq.snpEff.vcf.gz`
+  * Low frequency variants annotated VCF table.
+* `{sample_id}_T1.lowfreq.snpEff.genes.txt`
+  * Low frequency variants genes table.
+* `{sample_id}_T1.lowfreq.snpEff.summary.html`
+  * Low frequency variants summary html file.
+* `{sample_id}_T1.highfreq.snpEff.csv`
+  * High frequency variants annotation csv file.
+* `{sample_id}_T1.highfreq.snpSift.table.txt`
+  * High frequency variants SnpSift summary table.
+* `{sample_id}_T1.highfreq.snpEff.vcf.gz`
+  * High frequency variants annotated VCF table.
+* `{sample_id}_T1.highfreq.snpEff.genes.txt`
+  * High frequency variants genes table.
+* `{sample_id}_T1.highfreq.snpEff.summary.html`
+  * High frequency variants summary html file.
+
+## Consensus genome
+
+### BCFtools
+
+[Bcftools](http://samtools.github.io/bcftools/bcftools.html)<a name="bcftools"> ftom the SAMtools project </a><a href="#SAMtools_reference">[4]</a> is a set of utilities that manipulate variant calls in the Variant Call Format (VCF) and its binary counterpart BCF. The resulting variant calling vcf for haploid genomes is indexed and then the consensus genome is created adding the variants to the reference viral genome. This consensus genome was obtained using the predominant variants (majority) of the mapping file.
+
+**Output directory: `variants/bcftools`**
+
+* `{sample_id}_T1.consensus.fa`
+  * Consensus viral genome file generated from adding the variants called before to the viral reference genome. These variants are only the majoritarian variants, inlcuding only SNPs and small indels.
+
+### Bedtools
+
+[Bedtools](https://bedtools.readthedocs.io/en/latest/)<a name="bedtools"> </a><a href="#Bedtools_reference">[10]</a> are a swiss-army knife of tools for a wide-range of genomics analysis tasks. In this case we use:
+  * bedtools genomecov computes histograms (default), per-base reports (-d) and BEDGRAPH (-bg) summaries of feature coverage (e.g., aligned sequences) for a given genome.
+  * bedtools maskfasta masks sequences in a FASTA file based on intervals defined in a feature file. This may be useful fro creating your own masked genome file based on custom annotations or for masking all but your target regions when aligning sequence data from a targeted capture experiment.
+
+  **Output directory: `variants/bcftools`**
+
+* `{sample_id}_{reference_virus_name}.consensus.masked.fasta`
+  * Masked consensus fasta file.
+
 ## De novo assembly
 
 We selected the reads that didn't cluster using kraken2 with the host genome and assembled them to create a viral genome assembly.
