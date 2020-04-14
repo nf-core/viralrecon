@@ -52,6 +52,7 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 [Fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast all-in-one preprocessing for FastQ files. This tool is developed in C++ with multithreading supported to afford high performance. Fastp is used for quality filtering and adapter trimming.
 
 **Output directory: `preprocess/fastp`**
+
 * `<SAMPLE>.trim.fastq.gz`
   * Only with `--save_trimmed` param. Paired trimmed reads.
 * `<SAMPLE>.trim.fail.gz`
@@ -265,6 +266,7 @@ We selected the reads that didn't cluster using kraken2 with the host genome and
 Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) is used for clipping primer sequences from reads prior to assembly.
 
 **Output directory:** `preprocess/cutadapt`
+
 * `fastqc/<SAMPLE>.ptrim_fastqc.html`
   * Fastqc HTML reports for primer clipped reads.
 * `fastqc/zips/<SAMPLE>.ptrim_fastqc.zip`
@@ -279,6 +281,7 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 [SPAdes](https://kbase.us/applist/apps/kb_SPAdes/run_SPAdes/release?gclid=Cj0KCQiAt_PuBRDcARIsAMNlBdroQS7y2hPFuhagq1QPvQ39FcvGxbhtZwhn8YbxIB4LrGIHKjJ-iPwaAn_lEALw_wcB) is a de Bruijn graph-based assembler. We selected the reads that didn't mapped with the host genome and assembled them using SPAdes to create a viral genome assembly.
 
 **Output directory:** `assembly/spades`
+
 * `<SAMPLE>.scaffolds.fasta`
   * SPAdes sssembled scaffolds.
 
@@ -297,6 +300,7 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 [Unicycler](https://github.com/rrwick/Unicycler) is an assembly pipeline that works as a spades optimizer.
 
 **Output directory: `assembly/unicycler`**
+
 * `<SAMPLE>.assembly.fasta`
   * Assembled scaffolds.
 
@@ -305,6 +309,7 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 [QUAST](http://bioinf.spbau.ru/quast) evaluates genome assemblies. We compared the reference genome with the contigs and scaffold assemblies. The HTML results can be opened with any browser (we recommend using Google Chrome). We have a quast folder for each assembler selected.
 
 **Output directory: `assembly/<ASSEMBLER>/quast`**
+
 * `report.html`
   * Compressed format of the indexed variants file.
   * The meaning of the different metrics:
@@ -326,6 +331,7 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 [NCBI Blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi) is used for aligning the contigs against the reference virus genome.
 
 **Output directory: `assembly/<ASSEMBLER>/blast`**
+
 * `<SAMPLE>.blast.txt`
  * Blast results against the target virus.
 * `<SAMPLE>.blast.filt.header.txt`
@@ -336,6 +342,7 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 [PlasmidID](https://github.com/BU-ISCIII/plasmidID) was used to graphically represent the alignment of the reference genome with the assembly obtained with SPAdes. This helps to visualize the coverage of the reference genome in the assembly. To find more information about the output files go to: https://github.com/BU-ISCIII/plasmidID/wiki/Understanding-the-image:-track-by-track
 
 **Output directory: `assembly/<ASSEMBLER>/plasmidid**
+
 * `<SAMPLE>/images/<SAMPLE>_<REF_VIR_NAME>.png`
   * PNG file with the visualization of the alignment between the assembled viral genome and the reference viral genome.
 * `<SAMPLE>/data/`
@@ -348,6 +355,7 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 [Abacas](abacas.sourceforge.ne) intended to rapidly contiguate (align, order, orientate), visualize and design primers to close gaps on shotgun assembled contigs based on a reference sequence.
 
 **Output directory: `assembly/<ASSEMBLER>/abacas`**
+
 * `<SAMPLE>`
   * `<SAMPLE>_abacas.fasta`: Ordered and orientated sequence file.
   * `<SAMPLE>_abacas.tab`: Feature file.
