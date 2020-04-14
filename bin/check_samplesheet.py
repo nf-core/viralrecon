@@ -8,14 +8,23 @@ import argparse
 
 def parse_args(args=None):
     Description = 'Reformat nf-core/viralrecon samplesheet file and check its contents.'
-    Epilog = """Example usage: python check_samplesheet.py <FILE_IN> <FILE_OUT>"""
+    Epilog = """Example usage: python check_samplesheet.py <FILE_IN> <OUT_PREFIX>"""
 
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
     parser.add_argument('FILE_IN', help="Input samplesheet file.")
-    parser.add_argument('FILE_OUT', help="Output samplesheet file.")
+    parser.add_argument('OUT_PREFIX', help="Output file prefix.")
+    parser.add_argument('-ss', '--skip_sra', dest="SKIP_SRA", help="Skip steps involving SRA identifiers.",action='store_true')
+    parser.add_argument('-is', '--ignore_sra_errors', dest="IGNORE_SRA_ERRORS", help="Ignore SRA validation errors as opposed to failing.",action='store_true')
 
     return parser.parse_args(args)
 
+def make_dir(path):
+    if not len(path) == 0:
+        try:
+            os.makedirs(path)
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
 
 def print_error(error,line):
     print("ERROR: Please check samplesheet -> {}\nLine: '{}'".format(error,line.strip()))
@@ -29,7 +38,8 @@ def get_sra_runinfo(sra_id):
     except requests.exceptions.RequestException as e:
         raise SystemExit(e)
     if r.status_code != 200:
-        print_error("ERROR: Connection to SRA failed\nError code '{}'".format(r.status_code))
+        print("ERROR: Connection to SRA failed\nError code '{}'".format(r.status_code))
+        sys.exit(1)
 
     runInfoDict = {}
     csv_content = csv.DictReader(r.content.decode('utf-8').splitlines(), delimiter=',')
@@ -39,7 +49,7 @@ def get_sra_runinfo(sra_id):
     return runInfoDict
 
 
-def check_samplesheet(FileIn,FileOut):
+def check_samplesheet(FileIn,OutPrefix,ignoreSRAErrors=False,skipSRA=False):
     HEADER = ['sample', 'fastq_1', 'fastq_2']
 
     ## Check header
@@ -49,9 +59,10 @@ def check_samplesheet(FileIn,FileOut):
         print("ERROR: Please check samplesheet header -> {} != {}".format(','.join(header),','.join(HEADER)))
         sys.exit(1)
 
+    sampleRunDict = {}
+    sraRunInfoHeader = []
     sraRunInfoDict = {}
     sraWarningList = []
-    sampleRunDict = {}
     while True:
         line = fin.readline()
         if line:
@@ -83,34 +94,48 @@ def check_samplesheet(FileIn,FileOut):
 
             ## Auto-detect paired-end/single-end/is_sra
             is_sra = False
-            sampleInfoList = []                             ## [sample, single_end, is_sra, fastq_1, fastq_2]
+            sampleInfoList = []                                             ## [sample, single_end, is_sra, fastq_1, fastq_2]
             fastq_1,fastq_2 = fastQFiles
             if sample and fastq_1 and fastq_2:                              ## Paired-end short reads
                 sampleInfoList = [[sample, '0', '0', fastq_1, fastq_2]]
+
             elif sample and fastq_1 and not fastq_2:                        ## Single-end short reads
                 sampleInfoList = [[sample, '1', '0', fastq_1, fastq_2]]
-            elif sample and not fastq_1 and not fastq_2:    ## SRA accession
-                if sample[:2] in ['SR', 'PR']:
-                    is_sra = True
-                    runInfoDict = get_sra_runinfo(sample)
-                    if len(runInfoDict) != 0:
-                        for sra_id in runInfoDict.keys():
-                            platform = runInfoDict[sra_id]['Platform']
-                            library = runInfoDict[sra_id]['LibraryLayout']
-                            if runInfoDict[sra_id]['Platform'].lower() in ['illumina']:
-                                if library.lower() == 'single':
-                                    sampleInfoList = [[sra_id, '1', '1', '', '']]
-                                    single_end = '1'; fastq_1 = sra_id + "_1.fastq.gz"
-                                elif library.lower() == 'paired':
-                                    sampleInfoList = [[sra_id, '0', '1', '', '']]
+
+            elif sample and not fastq_1 and not fastq_2:                    ## SRA accession
+                if not skipSRA:
+                    if sample[:2] in ['SR', 'PR']:
+                        is_sra = True
+                        runInfoDict = get_sra_runinfo(sample)
+                        if len(runInfoDict) != 0:
+                            for sra_id in runInfoDict.keys():
+                                platform = runInfoDict[sra_id]['Platform']
+                                library = runInfoDict[sra_id]['LibraryLayout']
+                                if runInfoDict[sra_id]['Platform'].lower() in ['illumina']:
+                                    if library.lower() == 'single':
+                                        sampleInfoList.append([sra_id, '1', '1', '', ''])
+                                    elif library.lower() == 'paired':
+                                        sampleInfoList.append([sra_id, '0', '1', '', ''])
+                                    else:
+                                        errorStr = "Library layout '{}' != 'SINGLE' or 'PAIRED' for SRA id ({},{})!".format(layout,sample,sra_id)
+                                        if not ignoreSRAErrors:
+                                            print_error(errorStr,line)
+                                        sraWarningList.append(errorStr)
                                 else:
-                                    sraWarningList.append("WARNING: Library layout '{}' != 'SINGLE' or 'PAIRED' for SRA id ({},{})!".format(layout,sample,sra_id))
-                            else:
-                                sraWarningList.append("WARNING: Illumina platform currently supported. SRA id ({},{}) was sequenced on the '{}' platform!".format(sample,sra_id,platform))
+                                    errorStr = "Illumina platform currently supported. SRA id ({},{}) was sequenced on the '{}' platform!".format(sample,sra_id,platform)
+                                    if not ignoreSRAErrors:
+                                        print_error(errorStr,line)
+                                    sraWarningList.append(errorStr)
+
+                                sraRunInfoHeader = list(set(sraRunInfoHeader) | set(runInfoDict[sra_id].keys()))
+                                sraRunInfoDict[sra_id] = runInfoDict[sra_id]
+                        else:
+                            errorStr = "No data available for SRA id {}!".format(sample)
+                            if not ignoreSRAErrors:
+                                print_error(errorStr,line)
+                            sraWarningList.append(errorStr)
                     else:
-                        sraWarningList.append("WARNING: No data available for SRA id {}!".format(sample))
-                else:
-                    print_error("Please provide a valid SRA id starting with 'SR' or 'PR'!",line)
+                        print_error("Please provide a valid SRA id starting with 'SR' or 'PR'!",line)
             else:
                 print_error("Invalid combination of columns provided!",line)
 
@@ -119,22 +144,23 @@ def check_samplesheet(FileIn,FileOut):
                 if sample_id not in sampleRunDict:
                     sampleRunDict[sample_id] = []
                 else:
-                    if infoList in sampleRunDict[sample_id]:
-                        if is_sra:
-                            sraWarningList.append("WARNING: Duplicate SRA ids observed for ({},{})!".format(sample,sample_id))
-                        else:
+                    if is_sra:
+                        errorStr = "Duplicate SRA ids observed for ({},{})!".format(sample,sample_id)
+                        sraWarningList.append(errorStr)
+                    else:
+                        if infoList in sampleRunDict[sample_id]:
                             print_error("Samplesheet contains duplicate rows!",line)
-                sampleRunDict[sample_id].append(infoList)
+                        else:
+                            sampleRunDict[sample_id].append(infoList)
 
         else:
             fin.close()
             break
 
-    for i in sraWarningList:
-        print i
-
-    ## Write to file
-    fout = open(FileOut,'w')
+    ## Write validated samplesheet with appropriate columns
+    OutDir = os.path.dirname(OutPrefix)
+    make_dir(OutDir)
+    fout = open(os.path.join(OutDir,'{}.csv'.format(OutPrefix)),'w')
     fout.write(','.join(['sample_id', 'single_end', 'is_sra', 'fastq_1', 'fastq_2']) + '\n')
     for sample in sorted(sampleRunDict.keys()):
 
@@ -149,10 +175,31 @@ def check_samplesheet(FileIn,FileOut):
             fout.write(','.join([sample_id] + val) + ',\n')
     fout.close()
 
+    ## Write SRA warnings to file
+    if len(sraWarningList) != 0:
+        fout = open(os.path.join(OutDir,'{}.sra.warnings.txt'.format(OutPrefix)),'w')
+        for line in sorted(sraWarningList):
+            fout.write("WARNING: {}\n".format(line))
+        fout.close()
+
+    ## Write SRA runInfo to file
+    if len(sraRunInfoDict) != 0:
+        fout = open(os.path.join(OutDir,'{}.sra.runinfo.txt'.format(OutPrefix)),'w')
+        fout.write('\t'.join(sorted(sraRunInfoHeader)) + '\n')
+        for sra_id in sorted(sraRunInfoDict.keys()):
+            rowList = []
+            for col in sraRunInfoHeader:
+                if col in sraRunInfoDict[sra_id]:
+                    rowList.append(sraRunInfoDict[sra_id][col])
+                else:
+                    rowList.append('NA')
+            fout.write('\t'.join(rowList) + '\n')
+        fout.close()
+
 
 def main(args=None):
     args = parse_args(args)
-    check_samplesheet(args.FILE_IN,args.FILE_OUT)
+    check_samplesheet(args.FILE_IN,args.OUT_PREFIX,args.IGNORE_SRA_ERRORS,args.SKIP_SRA)
 
 
 if __name__ == '__main__':
