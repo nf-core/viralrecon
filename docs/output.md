@@ -179,6 +179,7 @@ iVar can also use the output of the samtools mpileup command to call variants - 
 Finally,iVar generates a consensus genome with the variants:
 
 **Output directory: `variants/ivar/consensus`**
+
 * `<SAMPLE>.consensus.fa`
   * Fasta file with thte consensus gneome.
 * `<SAMPLE>.consensus.qual.txt`
@@ -204,7 +205,6 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
   * VarScan2 high frequency variants log file.
 * `logs/<SAMPLE>.lowfreq.varscan2.log`
   * VarScan2 low frequency variants log file.
-
 
 ### SnpEff and SnpSift
 
@@ -247,8 +247,9 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
 ### Bedtools
 
 [Bedtools](https://bedtools.readthedocs.io/en/latest/) are a swiss-army knife of tools for a wide-range of genomics analysis tasks. In this case we use:
-  * bedtools genomecov computes histograms (default), per-base reports (-d) and BEDGRAPH (-bg) summaries of feature coverage (e.g., aligned sequences) for a given genome.
-  * bedtools maskfasta masks sequences in a FASTA file based on intervals defined in a feature file. This may be useful fro creating your own masked genome file based on custom annotations or for masking all but your target regions when aligning sequence data from a targeted capture experiment.
+
+* bedtools genomecov computes histograms (default), per-base reports (-d) and BEDGRAPH (-bg) summaries of feature coverage (e.g., aligned sequences) for a given genome.
+* bedtools maskfasta masks sequences in a FASTA file based on intervals defined in a feature file. This may be useful fro creating your own masked genome file based on custom annotations or for masking all but your target regions when aligning sequence data from a targeted capture experiment.
 
   **Output directory: `variants/bcftools`**
 
@@ -283,15 +284,14 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 * `<SAMPLE>.scaffolds.fasta`
   * SPAdes sssembled scaffolds.
 
-
 ### MetaSPAdes
 
-[MetaSPAdes](https://kbase.us/applist/apps/kb_SPAdes/run_SPAdes/release?gclid=Cj0KCQiAt_PuBRDcARIsAMNlBdroQS7y2hPFuhagq1QPvQ39FcvGxbhtZwhn8YbxIB4LrGIHKjJ-iPwaAn_lEALw_wcB) is a de Bruijn graph-based assembler, with the option `--meta` the assembler works for metagenomics date trying to reconstruct different genomes. 	
+[MetaSPAdes](https://kbase.us/applist/apps/kb_SPAdes/run_SPAdes/release?gclid=Cj0KCQiAt_PuBRDcARIsAMNlBdroQS7y2hPFuhagq1QPvQ39FcvGxbhtZwhn8YbxIB4LrGIHKjJ-iPwaAn_lEALw_wcB) is a de Bruijn graph-based assembler, with the option `--meta` the assembler works for metagenomics date trying to reconstruct different genomes.
 
 **Output directory: `assembly/metaspades`**
+
 * `<SAMPLE>.meta.scaffolds.fasta`
   * MetaSPaded assembled scaffolds.
-
 
 ### Unicycler
 
@@ -331,7 +331,7 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 **Output directory: `assembly/<ASSEMBLER>/blast`**
 
 * `<SAMPLE>.blast.txt`
- * Blast results against the target virus.
+  * Blast results against the target virus.
 * `<SAMPLE>.blast.filt.header.txt`
   * Filtered Blast results.
 
@@ -344,7 +344,7 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 * `<SAMPLE>/images/<SAMPLE>_<REF_VIR_NAME>.png`
   * PNG file with the visualization of the alignment between the assembled viral genome and the reference viral genome.
 * `<SAMPLE>/data/`
-  * Files used for drawing the circos images. 	
+  * Files used for drawing the circos images.
 * `<SAMPLE>/database`
   * Annotation files used for drawing the circos images.
 
