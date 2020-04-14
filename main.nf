@@ -360,7 +360,7 @@ checkHostname()
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * PREPROCESSING: Reformat samplesheet and check validitiy
+ * PREPROCESSING: Reformat samplesheet and check validity
  */
 process CHECK_SAMPLESHEET {
     tag "$samplesheet"
@@ -420,6 +420,11 @@ ch_samplesheet_reformat
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
+// TODO nf-core: Use '--split-3' with PE files
+// TODO nf-core: Test fastq_info and figure out whether it is worth keeping. Maybe replace it.
+/*
+ * PREPROCESSING: Download and check SRA data
+ */
 if (!params.skip_sra || !isOffline()) {
     ch_reads_sra
         .filter { it[2] }
@@ -438,12 +443,12 @@ if (!params.skip_sra || !isOffline()) {
         set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_sra
 
         output:
-        set val(sample), val(single_end), val(is_sra), file("*{1,2}.fastq.gz") into ch_fastq_dump
+        set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") into ch_fastq_dump
         file "*.log" into ch_fastq_dump_log
 
         script:
-        //pe = single_end ? "" : "--split-files --readids --split-3"
         pe = single_end ? "" : "--readids --split-e"
+        rm_orphan = single_end ? "" : "[ -f  ${sample}.fastq.gz ] && rm ${sample}.fastq.gz"
         """
         parallel-fastq-dump \\
             --sra-id $sample \\
@@ -453,17 +458,15 @@ if (!params.skip_sra || !isOffline()) {
             --gzip \\
             $pe \\
             > ${sample}.fastq_dump.log
+
+        $rm_orphan
         """
     }
 
     process SRA_FASTQ_INFO {
         tag "$sample"
         label 'process_medium'
-        // publishDir "${params.outdir}/preprocess/sra/fastq_info", mode: params.publish_dir_mode,
-        //     saveAs: { filename ->
-        //                   if (filename.endsWith(".log")) "log/$filename"
-        //                   else params.save_sra_fastq ? "$filename" : null
-        //             }
+        publishDir "${params.outdir}/preprocess/sra/fastq_info", mode: params.publish_dir_mode
 
         when:
         !params.skip_fastq_info && !params.skip_qc
@@ -471,20 +474,24 @@ if (!params.skip_sra || !isOffline()) {
         input:
         set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastq_dump
 
-        // output:
-        // set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") into ch_valid_fastq
-        // file "*.log" into ch_fastq_dump_log
+        output:
+        file "*.log" into ch_fastq_info
 
         script:
         pe = single_end ? "" : "-s"
         """
-        fastq_info $pe $reads
+        fastq_info $pe $reads 2> ${sample}.fastq_info.log
         """
     }
 } else {
     ch_reads_sra = Channel.empty()
     ch_reads_not_sra = Channel.empty()
 }
+
+
+// ch_reads_fastqc
+// ch_reads_fastp
+
 //
 // /*
 //  * Double-check if there is any fastq file that still has not been downloaded
@@ -590,8 +597,8 @@ if (!params.skip_sra || !isOffline()) {
 //
 //         output:
 //         set val(sample), val(single_end), file("*.trim.fastq.gz") into ch_fastp_cutadapt,
-//                                                                                     ch_fastp_bowtie2,
-//                                                                                     ch_fastp_kraken2
+//                                                                        ch_fastp_bowtie2,
+//                                                                        ch_fastp_kraken2
 //         set val(sample), val(single_end), file("*.fail.fastq.gz") into ch_fastp_orphan
 //         file "*.{log,fastp.html,json}" into ch_fastp_mqc
 //         file "*_fastqc.{zip,html}" into ch_fastp_fastqc_mqc
@@ -731,9 +738,9 @@ if (!params.skip_sra || !isOffline()) {
 //
 //     output:
 //     set val(sample), val(single_end), file("*.sorted.{bam,bam.bai}") into ch_sort_bam_ivar,
-//                                                                                        ch_sort_bam_metrics,
-//                                                                                        ch_sort_bam_varscan2,
-//                                                                                        ch_sort_bam_bcftools
+//                                                                           ch_sort_bam_metrics,
+//                                                                           ch_sort_bam_varscan2,
+//                                                                           ch_sort_bam_bcftools
 //     file "*.{flagstat,idxstats,stats}" into ch_sort_bam_flagstat_mqc
 //
 //     script:
@@ -777,10 +784,10 @@ if (!params.skip_sra || !isOffline()) {
 //
 //         output:
 //         set val(sample), val(single_end), file("*.sorted.{bam,bam.bai}") into ch_ivar_variants,
-//                                                                                            ch_ivar_consensus,
-//                                                                                            ch_ivar_metrics,
-//                                                                                            ch_ivar_varscan2,
-//                                                                                            ch_ivar_bcftools
+//                                                                               ch_ivar_consensus,
+//                                                                               ch_ivar_metrics,
+//                                                                               ch_ivar_varscan2,
+//                                                                               ch_ivar_bcftools
 //         file "*.{flagstat,idxstats,stats}" into ch_ivar_flagstat_mqc
 //         file "*.log" into ch_ivar_log
 //
@@ -937,7 +944,7 @@ if (!params.skip_sra || !isOffline()) {
 //
 //     output:
 //     set val(sample), val(single_end), file("*.highfreq.vcf.gz*") into ch_varscan2_highfreq_snpeff,
-//                                                                                    ch_varscan2_highfreq_consensus
+//                                                                       ch_varscan2_highfreq_consensus
 //     set val(sample), val(single_end), file("*.lowfreq.vcf.gz*") into ch_varscan2_lowfreq_snpeff
 //     file "*.pileup" into ch_varscan2_pileup
 //     file "*.log" into ch_varscan2_log
@@ -1245,8 +1252,8 @@ if (!params.skip_sra || !isOffline()) {
 //
 //     output:
 //     set val(sample), val(single_end), file("*.viral*") into ch_kraken2_spades,
-//                                                                          ch_kraken2_metaspades,
-//                                                                          ch_kraken2_unicycler
+//                                                             ch_kraken2_metaspades,
+//                                                             ch_kraken2_unicycler
 //     set val(sample), val(single_end), file("*.host*") into ch_kraken2_host_reads
 //     file "*.report.txt" into ch_kraken2_report
 //
@@ -1290,9 +1297,9 @@ if (!params.skip_sra || !isOffline()) {
 //
 //     output:
 //     set val(sample), val(single_end), file("*scaffolds.fa") into ch_spades_quast,
-//                                                                               ch_spades_blast,
-//                                                                               ch_spades_abacas,
-//                                                                               ch_spades_plasmidid
+//                                                                  ch_spades_blast,
+//                                                                  ch_spades_abacas,
+//                                                                  ch_spades_plasmidid
 //
 //     script:
 //     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
@@ -1448,9 +1455,9 @@ if (!params.skip_sra || !isOffline()) {
 //
 //     output:
 //     set val(sample), val(single_end), file("*scaffolds.fa") into ch_metaspades_quast,
-//                                                                               ch_metaspades_blast,
-//                                                                               ch_metaspades_abacas,
-//                                                                               ch_metaspades_plasmidid
+//                                                                  ch_metaspades_blast,
+//                                                                  ch_metaspades_abacas,
+//                                                                  ch_metaspades_plasmidid
 //
 //     script:
 //     """
@@ -1607,9 +1614,9 @@ if (!params.skip_sra || !isOffline()) {
 //
 //     output:
 //     set val(sample), val(single_end), file("*assembly.fa") into ch_unicycler_quast,
-//                                                                              ch_unicycler_blast,
-//                                                                              ch_unicycler_abacas,
-//                                                                              ch_unicycler_plasmidid
+//                                                                 ch_unicycler_blast,
+//                                                                 ch_unicycler_abacas,
+//                                                                 ch_unicycler_plasmidid
 //
 //     script:
 //     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
