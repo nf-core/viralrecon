@@ -117,12 +117,12 @@ def check_samplesheet(FileIn,OutPrefix,ignoreSRAErrors=False,skipSRA=False):
                                     elif library.lower() == 'paired':
                                         sampleInfoList.append([sra_id, '0', '1', '', ''])
                                     else:
-                                        errorStr = "Library layout '{}' != 'SINGLE' or 'PAIRED' for SRA id ({},{})!".format(layout,sample,sra_id)
+                                        errorStr = "Library layout '{}' != 'SINGLE' or 'PAIRED' for SRR id: '{}' (Provided id: '{}')!".format(layout,sra_id,sample)
                                         if not ignoreSRAErrors:
                                             print_error(errorStr,line)
                                         sraWarningList.append(errorStr)
                                 else:
-                                    errorStr = "Illumina platform currently supported. SRA id ({},{}) was sequenced on the '{}' platform!".format(sample,sra_id,platform)
+                                    errorStr = "Only Illumina platform is currently supported. SRR id: '{}' (Provided id: '{}') was sequenced on the '{}' platform!".format(sra_id,sample,platform)
                                     if not ignoreSRAErrors:
                                         print_error(errorStr,line)
                                     sraWarningList.append(errorStr)
@@ -130,7 +130,7 @@ def check_samplesheet(FileIn,OutPrefix,ignoreSRAErrors=False,skipSRA=False):
                                 sraRunInfoHeader = list(set(sraRunInfoHeader) | set(runInfoDict[sra_id].keys()))
                                 sraRunInfoDict[sra_id] = runInfoDict[sra_id]
                         else:
-                            errorStr = "No data available for SRA id {}!".format(sample)
+                            errorStr = "No data available for SRA id:{}!".format(sample)
                             if not ignoreSRAErrors:
                                 print_error(errorStr,line)
                             sraWarningList.append(errorStr)
@@ -142,10 +142,10 @@ def check_samplesheet(FileIn,OutPrefix,ignoreSRAErrors=False,skipSRA=False):
             for sampleList in sampleInfoList:
                 sample_id = sampleList[0]; infoList = sampleList[1:]
                 if sample_id not in sampleRunDict:
-                    sampleRunDict[sample_id] = []
+                    sampleRunDict[sample_id] = [infoList]
                 else:
                     if is_sra:
-                        errorStr = "Duplicate SRA ids observed for ({},{})!".format(sample,sample_id)
+                        errorStr = "Duplicate SRR id: '{}' (Provided id: '{}')!".format(sample_id,sample)
                         sraWarningList.append(errorStr)
                     else:
                         if infoList in sampleRunDict[sample_id]:
