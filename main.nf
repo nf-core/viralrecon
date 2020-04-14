@@ -34,7 +34,7 @@ def helpMessage() {
       --ncbi_api_key [str]            NCBI API key that permits an increases in the number of requests to the NCBI SRA database (Default: '')
       --ignore_sra_errors [bool]      Ignore validation errors when checking SRA identifiers that would otherwise cause the pipeline to fail (Default: false)
       --save_sra_fastq [bool]         Save FastQ files created from SRA identifiers in the results directory (Default: false)
-      --skip_sra [bool]               Skip steps involving the download and validation of FastQ files using SRA identifiers  (Default: false)
+      --skip_sra [bool]               Skip steps involving the download and validation of FastQ files using SRA identifiers (Default: false)
 
     References                        If not specified in the configuration file or you wish to overwrite any of the references
       --genome [str]                  Name of genome reference key for viral genome (Default: '')
@@ -65,6 +65,7 @@ def helpMessage() {
 
     QC
       --skip_qc [bool]                Skip all QC steps apart from MultiQC (Default: false)
+      --skip_fastq_info [bool]        Skip fastq_info validation check for FastQ files obtained via the SRA (Default: false)
       --skip_fastqc [bool]            Skip FastQC (Default: false)
       --skip_picard_metrics           Skip Picard CollectMultipleMetrics and CollectWgsMetrics (Default: false)
       --skip_multiqc [bool]           Skip MultiQC (Default: false)
@@ -217,6 +218,7 @@ summary['Assembly Tools']          = params.assemblers
 if (params.ncbi_api_key)           summary['NCBI API Key'] = params.ncbi_api_key
 if (params.ignore_sra_errors)      summary['Ignore SRA Errors'] = params.ignore_sra_errors
 if (params.save_sra_fastq)         summary['Save SRA FastQ'] = params.save_sra_fastq
+if (params.skip_fastq_info)        summary['Skip FastQ Info'] = params.skip_fastq_info
 if (params.skip_sra)               summary['Skip SRA Download'] = params.skip_sra
 if (params.kraken2_use_ftp)        summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
 if (params.save_kraken2_fastq)     summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
@@ -436,11 +438,12 @@ if (!params.skip_sra || !isOffline()) {
         set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_sra
 
         output:
-        set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") into ch_fastq_dump
+        set val(sample), val(single_end), val(is_sra), file("*{1,2}.fastq.gz") into ch_fastq_dump
         file "*.log" into ch_fastq_dump_log
 
         script:
-        pe = single_end ? "" : "--split-files --split-3"
+        //pe = single_end ? "" : "--split-files --readids --split-3"
+        pe = single_end ? "" : "--readids --split-e"
         """
         parallel-fastq-dump \\
             --sra-id $sample \\
@@ -453,28 +456,31 @@ if (!params.skip_sra || !isOffline()) {
         """
     }
 
-    // process SRA_VALIDATE_FASTQ {
-    //     tag "$sample"
-    //     label 'process_medium'
-    //     // publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
-    //     //     saveAs: { filename ->
-    //     //                   if (filename.endsWith(".log")) "log/$filename"
-    //     //                   else params.save_sra_fastq ? "$filename" : null
-    //     //             }
-    //
-    //     input:
-    //     set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastq_dump
-    //
-    //     // output:
-    //     // set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") into ch_valid_fastq
-    //     // file "*.log" into ch_fastq_dump_log
-    //
-    //     script:
-    //     pe = single_end ? "" : "-s"
-    //     """
-    //     fastq_info $pe $reads
-    //     """
-    //}
+    process SRA_FASTQ_INFO {
+        tag "$sample"
+        label 'process_medium'
+        // publishDir "${params.outdir}/preprocess/sra/fastq_info", mode: params.publish_dir_mode,
+        //     saveAs: { filename ->
+        //                   if (filename.endsWith(".log")) "log/$filename"
+        //                   else params.save_sra_fastq ? "$filename" : null
+        //             }
+
+        when:
+        !params.skip_fastq_info && !params.skip_qc
+
+        input:
+        set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastq_dump
+
+        // output:
+        // set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") into ch_valid_fastq
+        // file "*.log" into ch_fastq_dump_log
+
+        script:
+        pe = single_end ? "" : "-s"
+        """
+        fastq_info $pe $reads
+        """
+    }
 } else {
     ch_reads_sra = Channel.empty()
     ch_reads_not_sra = Channel.empty()
@@ -531,7 +537,7 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_fastqc && !params.skip_qc
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_fastqc
+//     set val(sample), val(single_end), file(reads) from ch_reads_fastqc
 //
 //     output:
 //     file "*.{zip,html}" into ch_fastqc_raw_reports_mqc
@@ -580,13 +586,13 @@ if (!params.skip_sra || !isOffline()) {
 //         !params.skip_variants || !params.skip_assembly
 //
 //         input:
-//         set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_fastp
+//         set val(sample), val(single_end), file(reads) from ch_reads_fastp
 //
 //         output:
-//         set val(sample), val(single_end), val(is_sra), file("*.trim.fastq.gz") into ch_fastp_cutadapt,
+//         set val(sample), val(single_end), file("*.trim.fastq.gz") into ch_fastp_cutadapt,
 //                                                                                     ch_fastp_bowtie2,
 //                                                                                     ch_fastp_kraken2
-//         set val(sample), val(single_end), val(is_sra), file("*.fail.fastq.gz") into ch_fastp_orphan
+//         set val(sample), val(single_end), file("*.fail.fastq.gz") into ch_fastp_orphan
 //         file "*.{log,fastp.html,json}" into ch_fastp_mqc
 //         file "*_fastqc.{zip,html}" into ch_fastp_fastqc_mqc
 //
@@ -682,11 +688,11 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_variants
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastp_bowtie2
+//     set val(sample), val(single_end), file(reads) from ch_fastp_bowtie2
 //     file index from ch_index.collect()
 //
 //     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.bam") into ch_bowtie2_bam
+//     set val(sample), val(single_end), file("*.bam") into ch_bowtie2_bam
 //     file "*.log" into ch_bowtie2_mqc
 //
 //     script:
@@ -721,10 +727,10 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_variants
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(bam) from ch_bowtie2_bam
+//     set val(sample), val(single_end), file(bam) from ch_bowtie2_bam
 //
 //     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_sort_bam_ivar,
+//     set val(sample), val(single_end), file("*.sorted.{bam,bam.bai}") into ch_sort_bam_ivar,
 //                                                                                        ch_sort_bam_metrics,
 //                                                                                        ch_sort_bam_varscan2,
 //                                                                                        ch_sort_bam_bcftools
@@ -766,11 +772,11 @@ if (!params.skip_sra || !isOffline()) {
 //         !params.skip_variants
 //
 //         input:
-//         set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_ivar
+//         set val(sample), val(single_end), file(bam) from ch_sort_bam_ivar
 //         file bed from ch_amplicon_bed.collect()
 //
 //         output:
-//         set val(sample), val(single_end), val(is_sra), file("*.sorted.{bam,bam.bai}") into ch_ivar_variants,
+//         set val(sample), val(single_end), file("*.sorted.{bam,bam.bai}") into ch_ivar_variants,
 //                                                                                            ch_ivar_consensus,
 //                                                                                            ch_ivar_metrics,
 //                                                                                            ch_ivar_varscan2,
@@ -811,12 +817,12 @@ if (!params.skip_sra || !isOffline()) {
 //         !params.skip_variants
 //
 //         input:
-//         set val(sample), val(single_end), val(is_sra), file(bam) from ch_ivar_variants
+//         set val(sample), val(single_end), file(bam) from ch_ivar_variants
 //         file fasta from ch_fasta_ivar_variants.collect()
 //         file gff from ch_gff_ivar_variants.collect().ifEmpty([])
 //
 //         output:
-//         set val(sample), val(single_end), val(is_sra), file("*.tsv") into ch_ivar_variants_tsv
+//         set val(sample), val(single_end), file("*.tsv") into ch_ivar_variants_tsv
 //
 //         script:
 //         features = params.gff ? "-g $gff" : ""
@@ -840,12 +846,12 @@ if (!params.skip_sra || !isOffline()) {
 //         !params.skip_variants
 //
 //         input:
-//         set val(sample), val(single_end), val(is_sra), file(bam) from ch_ivar_consensus
+//         set val(sample), val(single_end), file(bam) from ch_ivar_consensus
 //         file fasta from ch_fasta_ivar_consensus.collect()
 //
 //         output:
-//         set val(sample), val(single_end), val(is_sra), file("*.fa") into ch_ivar_consensus_fasta
-//         set val(sample), val(single_end), val(is_sra), file("*.txt") into ch_ivar_consensus_qual
+//         set val(sample), val(single_end), file("*.fa") into ch_ivar_consensus_fasta
+//         set val(sample), val(single_end), file("*.txt") into ch_ivar_consensus_qual
 //
 //         script:
 //         """
@@ -873,7 +879,7 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_variants && !params.skip_picard_metrics && !params.skip_qc
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_metrics
+//     set val(sample), val(single_end), file(bam) from ch_sort_bam_metrics
 //     file fasta from ch_fasta_picard.collect()
 //
 //     output:
@@ -926,13 +932,13 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_variants
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(bam) from ch_sort_bam_varscan2
+//     set val(sample), val(single_end), file(bam) from ch_sort_bam_varscan2
 //     file fasta from ch_fasta_varscan2.collect()
 //
 //     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.highfreq.vcf.gz*") into ch_varscan2_highfreq_snpeff,
+//     set val(sample), val(single_end), file("*.highfreq.vcf.gz*") into ch_varscan2_highfreq_snpeff,
 //                                                                                    ch_varscan2_highfreq_consensus
-//     set val(sample), val(single_end), val(is_sra), file("*.lowfreq.vcf.gz*") into ch_varscan2_lowfreq_snpeff
+//     set val(sample), val(single_end), file("*.lowfreq.vcf.gz*") into ch_varscan2_lowfreq_snpeff
 //     file "*.pileup" into ch_varscan2_pileup
 //     file "*.log" into ch_varscan2_log
 //
@@ -980,7 +986,7 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_variants && params.gff
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(highfreq_vcf), file(lowfreq_vcf) from ch_varscan2_highfreq_snpeff.join(ch_varscan2_lowfreq_snpeff, by: [0,1,2])
+//     set val(sample), val(single_end), file(highfreq_vcf), file(lowfreq_vcf) from ch_varscan2_highfreq_snpeff.join(ch_varscan2_lowfreq_snpeff, by: [0,1,2])
 //     file fasta from ch_fasta_snpeff.collect()
 //     file gff from ch_gff_snpeff.collect()
 //
@@ -1060,7 +1066,7 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_variants
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(bam), file(vcf) from ch_sort_bam_bcftools.join(ch_varscan2_highfreq_consensus, by: [0,1,2])
+//     set val(sample), val(single_end), file(bam), file(vcf) from ch_sort_bam_bcftools.join(ch_varscan2_highfreq_consensus, by: [0,1,2])
 //     file fasta from ch_fasta_bcftools.collect()
 //
 //     output:
@@ -1183,11 +1189,11 @@ if (!params.skip_sra || !isOffline()) {
 //         !params.skip_assembly
 //
 //         input:
-//         set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastp_cutadapt
+//         set val(sample), val(single_end), file(reads) from ch_fastp_cutadapt
 //         file amplicons from ch_amplicon_fasta.collect().ifEmpty([])
 //
 //         output:
-//         set val(sample), val(single_end), val(is_sra), file("*.ptrim.fastq.gz") into ch_cutadapt_kraken2
+//         set val(sample), val(single_end), file("*.ptrim.fastq.gz") into ch_cutadapt_kraken2
 //         file "*.{zip,html}" into ch_cutadapt_fastqc_mqc
 //         file "*.log" into ch_cutadapt_mqc
 //
@@ -1234,14 +1240,14 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastp_kraken2
+//     set val(sample), val(single_end), file(reads) from ch_fastp_kraken2
 //     file db from ch_kraken2_db.collect()
 //
 //     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.viral*") into ch_kraken2_spades,
+//     set val(sample), val(single_end), file("*.viral*") into ch_kraken2_spades,
 //                                                                          ch_kraken2_metaspades,
 //                                                                          ch_kraken2_unicycler
-//     set val(sample), val(single_end), val(is_sra), file("*.host*") into ch_kraken2_host_reads
+//     set val(sample), val(single_end), file("*.host*") into ch_kraken2_host_reads
 //     file "*.report.txt" into ch_kraken2_report
 //
 //     script:
@@ -1280,10 +1286,10 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly && 'spades' in assemblers
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_spades
+//     set val(sample), val(single_end), file(reads) from ch_kraken2_spades
 //
 //     output:
-//     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fa") into ch_spades_quast,
+//     set val(sample), val(single_end), file("*scaffolds.fa") into ch_spades_quast,
 //                                                                               ch_spades_blast,
 //                                                                               ch_spades_abacas,
 //                                                                               ch_spades_plasmidid
@@ -1311,7 +1317,7 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly && 'spades' in assemblers
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_blast
+//     set val(sample), val(single_end), file(scaffold) from ch_spades_blast
 //     file db from ch_blast_db_spades.collect()
 //     file header from ch_blast_outfmt6_header
 //
@@ -1349,11 +1355,11 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly && 'spades' in assemblers
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_abacas
+//     set val(sample), val(single_end), file(scaffold) from ch_spades_abacas
 //     file fasta from ch_fasta_spades_abacas.collect()
 //
 //     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_spades_abacas_fasta
+//     set val(sample), val(single_end), file("*.abacas.fasta") into ch_spades_abacas_fasta
 //     file "*.abacas*" into ch_spades_abacas_results
 //
 //     script:
@@ -1378,7 +1384,7 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly && 'spades' in assemblers
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
+//     set val(sample), val(single_end), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
 //     file fasta from ch_fasta_spades_plasmidid.collect()
 //
 //     output:
@@ -1438,10 +1444,10 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly && 'metaspades' in assemblers && !single_end
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_metaspades
+//     set val(sample), val(single_end), file(reads) from ch_kraken2_metaspades
 //
 //     output:
-//     set val(sample), val(single_end), val(is_sra), file("*scaffolds.fa") into ch_metaspades_quast,
+//     set val(sample), val(single_end), file("*scaffolds.fa") into ch_metaspades_quast,
 //                                                                               ch_metaspades_blast,
 //                                                                               ch_metaspades_abacas,
 //                                                                               ch_metaspades_plasmidid
@@ -1470,7 +1476,7 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly && 'metaspades' in assemblers && !single_end
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_blast
+//     set val(sample), val(single_end), file(scaffold) from ch_metaspades_blast
 //     file db from ch_blast_db_metaspades.collect()
 //     file header from ch_blast_outfmt6_header
 //
@@ -1508,11 +1514,11 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly && 'metaspades' in assemblers && !single_end
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_abacas
+//     set val(sample), val(single_end), file(scaffold) from ch_metaspades_abacas
 //     file fasta from ch_fasta_metaspades_abacas.collect()
 //
 //     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_metaspades_abacus_fasta
+//     set val(sample), val(single_end), file("*.abacas.fasta") into ch_metaspades_abacus_fasta
 //     file "*.abacas*" into ch_metaspades_abacus_results
 //
 //     script:
@@ -1537,7 +1543,7 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly && 'metaspades' in assemblers && !single_end
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_metaspades_plasmidid.filter { it.size() > 0 }
+//     set val(sample), val(single_end), file(scaffold) from ch_metaspades_plasmidid.filter { it.size() > 0 }
 //     file fasta from ch_fasta_metaspades_plasmidid.collect()
 //
 //     output:
@@ -1597,10 +1603,10 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly && 'unicycler' in assemblers
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(reads) from ch_kraken2_unicycler
+//     set val(sample), val(single_end), file(reads) from ch_kraken2_unicycler
 //
 //     output:
-//     set val(sample), val(single_end), val(is_sra), file("*assembly.fa") into ch_unicycler_quast,
+//     set val(sample), val(single_end), file("*assembly.fa") into ch_unicycler_quast,
 //                                                                              ch_unicycler_blast,
 //                                                                              ch_unicycler_abacas,
 //                                                                              ch_unicycler_plasmidid
@@ -1628,7 +1634,7 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly && 'unicycler' in assemblers
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_blast
+//     set val(sample), val(single_end), file(scaffold) from ch_unicycler_blast
 //     file db from ch_blast_db_unicycler.collect()
 //     file header from ch_blast_outfmt6_header
 //
@@ -1666,11 +1672,11 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly && 'unicycler' in assemblers
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_abacas
+//     set val(sample), val(single_end), file(scaffold) from ch_unicycler_abacas
 //     file fasta from ch_fasta_unicycler_abacas.collect()
 //
 //     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.abacas.fasta") into ch_unicycler_abacas_fasta
+//     set val(sample), val(single_end), file("*.abacas.fasta") into ch_unicycler_abacas_fasta
 //     file "*.abacas*" into ch_unicycler_abacas_results
 //
 //     script:
@@ -1695,7 +1701,7 @@ if (!params.skip_sra || !isOffline()) {
 //     !params.skip_assembly && 'unicycler' in assemblers
 //
 //     input:
-//     set val(sample), val(single_end), val(is_sra), file(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
+//     set val(sample), val(single_end), file(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
 //     file fasta from ch_fasta_unicycler_plasmidid.collect()
 //
 //     output:
