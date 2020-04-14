@@ -68,7 +68,6 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 * `logs/<SAMPLE>.fastp.log`
   * Trimming log file.
 
-
 ## Mapping + variant calling + consensus
 
 ### kraken2
@@ -146,7 +145,6 @@ The result mapping files are further processed with [SAMtools](http://samtools.s
   * PDF file with the distribution of quality scores.
 * `<SAMPLE>.CollectMultipleMetrics.quality_distribution_metrics`
   * Metrics file used to plot `<SAMPLE>.CollectMultipleMetrics.quality_distribution.pdf`.
-
 
 Picard documentation: [Picarddocs](https://broadinstitute.github.io/picard/command-line-overview.html)
 
