@@ -418,172 +418,67 @@ ch_samplesheet_reformat
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-// // TODO nf-core: Add --save_sra_fastq
-// // Split samples based on whether they are an SRA id or not
 if (!params.skip_sra || !isOffline()) {
     ch_reads_sra
         .filter { it[2] }
         .set { ch_reads_sra }
 
-    process FASTQ_DUMP {
+    process SRA_FASTQ_DUMP {
         tag "$sample"
         label 'process_medium'
-        // publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
-        //     saveAs: { filename ->
-        //                   //if (filename.endsWith(".json")) "$filename"
-        //                   //else if (filename.endsWith(".fastp.html")) "$filename"
-        //                   //else if (filename.endsWith("_fastqc.html")) "fastqc/$filename"
-        //                   //else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
-        //                   //else if (filename.endsWith(".log")) "log/$filename"
-        //                   if params.save_sra_fastq ? "$filename" : null
-        //             }
+        publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith(".log")) "log/$filename"
+                          else params.save_sra_fastq ? "$filename" : null
+                    }
 
         input:
         set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_sra
 
-        // output:
-        // set val(sample), val(single_end), val(is_sra), file("*.trim.fastq.gz") into ch_fastp_cutadapt,
-        //                                                                             ch_fastp_bowtie2,
-        //                                                                             ch_fastp_kraken2
-        // set val(sample), val(single_end), val(is_sra), file("*.fail.fastq.gz") into ch_fastp_orphan
-        // file "*.{log,fastp.html,json}" into ch_fastp_mqc
-        // file "*_fastqc.{zip,html}" into ch_fastp_fastqc_mqc
+        output:
+        set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") into ch_fastq_dump
+        file "*.log" into ch_fastq_dump_log
 
         script:
+        pe = single_end ? "" : "--split-files --split-3"
         """
         parallel-fastq-dump \\
             --sra-id $sample \\
             --threads $task.cpus \\
             --outdir ./ \\
             --tmpdir ./ \\
-            --split-files \\
-            --gzip
+            --gzip \\
+            $pe \\
+            > ${sample}.fastq_dump.log
         """
-        // // Added soft-links to original fastqs for consistent naming in MultiQC
-        // autodetect = single_end ? "" : "--detect_adapter_for_pe"
-        // """
-        // IN_READS='--in1 ${sample}.fastq.gz'
-        // OUT_READS='--out1 ${sample}.trim.fastq.gz --failed_out ${sample}.fail.fastq.gz'
-        // if $single_end; then
-        //     [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
-        // else
-        //     [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
-        //     [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-        //     IN_READS='--in1 ${sample}_1.fastq.gz --in2 ${sample}_2.fastq.gz'
-        //     OUT_READS='--out1 ${sample}_1.trim.fastq.gz --out2 ${sample}_2.trim.fastq.gz --unpaired1 ${sample}_1.fail.fastq.gz --unpaired2 ${sample}_2.fail.fastq.gz'
-        // fi
-        //
-        // fastp \\
-        //     \$IN_READS \\
-        //     \$OUT_READS \\
-        //     $autodetect \\
-        //     --cut_front \\
-        //     --cut_tail \\
-        //     --thread $task.cpus \\
-        //     --json ${sample}.fastp.json \\
-        //     --html ${sample}.fastp.html \\
-        //     2> ${sample}.fastp.log
-        //
-        // fastqc --quiet --threads $task.cpus *.trim.fastq.gz
-        // """
     }
 
-
-
-
+    // process SRA_VALIDATE_FASTQ {
+    //     tag "$sample"
+    //     label 'process_medium'
+    //     // publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
+    //     //     saveAs: { filename ->
+    //     //                   if (filename.endsWith(".log")) "log/$filename"
+    //     //                   else params.save_sra_fastq ? "$filename" : null
+    //     //             }
+    //
+    //     input:
+    //     set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastq_dump
+    //
+    //     // output:
+    //     // set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") into ch_valid_fastq
+    //     // file "*.log" into ch_fastq_dump_log
+    //
+    //     script:
+    //     pe = single_end ? "" : "-s"
+    //     """
+    //     fastq_info $pe $reads
+    //     """
+    //}
 } else {
     ch_reads_sra = Channel.empty()
     ch_reads_not_sra = Channel.empty()
 }
-
-
-//
-// ch_reads_not_sra
-//     .filter { !it[2] }
-//     .set { ch_reads_not_sra }
-// //ch_reads_not_sra.println()
-//
-// // Download fastq files using fromSRA Nextflow function
-// if (!ch_reads_sra.isEmpty()) {
-//     println('GOT HERE!')
-//     ch_sra_pointers =  params.ncbi_api_key ? Channel.fromSRA(ch_reads_sra, apiKey: params.ncbi_api_key) : Channel.fromSRA(ch_reads_sra)
-// } else {
-//     println('GOT HERE 2!')
-//     ch_sra_pointers = Channel.empty()
-// }
-// ch_sra_pointers.println()
-//
-// /*
-//  * Downloading fastq files using fasterq-dump
-//  */
-// process FASTERQ_DUMP {
-//     tag "$sample"
-//     label 'process_medium'
-//
-//     input:
-//     val(sample) from ch_fromSRA_ids_missing
-//
-//     output:
-//     set val(sample), stdout, val("true"), file("*.fastq") optional true into ch_fasterq_dump
-//
-//     script:
-//     """
-//     single_end=""
-//     single_end=`get_SRA_metainfo.py $sample --is_single`
-//
-//     if [[ \$single_end == "true" ]]
-//     then
-//         fasterq-dump ${sample} \\
-//             -O ./ \\
-//             -t ./ \\
-//             -e ${task.cpus}
-//     elif [[ \$single_end == "false" ]]
-//     then
-//         fasterq-dump ${sample} \\
-//             -O ./ \\
-//             -t ./ \\
-//             -e ${task.cpus} \\
-//             --split-files
-//     else
-//         1>&2 echo -e "Problem getting metainfo of fastq files, hence \"fasterq-dump\" not run"
-//         exit 1
-//     fi
-//     echo \${single_end}
-//     """
-// }
-//
-// /*
-//  * Validates and compresses fastq files
-//  */
-// process VALIDATE_FASTERQ_DUMP {
-//     tag "$sample"
-//     label 'process_medium'
-//
-//     input:
-//     set val(sample), val(single_end), val(is_sra), file(fastq_reads) from ch_fasterq_dump
-//
-//     output:
-//     set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") optional true into ch_fasterq_gz_validated,
-//                                                                                          ch_fasterq_gz_validated_to_check,
-//                                                                                          ch_fasterq_gz_validated_to_print
-//
-//     script:
-//     if (single_end.toBoolean()) {
-//         """
-//         fastq_info ${sample}.fastq
-//
-//         pigz -cp ${task.cpus} ${sample}.fastq > ${sample}.fastq.gz
-//         """
-//     } else {
-//         """
-//         fastq_info ${sample}_1.fastq
-//         fastq_info ${sample}_2.fastq
-//
-//         pigz -cp ${task.cpus} ${sample}_1.fastq > ${sample}_1.fastq.gz
-//         pigz -cp ${task.cpus} -fc ${sample}_2.fastq > ${sample}_2.fastq.gz
-//         """
-//     }
-// }
 //
 // /*
 //  * Double-check if there is any fastq file that still has not been downloaded
@@ -1886,6 +1781,8 @@ if (!params.skip_sra || !isOffline()) {
 //     """
 //     echo $workflow.manifest.version > v_pipeline.txt
 //     echo $workflow.nextflow.version > v_nextflow.txt
+//     parallel-fastq-dump --version > v_parallel_fastq_dump.txt
+//     fastq_info -h > v_fastq_utils.txt
 //     fastqc --version > v_fastqc.txt
 //     fastp --version 2> v_fastp.txt
 //     bowtie2 --version > v_bowtie2.txt
