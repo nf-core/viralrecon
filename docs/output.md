@@ -91,7 +91,7 @@ We mapped the fastq file against the reference host genome.
     5. NCBI taxonomic ID number
     6. Indented scientific name
 
-### Bowtie
+### Bowtie2
 
 [Bowtie](http://bio-bwa.sourceforge.net/) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small. Bowtie 2 supports gapped, local, and paired-end alignment modes.
 
@@ -106,7 +106,7 @@ We mapped the fastq file against the reference host genome.
 * `<SAMPLE>.sorted.bam.bai`
   * Index file for soreted aligned BAM file.
 
-### Samtools
+### SAMtools
 
 The result mapping files are further processed with [SAMtools](http://samtools.sourceforge.net/), sam format is converted to bam, sorted and an index .bai is generated. Samtools is also used to generate statistics about the mapping process.
 
