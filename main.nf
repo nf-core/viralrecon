@@ -372,8 +372,8 @@ process CHECK_SAMPLESHEET {
     file "*.txt" into ch_samplesheet_sra
 
     script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
-    skip = params.skip_sra ? "--skip_sra" : ""
-    ignore = (params.skip_sra || params.ignore_sra_errors) ? "--ignore_sra_errors" : ""
+    skip = (params.skip_sra || isOffline()) ? "--skip_sra" : ""
+    ignore = params.ignore_sra_errors ? "--ignore_sra_errors" : ""
     """
     check_samplesheet.py $samplesheet samplesheet_reformat $skip $ignore
     """
@@ -418,15 +418,85 @@ ch_samplesheet_reformat
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-// // TODO nf-core: Add --skip_sra option and check if offline
 // // TODO nf-core: Add --save_sra_fastq
 // // Split samples based on whether they are an SRA id or not
-// ch_reads_sra
-//     .filter { it[2] }
-//     .map { it -> it[0] }
-//     .collect()
-//     .set { ch_reads_sra }
-// //ch_reads_sra.println()
+if (!params.skip_sra || !isOffline()) {
+    ch_reads_sra
+        .filter { it[2] }
+        .set { ch_reads_sra }
+
+    process FASTQ_DUMP {
+        tag "$sample"
+        label 'process_medium'
+        // publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
+        //     saveAs: { filename ->
+        //                   //if (filename.endsWith(".json")) "$filename"
+        //                   //else if (filename.endsWith(".fastp.html")) "$filename"
+        //                   //else if (filename.endsWith("_fastqc.html")) "fastqc/$filename"
+        //                   //else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
+        //                   //else if (filename.endsWith(".log")) "log/$filename"
+        //                   if params.save_sra_fastq ? "$filename" : null
+        //             }
+
+        input:
+        set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_sra
+
+        // output:
+        // set val(sample), val(single_end), val(is_sra), file("*.trim.fastq.gz") into ch_fastp_cutadapt,
+        //                                                                             ch_fastp_bowtie2,
+        //                                                                             ch_fastp_kraken2
+        // set val(sample), val(single_end), val(is_sra), file("*.fail.fastq.gz") into ch_fastp_orphan
+        // file "*.{log,fastp.html,json}" into ch_fastp_mqc
+        // file "*_fastqc.{zip,html}" into ch_fastp_fastqc_mqc
+
+        script:
+        """
+        parallel-fastq-dump \\
+            --sra-id $sample \\
+            --threads $task.cpus \\
+            --outdir ./ \\
+            --tmpdir ./ \\
+            --split-files \\
+            --gzip
+        """
+        // // Added soft-links to original fastqs for consistent naming in MultiQC
+        // autodetect = single_end ? "" : "--detect_adapter_for_pe"
+        // """
+        // IN_READS='--in1 ${sample}.fastq.gz'
+        // OUT_READS='--out1 ${sample}.trim.fastq.gz --failed_out ${sample}.fail.fastq.gz'
+        // if $single_end; then
+        //     [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
+        // else
+        //     [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
+        //     [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
+        //     IN_READS='--in1 ${sample}_1.fastq.gz --in2 ${sample}_2.fastq.gz'
+        //     OUT_READS='--out1 ${sample}_1.trim.fastq.gz --out2 ${sample}_2.trim.fastq.gz --unpaired1 ${sample}_1.fail.fastq.gz --unpaired2 ${sample}_2.fail.fastq.gz'
+        // fi
+        //
+        // fastp \\
+        //     \$IN_READS \\
+        //     \$OUT_READS \\
+        //     $autodetect \\
+        //     --cut_front \\
+        //     --cut_tail \\
+        //     --thread $task.cpus \\
+        //     --json ${sample}.fastp.json \\
+        //     --html ${sample}.fastp.html \\
+        //     2> ${sample}.fastp.log
+        //
+        // fastqc --quiet --threads $task.cpus *.trim.fastq.gz
+        // """
+    }
+
+
+
+
+} else {
+    ch_reads_sra = Channel.empty()
+    ch_reads_not_sra = Channel.empty()
+}
+
+
 //
 // ch_reads_not_sra
 //     .filter { !it[2] }
@@ -602,14 +672,14 @@ ch_samplesheet_reformat
 //         tag "$sample"
 //         label 'process_medium'
 //         publishDir "${params.outdir}/preprocess/fastp", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".json")) "$filename"
-//                       else if (filename.endsWith(".fastp.html")) "$filename"
-//                       else if (filename.endsWith("_fastqc.html")) "fastqc/$filename"
-//                       else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
-//                       else if (filename.endsWith(".log")) "log/$filename"
-//                       else params.save_trimmed ? "$filename" : null
-//                 }
+//             saveAs: { filename ->
+//                           if (filename.endsWith(".json")) "$filename"
+//                           else if (filename.endsWith(".fastp.html")) "$filename"
+//                           else if (filename.endsWith("_fastqc.html")) "fastqc/$filename"
+//                           else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
+//                           else if (filename.endsWith(".log")) "log/$filename"
+//                           else params.save_trimmed ? "$filename" : null
+//                     }
 //
 //         when:
 //         !params.skip_variants || !params.skip_assembly
