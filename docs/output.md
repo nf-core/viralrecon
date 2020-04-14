@@ -260,17 +260,19 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
 
 We selected the reads that didn't cluster using kraken2 with the host genome and assembled them to create a viral genome assembly.
 
-### Cutadapt (*only amplicon*)
+### Cutadapt
 
-[Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) is used for clipping primer sequences from reads prior to assembly.
+Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) is used for clipping primer sequences from reads prior to assembly.
 
 **Output directory:** `preprocess/cutadapt`
-  * `fastqc`
-    * Fastqc reports for primer clipped reads.
-  * `logs`
-    * Cutadapt logs.
-  * `<SAMPLE>.ptrim.fastq.gz`
-    * only if `--save_trimmed`. Fastq files with primer sequences trimmed.
+* `fastqc/<SAMPLE>.ptrim_fastqc.html`
+  * Fastqc HTML reports for primer clipped reads.
+* `fastqc/zips/<SAMPLE>.ptrim_fastqc.zip`
+  * Fastqc HTML reports for primer clipped reads.
+* `log/<SAMPLE>.cutadapt.log`
+  * Cutadapt logs.
+* `<SAMPLE>.ptrim.fastq.gz`
+  * Only if `--save_trimmed`. Fastq files with primer sequences trimmed.
 
 ### SPAdes
 
@@ -278,7 +280,7 @@ We selected the reads that didn't cluster using kraken2 with the host genome and
 
 **Output directory:** `assembly/spades`
 * `<SAMPLE>.scaffolds.fasta`
-  * Assembled scaffolds.
+  * SPAdes sssembled scaffolds.
 
 
 ### MetaSPAdes
@@ -287,7 +289,7 @@ We selected the reads that didn't cluster using kraken2 with the host genome and
 
 **Output directory: `assembly/metaspades`**
 * `<SAMPLE>.meta.scaffolds.fasta`
-  * Assembled scaffolds.
+  * MetaSPaded assembled scaffolds.
 
 
 ### Unicycler
@@ -302,8 +304,8 @@ We selected the reads that didn't cluster using kraken2 with the host genome and
 
 [QUAST](http://bioinf.spbau.ru/quast) evaluates genome assemblies. We compared the reference genome with the contigs and scaffold assemblies. The html results can be opened with any browser (we recommend using Google Chrome). We have a quast folder for each assembler selected.
 
-**Output directory: `assembly/${assembler}`**
-* `quast/report.html`
+**Output directory: `assembly/<ASSEMBLER>/quast`**
+* `report.html`
   * Compressed format of the indexed variants file.
   * The meaning of the different metrics:
     * Contigs (≥ x bp): is total number of contigs of length ≥ x bp.
@@ -323,18 +325,18 @@ We selected the reads that didn't cluster using kraken2 with the host genome and
 
 [NCBI Blast](https://blast.ncbi.nlm.nih.gov/Blast.cgi) is used for aligning the contigs against the reference virus genome.
 
-**Output directory:** `assembly/${assembler}/blast`
-* `<SAMPLE>_blast_filt_header.txt`
+**Output directory: `assembly/<ASSEMBLER>/blast`**
+* `<SAMPLE>.blast.txt`
  * Blast results against the target virus.
-* `<SAMPLE>_blast_bacteria_filt.txt`
-  * Blast results for bacteria database.
+* `<SAMPLE>.blast.filt.header.txt`
+  * Filtered Blast results.
 
 ### PlasmidID
 
 [PlasmidID](https://github.com/BU-ISCIII/plasmidID) was used to graphically represent the alignment of the reference genome with the assembly obtained with SPAdes. This helps to visualize the coverage of the reference genome in the assembly. To find more information about the output files go to: https://github.com/BU-ISCIII/plasmidID/wiki/Understanding-the-image:-track-by-track
 
-**Output directory:** `assembly/${assembler}/plasmidid
-* `<SAMPLE>/images/<SAMPLE>_<reference_viral_genome>.png`
+**Output directory: `assembly/<ASSEMBLER>/plasmidid**
+* `<SAMPLE>/images/<SAMPLE>_<REF_VIR_NAME>.png`
   * PNG file with the visualization of the alignment between the assembled viral genome and the reference viral genome.
 * `<SAMPLE>/data/`
   * Files used for drawing the circos images. 	
@@ -345,15 +347,15 @@ We selected the reads that didn't cluster using kraken2 with the host genome and
 
 [Abacas](abacas.sourceforge.ne) intended to rapidly contiguate (align, order, orientate), visualize and design primers to close gaps on shotgun assembled contigs based on a reference sequence.
 
-**Output directory:** `assembly/${assembler}/abacas`
+**Output directory: `assembly/<ASSEMBLER>/abacas`**
 * `<SAMPLE>`
-  * <SAMPLE>_abacas.fasta: Ordered and orientated sequence file.
-  * <SAMPLE>_abacas.tab: Feature file.
-  * <SAMPLE>_abacas.bin: Bin file that contains contigs that are not used in ordering.
-  * <SAMPLE>_abacas.crunch: Comparison file.
-  * <SAMPLE>_abacas.gaps: Gap information.
-  * unused_contigs.out: Information on contigs that have a mapping information but could not be used in the ordering.
-  * <SAMPLE>_abacas.MULTIFASTA.fa: A list of ordered and orientated contigs in a multi-fasta format.
+  * `<SAMPLE>_abacas.fasta`: Ordered and orientated sequence file.
+  * `<SAMPLE>_abacas.tab`: Feature file.
+  * `<SAMPLE>_abacas.bin`: Bin file that contains contigs that are not used in ordering.
+  * `<SAMPLE>_abacas.crunch`: Comparison file.
+  * `<SAMPLE>_abacas.gaps`: Gap information.
+  * `unused_contigs.out`: Information on contigs that have a mapping information but could not be used in the ordering.
+  * `<SAMPLE>_abacas.MULTIFASTA.fa`: A list of ordered and orientated contigs in a multi-fasta format.
 
 ## MultiQC
 
