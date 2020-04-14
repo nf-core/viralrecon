@@ -1169,7 +1169,8 @@ process BCFTOOLS_CONSENSUS {
         -fi ${sample}.consensus.fa \\
         -bed ${sample}.mask.bed \\
         -fo ${sample}.consensus.masked.fa
-    sed -i 's/${index_base}/${sample}/g' ${sample}.consensus.masked.fa
+    header=\$(head -n1 ${sample}.consensus.masked.fa | sed 's/>//g')
+    sed -i "s/\${header}/${sample}/g" ${sample}.consensus.masked.fa
     """
 }
 
