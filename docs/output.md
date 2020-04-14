@@ -192,7 +192,7 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
 **Output directory: `variants/varscan2`**
 
 * `<SAMPLE>.pileup`
-  * If `--save_pileup`. Samtools pileup file. The pileup file summarises all data from the reads at each genomic region that is covered by at least one read. Each row of the pileup file gives similar information to a single vertical column of reads in the IGV view.
+  * If `--save_pileup`. Samtools pileup file. The pileup file summarizes all data from the reads at each genomic region that is covered by at least one read. Each row of the pileup file gives similar information to a single vertical column of reads in the IGV view.
 * `<SAMPLE>.highfreq.vcf.gz`
   * High frequency variants VCF file.
 * `<SAMPLE>.highfreq.vcf.gz.tbi`
@@ -243,7 +243,7 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
 **Output directory: `variants/bcftools`**
 
 * `<SAMPLE>.consensus.fa`
-  * Consensus viral genome file generated from adding the variants called before to the viral reference genome. These variants are only the majoritarian variants, inlcuding only SNPs and small indels.
+  * Consensus viral genome file generated from adding the variants called before to the viral reference genome. These variants are only the majoritarian variants, including only SNPs and small indels.
 
 ### Bedtools
 
@@ -294,7 +294,7 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 
 ### Unicycler
 
-[Unicycler](https://github.com/rrwick/Unicycler) is an assembly pipeline that works as a spades optimiser.
+[Unicycler](https://github.com/rrwick/Unicycler) is an assembly pipeline that works as a spades optimizer.
 
 **Output directory: `assembly/unicycler`**
 * `<SAMPLE>.assembly.fasta`
@@ -302,7 +302,7 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 
 ### QUAST
 
-[QUAST](http://bioinf.spbau.ru/quast) evaluates genome assemblies. We compared the reference genome with the contigs and scaffold assemblies. The html results can be opened with any browser (we recommend using Google Chrome). We have a quast folder for each assembler selected.
+[QUAST](http://bioinf.spbau.ru/quast) evaluates genome assemblies. We compared the reference genome with the contigs and scaffold assemblies. The HTML results can be opened with any browser (we recommend using Google Chrome). We have a quast folder for each assembler selected.
 
 **Output directory: `assembly/<ASSEMBLER>/quast`**
 * `report.html`
@@ -359,7 +359,7 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 
 ## MultiQC
 
-[MultiQC](http://multiqc.info) is a visualisation tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in within the report data directory.
+[MultiQC](http://multiqc.info) is a visualization tool that generates a single HTML report summarizing all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in within the report data directory.
 
 The pipeline has special steps which allow the software versions used to be reported in the MultiQC output for future traceability.
 
