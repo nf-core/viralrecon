@@ -409,8 +409,8 @@ def validate_input(LinkedHashMap sample) {
 ch_samplesheet_reformat
     .splitCsv(header:true, sep:',')
     .map { validate_input(it) }
-    .into { ch_reads_sra;
-            ch_reads_not_sra }
+    .into { ch_reads_all
+            ch_reads_sra }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -422,6 +422,7 @@ ch_samplesheet_reformat
 
 // TODO nf-core: Use '--split-3' with PE files
 // TODO nf-core: Test fastq_info and figure out whether it is worth keeping. Maybe replace it.
+// TODO nf-core: Auto-detect and merge same sample with multiple lanes. e.g. SRR390277
 /*
  * PREPROCESSING: Download and check SRA data
  */
@@ -443,7 +444,9 @@ if (!params.skip_sra || !isOffline()) {
         set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_sra
 
         output:
-        set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") into ch_fastq_dump
+        set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") into ch_sra_fastq,
+                                                                               ch_sra_fastq_info
+
         file "*.log" into ch_fastq_dump_log
 
         script:
@@ -472,7 +475,7 @@ if (!params.skip_sra || !isOffline()) {
         !params.skip_fastq_info && !params.skip_qc
 
         input:
-        set val(sample), val(single_end), val(is_sra), file(reads) from ch_fastq_dump
+        set val(sample), val(single_end), val(is_sra), file(reads) from ch_sra_fastq_info
 
         output:
         file "*.log" into ch_fastq_info
@@ -483,44 +486,22 @@ if (!params.skip_sra || !isOffline()) {
         fastq_info $pe $reads 2> ${sample}.fastq_info.log
         """
     }
-} else {
-    ch_reads_sra = Channel.empty()
-    ch_reads_not_sra = Channel.empty()
+
+    ch_sra_fastq
+        .map { [ it[0] + "_T1", it[1], it[2], it[3] ] }
+        .set { ch_sra_fastq }
+
+    ch_reads_all
+        .filter { !it[2] }
+        .concat(ch_sra_fastq)
+        .set { ch_reads_all }
 }
 
+ch_reads_all
+    .map { [ it[0], it[1], it[3] ] }
+    .into { ch_reads_fastqc
+            ch_reads_fastp }
 
-// ch_reads_fastqc
-// ch_reads_fastp
-
-//
-// /*
-//  * Double-check if there is any fastq file that still has not been downloaded
-//  */
-// ch_fromSRA_ids_missing_to_check
-//     .join ( ch_fasterq_gz_validated_to_check, remainder: true )
-//     .filter { it[1] == null | it[1] == "failed" }
-//     .map { it[0]}
-//     .set { ch_unreachable_fastq_files }
-//
-// /*
-//  * If any fastq file could not be downloaded pipeline is stopped
-//  */
-// ch_unreachable_fastq_files
-//     .collect()
-//     .map { if (it) { exit 1, "Some fastq file/s couldn't be downloaded please check its SRA ID/s: " + it.join(', ') } }
-//
-// /*
-//  * Mix channels with downloaded fastq files with channel of local fastq files
-//  */
-// ch_fromSRA_dw_validated
-//     .mix ( ch_fasterq_gz_validated )
-//     .filter { it[1] != "failed" }
-//     .map { [ it[0] + "_T1", it[1].toBoolean(), it[2], it[3] ] }
-//     .mix ( ch_reads_no_sra_filt )
-//     .into { ch_reads_fastqc;
-//             ch_reads_fastp_default
-//                }
-//
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
@@ -529,119 +510,134 @@ if (!params.skip_sra || !isOffline()) {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-// /*
-//  * STEP 1: FastQC on raw input reads
-//  */
-// process FASTQC {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/preprocess/fastqc", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       filename.endsWith(".zip") ? "zips/$filename" : "$filename"
-//                 }
-//
-//     when:
-//     !params.skip_fastqc && !params.skip_qc
-//
-//     input:
-//     set val(sample), val(single_end), file(reads) from ch_reads_fastqc
-//
-//     output:
-//     file "*.{zip,html}" into ch_fastqc_raw_reports_mqc
-//
-//     script:
-//     // Added soft-links to original fastqs for consistent naming in MultiQC
-//     """
-//     if $single_end; then
-//         [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
-//         fastqc --quiet --threads $task.cpus ${sample}.fastq.gz
-//     else
-//         [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
-//         [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-//         fastqc --quiet --threads $task.cpus ${sample}_1.fastq.gz
-//         fastqc --quiet --threads $task.cpus ${sample}_2.fastq.gz
-//     fi
-//     """
-// }
-//
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                        ADAPTER TRIMMING                             -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-//
-// /*
-// * STEP 2: Fastp adapter trimming and quality filtering
-// */
-// if (!params.skip_trimming) {
-//     process FASTP {
-//         tag "$sample"
-//         label 'process_medium'
-//         publishDir "${params.outdir}/preprocess/fastp", mode: params.publish_dir_mode,
-//             saveAs: { filename ->
-//                           if (filename.endsWith(".json")) "$filename"
-//                           else if (filename.endsWith(".fastp.html")) "$filename"
-//                           else if (filename.endsWith("_fastqc.html")) "fastqc/$filename"
-//                           else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
-//                           else if (filename.endsWith(".log")) "log/$filename"
-//                           else params.save_trimmed ? "$filename" : null
-//                     }
-//
-//         when:
-//         !params.skip_variants || !params.skip_assembly
-//
-//         input:
-//         set val(sample), val(single_end), file(reads) from ch_reads_fastp
-//
-//         output:
-//         set val(sample), val(single_end), file("*.trim.fastq.gz") into ch_fastp_cutadapt,
-//                                                                        ch_fastp_bowtie2,
-//                                                                        ch_fastp_kraken2
-//         set val(sample), val(single_end), file("*.fail.fastq.gz") into ch_fastp_orphan
-//         file "*.{log,fastp.html,json}" into ch_fastp_mqc
-//         file "*_fastqc.{zip,html}" into ch_fastp_fastqc_mqc
-//
-//         script:
-//         // Added soft-links to original fastqs for consistent naming in MultiQC
-//         autodetect = single_end ? "" : "--detect_adapter_for_pe"
-//         """
-//         IN_READS='--in1 ${sample}.fastq.gz'
-//         OUT_READS='--out1 ${sample}.trim.fastq.gz --failed_out ${sample}.fail.fastq.gz'
-//         if $single_end; then
-//             [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
-//         else
-//             [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
-//             [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-//             IN_READS='--in1 ${sample}_1.fastq.gz --in2 ${sample}_2.fastq.gz'
-//             OUT_READS='--out1 ${sample}_1.trim.fastq.gz --out2 ${sample}_2.trim.fastq.gz --unpaired1 ${sample}_1.fail.fastq.gz --unpaired2 ${sample}_2.fail.fastq.gz'
-//         fi
-//
-//         fastp \\
-//             \$IN_READS \\
-//             \$OUT_READS \\
-//             $autodetect \\
-//             --cut_front \\
-//             --cut_tail \\
-//             --thread $task.cpus \\
-//             --json ${sample}.fastp.json \\
-//             --html ${sample}.fastp.html \\
-//             2> ${sample}.fastp.log
-//
-//         fastqc --quiet --threads $task.cpus *.trim.fastq.gz
-//         """
-//     }
-// } else {
-//     ch_reads_fastp
-//         .into { ch_fastp_cutadapt
-//                 ch_fastp_bowtie2
-//                 ch_fastp_kraken2 }
-//
-//     ch_fastp_mqc = Channel.empty()
-//     ch_fastp_fastqc_mqc = Channel.empty()
-// }
-//
+/*
+ * STEP 1: FastQC on raw input reads
+ */
+process FASTQC {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/preprocess/fastqc", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      filename.endsWith(".zip") ? "zips/$filename" : "$filename"
+                }
+
+    when:
+    !params.skip_fastqc && !params.skip_qc
+
+    input:
+    set val(sample), val(single_end), file(reads) from ch_reads_fastqc
+
+    output:
+    file "*.{zip,html}" into ch_fastqc_raw_reports_mqc
+
+    script:
+    // Added soft-links to original fastqs for consistent naming in MultiQC
+    """
+    if $single_end; then
+        [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
+        fastqc --quiet --threads $task.cpus ${sample}.fastq.gz
+    else
+        [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
+        [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
+        fastqc --quiet --threads $task.cpus ${sample}_1.fastq.gz
+        fastqc --quiet --threads $task.cpus ${sample}_2.fastq.gz
+    fi
+    """
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/* --                                                                     -- */
+/* --                        ADAPTER TRIMMING                             -- */
+/* --                                                                     -- */
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+* STEP 2: Fastp adapter trimming and quality filtering
+*/
+if (!params.skip_trimming) {
+    process FASTP {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/preprocess/fastp", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith(".json")) "$filename"
+                          else if (filename.endsWith(".fastp.html")) "$filename"
+                          else if (filename.endsWith("_fastqc.html")) "fastqc/$filename"
+                          else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
+                          else if (filename.endsWith(".log")) "log/$filename"
+                          else params.save_trimmed ? "$filename" : null
+                    }
+
+        when:
+        !params.skip_variants || !params.skip_assembly
+
+        input:
+        set val(sample), val(single_end), file(reads) from ch_reads_fastp
+
+        output:
+        set val(sample), val(single_end), file("*.trim.fastq.gz") into ch_fastp_cutadapt,
+                                                                       ch_fastp_bowtie2,
+                                                                       ch_fastp_kraken2
+        set val(sample), val(single_end), file("*.fail.fastq.gz") into ch_fastp_orphan
+        file "*.{log,fastp.html,json}" into ch_fastp_mqc
+        file "*_fastqc.{zip,html}" into ch_fastp_fastqc_mqc
+
+        script:
+        // Added soft-links to original fastqs for consistent naming in MultiQC
+        autodetect = single_end ? "" : "--detect_adapter_for_pe"
+        """
+        IN_READS='--in1 ${sample}.fastq.gz'
+        OUT_READS='--out1 ${sample}.trim.fastq.gz --failed_out ${sample}.fail.fastq.gz'
+        if $single_end; then
+            [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
+        else
+            [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
+            [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
+            IN_READS='--in1 ${sample}_1.fastq.gz --in2 ${sample}_2.fastq.gz'
+            OUT_READS='--out1 ${sample}_1.trim.fastq.gz --out2 ${sample}_2.trim.fastq.gz --unpaired1 ${sample}_1.fail.fastq.gz --unpaired2 ${sample}_2.fail.fastq.gz'
+        fi
+
+        fastp \\
+            \$IN_READS \\
+            \$OUT_READS \\
+            $autodetect \\
+            --cut_front \\
+            --cut_tail \\
+            --thread $task.cpus \\
+            --json ${sample}.fastp.json \\
+            --html ${sample}.fastp.html \\
+            2> ${sample}.fastp.log
+
+        fastqc --quiet --threads $task.cpus *.trim.fastq.gz
+        """
+    }
+} else {
+    ch_reads_fastp
+        .into { ch_fastp_cutadapt
+                ch_fastp_bowtie2
+                ch_fastp_kraken2 }
+
+    ch_fastp_mqc = Channel.empty()
+    ch_fastp_fastqc_mqc = Channel.empty()
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/* --                                                                     -- */
+/* --                     MERGE RESEQUENCED FASTQ                         -- */
+/* --                                                                     -- */
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+
+// ch_sort_bam_merge
+//     .map { [ it[0].split('_')[0..-2].join('_'), it[1] ] }
+//     .groupTuple(by: [0])
+//     .map { [ it[0], it[1].flatten() ] }
+//     .set { ch_sort_bam_merge }
+
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
 // /* --                                                                     -- */
