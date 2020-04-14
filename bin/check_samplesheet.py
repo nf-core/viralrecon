@@ -117,12 +117,12 @@ def check_samplesheet(FileIn,OutPrefix,ignoreSRAErrors=False,skipSRA=False):
                                     elif library.lower() == 'paired':
                                         sampleInfoList.append([sra_id, '0', '1', '', ''])
                                     else:
-                                        errorStr = "Library layout '{}' != 'SINGLE' or 'PAIRED' for SRR id: '{}' (Provided id: '{}')!".format(layout,sra_id,sample)
+                                        errorStr = "Library layout '{}' != 'SINGLE' or 'PAIRED' for SRR id:'{}'! User provided id:'{}'.".format(layout,sra_id,sample)
                                         if not ignoreSRAErrors:
                                             print_error(errorStr,line)
                                         sraWarningList.append(errorStr)
                                 else:
-                                    errorStr = "Only Illumina platform is currently supported. SRR id: '{}' (Provided id: '{}') was sequenced on the '{}' platform!".format(sra_id,sample,platform)
+                                    errorStr = "Only Illumina platform is currently supported. SRR id:'{}' is from the '{}' platform! User provided id:'{}'.".format(sra_id,platform,sample)
                                     if not ignoreSRAErrors:
                                         print_error(errorStr,line)
                                     sraWarningList.append(errorStr)
@@ -145,7 +145,7 @@ def check_samplesheet(FileIn,OutPrefix,ignoreSRAErrors=False,skipSRA=False):
                     sampleRunDict[sample_id] = [infoList]
                 else:
                     if is_sra:
-                        errorStr = "Duplicate SRR id: '{}' (Provided id: '{}')!".format(sample_id,sample)
+                        errorStr = "Duplicate SRR id:'{}'! User provided id:'{}'.".format(sample_id,sample)
                         sraWarningList.append(errorStr)
                     else:
                         if infoList in sampleRunDict[sample_id]:
