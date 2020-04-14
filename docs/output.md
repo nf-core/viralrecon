@@ -337,7 +337,7 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 
 ### PlasmidID
 
-[PlasmidID](https://github.com/BU-ISCIII/plasmidID) was used to graphically represent the alignment of the reference genome with the assembly obtained with SPAdes. This helps to visualize the coverage of the reference genome in the assembly. To find more information about the output files go to: https://github.com/BU-ISCIII/plasmidID/wiki/Understanding-the-image:-track-by-track
+[PlasmidID](https://github.com/BU-ISCIII/plasmidID) was used to graphically represent the alignment of the reference genome with the assembly obtained with SPAdes. This helps to visualize the coverage of the reference genome in the assembly. To find more information about the output files go to the [plasmidID documentation](https://github.com/BU-ISCIII/plasmidID/wiki/Understanding-the-image:-track-by-track)
 
 **Output directory: `assembly/<ASSEMBLER>/plasmidid**
 
