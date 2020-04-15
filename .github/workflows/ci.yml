@@ -71,24 +71,24 @@ jobs:
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }}
 
-  test_sra:
-    env:
-      NXF_VER: '19.10.0'
-      NXF_ANSI_LOG: false
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        parameters: [--skip_sra, --skip_trimming, --skip_assembly, --skip_variants]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Nextflow
-        run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
-      - name: Pull docker image
-        run: |
-          docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
-      - name: Run pipeline with full SISPA data via SRA ids with various options
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_sra,docker ${{ matrix.parameters }}
+  # test_sra:
+  #   env:
+  #     NXF_VER: '19.10.0'
+  #     NXF_ANSI_LOG: false
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       parameters: [--skip_sra, --skip_trimming, --skip_assembly, --skip_variants]
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Install Nextflow
+  #       run: |
+  #         wget -qO- get.nextflow.io | bash
+  #         sudo mv nextflow /usr/local/bin/
+  #     - name: Pull docker image
+  #       run: |
+  #         docker pull nfcore/viralrecon:dev
+  #         docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+  #     - name: Run pipeline with full SISPA data via SRA ids with various options
+  #       run: |
+  #         nextflow run ${GITHUB_WORKSPACE} -profile test_sra,docker ${{ matrix.parameters }}
