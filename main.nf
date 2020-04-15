@@ -479,9 +479,8 @@ if (!params.skip_sra || !isOffline()) {
         file "*.log" into ch_fastq_info
 
         script:
-        pe = single_end ? "" : "-s"
         """
-        fastq_info $pe $reads 2> ${sample}.fastq_info.log
+        fastq_info $reads 2> ${sample}.fastq_info.log
         """
     }
 
@@ -642,8 +641,8 @@ process MERGE_FASTQ {
     set val(sample), val(single_end), file(reads) from ch_fastp_reads
 
     output:
-    set val(sample), val(single_end), file("*.merged.fastq.gz") into ch_fastq_cutadapt,
-                                                                     ch_fastq_bowtie2,
+    set val(sample), val(single_end), file("*.merged.fastq.gz") into ch_fastq_bowtie2,
+                                                                     ch_fastq_cutadapt,
                                                                      ch_fastq_kraken2
 
     script:
