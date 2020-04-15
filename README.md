@@ -27,10 +27,14 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     3. Primer sequence removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
     4. Alignment-level QC ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/), [`picard`](https://broadinstitute.github.io/picard/))
     5. Choice of multiple variant calling routes
-        1. Call variants with [`VarScan 2`](http://dkoboldt.github.io/varscan/) and generate consensus sequence with [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html) and [`BEDTools`](https://github.com/arq5x/bedtools2/)
-        2. Call variants and generate consensus sequence with [`iVar`](https://github.com/andersen-lab/ivar)
-    6. Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
-    7. Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
+        1. Call variants ([`VarScan 2`](http://dkoboldt.github.io/varscan/))
+            1. Consensus sequence generation ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
+            2. Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
+            3. Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
+        2. Call variants ([`iVar`](https://github.com/andersen-lab/ivar))
+            1. Consensus sequence generatation ([`iVar`](https://github.com/andersen-lab/ivar))
+            2. Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
+            3. Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))    
 6. De novo assembly
     1. Primer trimming ([`Cutadapt`](https://cutadapt.readthedocs.io/en/stable/guide.html); *amplicon data only*)
     2. Removal of host reads ([`Kraken2`](http://ccb.jhu.edu/software/kraken2/))
