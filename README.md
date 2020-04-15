@@ -26,9 +26,11 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
     3. Amplicon data primer removal, variant calling and consensus sequence generation ([`iVar`](https://github.com/andersen-lab/ivar))
     4. Alignment-level QC ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/), [`picard`](https://broadinstitute.github.io/picard/))
-    5. Call variants ([`VarScan 2`](http://dkoboldt.github.io/varscan/), [`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
+    5. Choice of multiple variant calling tools
+        1. Call variants ([`VarScan 2`](http://dkoboldt.github.io/varscan/)) -> Consensus sequence ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
+        2. Call variants ([`iVar`](https://github.com/andersen-lab/ivar)) -> Consensus sequence ([`iVar`](https://github.com/andersen-lab/ivar))
     6. Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
-    7. Consensus sequence generation ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
+    7. Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
 6. De novo assembly
     1. Primer trimming ([`Cutadapt`](https://cutadapt.readthedocs.io/en/stable/guide.html); *amplicon data only*)
     2. Removal of host reads ([`Kraken2`](http://ccb.jhu.edu/software/kraken2/))
