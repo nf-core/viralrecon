@@ -421,7 +421,6 @@ ch_samplesheet_reformat
 
 // TODO nf-core: Test fastq_info and figure out whether it is worth keeping. Maybe https://github.com/alastair-droop/fqtools
 // TODO nf-core: Auto-detect and merge same sample with multiple lanes. e.g. SRR390277
-// TODO nf-core: Use fasterq-dump instead so we can directly validate with sra-tools https://reneshbedre.github.io/blog/fqutil.html
 /*
  * STEP 1: Download and check SRA data
  */
@@ -750,7 +749,6 @@ process BOWTIE2 {
         | samtools view -@ $task.cpus -b -h -O BAM -o ${sample}.bam -
     """
 }
-
 
 /*
  * STEP 5.2: Convert BAM to coordinate sorted BAM
@@ -2081,7 +2079,6 @@ def checkHostname() {
     }
 }
 
-// TODO nf-core: Check this works with both -offline and NFX_OFFLINE
 // Function to check if running offline
 def isOffline() {
     try {
