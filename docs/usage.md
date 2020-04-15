@@ -34,12 +34,13 @@
 * [Alignments](#alignments)
   * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
   * [`--save_align_intermeds`](#--save_align_intermeds)
+* [Variant calling](#variant-calling)
+  * [`--callers`](#-callers)
+  * [`--save_pileup`](#--save_pileup)
+  * [`--skip_variants`](#--skip_variants)
 * [De novo assembly](#de-novo-assembly)
   * [`--assemblers`](#--assemblers)
   * [`--skip_assembly`](#--skip_assembly)
-* [Variant calling](#variant-calling)
-  * [`--save_pileup`](#--save_pileup)
-  * [`--skip_variants`](#--skip_variants)
 * [Skipping QC steps](#skipping-qc-steps)
   * `--skip_qc`
   * `--skip_fastqc`
@@ -335,6 +336,20 @@ This option unsets the `-e` parameter in `ivar trim` to discard reads without pr
 
 By default, intermediate BAM files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set to true to also save other intermediate BAM files.
 
+## Variant calling
+
+### `--callers`
+
+Specify which variant calling algorithms you would like to use. Available options are `varscan2` and `ivar` (Default: 'varscan2,ivar').
+
+### `--save_pileup`
+
+Save Pileup files in the results directory. These tend to be quite large so are not saved by default (Default: false).
+
+### `--skip_variants`
+
+Specify this parameter to skip all of the variant calling and mapping steps in the pipeline.
+
 ## De novo assembly
 
 ### `--assemblers`
@@ -344,16 +359,6 @@ Specify which assembly algorithms you would like to use. Available options are `
 ### `--skip_assembly`
 
 Specify this parameter to skip all of the de novo assembly steps in the pipeline.
-
-## Variant calling
-
-### `--save_pileup`
-
-Save Pileup files in the results directory. These tend to be quite large so are not saved by default (Default: false).
-
-### `--skip_variants`
-
-Specify this parameter to skip all of the variant calling and mapping steps in the pipeline.
 
 ## Skipping QC steps
 
