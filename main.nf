@@ -56,6 +56,7 @@ def helpMessage() {
       --save_align_intermeds [bool]   Save the intermediate BAM files from the alignment steps (Default: false)
 
     Variant calling
+      --callers [str]                 Specify which variant calling algorithms you would like to use (Default:'varscan2,ivar')
       --save_pileup [bool]            Save Pileup files generated during variant calling (Default: false)
       --skip_variants [bool]          Skip variant calling steps in the pipeline (Default: false)
 
@@ -129,6 +130,12 @@ if (params.protocol == 'amplicon' && !params.skip_variants && !params.amplicon_b
 }
 if (params.amplicon_bed) {
     ch_amplicon_bed = Channel.fromPath(params.amplicon_bed, checkIfExists: true)
+}
+
+callerList = [ 'varscan2', 'ivar']
+callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
+if ((callerList + callers).unique().size() != callerList.size()) {
+    exit 1, "Invalid variant calller option: ${params.callers}. Valid options: ${callerList.join(', ')}"
 }
 
 assemblerList = [ 'spades', 'metaspades', 'unicycler' ]
@@ -208,12 +215,13 @@ if (params.kraken2_db_name)        summary['Host Kraken2 Name'] = params.kraken2
 summary['Viral Genome']            = params.genome ?: 'Not supplied'
 summary['Viral Fasta File']        = params.fasta
 if (params.gff)                    summary['Viral GFF'] = params.gff
+summary['Variant Calling Tools']   = params.callers
+summary['Assembly Tools']          = params.assemblers
 if (!params.skip_trimming) {
     if (params.save_trimmed)       summary['Save Trimmed'] = 'Yes'
 } else {
     summary['Skip Trimming']       = 'Yes'
 }
-summary['Assembly Tools']          = params.assemblers
 if (params.ncbi_api_key)           summary['NCBI API Key'] = params.ncbi_api_key
 if (params.ignore_sra_errors)      summary['Ignore SRA Errors'] = params.ignore_sra_errors
 if (params.save_sra_fastq)         summary['Save SRA FastQ'] = params.save_sra_fastq
