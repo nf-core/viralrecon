@@ -1105,7 +1105,7 @@ process VARSCAN2_QUAST {
     !params.skip_variants && 'varscan2' in callers
 
     input:
-    file consensus from ch_bcftools_masked_consensus.collect{ it[2] }
+    file consensus from ch_bcftools_masked_consensus.collect()
     file fasta from ch_fasta_varscan2_quast.collect()
     file gff from ch_gff_varscan2_quast.collect().ifEmpty([])
 
