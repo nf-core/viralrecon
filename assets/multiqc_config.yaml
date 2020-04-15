@@ -10,6 +10,7 @@ fn_clean_exts:
     - '.trimmed'
     - '.trim'
     - '.fastp'
+    - '.merged'
     - '.sorted.bam'
     - '.bowtie2'
     - '.ptrim'
