@@ -420,9 +420,9 @@ ch_samplesheet_reformat
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-// TODO nf-core: Use '--split-3' with PE files
-// TODO nf-core: Test fastq_info and figure out whether it is worth keeping. Maybe replace it.
+// TODO nf-core: Test fastq_info and figure out whether it is worth keeping. Maybe https://github.com/alastair-droop/fqtools
 // TODO nf-core: Auto-detect and merge same sample with multiple lanes. e.g. SRR390277
+// TODO nf-core: Use fasterq-dump instead so we can directly validate with sra-tools https://reneshbedre.github.io/blog/fqutil.html
 /*
  * STEP 1: Download and check SRA data
  */
@@ -627,52 +627,56 @@ if (!params.skip_trimming) {
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+* STEP 4: Merge FastQ files with the same sample identifier
+*/
+// TODO nf-core: Test this properly for PE reads
 ch_fastp_reads
-    .into { ch_fastq_cutadapt
-            ch_fastq_bowtie2
-            ch_fastq_kraken2 }
-// /*
-// * STEP 4: Merge FastQ files with the same sample identifier
-// */
-// // TODO nf-core: Figure out how to do this properly for PE reads
-// // ch_fastp_reads
-// //     .map { [ it[0].split('_')[0..-2].join('_'), it[1], it[2] ] }
-// //     .groupTuple(by: [0])
-// //     .map { [ it[0], it[1], it[2].flatten() ] }
-// //     .println()
-// //     //.set { ch_fastp_reads }
-// //
-// // process MERGE_FASTQ {
-// //     tag "$sample"
-// //     //label 'process_medium'
-// //     //publishDir "${params.outdir}/preprocess/merged_fastq", mode: params.publish_dir_mode
-// //
-// //     input:
-// //     set val(sample), val(single_end), file(reads) from ch_fastp_reads
-// //
-// //     output:
-// //     set val(sample), val(single_end), file("*.fastq.gz") into ch_fastq_cutadapt,
-// //                                                               ch_fastq_bowtie2,
-// //                                                               ch_fastq_kraken2
-// //     file "*_fastqc.{zip,html}" into ch_fastq_fastqc_mqc
-// //
-// //     script:
-// //     """
-// //
-// //     IN_READS='--in1 ${sample}.fastq.gz'
-// //     OUT_READS='--out1 ${sample}.trim.fastq.gz --failed_out ${sample}.fail.fastq.gz'
-// //     if $single_end; then
-// //         cat ${reads.join(' ')} > ${sample}.fastq.gz
-// //     else
-// //         [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
-// //         [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-// //         IN_READS='--in1 ${sample}_1.fastq.gz --in2 ${sample}_2.fastq.gz'
-// //         OUT_READS='--out1 ${sample}_1.trim.fastq.gz --out2 ${sample}_2.trim.fastq.gz --unpaired1 ${sample}_1.fail.fastq.gz --unpaired2 ${sample}_2.fail.fastq.gz'
-// //     fi
-// //
-// //     fastqc --quiet --threads $task.cpus ${sample}.*.fastq.gz
-// //     """
-// // }
+    .map { [ it[0].split('_')[0..-2].join('_'), it[1], it[2] ] }
+    .groupTuple(by: [0, 1])
+    .map { [ it[0], it[1], it[2].flatten() ] }
+    .set { ch_fastp_reads }
+
+process MERGE_FASTQ {
+    tag "$sample"
+
+    input:
+    set val(sample), val(single_end), file(reads) from ch_fastp_reads
+
+    output:
+    set val(sample), val(single_end), file("*.merged.fastq.gz") into ch_fastq_cutadapt,
+                                                                     ch_fastq_bowtie2,
+                                                                     ch_fastq_kraken2
+
+    script:
+    readList = reads.collect{it.toString()}
+    if (!single_end) {
+        if (readList.size > 2) {
+            def read1 = []
+            def read2 = []
+            readList.eachWithIndex{ v, ix -> ( ix & 1 ? read2 : read1 ) << v }
+            """
+            cat ${read1.sort().join(' ')} > ${sample}_1.merged.fastq.gz
+            cat ${read2.sort().join(' ')} > ${sample}_2.merged.fastq.gz
+            """
+        } else {
+            """
+            ln -s ${reads[0]} ${sample}_1.merged.fastq.gz
+            ln -s ${reads[1]} ${sample}_2.merged.fastq.gz
+            """
+        }
+    } else {
+        if (readList.size > 1) {
+            """
+            cat ${readList.sort().join(' ')} > ${sample}.merged.fastq.gz
+            """
+        } else {
+            """
+            ln -s $reads {sample}.merged.fastq.gz
+            """
+        }
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
