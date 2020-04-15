@@ -189,7 +189,7 @@ def check_samplesheet(FileIn,OutPrefix,ignoreSRAErrors=False,skipSRA=False):
         for sra_id in sorted(sraRunInfoDict.keys()):
             rowList = []
             for col in sraRunInfoHeader:
-                if col in sraRunInfoDict[sra_id]:
+                if col in sorted(sraRunInfoDict[sra_id]):
                     rowList.append(sraRunInfoDict[sra_id][col])
                 else:
                     rowList.append('NA')
