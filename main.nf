@@ -131,7 +131,6 @@ if (params.amplicon_bed) {
     ch_amplicon_bed = Channel.fromPath(params.amplicon_bed, checkIfExists: true)
 }
 
-
 assemblerList = [ 'spades', 'metaspades', 'unicycler' ]
 assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
@@ -672,7 +671,7 @@ process MERGE_FASTQ {
             """
         } else {
             """
-            ln -s $reads {sample}.merged.fastq.gz
+            ln -s $reads ${sample}.merged.fastq.gz
             """
         }
     }
