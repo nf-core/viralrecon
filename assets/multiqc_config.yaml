@@ -66,11 +66,23 @@ module_order:
         info: 'This section of the report shows picard results after mapping (for amplicon data this will be after read filtering with IVar).'
         path_filters:
             - './picard/*'
+    - bcftools:
+        name: 'BCFTools (high frequency variants)'
+        info: 'This section of the report shows BCFTools stats results for high frequency variants.'
+        collapse_complementary_changes: true
+        path_filters:
+            - './varscan2/highfreq/*'
     - snpeff:
         name: 'SnpEff (high frequency variants)'
         info: 'This section of the report shows SnpEff results for high frequency variants.'
         path_filters:
             - './snpeff/highfreq/*'
+    - bcftools:
+        name: 'BCFTools (low frequency variants)'
+        info: 'This section of the report shows BCFTools stats results for low frequency variants.'
+        collapse_complementary_changes: true
+        path_filters:
+            - './varscan2/lowfreq/*'
     - snpeff:
         name: 'SnpEff (low frequency variants)'
         info: 'This section of the report shows SnpEff results for low frequency variants.'
