@@ -371,13 +371,13 @@ process CHECK_SAMPLESHEET {
 
     output:
     file "*.csv" into ch_samplesheet_reformat
-    file "*.txt" into ch_samplesheet_sra
+    file "*.txt" optional true into ch_samplesheet_sra
 
     script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     skip = (params.skip_sra || isOffline()) ? "--skip_sra" : ""
     ignore = params.ignore_sra_errors ? "--ignore_sra_errors" : ""
     """
-    check_samplesheet.py $samplesheet samplesheet_reformat $skip $ignore
+    check_samplesheet.py $samplesheet samplesheet.pass $skip $ignore
     """
 }
 
