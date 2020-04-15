@@ -37,16 +37,16 @@ module_order:
             - './fastp/fastqc/*'
     - cutadapt:
         name: 'Cutadapt (amplicon trimming)'
-        info: 'This section of the report shows Cutadapt results for reads after amplicon trimming only.'
+        info: 'This section of the report shows Cutadapt results for reads after amplicon trimming.'
         path_filters:
             - './cutadapt/*'
     - fastqc:
         name: 'FastQC (amplicon trimming)'
-        info: 'This section of the report shows FastQC results for reads after amplicon trimming only.'
+        info: 'This section of the report shows FastQC results for reads after amplicon trimming.'
         path_filters:
             - './cutadapt/fastqc/*'
     - bowtie2:
-        name: 'Bowtie2 (quality trimming)'
+        name: 'Bowtie2'
         info: 'This section of the report shows Bowtie2 mapping results for reads after quality trimming only.'
         path_filters:
             - './bowtie2/*'
