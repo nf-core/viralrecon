@@ -1094,7 +1094,7 @@ process VARSCAN2_SNPEFF {
 }
 
 /*
- * STEP 5.5.2.2: IVar consensus sequence report with QUAST
+ * STEP 5.5.1.3: Varscan 2 consensus sequence report with QUAST
  */
 // TODO nf-core: Need to provide BAM file here too with --ref-bam ${bam[0]} \\
 process VARSCAN2_QUAST {
@@ -1252,7 +1252,7 @@ process IVAR_CONSENSUS {
 // }
 
 /*
- * STEP 5.5.2.2: IVar consensus sequence report with QUAST
+ * STEP 5.5.2.3: IVar consensus sequence report with QUAST
  */
 // TODO nf-core: Need to provide BAM file here too with --ref-bam ${bam[0]} \\
 process IVAR_QUAST {
