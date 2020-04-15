@@ -177,14 +177,14 @@ def check_samplesheet(FileIn,OutPrefix,ignoreSRAErrors=False,skipSRA=False):
 
     ## Write SRA warnings to file
     if len(sraWarningList) != 0:
-        fout = open(os.path.join(OutDir,'{}.sra.warnings.txt'.format(OutPrefix)),'w')
+        fout = open(os.path.join(OutDir,'{}.sra_warnings.txt'.format(OutPrefix)),'w')
         for line in sorted(sraWarningList):
             fout.write("WARNING: {}\n".format(line))
         fout.close()
 
     ## Write SRA runInfo to file
     if len(sraRunInfoDict) != 0:
-        fout = open(os.path.join(OutDir,'{}.sra.runinfo.txt'.format(OutPrefix)),'w')
+        fout = open(os.path.join(OutDir,'{}.sra_runinfo.txt'.format(OutPrefix)),'w')
         fout.write('\t'.join(sorted(sraRunInfoHeader)) + '\n')
         for sra_id in sorted(sraRunInfoDict.keys()):
             rowList = []
