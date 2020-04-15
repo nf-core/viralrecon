@@ -67,27 +67,27 @@ module_order:
         path_filters:
             - './picard/*'
     - bcftools:
-        name: 'BCFTools (high frequency variants)'
-        info: 'This section of the report shows BCFTools stats results for high frequency variants.'
+        name: 'BCFTools (Varscan 2; high frequency variants)'
+        info: 'This section of the report shows BCFTools stats results for high frequency variants called by Varscan 2.'
         collapse_complementary_changes: true
         path_filters:
-            - './varscan2/highfreq/*'
+            - './varscan2/bcftools/highfreq/*'
     - snpeff:
-        name: 'SnpEff (high frequency variants)'
-        info: 'This section of the report shows SnpEff results for high frequency variants.'
+        name: 'SnpEff (Varscan 2; high frequency variants)'
+        info: 'This section of the report shows SnpEff results for high frequency variants called by Varscan 2.'
         path_filters:
-            - './snpeff/highfreq/*'
+            - './varscan2/snpeff/highfreq/*'
     - bcftools:
-        name: 'BCFTools (low frequency variants)'
-        info: 'This section of the report shows BCFTools stats results for low frequency variants.'
+        name: 'BCFTools (Varscan 2; low frequency variants)'
+        info: 'This section of the report shows BCFTools stats results for low frequency variants called by Varscan 2.'
         collapse_complementary_changes: true
         path_filters:
-            - './varscan2/lowfreq/*'
+            - './varscan2/bcftools/lowfreq/*'
     - snpeff:
-        name: 'SnpEff (low frequency variants)'
-        info: 'This section of the report shows SnpEff results for low frequency variants.'
+        name: 'SnpEff (Varscan 2; low frequency variants)'
+        info: 'This section of the report shows SnpEff results for low frequency variants called by Varscan 2.'
         path_filters:
-            - './snpeff/lowfreq/*'
+            - './varscan2/snpeff/lowfreq/*'
     - quast:
         name: 'QUAST (SPAdes)'
         info: 'This section of the report shows QUAST results from SPAdes de novo assembly.'
