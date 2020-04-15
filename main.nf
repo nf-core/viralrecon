@@ -2078,6 +2078,7 @@ def checkHostname() {
     }
 }
 
+// TODO nf-core: Check this works with both -offline and NFX_OFFLINE
 // Function to check if running offline
 def isOffline() {
     try {
