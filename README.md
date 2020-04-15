@@ -34,7 +34,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
         * Call variants ([`iVar`](https://github.com/andersen-lab/ivar))
             * Consensus sequence generatation ([`iVar`](https://github.com/andersen-lab/ivar))
             * Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
-            * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))    
+            * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
 6. De novo assembly
     1. Primer trimming ([`Cutadapt`](https://cutadapt.readthedocs.io/en/stable/guide.html); *amplicon data only*)
     2. Removal of host reads ([`Kraken2`](http://ccb.jhu.edu/software/kraken2/))
