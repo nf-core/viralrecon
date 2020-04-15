@@ -30,6 +30,8 @@
 
 * [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
+* [fastq_utils](https://github.com/nunofonseca/fastq_utils)
+
 * [iVar](https://www.ncbi.nlm.nih.gov/pubmed/30621750/)
   > Grubaugh ND, Gangavarapu K, Quick J, Matteson NL, De Jesus JG, Main BJ, Tan AL, Paul LM, Brackney DE, Grewal S, Gurfield N, Van Rompay KKA, Isern S, Michael SF, Coffey LL, Loman NJ, Andersen KG. An amplicon-based sequencing framework for accurately measuring intrahost virus diversity using PrimalSeq and iVar. Genome Biol. 2019 Jan 8;20(1):8. doi: 10.1186/s13059-018-1618-7. PubMed PMID: 30621750; PubMed Central PMCID: PMC6325816.
 
@@ -38,6 +40,8 @@
 
 * [MultiQC](https://www.ncbi.nlm.nih.gov/pubmed/27312411/)
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+
+* [parallel-fastq-dump](https://github.com/rvalieris/parallel-fastq-dump)
 
 * [picard-tools](http://broadinstitute.github.io/picard)
 
@@ -58,6 +62,8 @@
 
 * [SPAdes](https://www.ncbi.nlm.nih.gov/pubmed/24093227/)
   > Nurk S, Bankevich A, Antipov D, Gurevich AA, Korobeynikov A, Lapidus A, Prjibelski AD, Pyshkin A, Sirotkin A, Sirotkin Y, Stepanauskas R, Clingenpeel SR, Woyke T, McLean JS, Lasken R, Tesler G, Alekseyev MA, Pevzner PA. Assembling single-cell genomes and mini-metagenomes from chimeric MDA products. J Comput Biol. 2013 Oct;20(10):714-37. doi: 10.1089/cmb.2013.0084. PubMed PMID: 24093227; PubMed Central PMCID: PMC3791033.
+
+* [SRA Toolkit](http://ncbi.github.io/sra-tools/)
 
 * [Trimmomatic](https://www.ncbi.nlm.nih.gov/pubmed/24695404/)
   > Bolger AM, Lohse M, Usadel B. Trimmomatic: a flexible trimmer for Illumina sequence data. Bioinformatics. 2014 Aug 1;30(15):2114-20. doi: 10.1093/bioinformatics/btu170. Epub 2014 Apr 1. PubMed PMID: 24695404; PubMed Central PMCID: PMC4103590.

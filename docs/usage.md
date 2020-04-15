@@ -13,7 +13,11 @@
   * [`--protocol`](#--protocol)
   * [`--amplicon_bed`](#--amplicon_bed)
   * [`--amplicon_fasta`](#--amplicon_fasta)
+* [SRA download](#sra-download)
   * [`--ncbi_api_key`](#--ncbi_api_key)
+  * [`--ignore_sra_errors`](#--ignore_sra_errors)
+  * [`--save_sra_fastq`](#--save_sra_fastq)
+  * [`--skip_sra`](#--skip_sra)
 * [Reference genomes](#reference-genomes)
   * [`--genome`](#--genome)
   * [`--fasta`](#--fasta)
@@ -30,15 +34,17 @@
 * [Alignments](#alignments)
   * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
   * [`--save_align_intermeds`](#--save_align_intermeds)
+* [Variant calling](#variant-calling)
+  * [`--callers`](#-callers)
+  * [`--save_pileup`](#--save_pileup)
+  * [`--skip_variants`](#--skip_variants)
 * [De novo assembly](#de-novo-assembly)
   * [`--assemblers`](#--assemblers)
   * [`--skip_assembly`](#--skip_assembly)
-* [Variant calling](#variant-calling)
-  * [`--save_pileup`](#--save_pileup)
-  * [`--skip_variants`](#--skip_variants)
 * [Skipping QC steps](#skipping-qc-steps)
   * `--skip_qc`
   * `--skip_fastqc`
+  * `--skip_fastq_info`
   * `--skip_picard_metrics`
   * `--skip_multiqc`
 * [Job resources](#job-resources)
@@ -168,11 +174,11 @@ SRR11092056,,
 SRR11177792,,
 ```
 
-| Column    | Description                                                                                                                       |
-|-----------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `sample`  | Sample identifier or SRA 'SRR', 'SRP' or 'SRX' run accession. This will be identical for multiple sequencing libraries/runs from the same sample. |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".        |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".        |
+| Column    | Description                                                                                                                            |
+|-----------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `sample`  | Custom sample name or SRA 'SR' or 'PR' identifier. This will be identical for multiple sequencing libraries/runs from the same sample. |
+| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".             |
+| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".             |
 
 ### `--protocol`
 
@@ -225,9 +231,23 @@ AAGGTGTCTGCAATTCATAGCTCT
 
 ```
 
+## SRA download
+
 ### `--ncbi_api_key`
 
 Set the NCBI API key to query the NCBI search services when downloading `fastq` files from public DBs. Increases the number of request that can be launched to this service you can read more about it and learn how to obtain the key following this [link](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/)
+
+## `--ignore_sra_errors`
+
+Ignore validation errors when checking SRA identifiers that would otherwise cause the pipeline to fail (Default: false).
+
+## `--save_sra_fastq`
+
+Save FastQ files created from SRA identifiers in the results directory (Default: false).
+
+## `--skip_sra`
+
+Skip steps involving the download and validation of FastQ files using SRA identifiers (Default: false).
 
 ## Reference genomes
 
@@ -316,6 +336,20 @@ This option unsets the `-e` parameter in `ivar trim` to discard reads without pr
 
 By default, intermediate BAM files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set to true to also save other intermediate BAM files.
 
+## Variant calling
+
+### `--callers`
+
+Specify which variant calling algorithms you would like to use. Available options are `varscan2` and `ivar` (Default: 'varscan2,ivar').
+
+### `--save_pileup`
+
+Save Pileup files in the results directory. These tend to be quite large so are not saved by default (Default: false).
+
+### `--skip_variants`
+
+Specify this parameter to skip all of the variant calling and mapping steps in the pipeline.
+
 ## De novo assembly
 
 ### `--assemblers`
@@ -326,16 +360,6 @@ Specify which assembly algorithms you would like to use. Available options are `
 
 Specify this parameter to skip all of the de novo assembly steps in the pipeline.
 
-## Variant calling
-
-### `--save_pileup`
-
-Save Pileup files in the results directory. These tend to be quite large so are not saved by default (Default: false).
-
-### `--skip_variants`
-
-Specify this parameter to skip all of the variant calling and mapping steps in the pipeline.
-
 ## Skipping QC steps
 
 The pipeline contains a large number of quality control steps. Sometimes, it may not be desirable to run all of them if time and compute resources are limited.
@@ -344,6 +368,7 @@ The following options make this easy:
 | Step                      | Description                                              |
 |---------------------------|----------------------------------------------------------|
 | `--skip_qc`               | Skip all QC steps except for MultiQC                     |
+| `--skip_fastq_info`       | Skip fastq_info check for SRA reads                      |
 | `--skip_fastqc`           | Skip FastQC                                              |
 | `--skip_picard_metrics`   | Skip Picard CollectMultipleMetrics and CollectWgsMetrics |
 | `--skip_multiqc`          | Skip MultiQC                                             |
