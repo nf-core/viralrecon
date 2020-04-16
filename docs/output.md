@@ -166,8 +166,6 @@ If we are running the `--protocol amplicon`, [iVar](http://gensoft.pasteur.fr/do
   * Samtools stats in the mapping index file.
 * `samtools_stats/<SAMPLE>.trim.sorted.bam.stats`
   * Samtools mapping stats report.
-* `<SAMPLE>.trim.stats`
-  * Picard metrics summary file for evaluating coverage and performance.
 
 iVar can also use the output of the samtools mpileup command to call variants - single nucleotide variants(SNVs) and indels.
 
@@ -175,6 +173,12 @@ iVar can also use the output of the samtools mpileup command to call variants - 
 
 * `<SAMPLE>.tsv`
   * TAB separated file with the variants.
+* `<SAMPLE>.vcf.gz`
+  * VCF file with the iVar variants in the TSV file.
+* `<SAMPLE>.vcf.gz.tbi`
+  * VCF file index.
+* `<SAMPLE>.bcftools_stats.txt`
+  * Bcftools stats on the iVar variant calling.
 
 Finally,iVar generates a consensus genome with the variants:
 
@@ -212,28 +216,20 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
 
 [SnpSift](http://snpeff.sourceforge.net/SnpSift.html) annotates genomic variants using databases, filters, and manipulates genomic annotated variants. Once you annotated your files using SnpEff, you can use SnpSift to help you filter large genomic datasets in order to find the most significant variants for your experiment.
 
-**Output directory: `variants/varscan2/snpeff`**
+SnpEff and SnpSift are run for VarScan and iVar variant callings. The ouput will be in the corresponding variant calling folder. In the case of VarScan `lowfreq` files will correspond to the annotation of low frequency variants and `highfreq` will correspond to the annotation of high frequency variants.
 
-* `<SAMPLE>.lowfreq.snpEff.csv`
+**Output directory: `variants/[varscan2/ivar]/snpeff`**
+
+* `<SAMPLE>.snpEff.csv`
   * Low frequency variants annotation csv file.
-* `<SAMPLE>.lowfreq.snpSift.table.txt`
+* `<SAMPLE>.snpSift.table.txt`
   * Low frequency variants SnpSift summary table.
-* `<SAMPLE>.lowfreq.snpEff.vcf.gz`
+* `<SAMPLE>.snpEff.vcf.gz`
   * Low frequency variants annotated VCF table.
-* `<SAMPLE>.lowfreq.snpEff.genes.txt`
+* `<SAMPLE>.snpEff.genes.txt`
   * Low frequency variants genes table.
-* `<SAMPLE>.lowfreq.snpEff.summary.html`
+* `<SAMPLE>.snpEff.summary.html`
   * Low frequency variants summary html file.
-* `<SAMPLE>.highfreq.snpEff.csv`
-  * High frequency variants annotation csv file.
-* `<SAMPLE>.highfreq.snpSift.table.txt`
-  * High frequency variants SnpSift summary table.
-* `<SAMPLE>.highfreq.snpEff.vcf.gz`
-  * High frequency variants annotated VCF table.
-* `<SAMPLE>.highfreq.snpEff.genes.txt`
-  * High frequency variants genes table.
-* `<SAMPLE>.highfreq.snpEff.summary.html`
-  * High frequency variants summary html file.
 
 ### BCFtools
 
@@ -306,7 +302,9 @@ Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs
 
 [QUAST](http://bioinf.spbau.ru/quast) evaluates genome assemblies. We compared the reference genome with the contigs and scaffold assemblies. The HTML results can be opened with any browser (we recommend using Google Chrome). We have a quast folder for each assembler selected.
 
-**Output directory: `assembly/<ASSEMBLER>/quast`**
+Quast is going to be run for all the different assemblers (SPAdes, MetaSPAdes and Unicycler) and for the different genome consensus generation programs (BCFtools and iVar).
+
+**Output directory: `[assembly/variants]/[spades/metaspades/unicycler/ivar/varscan2]/quast`**
 
 * `report.html`
   * Compressed format of the indexed variants file.
