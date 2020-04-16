@@ -1584,7 +1584,7 @@ process SPADES_QUAST {
 
     output:
     file "quast/report.tsv" into ch_quast_spades_mqc
-    file "quast/"
+    file "quast"
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1741,7 +1741,7 @@ process METASPADES_QUAST {
 
     output:
     file "quast/report.tsv" into ch_quast_metaspades_mqc
-    file "quast/"
+    file "quast"
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1897,7 +1897,7 @@ process UNICYCLER_QUAST {
 
     output:
     file "quast/report.tsv" into ch_quast_unicycler_mqc
-    file "quast/"
+    file "quast"
 
     script:
     features = params.gff ? "--features $gff" : ""
