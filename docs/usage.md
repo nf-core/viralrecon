@@ -14,7 +14,6 @@
   * [`--amplicon_bed`](#--amplicon_bed)
   * [`--amplicon_fasta`](#--amplicon_fasta)
 * [SRA download](#sra-download)
-  * [`--ncbi_api_key`](#--ncbi_api_key)
   * [`--ignore_sra_errors`](#--ignore_sra_errors)
   * [`--save_sra_fastq`](#--save_sra_fastq)
   * [`--skip_sra`](#--skip_sra)
@@ -228,9 +227,6 @@ AAGGTGTCTGCAATTCATAGCTCT
 
 ## SRA download
 
-### `--ncbi_api_key`
-
-Set the NCBI API key to query the NCBI search services when downloading `fastq` files from public DBs. Increases the number of request that can be launched to this service you can read more about it and learn how to obtain the key following this [link](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/)
 
 ## `--ignore_sra_errors`
 

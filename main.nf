@@ -31,7 +31,6 @@ def helpMessage() {
       --protocol [str]                Specifies the type of protocol used for sequencing i.e. "metagenomic" or "amplicon" (Default: "metagenomic")
 
     SRA download
-      --ncbi_api_key [str]            NCBI API key that permits an increases in the number of requests to the NCBI SRA database (Default: '')
       --ignore_sra_errors [bool]      Ignore validation errors when checking SRA identifiers that would otherwise cause the pipeline to fail (Default: false)
       --save_sra_fastq [bool]         Save FastQ files created from SRA identifiers in the results directory (Default: false)
       --skip_sra [bool]               Skip steps involving the download and validation of FastQ files using SRA identifiers (Default: false)
@@ -221,7 +220,6 @@ if (!params.skip_trimming) {
 } else {
     summary['Skip Trimming']       = 'Yes'
 }
-if (params.ncbi_api_key)           summary['NCBI API Key'] = params.ncbi_api_key
 if (params.ignore_sra_errors)      summary['Ignore SRA Errors'] = params.ignore_sra_errors
 if (params.save_sra_fastq)         summary['Save SRA FastQ'] = params.save_sra_fastq
 if (params.skip_sra)               summary['Skip SRA Download'] = params.skip_sra
