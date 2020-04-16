@@ -30,8 +30,6 @@
 
 * [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
 
-* [fastq_utils](https://github.com/nunofonseca/fastq_utils)
-
 * [iVar](https://www.ncbi.nlm.nih.gov/pubmed/30621750/)
   > Grubaugh ND, Gangavarapu K, Quick J, Matteson NL, De Jesus JG, Main BJ, Tan AL, Paul LM, Brackney DE, Grewal S, Gurfield N, Van Rompay KKA, Isern S, Michael SF, Coffey LL, Loman NJ, Andersen KG. An amplicon-based sequencing framework for accurately measuring intrahost virus diversity using PrimalSeq and iVar. Genome Biol. 2019 Jan 8;20(1):8. doi: 10.1186/s13059-018-1618-7. PubMed PMID: 30621750; PubMed Central PMCID: PMC6325816.
 
