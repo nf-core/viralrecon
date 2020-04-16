@@ -15,19 +15,19 @@ def parse_args(args=None):
 
 def ivar_variants_to_vcf(FileIn,FileOut):
     filename = os.path.splitext(FileIn)[0]
-    header = """##fileformat=VCFv4.2
-                ##source=iVar
-                ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
-                ##FILTER=<ID=PASS,Description="Result of p-value <= 0.05">
-                ##FILTER=<ID=FAIL,Description="Result of p-value > 0.05">
-                ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-                ##FORMAT=<ID=REF_DP,Number=1,Type=Integer,Description="Depth of reference base">
-                ##FORMAT=<ID=REF_RV,Number=1,Type=Integer,Description="Depth of reference base on reverse reads">
-                ##FORMAT=<ID=REF_QUAL,Number=1,Type=Integer,Description="Mean quality of reference base">
-                ##FORMAT=<ID=ALT_DP,Number=1,Type=Integer,Description="Depth of alternate base">
-                ##FORMAT=<ID=ALT_RV,Number=1,Type=Integer,Description="Deapth of alternate base on reverse reads">
-                ##FORMAT=<ID=ALT_QUAL,Number=1,Type=String,Description="Mean quality of alternate base">
-                ##FORMAT=<ID=ALT_FREQ,Number=1,Type=String,Description="Frequency of alternate base">\n"""
+    header = ('##fileformat=VCFv4.2\n'
+              '##source=iVar\n'
+              '##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">\n'
+              '##FILTER=<ID=PASS,Description="Result of p-value <= 0.05">\n'
+              '##FILTER=<ID=FAIL,Description="Result of p-value > 0.05">\n'
+              '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n'
+              '##FORMAT=<ID=REF_DP,Number=1,Type=Integer,Description="Depth of reference base">\n'
+              '##FORMAT=<ID=REF_RV,Number=1,Type=Integer,Description="Depth of reference base on reverse reads">\n'
+              '##FORMAT=<ID=REF_QUAL,Number=1,Type=Integer,Description="Mean quality of reference base">\n'
+              '##FORMAT=<ID=ALT_DP,Number=1,Type=Integer,Description="Depth of alternate base">\n'
+              '##FORMAT=<ID=ALT_RV,Number=1,Type=Integer,Description="Deapth of alternate base on reverse reads">\n'
+              '##FORMAT=<ID=ALT_QUAL,Number=1,Type=String,Description="Mean quality of alternate base">\n'
+              '##FORMAT=<ID=ALT_FREQ,Number=1,Type=String,Description="Frequency of alternate base">\n')
     header += '#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t'+filename+'\n'
 
     fout = open(FileOut,'w')
