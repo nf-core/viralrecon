@@ -18,6 +18,8 @@ fn_clean_exts:
     - '.lowfreq'
     - '.consensus'
     - '.consensus.masked'
+    - '.snpEff'
+    - '.vcf.gz'
     - '.scaffolds'
     - '.meta'
     - '.assembly'
