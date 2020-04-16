@@ -1160,7 +1160,7 @@ process IVAR_VARIANTS {
         -Q 0 \\
         ${bam[0]} \\
         | ivar variants -p ${sample} -r $fasta $features
-    tsv_to_vcf.py ${sample}.tsv ${sample}.vcf
+    ivar_variants_to_vcf.py ${sample}.tsv ${sample}.vcf
     bgzip -c ${sample}.vcf > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
