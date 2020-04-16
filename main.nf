@@ -66,7 +66,6 @@ def helpMessage() {
 
     QC
       --skip_qc [bool]                Skip all QC steps apart from MultiQC (Default: false)
-      --skip_fastq_info [bool]        Skip fastq_info validation check for FastQ files obtained via the SRA (Default: false)
       --skip_fastqc [bool]            Skip FastQC (Default: false)
       --skip_picard_metrics           Skip Picard CollectMultipleMetrics and CollectWgsMetrics (Default: false)
       --skip_multiqc [bool]           Skip MultiQC (Default: false)
@@ -225,7 +224,6 @@ if (!params.skip_trimming) {
 if (params.ncbi_api_key)           summary['NCBI API Key'] = params.ncbi_api_key
 if (params.ignore_sra_errors)      summary['Ignore SRA Errors'] = params.ignore_sra_errors
 if (params.save_sra_fastq)         summary['Save SRA FastQ'] = params.save_sra_fastq
-if (params.skip_fastq_info)        summary['Skip FastQ Info'] = params.skip_fastq_info
 if (params.skip_sra)               summary['Skip SRA Download'] = params.skip_sra
 if (params.kraken2_use_ftp)        summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
 if (params.save_kraken2_fastq)     summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
@@ -431,7 +429,6 @@ ch_samplesheet_reformat
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-// TODO nf-core: Test fastq_info and figure out whether it is worth keeping. Maybe https://github.com/alastair-droop/fqtools
 // TODO nf-core: Auto-detect and merge same sample with multiple lanes. e.g. SRR390277
 /*
  * STEP 1: Download and check SRA data
@@ -454,8 +451,7 @@ if (!params.skip_sra || !isOffline()) {
         set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_sra
 
         output:
-        set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") into ch_sra_fastq,
-                                                                               ch_sra_fastq_info
+        set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") into ch_sra_fastq
         file "*.log"
 
         script:
@@ -472,26 +468,6 @@ if (!params.skip_sra || !isOffline()) {
             > ${sample}.fastq_dump.log
 
         $rm_orphan
-        """
-    }
-
-    process SRA_FASTQ_INFO {
-        tag "$sample"
-        label 'process_medium'
-        publishDir "${params.outdir}/preprocess/sra/fastq_info", mode: params.publish_dir_mode
-
-        when:
-        !params.skip_fastq_info && !params.skip_qc
-
-        input:
-        set val(sample), val(single_end), val(is_sra), file(reads) from ch_sra_fastq_info
-
-        output:
-        file "*.log"
-
-        script:
-        """
-        fastq_info $reads 2> ${sample}.fastq_info.log
         """
     }
 
@@ -1970,7 +1946,6 @@ process get_software_versions {
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     parallel-fastq-dump --version > v_parallel_fastq_dump.txt
-    fastq_info -h 2> v_fastq_utils.txt
     fastqc --version > v_fastqc.txt
     fastp --version 2> v_fastp.txt
     bowtie2 --version > v_bowtie2.txt
