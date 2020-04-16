@@ -307,7 +307,6 @@ Quast is going to be run for all the different assemblers (SPAdes, MetaSPAdes an
 **Output directory: `[assembly/variants]/[spades/metaspades/unicycler/ivar/varscan2]/quast`**
 
 * `report.html`
-  * Compressed format of the indexed variants file.
   * The meaning of the different metrics:
     * Contigs (≥ x bp): is total number of contigs of length ≥ x bp.
     * Total length (≥ x bp): is the total number of bases in contigs of length ≥ x bp.
