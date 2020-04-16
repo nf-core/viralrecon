@@ -230,11 +230,11 @@ if (params.skip_sra)               summary['Skip SRA Download'] = params.skip_sr
 if (params.kraken2_use_ftp)        summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
 if (params.save_kraken2_fastq)     summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
 if (params.save_reference)         summary['Save Genome Indices'] = 'Yes'
-if (params.ivar_exclude_reads)		 summary['IVar Trim Exclude Reads']  = 'Yes'
+if (params.ivar_exclude_reads)		 summary['IVar Trim Exclude']  = 'Yes'
 if (params.save_align_intermeds)   summary['Save Align Intermeds'] =  'Yes'
 if (params.save_pileup)            summary['Save Pileup'] = 'Yes'
 if (params.skip_variants)          summary['Skip Variant Calling'] =  'Yes'
-if (params.skip_assembly)          summary['Skip De novo Assembly'] =  'Yes'
+if (params.skip_assembly)          summary['Skip Assembly'] =  'Yes'
 if (params.skip_qc)                summary['Skip QC'] = 'Yes'
 if (params.skip_fastqc)            summary['Skip FastQC'] = 'Yes'
 if (params.skip_picard_metrics)    summary['Skip Picard Metrics'] = 'Yes'
@@ -261,7 +261,7 @@ if (params.email || params.email_on_fail) {
     summary['E-mail on failure']   = params.email_on_fail
     summary['MultiQC maxsize']     = params.max_multiqc_email_size
 }
-log.info summary.collect { k,v -> "${k.padRight(19)}: $v" }.join("\n")
+log.info summary.collect { k,v -> "${k.padRight(21)}: $v" }.join("\n")
 log.info "-\033[2m--------------------------------------------------\033[0m-"
 
 // Check the hostnames against configured profiles
@@ -646,7 +646,7 @@ ch_fastp_reads
     .map { [ it[0], it[1], it[2].flatten() ] }
     .set { ch_fastp_reads }
 
-process MERGE_FASTQ {
+process CAT_FASTQ {
     tag "$sample"
 
     input:
@@ -698,7 +698,7 @@ process MERGE_FASTQ {
 /*
  * PREPROCESSING: Build Bowtie2 index for viral genome
  */
-process BUILD_BOWTIE2_INDEX {
+process BOWTIE2_INDEX {
     tag "$fasta"
     label 'process_medium'
     publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
@@ -977,10 +977,10 @@ process VARSCAN2 {
 /*
  * STEP 5.5.1.1: Genome consensus generation with BCFtools and masked with BEDTools
  */
-process BCFTOOLS_CONSENSUS {
+process VARSCAN2_BCFTOOLS {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/varscan2/bcftools", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/varscan2/consensus", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && 'varscan2' in callers
@@ -1099,7 +1099,7 @@ process VARSCAN2_SNPEFF {
 // TODO nf-core: Need to provide BAM file here too with --ref-bam ${bam[0]} \\
 process VARSCAN2_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/variants/varscan2/quast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && 'varscan2' in callers
@@ -1257,7 +1257,7 @@ process IVAR_CONSENSUS {
 // TODO nf-core: Need to provide BAM file here too with --ref-bam ${bam[0]} \\
 process IVAR_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/variants/ivar/quast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/ivar", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && 'ivar' in callers
@@ -1294,7 +1294,7 @@ process IVAR_QUAST {
 /*
  * PREPROCESSING: Build Blast database for viral genome
  */
-process BUILD_BLAST_DB {
+process MAKE_BLAST_DB {
     tag "$fasta"
     label 'process_medium'
     publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
@@ -1328,7 +1328,7 @@ if (!isOffline()) {
     if (!params.kraken2_db) {
         if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
 
-        process BUILD_KRAKEN2_DB {
+        process KRAKEN2_BUILD {
             tag "$db"
             label 'process_high'
             publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
@@ -2006,6 +2006,7 @@ process get_software_versions {
 /*
  * STEP 7: MultiQC
  */
+// TODO nf-core: Check MultiQC log and config to see if everything is working as expected
 process MULTIQC {
     publishDir "${params.outdir}/multiqc", mode: params.publish_dir_mode
 
