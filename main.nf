@@ -1160,8 +1160,8 @@ process IVAR_VARIANTS {
         -Q 0 \\
         ${bam[0]} \\
         | ivar variants -p ${sample} -r $fasta $features
-    python tsv_to_vcf.py ${sample}.tsv ${sample}.vcf \\
-    | bgzip -c > ${sample}.vcf.gz
+    tsv_to_vcf.py ${sample}.tsv ${sample}.vcf
+    bgzip -c ${sample}.vcf > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
     """
@@ -1222,6 +1222,16 @@ process IVAR_CONSENSUS {
 
      script:
      """
+     mkdir -p ./data/genomes/ && cd ./data/genomes/
+     ln -s ../../$fasta ${index_base}.fa
+     cd ../../
+
+     mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
+     ln -s ../../$gff genes.gff
+     cd ../../
+     echo "${index_base}.genome : ${index_base}" > snpeff.config
+     snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
+
      snpEff ${index_base} \\
          -config ./snpeff.config \\
          -dataDir ./data ${vcf[0]} \\
