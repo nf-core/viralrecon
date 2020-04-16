@@ -1147,8 +1147,8 @@ process IVAR_VARIANTS {
 
     output:
     set val(sample), val(single_end), file("*.tsv") into ch_ivar_variants_tsv
-    set val(sample), val(single_end), file("*.vcf.gz*") into ch_ivar_vcf
-    file "*.bcftools_stats.txt" into ch_ivar_bcftools_mqc
+    set val(sample), val(single_end), file("*.vcf.gz*") into ch_ivar_variants_vcf
+    file "*.bcftools_stats.txt" into ch_ivar_variants_bcftools_mqc
 
     script:
     features = params.gff ? "-g $gff" : ""
@@ -1211,7 +1211,7 @@ process IVAR_CONSENSUS {
      !params.skip_variants && 'ivar' in callers && params.gff
 
      input:
-     set val(sample), val(single_end), file(vcf) from ch_ivar_vcf
+     set val(sample), val(single_end), file(vcf) from ch_ivar_variants_vcf
      file fasta from ch_fasta_ivar_snpeff.collect()
      file gff from ch_gff_ivar_snpeff.collect()
 
