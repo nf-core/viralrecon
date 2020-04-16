@@ -185,15 +185,15 @@ def check_samplesheet(FileIn,OutPrefix,ignoreSRAErrors=False,skipSRA=False):
     ## Write SRA runInfo to file
     if len(sraRunInfoDict) != 0:
         fout = open(os.path.join(OutDir,'{}.sra_runinfo.txt'.format(OutPrefix)),'w')
-        fout.write('\t'.join(sorted(sraRunInfoHeader)) + '\n')
+        fout.write('"{}"'.format('"\t "'.join(map(str, sorted(sraRunInfoHeader)))) + '\n')
         for sra_id in sorted(sraRunInfoDict.keys()):
             rowList = []
             for col in sraRunInfoHeader:
-                if col in sraRunInfoDict[sra_id]:
+                if col in sorted(sraRunInfoDict[sra_id]):
                     rowList.append(sraRunInfoDict[sra_id][col])
                 else:
                     rowList.append('NA')
-            fout.write('\t'.join(rowList) + '\n')
+            fout.write('"{}"'.format('"\t "'.join(map(str, rowList))) + '\n')
         fout.close()
 
 
