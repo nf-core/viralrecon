@@ -44,7 +44,6 @@
 * [Skipping QC steps](#skipping-qc-steps)
   * `--skip_qc`
   * `--skip_fastqc`
-  * `--skip_fastq_info`
   * `--skip_picard_metrics`
   * `--skip_multiqc`
 * [Job resources](#job-resources)
@@ -360,7 +359,6 @@ The following options make this easy:
 | Step                      | Description                                              |
 |---------------------------|----------------------------------------------------------|
 | `--skip_qc`               | Skip all QC steps except for MultiQC                     |
-| `--skip_fastq_info`       | Skip fastq_info check for SRA reads                      |
 | `--skip_fastqc`           | Skip FastQC                                              |
 | `--skip_picard_metrics`   | Skip Picard CollectMultipleMetrics and CollectWgsMetrics |
 | `--skip_multiqc`          | Skip MultiQC                                             |
