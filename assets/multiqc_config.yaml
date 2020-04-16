@@ -136,9 +136,6 @@ custom_plot_config:
     picard-insertsize:
         cpswitch_c_active: False
         smooth_points: 1000
-    bcftools:
-        collapse_complementary_changes: true
-    bcftools-1:
-        collapse_complementary_changes: true
-    bcftools-2:
-        collapse_complementary_changes: true
+
+bcftools:
+    collapse_complementary_changes: true
