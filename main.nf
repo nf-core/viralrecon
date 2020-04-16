@@ -373,7 +373,11 @@ if (params.kraken2_db) {
  */
 process CHECK_SAMPLESHEET {
     tag "$samplesheet"
-    publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".txt")) "preprocess/sra/$filename"
+                      else "pipeline_info/$filename"
+                }
 
     input:
     file samplesheet from ch_input
@@ -1341,7 +1345,7 @@ if (params.protocol == 'amplicon') {
     process CUTADAPT {
         tag "$sample"
         label 'process_medium'
-        publishDir "${params.outdir}/preprocess/cutadapt", mode: params.publish_dir_mode,
+        publishDir "${params.outdir}/assembly/cutadapt", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith(".html")) "fastqc/$filename"
                           else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
@@ -1394,7 +1398,7 @@ if (params.protocol == 'amplicon') {
 process KRAKEN2 {
     tag "$db"
     label 'process_high'
-    publishDir "${params.outdir}/preprocess/kraken2", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/assembly/kraken2", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) filename
                       else params.save_kraken2_fastq ? filename : null
