@@ -16,6 +16,8 @@ fn_clean_exts:
     - '.ptrim'
     - '.highfreq'
     - '.lowfreq'
+    - '.consensus'
+    - '.consensus.masked'
     - '.scaffolds'
     - '.meta'
     - '.assembly'
@@ -69,7 +71,6 @@ module_order:
     - bcftools:
         name: 'BCFTools (Varscan 2; high frequency variants)'
         info: 'This section of the report shows BCFTools stats results for high frequency variants called by Varscan 2.'
-        collapse_complementary_changes: true
         path_filters:
             - './varscan2/bcftools/highfreq/*'
     - snpeff:
@@ -85,7 +86,6 @@ module_order:
     - bcftools:
         name: 'BCFTools (Varscan 2; low frequency variants)'
         info: 'This section of the report shows BCFTools stats results for low frequency variants called by Varscan 2.'
-        collapse_complementary_changes: true
         path_filters:
             - './varscan2/bcftools/lowfreq/*'
     - snpeff:
@@ -129,3 +129,7 @@ custom_plot_config:
     picard-insertsize:
         cpswitch_c_active: False
         smooth_points: 1000
+    bcftools:
+        collapse_complementary_changes: true
+    bcftools-1:
+        collapse_complementary_changes: true
