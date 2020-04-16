@@ -1147,6 +1147,8 @@ process IVAR_VARIANTS {
 
     output:
     set val(sample), val(single_end), file("*.tsv") into ch_ivar_variants_tsv
+    set val(sample), val(single_end), file("*.vcf.gz*") into ch_ivar_variants_vcf
+    file "*.bcftools_stats.txt" into ch_ivar_variants_bcftools_mqc
 
     script:
     features = params.gff ? "-g $gff" : ""
@@ -1158,6 +1160,10 @@ process IVAR_VARIANTS {
         -Q 0 \\
         ${bam[0]} \\
         | ivar variants -p ${sample} -r $fasta $features
+    ivar_variants_to_vcf.py ${sample}.tsv ${sample}.vcf
+    bgzip -c ${sample}.vcf > ${sample}.vcf.gz
+    tabix -p vcf -f ${sample}.vcf.gz
+    bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
     """
 }
 
@@ -1193,63 +1199,62 @@ process IVAR_CONSENSUS {
     """
 }
 
-// /*
-//  * STEP 5.5.2.2: IVar variant calling annotation with SnpEff and SnpSift
-//  */
-// // TODO nf-core: Need to input a vcf file to SnpEff here
-// process IVAR_SNPEFF {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/ivar/snpeff", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_variants && 'ivar' in callers && params.gff
-//
-//     input:
-//     set val(sample), val(single_end), file(vcf) from ch_ivar_vcf
-//     file fasta from ch_fasta_ivar_snpeff.collect()
-//     file gff from ch_gff_ivar_snpeff.collect()
-//
-//     output:
-//     file "*.vcf.gz*" into ch_ivar_snpeff_vcf
-//     file "*.{txt,html}" into ch_ivar_snpeff_reports
-//     file "*.snpEff.csv" into ch_ivar_snpeff_mqc
-//
-//     script:
-//     """
-//     mkdir -p ./data/genomes/ && cd ./data/genomes/
-//     ln -s ../../$fasta ${index_base}.fa
-//     cd ../../
-//
-//     mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
-//     ln -s ../../$gff genes.gff
-//     cd ../../
-//     echo "${index_base}.genome : ${index_base}" > snpeff.config
-//     snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
-//
-//     snpEff ${index_base} \\
-//         -config ./snpeff.config \\
-//         -dataDir ./data ${vcf[0]} \\
-//         -csvStats ${sample}.snpEff.csv \\
-//         | bgzip -c > ${sample}.snpEff.vcf.gz
-//     tabix -p vcf -f ${sample}.snpEff.vcf.gz
-//     mv snpEff_summary.html ${sample}.snpEff.summary.html
-//
-//     SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${sample}.snpEff.vcf.gz \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${sample}.snpSift.table.txt
-//     	"""
-// }
+ /*
+  * STEP 5.5.2.2: IVar variant calling annotation with SnpEff and SnpSift
+  */
+ process IVAR_SNPEFF {
+     tag "$sample"
+     label 'process_medium'
+     publishDir "${params.outdir}/variants/ivar/snpeff", mode: params.publish_dir_mode
+
+     when:
+     !params.skip_variants && 'ivar' in callers && params.gff
+
+     input:
+     set val(sample), val(single_end), file(vcf) from ch_ivar_variants_vcf
+     file fasta from ch_fasta_ivar_snpeff.collect()
+     file gff from ch_gff_ivar_snpeff.collect()
+
+     output:
+     file "*.vcf.gz*" into ch_ivar_snpeff_vcf
+     file "*.{txt,html}" into ch_ivar_snpeff_reports
+     file "*.snpEff.csv" into ch_ivar_snpeff_mqc
+
+     script:
+     """
+     mkdir -p ./data/genomes/ && cd ./data/genomes/
+     ln -s ../../$fasta ${index_base}.fa
+     cd ../../
+
+     mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
+     ln -s ../../$gff genes.gff
+     cd ../../
+     echo "${index_base}.genome : ${index_base}" > snpeff.config
+     snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
+
+     snpEff ${index_base} \\
+         -config ./snpeff.config \\
+         -dataDir ./data ${vcf[0]} \\
+         -csvStats ${sample}.snpEff.csv \\
+         | bgzip -c > ${sample}.snpEff.vcf.gz
+     tabix -p vcf -f ${sample}.snpEff.vcf.gz
+     mv snpEff_summary.html ${sample}.snpEff.summary.html
+
+     SnpSift extractFields -s "," \\
+         -e "." \\
+         ${sample}.snpEff.vcf.gz \\
+         CHROM POS REF ALT \\
+         "ANN[*].GENE" "ANN[*].GENEID" \\
+         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+         > ${sample}.snpSift.table.txt
+     	"""
+ }
 
 /*
  * STEP 5.5.2.3: IVar consensus sequence report with QUAST
@@ -2029,7 +2034,7 @@ process MULTIQC {
     file ('varscan2/snpeff/highfreq/*') from ch_varscan2_snpeff_highfreq_mqc.collect().ifEmpty([])
     file ('varscan2/snpeff/lowfreq/*') from ch_varscan2_snpeff_lowfreq_mqc.collect().ifEmpty([])
     file ('varscan2/quast/highfreq/*') from ch_varscan2_quast_mqc.collect().ifEmpty([])
-    //file ('ivar/snpeff/*') from ch_ivar_snpeff_mqc.collect().ifEmpty([])
+    file ('ivar/snpeff/*') from ch_ivar_snpeff_mqc.collect().ifEmpty([])
     file ('ivar/quast/*') from ch_ivar_quast_mqc.collect().ifEmpty([])
     file ('spades/quast/*') from ch_quast_spades_mqc.collect().ifEmpty([])
     file ('metaspades/quast/*') from ch_quast_metaspades_mqc.collect().ifEmpty([])
