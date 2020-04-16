@@ -1111,7 +1111,11 @@ process VARSCAN2_QUAST {
 process IVAR_VARIANTS {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/ivar/variants", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/ivar/variants", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      else filename
+                }
 
     when:
     !params.skip_variants && 'ivar' in callers
