@@ -856,8 +856,10 @@ ch_sort_bam
     .into { ch_sort_bam_metrics
             ch_sort_bam_ivar_variants
             ch_sort_bam_ivar_consensus
+            ch_sort_bam_ivar_quast
             ch_sort_bam_varscan2
-            ch_sort_bam_bcftools }
+            ch_sort_bam_varscan2_bcftools
+            ch_sort_bam_varscan2_quast }
 /*
  * STEP 5.4: Picard CollectMultipleMetrics and CollectWgsMetrics
  */
@@ -986,12 +988,12 @@ process VARSCAN2_BCFTOOLS {
     !params.skip_variants && 'varscan2' in callers
 
     input:
-    set val(sample), val(single_end), file(bam), file(vcf) from ch_sort_bam_bcftools.join(ch_varscan2_highfreq_consensus, by: [0,1])
+    set val(sample), val(single_end), file(bam), file(vcf) from ch_sort_bam_varscan2_bcftools.join(ch_varscan2_highfreq_consensus, by: [0,1])
     file fasta from ch_fasta_bcftools.collect()
 
     output:
-    file "*consensus.fa" into ch_bcftools_unmasked_consensus
-    file "*consensus.masked.fa" into ch_bcftools_masked_consensus
+    set val(sample), val(single_end), file("*consensus.fa") into ch_bcftools_consensus_unmasked
+    set val(sample), val(single_end), file("*consensus.masked.fa") into ch_bcftools_consensus_masked
 
     script:
     """
@@ -1099,27 +1101,28 @@ process VARSCAN2_SNPEFF {
 // TODO nf-core: Need to provide BAM file here too with --ref-bam ${bam[0]} \\
 process VARSCAN2_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/varscan2/quast", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && 'varscan2' in callers
 
     input:
-    file consensus from ch_bcftools_masked_consensus.collect()
+    set val(sample), val(single_end), file(bam), file(consensus) from ch_sort_bam_varscan2_quast.join(ch_bcftools_consensus_masked, by: [0,1])
     file fasta from ch_fasta_varscan2_quast.collect()
     file gff from ch_gff_varscan2_quast.collect().ifEmpty([])
 
     output:
-    file "quast/" into ch_varscan2_quast_results
-    file "quast/report.tsv" into ch_varscan2_quast_mqc
+    file "${sample}/" into ch_varscan2_quast_results
+    file "${sample}/report.tsv" into ch_varscan2_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
     """
     quast.py \\
-        --output-dir quast \\
+        --output-dir ${sample} \\
         -r $fasta \\
         $features \\
+        --ref-bam ${bam[0]} \\
         --threads ${task.cpus} \\
         ${consensus.join(' ')}
     """
