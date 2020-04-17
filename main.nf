@@ -1357,8 +1357,7 @@ if (!isOffline()) {
 /*
  * STEP 6.1: Amplicon trimming with Cutadapt
  */
-// TODO nf-core: Logic isnt right here because this step should be skipped if --skip_adapter_trimming
-if (params.protocol == 'amplicon') {
+if (params.protocol == 'amplicon' && !params.skip_amplicon_trimming) {
     process CUTADAPT {
         tag "$sample"
         label 'process_medium'
