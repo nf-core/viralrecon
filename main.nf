@@ -1004,7 +1004,7 @@ process VARSCAN2_BCFTOOLS {
 }
 
 /*
- * STEP 5.5.1.2: Varscan 2 variant calling annotation with SnpEff and SnpSift
+ * STEP 5.5.1.2: VarScan 2 variant calling annotation with SnpEff and SnpSift
  */
 process VARSCAN2_SNPEFF {
     tag "$sample"
@@ -1084,7 +1084,7 @@ process VARSCAN2_SNPEFF {
 }
 
 /*
- * STEP 5.5.1.3: Varscan 2 consensus sequence report with QUAST
+ * STEP 5.5.1.3: VarScan 2 consensus sequence report with QUAST
  */
 process VARSCAN2_QUAST {
     label 'process_medium'
