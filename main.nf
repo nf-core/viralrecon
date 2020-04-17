@@ -633,7 +633,6 @@ if (!params.skip_adapter_trimming) {
 /*
 * STEP 4: Merge FastQ files with the same sample identifier
 */
-// TODO nf-core: Test this properly for PE reads
 ch_fastp_reads
     .map { [ it[0].split('_')[0..-2].join('_'), it[1], it[2] ] }
     .groupTuple(by: [0, 1])
