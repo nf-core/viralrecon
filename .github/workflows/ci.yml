@@ -89,6 +89,6 @@ jobs:
          run: |
            docker pull nfcore/viralrecon:dev
            docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
-       - name: Run pipeline with representative data via SRA ids with various options
+       - name: Run pipeline with minimal data via SRA ids and various options
          run: |
            nextflow run ${GITHUB_WORKSPACE} -profile test_sra,docker ${{ matrix.parameters }}
