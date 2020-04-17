@@ -38,7 +38,7 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 > **NB:** The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality. To see how your reads look after trimming, look at the FastQC reports in the `fastp` directory.
 
-**Output directory: `results/fastqc`**
+**Output directory: `preprocess/fastqc`**
 
 * `<SAMPLE>_fastqc.html`
   * FastQC report, containing quality metrics for your untrimmed raw fastq files
@@ -63,7 +63,7 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
   * FastQC report of the trimmed reads.
 * `fastqc/zips/<SAMPLE>.trim.fastqc.zip`
   * Zip file with the FastQC report.
-* `logs/<SAMPLE>.fastp.log`
+* `log/<SAMPLE>.fastp.log`
   * Trimming log file.
 
 ## Mapping + variant calling + consensus
@@ -74,7 +74,7 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 We mapped the fastq file against the reference host genome.
 
-**Output directory: `preprocess/kraken2`**
+**Output directory: `assembly/kraken2`**
 
 * `<SAMPLE>.host.fastq.gz`
   * Only with `--save_kraken2_fastq`. Reads that mapped with host taxon.
@@ -97,7 +97,7 @@ We mapped the fastq file against the reference host genome.
 
 * `<SAMPLE>.bam`
   * Only if `--save_align_intermeds`. Mapping BAM file
-* logs/`<SAMPLE>.log`
+* log/`<SAMPLE>.log`
   * Bowtie2 mapping log file.
 * `<SAMPLE>.sorted.bam`
   * Sorted aligned BAM file.
@@ -199,9 +199,9 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
   * Low frequency variants VCF file.
 * `<SAMPLE>.lowfreq.vcf.gz.tbi`
   * Low frequency variants VCF index file.
-* `logs/<SAMPLE>.highfreq.varscan2.log`
+* `log/<SAMPLE>.highfreq.varscan2.log`
   * VarScan2 high frequency variants log file.
-* `logs/<SAMPLE>.lowfreq.varscan2.log`
+* `log/<SAMPLE>.lowfreq.varscan2.log`
   * VarScan2 low frequency variants log file.
 
 ### SnpEff and SnpSift
@@ -262,7 +262,7 @@ We selected the reads that didn't cluster using kraken2 with the host genome and
 
 Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) is used for clipping primer sequences from reads prior to assembly.
 
-**Output directory:** `preprocess/cutadapt`
+**Output directory:** `assembly/cutadapt`
 
 * `fastqc/<SAMPLE>.ptrim_fastqc.html`
   * Fastqc HTML reports for primer clipped reads.
