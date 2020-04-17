@@ -83,6 +83,7 @@ The nf-core/viralrecon pipeline comes with documentation about the pipeline, fou
 ## Credits
 
 nf-core/viralrecon was originally written by Sarai Varona, Miguel Juliá and Sara Monzon from [BU-ISCIII](https://github.com/BU-ISCIII) and co-ordinated by Isabel Cuesta for the [Institute of Health Carlos III](https://eng.isciii.es/eng.isciii.es/Paginas/Inicio.html), Spain.
+Through collaboration with the nf-core community the pipeline has now been updated substantially to include additional processing steps and to standardise inputs/outputs.
 
 Many thanks to others who have helped out and contributed along the way too, including (but not limited to):
 
@@ -96,7 +97,7 @@ Many thanks to others who have helped out and contributed along the way too, inc
 | [Maxime Garcia](https://github.com/MaxUlysse)             | [SciLifeLab, Sweden](https://www.scilifelab.se/)                      |
 | [Michael Heuer](https://github.com/heuermh)               | [UC Berkeley, USA](https://https://rise.cs.berkeley.edu)              |
 | [Phil Ewels](https://github.com/ewels)                    | [SciLifeLab, Sweden](https://www.scilifelab.se/)                      |
-| [Stephen Kelly](https://github.com/stevekm)           | [Memorial Sloan Kettering Cancer Center, USA](https://www.mskcc.org/)                       |
+| [Stephen Kelly](https://github.com/stevekm)               | [Memorial Sloan Kettering Cancer Center, USA](https://www.mskcc.org/) |
 | [Thanh Le Viet](https://github.com/thanhleviet)           | [Quadram Institute, UK](https://quadram.ac.uk/)                       |
 
 > Listed in alphabetical order
@@ -109,7 +110,6 @@ For further information or help, don't hesitate to get in touch on [Slack](https
 
 ## Citation
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi. -->
 <!-- If you use  nf-core/viralrecon for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
 
 You can cite the `nf-core` publication as follows:
