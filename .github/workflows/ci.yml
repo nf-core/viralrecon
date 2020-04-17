@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        parameters: [--skip_adapter_trimming, --skip_assembly, --skip_variants]
+        parameters: [--skip_adapter_trimming, --skip_amplicon_trimming, --skip_assembly, --skip_variants]
     steps:
       - uses: actions/checkout@v2
       - name: Install Nextflow
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        parameters: [--skip_adapter_trimming, --skip_amplicon_trimming, --skip_assembly, --skip_variants]
+        parameters: [--gff false, '']
     steps:
       - uses: actions/checkout@v2
       - name: Install Nextflow
@@ -78,7 +78,7 @@ jobs:
      runs-on: ubuntu-latest
      strategy:
        matrix:
-         parameters: [--skip_sra, --skip_adapter_trimming, --skip_assembly, --skip_variants]
+         parameters: [--skip_sra, '']
      steps:
        - uses: actions/checkout@v2
        - name: Install Nextflow
