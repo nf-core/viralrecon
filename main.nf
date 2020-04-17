@@ -53,7 +53,7 @@ def helpMessage() {
 
     Variant calling
       --callers [str]                 Specify which variant calling algorithms you would like to use (Default:'varscan2,ivar')
-      --ivar_exclude_reads [bool]		  Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
+      --ivar_exclude_reads [bool]     Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
       --save_align_intermeds [bool]   Save the intermediate BAM files from the alignment steps (Default: false)
       --save_pileup [bool]            Save Pileup files generated during variant calling (Default: false)
       --skip_snpeff [bool]            Skip SnpEff and SnpSift annotation of variants (Default: false)
@@ -69,10 +69,10 @@ def helpMessage() {
       --skip_assembly [bool]          Skip assembly steps in the pipeline (Default: false)
 
     QC
-      --skip_qc [bool]                Skip all QC steps apart from MultiQC (Default: false)
       --skip_fastqc [bool]            Skip FastQC (Default: false)
       --skip_picard_metrics           Skip Picard CollectMultipleMetrics and CollectWgsMetrics (Default: false)
       --skip_multiqc [bool]           Skip MultiQC (Default: false)
+      --skip_qc [bool]                Skip all QC steps apart from MultiQC (Default: false)
 
     Other options:
       --outdir [file]                 The output directory where the results will be saved
@@ -207,58 +207,73 @@ if (workflow.profile.contains('awsbatch')) {
 // Header log info
 log.info nfcoreHeader()
 def summary = [:]
-if (workflow.revision)             summary['Pipeline Release'] = workflow.revision
-summary['Run Name']                = custom_runName ?: workflow.runName
-summary['Samplesheet']             = params.input
-summary['Protocol']                = params.protocol
-if (params.protocol == 'amplicon') summary['Amplicon Fasta File'] = params.amplicon_fasta
-if (params.protocol == 'amplicon') summary['Amplicon BED File'] = params.amplicon_bed
-if (params.kraken2_db)             summary['Host Kraken2 DB'] = params.kraken2_db
-if (params.kraken2_db_name)        summary['Host Kraken2 Name'] = params.kraken2_db_name
-summary['Viral Genome']            = params.genome ?: 'Not supplied'
-summary['Viral Fasta File']        = params.fasta
-if (params.gff)                    summary['Viral GFF'] = params.gff
-summary['Variant Calling Tools']   = params.callers
-summary['Assembly Tools']          = params.assemblers
-if (params.skip_adapter_trimming)  summary['Skip Adapter Trimming'] = 'Yes'
-if (params.save_trimmed)           summary['Save Trimmed'] = 'Yes'
-if (params.ignore_sra_errors)      summary['Ignore SRA Errors'] = params.ignore_sra_errors
-if (params.save_sra_fastq)         summary['Save SRA FastQ'] = params.save_sra_fastq
-if (params.skip_sra)               summary['Skip SRA Download'] = params.skip_sra
-if (params.kraken2_use_ftp)        summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
-if (params.save_kraken2_fastq)     summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
-if (params.save_reference)         summary['Save Genome Indices'] = 'Yes'
-if (params.ivar_exclude_reads)		 summary['iVar Trim Exclude']  = 'Yes'
-if (params.save_align_intermeds)   summary['Save Align Intermeds'] =  'Yes'
-if (params.save_pileup)            summary['Save Pileup'] = 'Yes'
-if (params.skip_variants)          summary['Skip Variant Calling'] =  'Yes'
-if (params.skip_amplicon_trimming) summary['Skip Amplicon Trimming'] = 'Yes'
-if (params.skip_assembly)          summary['Skip Assembly'] =  'Yes'
-if (params.skip_qc)                summary['Skip QC'] = 'Yes'
-if (params.skip_fastqc)            summary['Skip FastQC'] = 'Yes'
-if (params.skip_picard_metrics)    summary['Skip Picard Metrics'] = 'Yes'
-if (params.skip_multiqc)           summary['Skip MultiQC'] = 'Yes'
-summary['Max Resources']           = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
-if (workflow.containerEngine)      summary['Container'] = "$workflow.containerEngine - $workflow.container"
-summary['Output dir']              = params.outdir
-summary['Publish dir mode']        = params.publish_dir_mode
-summary['Launch dir']              = workflow.launchDir
-summary['Working dir']             = workflow.workDir
-summary['Script dir']              = workflow.projectDir
-summary['User']                    = workflow.userName
-if (workflow.profile.contains('awsbatch')) {
-    summary['AWS Region']          = params.awsregion
-    summary['AWS Queue']           = params.awsqueue
-    summary['AWS CLI']             = params.awscli
+if (workflow.revision)               summary['Pipeline Release'] = workflow.revision
+summary['Run Name']                  = custom_runName ?: workflow.runName
+summary['Samplesheet']               = params.input
+summary['Protocol']                  = params.protocol
+if (params.protocol == 'amplicon')   summary['Amplicon Fasta File'] = params.amplicon_fasta
+if (params.protocol == 'amplicon')   summary['Amplicon BED File'] = params.amplicon_bed
+summary['Viral Genome']              = params.genome ?: 'Not supplied'
+summary['Viral Fasta File']          = params.fasta
+if (params.gff)                      summary['Viral GFF'] = params.gff
+if (params.save_reference)           summary['Save Genome Indices'] = 'Yes'
+if (params.ignore_sra_errors)        summary['Ignore SRA Errors'] = params.ignore_sra_errors
+if (params.save_sra_fastq)           summary['Save SRA FastQ'] = params.save_sra_fastq
+if (params.skip_sra)                 summary['Skip SRA Download'] = params.skip_sra
+if (params.kraken2_db)               summary['Host Kraken2 DB'] = params.kraken2_db
+if (params.kraken2_db_name)          summary['Host Kraken2 Name'] = params.kraken2_db_name
+if (params.kraken2_use_ftp)          summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
+if (params.save_kraken2_fastq)       summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
+if (params.skip_adapter_trimming)    summary['Skip Adapter Trimming'] = 'Yes'
+if (params.skip_amplicon_trimming)   summary['Skip Amplicon Trimming'] = 'Yes'
+if (params.save_trimmed)             summary['Save Trimmed'] = 'Yes'
+if (!params.skip_variants) {
+    summary['Variant Calling Tools'] = params.callers
+    if (params.ivar_exclude_reads)	 summary['iVar Trim Exclude']  = 'Yes'
+    if (params.save_align_intermeds) summary['Save Align Intermeds'] =  'Yes'
+    if (params.save_pileup)          summary['Save Pileup'] = 'Yes'
+    if (params.skip_snpeff)          summary['Save SnpEff'] = 'Yes'
+    if (params.skip_variants_quast)  summary['Save Variants QUAST'] = 'Yes'
+} else {
+    summary['Skip Variant Calling']  = 'Yes'
 }
-summary['Config Profile']          = workflow.profile
+if (!params.skip_assembly) {
+    summary['Assembly Tools']        = params.assemblers
+    if (params.skip_blast)           summary['Skip BLAST'] =  'Yes'
+    if (params.skip_abacas)          summary['Skip ABACAS'] =  'Yes'
+    if (params.skip_plasmidid)       summary['Skip PlasmidID'] =  'Yes'
+    if (params.skip_assembly_quast)  summary['Skip Assembly QUAST'] =  'Yes'
+} else {
+    summary['Skip Assembly']         = 'Yes'
+}
+if (!params.skip_qc) {
+    if (params.skip_fastqc)          summary['Skip FastQC'] = 'Yes'
+    if (params.skip_picard_metrics)  summary['Skip Picard Metrics'] = 'Yes'
+} else {
+    summary['Skip QC'] = 'Yes'
+}
+if (params.skip_multiqc)             summary['Skip MultiQC'] = 'Yes'
+summary['Max Resources']             = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
+if (workflow.containerEngine)        summary['Container'] = "$workflow.containerEngine - $workflow.container"
+summary['Output dir']                = params.outdir
+summary['Publish dir mode']          = params.publish_dir_mode
+summary['Launch dir']                = workflow.launchDir
+summary['Working dir']               = workflow.workDir
+summary['Script dir']                = workflow.projectDir
+summary['User']                      = workflow.userName
+if (workflow.profile.contains('awsbatch')) {
+    summary['AWS Region']            = params.awsregion
+    summary['AWS Queue']             = params.awsqueue
+    summary['AWS CLI']               = params.awscli
+}
+summary['Config Profile']            = workflow.profile
 if (params.config_profile_description) summary['Config Description'] = params.config_profile_description
 if (params.config_profile_contact)     summary['Config Contact']     = params.config_profile_contact
 if (params.config_profile_url)         summary['Config URL']         = params.config_profile_url
 if (params.email || params.email_on_fail) {
-    summary['E-mail Address']      = params.email
-    summary['E-mail on failure']   = params.email_on_fail
-    summary['MultiQC maxsize']     = params.max_multiqc_email_size
+    summary['E-mail Address']        = params.email
+    summary['E-mail on failure']     = params.email_on_fail
+    summary['MultiQC maxsize']       = params.max_multiqc_email_size
 }
 log.info summary.collect { k,v -> "${k.padRight(21)}: $v" }.join("\n")
 log.info "-\033[2m--------------------------------------------------\033[0m-"

@@ -47,10 +47,10 @@
   * [`--skip_assembly_quast`](#--skip_assembly_quast)
   * [`--skip_assembly`](#--skip_assembly)  
 * [Skipping QC steps](#skipping-qc-steps)
-  * `--skip_qc`
   * `--skip_fastqc`
   * `--skip_picard_metrics`
   * `--skip_multiqc`
+  * `--skip_qc`
 * [Job resources](#job-resources)
   * [Automatic resubmission](#automatic-resubmission)
   * [Custom resource requests](#custom-resource-requests)
@@ -387,10 +387,10 @@ The following options make this easy:
 
 | Step                      | Description                                              |
 |---------------------------|----------------------------------------------------------|
-| `--skip_qc`               | Skip all QC steps except for MultiQC                     |
 | `--skip_fastqc`           | Skip FastQC                                              |
 | `--skip_picard_metrics`   | Skip Picard CollectMultipleMetrics and CollectWgsMetrics |
 | `--skip_multiqc`          | Skip MultiQC                                             |
+| `--skip_qc`               | Skip all QC steps except for MultiQC                     |
 
 ## Job resources
 
