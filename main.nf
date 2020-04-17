@@ -1012,7 +1012,7 @@ process VARSCAN2_SNPEFF {
     publishDir "${params.outdir}/variants/varscan2/snpeff", mode: params.publish_dir_mode
 
     when:
-    !params.skip_variants && 'varscan2' in callers && params.gff
+    !params.skip_variants && 'varscan2' in callers && params.gff && !params.skip_snpeff
 
     input:
     set val(sample), val(single_end), file(highfreq_vcf), file(lowfreq_vcf) from ch_varscan2_highfreq_snpeff.join(ch_varscan2_lowfreq_snpeff, by: [0,1])
@@ -1091,7 +1091,7 @@ process VARSCAN2_QUAST {
     publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode
 
     when:
-    !params.skip_variants && 'varscan2' in callers
+    !params.skip_variants && 'varscan2' in callerList && !params.skip_variants_quast
 
     input:
     file consensus from ch_bcftools_consensus_masked.collect{ it[2] }
@@ -1202,7 +1202,7 @@ process IVAR_SNPEFF {
     publishDir "${params.outdir}/variants/ivar/snpeff", mode: params.publish_dir_mode
 
     when:
-    !params.skip_variants && 'ivar' in callers && params.gff
+    !params.skip_variants && 'ivar' in callers && params.gff && !params.skip_snpeff
 
     input:
     set val(sample), val(single_end), file(vcf) from ch_ivar_variants_vcf
@@ -1255,7 +1255,7 @@ process IVAR_QUAST {
     publishDir "${params.outdir}/variants/ivar", mode: params.publish_dir_mode
 
     when:
-    !params.skip_variants && 'ivar' in callers
+    !params.skip_variants && 'ivar' in callers && !params.skip_variants_quast
 
     input:
     file consensus from ch_ivar_consensus_fasta.collect{ it[2] }
@@ -1296,7 +1296,7 @@ process MAKE_BLAST_DB {
         saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly
+    !params.skip_assembly && !params.skip_blast
 
     input:
     file fasta from ch_fasta_blast
@@ -1496,7 +1496,7 @@ process SPADES_BLAST {
     publishDir "${params.outdir}/assembly/spades/blast", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'spades' in assemblers
+    !params.skip_assembly && 'spades' in assemblers && !params.skip_blast
 
     input:
     set val(sample), val(single_end), file(scaffold) from ch_spades_blast
@@ -1533,7 +1533,7 @@ process SPADES_ABACAS {
                 }
 
     when:
-    !params.skip_assembly && 'spades' in assemblers
+    !params.skip_assembly && 'spades' in assemblers && !params.skip_abacas
 
     input:
     set val(sample), val(single_end), file(scaffold) from ch_spades_abacas
@@ -1561,7 +1561,7 @@ process SPADES_PLASMIDID {
     publishDir "${params.outdir}/assembly/spades/plasmidid", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'spades' in assemblers
+    !params.skip_assembly && 'spades' in assemblers && !params.skip_plasmidid
 
     input:
     set val(sample), val(single_end), file(scaffold) from ch_spades_plasmidid.filter { it.size() > 0 }
@@ -1585,7 +1585,7 @@ process SPADES_QUAST {
     publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'spades' in assemblers
+    !params.skip_assembly && 'spades' in assemblers && !params.skip_assembly_quast
 
     input:
     file scaffolds from ch_spades_quast.collect{ it[2] }
@@ -1653,7 +1653,7 @@ process METASPADES_BLAST {
     publishDir "${params.outdir}/assembly/metaspades/blast", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'metaspades' in assemblers && !single_end
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !params.skip_blast
 
     input:
     set val(sample), val(single_end), file(scaffold) from ch_metaspades_blast
@@ -1690,7 +1690,7 @@ process METASPADES_ABACAS {
                 }
 
     when:
-    !params.skip_assembly && 'metaspades' in assemblers && !single_end
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !params.skip_abacas
 
     input:
     set val(sample), val(single_end), file(scaffold) from ch_metaspades_abacas
@@ -1718,7 +1718,7 @@ process METASPADES_PLASMIDID {
     publishDir "${params.outdir}/assembly/metaspades/plasmidid", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'metaspades' in assemblers && !single_end
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !params.skip_plasmidid
 
     input:
     set val(sample), val(single_end), file(scaffold) from ch_metaspades_plasmidid.filter { it.size() > 0 }
@@ -1742,7 +1742,7 @@ process METASPADES_QUAST {
     publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'metaspades' in assemblers && !single_end
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !params.skip_assembly_quast
 
     input:
     file scaffolds from ch_metaspades_quast.collect{ it[2] }
@@ -1809,7 +1809,7 @@ process UNICYCLER_BLAST {
     publishDir "${params.outdir}/assembly/unicycler/blast", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'unicycler' in assemblers
+    !params.skip_assembly && 'unicycler' in assemblers && !params.skip_blast
 
     input:
     set val(sample), val(single_end), file(scaffold) from ch_unicycler_blast
@@ -1846,7 +1846,7 @@ process UNICYCLER_ABACAS {
                 }
 
     when:
-    !params.skip_assembly && 'unicycler' in assemblers
+    !params.skip_assembly && 'unicycler' in assemblers && !params.skip_abacas
 
     input:
     set val(sample), val(single_end), file(scaffold) from ch_unicycler_abacas
@@ -1874,7 +1874,7 @@ process UNICYCLER_PLASMIDID {
     publishDir "${params.outdir}/assembly/unicycler/plasmidid", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'unicycler' in assemblers
+    !params.skip_assembly && 'unicycler' in assemblers && !params.skip_plasmidid
 
     input:
     set val(sample), val(single_end), file(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
@@ -1898,7 +1898,7 @@ process UNICYCLER_QUAST {
     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'unicycler' in assemblers
+    !params.skip_assembly && 'unicycler' in assemblers && !params.skip_assembly_quast
 
     input:
     file scaffolds from ch_unicycler_quast.collect{ it[2] }
