@@ -75,89 +75,67 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 ### cat
 
+**Output directory: `preprocess/merged_fastq`**
+
 TODO: Add some notes here about why and how we are merging FastQ files from the same sample.
 
 ## Variant calling
 
 ### Bowtie 2
 
-[Bowtie 2](http://bio-bwa.sourceforge.net/) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. It is particularly good at aligning reads of about 50 up to 100s of characters to relatively long genomes. Bowtie 2 indexes the genome with an FM Index (based on the Burrows-Wheeler Transform or BWT) to keep its memory footprint small. Bowtie 2 supports gapped, local, and paired-end alignment modes.
+[Bowtie 2](http://bio-bwa.sourceforge.net/) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. Bowtie 2 supports gapped, local, and paired-end alignment modes.
 
 **Output directory: `variants/bowtie2`**
 
-* `<SAMPLE>.bam`
-  * Only if `--save_align_intermeds`. Mapping BAM file
-* log/`<SAMPLE>.log`
-  * Bowtie2 mapping log file.
-* `<SAMPLE>.sorted.bam`
-  * Sorted aligned BAM file.
-* `<SAMPLE>.sorted.bam.bai`
-  * Index file for soreted aligned BAM file.
+* `<SAMPLE>.bam`: Original BAM file containing mapped reads. Only present if `--save_align_intermeds` parameter is supplied.
+* `log/<SAMPLE>.log`: Bowtie2 mapping log file.
+* `<SAMPLE>.sorted.bam`: Sorted aligned BAM file.
+* `<SAMPLE>.sorted.bam.bai`: Index file for sorted aligned BAM file.
 
 ![Bowtie2 paired end reads quality score plot](images/bowtie2_pe_plot-1.png)
 
 ### SAMtools
 
-The result mapping files are further processed with [SAMtools](http://samtools.sourceforge.net/), sam format is converted to bam, sorted and an index .bai is generated. Samtools is also used to generate statistics about the mapping process.
+The resulting BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/) for co-ordinate sorting and indexing of the alignments. SAMtools is also used to generate read mapping statistics.
 
 **Output directory: `variants/bowtie2/samtools_stats`**
 
-* `<SAMPLE>.sorted.bam.flagstat`
-  * Samtools flagstats mapping stats summary.
-* `<SAMPLE>.sorted.bam.idxstats`
-  * Samtools stats in the mapping index file.
-* `<SAMPLE>.sorted.bam.stats`
-  * Samtools mapping stats report.
+* `<SAMPLE>.sorted.bam.flagstat`: Samtools flagstats mapping stats summary.
+* `<SAMPLE>.sorted.bam.idxstats`: Samtools stats in the mapping index file.
+* `<SAMPLE>.sorted.bam.stats`: Samtools mapping stats report.
 
 ![SAMtools alignment quality scores plot](images/samtools_alignment_plot-1.png)
 
 ### iVar trim
 
-If we are running the `--protocol amplicon`, [iVar](http://gensoft.pasteur.fr/docs/ivar/1.0/manualpage.html) is used to trim the amplicon primers. iVar uses primer positions supplied in a BED file to soft clip primer sequences from an aligned and sorted BAM file.
+If `--protocol amplicon` is set then [iVar](http://gensoft.pasteur.fr/docs/ivar/1.0/manualpage.html) is used to trim the amplicon primer sequences from the reads. iVar uses the primer positions supplied in `--amplicon_bed` to soft clip primer sequences from an aligned and sorted BAM file.
 
 **Output directory: `variants/ivar`**
 
-* `<SAMPLE>.trim.sorted.bam`
-  * Sorted aligned bam file after trimming.
-* `<SAMPLE>.trim.sorted.bam.bai`
-  * Index file for sorted aligned trimmed bam.
-* `log/<SAMPLE>.trim.ivar.log`
-  * iVar log file.
-* `samtools_stats/<SAMPLE>.trim.sorted.bam.flagstat`
-  * Samtools flagstats summary file.
-* `samtools_stats/<SAMPLE>.trim.sorted.bam.idxstats`
-  * Samtools stats in the mapping index file.
-* `samtools_stats/<SAMPLE>.trim.sorted.bam.stats`
-  * Samtools mapping stats report.
-* `<SAMPLE>.trim.stats`
-  * Picard metrics summary file for evaluating coverage and performance.
+* `<SAMPLE>.trim.sorted.bam`: Sorted aligned BAM file after trimming.
+* `<SAMPLE>.trim.sorted.bam.bai`: Index file for sorted aligned trimmed BAM.
+* `log/<SAMPLE>.trim.ivar.log`: iVar log file.
+* `samtools_stats/<SAMPLE>.trim.sorted.bam.flagstat`: SAMtools flagstats summary file.
+* `samtools_stats/<SAMPLE>.trim.sorted.bam.idxstats`: SAMtools stats in the mapping index file.
+* `samtools_stats/<SAMPLE>.trim.sorted.bam.stats`: SAMtools mapping stats report.
+* `<SAMPLE>.trim.stats`: Picard metrics summary file for evaluating coverage and performance.
 
 ### picard-tools
 
-[picard-tools](https://broadinstitute.github.io/picard/index.html) is a set of command line tools for manipulating high-throughput sequencing (HTS) data. In this case we used it to obtain mapping stats. If we are running `--protocol amplicon` Picards is going to be run over iVar files. Else, it will be run over Bowtie+Samtools files.
+[picard-tools](https://broadinstitute.github.io/picard/index.html) is a set of command-line tools for manipulating high-throughput sequencing data. In this case we use it to obtain mapping and coverage metrics. If `--protocol amplicon` is set then these metrics will be obtained from the IVar trimmed alignments as opposed to the original Bowtie 2 alignments.
 
 **Output directory: `variants/[bowtie2/iVar]/picard_metrics`**
 
-* `<SAMPLE>.CollectWgsMetrics.coverage_metrics`
-  * Picard metrics summary file for evaluating coverage and performance.
-* `<SAMPLE>.CollectMultipleMetrics.alignment_summary_metrics`
-  * Summary metrics of the alignment.
-* `<SAMPLE>.CollectMultipleMetrics.base_distribution_by_cycle.pdf`
-  * PDF file with the Base percentage plotted against the number of cycle.
-* `<SAMPLE>.CollectMultipleMetrics.base_distribution_by_cycle_metrics`
-  * Metrics file used to plot `<SAMPLE>.CollectMultipleMetrics.base_distribution_by_cycle.pdf`.
-* `<SAMPLE>.CollectMultipleMetrics.insert_size_histogram.pdf`
-  * PDF file with the counts and the cumulative fraction of reads that is higher than the insert size against the insert size.
-* `<SAMPLE>.CollectMultipleMetrics.insert_size_metrics`
-  * Metrics about the insert size distribution of a paired-end library used to plot `<SAMPLE>.CollectMultipleMetrics.insert_size_histogram.pdf`.
-* `<SAMPLE>.CollectMultipleMetrics.quality_by_cycle.pdf`
-  * PDF file with the Mean Quality against the cycle number.
-* `<SAMPLE>.CollectMultipleMetrics.quality_by_cycle_metrics`
-  * Metrics file used to plot `<SAMPLE>.CollectMultipleMetrics.quality_by_cycle.pdf`.
-* `<SAMPLE>.CollectMultipleMetrics.quality_distribution.pdf`
-  * PDF file with the distribution of quality scores.
-* `<SAMPLE>.CollectMultipleMetrics.quality_distribution_metrics`
-  * Metrics file used to plot `<SAMPLE>.CollectMultipleMetrics.quality_distribution.pdf`.
+* `<SAMPLE>.CollectWgsMetrics.coverage_metrics`: Picard metrics summary file for evaluating coverage and performance.
+* `<SAMPLE>.CollectMultipleMetrics.alignment_summary_metrics`: Summary metrics of the alignment.
+* `<SAMPLE>.CollectMultipleMetrics.base_distribution_by_cycle.pdf`: PDF file with the Base percentage plotted against the number of cycle.
+* `<SAMPLE>.CollectMultipleMetrics.base_distribution_by_cycle_metrics`: Metrics file used to plot `<SAMPLE>.CollectMultipleMetrics.base_distribution_by_cycle.pdf`.
+* `<SAMPLE>.CollectMultipleMetrics.insert_size_histogram.pdf`: PDF file with the counts and the cumulative fraction of reads that is higher than the insert size against the insert size.
+* `<SAMPLE>.CollectMultipleMetrics.insert_size_metrics`: Metrics about the insert size distribution of a paired-end library used to plot `<SAMPLE>.CollectMultipleMetrics.insert_size_histogram.pdf`.
+* `<SAMPLE>.CollectMultipleMetrics.quality_by_cycle.pdf`: PDF file with the Mean Quality against the cycle number.
+* `<SAMPLE>.CollectMultipleMetrics.quality_by_cycle_metrics`: Metrics file used to plot `<SAMPLE>.CollectMultipleMetrics.quality_by_cycle.pdf`.
+* `<SAMPLE>.CollectMultipleMetrics.quality_distribution.pdf`: PDF file with the distribution of quality scores.
+* `<SAMPLE>.CollectMultipleMetrics.quality_distribution_metrics`: Metrics file used to plot `<SAMPLE>.CollectMultipleMetrics.quality_distribution.pdf`.
 
 Picard documentation: [Picard docs](https://broadinstitute.github.io/picard/command-line-overview.html)
 
