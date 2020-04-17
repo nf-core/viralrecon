@@ -52,33 +52,24 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 **Output directory: `preprocess/fastqc`**
 
-* `<SAMPLE>_fastqc.html`
-  * FastQC report, containing quality metrics for your untrimmed raw fastq files
-* `zips/<SAMPLE>_fastqc.zip`
-  * zip file containing the FastQC report, tab-delimited data file and plot images
+* `<SAMPLE>_fastqc.html`: FastQC report, containing quality metrics for your untrimmed raw fastq files.
+* `zips/<SAMPLE>_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
 
 ![FastQC per base sequence plot](images/fastqc_per_base_sequence_quality_plot-1.png)
 
 ### fastp
 
-[fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast all-in-one preprocessing for FastQ files. This tool is developed in C++ with multithreading supported to afford high performance. Fastp is used for quality filtering and adapter trimming.
+[fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast all-in-one preprocessing for FastQ files. It is developed in C++ with multithreading support to afford high performance. We use fastp for adapter trimming and quality filtering.
 
 **Output directory: `preprocess/fastp`**
 
-* `<SAMPLE>.trim.fastq.gz`
-  * Only with `--save_trimmed` param. Paired trimmed reads.
-* `<SAMPLE>.trim.fail.gz`
-  * Only with `--save_trimmed` param. Unpaired trimmed reads.
-* `<SAMPLE>.fastp.html`
-  * Fastp report in html format.
-* `<SAMPLE>.fastp.json`
-  * Fastp report in json format.
-* `fastqc/<SAMPLE>.trim.fastqc.html`
-  * FastQC report of the trimmed reads.
-* `fastqc/zips/<SAMPLE>.trim.fastqc.zip`
-  * Zip file with the FastQC report.
-* `log/<SAMPLE>.fastp.log`
-  * Trimming log file.
+* `<SAMPLE>.trim.fastq.gz`: Paired trimmed reads. Only present if `--save_trimmed` parameter is supplied.
+* `<SAMPLE>.trim.fail.gz`: Unpaired trimmed reads. Only present if `--save_trimmed` parameter is supplied.
+* `<SAMPLE>.fastp.html`: fastp report in html format.
+* `<SAMPLE>.fastp.json`: fastp report in json format.
+* `fastqc/<SAMPLE>.trim.fastqc.html`: FastQC report of the trimmed reads.
+* `fastqc/zips/<SAMPLE>.trim.fastqc.zip`: Zip archive containing the FastQC report.
+* `log/<SAMPLE>.fastp.log`: Trimming log file.
 
 ![fastp filtered reads plot](images/fastp_filtered_reads_plot-1.png)
 
