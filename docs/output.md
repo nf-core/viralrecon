@@ -1,4 +1,4 @@
-# nf-core/viralrecon: Output
+# ![nf-core/viralrecon](images/nf-core-viralrecon_logo.png)
 
 This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
 
