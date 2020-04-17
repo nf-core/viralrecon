@@ -71,7 +71,7 @@ jobs:
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }}
 
-   test_sra:
+  test_sra:
      env:
        NXF_VER: '19.10.0'
        NXF_ANSI_LOG: false
