@@ -14,7 +14,6 @@ dependencies:
   - conda-forge::pygments=2.6.1
   - conda-forge::pigz=2.3.4
   - conda-forge::r-base=3.6.2
-  - conda-forge::wkhtmltopdf=0.12.4
   - conda-forge::bc=1.07.1
 
   ## bioconda packages
