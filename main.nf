@@ -2055,12 +2055,11 @@ process output_documentation {
     file images from ch_output_docs_images
 
     output:
-    file "results_description.html"
+    file ".{html,pdf}"
 
     script:
     """
     markdown_to_html.py $output_docs -o results_description.html
-    #wkhtmltopdf --keep-relative-links results_description.html results_description.pdf
     """
 }
 
