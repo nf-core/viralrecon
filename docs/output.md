@@ -45,6 +45,8 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 * `zips/<SAMPLE>_fastqc.zip`
   * zip file containing the FastQC report, tab-delimited data file and plot images
 
+![FastQC per base sequence plot](images/fastqc_per_base_sequence_quality_plot-1.png)
+
 ### Fastp
 
 [Fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast all-in-one preprocessing for FastQ files. This tool is developed in C++ with multithreading supported to afford high performance. Fastp is used for quality filtering and adapter trimming.
