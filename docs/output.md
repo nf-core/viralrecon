@@ -68,6 +68,8 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 * `log/<SAMPLE>.fastp.log`
   * Trimming log file.
 
+![Fastp filtered reads plot](images/fastp_filtered_reads_plot-1.png)
+
 ## Mapping + variant calling + consensus
 
 ### kraken2
@@ -106,6 +108,8 @@ We mapped the fastq file against the reference host genome.
 * `<SAMPLE>.sorted.bam.bai`
   * Index file for soreted aligned BAM file.
 
+![Bowtie2 paired end reads quality score plot](images/bowtie2_pe_plot-1.png)
+
 ### SAMtools
 
 The result mapping files are further processed with [SAMtools](http://samtools.sourceforge.net/), sam format is converted to bam, sorted and an index .bai is generated. Samtools is also used to generate statistics about the mapping process.
@@ -118,6 +122,8 @@ The result mapping files are further processed with [SAMtools](http://samtools.s
   * Samtools stats in the mapping index file.
 * `<SAMPLE>.sorted.bam.stats`
   * Samtools mapping stats report.
+
+![SAMtools alignment quality scores plot](images/samtools_alignment_plot-1.png)
 
 ### Picard
 
@@ -147,6 +153,8 @@ The result mapping files are further processed with [SAMtools](http://samtools.s
   * Metrics file used to plot `<SAMPLE>.CollectMultipleMetrics.quality_distribution.pdf`.
 
 Picard documentation: [Picarddocs](https://broadinstitute.github.io/picard/command-line-overview.html)
+
+![Picard insert size plot](images/picard_insert_size-1.png)
 
 ### iVar
 
