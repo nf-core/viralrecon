@@ -2055,7 +2055,7 @@ process output_documentation {
     file images from ch_output_docs_images
 
     output:
-    file ".{html,pdf}"
+    file "results_description.html"
 
     script:
     """
