@@ -32,7 +32,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
             * Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
             * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
         * Call variants ([`iVar`](https://github.com/andersen-lab/ivar))
-            * Consensus sequence generatation ([`iVar`](https://github.com/andersen-lab/ivar))
+            * Consensus sequence generation ([`iVar`](https://github.com/andersen-lab/ivar))
             * Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
             * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
 6. De novo assembly
@@ -40,12 +40,10 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     2. Removal of host reads ([`Kraken2`](http://ccb.jhu.edu/software/kraken2/))
     3. Choice of multiple assembly tools ([`SPAdes`](http://cab.spbu.ru/software/spades/), [`metaSPAdes`](http://cab.spbu.ru/software/meta-spades/), [`Unicycler`](https://github.com/rrwick/Unicycler))
         * Blast to reference assembly ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch))
-        * Contiguate contigs assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
+        * Contiguate assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
         * Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))
         * Assembly assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
 7. Present QC for raw read, alignment, assembly, variant annotation results ([`MultiQC`](http://multiqc.info/), [`R`](https://www.r-project.org/))
-
-<!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
 
 ## Quick Start
 
@@ -62,8 +60,6 @@ nextflow run nf-core/viralrecon -profile test,<docker/singularity/conda/institut
 > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
 
 iv. Start running your own analysis!
-
-<!-- TODO nf-core: Update the default command above used to run the pipeline -->
 
 ```bash
 nextflow run nf-core/viralrecon -profile <docker/singularity/conda/institute> --input samplesheet.csv --genome 'NC_045512.2' -profile docker
@@ -100,6 +96,7 @@ Many thanks to others who have helped out and contributed along the way too, inc
 | [Maxime Garcia](https://github.com/MaxUlysse)             | [SciLifeLab, Sweden](https://www.scilifelab.se/)                      |
 | [Michael Heuer](https://github.com/heuermh)               | [UC Berkeley, USA](https://https://rise.cs.berkeley.edu)              |
 | [Phil Ewels](https://github.com/ewels)                    | [SciLifeLab, Sweden](https://www.scilifelab.se/)                      |
+| [Stephen Kelly](https://github.com/stevekm)           | [Memorial Sloan Kettering Cancer Center, USA](https://www.mskcc.org/)                       |
 | [Thanh Le Viet](https://github.com/thanhleviet)           | [Quadram Institute, UK](https://quadram.ac.uk/)                       |
 
 > Listed in alphabetical order

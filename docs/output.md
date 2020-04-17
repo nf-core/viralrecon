@@ -2,8 +2,6 @@
 
 This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
 
-<!-- TODO nf-core: Write this documentation describing your workflow's output -->
-
 ## Pipeline overview
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/)
@@ -40,12 +38,14 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 > **NB:** The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality. To see how your reads look after trimming, look at the FastQC reports in the `fastp` directory.
 
-**Output directory: `results/fastqc`**
+**Output directory: `preprocess/fastqc`**
 
 * `<SAMPLE>_fastqc.html`
   * FastQC report, containing quality metrics for your untrimmed raw fastq files
 * `zips/<SAMPLE>_fastqc.zip`
   * zip file containing the FastQC report, tab-delimited data file and plot images
+
+![FastQC per base sequence plot](images/fastqc_per_base_sequence_quality_plot-1.png)
 
 ### Fastp
 
@@ -65,8 +65,10 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
   * FastQC report of the trimmed reads.
 * `fastqc/zips/<SAMPLE>.trim.fastqc.zip`
   * Zip file with the FastQC report.
-* `logs/<SAMPLE>.fastp.log`
+* `log/<SAMPLE>.fastp.log`
   * Trimming log file.
+
+![Fastp filtered reads plot](images/fastp_filtered_reads_plot-1.png)
 
 ## Mapping + variant calling + consensus
 
@@ -76,7 +78,7 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 We mapped the fastq file against the reference host genome.
 
-**Output directory: `preprocess/kraken2`**
+**Output directory: `assembly/kraken2`**
 
 * `<SAMPLE>.host.fastq.gz`
   * Only with `--save_kraken2_fastq`. Reads that mapped with host taxon.
@@ -99,12 +101,14 @@ We mapped the fastq file against the reference host genome.
 
 * `<SAMPLE>.bam`
   * Only if `--save_align_intermeds`. Mapping BAM file
-* logs/`<SAMPLE>.log`
+* log/`<SAMPLE>.log`
   * Bowtie2 mapping log file.
 * `<SAMPLE>.sorted.bam`
   * Sorted aligned BAM file.
 * `<SAMPLE>.sorted.bam.bai`
   * Index file for soreted aligned BAM file.
+
+![Bowtie2 paired end reads quality score plot](images/bowtie2_pe_plot-1.png)
 
 ### SAMtools
 
@@ -118,6 +122,8 @@ The result mapping files are further processed with [SAMtools](http://samtools.s
   * Samtools stats in the mapping index file.
 * `<SAMPLE>.sorted.bam.stats`
   * Samtools mapping stats report.
+
+![SAMtools alignment quality scores plot](images/samtools_alignment_plot-1.png)
 
 ### Picard
 
@@ -147,6 +153,8 @@ The result mapping files are further processed with [SAMtools](http://samtools.s
   * Metrics file used to plot `<SAMPLE>.CollectMultipleMetrics.quality_distribution.pdf`.
 
 Picard documentation: [Picarddocs](https://broadinstitute.github.io/picard/command-line-overview.html)
+
+![Picard insert size plot](images/picard_insert_size-1.png)
 
 ### iVar
 
@@ -205,9 +213,9 @@ First of all SAMtools is used to generate the variant calling VCF file. Then [Va
   * Low frequency variants VCF file.
 * `<SAMPLE>.lowfreq.vcf.gz.tbi`
   * Low frequency variants VCF index file.
-* `logs/<SAMPLE>.highfreq.varscan2.log`
+* `log/<SAMPLE>.highfreq.varscan2.log`
   * VarScan2 high frequency variants log file.
-* `logs/<SAMPLE>.lowfreq.varscan2.log`
+* `log/<SAMPLE>.lowfreq.varscan2.log`
   * VarScan2 low frequency variants log file.
 
 ### SnpEff and SnpSift
@@ -260,7 +268,7 @@ We selected the reads that didn't cluster using kraken2 with the host genome and
 
 Only when running `--protocol amplicon`, [Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) is used for clipping primer sequences from reads prior to assembly.
 
-**Output directory:** `preprocess/cutadapt`
+**Output directory:** `assembly/cutadapt`
 
 * `fastqc/<SAMPLE>.ptrim_fastqc.html`
   * Fastqc HTML reports for primer clipped reads.
