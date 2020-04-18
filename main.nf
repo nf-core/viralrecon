@@ -61,7 +61,7 @@ def helpMessage() {
       --skip_variants [bool]          Skip variant calling steps in the pipeline (Default: false)
 
     De novo assembly
-      --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler')
+      --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler,minia')
       --skip_blast [bool]             Skip blastn of assemblies relative to reference genome (Default: false)
       --skip_abacas [bool]            Skip ABACUS process for assembly contiguation (Default: false)
       --skip_plasmidid [bool]         Skip assembly report generation by PlasmidID (Default: false)
@@ -141,7 +141,7 @@ if ((callerList + callers).unique().size() != callerList.size()) {
     exit 1, "Invalid variant calller option: ${params.callers}. Valid options: ${callerList.join(', ')}"
 }
 
-assemblerList = [ 'spades', 'metaspades', 'unicycler' ]
+assemblerList = [ 'spades', 'metaspades', 'unicycler', 'minia' ]
 assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
@@ -317,7 +317,9 @@ ch_fasta
             ch_fasta_ivar_variants; ch_fasta_ivar_consensus; ch_fasta_ivar_snpeff; ch_fasta_ivar_quast;
             ch_fasta_blast; ch_fasta_spades_abacas; ch_fasta_spades_plasmidid; ch_fasta_spades_quast;
             ch_fasta_metaspades_abacas; ch_fasta_metaspades_plasmidid; ch_fasta_metaspades_quast;
-            ch_fasta_unicycler_abacas; ch_fasta_unicycler_plasmidid; ch_fasta_unicycler_quast }
+            ch_fasta_unicycler_abacas; ch_fasta_unicycler_plasmidid; ch_fasta_unicycler_quast;
+            ch_fasta_minia_overlap_scaffolds; ch_fasta_minia_induce_graph;
+            ch_fasta_minia_abacas; ch_fasta_minia_plasmidid; ch_minia_spades_quast }
 
 /*
  * PREPROCESSING: Uncompress gff annotation file
@@ -1429,7 +1431,8 @@ process KRAKEN2 {
     output:
     set val(sample), val(single_end), file("*.viral*") into ch_kraken2_spades,
                                                             ch_kraken2_metaspades,
-                                                            ch_kraken2_unicycler
+                                                            ch_kraken2_unicycler,
+                                                            ch_kraken2_minia
     file "*.host*"
     file "*.report.txt"
 
@@ -1920,6 +1923,228 @@ process UNICYCLER_QUAST {
     """
 }
 
+////////////////////////////////////////////////////
+/* --                MINIA                     -- */
+////////////////////////////////////////////////////
+
+/*
+ * STEP 6.3: De novo assembly with minia
+ */
+process MINIA_ASSEMBLY {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
+    container "quay.io/biocontainers/minia:3.2.1--he513fc3_0"
+
+    when:
+    !params.skip_assembly && 'minia' in assemblers
+
+    input:
+    set val(sample), val(single_end), file(reads) from ch_kraken2_minia
+    output:
+    set val(sample), val(single_end), file("*scaffolds.fa") into ch_minia_overlap_scaffolds,
+                                                                 ch_minia_quast,
+                                                                 ch_minia_blast,
+                                                                 ch_minia_abacas,
+                                                                 ch_minia_plasmidid
+
+    """
+    minia -kmer-size 51 -abundance-min 20 -in $reads -out ${sample}.k51.a20
+    mv ${sample}.k51.a20.contigs.fa ${sample}.scaffolds.fa
+    """
+}
+
+/*
+ * STEP 6.3.1: Overlap scaffolds with minimap2
+ */
+process MINIA_OVERLAP_SCAFFOLDS {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
+    container "quay.io/biocontainers/minimap2:2.17--h8b12597_1"
+
+    when:
+    !params.skip_assembly && 'minia' in assemblers
+
+    input:
+    set val(sample), val(single_end), file(fasta) from ch_minia_overlap_scaffolds
+    file reference from ch_fasta_minia_overlap_scaffolds.collect()
+    output:
+    set val(sample), file(fasta), file("${sample}.paf") into ch_minia_induce_graph
+
+    """
+    minimap2 -c -x asm20 $reference $fasta > ${sample}.paf
+    """
+}
+
+/*
+ * STEP 6.3.2: Induce assembly graph with seqwish
+ */
+process MINIA_INDUCE_GRAPH {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
+    container "quay.io/biocontainers/seqwish:0.4.1--h8b12597_0"
+
+    when:
+    !params.skip_assembly && 'minia' in assemblers
+
+    input:
+    set val(sample), file(fasta), file(alignment) from ch_minia_induce_graph
+    file reference from ch_fasta_minia_induce_graph.collect()
+    output:
+    set val(sample), file("${sample}.gfa") into ch_minia_call_variants
+
+    """
+    cat $fasta $reference > ${sample}.withRef.fasta
+    seqwish -s ${sample}.withRef.fasta -p $alignment -g ${sample}.gfa
+    """
+}
+
+/*
+ * STEP 6.3.3: Polish assembly graph and call variants with vg
+ */
+process MINIA_CALL_VARIANTS {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
+    container "quay.io/biocontainers/vg:1.23.0--0"
+
+    when:
+    !params.skip_assembly && 'minia' in assemblers
+
+    input:
+    set val(sample), file(graph) from ch_minia_call_variants
+    output:
+    set val(sample), file("${sample}.xg"), file("${sample}.vcf") into ch_minia_variants
+
+    """
+    vg convert -x -g $graph > ${sample}.xg
+    vg deconstruct -p NC_045512.2 ${sample}.xg > ${sample}.vcf
+    """
+}
+
+/*
+ * STEP 6.3.4: Run Blast on minia de novo assembly
+ */
+process MINIA_BLAST {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/minia/blast", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'minia' in assemblers && !params.skip_blast
+
+    input:
+    set val(sample), val(single_end), file(scaffold) from ch_minia_blast
+    file db from ch_blast_db_minia.collect()
+    file header from ch_blast_outfmt6_header
+
+    output:
+    file "*.blast*"
+
+    script:
+    """
+    blastn \\
+        -num_threads $task.cpus \\
+        -db $db/$fasta_base \\
+        -query $scaffold \\
+        -outfmt \'6 stitle std slen qlen qcovs\' \\
+        -out ${sample}.blast.txt
+
+    awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
+    cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
+    """
+}
+
+/*
+ * STEP 6.3.5: Run ABACAS on minia de novo assembly
+ */
+process MINIA_ABACAS {
+    tag "$sample"
+    label "process_medium"
+    publishDir "${params.outdir}/assembly/minia/abacas", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
+                      else filename
+                }
+
+    when:
+    !params.skip_assembly && 'minia' in assemblers && !params.skip_abacas
+
+    input:
+    set val(sample), val(single_end), file(scaffold) from ch_minia_abacas
+    file fasta from ch_fasta_minia_abacas.collect()
+
+    output:
+    file "*.abacas*"
+
+    script:
+    """
+    abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
+    mv nucmer.delta ${sample}.abacas.nucmer.delta
+    mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
+    mv nucmer.tiling ${sample}.abacas.nucmer.tiling
+    mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+    """
+}
+
+/*
+ * STEP 6.3.6: Run PlasmidID on minia de novo assembly
+ */
+process MINIA_PLASMIDID {
+    tag "$sample"
+    label "process_medium"
+    publishDir "${params.outdir}/assembly/minia/plasmidid", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'minia' in assemblers && !params.skip_plasmidid
+
+    input:
+    set val(sample), val(single_end), file(scaffold) from ch_minia_plasmidid.filter { it.size() > 0 }
+    file fasta from ch_fasta_minia_plasmidid.collect()
+
+    output:
+    file "$sample"
+
+    script:
+    """
+    plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+    mv NO_GROUP/$sample ./$sample
+    """
+}
+
+/*
+ * STEP 6.3.7: Run Quast on minia de novo assembly
+ */
+process MINIA_QUAST {
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'minia' in assemblers && !params.skip_assembly_quast
+
+    input:
+    file scaffolds from ch_minia_quast.collect{ it[2] }
+    file fasta from ch_fasta_minia_quast.collect()
+    file gff from ch_gff_minia_quast.collect().ifEmpty([])
+
+    output:
+    file "quast/report.tsv" into ch_quast_minia_mqc
+    file "quast"
+
+    script:
+    features = params.gff ? "--features $gff" : ""
+    """
+    quast.py \\
+        --output-dir quast \\
+        -r $fasta \\
+        $features \\
+        --threads $task.cpus \\
+        ${scaffolds.join(' ')}
+    """
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
@@ -2020,6 +2245,7 @@ process MULTIQC {
     file ('spades/quast/*') from ch_quast_spades_mqc.collect().ifEmpty([])
     file ('metaspades/quast/*') from ch_quast_metaspades_mqc.collect().ifEmpty([])
     file ('unicycler/quast/*') from ch_quast_unicycler_mqc.collect().ifEmpty([])
+    file ('minia/quast/*') from ch_quast_minia_mqc.collect().ifEmpty([])
     file ('software_versions/*') from ch_software_versions_yaml.collect()
     file workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
 
