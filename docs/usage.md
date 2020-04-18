@@ -114,7 +114,7 @@ nextflow pull nf-core/viralrecon
 
 ### Reproducibility
 
-It's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
+It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
 First, go to the [nf-core/viralrecon releases page](https://github.com/nf-core/viralrecon/releases) and find the latest version number - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`.
 
@@ -144,7 +144,7 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
   * Pulls software from DockerHub: [`nfcore/viralrecon`](http://hub.docker.com/r/nfcore/viralrecon/)
 * `conda`
-  * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
+  * Please only use Conda as a last resort i.e. when it is not possible to run the pipeline with Docker or Singularity.
   * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
   * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `test`
@@ -190,7 +190,7 @@ Viral genome location of primers. Mandatory when `--protocol amplicon` and not `
 
 #### Format
 
-It must be in bed format, with this fields:
+It must be in [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format, with these fields:
 
 ```Bash
 
@@ -211,7 +211,7 @@ NC_045512.2 704 726 nCoV-2019_2_RIGHT 60 +
 
 ### `--amplicon_fasta`
 
-Primer sequences in fasta format. Mandatory when `--protocol amplicon` and not `--skip_assembly`.
+Primer sequences in Fasta format. Mandatory when `--protocol amplicon` and not `--skip_assembly`.
 Example:
 
 ```Bash
@@ -260,12 +260,12 @@ params {
   // Genome reference file paths
   genomes {
     'NC_045512.2' {
-      fasta = "<path to the genome fasta file>"
-      gff   = "<path to the genome annotation file>"
+      fasta = "<path to the genome Fasta file>"
+      gff   = "<path to the genome annotation GFF file>"
     }
     'MN908947.3' {
-      fasta = "<path to the genome fasta file>"
-      gff   = "<path to the genome annotation file>"
+      fasta = "<path to the genome Fasta file>"
+      gff   = "<path to the genome annotation GFF file>"
     }
     // Any number of additional genomes, key is used with --genome
   }
@@ -276,15 +276,15 @@ You can find the keys to specify the genomes in the [Genomes config file](https:
 
 ### `--fasta`
 
-Full path to fasta file containing reference genome for the viral species (*mandatory* if `--genome` is not specified). If you don't have a Bowtie2 index available this will be generated for you automatically. Combine with `--save_reference` to save Bowtie2 index for future runs.
+Full path to Fasta file containing reference genome for the viral species (*mandatory* if `--genome` is not specified). If you don't have a Bowtie2 index available this will be generated for you automatically. Combine with `--save_reference` to save Bowtie2 index for future runs.
 
 ```bash
---fasta '[path to FASTA reference]'
+--fasta '[path to Fasta reference]'
 ```
 
 ### `--gff`
 
-Full path to viral gff annotation file (Default: false).
+Full path to viral [GFF](http://www.gmod.org/wiki/GFF3) annotation file (Default: false).
 
 ### `--save_reference`
 
@@ -330,7 +330,7 @@ This option unsets the `-e` parameter in `ivar trim` to discard reads without pr
 
 ### `--save_align_intermeds`
 
-By default, intermediate BAM files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set to true to also save other intermediate BAM files (Default: false).
+By default, intermediate [BAM](https://samtools.github.io/hts-specs/) files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set to true to also save other intermediate BAM files (Default: false).
 
 ## Variant calling
 
@@ -477,7 +477,7 @@ Provide git commit id for custom Institutional configs hosted at `nf-core/config
 
 ### `--custom_config_base`
 
-If you're running offline, nextflow will not be able to fetch the institutional config files
+If you're running offline, Nextflow will not be able to fetch the institutional config files
 from the internet. If you don't need them, then this is not a problem. If you do need them,
 you should download the files from the repo and tell nextflow where to find them with the
 `custom_config_base` option. For example:
