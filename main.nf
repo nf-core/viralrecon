@@ -319,7 +319,7 @@ ch_fasta
             ch_fasta_metaspades_abacas; ch_fasta_metaspades_plasmidid; ch_fasta_metaspades_quast;
             ch_fasta_unicycler_abacas; ch_fasta_unicycler_plasmidid; ch_fasta_unicycler_quast;
             ch_fasta_minia_overlap_scaffolds; ch_fasta_minia_induce_graph;
-            ch_fasta_minia_abacas; ch_fasta_minia_plasmidid; ch_minia_spades_quast }
+            ch_fasta_minia_abacas; ch_fasta_minia_plasmidid; ch_fasta_minia_quast }
 
 /*
  * PREPROCESSING: Uncompress gff annotation file
@@ -354,7 +354,8 @@ ch_gff
             ch_gff_ivar_quast
             ch_gff_spades_quast
             ch_gff_metaspades_quast
-            ch_gff_unicycler_quast }
+            ch_gff_unicycler_quast
+            ch_gff_minia_quast }
 
 /*
  * PREPROCESSING: Uncompress Kraken2 database
@@ -1306,7 +1307,8 @@ process MAKE_BLAST_DB {
     output:
     file "BlastDB" into ch_blast_db_spades,
                         ch_blast_db_metaspades,
-                        ch_blast_db_unicycler
+                        ch_blast_db_unicycler,
+                        ch_blast_db_minia
 
     script:
     """
