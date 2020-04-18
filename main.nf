@@ -1932,7 +1932,7 @@ process UNICYCLER_QUAST {
 /*
  * STEP 6.3: De novo assembly with minia
  */
-process MINIA_ASSEMBLY {
+process MINIA {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
@@ -1950,16 +1950,27 @@ process MINIA_ASSEMBLY {
                                                                  ch_minia_abacas,
                                                                  ch_minia_plasmidid
 
-    """
-    minia -kmer-size 51 -abundance-min 20 -in $reads -out ${sample}.k51.a20
-    mv ${sample}.k51.a20.contigs.fa ${sample}.scaffolds.fa
-    """
+    script:
+    if (single_end) {
+        """
+        minia -kmer-size 51 -abundance-min 20 -in $reads -out ${sample}.k51.a20
+        mv ${sample}.k51.a20.contigs.fa ${sample}.scaffolds.fa
+        """
+    }
+    else {
+        inputFiles = reads.join("\n")
+        """
+        echo '$inputFiles' > input_files.txt
+        minia -kmer-size 51 -abundance-min 20 -in input_files.txt -out ${sample}.k51.a20
+        mv ${sample}.k51.a20.contigs.fa ${sample}.scaffolds.fa
+        """
+    }
 }
 
 /*
  * STEP 6.3.1: Overlap scaffolds with minimap2
  */
-process MINIA_OVERLAP_SCAFFOLDS {
+process MINIA_OVERLAP {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
@@ -2018,10 +2029,11 @@ process MINIA_CALL_VARIANTS {
     input:
     set val(sample), file(graph) from ch_minia_call_variants
     output:
-    set val(sample), file("${sample}.xg"), file("${sample}.vcf") into ch_minia_variants
+    set val(sample), file("${sample}.vg"), file("${sample}.xg"), file("${sample}.vcf") into ch_minia_variants
 
     """
-    vg convert -x -g $graph > ${sample}.xg
+    vg view -Fv $graph > ${sample}.vg
+    vg convert -x ${sample}.vg > ${sample}.xg
     vg deconstruct -p NC_045512.2 ${sample}.xg > ${sample}.vcf
     """
 }
