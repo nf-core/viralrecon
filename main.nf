@@ -1943,7 +1943,6 @@ process MINIA_ASSEMBLY {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
-    container "quay.io/biocontainers/minia:3.2.1--he513fc3_0"
 
     when:
     !params.skip_assembly && 'minia' in assemblers
@@ -1970,7 +1969,6 @@ process MINIA_OVERLAP_SCAFFOLDS {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
-    container "quay.io/biocontainers/minimap2:2.17--h8b12597_1"
 
     when:
     !params.skip_assembly && 'minia' in assemblers
@@ -1993,7 +1991,6 @@ process MINIA_INDUCE_GRAPH {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
-    container "quay.io/biocontainers/seqwish:0.4.1--h8b12597_0"
 
     when:
     !params.skip_assembly && 'minia' in assemblers
@@ -2017,7 +2014,6 @@ process MINIA_CALL_VARIANTS {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
-    container "quay.io/biocontainers/vg:1.23.0--0"
 
     when:
     !params.skip_assembly && 'minia' in assemblers
