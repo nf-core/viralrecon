@@ -1474,7 +1474,8 @@ process SPADES {
                                                                  ch_spades_blast,
                                                                  ch_spades_abacas,
                                                                  ch_spades_plasmidid
-    set val(sample), val(single_end), file("*scaffolds.fa"), file("*assembly.gfa") into ch_spades_graph
+    file "*assembly.gfa"
+
 
     script:
     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
