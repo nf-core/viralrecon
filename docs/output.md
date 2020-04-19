@@ -28,6 +28,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [SPAdes](#spades) - OPTION 1: Viral genome assembly
   * [metaSPAdes](#metaspades) - OPTION 2: Viral genome assembly
   * [Unicycler](#unicycler) - OPTION 3: Viral genome assembly
+  * [minia](#minia) - OPTION 4: Viral genome assembly
+  * [Minimap2, seqwish, vg](#minimap2-seqwish-vg) - Call variants relative to reference
   * [BLAST](#blast) - Blast to reference assembly
   * [ABACAS](#abacas) - Order contigs according to reference genome
   * [PlasmidID](#plasmidid) - Assembly report and visualisation
@@ -281,6 +283,14 @@ We used a Kraken2 database in this workflow to filter out reads specific to the 
 
 * `assembly/unicycler/`
   * `<SAMPLE>.assembly.fasta`: Unicycler assembled scaffolds.
+
+### minia
+
+TODO: Add documentation here about minia.
+
+### [Minimap2, seqwish, vg](#minimap2-seqwish-vg) - Call variants relative to reference
+
+TODO: Add documentation here about these steps.
 
 ### BLAST
 
