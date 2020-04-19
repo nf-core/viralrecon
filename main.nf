@@ -1633,7 +1633,8 @@ process METASPADES {
                                                                  ch_metaspades_blast,
                                                                  ch_metaspades_abacas,
                                                                  ch_metaspades_plasmidid
-    set val(sample), val(single_end), file("*scaffolds.fa"), file("*assembly.gfa") into ch_metaspades_graph
+    file "*assembly.gfa"
+
 
     script:
     """
