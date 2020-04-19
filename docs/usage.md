@@ -359,7 +359,7 @@ Specify this parameter to skip all of the variant calling and mapping steps in t
 
 ### `--assemblers`
 
-Specify which assembly algorithms you would like to use. Available options are `spades`, `metaspades` and `unicycler` (Default: 'spades,metaspades,unicycler').
+Specify which assembly algorithms you would like to use. Available options are `spades`, `metaspades`, `unicycler` and `minia` (Default: 'spades,metaspades,unicycler,minia').
 
 ### `--skip_vg`
 
