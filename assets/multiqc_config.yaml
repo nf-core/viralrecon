@@ -140,6 +140,16 @@ module_order:
         info: 'This section of the report shows QUAST results from Unicycler de novo assembly.'
         path_filters:
             - './unicycler/quast/*'
+    - bcftools:
+        name: 'BCFTools (minia)'
+        info: 'This section of the report shows BCFTools stats results for variants called in the minia assembly relative to the reference.'
+        path_filters:
+            - './minia/bcftools/*'
+    - quast:
+        name: 'QUAST (minia)'
+        info: 'This section of the report shows QUAST results from minia de novo assembly.'
+        path_filters:
+            - './minia/quast/*'
 
 report_section_order:
     software_versions:
