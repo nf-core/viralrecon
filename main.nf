@@ -1474,6 +1474,8 @@ process SPADES {
                                                                  ch_spades_blast,
                                                                  ch_spades_abacas,
                                                                  ch_spades_plasmidid
+    file "*assembly.gfa"
+
 
     script:
     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
@@ -1483,6 +1485,7 @@ process SPADES {
         $input_reads \\
         -o ./
     mv scaffolds.fasta ${sample}.scaffolds.fa
+    mv assembly_graph_with_scaffolds.gfa ${sample}.assembly.gfa
     """
 }
 
@@ -1630,6 +1633,8 @@ process METASPADES {
                                                                  ch_metaspades_blast,
                                                                  ch_metaspades_abacas,
                                                                  ch_metaspades_plasmidid
+    file "*assembly.gfa"
+
 
     script:
     """
@@ -1640,6 +1645,7 @@ process METASPADES {
         -2 ${reads[1]} \\
         -o ./
     mv scaffolds.fasta ${sample}.meta.scaffolds.fa
+    mv assembly_graph_with_scaffolds.gfa ${sample}.meta.assembly.gfa
     """
 }
 
@@ -1787,6 +1793,8 @@ process UNICYCLER {
                                                                 ch_unicycler_blast,
                                                                 ch_unicycler_abacas,
                                                                 ch_unicycler_plasmidid
+    file "*assembly.gfa"
+
 
     script:
     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
@@ -1796,6 +1804,7 @@ process UNICYCLER {
         $input_reads \\
         --out ./
     mv assembly.fasta ${sample}.assembly.fa
+    mv assembly.gfa ${sample}.assembly.gfa
     """
 }
 
