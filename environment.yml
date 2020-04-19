@@ -22,14 +22,13 @@ dependencies:
   - bioconda::parallel-fastq-dump=0.6.6
   - bioconda::sra-tools=2.10.3
   - bioconda::fastp=0.20.1
-  - bioconda::bowtie2=2.3.5.1
-  - bioconda::kraken2=2.0.8_beta
   - bioconda::samtools=1.9
-  - bioconda::picard=2.22.3
   - bioconda::bedtools=2.29.2
   - bioconda::multiqc=1.8
 
-  ## mapping
+  ## variants
+  - bioconda::bowtie2=2.3.5.1
+  - bioconda::picard=2.22.3
   - bioconda::ivar=1.2
   - bioconda::bcftools=1.9
   - bioconda::varscan=2.4.4
@@ -38,8 +37,13 @@ dependencies:
 
   ## assembly
   - bioconda::cutadapt=2.9
+  - bioconda::kraken2=2.0.8_beta
   - bioconda::spades=3.14.0
   - bioconda::unicycler=0.4.7
+  - bioconda::minia=3.2.2
+  - bioconda::minimap2=2.17
+  - bioconda::seqwish=0.4.1
+  - bioconda::vg=1.23.0
   - bioconda::quast=5.0.2
   - bioconda::blast=2.9.0
   - bioconda::plasmidid=1.5.2

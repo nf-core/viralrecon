@@ -1479,6 +1479,8 @@ process SPADES {
                                                                  ch_spades_blast,
                                                                  ch_spades_abacas,
                                                                  ch_spades_plasmidid
+    file "*assembly.gfa"
+
 
     script:
     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
@@ -1488,6 +1490,7 @@ process SPADES {
         $input_reads \\
         -o ./
     mv scaffolds.fasta ${sample}.scaffolds.fa
+    mv assembly_graph_with_scaffolds.gfa ${sample}.assembly.gfa
     """
 }
 
@@ -1635,6 +1638,8 @@ process METASPADES {
                                                                  ch_metaspades_blast,
                                                                  ch_metaspades_abacas,
                                                                  ch_metaspades_plasmidid
+    file "*assembly.gfa"
+
 
     script:
     """
@@ -1645,6 +1650,7 @@ process METASPADES {
         -2 ${reads[1]} \\
         -o ./
     mv scaffolds.fasta ${sample}.meta.scaffolds.fa
+    mv assembly_graph_with_scaffolds.gfa ${sample}.meta.assembly.gfa
     """
 }
 
@@ -1792,6 +1798,8 @@ process UNICYCLER {
                                                                 ch_unicycler_blast,
                                                                 ch_unicycler_abacas,
                                                                 ch_unicycler_plasmidid
+    file "*assembly.gfa"
+
 
     script:
     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
@@ -1801,6 +1809,7 @@ process UNICYCLER {
         $input_reads \\
         --out ./
     mv assembly.fasta ${sample}.assembly.fa
+    mv assembly.gfa ${sample}.assembly.gfa
     """
 }
 
@@ -1936,7 +1945,6 @@ process MINIA {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
-    container "quay.io/biocontainers/minia:3.2.1--he513fc3_0"
 
     when:
     !params.skip_assembly && 'minia' in assemblers
@@ -1974,7 +1982,6 @@ process MINIA_OVERLAP {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
-    container "quay.io/biocontainers/minimap2:2.17--h8b12597_1"
 
     when:
     !params.skip_assembly && 'minia' in assemblers
@@ -1997,7 +2004,6 @@ process MINIA_INDUCE_GRAPH {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
-    container "quay.io/biocontainers/seqwish:0.4.1--h8b12597_0"
 
     when:
     !params.skip_assembly && 'minia' in assemblers
@@ -2021,7 +2027,6 @@ process MINIA_CALL_VARIANTS {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
-    container "quay.io/biocontainers/vg:1.23.0--0"
 
     when:
     !params.skip_assembly && 'minia' in assemblers
