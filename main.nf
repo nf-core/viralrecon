@@ -1501,7 +1501,7 @@ process SPADES_VG {
     label 'process_medium'
     publishDir "${params.outdir}/assembly/spades/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
-            		      if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      if (filename.endsWith(".txt")) "bcftools_stats/$filename"
                       else filename
                 }
 
@@ -1524,7 +1524,6 @@ process SPADES_VG {
     seqwish --paf-alns ${sample}.paf --seqs ${sample}.withRef.fasta --gfa ${sample}.gfa --threads $task.cpus
 
     PREFIX=`head -n 1 $fasta | tr -d ">" | cut -f 1 -d' '`
-    echo \$PREFIX
     vg view -Fv ${sample}.gfa --threads $task.cpus > ${sample}.vg
     vg convert -x ${sample}.vg > ${sample}.xg
     vg deconstruct -p \$PREFIX ${sample}.xg --threads $task.cpus \\
@@ -1704,7 +1703,7 @@ process METASPADES_VG {
     label 'process_medium'
     publishDir "${params.outdir}/assembly/metaspades/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
-            		      if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      if (filename.endsWith(".txt")) "bcftools_stats/$filename"
                       else filename
                 }
 
@@ -1727,7 +1726,6 @@ process METASPADES_VG {
     seqwish --paf-alns ${sample}.paf --seqs ${sample}.withRef.fasta --gfa ${sample}.gfa --threads $task.cpus
 
     PREFIX=`head -n 1 $fasta | tr -d ">" | cut -f 1 -d' '`
-    echo \$PREFIX
     vg view -Fv ${sample}.gfa --threads $task.cpus > ${sample}.vg
     vg convert -x ${sample}.vg > ${sample}.xg
     vg deconstruct -p \$PREFIX ${sample}.xg --threads $task.cpus \\
@@ -1906,7 +1904,7 @@ process UNICYCLER_VG {
     label 'process_medium'
     publishDir "${params.outdir}/assembly/unicycler/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
-            		      if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      if (filename.endsWith(".txt")) "bcftools_stats/$filename"
                       else filename
                 }
 
@@ -1929,7 +1927,6 @@ process UNICYCLER_VG {
     seqwish --paf-alns ${sample}.paf --seqs ${sample}.withRef.fasta --gfa ${sample}.gfa --threads $task.cpus
 
     PREFIX=`head -n 1 $fasta | tr -d ">" | cut -f 1 -d' '`
-    echo \$PREFIX
     vg view -Fv ${sample}.gfa --threads $task.cpus > ${sample}.vg
     vg convert -x ${sample}.vg > ${sample}.xg
     vg deconstruct -p \$PREFIX ${sample}.xg --threads $task.cpus \\
