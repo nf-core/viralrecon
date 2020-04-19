@@ -1504,7 +1504,7 @@ process SPADES {
 // TODO nf-core: What would the value of $PREFIX by for a multi-fasta?
 // TODO nf-core: Add documentation for this process to output docs
 // TODO nf-core: Which of these files do we need to save to the results dir?
-// TODO nf-core: Annotate variants with snpEff
+// TODO nf-core: Annotate variants with snpEff?
 process SPADES_VG {
     tag "$sample"
     label 'process_medium'
@@ -2074,7 +2074,7 @@ process UNICYCLER_QUAST {
 /*
  * STEP 6.3: De novo assembly with minia
  */
-// TODO nf-core: Add minia parameters e.g. for k-mer size?
+// TODO nf-core: Add any more customisable minia parameters?
 process MINIA {
     tag "$sample"
     label 'process_medium'
@@ -2104,20 +2104,6 @@ process MINIA {
         -out ${sample}.k${params.minia_kmer_size}.a20
     mv ${sample}.k${params.minia_kmer_size}.a20.contigs.fa ${sample}.k${params.minia_kmer_size}.scaffolds.fa
     """
-    // if (single_end) {
-    //     """
-    //     minia -kmer-size 51 -abundance-min 20 -in $reads -out ${sample}.k51.a20
-    //     mv ${sample}.k51.a20.contigs.fa ${sample}.scaffolds.fa
-    //     """
-    // }
-    // else {
-    //
-    //     """
-    //     echo '$inputFiles' > input_files.txt
-    //     minia -kmer-size 51 -abundance-min 20 -in input_files.txt -out ${sample}.k51.a20
-    //     mv ${sample}.k51.a20.contigs.fa ${sample}.scaffolds.fa
-    //     """
-    // }
 }
 
 /*
