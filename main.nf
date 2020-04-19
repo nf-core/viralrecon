@@ -1793,7 +1793,8 @@ process UNICYCLER {
                                                                 ch_unicycler_blast,
                                                                 ch_unicycler_abacas,
                                                                 ch_unicycler_plasmidid
-    set val(sample), val(single_end), file("*assembly.fa"), file("*assembly.gfa") into ch_unicycler_graph
+    file "*assembly.gfa"
+
 
     script:
     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
