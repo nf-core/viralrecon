@@ -1505,6 +1505,7 @@ process SPADES {
 // TODO nf-core: Add documentation for this process to output docs
 // TODO nf-core: Which of these files do we need to save to the results dir?
 // TODO nf-core: Annotate variants with snpEff?
+// TODO nf-core: How do you get version number for seqwish on command-line?
 process SPADES_VG {
     tag "$sample"
     label 'process_medium'
@@ -2326,9 +2327,12 @@ process get_software_versions {
     kraken2 --version > v_kraken2.txt
     spades.py --version > v_spades.txt
     unicycler --version > v_unicycler.txt
-    quast.py --version > v_quast.txt
+    minia --version > v_minia.txt
+    minimap2 --version > v_minimap2.txt
+    vg version > v_vg.txt
     blastn -version > v_blast.txt
     abacas.pl -v &> v_abacas.txt || true
+    quast.py --version > v_quast.txt
     echo \$(R --version 2>&1) > v_R.txt
     multiqc --version > v_multiqc.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
