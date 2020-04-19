@@ -1496,6 +1496,9 @@ process SPADES {
  * STEP 6.3.1: Overlap scaffolds with Minimap2, induce and polish assembly, and call variants with seqwish and vg
  */
 // TODO nf-core: What would the value of $PREFIX by for a multi-fasta?
+// TODO nf-core: Add documentation for this process to output docs
+// TODO nf-core: Annotate variants with snpEff
+// TODO nf-core: Add minia parameters e.g. for k-mer size?
 process SPADES_VG {
     tag "$sample"
     label 'process_medium'
