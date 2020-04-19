@@ -62,6 +62,7 @@ def helpMessage() {
 
     De novo assembly
       --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler,minia')
+      --minia_kmer_size [int]         Kmer size to use when running minia (Default: 31)
       --skip_vg [bool]                Skip variant graph creation and calling (Default: false)
       --skip_blast [bool]             Skip blastn of assemblies relative to reference genome (Default: false)
       --skip_abacas [bool]            Skip ABACUS process for assembly contiguation (Default: false)
@@ -241,6 +242,7 @@ if (!params.skip_variants) {
 }
 if (!params.skip_assembly) {
     summary['Assembly Tools']        = params.assemblers
+    summary['Minia Kmer Size']       = params.minia_kmer_size
     if (params.skip_vg)              summary['Skip Variant Graph'] =  'Yes'
     if (params.skip_blast)           summary['Skip BLAST'] =  'Yes'
     if (params.skip_abacas)          summary['Skip ABACAS'] =  'Yes'
@@ -2092,20 +2094,30 @@ process MINIA {
                                                                  ch_minia_quast
 
     script:
-    if (single_end) {
-        """
-        minia -kmer-size 51 -abundance-min 20 -in $reads -out ${sample}.k51.a20
-        mv ${sample}.k51.a20.contigs.fa ${sample}.scaffolds.fa
-        """
-    }
-    else {
-        inputFiles = reads.join("\n")
-        """
-        echo '$inputFiles' > input_files.txt
-        minia -kmer-size 51 -abundance-min 20 -in input_files.txt -out ${sample}.k51.a20
-        mv ${sample}.k51.a20.contigs.fa ${sample}.scaffolds.fa
-        """
-    }
+    """
+    echo "${reads.join("\n")}" > input_files.txt
+    minia \\
+        -kmer-size $params.minia_kmer_size \\
+        -abundance-min 20 \\
+        -nb-cores $task.cpus \\
+        -in input_files.txt \\
+        -out ${sample}.k${params.minia_kmer_size}.a20
+    mv ${sample}.k${params.minia_kmer_size}.a20.contigs.fa ${sample}.k${params.minia_kmer_size}.scaffolds.fa
+    """
+    // if (single_end) {
+    //     """
+    //     minia -kmer-size 51 -abundance-min 20 -in $reads -out ${sample}.k51.a20
+    //     mv ${sample}.k51.a20.contigs.fa ${sample}.scaffolds.fa
+    //     """
+    // }
+    // else {
+    //
+    //     """
+    //     echo '$inputFiles' > input_files.txt
+    //     minia -kmer-size 51 -abundance-min 20 -in input_files.txt -out ${sample}.k51.a20
+    //     mv ${sample}.k51.a20.contigs.fa ${sample}.scaffolds.fa
+    //     """
+    // }
 }
 
 /*
