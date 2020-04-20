@@ -2,7 +2,7 @@
 
 This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
 
-The directories listed below will be created in the output directory after the pipeline has finished. All paths are relative to the top-level results directory.
+The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
 ## Pipeline overview
 
@@ -44,7 +44,17 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 ### parallel-fastq-dump
 
-TODO: Add some notes here about how we are downloading the data.
+[parallel-fastq-dump](https://github.com/rvalieris/parallel-fastq-dump) is used within the pipeline to automatically download and create FastQ files via user provided IDs from the [Sequence Read Archive (SRA)](https://www.ncbi.nlm.nih.gov/sra).
+
+**Output files:**
+
+* `preprocess/sra/`
+  * `*.fastq.gz`: Paired-end/single-end reads downloaded and extracted from the SRA.
+* `preprocess/sra/log/`
+  * `*.fastq_dump.log`: Log file generated from stdout.
+
+> **NB:** Downloaded FastQ files will only be saved in the results directory if the `--save_sra_fastq` parameter is supplied.
+> **NB:** If downloading data from the SRA, a metadata (`*.sra_runinfo.txt`) and warnings (`*.sra_warnings.txt`) file is also saved in the `pipeline_info/` directory.
 
 ### FastQC
 
@@ -52,10 +62,12 @@ TODO: Add some notes here about how we are downloading the data.
 
 For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
+![MultiQC - FastQC per base sequence plot](images/mqc_fastqc_plot.png)
+
 **Output files:**
 
 * `preprocess/fastqc/`
-  * `*_fastqc.html`: FastQC report, containing quality metrics for your untrimmed raw fastq files.
+  * `*_fastqc.html`: FastQC report containing quality metrics.
 * `preprocess/fastqc/zips/`
   * `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
 
@@ -81,11 +93,11 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 ![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
 
-> **NB:** Post-trimmed FastQ files will only be saved in the output directory if the `--save_trimmed` parameter is supplied.
+> **NB:** Post-trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
 
 ### cat
 
-The initial QC and adapter trimming is performed at the run-level e.g. if a sample has been sequenced more than once to increase sequencing depth. This has the advantage of being able to assess each library individually, and the ability to process multiple libraries from the same sample in parallel. These samples are subsequently merged using the Linux `cat` after the `fastp` adapter trimming step. There is currently no option to save the merged FastQ files to the results directory.
+The initial QC and adapter trimming for each sample is performed at the run-level e.g. if a sample has been sequenced more than once to increase sequencing depth. This has the advantage of being able to assess each library individually, and the ability to process multiple libraries from the same sample in parallel. If applicable, these samples are subsequently merged using the Linux cat command after the fastp adapter trimming step. There is currently no option to save the merged FastQ files to the results directory.
 
 ## Variant calling
 
@@ -96,8 +108,8 @@ The initial QC and adapter trimming is performed at the run-level e.g. if a samp
 **Output files:**
 
 * `variants/bowtie2/`
-  * `*.sorted.bam`: Co-ordinate sorted BAM file.
-  * `*.sorted.bam.bai`: Index file for co-ordinate sorted aligned BAM file.
+  * `*.sorted.bam`: Coordinate sorted BAM file containing read alignment information.
+  * `*.sorted.bam.bai`: Index file for coordinate sorted aligned BAM file.
   * `<SAMPLE>.bam`: Original BAM file containing mapped reads. Only present if `--save_align_intermeds` parameter is supplied.
 * `variants/bowtie2/log/`
   * `*.log`: Bowtie 2 mapping log file.
@@ -106,7 +118,7 @@ The initial QC and adapter trimming is performed at the run-level e.g. if a samp
 
 ### SAMtools
 
-The resulting BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/) for co-ordinate sorting and indexing of the alignments. SAMtools was also used to generate read mapping statistics at various stages in the pipeline.
+Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/) to coordinate sort and index the alignments, as well as to generate read mapping statistics.
 
 **Output files:**
 
@@ -117,13 +129,13 @@ The resulting BAM files are further processed with [SAMtools](http://samtools.so
 
 ### iVar trim
 
-If `--protocol amplicon` is set then [iVar](http://gensoft.pasteur.fr/docs/ivar/1.0/manualpage.html) is used to trim the amplicon primer sequences from the reads. iVar uses the primer positions supplied in `--amplicon_bed` to soft clip primer sequences from an aligned and sorted BAM file.
+If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pasteur.fr/docs/ivar/1.0/manualpage.html) is used to trim amplicon primer sequences from the reads. iVar uses the primer positions supplied in `--amplicon_bed` to soft clip primer sequences from a coordinate sorted BAM file.
 
 **Output files:**
 
 * `variants/ivar/`
-  * `*.trim.sorted.bam`: Co-ordinate sorted BAM file after primer trimming.
-  * `*.trim.sorted.bam.bai`: Index file for co-ordinate sorted BAM file after primer trimming.
+  * `*.trim.sorted.bam`: Coordinate sorted BAM file after primer trimming.
+  * `*.trim.sorted.bam.bai`: Index file for coordinate sorted BAM file after primer trimming.
 * `variants/ivar/log/`
   * `*.trim.ivar.log`: iVar trim log file obtained from stdout.
 * `variants/ivar/samtools_stats/`
@@ -131,7 +143,7 @@ If `--protocol amplicon` is set then [iVar](http://gensoft.pasteur.fr/docs/ivar/
 
 ### picard-tools
 
-[picard-tools](https://broadinstitute.github.io/picard/command-line-overview.html) is a set of command-line tools for manipulating high-throughput sequencing data. In this case we used picard-tools to obtain mapping and coverage metrics. If `--protocol amplicon` is set then these metrics will be obtained from the iVar trimmed alignments as opposed to the original Bowtie 2 alignments.
+[picard-tools](https://broadinstitute.github.io/picard/command-line-overview.html) is a set of command-line tools for manipulating high-throughput sequencing data. We use picard-tools in this pipeline to obtain mapping and coverage metrics. If `--protocol amplicon` is set then these metrics will be obtained from the iVar trimmed alignments as opposed to the original Bowtie 2 alignments.
 
 **Output files:**
 
@@ -144,7 +156,7 @@ If `--protocol amplicon` is set then [iVar](http://gensoft.pasteur.fr/docs/ivar/
 
 VarScan is a platform-independent software tool developed at the Genome Institute, Washington University to detect variants in NGS data. SAMtools was used to generate the a Pileup file which was then passed to [VarScan 2](http://varscan.sourceforge.net/) in order to call both high and low frequency variants.
 
-[BCFtools](http://samtools.github.io/bcftools/bcftools.html) is a set of utilities that manipulate variant calls in the Variant Call Format (VCF) and its binary counterpart BCF. BCFTools was used in this pipeline to obtain basic statistics in the VCF output generated by VarScan 2 (and iVar), and to generate the consensus sequence by integrating the high frequency variant calls into the reference genome.
+[BCFtools](http://samtools.github.io/bcftools/bcftools.html) is a set of utilities that manipulate variant calls in the VCF and its binary counterpart BCF. BCFTools was used in this pipeline to obtain basic statistics from the VCF output generated by VarScan 2 (and iVar), and to generate the consensus sequence by integrating high frequency variant calls into the reference genome.
 
 [BEDTools](https://bedtools.readthedocs.io/en/latest/) is a swiss-army knife of tools for a wide-range of genomics analysis tasks. In this pipeline we used `bedtools genomecov` to compute the per-base mapped read coverage in bedGraph format, and `bedtools maskfasta` to mask sequences in a Fasta file based on intervals defined in a feature file. This may be useful for creating your own masked genome file based on custom annotations or for masking all but your target regions when aligning sequence data from a targeted capture experiment.
 
@@ -166,7 +178,7 @@ VarScan is a platform-independent software tool developed at the Genome Institut
   * `*.highfreq.bcftools_stats.txt`: Statistics and counts for high frequency variants VCF file.
   * `*.lowfreq.bcftools_stats.txt`: Statistics and counts for high frequency variants VCF file.
 
-> **NB:** Output Pileup files will only be saved in the output directory if the `--save_pileup` parameter is supplied.
+> **NB:** Output Pileup files will only be saved in the results directory if the `--save_pileup` parameter is supplied.
 
 ### iVar variants and iVar consensus
 
@@ -206,23 +218,7 @@ iVar can also be used to call variants and to generate a consensus sequences.
 
 ### QUAST
 
-TODO: Add description of what QUAST is doing here
-
-[QUAST](http://bioinf.spbau.ru/quast) was used to evaluate the quality of the consensus sequence across multiple samples. The HTML results can be opened within any browser (we recommend using Google Chrome). A single QUAST report will be generated to collate the results across all samples.
-
-* The meaning of the different metrics:
-  * Contigs (≥ x bp): is total number of contigs of length ≥ x bp.
-  * Total length (≥ x bp): is the total number of bases in contigs of length ≥ x bp.
-  * Contigs: is the total number of contigs in the assembly.
-  * Largest contig: is the length of the longest contig in the assembly.
-  * Total length: is the total number of bases in the assembly.
-  * Reference length: is the total number of bases in the reference genome.
-  * GC (%): is the total number of G and C nucleotides in the assembly, divided by the total length of the assembly.
-  * Reference GC (%): is the percentage of G and C nucleotides in the reference genome.
-  * N50: is the length for which the collection of all contigs of that length or longer covers at least half an assembly.
-  * NG50: is the length for which the collection of all contigs of that length or longer covers at least half the reference genome. This metric is computed only if the reference genome is provided.
-  * N75 and NG75: are defined similarly to N50 but with 75 % instead of 50 %.
-  * L50 (L75, LG50, LG75) is the number of contigs equal to or longer than N50 (N75, NG50, NG75). In other words, L50, for example, is the minimal number of contigs that cover half the assembly.
+[QUAST](http://bioinf.spbau.ru/quast) was used to evaluate the quality of the consensus sequence across multiple samples. The HTML results can be opened within any browser (we recommend using Google Chrome). A single QUAST report will be generated to collate the results across all samples. Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
 
 **Output files:**
 
@@ -248,7 +244,7 @@ When `--protocol amplicon` is set [Cutadapt](https://cutadapt.readthedocs.io/en/
 * `assembly/cutadapt/fastqc/zips/`
   * `*.ptrim_fastqc.zip`: Zip archive containing the FastQC report.
 
-> **NB:** Trimmed FastQ files will only be saved in the output directory if the `--save_trimmed` parameter is supplied.
+> **NB:** Trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
 
 ### Kraken2
 
@@ -263,11 +259,11 @@ We used a Kraken2 database in this workflow to filter out reads specific to the 
   * `*.viral.fastq.gz`: Reads that were unclassified to the host database.
   * `*.kraken2.report.txt`: Kraken taxonomic report. See [here](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual#sample-report-output-format) for a detailed description of the format.
 
-> **NB:** Output FastQ files will only be saved in the output directory if the `--save_kraken2_fastq` parameter is supplied.
+> **NB:** Output FastQ files will only be saved in the results directory if the `--save_kraken2_fastq` parameter is supplied.
 
 ### SPAdes
 
-[SPAdes](http://cab.spbu.ru/software/spades/) is a de Bruijn graph-based assembler. We selected reads that did not map to the host genome and assembled them using SPAdes to create a viral genome assembly.
+[SPAdes](http://cab.spbu.ru/software/spades/) is a de Bruijn graph-based assembler.
 
 **Output files:**
 
@@ -324,7 +320,9 @@ TODO: Add documentation here about [`Minimap2`](https://github.com/lh3/minimap2)
 
 ### Assembly SnpEff and SnpSift
 
-TODO: Add documentation here about these steps.
+[SnpEff](http://snpeff.sourceforge.net/SnpEff.html) is a genetic variant annotation and functional effect prediction toolbox. It annotates and predicts the effects of genetic variants on genes and proteins (such as amino acid changes).
+
+[SnpSift](http://snpeff.sourceforge.net/SnpSift.html) annotates genomic variants using databases, filters, and manipulates genomic annotated variants. Once you have annotated your files using SnpEff, you can use SnpSift to help you filter large genomic datasets in order to find the most significant variants for your experiment.
 
 **Output files:**
 
@@ -389,7 +387,7 @@ TODO: Add documentation here about these steps.
 
 ### Assembly QUAST
 
-[QUAST](http://bioinf.spbau.ru/quast) was used to evaluate the quality of assemblies across multiple samples. The HTML results can be opened within any browser (we recommend using Google Chrome). A single QUAST report will be generated to collate the results across all samples for each assembler.
+[QUAST](http://bioinf.spbau.ru/quast) was used to evaluate the quality of assemblies across multiple samples. The HTML results can be opened within any browser (we recommend using Google Chrome). A single QUAST report will be generated to collate the results across all samples for each assembler. Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
 
 **Output files:**
 
@@ -438,4 +436,5 @@ A number of genome-specific files are generated by the pipeline because they are
   * Reports generated by Nextflow: `execution_report.html`, `execution_timeline.html`, `execution_trace.txt` and `pipeline_dag.dot`/`pipeline_dag.svg`.
   * Reports generated by the pipeline: `pipeline_report.html`, `pipeline_report.txt` and `software_versions.csv`.
   * Reformatted samplesheet files used as input to the pipeline: `samplesheet.pass.csv`.
+  * If downloading data from the SRA, a metadata (`*.sra_runinfo.txt`) and warnings (`*.sra_warnings.txt`) file is also saved in this directory.
   * Documentation for interpretation of results in HTML format: `results_description.html`.
