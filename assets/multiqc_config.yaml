@@ -115,6 +115,11 @@ module_order:
         info: 'This section of the report shows BCFTools stats results for variants called in the SPAdes assembly relative to the reference.'
         path_filters:
             - './spades/bcftools/*'
+    - snpeff:
+        name: 'SnpEff (SPAdes)'
+        info: 'This section of the report shows SnpEff results for variants called in the SPAdes assembly relative to the reference.'
+        path_filters:
+            - './spades/snpeff/*'
     - quast:
         name: 'QUAST (SPAdes)'
         info: 'This section of the report shows QUAST results from SPAdes de novo assembly.'
@@ -125,6 +130,11 @@ module_order:
         info: 'This section of the report shows BCFTools stats results for variants called in the MetaSPAdes assembly relative to the reference.'
         path_filters:
             - './metaspades/bcftools/*'
+    - snpeff:
+        name: 'SnpEff (MetaSPAdes)'
+        info: 'This section of the report shows SnpEff results for variants called in the MetaSPAdes assembly relative to the reference.'
+        path_filters:
+            - './metaspades/snpeff/*'
     - quast:
         name: 'QUAST (MetaSPAdes)'
         info: 'This section of the report shows QUAST results from MetaSPAdes de novo assembly.'
@@ -135,6 +145,11 @@ module_order:
         info: 'This section of the report shows BCFTools stats results for variants called in the Unicycler assembly relative to the reference.'
         path_filters:
             - './unicycler/bcftools/*'
+    - snpeff:
+        name: 'SnpEff (Unicycler)'
+        info: 'This section of the report shows SnpEff results for variants called in the Unicycler assembly relative to the reference.'
+        path_filters:
+            - './unicycler/snpeff/*'
     - quast:
         name: 'QUAST (Unicycler)'
         info: 'This section of the report shows QUAST results from Unicycler de novo assembly.'
@@ -145,6 +160,11 @@ module_order:
         info: 'This section of the report shows BCFTools stats results for variants called in the minia assembly relative to the reference.'
         path_filters:
             - './minia/bcftools/*'
+    - snpeff:
+        name: 'SnpEff (minia)'
+        info: 'This section of the report shows SnpEff results for variants called in the minia assembly relative to the reference.'
+        path_filters:
+            - './minia/snpeff/*'
     - quast:
         name: 'QUAST (minia)'
         info: 'This section of the report shows QUAST results from minia de novo assembly.'
