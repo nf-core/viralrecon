@@ -1,4 +1,4 @@
-# ![nf-core/viralrecon](images/nf-core-viralrecon_small_logo.png)
+# ![nf-core/viralrecon](images/nf-core-viralrecon_logo.png)
 
 This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
 
@@ -178,6 +178,8 @@ VarScan is a platform-independent software tool developed at the Genome Institut
   * `*.highfreq.bcftools_stats.txt`: Statistics and counts for high frequency variants VCF file.
   * `*.lowfreq.bcftools_stats.txt`: Statistics and counts for high frequency variants VCF file.
 
+![MultiQC - BCFTools variant counts](images/mqc_bcftools_plot.png)
+
 > **NB:** Output Pileup files will only be saved in the results directory if the `--save_pileup` parameter is supplied.
 
 ### iVar variants and iVar consensus
@@ -213,6 +215,8 @@ iVar can also be used to call variants and to generate a consensus sequences.
   * `*.snpEff.vcf.gz`: VCF file with variant annotations.
   * `*.snpEff.vcf.gz.tbi`: Index for VCF file with variant annotations.
   * `*.snpSift.table.txt`: SnpSift summary table.
+
+![MultiQC - SnpEff annotation counts](images/mqc_snpeff_plot.png)
 
 > **NB:** By default, the SnpEff annotation files will be generated relative to the variants called for each variant caller.
 
@@ -393,6 +397,8 @@ TODO: Add documentation here about [`Minimap2`](https://github.com/lh3/minimap2)
 
 * `assembly/<ASSEMBLER>/quast/`
   * `report.html`: TODO Add some description here and the different report formats available.
+
+![MultiQC - QUAST contig counts](images/mqc_quast_plot.png)
 
 > **NB:** By default, these files will be generated relative to the assemblies for each assembler.
 
