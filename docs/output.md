@@ -52,8 +52,6 @@ TODO: Add some notes here about how we are downloading the data.
 
 For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
-![MultiQC - FastQC per base sequence plot](images/mqc_fastqc_plot.png)
-
 **Output files:**
 
 * `preprocess/fastqc/`
@@ -61,13 +59,11 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 * `preprocess/fastqc/zips/`
   * `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
 
-> **NB:** The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality. To see how your reads look after trimming, look at the FastQC reports in the `fastp` directory.
+> **NB:** The FastQC plots in this directory are generated relative to the raw, input reads. They may contain adapter sequence and regions of low quality. To see how your reads look after trimming look at the FastQC reports in the `preprocess/fastp/fastqc/` directory.
 
 ### fastp
 
-[fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast all-in-one preprocessing for FastQ files. It is developed in C++ with multithreading support to afford high performance. We used fastp for adapter trimming and quality filtering.
-
-![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
+[fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast all-in-one preprocessing for FastQ files. It has been developed in C++ with multithreading support to afford high performance. fastp is used in this pipeline for adapter trimming and quality filtering.
 
 **Output files:**
 
@@ -83,19 +79,19 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 * `preprocess/fastp/fastqc/zips/`
   * `*.trim_fastqc.zip`: Zip archive containing the FastQC report.
 
+![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
+
 > **NB:** Post-trimmed FastQ files will only be saved in the output directory if the `--save_trimmed` parameter is supplied.
 
 ### cat
 
-TODO: Add some notes here about why and how we are merging FastQ files from the same sample.
+The initial QC and adapter trimming is performed at the run-level e.g. if a sample has been sequenced more than once to increase sequencing depth. This has the advantage of being able to assess each library individually, and the ability to process multiple libraries from the same sample in parallel. These samples are subsequently merged using the Linux `cat` after the `fastp` adapter trimming step. There is currently no option to save the merged FastQ files to the results directory.
 
 ## Variant calling
 
 ### Bowtie 2
 
 [Bowtie 2](http://bio-bwa.sourceforge.net/) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. Bowtie 2 supports gapped, local, and paired-end alignment modes.
-
-![MultiQC - Bowtie2 alignment score plot](images/mqc_bowtie2_plot.png)
 
 **Output files:**
 
@@ -106,16 +102,18 @@ TODO: Add some notes here about why and how we are merging FastQ files from the 
 * `variants/bowtie2/log/`
   * `*.log`: Bowtie 2 mapping log file.
 
+![MultiQC - Bowtie2 alignment score plot](images/mqc_bowtie2_plot.png)
+
 ### SAMtools
 
 The resulting BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/) for co-ordinate sorting and indexing of the alignments. SAMtools was also used to generate read mapping statistics at various stages in the pipeline.
-
-![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
 
 **Output files:**
 
 * `variants/bowtie2/samtools_stats/`
   * SAMtools `*.flagstat`, `*.idxstats` and `*.stats` files generated from the alignment files.
+
+![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
 
 ### iVar trim
 
@@ -135,12 +133,12 @@ If `--protocol amplicon` is set then [iVar](http://gensoft.pasteur.fr/docs/ivar/
 
 [picard-tools](https://broadinstitute.github.io/picard/command-line-overview.html) is a set of command-line tools for manipulating high-throughput sequencing data. In this case we used picard-tools to obtain mapping and coverage metrics. If `--protocol amplicon` is set then these metrics will be obtained from the iVar trimmed alignments as opposed to the original Bowtie 2 alignments.
 
-![MultiQC - Picard insert size plot](images/mqc_picard_insert_size_plot.png)
-
 **Output files:**
 
 * `variants/<bowtie2/ivar>/picard_metrics/`  
   Alignment QC files from picard CollectMultipleMetrics and the metrics file from CollectWgsMetrics in `*_metrics` text format and plotted in `*.pdf` format.
+
+![MultiQC - Picard insert size plot](images/mqc_picard_insert_size_plot.png)
 
 ### VarScan 2, BCFTools, BEDTools
 
