@@ -319,10 +319,10 @@ ch_fasta
     .into { ch_fasta_bowtie2; ch_fasta_picard;
             ch_fasta_varscan2; ch_fasta_bcftools; ch_fasta_varscan2_snpeff; ch_fasta_varscan2_quast;
             ch_fasta_ivar_variants; ch_fasta_ivar_consensus; ch_fasta_ivar_snpeff; ch_fasta_ivar_quast;
-            ch_fasta_blast; ch_fasta_spades_vg; ch_fasta_spades_abacas; ch_fasta_spades_plasmidid; ch_fasta_spades_quast;
-            ch_fasta_metaspades_vg; ch_fasta_metaspades_abacas; ch_fasta_metaspades_plasmidid; ch_fasta_metaspades_quast;
-            ch_fasta_unicycler_vg; ch_fasta_unicycler_abacas; ch_fasta_unicycler_plasmidid; ch_fasta_unicycler_quast;
-            ch_fasta_minia_vg; ch_fasta_minia_abacas; ch_fasta_minia_plasmidid; ch_fasta_minia_quast }
+            ch_fasta_blast; ch_fasta_spades_vg; ch_fasta_spades_snpeff; ch_fasta_spades_abacas; ch_fasta_spades_plasmidid; ch_fasta_spades_quast;
+            ch_fasta_metaspades_vg; ch_fasta_metaspades_snpeff; ch_fasta_metaspades_abacas; ch_fasta_metaspades_plasmidid; ch_fasta_metaspades_quast;
+            ch_fasta_unicycler_vg; ch_fasta_unicycler_snpeff; ch_fasta_unicycler_abacas; ch_fasta_unicycler_plasmidid; ch_fasta_unicycler_quast;
+            ch_fasta_minia_vg; ch_fasta_minia_snpeff; ch_fasta_minia_abacas; ch_fasta_minia_plasmidid; ch_fasta_minia_quast }
 
 /*
  * PREPROCESSING: Uncompress gff annotation file
@@ -350,15 +350,12 @@ if (params.gff) {
 }
 
 ch_gff
-    .into { ch_gff_ivar_variants
-            ch_gff_varscan2_snpeff
-            ch_gff_varscan2_quast
-            ch_gff_ivar_snpeff
-            ch_gff_ivar_quast
-            ch_gff_spades_quast
-            ch_gff_metaspades_quast
-            ch_gff_unicycler_quast
-            ch_gff_minia_quast }
+    .into { ch_gff_varscan2_snpeff; ch_gff_varscan2_quast;
+            ch_gff_ivar_variants; ch_gff_ivar_snpeff; ch_gff_ivar_quast;
+            ch_gff_spades_quast; ch_gff_spades_snpeff;
+            ch_gff_metaspades_quast; ch_gff_metaspades_snpeff;
+            ch_gff_unicycler_quast; ch_gff_unicycler_snpeff;
+            ch_gff_minia_quast; ch_gff_minia_snpeff }
 
 /*
  * PREPROCESSING: Uncompress Kraken2 database
@@ -1504,7 +1501,6 @@ process SPADES {
 // TODO nf-core: What would the value of $PREFIX by for a multi-fasta?
 // TODO nf-core: Add documentation for this process to output docs
 // TODO nf-core: Which of these files do we need to save to the results dir?
-// TODO nf-core: Annotate variants with snpEff?
 // TODO nf-core: How do you get version number for seqwish on command-line?
 process SPADES_VG {
     tag "$sample"
@@ -1523,8 +1519,9 @@ process SPADES_VG {
     file fasta from ch_fasta_spades_vg.collect()
 
     output:
-    file "*.{paf,gfa,vg,xg,vcf.gz,vcf.gz.tbi}"
+    set val(sample), val(single_end), file("*.vcf.gz*") into ch_spades_vg_vcf
     file "*.bcftools_stats.txt" into ch_spades_vg_bcftools_mqc
+    file "*.{paf,gfa,vg,xg}"
 
     script:
     """
@@ -1545,7 +1542,61 @@ process SPADES_VG {
 }
 
 /*
- * STEP 6.3.2: Run Blast on SPAdes de novo assembly
+ * STEP 6.3.2: Variant annotation with SnpEff and SnpSift
+ */
+process SPADES_SNPEFF {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/spades/variants/snpeff", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'spades' in assemblers && params.gff && !params.skip_snpeff
+
+    input:
+    set val(sample), val(single_end), file(vcf) from ch_spades_vg_vcf
+    file fasta from ch_fasta_spades_snpeff.collect()
+    file gff from ch_gff_spades_snpeff.collect()
+
+    output:
+    file "*.snpEff.csv" into ch_spades_snpeff_mqc
+    file "*.vcf.gz*"
+    file "*.{txt,html}"
+
+    script:
+    """
+    mkdir -p ./data/genomes/ && cd ./data/genomes/
+    ln -s ../../$fasta ${index_base}.fa
+    cd ../../
+    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
+    ln -s ../../$gff genes.gff
+    cd ../../
+    echo "${index_base}.genome : ${index_base}" > snpeff.config
+    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
+    snpEff ${index_base} \\
+        -config ./snpeff.config \\
+        -dataDir ./data ${vcf[0]} \\
+        -csvStats ${sample}.snpEff.csv \\
+        | bgzip -c > ${sample}.snpEff.vcf.gz
+    tabix -p vcf -f ${sample}.snpEff.vcf.gz
+    mv snpEff_summary.html ${sample}.snpEff.summary.html
+    SnpSift extractFields -s "," \\
+        -e "." \\
+        ${sample}.snpEff.vcf.gz \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > ${sample}.snpSift.table.txt
+    	"""
+}
+
+/*
+ * STEP 6.3.3: Run Blast on SPAdes de novo assembly
  */
 process SPADES_BLAST {
     tag "$sample"
@@ -1578,7 +1629,7 @@ process SPADES_BLAST {
 }
 
 /*
- * STEP 6.3.3: Run ABACAS on SPAdes de novo assembly
+ * STEP 6.3.4: Run ABACAS on SPAdes de novo assembly
  */
 process SPADES_ABACAS {
     tag "$sample"
@@ -1610,7 +1661,7 @@ process SPADES_ABACAS {
 }
 
 /*
- * STEP 6.3.4: Run PlasmidID on SPAdes de novo assembly
+ * STEP 6.3.5: Run PlasmidID on SPAdes de novo assembly
  */
 process SPADES_PLASMIDID {
     tag "$sample"
@@ -1635,7 +1686,7 @@ process SPADES_PLASMIDID {
 }
 
 /*
- * STEP 6.3.5: Run Quast on SPAdes de novo assembly
+ * STEP 6.3.6: Run Quast on SPAdes de novo assembly
  */
 process SPADES_QUAST {
     label 'process_medium'
@@ -1725,8 +1776,9 @@ process METASPADES_VG {
     file fasta from ch_fasta_metaspades_vg.collect()
 
     output:
-    file "*.{paf,gfa,vg,xg,vcf.gz,vcf.gz.tbi}"
+    set val(sample), val(single_end), file("*.vcf.gz*") into ch_metaspades_vg_vcf
     file "*.bcftools_stats.txt" into ch_metaspades_vg_bcftools_mqc
+    file "*.{paf,gfa,vg,xg}"
 
     script:
     """
@@ -1747,7 +1799,61 @@ process METASPADES_VG {
 }
 
 /*
- * STEP 6.3.2: Run Blast on MetaSPAdes de novo assembly
+ * STEP 6.3.2: Variant annotation with SnpEff and SnpSift
+ */
+process METASPADES_SNPEFF {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/metaspades/variants/snpeff", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && params.gff && !params.skip_snpeff
+
+    input:
+    set val(sample), val(single_end), file(vcf) from ch_metaspades_vg_vcf
+    file fasta from ch_fasta_metaspades_snpeff.collect()
+    file gff from ch_gff_metaspades_snpeff.collect()
+
+    output:
+    file "*.snpEff.csv" into ch_metaspades_snpeff_mqc
+    file "*.vcf.gz*"
+    file "*.{txt,html}"
+
+    script:
+    """
+    mkdir -p ./data/genomes/ && cd ./data/genomes/
+    ln -s ../../$fasta ${index_base}.fa
+    cd ../../
+    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
+    ln -s ../../$gff genes.gff
+    cd ../../
+    echo "${index_base}.genome : ${index_base}" > snpeff.config
+    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
+    snpEff ${index_base} \\
+        -config ./snpeff.config \\
+        -dataDir ./data ${vcf[0]} \\
+        -csvStats ${sample}.snpEff.csv \\
+        | bgzip -c > ${sample}.snpEff.vcf.gz
+    tabix -p vcf -f ${sample}.snpEff.vcf.gz
+    mv snpEff_summary.html ${sample}.snpEff.summary.html
+    SnpSift extractFields -s "," \\
+        -e "." \\
+        ${sample}.snpEff.vcf.gz \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > ${sample}.snpSift.table.txt
+    	"""
+}
+
+/*
+ * STEP 6.3.3: Run Blast on MetaSPAdes de novo assembly
  */
 process METASPADES_BLAST {
     tag "$sample"
@@ -1780,7 +1886,7 @@ process METASPADES_BLAST {
 }
 
 /*
- * STEP 6.3.3: Run ABACAS on MetaSPAdes de novo assembly
+ * STEP 6.3.4: Run ABACAS on MetaSPAdes de novo assembly
  */
 process METASPADES_ABACAS {
     tag "$sample"
@@ -1812,7 +1918,7 @@ process METASPADES_ABACAS {
 }
 
 /*
- * STEP 6.3.4: Run PlasmidID on MetaSPAdes de novo assembly
+ * STEP 6.3.5: Run PlasmidID on MetaSPAdes de novo assembly
  */
 process METASPADES_PLASMIDID {
     tag "$sample"
@@ -1837,7 +1943,7 @@ process METASPADES_PLASMIDID {
 }
 
 /*
- * STEP 6.3.5: Run Quast on MetaSPAdes de novo assembly
+ * STEP 6.3.6: Run Quast on MetaSPAdes de novo assembly
  */
 process METASPADES_QUAST {
     label 'process_medium'
@@ -1926,8 +2032,9 @@ process UNICYCLER_VG {
     file fasta from ch_fasta_unicycler_vg.collect()
 
     output:
-    file "*.{paf,gfa,vg,xg,vcf.gz,vcf.gz.tbi}"
+    set val(sample), val(single_end), file("*.vcf.gz*") into ch_unicycler_vg_vcf
     file "*.bcftools_stats.txt" into ch_unicycler_vg_bcftools_mqc
+    file "*.{paf,gfa,vg,xg}"
 
     script:
     """
@@ -1948,7 +2055,61 @@ process UNICYCLER_VG {
 }
 
 /*
- * STEP 6.3.2: Run Blast on MetaSPAdes de novo assembly
+ * STEP 6.3.2: Variant annotation with SnpEff and SnpSift
+ */
+process UNICYCLER_SNPEFF {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/unicycler/variants/snpeff", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'unicycler' in assemblers && params.gff && !params.skip_snpeff
+
+    input:
+    set val(sample), val(single_end), file(vcf) from ch_unicycler_vg_vcf
+    file fasta from ch_fasta_unicycler_snpeff.collect()
+    file gff from ch_gff_unicycler_snpeff.collect()
+
+    output:
+    file "*.snpEff.csv" into ch_unicycler_snpeff_mqc
+    file "*.vcf.gz*"
+    file "*.{txt,html}"
+
+    script:
+    """
+    mkdir -p ./data/genomes/ && cd ./data/genomes/
+    ln -s ../../$fasta ${index_base}.fa
+    cd ../../
+    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
+    ln -s ../../$gff genes.gff
+    cd ../../
+    echo "${index_base}.genome : ${index_base}" > snpeff.config
+    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
+    snpEff ${index_base} \\
+        -config ./snpeff.config \\
+        -dataDir ./data ${vcf[0]} \\
+        -csvStats ${sample}.snpEff.csv \\
+        | bgzip -c > ${sample}.snpEff.vcf.gz
+    tabix -p vcf -f ${sample}.snpEff.vcf.gz
+    mv snpEff_summary.html ${sample}.snpEff.summary.html
+    SnpSift extractFields -s "," \\
+        -e "." \\
+        ${sample}.snpEff.vcf.gz \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > ${sample}.snpSift.table.txt
+    	"""
+}
+
+/*
+ * STEP 6.3.3: Run Blast on MetaSPAdes de novo assembly
  */
 process UNICYCLER_BLAST {
     tag "$sample"
@@ -1981,7 +2142,7 @@ process UNICYCLER_BLAST {
 }
 
 /*
- * STEP 6.3.3: Run ABACAS on Unicycler de novo assembly
+ * STEP 6.3.4: Run ABACAS on Unicycler de novo assembly
  */
 process UNICYCLER_ABACAS {
     tag "$sample"
@@ -2013,7 +2174,7 @@ process UNICYCLER_ABACAS {
 }
 
 /*
- * STEP 6.3.4: Run PlasmidID on Unicycler de novo assembly
+ * STEP 6.3.5: Run PlasmidID on Unicycler de novo assembly
  */
 process UNICYCLER_PLASMIDID {
     tag "$sample"
@@ -2038,7 +2199,7 @@ process UNICYCLER_PLASMIDID {
 }
 
 /*
- * STEP 6.3.5: Run Quast on Unicycler de novo assembly
+ * STEP 6.3.6: Run Quast on Unicycler de novo assembly
  */
 process UNICYCLER_QUAST {
     label 'process_medium'
@@ -2127,8 +2288,9 @@ process MINIA_VG {
     file fasta from ch_fasta_minia_vg.collect()
 
     output:
-    file "*.{paf,gfa,vg,xg,vcf.gz,vcf.gz.tbi}"
+    set val(sample), val(single_end), file("*.vcf.gz*") into ch_minia_vg_vcf
     file "*.bcftools_stats.txt" into ch_minia_vg_bcftools_mqc
+    file "*.{paf,gfa,vg,xg}"
 
     script:
     """
@@ -2149,7 +2311,61 @@ process MINIA_VG {
 }
 
 /*
- * STEP 6.3.2: Run Blast on minia de novo assembly
+ * STEP 6.3.2: Variant annotation with SnpEff and SnpSift
+ */
+process MINIA_SNPEFF {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/variants/snpeff", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_assembly && 'minia' in assemblers && params.gff && !params.skip_snpeff
+
+    input:
+    set val(sample), val(single_end), file(vcf) from ch_minia_vg_vcf
+    file fasta from ch_fasta_minia_snpeff.collect()
+    file gff from ch_gff_minia_snpeff.collect()
+
+    output:
+    file "*.snpEff.csv" into ch_minia_snpeff_mqc
+    file "*.vcf.gz*"
+    file "*.{txt,html}"
+
+    script:
+    """
+    mkdir -p ./data/genomes/ && cd ./data/genomes/
+    ln -s ../../$fasta ${index_base}.fa
+    cd ../../
+    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
+    ln -s ../../$gff genes.gff
+    cd ../../
+    echo "${index_base}.genome : ${index_base}" > snpeff.config
+    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
+    snpEff ${index_base} \\
+        -config ./snpeff.config \\
+        -dataDir ./data ${vcf[0]} \\
+        -csvStats ${sample}.snpEff.csv \\
+        | bgzip -c > ${sample}.snpEff.vcf.gz
+    tabix -p vcf -f ${sample}.snpEff.vcf.gz
+    mv snpEff_summary.html ${sample}.snpEff.summary.html
+    SnpSift extractFields -s "," \\
+        -e "." \\
+        ${sample}.snpEff.vcf.gz \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > ${sample}.snpSift.table.txt
+    	"""
+}
+
+/*
+ * STEP 6.3.3: Run Blast on minia de novo assembly
  */
 process MINIA_BLAST {
     tag "$sample"
@@ -2182,7 +2398,7 @@ process MINIA_BLAST {
 }
 
 /*
- * STEP 6.3.3: Run ABACAS on minia de novo assembly
+ * STEP 6.3.4: Run ABACAS on minia de novo assembly
  */
 process MINIA_ABACAS {
     tag "$sample"
@@ -2214,7 +2430,7 @@ process MINIA_ABACAS {
 }
 
 /*
- * STEP 6.3.4: Run PlasmidID on minia de novo assembly
+ * STEP 6.3.5: Run PlasmidID on minia de novo assembly
  */
 process MINIA_PLASMIDID {
     tag "$sample"
@@ -2239,7 +2455,7 @@ process MINIA_PLASMIDID {
 }
 
 /*
- * STEP 6.3.5: Run Quast on minia de novo assembly
+ * STEP 6.3.6: Run Quast on minia de novo assembly
  */
 process MINIA_QUAST {
     label 'process_medium'
