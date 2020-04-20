@@ -22,9 +22,12 @@ regexes = {
     'Kraken2': ['v_kraken2.txt', r"Kraken\sversion\s(\S+)"],
     'SPAdes': ['v_spades.txt', r"SPAdes\sgenome\sassembler\sv(\S+)"],
     'Unicycler': ['v_unicycler.txt', r"Unicycler\sv(\S+)"],
-    'QUAST': ['v_quast.txt', r"QUAST\sv(\S+)"],
+    'minia': ['v_minia.txt', r"Minia\sversion\s(\S+)"],
+    'Minimap2': ['v_minimap2.txt', r"(\S+)"],
+    'vg': ['v_vg.txt', r"vg\sversion\sv(\S+)"],
     'BLAST': ['v_blast.txt', r"blastn:\s(\S+)"],
     'ABACAS': ['v_abacas.txt', r"ABACAS.(\S+)"],
+    'QUAST': ['v_quast.txt', r"QUAST\sv(\S+)"],
     'R': ['v_R.txt', r"R\sversion\s(\S+)"],
     'MultiQC': ['v_multiqc.txt', r"multiqc,\sversion\s(\S+)"]
 }
@@ -47,9 +50,12 @@ results['Cutadapt'] = '<span style="color:#999999;\">N/A</span>'
 results['Kraken2'] = '<span style="color:#999999;\">N/A</span>'
 results['SPAdes'] = '<span style="color:#999999;\">N/A</span>'
 results['Unicycler'] = '<span style="color:#999999;\">N/A</span>'
-results['QUAST'] = '<span style="color:#999999;\">N/A</span>'
+results['minia'] = '<span style="color:#999999;\">N/A</span>'
+results['Minimap2'] = '<span style="color:#999999;\">N/A</span>'
+results['vg'] = '<span style="color:#999999;\">N/A</span>'
 results['BLAST'] = '<span style="color:#999999;\">N/A</span>'
 results['ABACAS'] = '<span style="color:#999999;\">N/A</span>'
+results['QUAST'] = '<span style="color:#999999;\">N/A</span>'
 results['R'] = '<span style="color:#999999;\">N/A</span>'
 results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
 

@@ -41,6 +41,8 @@
   * [`--skip_variants`](#--skip_variants)
 * [De novo assembly](#de-novo-assembly)
   * [`--assemblers`](#--assemblers)
+  * [`--minia_kmer`](#--minia_kmer)
+  * [`--skip_vg`](#--skip_vg)
   * [`--skip_blast`](#--skip_blast)
   * [`--skip_abacas`](#--skip_abacas)
   * [`--skip_plasmidid`](#--skip_plasmidid)
@@ -358,11 +360,19 @@ Specify this parameter to skip all of the variant calling and mapping steps in t
 
 ### `--assemblers`
 
-Specify which assembly algorithms you would like to use. Available options are `spades`, `metaspades` and `unicycler` (Default: 'spades,metaspades,unicycler').
+Specify which assembly algorithms you would like to use. Available options are `spades`, `metaspades`, `unicycler` and `minia` (Default: 'spades,metaspades,unicycler,minia').
+
+### `--minia_kmer`
+
+Kmer size to use when running minia (Default: 31).
+
+### `--skip_vg`
+
+Skip variant graph creation and variant calling relative to reference genome (Default: false).
 
 ### `--skip_blast`
 
-Skip blastn of assemblies relative to reference genome (Default: false)
+Skip blastn of assemblies relative to reference genome (Default: false).
 
 ### `--skip_abacas`
 
@@ -382,8 +392,7 @@ Specify this parameter to skip all of the de novo assembly steps in the pipeline
 
 ## Skipping QC steps
 
-The pipeline contains a large number of quality control steps. Sometimes, it may not be desirable to run all of them if time and compute resources are limited.
-The following options make this easy:
+The pipeline contains a large number of quality control steps. Sometimes, it may not be desirable to run all of them if time and compute resources are limited. The following options make this easy:
 
 | Step                      | Description                                              |
 |---------------------------|----------------------------------------------------------|
