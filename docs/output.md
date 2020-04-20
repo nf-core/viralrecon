@@ -30,10 +30,11 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [Unicycler](#unicycler) - OPTION 3: Viral genome assembly
   * [minia](#minia) - OPTION 4: Viral genome assembly
   * [Minimap2, seqwish, vg](#minimap2-seqwish-vg) - Call variants relative to reference
+  * [Assembly SnpEff and SnpSift](#assembly-snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
   * [BLAST](#blast) - Blast to reference assembly
   * [ABACAS](#abacas) - Order contigs according to reference genome
   * [PlasmidID](#plasmidid) - Assembly report and visualisation
-  * [QUAST](#quast) - Assembly quality assessment
+  * [Assembly QUAST](#assembly-quast) - Assembly quality assessment
 * [Workflow reporting and genomes](#workflow-reporting-and-genomes)
   * [MultiQC](#multiqc) - Present QC for raw reads, alignment, assembly and variant calling
   * [Reference genome files](#reference-genome-files) - Saving reference genome indices/files
@@ -288,7 +289,11 @@ We used a Kraken2 database in this workflow to filter out reads specific to the 
 
 TODO: Add documentation here about minia.
 
-### [Minimap2, seqwish, vg](#minimap2-seqwish-vg) - Call variants relative to reference
+### Minimap2, seqwish, vg
+
+TODO: Add documentation here about these steps.
+
+### Assembly SnpEff and SnpSift
 
 TODO: Add documentation here about these steps.
 
@@ -328,7 +333,7 @@ TODO: Add documentation here about these steps.
   * `data/`: Files used for drawing the circos images.
   * `database/`: Annotation files used for drawing the circos images.
 
-### QUAST
+### Assembly QUAST
 
 [QUAST](http://bioinf.spbau.ru/quast) was used to evaluate the quality of assemblies across multiple samples. The HTML results can be opened within any browser (we recommend using Google Chrome). A single QUAST report will be generated to collate the results across all samples for each assembler.
 
