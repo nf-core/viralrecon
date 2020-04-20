@@ -41,7 +41,7 @@
   * [`--skip_variants`](#--skip_variants)
 * [De novo assembly](#de-novo-assembly)
   * [`--assemblers`](#--assemblers)
-  * [`--minia_kmer_size`](#--minia_kmer_size)
+  * [`--minia_kmer`](#--minia_kmer)
   * [`--skip_vg`](#--skip_vg)
   * [`--skip_blast`](#--skip_blast)
   * [`--skip_abacas`](#--skip_abacas)
@@ -362,13 +362,13 @@ Specify this parameter to skip all of the variant calling and mapping steps in t
 
 Specify which assembly algorithms you would like to use. Available options are `spades`, `metaspades`, `unicycler` and `minia` (Default: 'spades,metaspades,unicycler,minia').
 
-### `--minia_kmer_size`
+### `--minia_kmer`
 
 Kmer size to use when running minia (Default: 31).
 
 ### `--skip_vg`
 
-Skip variant graph creating and variant calling relative to reference genome (Default: false).
+Skip variant graph creation and variant calling relative to reference genome (Default: false).
 
 ### `--skip_blast`
 

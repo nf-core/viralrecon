@@ -62,7 +62,7 @@ def helpMessage() {
 
     De novo assembly
       --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler,minia')
-      --minia_kmer_size [int]         Kmer size to use when running minia (Default: 31)
+      --minia_kmer [int]              Kmer size to use when running minia (Default: 31)
       --skip_vg [bool]                Skip variant graph creation and calling (Default: false)
       --skip_blast [bool]             Skip blastn of assemblies relative to reference genome (Default: false)
       --skip_abacas [bool]            Skip ABACUS process for assembly contiguation (Default: false)
@@ -242,7 +242,7 @@ if (!params.skip_variants) {
 }
 if (!params.skip_assembly) {
     summary['Assembly Tools']        = params.assemblers
-    summary['Minia Kmer Size']       = params.minia_kmer_size
+    summary['Minia Kmer Size']       = params.minia_kmer
     if (params.skip_vg)              summary['Skip Variant Graph'] =  'Yes'
     if (params.skip_blast)           summary['Skip BLAST'] =  'Yes'
     if (params.skip_abacas)          summary['Skip ABACAS'] =  'Yes'
@@ -2079,7 +2079,7 @@ process UNICYCLER_QUAST {
 process MINIA {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'minia' in assemblers
@@ -2098,12 +2098,12 @@ process MINIA {
     """
     echo "${reads.join("\n")}" > input_files.txt
     minia \\
-        -kmer-size $params.minia_kmer_size \\
+        -kmer-size $params.minia_kmer \\
         -abundance-min 20 \\
         -nb-cores $task.cpus \\
         -in input_files.txt \\
-        -out ${sample}.k${params.minia_kmer_size}.a20
-    mv ${sample}.k${params.minia_kmer_size}.a20.contigs.fa ${sample}.k${params.minia_kmer_size}.scaffolds.fa
+        -out ${sample}.k${params.minia_kmer}.a20
+    mv ${sample}.k${params.minia_kmer}.a20.contigs.fa ${sample}.k${params.minia_kmer}.scaffolds.fa
     """
 }
 
@@ -2113,7 +2113,7 @@ process MINIA {
 process MINIA_VG {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/assembly/minia/variants", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
                       else filename
@@ -2154,7 +2154,7 @@ process MINIA_VG {
 process MINIA_BLAST {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/assembly/minia/blast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/blast", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'minia' in assemblers && !params.skip_blast
@@ -2187,7 +2187,7 @@ process MINIA_BLAST {
 process MINIA_ABACAS {
     tag "$sample"
     label "process_medium"
-    publishDir "${params.outdir}/assembly/minia/abacas", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/abacas", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
                       else filename
@@ -2219,7 +2219,7 @@ process MINIA_ABACAS {
 process MINIA_PLASMIDID {
     tag "$sample"
     label "process_medium"
-    publishDir "${params.outdir}/assembly/minia/plasmidid", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/plasmidid", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'minia' in assemblers && !params.skip_plasmidid
@@ -2243,7 +2243,7 @@ process MINIA_PLASMIDID {
  */
 process MINIA_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/assembly/minia", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}", mode: params.publish_dir_mode
 
     when:
     !params.skip_assembly && 'minia' in assemblers && !params.skip_assembly_quast
