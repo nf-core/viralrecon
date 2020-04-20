@@ -26,7 +26,7 @@ fn_clean_exts:
 
 extra_fn_clean_exts:
     - type: regex
-      pattern: '.[k][0-9]+.'
+      pattern: '.[k][0-9]+.*'
 
 module_order:
     - fastqc:
