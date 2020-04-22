@@ -10,6 +10,9 @@
 * [ABACAS](https://www.ncbi.nlm.nih.gov/pubmed/19497936/)
   > Assefa S, Keane TM, Otto TD, Newbold C, Berriman M. ABACAS: algorithm-based automatic contiguation of assembled sequences. Bioinformatics. 2009 Aug 1;25(15):1968-9. doi: 10.1093/bioinformatics/btp347. Epub 2009 Jun 3. PubMed PMID: 19497936; PubMed Central PMCID: PMC2712343.
 
+* [Bandage](https://www.ncbi.nlm.nih.gov/pubmed/26099265)
+  > Wick R.R., Schultz M.B., Zobel J. & Holt K.E. Bandage: interactive visualisation of de novo genome assemblies. Bioinformatics, 31(20), 3350-3352. doi: 10.1093/bioinformatics/btv383. PubMed PMID: 26099265; PubMed Central PCMID: PMC4595904.
+
 * [BCFtools](https://www.ncbi.nlm.nih.gov/pubmed/21903627/)
   > Li H. A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics. 2011 Nov 1;27(21):2987-93. doi: 10.1093/bioinformatics/btr509. Epub 2011 Sep 8. PubMed PMID: 21903627; PubMed Central PMCID: PMC3198575.
 
