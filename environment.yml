@@ -29,7 +29,7 @@ dependencies:
   ## variants
   - bioconda::bowtie2=2.3.5.1
   - bioconda::picard=2.22.3
-  - bioconda::ivar=1.2
+  - bioconda::ivar=1.2=h3ae53b1_0
   - bioconda::bcftools=1.9
   - bioconda::varscan=2.4.4
   - bioconda::snpeff=4.3.1t
@@ -47,4 +47,5 @@ dependencies:
   - bioconda::quast=5.0.2
   - bioconda::blast=2.9.0
   - bioconda::plasmidid=1.5.2
+  - bioconda::bandage=0.8.1
   - hcc::abacas=1.3.1
