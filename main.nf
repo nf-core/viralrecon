@@ -31,7 +31,6 @@ def helpMessage() {
       --protocol [str]                Specifies the type of protocol used for sequencing i.e. "metagenomic" or "amplicon" (Default: "metagenomic")
 
     SRA download
-      --aspera_openssh_file [file]    Provide the path to this file if you prefer to use the Aspera client instead of FTP to download SRA/ENA files (Default: '')
       --ignore_sra_errors [bool]      Ignore validation errors when checking SRA identifiers that would otherwise cause the pipeline to fail (Default: false)
       --save_sra_fastq [bool]         Save FastQ files created from SRA identifiers in the results directory (Default: false)
       --skip_sra [bool]               Skip steps involving the download and validation of FastQ files using SRA identifiers (Default: false)
@@ -120,12 +119,6 @@ if (params.input) {
     ch_input = file(params.input, checkIfExists: true)
 } else {
     exit 1, "Input samplesheet file not specified!"
-}
-
-if (params.aspera_openssh_file) {
-    ch_aspera_openssh_file = Channel.fromPath(params.aspera_openssh_file, checkIfExists: true)
-} else {
-    ch_aspera_openssh_file = Channel.empty()
 }
 
 if (params.protocol != 'metagenomic' && params.protocol != 'amplicon') {
@@ -231,7 +224,6 @@ summary['Viral Genome']              = params.genome ?: 'Not supplied'
 summary['Viral Fasta File']          = params.fasta
 if (params.gff)                      summary['Viral GFF'] = params.gff
 if (params.save_reference)           summary['Save Genome Indices'] = 'Yes'
-if (params.aspera_openssh_file)      summary['Asepera Openssh File'] = params.aspera_openssh_file
 if (params.ignore_sra_errors)        summary['Ignore SRA Errors'] = params.ignore_sra_errors
 if (params.save_sra_fastq)           summary['Save SRA FastQ'] = params.save_sra_fastq
 if (params.skip_sra)                 summary['Skip SRA Download'] = params.skip_sra
@@ -419,11 +411,10 @@ process CHECK_SAMPLESHEET {
     file "*.txt" optional true
 
     script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
-    aspera = params.aspera_openssh_file ? "--get_aspera_links" : ""
     ignore = params.ignore_sra_errors ? "--ignore_sra_errors" : ""
     skip = (params.skip_sra || isOffline()) ? "--skip_sra" : ""
     """
-    check_samplesheet.py $samplesheet samplesheet.pass $aspera $ignore $skip
+    check_samplesheet.py $samplesheet samplesheet.pass $ignore $skip
     """
 }
 
@@ -492,32 +483,25 @@ if (!params.skip_sra || !isOffline()) {
 
         input:
         set val(sample), val(single_end), val(is_sra), val(is_ftp), val(fastq), val(md5) from ch_reads_sra_ftp
-        file openssh from ch_aspera_openssh_file.collect().ifEmpty([])
 
         output:
         set val(sample), val(single_end), val(is_sra), val(is_ftp), file("*.fastq.gz") into ch_sra_fastq_ftp
         file "*.md5"
 
         script:
-        base_idx = fastq[0].lastIndexOf(File.separator)
-        fastq_base_1 = "${fastq[0].substring(base_idx+1)}"
         if (single_end) {
-            get_read1 = params.aspera_openssh_file ?  "ascp -QT -l 300m -P33001 -i $openssh ${fastq[0]} . && mv $fastq_base_1 ${sample}.fastq.gz" : "curl -L ${fastq[0]} -o ${sample}.fastq.gz"
             """
-            $get_read1
+            curl -L ${fastq[0]} -o ${sample}.fastq.gz
             echo "${md5[0]}  ${sample}.fastq.gz" > ${sample}.fastq.gz.md5
             md5sum -c ${sample}.fastq.gz.md5
             """
         } else {
-            fastq_base_2 = "${fastq[1].substring(base_idx+1)}"
-            get_read1 = params.aspera_openssh_file ?  "ascp -QT -l 300m -P33001 -i $openssh ${fastq[0]} . && mv $fastq_base_1 ${sample}_1.fastq.gz" : "curl -L ${fastq[0]} -o ${sample}_1.fastq.gz"
-            get_read2 = params.aspera_openssh_file ?  "ascp -QT -l 300m -P33001 -i $openssh ${fastq[1]} . && mv $fastq_base_2 ${sample}_2.fastq.gz" : "curl -L ${fastq[1]} -o ${sample}_2.fastq.gz"
             """
-            $get_read1
+            curl -L ${fastq[0]} -o ${sample}_1.fastq.gz
             echo "${md5[0]}  ${sample}_1.fastq.gz" > ${sample}_1.fastq.gz.md5
             md5sum -c ${sample}_1.fastq.gz.md5
 
-            $get_read2
+            curl -L ${fastq[1]} -o ${sample}_2.fastq.gz
             echo "${md5[1]}  ${sample}_2.fastq.gz" > ${sample}_2.fastq.gz.md5
             md5sum -c ${sample}_2.fastq.gz.md5
             """

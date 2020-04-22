@@ -14,7 +14,6 @@
   * [`--amplicon_bed`](#--amplicon_bed)
   * [`--amplicon_fasta`](#--amplicon_fasta)
 * [SRA download](#sra-download)
-  * [`--aspera_openssh_file`](#--aspera_openssh_file)  
   * [`--ignore_sra_errors`](#--ignore_sra_errors)
   * [`--save_sra_fastq`](#--save_sra_fastq)
   * [`--skip_sra`](#--skip_sra)
@@ -200,8 +199,7 @@ The pipeline has been set-up to automatically download the raw FastQ files from 
 If `SRR`/`ERR` run ids are provided then these will be resolved back to their appropriate `SRX`/`ERX` ids to be able to merge multiple runs from the same experiment.
 
 The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well
-as their associated md5 sums. If download links exist, the files will be downloaded by FTP (default) or Aspera (if `--aspera_openssh_file` is provided)
-otherwise they will be downloaded using the [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump) tool.
+as their associated md5 sums. If download links exist, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
 
 ### `--protocol`
 
@@ -255,10 +253,6 @@ AAGGTGTCTGCAATTCATAGCTCT
 ```
 
 ## SRA download
-
-## `--aspera_openssh_file`
-
-Provide the path to this file if you prefer to use the Aspera client instead of FTP to download SRA/ENA files (Default: '').
 
 ## `--ignore_sra_errors`
 
