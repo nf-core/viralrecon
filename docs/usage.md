@@ -254,15 +254,15 @@ AAGGTGTCTGCAATTCATAGCTCT
 
 ## SRA download
 
-## `--ignore_sra_errors`
+### `--ignore_sra_errors`
 
 Ignore validation errors when checking SRA identifiers that would otherwise cause the pipeline to fail (Default: false).
 
-## `--save_sra_fastq`
+### `--save_sra_fastq`
 
 Save FastQ files created from SRA identifiers in the results directory (Default: false).
 
-## `--skip_sra`
+### `--skip_sra`
 
 Skip steps involving the download and validation of FastQ files using SRA identifiers (Default: false).
 
