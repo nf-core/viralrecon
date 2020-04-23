@@ -176,11 +176,30 @@ SRR11092056,,
 SRR11177792,,
 ```
 
-| Column    | Description                                                                                                                            |
-|-----------|----------------------------------------------------------------------------------------------------------------------------------------|
-| `sample`  | Custom sample name or SRA 'SR' or 'PR' identifier. This will be identical for multiple sequencing libraries/runs from the same sample. |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".             |
+| Column    | Description                                                                                                                                                        |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `sample`  | Custom sample name or [database identifier](#supported-public-repository-ids). This will be identical for multiple sequencing libraries/runs from the same sample. |
+| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                         |
+| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                         |
+
+#### Supported public repository ids
+
+The pipeline has been set-up to automatically download the raw FastQ files from public repositories. Currently, the following identifiers are supported:
+
+| `SRA`        | `ENA`        | `GEO`     |
+|--------------|--------------|-----------|
+| SRR390278    | ERR674736    | GSM465244 |
+| SRX111814    | ERX629702    | GSE18729  |
+| SRS282569    | ERS4399631   |           |
+| SAMN00765663 | SAMEA3121481 |           |
+| SRP003255    | ERP120836    |           |
+| SRA023522    | ERA2421642   |           |
+| PRJNA63463   | PRJEB7743    |           |
+
+If `SRR`/`ERR` run ids are provided then these will be resolved back to their appropriate `SRX`/`ERX` ids to be able to merge multiple runs from the same experiment.
+
+The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well
+as their associated md5 sums. If download links exist, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
 
 ### `--protocol`
 
@@ -235,15 +254,15 @@ AAGGTGTCTGCAATTCATAGCTCT
 
 ## SRA download
 
-## `--ignore_sra_errors`
+### `--ignore_sra_errors`
 
 Ignore validation errors when checking SRA identifiers that would otherwise cause the pipeline to fail (Default: false).
 
-## `--save_sra_fastq`
+### `--save_sra_fastq`
 
 Save FastQ files created from SRA identifiers in the results directory (Default: false).
 
-## `--skip_sra`
+### `--skip_sra`
 
 Skip steps involving the download and validation of FastQ files using SRA identifiers (Default: false).
 

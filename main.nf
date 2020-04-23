@@ -115,7 +115,11 @@ if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
 
-if (params.input) { ch_input = file(params.input, checkIfExists: true) } else { exit 1, "Input samplesheet file not specified!" }
+if (params.input) {
+    ch_input = file(params.input, checkIfExists: true)
+} else {
+    exit 1, "Input samplesheet file not specified!"
+}
 
 if (params.protocol != 'metagenomic' && params.protocol != 'amplicon') {
     exit 1, "Invalid protocol option: ${params.protocol}. Valid options: 'metagenomic' or 'amplicon'!"
@@ -407,30 +411,33 @@ process CHECK_SAMPLESHEET {
     file "*.txt" optional true
 
     script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
-    skip = (params.skip_sra || isOffline()) ? "--skip_sra" : ""
     ignore = params.ignore_sra_errors ? "--ignore_sra_errors" : ""
+    skip = (params.skip_sra || isOffline()) ? "--skip_sra" : ""
     """
-    check_samplesheet.py $samplesheet samplesheet.pass $skip $ignore
+    check_samplesheet.py $samplesheet samplesheet.pass $ignore $skip
     """
 }
 
-// Function to get list of [ sample, single_end?, is_sra?, [ fastq_1, fastq_2 ] ]
+// Function to get list of [ sample, single_end?, is_sra?, is_ftp?, [ fastq_1, fastq_2 ], [ md5_1, md5_2] ]
 def validate_input(LinkedHashMap sample) {
     def sample_id = sample.sample_id
     def single_end = sample.single_end.toBoolean()
     def is_sra = sample.is_sra.toBoolean()
+    def is_ftp = sample.is_ftp.toBoolean()
     def fastq_1 = sample.fastq_1
     def fastq_2 = sample.fastq_2
+    def md5_1 = sample.md5_1
+    def md5_2 = sample.md5_2
 
     def array = []
     if (!is_sra) {
         if (single_end) {
-            array = [ sample_id, single_end, is_sra, [ file(fastq_1, checkIfExists: true) ] ]
+            array = [ sample_id, single_end, is_sra, is_ftp, [ file(fastq_1, checkIfExists: true) ] ]
         } else {
-            array = [ sample_id, single_end, is_sra, [ file(fastq_1, checkIfExists: true), file(fastq_2, checkIfExists: true) ] ]
+            array = [ sample_id, single_end, is_sra, is_ftp, [ file(fastq_1, checkIfExists: true), file(fastq_2, checkIfExists: true) ] ]
         }
     } else {
-        array = [ sample_id, single_end, is_sra, [ ] ]
+        array = [ sample_id, single_end, is_sra, is_ftp, [ fastq_1, fastq_2 ], [ md5_1, md5_2 ] ]
     }
 
     return array
@@ -459,7 +466,47 @@ ch_samplesheet_reformat
 if (!params.skip_sra || !isOffline()) {
     ch_reads_sra
         .filter { it[2] }
-        .set { ch_reads_sra }
+        .into { ch_reads_sra_ftp
+                ch_reads_sra_dump }
+
+    process SRA_FASTQ_FTP {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith(".md5")) $filename
+                          else params.save_sra_fastq ? "$filename" : null
+                    }
+
+        when:
+        is_ftp
+
+        input:
+        set val(sample), val(single_end), val(is_sra), val(is_ftp), val(fastq), val(md5) from ch_reads_sra_ftp
+
+        output:
+        set val(sample), val(single_end), val(is_sra), val(is_ftp), file("*.fastq.gz") into ch_sra_fastq_ftp
+        file "*.md5"
+
+        script:
+        if (single_end) {
+            """
+            curl -L ${fastq[0]} -o ${sample}.fastq.gz
+            echo "${md5[0]}  ${sample}.fastq.gz" > ${sample}.fastq.gz.md5
+            md5sum -c ${sample}.fastq.gz.md5
+            """
+        } else {
+            """
+            curl -L ${fastq[0]} -o ${sample}_1.fastq.gz
+            echo "${md5[0]}  ${sample}_1.fastq.gz" > ${sample}_1.fastq.gz.md5
+            md5sum -c ${sample}_1.fastq.gz.md5
+
+            curl -L ${fastq[1]} -o ${sample}_2.fastq.gz
+            echo "${md5[1]}  ${sample}_2.fastq.gz" > ${sample}_2.fastq.gz.md5
+            md5sum -c ${sample}_2.fastq.gz.md5
+            """
+        }
+    }
 
     process SRA_FASTQ_DUMP {
         tag "$sample"
@@ -470,42 +517,42 @@ if (!params.skip_sra || !isOffline()) {
                           else params.save_sra_fastq ? "$filename" : null
                     }
 
+        when:
+        !is_ftp
+
         input:
-        set val(sample), val(single_end), val(is_sra), file(reads) from ch_reads_sra
+        set val(sample), val(single_end), val(is_sra), val(is_ftp) from ch_reads_sra_dump.map { it[0..3] }
 
         output:
-        set val(sample), val(single_end), val(is_sra), file("*.fastq.gz") into ch_sra_fastq
+        set val(sample), val(single_end), val(is_sra), val(is_ftp), file("*.fastq.gz") into ch_sra_fastq_dump
         file "*.log"
 
         script:
+        prefix = "${sample.split('_')[0..-2].join('_')}"
         pe = single_end ? "" : "--readids --split-e"
-        rm_orphan = single_end ? "" : "[ -f  ${sample}.fastq.gz ] && rm ${sample}.fastq.gz"
+        rm_orphan = single_end ? "" : "[ -f  ${prefix}.fastq.gz ] && rm ${prefix}.fastq.gz"
         """
         parallel-fastq-dump \\
-            --sra-id $sample \\
+            --sra-id $prefix \\
             --threads $task.cpus \\
             --outdir ./ \\
             --tmpdir ./ \\
             --gzip \\
             $pe \\
-            > ${sample}.fastq_dump.log
+            > ${prefix}.fastq_dump.log
 
         $rm_orphan
         """
     }
 
-    ch_sra_fastq
-        .map { [ it[0] + "_T1", it[1], it[2], it[3] ] }
-        .set { ch_sra_fastq }
-
     ch_reads_all
         .filter { !it[2] }
-        .concat(ch_sra_fastq)
+        .concat(ch_sra_fastq_ftp, ch_sra_fastq_dump)
         .set { ch_reads_all }
 }
 
 ch_reads_all
-    .map { [ it[0], it[1], it[3] ] }
+    .map { [ it[0], it[1], it[4] ] }
     .into { ch_reads_fastqc
             ch_reads_fastp }
 
