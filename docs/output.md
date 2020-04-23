@@ -318,13 +318,10 @@ TODO: Add documentation here about [`Minimap2`](https://github.com/lh3/minimap2)
 
 * `assembly/<ASSEMBLER>/variants/`
   * `*.gfa`: minia scaffold assembly.
-  * `*.png`: minia scaffold assembly visualized by Bandage in PNG format.
-  * `*.svg`: minia scaffold assembly visualized by Bandage in SVG format.
-  * `*.paf`: minia scaffold assembly.
   * `*.vcf.gz`: VCF file with variant annotations.
   * `*.vcf.gz.tbi`: Index for VCF file with variant annotations.
-  * `*.vg`: VCF file with variant annotations.
-  * `*.xg`: VCF file with variant annotations.
+  * `*.png`: minia scaffold assembly visualized by Bandage in PNG format.
+  * `*.svg`: minia scaffold assembly visualized by Bandage in SVG format.
 * `assembly/<ASSEMBLER>/variants/bcftools_stats/`
   * `*.bcftools_stats.txt`: Statistics and counts for variants in VCF files.
 
