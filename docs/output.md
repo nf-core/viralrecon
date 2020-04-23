@@ -274,6 +274,8 @@ We used a Kraken2 database in this workflow to filter out reads specific to the 
 * `assembly/spades/`
   * `*.scaffolds.fa`: SPAdes scaffold assembly.
   * `*.assembly.gfa`: SPAdes assembly in GFA format.
+  * `*.assembly.png`: SPAdes assembly in GFA format visualized by Bandage in PNG format.
+  * `*.assembly.svg`: SPAdes assembly in GFA format visualized by Bandage in SVG format.
 
 ### metaSPAdes
 
@@ -284,6 +286,8 @@ We used a Kraken2 database in this workflow to filter out reads specific to the 
 * `assembly/metaspades/`
   * `*.scaffolds.fa`: metaSPAdes scaffold assembly.
   * `*.assembly.gfa`: metaSPAdes assembly in GFA format.
+  * `*.assembly.png`: metaSPAdes assembly in GFA format visualized by Bandage in PNG format.
+  * `*.assembly.svg`: metaSPAdes assembly in GFA format visualized by Bandage in SVG format.
 
 ### Unicycler
 
@@ -294,6 +298,8 @@ We used a Kraken2 database in this workflow to filter out reads specific to the 
 * `assembly/unicycler/`
   * `*.scaffolds.fa`: Unicycler scaffold assembly.
   * `*.assembly.gfa`: Unicycler assembly in GFA format.
+  * `*.assembly.png`: Unicycler assembly in GFA format visualized by Bandage in PNG format.
+  * `*.assembly.png`: Unicycler assembly in GFA format visualized by Bandage in SVG format.
 
 ### minia
 
@@ -306,17 +312,16 @@ TODO: Add documentation here about [minia](https://github.com/GATB/minia).
 
 ### Minimap2, seqwish, vg
 
-TODO: Add documentation here about [`Minimap2`](https://github.com/lh3/minimap2), [`seqwish`](https://github.com/ekg/seqwish), [`vg`](https://github.com/vgteam/vg).
+TODO: Add documentation here about [`Minimap2`](https://github.com/lh3/minimap2), [`seqwish`](https://github.com/ekg/seqwish), [`vg`](https://github.com/vgteam/vg), [`Bandage`](https://github.com/rrwick/Bandage).
 
 **Output files:**
 
 * `assembly/<ASSEMBLER>/variants/`
-  * `*.gfa`: minia scaffold assembly.
-  * `*.paf`: minia scaffold assembly.
+  * `*.gfa`: Scaffold assembly.
   * `*.vcf.gz`: VCF file with variant annotations.
   * `*.vcf.gz.tbi`: Index for VCF file with variant annotations.
-  * `*.vg`: VCF file with variant annotations.
-  * `*.xg`: VCF file with variant annotations.
+  * `*.png`: Scaffold assembly visualized by Bandage in PNG format.
+  * `*.svg`: Scaffold assembly visualized by Bandage in SVG format.
 * `assembly/<ASSEMBLER>/variants/bcftools_stats/`
   * `*.bcftools_stats.txt`: Statistics and counts for variants in VCF files.
 

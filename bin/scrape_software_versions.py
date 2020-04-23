@@ -28,6 +28,7 @@ regexes = {
     'BLAST': ['v_blast.txt', r"blastn:\s(\S+)"],
     'ABACAS': ['v_abacas.txt', r"ABACAS.(\S+)"],
     'QUAST': ['v_quast.txt', r"QUAST\sv(\S+)"],
+    'Bandage': ['v_bandage.txt', r"Version:\s(\S+)"],
     'R': ['v_R.txt', r"R\sversion\s(\S+)"],
     'MultiQC': ['v_multiqc.txt', r"multiqc,\sversion\s(\S+)"]
 }
@@ -56,6 +57,7 @@ results['vg'] = '<span style="color:#999999;\">N/A</span>'
 results['BLAST'] = '<span style="color:#999999;\">N/A</span>'
 results['ABACAS'] = '<span style="color:#999999;\">N/A</span>'
 results['QUAST'] = '<span style="color:#999999;\">N/A</span>'
+results['Bandage'] = '<span style="color:#999999;\">N/A</span>'
 results['R'] = '<span style="color:#999999;\">N/A</span>'
 results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
 
