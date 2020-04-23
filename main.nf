@@ -1527,7 +1527,7 @@ process SPADES {
                                                                  ch_spades_abacas,
                                                                  ch_spades_plasmidid,
                                                                  ch_spades_quast
-    file "*assembly.gfa"
+    file "*assembly.{gfa,png,svg}"
 
 
     script:
@@ -1539,6 +1539,9 @@ process SPADES {
         -o ./
     mv scaffolds.fasta ${sample}.scaffolds.fa
     mv assembly_graph_with_scaffolds.gfa ${sample}.assembly.gfa
+
+    Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
+    Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
     """
 }
 
@@ -1568,7 +1571,7 @@ process SPADES_VG {
     output:
     set val(sample), val(single_end), file("*.vcf.gz*") into ch_spades_vg_vcf
     file "*.bcftools_stats.txt" into ch_spades_vg_bcftools_mqc
-    file "*.{paf,gfa,vg,xg}"
+    file "*.{paf,gfa,vg,xg,png,svg}"
 
     script:
     """
@@ -1585,6 +1588,9 @@ process SPADES_VG {
         | bgzip -c > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
+
+    Bandage image ${sample}.gfa ${sample}.png --height 1000
+    Bandage image ${sample}.gfa ${sample}.svg --height 1000
     """
 }
 
@@ -1787,7 +1793,7 @@ process METASPADES {
                                                                  ch_metaspades_abacas,
                                                                  ch_metaspades_plasmidid,
                                                                  ch_metaspades_quast
-    file "*assembly.gfa"
+    file "*assembly.{gfa,png,svg}"
 
 
     script:
@@ -1800,6 +1806,9 @@ process METASPADES {
         -o ./
     mv scaffolds.fasta ${sample}.scaffolds.fa
     mv assembly_graph_with_scaffolds.gfa ${sample}.assembly.gfa
+
+    Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
+    Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
     """
 }
 
@@ -1825,7 +1834,7 @@ process METASPADES_VG {
     output:
     set val(sample), val(single_end), file("*.vcf.gz*") into ch_metaspades_vg_vcf
     file "*.bcftools_stats.txt" into ch_metaspades_vg_bcftools_mqc
-    file "*.{paf,gfa,vg,xg}"
+    file "*.{paf,gfa,vg,xg,png,svg}"
 
     script:
     """
@@ -1842,6 +1851,9 @@ process METASPADES_VG {
         | bgzip -c > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
+
+    Bandage image ${sample}.gfa ${sample}.png --height 1000
+    Bandage image ${sample}.gfa ${sample}.svg --height 1000
     """
 }
 
@@ -2044,7 +2056,7 @@ process UNICYCLER {
                                                                  ch_unicycler_abacas,
                                                                  ch_unicycler_plasmidid,
                                                                  ch_unicycler_quast
-    file "*assembly.gfa"
+    file "*assembly.{gfa,png,svg}"
 
 
     script:
@@ -2056,6 +2068,9 @@ process UNICYCLER {
         --out ./
     mv assembly.fasta ${sample}.scaffolds.fa
     mv assembly.gfa ${sample}.assembly.gfa
+
+    Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
+    Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
     """
 }
 
@@ -2081,7 +2096,7 @@ process UNICYCLER_VG {
     output:
     set val(sample), val(single_end), file("*.vcf.gz*") into ch_unicycler_vg_vcf
     file "*.bcftools_stats.txt" into ch_unicycler_vg_bcftools_mqc
-    file "*.{paf,gfa,vg,xg}"
+    file "*.{paf,gfa,vg,xg,png,svg}"
 
     script:
     """
@@ -2098,6 +2113,9 @@ process UNICYCLER_VG {
         | bgzip -c > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
+
+    Bandage image ${sample}.gfa ${sample}.png --height 1000
+    Bandage image ${sample}.gfa ${sample}.svg --height 1000
     """
 }
 
@@ -2337,7 +2355,7 @@ process MINIA_VG {
     output:
     set val(sample), val(single_end), file("*.vcf.gz*") into ch_minia_vg_vcf
     file "*.bcftools_stats.txt" into ch_minia_vg_bcftools_mqc
-    file "*.{paf,gfa,vg,xg}"
+    file "*.{paf,gfa,vg,xg,png,svg}"
 
     script:
     """
@@ -2354,6 +2372,9 @@ process MINIA_VG {
         | bgzip -c > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
+
+    Bandage image ${sample}.gfa ${sample}.png --height 1000
+    Bandage image ${sample}.gfa ${sample}.svg --height 1000
     """
 }
 
