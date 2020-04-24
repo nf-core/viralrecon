@@ -27,6 +27,7 @@
   * [`--kraken2_db_name`](#--kraken2_db_name)
   * [`--kraken2_use_ftp`](#--kraken2_use_ftp)
   * [`--save_kraken2_fastq`](#--save_kraken2_fastq)
+  * [`--skip_kraken2`](#--skip_kraken2)
 * [Read trimming](#read-trimming)
   * [`--skip_adapter_trimming`](#--skip_adapter_trimming)
   * [`--skip_amplicon_trimming`](#--skip_amplicon_trimming)
@@ -328,6 +329,10 @@ Option for kraken using ftp download instead of rsync (Default: false).
 ### `--save_kraken2_fastq`
 
 Save the host and viral fastq files in the results directory (Default: false).
+
+### `--skip_kraken2`
+
+Skip Kraken2 process for removing host classified reads (Default: false).
 
 ## Read trimming
 
