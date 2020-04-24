@@ -99,7 +99,7 @@ Many thanks to others who have helped out and contributed along the way too, inc
 | [Harshil Patel](https://github.com/drpatelh)              | [The Francis Crick Institute, UK](https://www.crick.ac.uk/)                                     |
 | [Joao Curado](https://github.com/jcurado)                 | [Flomics Biotech, Spain](https://www.flomics.com/)                                              |
 | [Jose Espinosa-Carrasco](https://github.com/JoseEspinosa) | [Centre for Genomic Regulation, Spain](https://www.crg.eu/)                                     |
-| [Katrin Sameith](https://github.com/ktrns)                | [Max Planck Institute of Molecular Cell Biology and Genetics, Germany](https://www.mpi-cbg.de/) |     
+| [Katrin Sameith](https://github.com/ktrns)                | [Max Planck Institute of Molecular Cell Biology and Genetics, Germany](https://www.mpi-cbg.de/) |
 | [Maxime Garcia](https://github.com/MaxUlysse)             | [SciLifeLab, Sweden](https://www.scilifelab.se/)                                                |
 | [Michael Heuer](https://github.com/heuermh)               | [UC Berkeley, USA](https://https://rise.cs.berkeley.edu)                                        |
 | [Phil Ewels](https://github.com/ewels)                    | [SciLifeLab, Sweden](https://www.scilifelab.se/)                                                |
