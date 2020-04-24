@@ -45,6 +45,7 @@ def helpMessage() {
       --kraken2_db_name [str]         Name of host genome for building Kraken2 database (Default: 'human')
       --kraken2_use_ftp [bool]        Use FTP instead of rsync when building kraken2 databases (Default: false)
       --save_kraken2_fastq [bool]     Save the host and viral fastq files in the results directory (Default: false)
+      --skip_kraken2 [bool]           Skip Kraken2 process for removing host classified reads (Default: false)
 
     Read trimming
       --skip_adapter_trimming [bool]  Skip the adapter trimming step with fastp (Default: false)
@@ -227,10 +228,14 @@ if (params.save_reference)           summary['Save Genome Indices'] = 'Yes'
 if (params.ignore_sra_errors)        summary['Ignore SRA Errors'] = params.ignore_sra_errors
 if (params.save_sra_fastq)           summary['Save SRA FastQ'] = params.save_sra_fastq
 if (params.skip_sra)                 summary['Skip SRA Download'] = params.skip_sra
-if (params.kraken2_db)               summary['Host Kraken2 DB'] = params.kraken2_db
-if (params.kraken2_db_name)          summary['Host Kraken2 Name'] = params.kraken2_db_name
-if (params.kraken2_use_ftp)          summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
-if (params.save_kraken2_fastq)       summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
+if (!params.skip_kraken2) {
+    if (params.kraken2_db)           summary['Host Kraken2 DB'] = params.kraken2_db
+    if (params.kraken2_db_name)      summary['Host Kraken2 Name'] = params.kraken2_db_name
+    if (params.kraken2_use_ftp)      summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
+    if (params.save_kraken2_fastq)   summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
+} else {
+    summary['Skip Kraken2']          = 'Yes'
+}
 if (params.skip_adapter_trimming)    summary['Skip Adapter Trimming'] = 'Yes'
 if (params.skip_amplicon_trimming)   summary['Skip Amplicon Trimming'] = 'Yes'
 if (params.save_trimmed)             summary['Save Trimmed'] = 'Yes'
@@ -364,7 +369,7 @@ ch_gff
 /*
  * PREPROCESSING: Uncompress Kraken2 database
  */
-if (params.kraken2_db) {
+if (!params.skip_kraken2 && params.kraken2_db) {
     if (params.kraken2_db.endsWith('.tar.gz')) {
         process UNTAR_KRAKEN2_DB {
             input:
@@ -1371,7 +1376,7 @@ process MAKE_BLAST_DB {
  * PREPROCESSING: Build Kraken2 database for host genome
  */
 if (!isOffline()) {
-    if (!params.kraken2_db) {
+    if (!params.skip_kraken2 && !params.kraken2_db) {
         if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
 
         process KRAKEN2_BUILD {
@@ -1461,46 +1466,54 @@ if (params.protocol == 'amplicon' && !params.skip_amplicon_trimming) {
 /*
  * STEP 6.2: Filter reads with Kraken2
  */
-process KRAKEN2 {
-    tag "$db"
-    label 'process_high'
-    publishDir "${params.outdir}/assembly/kraken2", mode: params.publish_dir_mode,
-        saveAs: { filename ->
-                      if (filename.endsWith(".txt")) filename
-                      else params.save_kraken2_fastq ? filename : null
-                }
+if (!params.skip_kraken2) {
+    process KRAKEN2 {
+        tag "$db"
+        label 'process_high'
+        publishDir "${params.outdir}/assembly/kraken2", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith(".txt")) filename
+                          else params.save_kraken2_fastq ? filename : null
+                    }
 
-    when:
-    !params.skip_assembly
+        when:
+        !params.skip_assembly
 
-    input:
-    set val(sample), val(single_end), file(reads) from ch_fastq_kraken2
-    file db from ch_kraken2_db.collect()
+        input:
+        set val(sample), val(single_end), file(reads) from ch_fastq_kraken2
+        file db from ch_kraken2_db.collect()
 
-    output:
-    set val(sample), val(single_end), file("*.viral*") into ch_kraken2_spades,
-                                                            ch_kraken2_metaspades,
-                                                            ch_kraken2_unicycler,
-                                                            ch_kraken2_minia
-    file "*.host*"
-    file "*.report.txt"
+        output:
+        set val(sample), val(single_end), file("*.viral*") into ch_kraken2_spades,
+                                                                ch_kraken2_metaspades,
+                                                                ch_kraken2_unicycler,
+                                                                ch_kraken2_minia
+        file "*.host*"
+        file "*.report.txt"
 
-    script:
-    pe = single_end ? "" : "--paired"
-    classified = single_end ? "${sample}.host.fastq" : "${sample}.host#.fastq"
-    unclassified = single_end ? "${sample}.viral.fastq" : "${sample}.viral#.fastq"
-    """
-    kraken2 \\
-        --db $db \\
-        --threads $task.cpus \\
-        --unclassified-out $unclassified \\
-        --classified-out $classified \\
-        --report ${sample}.kraken2.report.txt \\
-        $pe \\
-        --gzip-compressed \\
-        $reads
-    pigz -p $task.cpus *.fastq
-    """
+        script:
+        pe = single_end ? "" : "--paired"
+        classified = single_end ? "${sample}.host.fastq" : "${sample}.host#.fastq"
+        unclassified = single_end ? "${sample}.viral.fastq" : "${sample}.viral#.fastq"
+        """
+        kraken2 \\
+            --db $db \\
+            --threads $task.cpus \\
+            --unclassified-out $unclassified \\
+            --classified-out $classified \\
+            --report ${sample}.kraken2.report.txt \\
+            $pe \\
+            --gzip-compressed \\
+            $reads
+        pigz -p $task.cpus *.fastq
+        """
+    }
+} else {
+    ch_fastq_kraken2
+        .into { ch_kraken2_spades
+                ch_kraken2_metaspades
+                ch_kraken2_unicycler
+                ch_kraken2_minia }
 }
 
 ////////////////////////////////////////////////////
