@@ -14,7 +14,6 @@
   * [`--amplicon_bed`](#--amplicon_bed)
   * [`--amplicon_fasta`](#--amplicon_fasta)
 * [SRA download](#sra-download)
-  * [`--ncbi_api_key`](#--ncbi_api_key)
   * [`--ignore_sra_errors`](#--ignore_sra_errors)
   * [`--save_sra_fastq`](#--save_sra_fastq)
   * [`--skip_sra`](#--skip_sra)
@@ -28,25 +27,32 @@
   * [`--kraken2_db_name`](#--kraken2_db_name)
   * [`--kraken2_use_ftp`](#--kraken2_use_ftp)
   * [`--save_kraken2_fastq`](#--save_kraken2_fastq)
-* [Adapter trimming](#Adapter-trimming)
-  * [`--skip_trimming`](#--skip_trimming)
+* [Read trimming](#read-trimming)
+  * [`--skip_adapter_trimming`](#--skip_adapter_trimming)
+  * [`--skip_amplicon_trimming`](#--skip_amplicon_trimming)
   * [`--save_trimmed`](#--save_trimmed)
-* [Alignments](#alignments)
-  * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
-  * [`--save_align_intermeds`](#--save_align_intermeds)
 * [Variant calling](#variant-calling)
   * [`--callers`](#-callers)
+  * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
+  * [`--save_align_intermeds`](#--save_align_intermeds)
   * [`--save_pileup`](#--save_pileup)
+  * [`--skip_snpeff`](#--skip_snpeff)
+  * [`--skip_variants_quast`](#--skip_variants_quast)
   * [`--skip_variants`](#--skip_variants)
 * [De novo assembly](#de-novo-assembly)
   * [`--assemblers`](#--assemblers)
-  * [`--skip_assembly`](#--skip_assembly)
+  * [`--minia_kmer`](#--minia_kmer)
+  * [`--skip_vg`](#--skip_vg)
+  * [`--skip_blast`](#--skip_blast)
+  * [`--skip_abacas`](#--skip_abacas)
+  * [`--skip_plasmidid`](#--skip_plasmidid)
+  * [`--skip_assembly_quast`](#--skip_assembly_quast)
+  * [`--skip_assembly`](#--skip_assembly)  
 * [Skipping QC steps](#skipping-qc-steps)
-  * `--skip_qc`
   * `--skip_fastqc`
-  * `--skip_fastq_info`
   * `--skip_picard_metrics`
   * `--skip_multiqc`
+  * `--skip_qc`
 * [Job resources](#job-resources)
   * [Automatic resubmission](#automatic-resubmission)
   * [Custom resource requests](#custom-resource-requests)
@@ -73,15 +79,13 @@
 
 ## Introduction
 
-Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
+Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler. Finally, you can use nextflow `-bg` flag to execute nextflow in background.
 
 It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
 
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
-
-<!-- TODO nf-core: Document required command line parameters to run the pipeline-->
 
 ## Running the pipeline
 
@@ -112,7 +116,7 @@ nextflow pull nf-core/viralrecon
 
 ### Reproducibility
 
-It's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
+It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
 First, go to the [nf-core/viralrecon releases page](https://github.com/nf-core/viralrecon/releases) and find the latest version number - numeric only (eg. `1.3.1`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.3.1`.
 
@@ -142,14 +146,12 @@ If `-profile` is not specified, the pipeline will run locally and expect all sof
   * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
   * Pulls software from DockerHub: [`nfcore/viralrecon`](http://hub.docker.com/r/nfcore/viralrecon/)
 * `conda`
-  * Please only use Conda as a last resort i.e. when it's not possible to run the pipeline with Docker or Singularity.
+  * Please only use Conda as a last resort i.e. when it is not possible to run the pipeline with Docker or Singularity.
   * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
   * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `test`
   * A profile with a complete configuration for automated testing
   * Includes links to test data so needs no other parameters
-
-<!-- TODO nf-core: Document required command line parameters -->
 
 ### `--input`
 
@@ -174,11 +176,30 @@ SRR11092056,,
 SRR11177792,,
 ```
 
-| Column    | Description                                                                                                                            |
-|-----------|----------------------------------------------------------------------------------------------------------------------------------------|
-| `sample`  | Custom sample name or SRA 'SR' or 'PR' identifier. This will be identical for multiple sequencing libraries/runs from the same sample. |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".             |
+| Column    | Description                                                                                                                                                        |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `sample`  | Custom sample name or [database identifier](#supported-public-repository-ids). This will be identical for multiple sequencing libraries/runs from the same sample. |
+| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                         |
+| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                         |
+
+#### Supported public repository ids
+
+The pipeline has been set-up to automatically download the raw FastQ files from public repositories. Currently, the following identifiers are supported:
+
+| `SRA`        | `ENA`        | `GEO`     |
+|--------------|--------------|-----------|
+| SRR390278    | ERR674736    | GSM465244 |
+| SRX111814    | ERX629702    | GSE18729  |
+| SRS282569    | ERS4399631   |           |
+| SAMN00765663 | SAMEA3121481 |           |
+| SRP003255    | ERP120836    |           |
+| SRA023522    | ERA2421642   |           |
+| PRJNA63463   | PRJEB7743    |           |
+
+If `SRR`/`ERR` run ids are provided then these will be resolved back to their appropriate `SRX`/`ERX` ids to be able to merge multiple runs from the same experiment.
+
+The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well
+as their associated md5 sums. If download links exist, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
 
 ### `--protocol`
 
@@ -190,7 +211,7 @@ Viral genome location of primers. Mandatory when `--protocol amplicon` and not `
 
 #### Format
 
-It must be in bed format, with this fields:
+It must be in [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format, with these fields:
 
 ```Bash
 
@@ -211,7 +232,7 @@ NC_045512.2 704 726 nCoV-2019_2_RIGHT 60 +
 
 ### `--amplicon_fasta`
 
-Primer sequences in fasta format. Mandatory when `--protocol amplicon` and not `--skip_assembly`.
+Primer sequences in Fasta format. Mandatory when `--protocol amplicon` and not `--skip_assembly`.
 Example:
 
 ```Bash
@@ -233,25 +254,19 @@ AAGGTGTCTGCAATTCATAGCTCT
 
 ## SRA download
 
-### `--ncbi_api_key`
-
-Set the NCBI API key to query the NCBI search services when downloading `fastq` files from public DBs. Increases the number of request that can be launched to this service you can read more about it and learn how to obtain the key following this [link](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/)
-
-## `--ignore_sra_errors`
+### `--ignore_sra_errors`
 
 Ignore validation errors when checking SRA identifiers that would otherwise cause the pipeline to fail (Default: false).
 
-## `--save_sra_fastq`
+### `--save_sra_fastq`
 
 Save FastQ files created from SRA identifiers in the results directory (Default: false).
 
-## `--skip_sra`
+### `--skip_sra`
 
 Skip steps involving the download and validation of FastQ files using SRA identifiers (Default: false).
 
 ## Reference genomes
-
-<!-- TODO nf-core: Describe reference path flags -->
 
 ### `--genome`
 
@@ -261,19 +276,17 @@ Note that you can use the same configuration setup to save sets of reference fil
 
 The syntax for this reference configuration is as follows:
 
-<!-- TODO nf-core: Update reference genome example according to what is needed -->
-
 ```nextflow
 params {
   // Genome reference file paths
   genomes {
     'NC_045512.2' {
-      fasta = "<path to the genome fasta file>"
-      gff   = "<path to the genome annotation file>"
+      fasta = "<path to the genome Fasta file>"
+      gff   = "<path to the genome annotation GFF file>"
     }
     'MN908947.3' {
-      fasta = "<path to the genome fasta file>"
-      gff   = "<path to the genome annotation file>"
+      fasta = "<path to the genome Fasta file>"
+      gff   = "<path to the genome annotation GFF file>"
     }
     // Any number of additional genomes, key is used with --genome
   }
@@ -284,25 +297,25 @@ You can find the keys to specify the genomes in the [Genomes config file](https:
 
 ### `--fasta`
 
-Full path to fasta file containing reference genome for the viral species (*mandatory* if `--genome` is not specified). If you don't have a Bowtie2 index available this will be generated for you automatically. Combine with `--save_reference` to save Bowtie2 index for future runs.
+Full path to Fasta file containing reference genome for the viral species (*mandatory* if `--genome` is not specified). If you don't have a Bowtie2 index available this will be generated for you automatically. Combine with `--save_reference` to save Bowtie2 index for future runs.
 
 ```bash
---fasta '[path to FASTA reference]'
+--fasta '[path to Fasta reference]'
 ```
 
 ### `--gff`
 
-Full path to viral gff annotation file.
+Full path to viral [GFF](http://www.gmod.org/wiki/GFF3) annotation file (Default: false).
 
 ### `--save_reference`
 
-If the Bowtie2 index is generated by the pipeline use this parameter to save it to your results folder. These can then be used for future pipeline runs, reducing processing times.
+If the Bowtie2 index is generated by the pipeline use this parameter to save it to your results folder. These can then be used for future pipeline runs, reducing processing times (Default: false).
 
 ## Kraken2
 
 ### `--kraken2_db`
 
-Full path to Kraken2 database built from host genome.
+Full path to Kraken2 database built from host genome (Default: '<https://zenodo.org/record/3738199/files/kraken2_human.tar.gz>').
 
 ### `--kraken2_db_name`
 
@@ -316,15 +329,19 @@ Option for kraken using ftp download instead of rsync (Default: false).
 
 Save the host and viral fastq files in the results directory (Default: false).
 
-## Adapter trimming
+## Read trimming
 
-### `--skip_trimming`
+### `--skip_adapter_trimming`
 
-Skip the adapter trimming step. Use this if your input FastQ files have already been trimmed outside of the workflow or if you're very confident that there is no adapter contamination in your data.
+Skip the adapter trimming step performed by fastp. Use this if your input FastQ files have already been trimmed outside of the workflow or if you're very confident that there is no adapter contamination in your data (Default: false).
+
+### `--skip_amplicon_trimming`
+
+Skip the amplicon trimming step performed by Cutadapt. Use this if your input FastQ files have already been trimmed outside of the workflow or if you're very confident that there is no primer sequence contamination in your data (Default: false).
 
 ### `--save_trimmed`
 
-By default, trimmed FastQ files will not be saved to the results directory. Specify this flag (or set to true in your config file) to copy these files to the results directory when complete.
+By default, trimmed FastQ files will not be saved to the results directory. Specify this flag (or set to true in your config file) to copy these files to the results directory when complete (Default: false).
 
 ## Alignments
 
@@ -334,7 +351,7 @@ This option unsets the `-e` parameter in `ivar trim` to discard reads without pr
 
 ### `--save_align_intermeds`
 
-By default, intermediate BAM files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set to true to also save other intermediate BAM files.
+By default, intermediate [BAM](https://samtools.github.io/hts-specs/) files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set to true to also save other intermediate BAM files (Default: false).
 
 ## Variant calling
 
@@ -346,32 +363,62 @@ Specify which variant calling algorithms you would like to use. Available option
 
 Save Pileup files in the results directory. These tend to be quite large so are not saved by default (Default: false).
 
+### `--skip_snpeff`
+
+Skip SnpEff and SnpSift annotation of variants (Default: false).
+
+### `--skip_variants_quast`
+
+Skip generation of QUAST aggregated report for consensus sequences (Default: false).
+
 ### `--skip_variants`
 
-Specify this parameter to skip all of the variant calling and mapping steps in the pipeline.
+Specify this parameter to skip all of the variant calling and mapping steps in the pipeline (Default: false).
 
 ## De novo assembly
 
 ### `--assemblers`
 
-Specify which assembly algorithms you would like to use. Available options are `spades`, `metaspades` and `unicycler` (Default: 'spades,metaspades,unicycler').
+Specify which assembly algorithms you would like to use. Available options are `spades`, `metaspades`, `unicycler` and `minia` (Default: 'spades,metaspades,unicycler,minia').
+
+### `--minia_kmer`
+
+Kmer size to use when running minia (Default: 31).
+
+### `--skip_vg`
+
+Skip variant graph creation and variant calling relative to reference genome (Default: false).
+
+### `--skip_blast`
+
+Skip blastn of assemblies relative to reference genome (Default: false).
+
+### `--skip_abacas`
+
+Skip ABACUS process for assembly contiguation (Default: false).
+
+### `--skip_plasmidid`
+
+Skip assembly report generation by PlasmidID (Default: false).
+
+### `--skip_assembly_quast`
+
+Skip generation of QUAST aggregated report for assemblies (Default: false).
 
 ### `--skip_assembly`
 
-Specify this parameter to skip all of the de novo assembly steps in the pipeline.
+Specify this parameter to skip all of the de novo assembly steps in the pipeline (Default: false).
 
 ## Skipping QC steps
 
-The pipeline contains a large number of quality control steps. Sometimes, it may not be desirable to run all of them if time and compute resources are limited.
-The following options make this easy:
+The pipeline contains a large number of quality control steps. Sometimes, it may not be desirable to run all of them if time and compute resources are limited. The following options make this easy:
 
 | Step                      | Description                                              |
 |---------------------------|----------------------------------------------------------|
-| `--skip_qc`               | Skip all QC steps except for MultiQC                     |
-| `--skip_fastq_info`       | Skip fastq_info check for SRA reads                      |
 | `--skip_fastqc`           | Skip FastQC                                              |
 | `--skip_picard_metrics`   | Skip Picard CollectMultipleMetrics and CollectWgsMetrics |
 | `--skip_multiqc`          | Skip MultiQC                                             |
+| `--skip_qc`               | Skip all QC steps except for MultiQC                     |
 
 ## Job resources
 
@@ -406,8 +453,6 @@ The [AWS CLI](https://www.nextflow.io/docs/latest/awscloud.html#aws-cli-installa
 Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a S3 storage bucket of your choice - you'll get an error message notifying you if you didn't.
 
 ## Other command line parameters
-
-<!-- TODO nf-core: Describe any other command line flags here -->
 
 ### `--outdir`
 
@@ -460,7 +505,7 @@ Provide git commit id for custom Institutional configs hosted at `nf-core/config
 
 ### `--custom_config_base`
 
-If you're running offline, nextflow will not be able to fetch the institutional config files
+If you're running offline, Nextflow will not be able to fetch the institutional config files
 from the internet. If you don't need them, then this is not a problem. If you do need them,
 you should download the files from the repo and tell nextflow where to find them with the
 `custom_config_base` option. For example:

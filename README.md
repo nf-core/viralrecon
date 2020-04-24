@@ -32,20 +32,20 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
             * Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
             * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
         * Call variants ([`iVar`](https://github.com/andersen-lab/ivar))
-            * Consensus sequence generatation ([`iVar`](https://github.com/andersen-lab/ivar))
+            * Consensus sequence generation ([`iVar`](https://github.com/andersen-lab/ivar))
             * Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
             * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
 6. De novo assembly
     1. Primer trimming ([`Cutadapt`](https://cutadapt.readthedocs.io/en/stable/guide.html); *amplicon data only*)
     2. Removal of host reads ([`Kraken2`](http://ccb.jhu.edu/software/kraken2/))
-    3. Choice of multiple assembly tools ([`SPAdes`](http://cab.spbu.ru/software/spades/), [`metaSPAdes`](http://cab.spbu.ru/software/meta-spades/), [`Unicycler`](https://github.com/rrwick/Unicycler))
-        * Blast to reference assembly ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch))
-        * Contiguate contigs assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
+    3. Choice of multiple assembly tools ([`SPAdes`](http://cab.spbu.ru/software/spades/), [`metaSPAdes`](http://cab.spbu.ru/software/meta-spades/), [`Unicycler`](https://github.com/rrwick/Unicycler), [`minia`](https://github.com/GATB/minia))
+        * Call variants relative to reference ([`Minimap2`](https://github.com/lh3/minimap2), [`seqwish`](https://github.com/ekg/seqwish), [`vg`](https://github.com/vgteam/vg))
+        * Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
+        * Blast to reference genome ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch))
+        * Contiguate assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
         * Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))
         * Assembly assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
-7. Present QC for raw read, alignment, assembly, variant annotation results ([`MultiQC`](http://multiqc.info/), [`R`](https://www.r-project.org/))
-
-<!-- TODO nf-core: Add a brief overview of what the pipeline does and how it works -->
+7. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/), [`Bandage`](https://github.com/rrwick/Bandage))
 
 ## Quick Start
 
@@ -62,8 +62,6 @@ nextflow run nf-core/viralrecon -profile test,<docker/singularity/conda/institut
 > Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
 
 iv. Start running your own analysis!
-
-<!-- TODO nf-core: Update the default command above used to run the pipeline -->
 
 ```bash
 nextflow run nf-core/viralrecon -profile <docker/singularity/conda/institute> --input samplesheet.csv --genome 'NC_045512.2' -profile docker
@@ -87,6 +85,7 @@ The nf-core/viralrecon pipeline comes with documentation about the pipeline, fou
 ## Credits
 
 nf-core/viralrecon was originally written by Sarai Varona, Miguel Juliá and Sara Monzon from [BU-ISCIII](https://github.com/BU-ISCIII) and co-ordinated by Isabel Cuesta for the [Institute of Health Carlos III](https://eng.isciii.es/eng.isciii.es/Paginas/Inicio.html), Spain.
+Through collaboration with the nf-core community the pipeline has now been updated substantially to include additional processing steps and to standardise inputs/outputs.
 
 Many thanks to others who have helped out and contributed along the way too, including (but not limited to):
 
@@ -100,6 +99,7 @@ Many thanks to others who have helped out and contributed along the way too, inc
 | [Maxime Garcia](https://github.com/MaxUlysse)             | [SciLifeLab, Sweden](https://www.scilifelab.se/)                      |
 | [Michael Heuer](https://github.com/heuermh)               | [UC Berkeley, USA](https://https://rise.cs.berkeley.edu)              |
 | [Phil Ewels](https://github.com/ewels)                    | [SciLifeLab, Sweden](https://www.scilifelab.se/)                      |
+| [Stephen Kelly](https://github.com/stevekm)               | [Memorial Sloan Kettering Cancer Center, USA](https://www.mskcc.org/) |
 | [Thanh Le Viet](https://github.com/thanhleviet)           | [Quadram Institute, UK](https://quadram.ac.uk/)                       |
 
 > Listed in alphabetical order
@@ -112,7 +112,6 @@ For further information or help, don't hesitate to get in touch on [Slack](https
 
 ## Citation
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi. -->
 <!-- If you use  nf-core/viralrecon for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
 
 You can cite the `nf-core` publication as follows:

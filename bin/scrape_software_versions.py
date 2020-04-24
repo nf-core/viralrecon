@@ -3,12 +3,10 @@ from __future__ import print_function
 from collections import OrderedDict
 import re
 
-# TODO nf-core: Add additional regexes for new tools in process get_software_versions
 regexes = {
     'nf-core/viralrecon': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
     'parallel-fastq-dump': ['v_parallel_fastq_dump.txt', r"parallel-fastq-dump\s:\s(\S+)"],
-    'fastq_utils': ['v_fastq_utils.txt', r"fastq_utils\s(\S+)"],
     'FastQC': ['v_fastqc.txt', r"FastQC\sv(\S+)"],
     'fastp': ['v_fastp.txt', r"fastp\s(\S+)"],
     'Bowtie 2': ['v_bowtie2.txt', r"bowtie2-align-s\sversion\s(\S+)"],
@@ -24,9 +22,13 @@ regexes = {
     'Kraken2': ['v_kraken2.txt', r"Kraken\sversion\s(\S+)"],
     'SPAdes': ['v_spades.txt', r"SPAdes\sgenome\sassembler\sv(\S+)"],
     'Unicycler': ['v_unicycler.txt', r"Unicycler\sv(\S+)"],
-    'QUAST': ['v_quast.txt', r"QUAST\sv(\S+)"],
+    'minia': ['v_minia.txt', r"Minia\sversion\s(\S+)"],
+    'Minimap2': ['v_minimap2.txt', r"(\S+)"],
+    'vg': ['v_vg.txt', r"vg\sversion\sv(\S+)"],
     'BLAST': ['v_blast.txt', r"blastn:\s(\S+)"],
     'ABACAS': ['v_abacas.txt', r"ABACAS.(\S+)"],
+    'QUAST': ['v_quast.txt', r"QUAST\sv(\S+)"],
+    'Bandage': ['v_bandage.txt', r"Version:\s(\S+)"],
     'R': ['v_R.txt', r"R\sversion\s(\S+)"],
     'MultiQC': ['v_multiqc.txt', r"multiqc,\sversion\s(\S+)"]
 }
@@ -34,7 +36,6 @@ results = OrderedDict()
 results['nf-core/viralrecon'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['parallel-fastq-dump'] = '<span style="color:#999999;\">N/A</span>'
-results['fastq_utils'] = '<span style="color:#999999;\">N/A</span>'
 results['FastQC'] = '<span style="color:#999999;\">N/A</span>'
 results['fastp'] = '<span style="color:#999999;\">N/A</span>'
 results['Bowtie 2'] = '<span style="color:#999999;\">N/A</span>'
@@ -50,9 +51,13 @@ results['Cutadapt'] = '<span style="color:#999999;\">N/A</span>'
 results['Kraken2'] = '<span style="color:#999999;\">N/A</span>'
 results['SPAdes'] = '<span style="color:#999999;\">N/A</span>'
 results['Unicycler'] = '<span style="color:#999999;\">N/A</span>'
-results['QUAST'] = '<span style="color:#999999;\">N/A</span>'
+results['minia'] = '<span style="color:#999999;\">N/A</span>'
+results['Minimap2'] = '<span style="color:#999999;\">N/A</span>'
+results['vg'] = '<span style="color:#999999;\">N/A</span>'
 results['BLAST'] = '<span style="color:#999999;\">N/A</span>'
 results['ABACAS'] = '<span style="color:#999999;\">N/A</span>'
+results['QUAST'] = '<span style="color:#999999;\">N/A</span>'
+results['Bandage'] = '<span style="color:#999999;\">N/A</span>'
 results['R'] = '<span style="color:#999999;\">N/A</span>'
 results['MultiQC'] = '<span style="color:#999999;\">N/A</span>'
 
