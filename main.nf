@@ -366,29 +366,6 @@ ch_gff
             ch_gff_unicycler_quast; ch_gff_unicycler_snpeff;
             ch_gff_minia_quast; ch_gff_minia_snpeff }
 
-/*
- * PREPROCESSING: Uncompress Kraken2 database
- */
-if (!params.skip_kraken2 && params.kraken2_db) {
-    if (params.kraken2_db.endsWith('.tar.gz')) {
-        process UNTAR_KRAKEN2_DB {
-            input:
-            file db from Channel.fromPath(params.kraken2_db, checkIfExists: true)
-
-            output:
-            file "$untar" into ch_kraken2_db
-
-            script:
-            untar = db.toString() - '.tar.gz'
-            """
-            tar -xvf $db
-            """
-        }
-    } else {
-        ch_kraken2_db = Channel.fromPath(params.kraken2_db, checkIfExists: true)
-    }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 /* --                                                                     -- */
@@ -1376,34 +1353,38 @@ process MAKE_BLAST_DB {
  * PREPROCESSING: Build Kraken2 database for host genome
  */
 if (!isOffline()) {
-    if (!params.skip_kraken2 && !params.kraken2_db) {
-        if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
+    if (!params.skip_kraken2) {
+        if (!params.kraken2_db) {
+            if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
 
-        process KRAKEN2_BUILD {
-            tag "$db"
-            label 'process_high'
-            publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-                saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+            process KRAKEN2_BUILD {
+                tag "$db"
+                label 'process_high'
+                publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
+                    saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
 
-            when:
-            !params.skip_assembly
+                when:
+                !params.skip_assembly
 
-            output:
-            file "$db" into ch_kraken2_db
+                output:
+                file "$db" into ch_kraken2_db
 
-            script:
-            db = "kraken2_${params.kraken2_db_name}"
-            ftp = params.kraken2_use_ftp ? "--use-ftp" : ""
-            """
-            kraken2-build --db $db --threads $task.cpus $ftp --download-taxonomy
-            kraken2-build --db $db --threads $task.cpus $ftp --download-library $params.kraken2_db_name
-            kraken2-build --db $db --threads $task.cpus $ftp --build
+                script:
+                db = "kraken2_${params.kraken2_db_name}"
+                ftp = params.kraken2_use_ftp ? "--use-ftp" : ""
+                """
+                kraken2-build --db $db --threads $task.cpus $ftp --download-taxonomy
+                kraken2-build --db $db --threads $task.cpus $ftp --download-library $params.kraken2_db_name
+                kraken2-build --db $db --threads $task.cpus $ftp --build
 
-            cd $db
-            if [ -d "taxonomy" ]; then rm -rf taxonomy; fi
-            if [ -d "library" ]; then rm -rf library; fi
-            if [ -f "seqid2taxid.map" ]; then rm seqid2taxid.map; fi
-            """
+                cd $db
+                if [ -d "taxonomy" ]; then rm -rf taxonomy; fi
+                if [ -d "library" ]; then rm -rf library; fi
+                if [ -f "seqid2taxid.map" ]; then rm seqid2taxid.map; fi
+                """
+            }
+        } else {
+            ch_kraken2_db = Channel.fromPath(params.kraken2_db, checkIfExists: true)
         }
     }
 } else {
@@ -1496,8 +1477,15 @@ if (!params.skip_kraken2) {
         classified = single_end ? "${sample}.host.fastq" : "${sample}.host#.fastq"
         unclassified = single_end ? "${sample}.viral.fastq" : "${sample}.viral#.fastq"
         """
+        DB=$db
+        if [[ \$DB == *.tar.gz ]]
+        then
+            tar -xvf \$DB
+            DB=\${DB%.*.*}
+        fi
+
         kraken2 \\
-            --db $db \\
+            --db \$DB \\
             --threads $task.cpus \\
             --unclassified-out $unclassified \\
             --classified-out $classified \\
