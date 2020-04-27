@@ -338,6 +338,9 @@ if (params.gff) {
     } else {
         ch_gff = file(params.gff)
     }
+} else {
+    //See: https://nextflow-io.github.io/patterns/index.html#_optional_input
+    ch_gff = file('NO_FILE')
 }
 
 /*
