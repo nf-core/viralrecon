@@ -116,7 +116,7 @@ if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
 
-if (params.input) { file(params.input, checkIfExists: true) } else { exit 1, "Input samplesheet file not specified!" }
+if (params.input) { ch_input = file(params.input, checkIfExists: true) } else { exit 1, "Input samplesheet file not specified!" }
 
 if (params.protocol != 'metagenomic' && params.protocol != 'amplicon') {
     exit 1, "Invalid protocol option: ${params.protocol}. Valid options: 'metagenomic' or 'amplicon'!"
@@ -125,14 +125,12 @@ if (params.protocol != 'metagenomic' && params.protocol != 'amplicon') {
 if (params.protocol == 'amplicon' && !params.skip_assembly && !params.amplicon_fasta) {
     exit 1, "To perform de novo assembly in 'amplicon' mode please provide a valid amplicon fasta file!"
 }
-if (params.amplicon_fasta) { file(params.amplicon_fasta, checkIfExists: true) }
+if (params.amplicon_fasta) { ch_amplicon_fasta = file(params.amplicon_fasta, checkIfExists: true) }
 
 if (params.protocol == 'amplicon' && !params.skip_variants && !params.amplicon_bed) {
     exit 1, "To perform variant calling in 'amplicon' mode please provide a valid amplicon BED file!"
 }
-if (params.amplicon_bed) {
-    ch_amplicon_bed = Channel.fromPath(params.amplicon_bed, checkIfExists: true)
-}
+if (params.amplicon_bed) { ch_amplicon_bed = file(params.amplicon_bed, checkIfExists: true) }
 
 callerList = [ 'varscan2', 'ivar']
 callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
@@ -318,21 +316,11 @@ if (params.fasta.endsWith('.gz')) {
     ch_fasta = file(params.fasta)
 }
 
-// ch_fasta
-//     .into { ch_fasta_bowtie2; ch_fasta_picard;
-//             ch_fasta_varscan2; ch_fasta_bcftools; ch_fasta_varscan2_snpeff; ch_fasta_varscan2_quast;
-//             ch_fasta_ivar_variants; ch_fasta_ivar_consensus; ch_fasta_ivar_snpeff; ch_fasta_ivar_quast;
-//             ch_fasta_blast; ch_fasta_spades_abacas; ch_fasta_spades_plasmidid; ch_fasta_spades_quast; ch_fasta_spades_vg; ch_fasta_spades_snpeff;
-//             ch_fasta_metaspades_abacas; ch_fasta_metaspades_plasmidid; ch_fasta_metaspades_quast; ch_fasta_metaspades_vg; ch_fasta_metaspades_snpeff;
-//             ch_fasta_unicycler_abacas; ch_fasta_unicycler_plasmidid; ch_fasta_unicycler_quast; ch_fasta_unicycler_vg; ch_fasta_unicycler_snpeff;
-//             ch_fasta_minia_abacas; ch_fasta_minia_plasmidid; ch_fasta_minia_quast; ch_fasta_minia_vg; ch_fasta_minia_snpeff }
-
 /*
  * PREPROCESSING: Uncompress gff annotation file
  */
 if (params.gff) {
     file(params.gff, checkIfExists: true)
-
     if (params.gff.endsWith('.gz')) {
         process GUNZIP_GFF {
             input:
@@ -350,18 +338,8 @@ if (params.gff) {
     } else {
         ch_gff = file(params.gff)
     }
-} else {
-    ch_gff = Channel.empty()
 }
-//
-// ch_gff
-//     .into { ch_gff_varscan2_snpeff; ch_gff_varscan2_quast;
-//             ch_gff_ivar_variants; ch_gff_ivar_snpeff; ch_gff_ivar_quast;
-//             ch_gff_spades_quast; ch_gff_spades_snpeff;
-//             ch_gff_metaspades_quast; ch_gff_metaspades_snpeff;
-//             ch_gff_unicycler_quast; ch_gff_unicycler_snpeff;
-//             ch_gff_minia_quast; ch_gff_minia_snpeff }
-//
+
 /*
  * PREPROCESSING: Uncompress Kraken2 database
  */
@@ -406,7 +384,7 @@ process CHECK_SAMPLESHEET {
                 }
 
     input:
-    path samplesheet from params.input
+    path samplesheet from ch_input
 
     output:
     path "*.csv" into ch_samplesheet_reformat
@@ -865,7 +843,7 @@ if (params.protocol != 'amplicon') {
 
         input:
         tuple val(sample), val(single_end), path(bam) from ch_sort_bam_ivar
-        path bed from ch_amplicon_bed.collect()
+        path bed from ch_amplicon_bed
 
         output:
         tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_ivar_trim_bam
@@ -901,6 +879,7 @@ ch_sort_bam
             ch_sort_bam_ivar_consensus
             ch_sort_bam_varscan2
             ch_sort_bam_varscan2_bcftools }
+
 /*
  * STEP 5.4: Picard CollectMultipleMetrics and CollectWgsMetrics
  */
@@ -1419,7 +1398,7 @@ if (params.protocol == 'amplicon' && !params.skip_amplicon_trimming) {
 
         input:
         tuple val(sample), val(single_end), path(reads) from ch_fastq_cutadapt
-        path amplicons from params.amplicon_fasta
+        path amplicons from ch_amplicon_fasta
 
         output:
         tuple val(sample), val(single_end), path("*.ptrim.fastq.gz") into ch_cutadapt_kraken2
