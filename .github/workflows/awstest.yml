@@ -26,5 +26,5 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{secrets.AWS_KEY_ID}}
           AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_KEY_SECRET}}
           TOWER_ACCESS_TOKEN: ${{secrets.TOWER_ACCESS_TOKEN}}
-        run: |
+        run: | # Submits job to AWS batch, using the pre-define job definition. Setting JVM options to "-Xms1g -Xmx4g -XX:+UseG1GC" to allow staging of larger files.
           aws batch submit-job --region eu-west-1 --job-name nf-core-viralrecon --job-queue 'default-8b3836e0-5eda-11ea-96e5-0a2c3f6a2a32' --job-definition nextflow-big --container-overrides '{"command": ["nf-core/viralrecon", "-r '"${GITHUB_SHA}"' -profile test_full --outdir s3://nf-core-awsmegatests/viralrecon/results-'"${GITHUB_SHA}"' -w s3://nf-core-awsmegatests/viralrecon/work-'"${GITHUB_SHA}"' -with-tower"], "environment": [{"name": "TOWER_ACCESS_TOKEN", "value": "'"$TOWER_ACCESS_TOKEN"'"}, {"name": "NXF_OPTS", "value": "-Xms1g -Xmx4g -XX:+UseG1GC"}]}'
