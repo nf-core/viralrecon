@@ -1532,8 +1532,11 @@ process SPADES {
     mv scaffolds.fasta ${sample}.scaffolds.fa
     mv assembly_graph_with_scaffolds.gfa ${sample}.assembly.gfa
 
-    Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
-    Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
+    if [ -s ${sample}.assembly.gfa ]
+    then
+        Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
+        Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
+    fi
     """
 }
 
@@ -1702,8 +1705,11 @@ process SPADES_VG {
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
-    Bandage image ${sample}.gfa ${sample}.png --height 1000
-    Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    if [ -s ${sample}.gfa ]
+    then
+        Bandage image ${sample}.gfa ${sample}.png --height 1000
+        Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    fi
     """
 }
 
@@ -1800,8 +1806,11 @@ process METASPADES {
     mv scaffolds.fasta ${sample}.scaffolds.fa
     mv assembly_graph_with_scaffolds.gfa ${sample}.assembly.gfa
 
-    Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
-    Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
+    if [ -s ${sample}.assembly.gfa ]
+    then
+        Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
+        Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
+    fi
     """
 }
 
@@ -1969,8 +1978,11 @@ process METASPADES_VG {
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
-    Bandage image ${sample}.gfa ${sample}.png --height 1000
-    Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    if [ -s ${sample}.gfa ]
+    then
+        Bandage image ${sample}.gfa ${sample}.png --height 1000
+        Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    fi
     """
 }
 
@@ -2065,8 +2077,11 @@ process UNICYCLER {
     mv assembly.fasta ${sample}.scaffolds.fa
     mv assembly.gfa ${sample}.assembly.gfa
 
-    Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
-    Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
+    if [ -s ${sample}.assembly.gfa ]
+    then
+        Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
+        Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
+    fi
     """
 }
 
@@ -2234,8 +2249,11 @@ process UNICYCLER_VG {
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
-    Bandage image ${sample}.gfa ${sample}.png --height 1000
-    Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    if [ -s ${sample}.gfa ]
+    then
+        Bandage image ${sample}.gfa ${sample}.png --height 1000
+        Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    fi
     """
 }
 
@@ -2496,8 +2514,11 @@ process MINIA_VG {
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
-    Bandage image ${sample}.gfa ${sample}.png --height 1000
-    Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    if [ -s ${sample}.gfa ]
+    then
+        Bandage image ${sample}.gfa ${sample}.png --height 1000
+        Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    fi
     """
 }
 
