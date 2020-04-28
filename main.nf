@@ -318,6 +318,20 @@ if (params.fasta.endsWith('.gz')) {
     ch_fasta = file(params.fasta)
 }
 
+// Print warning if viral genome fasta has more than one sequence
+def count = 0
+ch_fasta.withReader { reader ->
+    while (line = reader.readLine()) {
+        if (line.contains('>')) {
+            count++
+            if (count > 1) {
+                log.info "[nf-core/viralrecon] WARNING: This pipeline does not support multi-fasta genome files. Please amend the '--fasta' parameter."
+                break
+            }
+        }
+    }
+}
+
 /*
  * PREPROCESSING: Uncompress gff annotation file
  */
@@ -1666,7 +1680,6 @@ process SPADES_QUAST {
 /*
  * STEP 6.3.5: Overlap scaffolds with Minimap2, induce and polish assembly, and call variants with seqwish and vg
  */
-// TODO nf-core: What would the value of $PREFIX by for a multi-fasta?
 process SPADES_VG {
     tag "$sample"
     label 'process_medium'
@@ -1685,7 +1698,7 @@ process SPADES_VG {
     path fasta from ch_fasta
 
     output:
-    tuple val(sample), val(single_end), path("*.vcf.gz*") into ch_spades_vg_vcf
+    tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_spades_vg_vcf
     path "*.bcftools_stats.txt" into ch_spades_vg_bcftools_mqc
     path "*.{gfa,png,svg}"
 
@@ -1696,12 +1709,17 @@ process SPADES_VG {
     cat $scaffolds $fasta > ${sample}.withRef.fasta
     seqwish --paf-alns ${sample}.paf --seqs ${sample}.withRef.fasta --gfa ${sample}.gfa --threads $task.cpus
 
-    PREFIX=`head -n 1 $fasta | tr -d ">" | cut -f 1 -d' '`
     vg view -Fv ${sample}.gfa --threads $task.cpus > ${sample}.vg
     vg convert -x ${sample}.vg > ${sample}.xg
-    vg deconstruct -p \$PREFIX ${sample}.xg --threads $task.cpus \\
-        | bcftools sort -O v -T ./ \\
-        | bgzip -c > ${sample}.vcf.gz
+
+    samtools faidx $fasta
+    for chrom in `cat ${fasta}.fai | cut -f1`
+    do
+        vg deconstruct -p \$chrom ${sample}.xg --threads $task.cpus \\
+            | bcftools sort -O v -T ./ \\
+            | bgzip -c > ${sample}.\$chrom.vcf.gz
+    done
+    bcftools concat --output-type z --output ${sample}.vcf.gz *.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
@@ -1958,7 +1976,7 @@ process METASPADES_VG {
     path fasta from ch_fasta
 
     output:
-    tuple val(sample), val(single_end), path("*.vcf.gz*") into ch_metaspades_vg_vcf
+    tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_metaspades_vg_vcf
     path "*.bcftools_stats.txt" into ch_metaspades_vg_bcftools_mqc
     path "*.{gfa,png,svg}"
 
@@ -1969,12 +1987,17 @@ process METASPADES_VG {
     cat $scaffolds $fasta > ${sample}.withRef.fasta
     seqwish --paf-alns ${sample}.paf --seqs ${sample}.withRef.fasta --gfa ${sample}.gfa --threads $task.cpus
 
-    PREFIX=`head -n 1 $fasta | tr -d ">" | cut -f 1 -d' '`
     vg view -Fv ${sample}.gfa --threads $task.cpus > ${sample}.vg
     vg convert -x ${sample}.vg > ${sample}.xg
-    vg deconstruct -p \$PREFIX ${sample}.xg --threads $task.cpus \\
-        | bcftools sort -O v -T ./ \\
-        | bgzip -c > ${sample}.vcf.gz
+
+    samtools faidx $fasta
+    for chrom in `cat ${fasta}.fai | cut -f1`
+    do
+        vg deconstruct -p \$chrom ${sample}.xg --threads $task.cpus \\
+            | bcftools sort -O v -T ./ \\
+            | bgzip -c > ${sample}.\$chrom.vcf.gz
+    done
+    bcftools concat --output-type z --output ${sample}.vcf.gz *.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
@@ -2229,7 +2252,7 @@ process UNICYCLER_VG {
     path fasta from ch_fasta
 
     output:
-    tuple val(sample), val(single_end), path("*.vcf.gz*") into ch_unicycler_vg_vcf
+    tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_unicycler_vg_vcf
     path "*.bcftools_stats.txt" into ch_unicycler_vg_bcftools_mqc
     path "*.{gfa,png,svg}"
 
@@ -2240,12 +2263,17 @@ process UNICYCLER_VG {
     cat $scaffolds $fasta > ${sample}.withRef.fasta
     seqwish --paf-alns ${sample}.paf --seqs ${sample}.withRef.fasta --gfa ${sample}.gfa --threads $task.cpus
 
-    PREFIX=`head -n 1 $fasta | tr -d ">" | cut -f 1 -d' '`
     vg view -Fv ${sample}.gfa --threads $task.cpus > ${sample}.vg
     vg convert -x ${sample}.vg > ${sample}.xg
-    vg deconstruct -p \$PREFIX ${sample}.xg --threads $task.cpus \\
-        | bcftools sort -O v -T ./ \\
-        | bgzip -c > ${sample}.vcf.gz
+
+    samtools faidx $fasta
+    for chrom in `cat ${fasta}.fai | cut -f1`
+    do
+        vg deconstruct -p \$chrom ${sample}.xg --threads $task.cpus \\
+            | bcftools sort -O v -T ./ \\
+            | bgzip -c > ${sample}.\$chrom.vcf.gz
+    done
+    bcftools concat --output-type z --output ${sample}.vcf.gz *.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
@@ -2494,7 +2522,7 @@ process MINIA_VG {
     path fasta from ch_fasta
 
     output:
-    tuple val(sample), val(single_end), path("*.vcf.gz*") into ch_minia_vg_vcf
+    tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_minia_vg_vcf
     path "*.bcftools_stats.txt" into ch_minia_vg_bcftools_mqc
     path "*.{gfa,png,svg}"
 
@@ -2505,12 +2533,17 @@ process MINIA_VG {
     cat $scaffolds $fasta > ${sample}.withRef.fasta
     seqwish --paf-alns ${sample}.paf --seqs ${sample}.withRef.fasta --gfa ${sample}.gfa --threads $task.cpus
 
-    PREFIX=`head -n 1 $fasta | tr -d ">" | cut -f 1 -d' '`
     vg view -Fv ${sample}.gfa --threads $task.cpus > ${sample}.vg
     vg convert -x ${sample}.vg > ${sample}.xg
-    vg deconstruct -p \$PREFIX ${sample}.xg --threads $task.cpus \\
-        | bcftools sort -O v -T ./ \\
-        | bgzip -c > ${sample}.vcf.gz
+
+    samtools faidx $fasta
+    for chrom in `cat ${fasta}.fai | cut -f1`
+    do
+        vg deconstruct -p \$chrom ${sample}.xg --threads $task.cpus \\
+            | bcftools sort -O v -T ./ \\
+            | bgzip -c > ${sample}.\$chrom.vcf.gz
+    done
+    bcftools concat --output-type z --output ${sample}.vcf.gz *.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
