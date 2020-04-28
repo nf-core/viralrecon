@@ -300,6 +300,8 @@ checkHostname()
  */
 if (params.fasta.endsWith('.gz')) {
     process GUNZIP_FASTA {
+        label 'error_retry'
+
         input:
         path fasta from params.fasta
 
@@ -323,6 +325,8 @@ if (params.gff) {
     file(params.gff, checkIfExists: true)
     if (params.gff.endsWith('.gz')) {
         process GUNZIP_GFF {
+            label 'error_retry'
+
             input:
             path gff from params.gff
 
@@ -350,6 +354,8 @@ if (!params.skip_kraken2 && params.kraken2_db) {
     file(params.kraken2_db, checkIfExists: true)
     if (params.kraken2_db.endsWith('.tar.gz')) {
         process UNTAR_KRAKEN2_DB {
+            label 'error_retry'
+
             input:
             path db from params.kraken2_db
 
@@ -455,6 +461,7 @@ if (!params.skip_sra || !isOffline()) {
     process SRA_FASTQ_FTP {
         tag "$sample"
         label 'process_medium'
+        label 'error_retry'
         publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith(".md5")) $filename
@@ -494,6 +501,7 @@ if (!params.skip_sra || !isOffline()) {
     process SRA_FASTQ_DUMP {
         tag "$sample"
         label 'process_medium'
+        label 'error_retry'
         publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith(".log")) "log/$filename"
@@ -1524,8 +1532,11 @@ process SPADES {
     mv scaffolds.fasta ${sample}.scaffolds.fa
     mv assembly_graph_with_scaffolds.gfa ${sample}.assembly.gfa
 
-    Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
-    Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
+    if [ -s ${sample}.assembly.gfa ]
+    then
+        Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
+        Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
+    fi
     """
 }
 
@@ -1567,7 +1578,8 @@ process SPADES_BLAST {
  */
 process SPADES_ABACAS {
     tag "$sample"
-    label "process_medium"
+    label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/spades/abacas", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
@@ -1599,7 +1611,8 @@ process SPADES_ABACAS {
  */
 process SPADES_PLASMIDID {
     tag "$sample"
-    label "process_medium"
+    label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/spades/plasmidid", mode: params.publish_dir_mode
 
     when:
@@ -1657,6 +1670,7 @@ process SPADES_QUAST {
 process SPADES_VG {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/spades/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
@@ -1691,8 +1705,11 @@ process SPADES_VG {
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
-    Bandage image ${sample}.gfa ${sample}.png --height 1000
-    Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    if [ -s ${sample}.gfa ]
+    then
+        Bandage image ${sample}.gfa ${sample}.png --height 1000
+        Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    fi
     """
 }
 
@@ -1702,6 +1719,7 @@ process SPADES_VG {
 process SPADES_SNPEFF {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/spades/variants/snpeff", mode: params.publish_dir_mode
 
     when:
@@ -1788,8 +1806,11 @@ process METASPADES {
     mv scaffolds.fasta ${sample}.scaffolds.fa
     mv assembly_graph_with_scaffolds.gfa ${sample}.assembly.gfa
 
-    Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
-    Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
+    if [ -s ${sample}.assembly.gfa ]
+    then
+        Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
+        Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
+    fi
     """
 }
 
@@ -1831,7 +1852,8 @@ process METASPADES_BLAST {
  */
 process METASPADES_ABACAS {
     tag "$sample"
-    label "process_medium"
+    label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/metaspades/abacas", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
@@ -1863,7 +1885,8 @@ process METASPADES_ABACAS {
  */
 process METASPADES_PLASMIDID {
     tag "$sample"
-    label "process_medium"
+    label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/metaspades/plasmidid", mode: params.publish_dir_mode
 
     when:
@@ -1920,6 +1943,7 @@ process METASPADES_QUAST {
 process METASPADES_VG {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/metaspades/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
@@ -1954,8 +1978,11 @@ process METASPADES_VG {
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
-    Bandage image ${sample}.gfa ${sample}.png --height 1000
-    Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    if [ -s ${sample}.gfa ]
+    then
+        Bandage image ${sample}.gfa ${sample}.png --height 1000
+        Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    fi
     """
 }
 
@@ -1965,6 +1992,7 @@ process METASPADES_VG {
 process METASPADES_SNPEFF {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/metaspades/variants/snpeff", mode: params.publish_dir_mode
 
     when:
@@ -2049,8 +2077,11 @@ process UNICYCLER {
     mv assembly.fasta ${sample}.scaffolds.fa
     mv assembly.gfa ${sample}.assembly.gfa
 
-    Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
-    Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
+    if [ -s ${sample}.assembly.gfa ]
+    then
+        Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
+        Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
+    fi
     """
 }
 
@@ -2092,7 +2123,8 @@ process UNICYCLER_BLAST {
  */
 process UNICYCLER_ABACAS {
     tag "$sample"
-    label "process_medium"
+    label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/unicycler/abacas", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
@@ -2124,7 +2156,8 @@ process UNICYCLER_ABACAS {
  */
 process UNICYCLER_PLASMIDID {
     tag "$sample"
-    label "process_medium"
+    label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/unicycler/plasmidid", mode: params.publish_dir_mode
 
     when:
@@ -2181,6 +2214,7 @@ process UNICYCLER_QUAST {
 process UNICYCLER_VG {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/unicycler/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
@@ -2215,8 +2249,11 @@ process UNICYCLER_VG {
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
-    Bandage image ${sample}.gfa ${sample}.png --height 1000
-    Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    if [ -s ${sample}.gfa ]
+    then
+        Bandage image ${sample}.gfa ${sample}.png --height 1000
+        Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    fi
     """
 }
 
@@ -2226,6 +2263,7 @@ process UNICYCLER_VG {
 process UNICYCLER_SNPEFF {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/unicycler/variants/snpeff", mode: params.publish_dir_mode
 
     when:
@@ -2350,7 +2388,8 @@ process MINIA_BLAST {
  */
 process MINIA_ABACAS {
     tag "$sample"
-    label "process_medium"
+    label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/abacas", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
@@ -2382,7 +2421,8 @@ process MINIA_ABACAS {
  */
 process MINIA_PLASMIDID {
     tag "$sample"
-    label "process_medium"
+    label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/plasmidid", mode: params.publish_dir_mode
 
     when:
@@ -2439,6 +2479,7 @@ process MINIA_QUAST {
 process MINIA_VG {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
@@ -2473,8 +2514,11 @@ process MINIA_VG {
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
-    Bandage image ${sample}.gfa ${sample}.png --height 1000
-    Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    if [ -s ${sample}.gfa ]
+    then
+        Bandage image ${sample}.gfa ${sample}.png --height 1000
+        Bandage image ${sample}.gfa ${sample}.svg --height 1000
+    fi
     """
 }
 
@@ -2484,6 +2528,7 @@ process MINIA_VG {
 process MINIA_SNPEFF {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/variants/snpeff", mode: params.publish_dir_mode
 
     when:
