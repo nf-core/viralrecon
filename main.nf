@@ -318,6 +318,20 @@ if (params.fasta.endsWith('.gz')) {
     ch_fasta = file(params.fasta)
 }
 
+// Print warning if viral genome fasta has more than one sequence
+def count = 0
+ch_fasta.withReader { reader ->
+    while (line = reader.readLine()) {
+        if (line.contains('>')) {
+            count++
+            if (count > 1) {
+                log.info "[nf-core/viralrecon] WARNING: This pipeline does not support multi-fasta genome files. Please amend the '--fasta' parameter."
+                break
+            }
+        }
+    }
+}
+
 /*
  * PREPROCESSING: Uncompress gff annotation file
  */
