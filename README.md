@@ -19,7 +19,7 @@ We have integrated a number of options in the pipeline to allow you to run speci
 
 ## Pipeline summary
 
-1. Download samples from SRA ([`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump); *if required*)
+1. Download samples via `SRA`, `ENA` or `GEO` ids ([`ENA ftp`](https://ena-docs.readthedocs.io/en/latest/retrieval/file-download.html), [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump); *if required*)
 2. Raw read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 3. Adapter trimming ([`fastp`](https://github.com/OpenGene/fastp))
 4. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html))
@@ -37,15 +37,15 @@ We have integrated a number of options in the pipeline to allow you to run speci
             * Consensus sequence generation ([`iVar`](https://github.com/andersen-lab/ivar))
             * Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
             * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
-6. De novo assembly
+6. _De novo_ assembly
     1. Primer trimming ([`Cutadapt`](https://cutadapt.readthedocs.io/en/stable/guide.html); *amplicon data only*)
-    2. Removal of host reads ([`Kraken2`](http://ccb.jhu.edu/software/kraken2/))
+    2. Removal of host reads ([`Kraken 2`](http://ccb.jhu.edu/software/kraken2/))
     3. Choice of multiple assembly tools ([`SPAdes`](http://cab.spbu.ru/software/spades/), [`metaSPAdes`](http://cab.spbu.ru/software/meta-spades/), [`Unicycler`](https://github.com/rrwick/Unicycler), [`minia`](https://github.com/GATB/minia))
         * Blast to reference genome ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch))
         * Contiguate assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
         * Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))
         * Assembly assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
-        * Call variants relative to reference ([`Minimap2`](https://github.com/lh3/minimap2), [`seqwish`](https://github.com/ekg/seqwish), [`vg`](https://github.com/vgteam/vg); *optional*)
+        * Call variants relative to reference ([`Minimap2`](https://github.com/lh3/minimap2), [`seqwish`](https://github.com/ekg/seqwish), [`vg`](https://github.com/vgteam/vg))
         * Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
 7. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/), [`Bandage`](https://github.com/rrwick/Bandage))
 
