@@ -62,12 +62,12 @@ def helpMessage() {
       --skip_variants [bool]          Skip variant calling steps in the pipeline (Default: false)
 
     De novo assembly
-      --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler')
+      --assemblers [str]              Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler,minia')
       --minia_kmer [int]              Kmer size to use when running minia (Default: 31)
-      --run_vg [bool]                 Run variant graph creation and variant calling relative to reference (Default: false)
       --skip_blast [bool]             Skip blastn of assemblies relative to reference genome (Default: false)
       --skip_abacas [bool]            Skip ABACUS process for assembly contiguation (Default: false)
       --skip_plasmidid [bool]         Skip assembly report generation by PlasmidID (Default: false)
+      --skip_vg [bool]                Skip variant graph creation and variant calling relative to reference (Default: false)
       --skip_assembly_quast [bool]    Skip generation of QUAST aggregated report for assemblies (Default: false)
       --skip_assembly [bool]          Skip assembly steps in the pipeline (Default: false)
 
@@ -244,7 +244,7 @@ if (!params.skip_variants) {
 if (!params.skip_assembly) {
     summary['Assembly Tools']        = params.assemblers
     summary['Minia Kmer Size']       = params.minia_kmer
-    if (params.run_vg)              summary['Skip Variant Graph'] =  'Yes'
+    if (params.skip_vg)              summary['Skip Variant Graph'] =  'Yes'
     if (params.skip_blast)           summary['Skip BLAST'] =  'Yes'
     if (params.skip_abacas)          summary['Skip ABACAS'] =  'Yes'
     if (params.skip_plasmidid)       summary['Skip PlasmidID'] =  'Yes'
@@ -1691,7 +1691,7 @@ process SPADES_VG {
                 }
 
     when:
-    !params.skip_assembly && 'spades' in assemblers && params.run_vg
+    !params.skip_assembly && 'spades' in assemblers && !params.skip_vg
 
     input:
     tuple val(sample), val(single_end), path(scaffolds) from ch_spades_vg
@@ -1741,7 +1741,7 @@ process SPADES_SNPEFF {
     publishDir "${params.outdir}/assembly/spades/variants/snpeff", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'spades' in assemblers && params.run_vg && params.gff && !params.skip_snpeff
+    !params.skip_assembly && 'spades' in assemblers && !params.skip_vg && params.gff && !params.skip_snpeff
 
     input:
     tuple val(sample), val(single_end), path(vcf) from ch_spades_vg_vcf
@@ -1969,7 +1969,7 @@ process METASPADES_VG {
                 }
 
     when:
-    !params.skip_assembly && 'metaspades' in assemblers && !single_end && params.run_vg
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !params.skip_vg
 
     input:
     tuple val(sample), val(single_end), path(scaffolds) from ch_metaspades_vg
@@ -2019,7 +2019,7 @@ process METASPADES_SNPEFF {
     publishDir "${params.outdir}/assembly/metaspades/variants/snpeff", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'metaspades' in assemblers && !single_end && params.run_vg && params.gff && !params.skip_snpeff
+    !params.skip_assembly && 'metaspades' in assemblers && !single_end && !params.skip_vg && params.gff && !params.skip_snpeff
 
     input:
     tuple val(sample), val(single_end), path(vcf) from ch_metaspades_vg_vcf
@@ -2245,7 +2245,7 @@ process UNICYCLER_VG {
                 }
 
     when:
-    !params.skip_assembly && 'unicycler' in assemblers && params.run_vg
+    !params.skip_assembly && 'unicycler' in assemblers && !params.skip_vg
 
     input:
     tuple val(sample), val(single_end), path(scaffolds) from ch_unicycler_vg
@@ -2295,7 +2295,7 @@ process UNICYCLER_SNPEFF {
     publishDir "${params.outdir}/assembly/unicycler/variants/snpeff", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'unicycler' in assemblers && params.run_vg && params.gff && !params.skip_snpeff
+    !params.skip_assembly && 'unicycler' in assemblers && !params.skip_vg && params.gff && !params.skip_snpeff
 
     input:
     tuple val(sample), val(single_end), path(vcf) from ch_unicycler_vg_vcf
@@ -2350,6 +2350,7 @@ process UNICYCLER_SNPEFF {
 process MINIA {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}", mode: params.publish_dir_mode
 
     when:
@@ -2384,6 +2385,7 @@ process MINIA {
 process MINIA_BLAST {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/blast", mode: params.publish_dir_mode
 
     when:
@@ -2475,6 +2477,7 @@ process MINIA_PLASMIDID {
  */
 process MINIA_QUAST {
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}", mode: params.publish_dir_mode
 
     when:
@@ -2515,7 +2518,7 @@ process MINIA_VG {
                 }
 
     when:
-    !params.skip_assembly && 'minia' in assemblers && params.run_vg
+    !params.skip_assembly && 'minia' in assemblers && !params.skip_vg
 
     input:
     tuple val(sample), val(single_end), path(scaffolds) from ch_minia_vg
@@ -2565,7 +2568,7 @@ process MINIA_SNPEFF {
     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/variants/snpeff", mode: params.publish_dir_mode
 
     when:
-    !params.skip_assembly && 'minia' in assemblers && params.run_vg && params.gff && !params.skip_snpeff
+    !params.skip_assembly && 'minia' in assemblers && !params.skip_vg && params.gff && !params.skip_snpeff
 
     input:
     tuple val(sample), val(single_end), path(vcf) from ch_minia_vg_vcf
