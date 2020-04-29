@@ -43,10 +43,10 @@
 * [De novo assembly](#de-novo-assembly)
   * [`--assemblers`](#--assemblers)
   * [`--minia_kmer`](#--minia_kmer)
-  * [`--run_vg`](#--run_vg)
   * [`--skip_blast`](#--skip_blast)
   * [`--skip_abacas`](#--skip_abacas)
   * [`--skip_plasmidid`](#--skip_plasmidid)
+  * [`--skip_vg`](#--skip_vg)
   * [`--skip_assembly_quast`](#--skip_assembly_quast)
   * [`--skip_assembly`](#--skip_assembly)  
 * [Skipping QC steps](#skipping-qc-steps)
@@ -384,15 +384,11 @@ Specify this parameter to skip all of the variant calling and mapping steps in t
 
 ### `--assemblers`
 
-Specify which assembly algorithms you would like to use. Available options are `spades`, `metaspades`, `unicycler` and `minia` (Default: 'spades,metaspades,unicycler').
+Specify which assembly algorithms you would like to use. Available options are `spades`, `metaspades`, `unicycler` and `minia` (Default: 'spades,metaspades,unicycler,minia').
 
 ### `--minia_kmer`
 
 Kmer size to use when running minia (Default: 31).
-
-### `--run_vg`
-
-Run variant graph creation and variant calling relative to reference genome (Default: false).
 
 ### `--skip_blast`
 
@@ -405,6 +401,10 @@ Skip ABACUS process for assembly contiguation (Default: false).
 ### `--skip_plasmidid`
 
 Skip assembly report generation by PlasmidID (Default: false).
+
+### `--skip_vg`
+
+Skip variant graph creation and variant calling relative to reference genome (Default: false).
 
 ### `--skip_assembly_quast`
 
