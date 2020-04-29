@@ -2661,7 +2661,7 @@ process get_software_versions {
     bowtie2 --version > v_bowtie2.txt
     samtools --version > v_samtools.txt
     bedtools --version > v_bedtools.txt
-    picard MarkDuplicates --version &> v_picard.txt || true
+    picard CollectMultipleMetrics --version &> v_picard.txt || true
     ivar -v > v_ivar.txt
     echo \$(varscan 2>&1) > v_varscan.txt
     snpEff -version > v_snpeff.txt
