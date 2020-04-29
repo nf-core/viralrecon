@@ -314,8 +314,6 @@ TODO: Add documentation here about [minia](https://github.com/GATB/minia).
 
 TODO: Add documentation here about [`Minimap2`](https://github.com/lh3/minimap2), [`seqwish`](https://github.com/ekg/seqwish), [`vg`](https://github.com/vgteam/vg), [`Bandage`](https://github.com/rrwick/Bandage).
 
-> **NB:** This step will only be run if the `--run_vg` parameter is supplied.
-
 **Output files:**
 
 * `assembly/<ASSEMBLER>/variants/`
