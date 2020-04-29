@@ -56,7 +56,7 @@ module_order:
             - './bowtie2/flagstat/*'
     - samtools:
         name: 'VARIANTS: SAMTools (iVar)'
-        info: 'This section of the report shows SAMTools counts/statistics after primar sequence removal with iVar.'
+        info: 'This section of the report shows SAMTools counts/statistics after primer sequence removal with iVar.'
         path_filters:
             - './ivar/flagstat/*'
     - picard:
