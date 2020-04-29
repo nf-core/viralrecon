@@ -2,6 +2,7 @@
 import os
 import sys
 import re
+import errno
 import argparse
 
 def parse_args(args=None):
@@ -12,6 +13,14 @@ def parse_args(args=None):
     parser.add_argument('FILE_IN', help="Input tsv file.")
     parser.add_argument('FILE_OUT', help="Full path to output vcf file")
     return parser.parse_args(args)
+
+def make_dir(path):
+    if not len(path) == 0:
+        try:
+            os.makedirs(path)
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
 
 def ivar_variants_to_vcf(FileIn,FileOut):
     filename = os.path.splitext(FileIn)[0]
@@ -30,6 +39,8 @@ def ivar_variants_to_vcf(FileIn,FileOut):
               '##FORMAT=<ID=ALT_FREQ,Number=1,Type=String,Description="Frequency of alternate base">\n')
     header += '#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t'+filename+'\n'
 
+    OutDir = os.path.dirname(FileOut)
+    make_dir(OutDir)
     fout = open(FileOut,'w')
     fout.write(header)
     with open(FileIn) as f:
