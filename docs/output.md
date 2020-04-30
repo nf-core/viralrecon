@@ -58,12 +58,14 @@ Please see the [usage docs](usage.md#supported-public-repository-ids) for a list
 
 **Output files:**
 
-<img style="float: right" src="images/mqc_fastqc_plot.png" alt="MultiQC - FastQC per base sequence plot" width="600"/>
-
 * `preprocess/fastqc/`
   * `*_fastqc.html`: FastQC report containing quality metrics.
 * `preprocess/fastqc/zips/`
   * `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
+
+<p align="center">
+  <img width="600" src="images/mqc_fastqc_plot.png" alt="MultiQC - FastQC per base sequence plot"/>
+</p>
 
 > **NB:** The FastQC plots in this directory are generated relative to the raw, input reads. They may contain adapter sequence and regions of low quality. To see how your reads look after trimming please refer to the FastQC reports in the `preprocess/fastp/fastqc/` directory.
 
