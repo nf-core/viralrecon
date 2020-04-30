@@ -18,23 +18,19 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [SAMtools](#samtools) - Sort, index and generate metrics for alignments
   * [iVar trim](#ivar-trim) - Primer sequence removal for amplicon data
   * [picard-tools](#picard-tools) - Whole genome coverage and alignment metrics
-  * [VarScan 2, BCFTools, BEDTools](#varscan-2-bcftools-bedtools) - OPTION 1: Variant calling, consensus sequence generation and masking
-  * [iVar variants and iVar consensus](#ivar-variants-and-ivar-consensus) - OPTION 2: Variant calling and consensus sequence generation
-  * [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
-  * [QUAST](#quast) - Consensus assessment report
+  * [VarScan 2, BCFTools, BEDTools](#varscan-2-bcftools-bedtools) / [iVar variants and iVar consensus](#ivar-variants-and-ivar-consensus) - Variant calling and consensus sequence generation
+    * [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
+    * [QUAST](#quast) - Consensus assessment report
 * [De novo assembly](#de-novo-assembly)
   * [Cutadapt](#cutadapt) - Primer trimming for amplicon data
   * [Kraken 2](#kraken-2) - Removal of host reads
-  * [SPAdes](#spades) - OPTION 1: Viral genome assembly
-  * [metaSPAdes](#metaspades) - OPTION 2: Viral genome assembly
-  * [Unicycler](#unicycler) - OPTION 3: Viral genome assembly
-  * [minia](#minia) - OPTION 4: Viral genome assembly
-  * [Minimap2, seqwish, vg](#minimap2-seqwish-vg) - Call variants relative to reference
-  * [Assembly SnpEff and SnpSift](#assembly-snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
-  * [BLAST](#blast) - Blast to reference assembly
-  * [ABACAS](#abacas) - Order contigs according to reference genome
-  * [PlasmidID](#plasmidid) - Assembly report and visualisation
-  * [Assembly QUAST](#assembly-quast) - Assembly quality assessment
+  * [SPAdes](#spades) / [metaSPAdes](#metaspades) / [metaSPAdes](#metaspades) / [minia](#minia) - Viral genome assembly
+    * [BLAST](#blast) - Blast to reference assembly
+    * [ABACAS](#abacas) - Order contigs according to reference genome
+    * [PlasmidID](#plasmidid) - Assembly report and visualisation
+    * [Assembly QUAST](#assembly-quast) - Assembly quality assessment
+    * [Minimap2, seqwish, vg](#minimap2-seqwish-vg) - Call variants relative to reference
+    * [Assembly SnpEff and SnpSift](#assembly-snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
 * [Workflow reporting and genomes](#workflow-reporting-and-genomes)
   * [MultiQC](#multiqc) - Present QC for raw reads, alignment, assembly and variant calling
   * [Reference genome files](#reference-genome-files) - Saving reference genome indices/files
@@ -44,7 +40,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 ### parallel-fastq-dump
 
-[parallel-fastq-dump](https://github.com/rvalieris/parallel-fastq-dump) is used within the pipeline to automatically download and create FastQ files via user provided IDs from the [Sequence Read Archive (SRA)](https://www.ncbi.nlm.nih.gov/sra).
+Please see the [usage docs](usage.md#supported-public-repository-ids) for a list of supported public repository identifiers and how to provide them to the pipeline. The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well as their associated md5 sums. If download links exist, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
 
 **Output files:**
 
@@ -53,8 +49,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 * `preprocess/sra/log/`
   * `*.fastq_dump.log`: Log file generated from stdout.
 
-> **NB:** Downloaded FastQ files will only be saved in the results directory if the `--save_sra_fastq` parameter is supplied.
-> **NB:** If downloading data from the SRA, a metadata (`*.sra_runinfo.txt`) and warnings (`*.sra_warnings.txt`) file is also saved in the `pipeline_info/` directory.
+> **NB:** Downloaded FastQ files will only be saved in the results directory if the `--save_sra_fastq` parameter is supplied.  
+> **NB:** If downloading data from the ENA/SRA, a metadata (`*.sra_runinfo.txt`) and warnings (`*.sra_warnings.txt`) file is also saved in the `pipeline_info/` directory.
 
 ### FastQC
 
