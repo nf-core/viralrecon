@@ -1519,7 +1519,12 @@ if (!params.skip_kraken2) {
 process SPADES {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".png")) "bandage/$filename"
+                      else if (filename.endsWith(".svg")) "bandage/$filename"
+                      else filename
+                }
 
     when:
     !params.skip_assembly && 'spades' in assemblers
@@ -1687,6 +1692,8 @@ process SPADES_VG {
     publishDir "${params.outdir}/assembly/spades/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      else if (filename.endsWith(".png")) "bandage/$filename"
+                      else if (filename.endsWith(".svg")) "bandage/$filename"
                       else filename
                 }
 
@@ -1796,7 +1803,12 @@ process SPADES_SNPEFF {
 process METASPADES {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode,
+    saveAs: { filename ->
+                  if (filename.endsWith(".png")) "bandage/$filename"
+                  else if (filename.endsWith(".svg")) "bandage/$filename"
+                  else filename
+            }
 
     when:
     !params.skip_assembly && 'metaspades' in assemblers && !single_end
@@ -1965,6 +1977,8 @@ process METASPADES_VG {
     publishDir "${params.outdir}/assembly/metaspades/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      else if (filename.endsWith(".png")) "bandage/$filename"
+                      else if (filename.endsWith(".svg")) "bandage/$filename"
                       else filename
                 }
 
@@ -2074,7 +2088,12 @@ process METASPADES_SNPEFF {
 process UNICYCLER {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode,
+    saveAs: { filename ->
+                  if (filename.endsWith(".png")) "bandage/$filename"
+                  else if (filename.endsWith(".svg")) "bandage/$filename"
+                  else filename
+            }
 
     when:
     !params.skip_assembly && 'unicycler' in assemblers
@@ -2241,6 +2260,8 @@ process UNICYCLER_VG {
     publishDir "${params.outdir}/assembly/unicycler/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      else if (filename.endsWith(".png")) "bandage/$filename"
+                      else if (filename.endsWith(".svg")) "bandage/$filename"
                       else filename
                 }
 
@@ -2514,6 +2535,8 @@ process MINIA_VG {
     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      else if (filename.endsWith(".png")) "bandage/$filename"
+                      else if (filename.endsWith(".svg")) "bandage/$filename"
                       else filename
                 }
 
@@ -2643,7 +2666,7 @@ Channel.from(summary.collect{ [it.key, it.value] })
 process get_software_versions {
     publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
         saveAs: { filename ->
-                      if (filename.indexOf(".csv") > 0) filename
+                      if (filename.endsWith(".csv")) filename
                       else null
                 }
 
