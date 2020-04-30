@@ -301,6 +301,9 @@ checkHostname()
 if (params.fasta.endsWith('.gz')) {
     process GUNZIP_FASTA {
         label 'error_retry'
+        if (params.save_reference) {
+            publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+        }
 
         input:
         path fasta from params.fasta
@@ -340,6 +343,9 @@ if (params.gff) {
     if (params.gff.endsWith('.gz')) {
         process GUNZIP_GFF {
             label 'error_retry'
+            if (params.save_reference) {
+                publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+            }
 
             input:
             path gff from params.gff
@@ -369,6 +375,9 @@ if (!params.skip_kraken2 && params.kraken2_db) {
     if (params.kraken2_db.endsWith('.tar.gz')) {
         process UNTAR_KRAKEN2_DB {
             label 'error_retry'
+            if (params.save_reference) {
+                publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+            }
 
             input:
             path db from params.kraken2_db
@@ -478,8 +487,8 @@ if (!params.skip_sra || !isOffline()) {
         label 'error_retry'
         publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.endsWith(".md5")) $filename
-                          else params.save_sra_fastq ? "$filename" : null
+                          if (filename.endsWith(".md5")) filename
+                          else params.save_sra_fastq ? filename : null
                     }
 
         when:
@@ -519,7 +528,7 @@ if (!params.skip_sra || !isOffline()) {
         publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith(".log")) "log/$filename"
-                          else params.save_sra_fastq ? "$filename" : null
+                          else params.save_sra_fastq ? filename : null
                     }
 
         when:
@@ -577,7 +586,7 @@ process FASTQC {
     label 'process_medium'
     publishDir "${params.outdir}/preprocess/fastqc", mode: params.publish_dir_mode,
         saveAs: { filename ->
-                      filename.endsWith(".zip") ? "zips/$filename" : "$filename"
+                      filename.endsWith(".zip") ? "zips/$filename" : filename
                 }
 
     when:
@@ -621,12 +630,12 @@ if (!params.skip_adapter_trimming) {
         label 'process_medium'
         publishDir "${params.outdir}/preprocess/fastp", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.endsWith(".json")) "$filename"
-                          else if (filename.endsWith(".fastp.html")) "$filename"
+                          if (filename.endsWith(".json")) filename
+                          else if (filename.endsWith(".fastp.html")) filename
                           else if (filename.endsWith("_fastqc.html")) "fastqc/$filename"
                           else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
                           else if (filename.endsWith(".log")) "log/$filename"
-                          else params.save_trimmed ? "$filename" : null
+                          else params.save_trimmed ? filename : null
                     }
 
         when:
@@ -697,6 +706,9 @@ ch_fastp_reads
 
 process CAT_FASTQ {
     tag "$sample"
+    if (params.save_sra_fastq) {
+        publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode
+    }
 
     input:
     tuple val(sample), val(single_end), path(reads) from ch_fastp_reads
@@ -750,8 +762,9 @@ process CAT_FASTQ {
 process BOWTIE2_INDEX {
     tag "$fasta"
     label 'process_medium'
-    publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-        saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+    if (params.save_reference) {
+        publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+    }
 
     when:
     !params.skip_variants
@@ -911,8 +924,8 @@ ch_sort_bam
 process PICARD_METRICS {
     tag "$sample"
     label 'process_medium'
-    publishDir path: "${params.outdir}/variants/${program}/picard_metrics", mode: params.publish_dir_mode
-
+    publishDir "${params.outdir}/variants/${program}/picard_metrics", mode: params.publish_dir_mode
+    
     when:
     !params.skip_variants && !params.skip_picard_metrics && !params.skip_qc
 
@@ -963,8 +976,8 @@ process VARSCAN2 {
     label 'process_medium'
     publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode,
         saveAs: { filename ->
-            		      if (filename.endsWith("vcf.gz")) "$filename"
-                      else if (filename.endsWith("vcf.gz.tbi")) "$filename"
+            		      if (filename.endsWith("vcf.gz")) filename
+                      else if (filename.endsWith("vcf.gz.tbi")) filename
                       else if (filename.endsWith(".log")) "log/$filename"
                       else if (filename.endsWith(".txt")) "bcftools_stats/$filename"
                       else params.save_pileup ? filename : null
@@ -1348,8 +1361,9 @@ process IVAR_QUAST {
 process MAKE_BLAST_DB {
     tag "$fasta"
     label 'process_medium'
-    publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-        saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+    if (params.save_reference) {
+        publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+    }
 
     when:
     !params.skip_assembly && !params.skip_blast
@@ -1380,8 +1394,9 @@ if (!isOffline()) {
         process KRAKEN2_BUILD {
             tag "$db"
             label 'process_high'
-            publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-                saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+            if (params.save_reference) {
+                publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+            }
 
             when:
             !params.skip_assembly
@@ -1415,7 +1430,7 @@ if (params.protocol == 'amplicon' && !params.skip_amplicon_trimming) {
                           if (filename.endsWith(".html")) "fastqc/$filename"
                           else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
                           else if (filename.endsWith(".log")) "log/$filename"
-                          else params.save_trimmed ? "$filename" : null
+                          else params.save_trimmed ? filename : null
                     }
 
         when:
