@@ -281,10 +281,10 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 * `assembly/spades/`
   * `*.scaffolds.fa`: SPAdes scaffold assembly.
-  * `*.assembly.gfa`: SPAdes assembly in GFA format.
+  * `*.assembly.gfa`: SPAdes assembly graph in [GFA](https://github.com/GFA-spec/GFA-spec/blob/master/GFA1.md) format.
 * `assembly/spades/bandage/`
-  * `*.png`: Bandage visualisation for SPAdes assembly in PNG format.
-  * `*.svg`: Bandage visualisation for SPAdes assembly in SVG format.
+  * `*.png`: Bandage visualisation for SPAdes assembly graph in PNG format.
+  * `*.svg`: Bandage visualisation for SPAdes assembly graph in SVG format.
 
 ### metaSPAdes
 
@@ -294,10 +294,10 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 * `assembly/metaspades/`
   * `*.scaffolds.fa`: metaSPAdes scaffold assembly.
-  * `*.assembly.gfa`: metaSPAdes assembly in GFA format.
+  * `*.assembly.gfa`: metaSPAdes assembly graph in GFA format.
 * `assembly/metaspades/bandage/`
-  * `*.png`: Bandage visualisation for metaSPAdes assembly in PNG format.
-  * `*.svg`: Bandage visualisation for metaSPAdes assembly in SVG format.
+  * `*.png`: Bandage visualisation for metaSPAdes assembly graph in PNG format.
+  * `*.svg`: Bandage visualisation for metaSPAdes assembly graph in SVG format.
 
 ### Unicycler
 
@@ -307,10 +307,10 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 * `assembly/unicycler/`
   * `*.scaffolds.fa`: Unicycler scaffold assembly.
-  * `*.assembly.gfa`: Unicycler assembly in GFA format.
+  * `*.assembly.gfa`: Unicycler assembly graph in GFA format.
 * `assembly/unicycler/bandage/`
-  * `*.png`: Bandage visualisation for Unicycler assembly in PNG format.
-  * `*.svg`: Bandage visualisation for Unicycler assembly in SVG format.
+  * `*.png`: Bandage visualisation for Unicycler assembly graph in PNG format.
+  * `*.svg`: Bandage visualisation for Unicycler assembly graph in SVG format.
 
 ### minia
 
@@ -323,19 +323,26 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 ### Minimap2, seqwish, vg
 
-TODO: Add documentation here about [`Minimap2`](https://github.com/lh3/minimap2), [`seqwish`](https://github.com/ekg/seqwish), [`vg`](https://github.com/vgteam/vg), [`Bandage`](https://github.com/rrwick/Bandage).
+[`Minimap2`](https://github.com/lh3/minimap2) is a versatile sequence alignment program that aligns DNA or mRNA sequences against a large reference database. Minimap2 was used to generate all-versus-all alignments between scaffold assembly contigs and contigs from a reference genome.
+
+[`seqwish`](https://github.com/ekg/seqwish) implements a lossless conversion from pairwise alignments between sequences to a variation graph encoding the sequences and their alignments. Seqwish was used to induce a genome variation graph from all-versus-all alignments between scaffold assembly contigs and contigs from a reference genome.
+
+[`vg`](https://github.com/vgteam/vg) is a collection of tools for working with genome variation graphs. vg was used to call variants from the genome variation graph induced from all-versus-all alignments between scaffold assembly contigs and contigs from a reference genome.
+
+[`Bandage`](https://github.com/rrwick/Bandage), a Bioinformatics Application for Navigating De novo Assembly Graphs Easily, is a GUI program that allows users to interact with the assembly graphs made by de novo assemblers and other graphs in GFA format. Bandage was used to render induced genome variation graphs as static PNG and SVG images.
+
 
 **Output files:**
 
 * `assembly/<ASSEMBLER>/variants/`
-  * `*.gfa`: Scaffold assembly.
+  * `*.gfa`: Induced genome variation graph.
   * `*.vcf.gz`: VCF file with variant annotations.
   * `*.vcf.gz.tbi`: Index for VCF file with variant annotations.
 * `assembly/<ASSEMBLER>/variants/bcftools_stats/`
   * `*.bcftools_stats.txt`: Statistics and counts for variants in VCF files.
 * `assembly/<ASSEMBLER>/bandage/`
-  * `*.png`: Bandage visualisation for scaffold assembly in PNG format.
-  * `*.svg`: Bandage visualisation for scaffold assembly in SVG format.
+  * `*.png`: Bandage visualisation for induced genome variation graph in PNG format.
+  * `*.svg`: Bandage visualisation for induced genome variation graph in SVG format.
 
 > **NB:** By default, these files will be generated relative to the assemblies for each assembler.
 
