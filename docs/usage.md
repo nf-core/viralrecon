@@ -207,36 +207,20 @@ Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplic
 
 ### `--amplicon_bed`
 
-Viral genome location of primers. Mandatory when `--protocol amplicon` and not `--skip_mapping`.
+If the `--protocol amplicon` parameter is provided then iVar is used to trim amplicon primer sequences after read alignment and before variant calling. iVar uses the primer positions relative to the viral genome supplied in `--amplicon_bed` to soft clip primer sequences from a coordinate sorted BAM file. The file must be in [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format as highlighted below:
 
-#### Format
-
-It must be in [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format, with these fields:
-
-```Bash
-
-chr\tstart_primer\tend_primer\tname\tqual\tstrand
-
-```
-
-Example:
-
-```Bash
-
+```bash
 NC_045512.2 30 54 nCoV-2019_1_LEFT 60 -
 NC_045512.2 385 410 nCoV-2019_1_RIGHT 60 +
 NC_045512.2 320 342 nCoV-2019_2_LEFT 60 -
 NC_045512.2 704 726 nCoV-2019_2_RIGHT 60 +
-
 ```
 
 ### `--amplicon_fasta`
 
-Primer sequences in Fasta format. Mandatory when `--protocol amplicon` and not `--skip_assembly`.
-Example:
+If the `--protocol amplicon` parameter is provided then Cutadapt is used to trim amplicon primer sequences from FastQ files before *de novo* assembly. This file must contain amplicon primer sequences in Fasta format and is mandatory when `--protocol amplicon` is specified. An example is shown below:
 
-```Bash
-
+```bash
 >nCoV-2019_1_LEFT
 ACCAACCAACTTTCGATCTCTTGT
 >nCoV-2019_1_RIGHT
@@ -249,7 +233,6 @@ TAAGGATCAGTGCCAAGCTCGT
 CGGTAATAAAGGAGCTGGTGGC
 >nCoV-2019_3_RIGHT
 AAGGTGTCTGCAATTCATAGCTCT
-
 ```
 
 ## SRA download
