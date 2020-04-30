@@ -706,9 +706,6 @@ ch_fastp_reads
 
 process CAT_FASTQ {
     tag "$sample"
-    if (params.save_sra_fastq) {
-        publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode
-    }
 
     input:
     tuple val(sample), val(single_end), path(reads) from ch_fastp_reads
@@ -925,7 +922,7 @@ process PICARD_METRICS {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/variants/${program}/picard_metrics", mode: params.publish_dir_mode
-    
+
     when:
     !params.skip_variants && !params.skip_picard_metrics && !params.skip_qc
 
@@ -1168,8 +1165,7 @@ process VARSCAN2_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast/report.tsv" into ch_varscan2_quast_mqc
-    path "quast"
+    path "quast" into ch_varscan2_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1332,8 +1328,7 @@ process IVAR_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast/report.tsv" into ch_ivar_quast_mqc
-    path "quast"
+    path "quast" into ch_ivar_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1682,8 +1677,7 @@ process SPADES_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast/report.tsv" into ch_quast_spades_mqc
-    path "quast"
+    path "quast" into ch_quast_spades_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1967,8 +1961,7 @@ process METASPADES_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast/report.tsv" into ch_quast_metaspades_mqc
-    path "quast"
+    path "quast" into ch_quast_metaspades_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2250,8 +2243,7 @@ process UNICYCLER_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast/report.tsv" into ch_quast_unicycler_mqc
-    path "quast"
+    path "quast" into ch_quast_unicycler_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2525,8 +2517,7 @@ process MINIA_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast/report.tsv" into ch_quast_minia_mqc
-    path "quast"
+    path "quast" into ch_quast_minia_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
