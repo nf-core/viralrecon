@@ -71,7 +71,7 @@ Please see the [usage docs](usage.md#supported-public-repository-ids) for a list
 
 ### fastp
 
-[fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast, all-in-one preprocessing for FastQ files. It has been developed in C++ with multithreading support to afford high performance. fastp is used in this pipeline for adapter trimming and quality filtering.
+[fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast, all-in-one preprocessing for FastQ files. It has been developed in C++ with multithreading support to afford high performance. fastp is used in this pipeline for standard adapter trimming and quality filtering.
 
 **Output files:**
 
