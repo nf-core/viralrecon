@@ -15,9 +15,11 @@ This pipeline is a re-implementation of the [SARS_Cov2_consensus-nf](https://git
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
 
+We have integrated a number of options in the pipeline to allow you to run specific aspects of the workflow if you so wish. For example, you can skip all of the assembly steps with the `--skip_assembly` parameter. See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
+
 ## Pipeline summary
 
-1. Download samples from SRA ([`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump); *if required*)
+1. Download samples via SRA, ENA or GEO ids ([`ENA FTP`](https://ena-docs.readthedocs.io/en/latest/retrieval/file-download.html), [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump); *if required*)
 2. Raw read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 3. Adapter trimming ([`fastp`](https://github.com/OpenGene/fastp))
 4. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html))
@@ -29,22 +31,22 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     5. Choice of multiple variant calling routes
         * Call variants ([`VarScan 2`](http://dkoboldt.github.io/varscan/))
             * Consensus sequence generation ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
-            * Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
+            * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
             * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
         * Call variants ([`iVar`](https://github.com/andersen-lab/ivar))
             * Consensus sequence generation ([`iVar`](https://github.com/andersen-lab/ivar))
-            * Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
+            * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
             * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
-6. De novo assembly
+6. _De novo_ assembly
     1. Primer trimming ([`Cutadapt`](https://cutadapt.readthedocs.io/en/stable/guide.html); *amplicon data only*)
-    2. Removal of host reads ([`Kraken2`](http://ccb.jhu.edu/software/kraken2/))
+    2. Removal of host reads ([`Kraken 2`](http://ccb.jhu.edu/software/kraken2/))
     3. Choice of multiple assembly tools ([`SPAdes`](http://cab.spbu.ru/software/spades/), [`metaSPAdes`](http://cab.spbu.ru/software/meta-spades/), [`Unicycler`](https://github.com/rrwick/Unicycler), [`minia`](https://github.com/GATB/minia))
-        * Call variants relative to reference ([`Minimap2`](https://github.com/lh3/minimap2), [`seqwish`](https://github.com/ekg/seqwish), [`vg`](https://github.com/vgteam/vg))
-        * Variant annotation ([`snpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`snpSift`](http://snpeff.sourceforge.net/SnpSift.html))
         * Blast to reference genome ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch))
         * Contiguate assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
         * Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))
         * Assembly assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
+        * Call variants relative to reference ([`Minimap2`](https://github.com/lh3/minimap2), [`seqwish`](https://github.com/ekg/seqwish), [`vg`](https://github.com/vgteam/vg))
+        * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
 7. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/), [`Bandage`](https://github.com/rrwick/Bandage))
 
 ## Quick Start
@@ -89,18 +91,24 @@ Through collaboration with the nf-core community the pipeline has now been updat
 
 Many thanks to others who have helped out and contributed along the way too, including (but not limited to):
 
-| Name                                                      | Affiliation                                                           |
-|-----------------------------------------------------------|-----------------------------------------------------------------------|
-| [Alexander Peltzer](https://github.com/apeltzer)          | [Boehringer Ingelheim, Germany](https://www.boehringer-ingelheim.de/) |
-| [Edgar Garriga Nogales](https://github.com/edgano)        | [Centre for Genomic Regulation, Spain](https://www.crg.eu/)           |
-| [Erik Garrison](https://github.com/ekg)                   | [UCSC, USA](https://www.ucsc.edu/)                                    |
-| [Harshil Patel](https://github.com/drpatelh)              | [The Francis Crick Institute, UK](https://www.crick.ac.uk/)           |
-| [Jose Espinosa-Carrasco](https://github.com/JoseEspinosa) | [Centre for Genomic Regulation, Spain](https://www.crg.eu/)           |
-| [Maxime Garcia](https://github.com/MaxUlysse)             | [SciLifeLab, Sweden](https://www.scilifelab.se/)                      |
-| [Michael Heuer](https://github.com/heuermh)               | [UC Berkeley, USA](https://https://rise.cs.berkeley.edu)              |
-| [Phil Ewels](https://github.com/ewels)                    | [SciLifeLab, Sweden](https://www.scilifelab.se/)                      |
-| [Stephen Kelly](https://github.com/stevekm)               | [Memorial Sloan Kettering Cancer Center, USA](https://www.mskcc.org/) |
-| [Thanh Le Viet](https://github.com/thanhleviet)           | [Quadram Institute, UK](https://quadram.ac.uk/)                       |
+| Name                                                      | Affiliation                                                                           |
+|-----------------------------------------------------------|---------------------------------------------------------------------------------------|
+| [Alexander Peltzer](https://github.com/apeltzer)          | [Boehringer Ingelheim, Germany](https://www.boehringer-ingelheim.de/)                 |
+| [Alison Meynert](https://github.com/ameynert)             | [University of Edinburgh, Scotland](https://www.ed.ac.uk/)                            |
+| [Edgar Garriga Nogales](https://github.com/edgano)        | [Centre for Genomic Regulation, Spain](https://www.crg.eu/)                           |
+| [Erik Garrison](https://github.com/ekg)                   | [UCSC, USA](https://www.ucsc.edu/)                                                    |
+| [Gisela Gabernet](https://github.com/ggabernet)           | [QBiC, University of Tübingen, Germany](https://portal.qbic.uni-tuebingen.de/portal/) |
+| [Harshil Patel](https://github.com/drpatelh)              | [The Francis Crick Institute, UK](https://www.crick.ac.uk/)                           |
+| [Joao Curado](https://github.com/jcurado-flomics)         | [Flomics Biotech, Spain](https://www.flomics.com/)                                    |
+| [Jose Espinosa-Carrasco](https://github.com/JoseEspinosa) | [Centre for Genomic Regulation, Spain](https://www.crg.eu/)                           |
+| [Katrin Sameith](https://github.com/ktrns)                | [DRESDEN-concept Genome Center, Germany](https://genomecenter.tu-dresden.de)          |
+| [Marta Pozuelo](https://github.com/mpozuelo-flomics)      | [Flomics Biotech, Spain](https://www.flomics.com/)                                    |
+| [Maxime Garcia](https://github.com/MaxUlysse)             | [SciLifeLab, Sweden](https://www.scilifelab.se/)                                      |
+| [Michael Heuer](https://github.com/heuermh)               | [UC Berkeley, USA](https://https://rise.cs.berkeley.edu)                              |
+| [Phil Ewels](https://github.com/ewels)                    | [SciLifeLab, Sweden](https://www.scilifelab.se/)                                      |
+| [Simon Heumos](https://github.com/subwaystation)          | [QBiC, University of Tübingen, Germany](https://portal.qbic.uni-tuebingen.de/portal/) |
+| [Stephen Kelly](https://github.com/stevekm)               | [Memorial Sloan Kettering Cancer Center, USA](https://www.mskcc.org/)                 |
+| [Thanh Le Viet](https://github.com/thanhleviet)           | [Quadram Institute, UK](https://quadram.ac.uk/)                                       |
 
 > Listed in alphabetical order
 

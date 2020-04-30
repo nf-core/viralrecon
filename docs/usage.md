@@ -22,11 +22,12 @@
   * [`--fasta`](#--fasta)
   * [`--gff`](#--gff)
   * [`--save_reference`](#--save_reference)
-* [Kraken](#kraken)
+* [Kraken 2](#kraken-2)
   * [`--kraken2_db`](#--kraken2_db)
   * [`--kraken2_db_name`](#--kraken2_db_name)
   * [`--kraken2_use_ftp`](#--kraken2_use_ftp)
   * [`--save_kraken2_fastq`](#--save_kraken2_fastq)
+  * [`--skip_kraken2`](#--skip_kraken2)
 * [Read trimming](#read-trimming)
   * [`--skip_adapter_trimming`](#--skip_adapter_trimming)
   * [`--skip_amplicon_trimming`](#--skip_amplicon_trimming)
@@ -42,10 +43,10 @@
 * [De novo assembly](#de-novo-assembly)
   * [`--assemblers`](#--assemblers)
   * [`--minia_kmer`](#--minia_kmer)
-  * [`--skip_vg`](#--skip_vg)
   * [`--skip_blast`](#--skip_blast)
   * [`--skip_abacas`](#--skip_abacas)
   * [`--skip_plasmidid`](#--skip_plasmidid)
+  * [`--skip_vg`](#--skip_vg)
   * [`--skip_assembly_quast`](#--skip_assembly_quast)
   * [`--skip_assembly`](#--skip_assembly)  
 * [Skipping QC steps](#skipping-qc-steps)
@@ -165,41 +166,41 @@ You will need to create a samplesheet with information about the samples you wou
 
 The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once (e.g. to increase sequencing depth). The pipeline will perform the analysis in parallel, and subsequently merge them when required.
 
-A final design file may look something like the one below. `SRR10903401` was sequenced twice in Illumina PE format, `SRR11241255` was sequenced once in Illumina SE format, and `SRR11092056` and `SRR11177792` need to be downloaded from the SRA before the main pipeline execution.
+A final design file may look something like the one below. `SAMPLE_1` was sequenced twice in Illumina PE format, `SAMPLE_2` was sequenced once in Illumina SE format, and `SRR11605097`, `GSM4432381` and `ERX4009132` need to be downloaded from the ENA/SRA before the main pipeline execution.
 
 ```bash
 sample,fastq_1,fastq_2
-SRR10903401,SRR10903401_1.fastq.gz,SRR10903401_2.fastq.gz
-SRR10903401,SRR10903402_1.fastq.gz,SRR10903402_2.fastq.gz
-SRR11241255,SRR11241255.fastq.gz,
-SRR11092056,,
-SRR11177792,,
+SAMPLE_1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+SAMPLE_1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
+SAMPLE_2,AEG588A2_S4_L003_R1_001.fastq.gz,
+SRR11605097,,
+GSM4432381,,
+ERX4009132,,
 ```
 
-| Column    | Description                                                                                                                                                        |
-|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `sample`  | Custom sample name or [database identifier](#supported-public-repository-ids). This will be identical for multiple sequencing libraries/runs from the same sample. |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                         |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                         |
+| Column    | Description                                                                                                                                                              |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `sample`  | Custom sample name or [database identifier](#supported-public-repository-ids). This entry will be identical for multiple sequencing libraries/runs from the same sample. |
+| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                               |
+| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                               |
 
 #### Supported public repository ids
 
-The pipeline has been set-up to automatically download the raw FastQ files from public repositories. Currently, the following identifiers are supported:
+The pipeline has been set-up to automatically download and process the raw FastQ files from public repositories. Currently, the following identifiers are supported:
 
-| `SRA`        | `ENA`        | `GEO`     |
-|--------------|--------------|-----------|
-| SRR390278    | ERR674736    | GSM465244 |
-| SRX111814    | ERX629702    | GSE18729  |
-| SRS282569    | ERS4399631   |           |
-| SAMN00765663 | SAMEA3121481 |           |
-| SRP003255    | ERP120836    |           |
-| SRA023522    | ERA2421642   |           |
-| PRJNA63463   | PRJEB7743    |           |
+| `SRA`        | `ENA`        | `GEO`      |
+|--------------|--------------|------------|
+| SRR11605097  | ERR4007730   | GSM4432381 |
+| SRX8171613   | ERX4009132   | GSE147507  |
+| SRS6531847   | ERS4399630   |            |
+| SAMN14689442 | SAMEA6638373 |            |
+| SRP256957    | ERP120836    |            |
+| SRA1068758   | ERA2420837   |            |
+| PRJNA625551  | PRJEB37513   |            |
 
 If `SRR`/`ERR` run ids are provided then these will be resolved back to their appropriate `SRX`/`ERX` ids to be able to merge multiple runs from the same experiment.
 
-The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well
-as their associated md5 sums. If download links exist, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
+The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well as their associated md5 sums. If download links exist, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
 
 ### `--protocol`
 
@@ -207,36 +208,20 @@ Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplic
 
 ### `--amplicon_bed`
 
-Viral genome location of primers. Mandatory when `--protocol amplicon` and not `--skip_mapping`.
+If the `--protocol amplicon` parameter is provided then iVar is used to trim amplicon primer sequences after read alignment and before variant calling. iVar uses the primer positions relative to the viral genome supplied in `--amplicon_bed` to soft clip primer sequences from a coordinate sorted BAM file. The file must be in [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format as highlighted below:
 
-#### Format
-
-It must be in [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format, with these fields:
-
-```Bash
-
-chr\tstart_primer\tend_primer\tname\tqual\tstrand
-
-```
-
-Example:
-
-```Bash
-
+```bash
 NC_045512.2 30 54 nCoV-2019_1_LEFT 60 -
 NC_045512.2 385 410 nCoV-2019_1_RIGHT 60 +
 NC_045512.2 320 342 nCoV-2019_2_LEFT 60 -
 NC_045512.2 704 726 nCoV-2019_2_RIGHT 60 +
-
 ```
 
 ### `--amplicon_fasta`
 
-Primer sequences in Fasta format. Mandatory when `--protocol amplicon` and not `--skip_assembly`.
-Example:
+If the `--protocol amplicon` parameter is provided then Cutadapt is used to trim amplicon primer sequences from FastQ files before *de novo* assembly. This file must contain amplicon primer sequences in Fasta format and is mandatory when `--protocol amplicon` is specified. An example is shown below:
 
-```Bash
-
+```bash
 >nCoV-2019_1_LEFT
 ACCAACCAACTTTCGATCTCTTGT
 >nCoV-2019_1_RIGHT
@@ -249,7 +234,6 @@ TAAGGATCAGTGCCAAGCTCGT
 CGGTAATAAAGGAGCTGGTGGC
 >nCoV-2019_3_RIGHT
 AAGGTGTCTGCAATTCATAGCTCT
-
 ```
 
 ## SRA download
@@ -311,23 +295,27 @@ Full path to viral [GFF](http://www.gmod.org/wiki/GFF3) annotation file (Default
 
 If the Bowtie2 index is generated by the pipeline use this parameter to save it to your results folder. These can then be used for future pipeline runs, reducing processing times (Default: false).
 
-## Kraken2
+## Kraken 2
 
 ### `--kraken2_db`
 
-Full path to Kraken2 database built from host genome (Default: '<https://zenodo.org/record/3738199/files/kraken2_human.tar.gz>').
+Full path to Kraken 2 database built from host genome (Default: '<https://zenodo.org/record/3738199/files/kraken2_human.tar.gz>').
 
 ### `--kraken2_db_name`
 
-Name for host genome as recognised by Kraken2 when using the `kraken2 build` command (Default: 'human').
+Name for host genome as recognised by Kraken 2 when using the `kraken2 build` command (Default: 'human').
 
 ### `--kraken2_use_ftp`
 
-Option for kraken using ftp download instead of rsync (Default: false).
+Option for Kraken 2 using ftp download instead of rsync (Default: false).
 
 ### `--save_kraken2_fastq`
 
-Save the host and viral fastq files in the results directory (Default: false).
+Save the host and viral FastQ files in the results directory (Default: false).
+
+### `--skip_kraken2`
+
+Skip Kraken 2 process for removing host classified reads (Default: false).
 
 ## Read trimming
 
@@ -385,10 +373,6 @@ Specify which assembly algorithms you would like to use. Available options are `
 
 Kmer size to use when running minia (Default: 31).
 
-### `--skip_vg`
-
-Skip variant graph creation and variant calling relative to reference genome (Default: false).
-
 ### `--skip_blast`
 
 Skip blastn of assemblies relative to reference genome (Default: false).
@@ -400,6 +384,10 @@ Skip ABACUS process for assembly contiguation (Default: false).
 ### `--skip_plasmidid`
 
 Skip assembly report generation by PlasmidID (Default: false).
+
+### `--skip_vg`
+
+Skip variant graph creation and variant calling relative to reference genome (Default: false).
 
 ### `--skip_assembly_quast`
 
