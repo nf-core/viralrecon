@@ -166,41 +166,41 @@ You will need to create a samplesheet with information about the samples you wou
 
 The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once (e.g. to increase sequencing depth). The pipeline will perform the analysis in parallel, and subsequently merge them when required.
 
-A final design file may look something like the one below. `SRR10903401` was sequenced twice in Illumina PE format, `SRR11241255` was sequenced once in Illumina SE format, and `SRR11092056` and `SRR11177792` need to be downloaded from the SRA before the main pipeline execution.
+A final design file may look something like the one below. `SAMPLE_1` was sequenced twice in Illumina PE format, `SAMPLE_2` was sequenced once in Illumina SE format, and `SRR11605097`, `GSM4432381` and `ERX4009132` need to be downloaded from the ENA/SRA before the main pipeline execution.
 
 ```bash
 sample,fastq_1,fastq_2
-SRR10903401,SRR10903401_1.fastq.gz,SRR10903401_2.fastq.gz
-SRR10903401,SRR10903402_1.fastq.gz,SRR10903402_2.fastq.gz
-SRR11241255,SRR11241255.fastq.gz,
-SRR11092056,,
-SRR11177792,,
+SAMPLE_1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+SAMPLE_1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
+SAMPLE_2,AEG588A2_S4_L003_R1_001.fastq.gz,
+SRR11605097,,
+GSM4432381,,
+ERX4009132,,
 ```
 
-| Column    | Description                                                                                                                                                        |
-|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `sample`  | Custom sample name or [database identifier](#supported-public-repository-ids). This will be identical for multiple sequencing libraries/runs from the same sample. |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                         |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                         |
+| Column    | Description                                                                                                                                                              |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `sample`  | Custom sample name or [database identifier](#supported-public-repository-ids). This entry will be identical for multiple sequencing libraries/runs from the same sample. |
+| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                               |
+| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                               |
 
 #### Supported public repository ids
 
-The pipeline has been set-up to automatically download the raw FastQ files from public repositories. Currently, the following identifiers are supported:
+The pipeline has been set-up to automatically download and process the raw FastQ files from public repositories. Currently, the following identifiers are supported:
 
-| `SRA`        | `ENA`        | `GEO`     |
-|--------------|--------------|-----------|
-| SRR390278    | ERR674736    | GSM465244 |
-| SRX111814    | ERX629702    | GSE18729  |
-| SRS282569    | ERS4399631   |           |
-| SAMN00765663 | SAMEA3121481 |           |
-| SRP003255    | ERP120836    |           |
-| SRA023522    | ERA2421642   |           |
-| PRJNA63463   | PRJEB7743    |           |
+| `SRA`        | `ENA`        | `GEO`      |
+|--------------|--------------|------------|
+| SRR11605097  | ERR4007730   | GSM4432381 |
+| SRX8171613   | ERX4009132   | GSE147507  |
+| SRS6531847   | ERS4399630   |            |
+| SAMN14689442 | SAMEA6638373 |            |
+| SRP256957    | ERP120836    |            |
+| SRA1068758   | ERA2420837   |            |
+| PRJNA625551  | PRJEB37513   |            |
 
 If `SRR`/`ERR` run ids are provided then these will be resolved back to their appropriate `SRX`/`ERX` ids to be able to merge multiple runs from the same experiment.
 
-The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well
-as their associated md5 sums. If download links exist, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
+The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well as their associated md5 sums. If download links exist, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
 
 ### `--protocol`
 
@@ -208,36 +208,20 @@ Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplic
 
 ### `--amplicon_bed`
 
-Viral genome location of primers. Mandatory when `--protocol amplicon` and not `--skip_mapping`.
+If the `--protocol amplicon` parameter is provided then iVar is used to trim amplicon primer sequences after read alignment and before variant calling. iVar uses the primer positions relative to the viral genome supplied in `--amplicon_bed` to soft clip primer sequences from a coordinate sorted BAM file. The file must be in [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format as highlighted below:
 
-#### Format
-
-It must be in [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format, with these fields:
-
-```Bash
-
-chr\tstart_primer\tend_primer\tname\tqual\tstrand
-
-```
-
-Example:
-
-```Bash
-
+```bash
 NC_045512.2 30 54 nCoV-2019_1_LEFT 60 -
 NC_045512.2 385 410 nCoV-2019_1_RIGHT 60 +
 NC_045512.2 320 342 nCoV-2019_2_LEFT 60 -
 NC_045512.2 704 726 nCoV-2019_2_RIGHT 60 +
-
 ```
 
 ### `--amplicon_fasta`
 
-Primer sequences in Fasta format. Mandatory when `--protocol amplicon` and not `--skip_assembly`.
-Example:
+If the `--protocol amplicon` parameter is provided then Cutadapt is used to trim amplicon primer sequences from FastQ files before *de novo* assembly. This file must contain amplicon primer sequences in Fasta format and is mandatory when `--protocol amplicon` is specified. An example is shown below:
 
-```Bash
-
+```bash
 >nCoV-2019_1_LEFT
 ACCAACCAACTTTCGATCTCTTGT
 >nCoV-2019_1_RIGHT
@@ -250,7 +234,6 @@ TAAGGATCAGTGCCAAGCTCGT
 CGGTAATAAAGGAGCTGGTGGC
 >nCoV-2019_3_RIGHT
 AAGGTGTCTGCAATTCATAGCTCT
-
 ```
 
 ## SRA download

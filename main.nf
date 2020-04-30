@@ -301,6 +301,9 @@ checkHostname()
 if (params.fasta.endsWith('.gz')) {
     process GUNZIP_FASTA {
         label 'error_retry'
+        if (params.save_reference) {
+            publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+        }
 
         input:
         path fasta from params.fasta
@@ -340,6 +343,9 @@ if (params.gff) {
     if (params.gff.endsWith('.gz')) {
         process GUNZIP_GFF {
             label 'error_retry'
+            if (params.save_reference) {
+                publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+            }
 
             input:
             path gff from params.gff
@@ -369,6 +375,9 @@ if (!params.skip_kraken2 && params.kraken2_db) {
     if (params.kraken2_db.endsWith('.tar.gz')) {
         process UNTAR_KRAKEN2_DB {
             label 'error_retry'
+            if (params.save_reference) {
+                publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+            }
 
             input:
             path db from params.kraken2_db
@@ -478,8 +487,8 @@ if (!params.skip_sra || !isOffline()) {
         label 'error_retry'
         publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.endsWith(".md5")) $filename
-                          else params.save_sra_fastq ? "$filename" : null
+                          if (filename.endsWith(".md5")) filename
+                          else params.save_sra_fastq ? filename : null
                     }
 
         when:
@@ -519,7 +528,7 @@ if (!params.skip_sra || !isOffline()) {
         publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith(".log")) "log/$filename"
-                          else params.save_sra_fastq ? "$filename" : null
+                          else params.save_sra_fastq ? filename : null
                     }
 
         when:
@@ -577,7 +586,7 @@ process FASTQC {
     label 'process_medium'
     publishDir "${params.outdir}/preprocess/fastqc", mode: params.publish_dir_mode,
         saveAs: { filename ->
-                      filename.endsWith(".zip") ? "zips/$filename" : "$filename"
+                      filename.endsWith(".zip") ? "zips/$filename" : filename
                 }
 
     when:
@@ -621,12 +630,12 @@ if (!params.skip_adapter_trimming) {
         label 'process_medium'
         publishDir "${params.outdir}/preprocess/fastp", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.endsWith(".json")) "$filename"
-                          else if (filename.endsWith(".fastp.html")) "$filename"
+                          if (filename.endsWith(".json")) filename
+                          else if (filename.endsWith(".fastp.html")) filename
                           else if (filename.endsWith("_fastqc.html")) "fastqc/$filename"
                           else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
                           else if (filename.endsWith(".log")) "log/$filename"
-                          else params.save_trimmed ? "$filename" : null
+                          else params.save_trimmed ? filename : null
                     }
 
         when:
@@ -750,8 +759,9 @@ process CAT_FASTQ {
 process BOWTIE2_INDEX {
     tag "$fasta"
     label 'process_medium'
-    publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-        saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+    if (params.save_reference) {
+        publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+    }
 
     when:
     !params.skip_variants
@@ -911,7 +921,7 @@ ch_sort_bam
 process PICARD_METRICS {
     tag "$sample"
     label 'process_medium'
-    publishDir path: "${params.outdir}/variants/${program}/picard_metrics", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/${program}/picard_metrics", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && !params.skip_picard_metrics && !params.skip_qc
@@ -963,8 +973,8 @@ process VARSCAN2 {
     label 'process_medium'
     publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode,
         saveAs: { filename ->
-            		      if (filename.endsWith("vcf.gz")) "$filename"
-                      else if (filename.endsWith("vcf.gz.tbi")) "$filename"
+            		      if (filename.endsWith("vcf.gz")) filename
+                      else if (filename.endsWith("vcf.gz.tbi")) filename
                       else if (filename.endsWith(".log")) "log/$filename"
                       else if (filename.endsWith(".txt")) "bcftools_stats/$filename"
                       else params.save_pileup ? filename : null
@@ -1155,8 +1165,7 @@ process VARSCAN2_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast/report.tsv" into ch_varscan2_quast_mqc
-    path "quast"
+    path "quast" into ch_varscan2_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1319,8 +1328,7 @@ process IVAR_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast/report.tsv" into ch_ivar_quast_mqc
-    path "quast"
+    path "quast" into ch_ivar_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1348,8 +1356,9 @@ process IVAR_QUAST {
 process MAKE_BLAST_DB {
     tag "$fasta"
     label 'process_medium'
-    publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-        saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+    if (params.save_reference) {
+        publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+    }
 
     when:
     !params.skip_assembly && !params.skip_blast
@@ -1380,8 +1389,9 @@ if (!isOffline()) {
         process KRAKEN2_BUILD {
             tag "$db"
             label 'process_high'
-            publishDir path: { params.save_reference ? "${params.outdir}/genome" : params.outdir },
-                saveAs: { params.save_reference ? it : null }, mode: params.publish_dir_mode
+            if (params.save_reference) {
+                publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+            }
 
             when:
             !params.skip_assembly
@@ -1415,7 +1425,7 @@ if (params.protocol == 'amplicon' && !params.skip_amplicon_trimming) {
                           if (filename.endsWith(".html")) "fastqc/$filename"
                           else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
                           else if (filename.endsWith(".log")) "log/$filename"
-                          else params.save_trimmed ? "$filename" : null
+                          else params.save_trimmed ? filename : null
                     }
 
         when:
@@ -1519,7 +1529,12 @@ if (!params.skip_kraken2) {
 process SPADES {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".png")) "bandage/$filename"
+                      else if (filename.endsWith(".svg")) "bandage/$filename"
+                      else filename
+                }
 
     when:
     !params.skip_assembly && 'spades' in assemblers
@@ -1662,8 +1677,7 @@ process SPADES_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast/report.tsv" into ch_quast_spades_mqc
-    path "quast"
+    path "quast" into ch_quast_spades_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1687,6 +1701,8 @@ process SPADES_VG {
     publishDir "${params.outdir}/assembly/spades/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      else if (filename.endsWith(".png")) "bandage/$filename"
+                      else if (filename.endsWith(".svg")) "bandage/$filename"
                       else filename
                 }
 
@@ -1796,7 +1812,12 @@ process SPADES_SNPEFF {
 process METASPADES {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode,
+    saveAs: { filename ->
+                  if (filename.endsWith(".png")) "bandage/$filename"
+                  else if (filename.endsWith(".svg")) "bandage/$filename"
+                  else filename
+            }
 
     when:
     !params.skip_assembly && 'metaspades' in assemblers && !single_end
@@ -1940,8 +1961,7 @@ process METASPADES_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast/report.tsv" into ch_quast_metaspades_mqc
-    path "quast"
+    path "quast" into ch_quast_metaspades_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1965,6 +1985,8 @@ process METASPADES_VG {
     publishDir "${params.outdir}/assembly/metaspades/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      else if (filename.endsWith(".png")) "bandage/$filename"
+                      else if (filename.endsWith(".svg")) "bandage/$filename"
                       else filename
                 }
 
@@ -2074,7 +2096,12 @@ process METASPADES_SNPEFF {
 process UNICYCLER {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode,
+    saveAs: { filename ->
+                  if (filename.endsWith(".png")) "bandage/$filename"
+                  else if (filename.endsWith(".svg")) "bandage/$filename"
+                  else filename
+            }
 
     when:
     !params.skip_assembly && 'unicycler' in assemblers
@@ -2216,8 +2243,7 @@ process UNICYCLER_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast/report.tsv" into ch_quast_unicycler_mqc
-    path "quast"
+    path "quast" into ch_quast_unicycler_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2241,6 +2267,8 @@ process UNICYCLER_VG {
     publishDir "${params.outdir}/assembly/unicycler/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      else if (filename.endsWith(".png")) "bandage/$filename"
+                      else if (filename.endsWith(".svg")) "bandage/$filename"
                       else filename
                 }
 
@@ -2489,8 +2517,7 @@ process MINIA_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast/report.tsv" into ch_quast_minia_mqc
-    path "quast"
+    path "quast" into ch_quast_minia_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2514,6 +2541,8 @@ process MINIA_VG {
     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      else if (filename.endsWith(".png")) "bandage/$filename"
+                      else if (filename.endsWith(".svg")) "bandage/$filename"
                       else filename
                 }
 
@@ -2643,7 +2672,7 @@ Channel.from(summary.collect{ [it.key, it.value] })
 process get_software_versions {
     publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
         saveAs: { filename ->
-                      if (filename.indexOf(".csv") > 0) filename
+                      if (filename.endsWith(".csv")) filename
                       else null
                 }
 
