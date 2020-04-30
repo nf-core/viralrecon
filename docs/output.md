@@ -18,13 +18,13 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [SAMtools](#samtools) - Sort, index and generate metrics for alignments
   * [iVar trim](#ivar-trim) - Primer sequence removal for amplicon data
   * [picard-tools](#picard-tools) - Whole genome coverage and alignment metrics
-  * [VarScan 2, BCFTools, BEDTools](#varscan-2-bcftools-bedtools) / [iVar variants and iVar consensus](#ivar-variants-and-ivar-consensus) - Variant calling and consensus sequence generation
+  * [VarScan 2, BCFTools, BEDTools](#varscan-2-bcftools-bedtools) **|** [iVar variants and iVar consensus](#ivar-variants-and-ivar-consensus) - Variant calling and consensus sequence generation
     * [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
     * [QUAST](#quast) - Consensus assessment report
 * [De novo assembly](#de-novo-assembly)
   * [Cutadapt](#cutadapt) - Primer trimming for amplicon data
   * [Kraken 2](#kraken-2) - Removal of host reads
-  * [SPAdes](#spades) / [metaSPAdes](#metaspades) / [metaSPAdes](#metaspades) / [minia](#minia) - Viral genome assembly
+  * [SPAdes](#spades) **|** [metaSPAdes](#metaspades) **|** [metaSPAdes](#metaspades) **|** [minia](#minia) - Viral genome assembly
     * [BLAST](#blast) - Blast to reference assembly
     * [ABACAS](#abacas) - Order contigs according to reference genome
     * [PlasmidID](#plasmidid) - Assembly report and visualisation
@@ -50,15 +50,11 @@ Please see the [usage docs](usage.md#supported-public-repository-ids) for a list
   * `*.fastq_dump.log`: Log file generated from stdout.
 
 > **NB:** Downloaded FastQ files will only be saved in the results directory if the `--save_sra_fastq` parameter is supplied.  
-> **NB:** If downloading data from the ENA/SRA, a metadata (`*.sra_runinfo.txt`) and warnings (`*.sra_warnings.txt`) file is also saved in the `pipeline_info/` directory.
+> **NB:** A metadata (`*.sra_runinfo.txt`) and warnings (`*.sra_warnings.txt`) file is also saved in the `pipeline_info/` directory.
 
 ### FastQC
 
-[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your reads. It provides information about the quality score distribution across your reads, the per base sequence content (%T/A/G/C). You get information about adapter contamination and other overrepresented sequences.
-
-For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
-
-![MultiQC - FastQC per base sequence plot](images/mqc_fastqc_plot.png)
+[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
 **Output files:**
 
@@ -67,7 +63,11 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 * `preprocess/fastqc/zips/`
   * `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
 
-> **NB:** The FastQC plots in this directory are generated relative to the raw, input reads. They may contain adapter sequence and regions of low quality. To see how your reads look after trimming look at the FastQC reports in the `preprocess/fastp/fastqc/` directory.
+<p align="center">
+  <img src="images/mqc_fastqc_plot.png" alt="MultiQC - FastQC per base sequence plot" width="200"/>
+</p>
+
+> **NB:** The FastQC plots in this directory are generated relative to the raw, input reads. They may contain adapter sequence and regions of low quality. To see how your reads look after trimming please refer to the FastQC reports in the `preprocess/fastp/fastqc/` directory.
 
 ### fastp
 
@@ -93,7 +93,9 @@ For further reading and documentation see the [FastQC help](http://www.bioinform
 
 ### cat
 
-The initial QC and adapter trimming for each sample is performed at the run-level e.g. if a sample has been sequenced more than once to increase sequencing depth. This has the advantage of being able to assess each library individually, and the ability to process multiple libraries from the same sample in parallel. If applicable, these samples are subsequently merged using the Linux cat command after the fastp adapter trimming step. There is currently no option to save the merged FastQ files to the results directory.
+The initial QC and adapter trimming for each sample is performed at the run-level e.g. if a sample has been sequenced more than once to increase sequencing depth. This has the advantage of being able to assess each library individually, and the ability to process multiple libraries from the same sample in parallel. If applicable, these samples are subsequently merged using the Linux `cat` command after the fastp adapter trimming step.
+
+> **NB:** Downloaded FastQ files will only be saved in the results directory if the `--save_sra_fastq` parameter is supplied.
 
 ## Variant calling
 
