@@ -87,7 +87,9 @@ Please see the [usage docs](usage.md#supported-public-repository-ids) for a list
 * `preprocess/fastp/fastqc/zips/`
   * `*.trim_fastqc.zip`: Zip archive containing the FastQC report.
 
-![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
+<p align="center">
+  <img width="600" src="images/mqc_fastp_plot.png" alt="MultiQC - fastp filtered reads plot"/>
+</p>
 
 > **NB:** Post-trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
 
@@ -112,7 +114,9 @@ The initial QC and adapter trimming for each sample is performed at the run-leve
 * `variants/bowtie2/log/`
   * `*.log`: Bowtie 2 mapping log file.
 
-![MultiQC - Bowtie2 alignment score plot](images/mqc_bowtie2_plot.png)
+<p align="center">
+  <img width="600" src="images/mqc_bowtie2_plot.png" alt="MultiQC - Bowtie2 alignment score plot"/>
+</p>
 
 ### SAMtools
 
@@ -123,7 +127,9 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 * `variants/bowtie2/samtools_stats/`
   * SAMtools `*.flagstat`, `*.idxstats` and `*.stats` files generated from the alignment files.
 
-![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
+<p align="center">
+  <img width="600" src="images/mqc_samtools_stats_plot.png" alt="MultiQC - SAMtools alignment scores plot"/>
+</p>
 
 ### iVar trim
 
@@ -148,7 +154,9 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 * `variants/<bowtie2/ivar>/picard_metrics/`  
   Alignment QC files from picard CollectMultipleMetrics and the metrics file from CollectWgsMetrics in `*_metrics` text format and plotted in `*.pdf` format.
 
-![MultiQC - Picard insert size plot](images/mqc_picard_insert_size_plot.png)
+<p align="center">
+  <img width="600" src="images/mqc_picard_insert_size_plot.png" alt="MultiQC - Picard insert size plot"/>
+</p>
 
 ### VarScan 2, BCFTools, BEDTools
 
@@ -176,7 +184,9 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
   * `*.highfreq.bcftools_stats.txt`: Statistics and counts for high frequency variants VCF file.
   * `*.lowfreq.bcftools_stats.txt`: Statistics and counts for high frequency variants VCF file.
 
-![MultiQC - BCFTools variant counts](images/mqc_bcftools_plot.png)
+<p align="center">
+  <img width="600" src="images/mqc_bcftools_plot.png" alt="MultiQC - BCFTools variant counts"/>
+</p>
 
 > **NB:** Output Pileup files will only be saved in the results directory if the `--save_pileup` parameter is supplied.
 
@@ -214,7 +224,9 @@ iVar can also be used to call variants and to generate a consensus sequences.
   * `*.snpEff.vcf.gz.tbi`: Index for VCF file with variant annotations.
   * `*.snpSift.table.txt`: SnpSift summary table.
 
-![MultiQC - SnpEff annotation counts](images/mqc_snpeff_plot.png)
+<p align="center">
+  <img width="600" src="images/mqc_snpeff_plot.png" alt="MultiQC - SnpEff annotation counts"/>
+</p>
 
 > **NB:** By default, the SnpEff annotation files will be generated relative to the variants called for each variant caller.
 
@@ -401,7 +413,9 @@ TODO: Add documentation here about [`Minimap2`](https://github.com/lh3/minimap2)
 * `assembly/<ASSEMBLER>/quast/`
   * `report.html`: TODO Add some description here and the different report formats available.
 
-![MultiQC - QUAST contig counts](images/mqc_quast_plot.png)
+<p align="center">
+  <img width="600" src="images/mqc_quast_plot.png" alt="MultiQC - QUAST contig counts"/>
+</p>
 
 > **NB:** By default, these files will be generated relative to the assemblies for each assembler.
 
