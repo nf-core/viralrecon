@@ -166,15 +166,16 @@ You will need to create a samplesheet with information about the samples you wou
 
 The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once (e.g. to increase sequencing depth). The pipeline will perform the analysis in parallel, and subsequently merge them when required.
 
-A final design file may look something like the one below. `SRR10903401` was sequenced twice in Illumina PE format, `SRR11241255` was sequenced once in Illumina SE format, and `SRR11092056` and `SRR11177792` need to be downloaded from the SRA before the main pipeline execution.
+A final design file may look something like the one below. `SAMPLE_1` was sequenced twice in Illumina PE format, `SAMPLE_2` was sequenced once in Illumina SE format, and `SRR11092056` and `SRR11177792` need to be downloaded from the ENA/SRA before the main pipeline execution.
 
 ```bash
 sample,fastq_1,fastq_2
-SRR10903401,SRR10903401_1.fastq.gz,SRR10903401_2.fastq.gz
-SRR10903401,SRR10903402_1.fastq.gz,SRR10903402_2.fastq.gz
-SRR11241255,SRR11241255.fastq.gz,
-SRR11092056,,
-SRR11177792,,
+SAMPLE_1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+SAMPLE_1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
+SAMPLE_2,AEG588A2_S4_L003_R1_001.fastq.gz,
+SRR11605097,,
+GSM4432381,,
+ERX4009132,,
 ```
 
 | Column    | Description                                                                                                                                                        |
@@ -187,15 +188,15 @@ SRR11177792,,
 
 The pipeline has been set-up to automatically download and process the raw FastQ files from public repositories. Currently, the following identifiers are supported:
 
-| `SRA`        | `ENA`        | `GEO`     |
-|--------------|--------------|-----------|
-| SRR390278    | ERR674736    | GSM465244 |
-| SRX111814    | ERX629702    | GSE18729  |
-| SRS282569    | ERS4399631   |           |
-| SAMN00765663 | SAMEA3121481 |           |
-| SRP003255    | ERP120836    |           |
-| SRA023522    | ERA2421642   |           |
-| PRJNA63463   | PRJEB7743    |           |
+| `SRA`        | `ENA`        | `GEO`      |
+|--------------|--------------|------------|
+| SRR11605097  | ERR4007730   | GSM4432381 |
+| SRX8171613   | ERX4009132   | GSE147507  |
+| SRS6531847   | ERS4399630   |            |
+| SAMN14689442 | SAMEA6638373 |            |
+| SRP256957    | ERP120836    |            |
+| SRA1068758   | ERA2420837   |            |
+| PRJNA625551  | PRJEB37513   |            |
 
 If `SRR`/`ERR` run ids are provided then these will be resolved back to their appropriate `SRX`/`ERX` ids to be able to merge multiple runs from the same experiment.
 
