@@ -29,7 +29,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
     * [ABACAS](#abacas) - Order contigs according to reference genome
     * [PlasmidID](#plasmidid) - Assembly report and visualisation
     * [Assembly QUAST](#assembly-quast) - Assembly quality assessment
-    * [Minimap2, seqwish, vg](#minimap2-seqwish-vg) - Call variants relative to reference
+    * [Minimap2, seqwish, vg](#minimap2-seqwish-vg) - Call variants from induced genome variation graph
     * [Assembly SnpEff and SnpSift](#assembly-snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
 * [Workflow reporting and genomes](#workflow-reporting-and-genomes)
   * [MultiQC](#multiqc) - Present QC for raw reads, alignment, assembly and variant calling
@@ -319,7 +319,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 **Output files:**
 
 * `assembly/minia/`
-  * `*.scaffolds.fa`: minia scaffold assembly.
+  * `*.scaffolds.fa`: Minia scaffold assembly.
 
 ### Minimap2, seqwish, vg
 
@@ -330,7 +330,6 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 [`vg`](https://github.com/vgteam/vg) is a collection of tools for working with genome variation graphs. vg was used to call variants from the genome variation graph induced from all-versus-all alignments between scaffold assembly contigs and contigs from a reference genome.
 
 [`Bandage`](https://github.com/rrwick/Bandage), a Bioinformatics Application for Navigating De novo Assembly Graphs Easily, is a GUI program that allows users to interact with the assembly graphs made by de novo assemblers and other graphs in GFA format. Bandage was used to render induced genome variation graphs as static PNG and SVG images.
-
 
 **Output files:**
 
