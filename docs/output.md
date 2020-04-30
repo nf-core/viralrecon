@@ -228,7 +228,7 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 
 ### QUAST
 
-[QUAST](http://bioinf.spbau.ru/quast) is used to evaluate the quality of the consensus sequence across all of the samples provided to the pipeline. The HTML results can be opened within any browser (we recommend using Google Chrome). A single QUAST report will be generated to collate the results across all samples. Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
+[QUAST](http://bioinf.spbau.ru/quast) is used to generate a single report with which to evaluate the quality of the consensus sequence across all of the samples provided to the pipeline. The HTML results can be opened within any browser (we recommend using Google Chrome). Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
 
 **Output files:**
 
@@ -241,7 +241,7 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 
 ### Cutadapt
 
-When `--protocol amplicon` is set [Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) is used to clip primer sequences from reads prior to assembly.
+In the variant calling branch of the pipeline we are using [iVar trim](#ivar-trim) to remove primer sequences from the aligned BAM files for amplicon data. Similarly, we use [Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) in the *de novo* assembly branch as an alternative option to remove and clean the primer sequences directly from FastQ files.
 
 **Output files:**
 
@@ -260,7 +260,7 @@ When `--protocol amplicon` is set [Cutadapt](https://cutadapt.readthedocs.io/en/
 
 [Kraken 2](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual) is a sequence classifier that assigns taxonomic labels to DNA sequences. Kraken 2 examines the k-mers within a query sequence and uses the information within those k-mers to query a database. That database maps k-mers to the lowest common ancestor (LCA) of all genomes known to contain a given k-mer.
 
-We used a Kraken 2 database in this workflow to filter out reads specific to the host genome. The remainder of the reads are then passed to numerous de novo assembly algorithms in order to reconstruct the viral genome assembly.
+We used a Kraken 2 database in this workflow to filter out reads specific to the host genome. The remainder of the reads are then passed to numerous *de novo* assembly algorithms in order to reconstruct the viral genome.
 
 **Output files:**
 
@@ -273,43 +273,48 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 ### SPAdes
 
-[SPAdes](http://cab.spbu.ru/software/spades/) is a de Bruijn graph-based assembler.
+[SPAdes](http://cab.spbu.ru/software/spades/) is an assembly toolkit containing various assembly pipelines. Generically speaking, SPAdes is one of the most popular de Bruijn graph-based assembly algorithms used for bacterial/viral genome reconstruction.
+
+[Bandage](https://rrwick.github.io/Bandage/) is a program for visualising *de novo* assembly graphs. By displaying connections which are not present in the contigs file, Bandage opens up new possibilities for analysing *de novo* assemblies.
 
 **Output files:**
 
 * `assembly/spades/`
   * `*.scaffolds.fa`: SPAdes scaffold assembly.
   * `*.assembly.gfa`: SPAdes assembly in GFA format.
-  * `*.assembly.png`: SPAdes assembly in GFA format visualized by Bandage in PNG format.
-  * `*.assembly.svg`: SPAdes assembly in GFA format visualized by Bandage in SVG format.
+* `assembly/spades/bandage/`
+  * `*.png`: Bandage visualisation for SPAdes assembly in PNG format.
+  * `*.svg`: Bandage visualisation for SPAdes assembly in SVG format.
 
 ### metaSPAdes
 
-[metaSPAdes](http://cab.spbu.ru/software/meta-spades/) is a de Bruijn graph-based assembler that is distributed with SPAdes (run via the `--meta` option). It can be used for the simultaneous reconstruction of multiple genomes as observed in metagenomics data.
+[metaSPAdes](http://cab.spbu.ru/software/meta-spades/) is a de Bruijn graph-based assembler that is distributed with SPAdes and executed via the `--meta` option. It can be used for the simultaneous reconstruction of multiple genomes as observed in metagenomics data.
 
 **Output files:**
 
 * `assembly/metaspades/`
   * `*.scaffolds.fa`: metaSPAdes scaffold assembly.
   * `*.assembly.gfa`: metaSPAdes assembly in GFA format.
-  * `*.assembly.png`: metaSPAdes assembly in GFA format visualized by Bandage in PNG format.
-  * `*.assembly.svg`: metaSPAdes assembly in GFA format visualized by Bandage in SVG format.
+* `assembly/metaspades/bandage/`
+  * `*.png`: Bandage visualisation for metaSPAdes assembly in PNG format.
+  * `*.svg`: Bandage visualisation for metaSPAdes assembly in SVG format.
 
 ### Unicycler
 
-[Unicycler](https://github.com/rrwick/Unicycler) is an assembly pipeline that works as a SPAdes optimizer.
+[Unicycler](https://github.com/rrwick/Unicycler) is an assembly pipeline for bacterial genomes. It can assemble Illumina-only read sets where it functions as a SPAdes-optimiser.
 
 **Output files:**
 
 * `assembly/unicycler/`
   * `*.scaffolds.fa`: Unicycler scaffold assembly.
   * `*.assembly.gfa`: Unicycler assembly in GFA format.
-  * `*.assembly.png`: Unicycler assembly in GFA format visualized by Bandage in PNG format.
-  * `*.assembly.png`: Unicycler assembly in GFA format visualized by Bandage in SVG format.
+* `assembly/unicycler/bandage/`
+  * `*.png`: Bandage visualisation for Unicycler assembly in PNG format.
+  * `*.svg`: Bandage visualisation for Unicycler assembly in SVG format.
 
 ### minia
 
-TODO: Add documentation here about [minia](https://github.com/GATB/minia).
+[Minia](https://github.com/GATB/minia) is a short-read assembler based on a de Bruijn graph, capable of assembling a human genome on a desktop computer in a day. The output of Minia is a set of contigs. Minia produces results of similar contiguity and accuracy to other de Bruijn assemblers.
 
 **Output files:**
 
@@ -326,10 +331,11 @@ TODO: Add documentation here about [`Minimap2`](https://github.com/lh3/minimap2)
   * `*.gfa`: Scaffold assembly.
   * `*.vcf.gz`: VCF file with variant annotations.
   * `*.vcf.gz.tbi`: Index for VCF file with variant annotations.
-  * `*.png`: Scaffold assembly visualized by Bandage in PNG format.
-  * `*.svg`: Scaffold assembly visualized by Bandage in SVG format.
 * `assembly/<ASSEMBLER>/variants/bcftools_stats/`
   * `*.bcftools_stats.txt`: Statistics and counts for variants in VCF files.
+* `assembly/<ASSEMBLER>/bandage/`
+  * `*.png`: Bandage visualisation for scaffold assembly in PNG format.
+  * `*.svg`: Bandage visualisation for scaffold assembly in SVG format.
 
 > **NB:** By default, these files will be generated relative to the assemblies for each assembler.
 
@@ -337,7 +343,7 @@ TODO: Add documentation here about [`Minimap2`](https://github.com/lh3/minimap2)
 
 [SnpEff](http://snpeff.sourceforge.net/SnpEff.html) is a genetic variant annotation and functional effect prediction toolbox. It annotates and predicts the effects of genetic variants on genes and proteins (such as amino acid changes).
 
-[SnpSift](http://snpeff.sourceforge.net/SnpSift.html) annotates genomic variants using databases, filters, and manipulates genomic annotated variants. Once you have annotated your files using SnpEff, you can use SnpSift to help you filter large genomic datasets in order to find the most significant variants for your experiment.
+[SnpSift](http://snpeff.sourceforge.net/SnpSift.html) annotates genomic variants using databases, filters, and manipulates genomic annotated variants. After annotation with SnpEff, you can use SnpSift to help filter large genomic datasets in order to find the most significant variants.
 
 **Output files:**
 
@@ -349,11 +355,11 @@ TODO: Add documentation here about [`Minimap2`](https://github.com/lh3/minimap2)
   * `*.snpEff.vcf.gz.tbi`: Index for VCF file with variant annotations.
   * `*.snpSift.table.txt`: SnpSift summary table.
 
-> **NB:** By default, these files will be generated relative to the assemblies for each assembler.
+> **NB:** By default, these files will be generated relative to the variants called relative to each assembler.
 
 ### BLAST
 
-[blastn](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch) was used to align the assembled contigs against the virus reference genome.
+[blastn](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch) is used to align the assembled contigs against the virus reference genome.
 
 **Output files:**
 
@@ -402,7 +408,7 @@ TODO: Add documentation here about [`Minimap2`](https://github.com/lh3/minimap2)
 
 ### Assembly QUAST
 
-[QUAST](http://bioinf.spbau.ru/quast) was used to evaluate the quality of assemblies across multiple samples. The HTML results can be opened within any browser (we recommend using Google Chrome). A single QUAST report will be generated to collate the results across all samples for each assembler. Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
+[QUAST](http://bioinf.spbau.ru/quast) is used to generate a single report with which to evaluate the quality of the *de novo* assemblies across all of the samples provided to the pipeline. The HTML results can be opened within any browser (we recommend using Google Chrome). Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
 
 **Output files:**
 
@@ -436,7 +442,7 @@ The pipeline has special steps which also allow the software versions to be repo
 
 ### Reference genome files
 
-A number of genome-specific files are generated by the pipeline because they are required for the downstream processing of the results. If the `--save_reference` parameter is provided then the Bowtie 2 alignment indices, BLAST and Kraken 2 databases generated by the pipeline will be saved in the `genome/` directory. It is recommended to use the `--save_reference` parameter if you are using the pipeline to build a Kraken 2 database for the host genome. This can be quite a time-consuming process and it permits their reuse for future runs of the pipeline or for other purposes.
+A number of genome-specific files are generated by the pipeline because they are required for the downstream processing of the results. If the `--save_reference` parameter is provided then the Bowtie 2 alignment indices, BLAST and Kraken 2 databases downloaded/generated by the pipeline will be saved in the `genome/` directory. It is recommended to use the `--save_reference` parameter if you are using the pipeline to build a Kraken 2 database for the host genome. This can be quite a time-consuming process and it permits their reuse for future runs of the pipeline or for other purposes.
 
 **Output files:**
 
