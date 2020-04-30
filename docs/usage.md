@@ -185,7 +185,7 @@ SRR11177792,,
 
 #### Supported public repository ids
 
-The pipeline has been set-up to automatically download the raw FastQ files from public repositories. Currently, the following identifiers are supported:
+The pipeline has been set-up to automatically download and process the raw FastQ files from public repositories. Currently, the following identifiers are supported:
 
 | `SRA`        | `ENA`        | `GEO`     |
 |--------------|--------------|-----------|
@@ -199,8 +199,7 @@ The pipeline has been set-up to automatically download the raw FastQ files from 
 
 If `SRR`/`ERR` run ids are provided then these will be resolved back to their appropriate `SRX`/`ERX` ids to be able to merge multiple runs from the same experiment.
 
-The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well
-as their associated md5 sums. If download links exist, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
+The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well as their associated md5 sums. If download links exist, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
 
 ### `--protocol`
 
