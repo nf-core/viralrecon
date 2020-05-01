@@ -40,7 +40,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 ### parallel-fastq-dump
 
-Please see the [usage docs](usage.md#supported-public-repository-ids) for a list of supported public repository identifiers and how to provide them to the pipeline. The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well as their associated md5 sums. If download links exist, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
+Please see the [usage docs](usage.md#supported-public-repository-ids) for a list of supported public repository identifiers and how to provide them to the pipeline. The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well as their associated md5sums. If download links exist, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
 
 **Output files:**
 
@@ -71,7 +71,7 @@ Please see the [usage docs](usage.md#supported-public-repository-ids) for a list
 
 ### fastp
 
-[fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast, all-in-one preprocessing for FastQ files. It has been developed in C++ with multithreading support to afford high performance. fastp is used in this pipeline for standard adapter trimming and quality filtering.
+[fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast, all-in-one preprocessing for FastQ files. It has been developed in C++ with multithreading support to achieve higher performance. fastp is used in this pipeline for standard adapter trimming and quality filtering.
 
 **Output files:**
 
@@ -158,7 +158,7 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 
 ### VarScan 2, BCFTools, BEDTools
 
-[VarScan 2](http://dkoboldt.github.io/varscan/) is a platform-independent software tool developed at the Genome Institute, Washington University to detect variants in NGS data. In this pipeline, VarScan 2 is used in conjunction with SAMtools in order to call both high and low frequency variants.
+[VarScan 2](http://dkoboldt.github.io/varscan/) is a platform-independent software tool to detect variants in NGS data. In this pipeline, VarScan 2 is used in conjunction with SAMtools in order to call both high and low frequency variants.
 
 [BCFtools](http://samtools.github.io/bcftools/bcftools.html) is a set of utilities that manipulate variant calls in [VCF](https://vcftools.github.io/specs.html) and its binary counterpart BCF format. BCFTools is used in the variant calling and *de novo* assembly steps of this pipeline to obtain basic statistics from the VCF output. It is also used in the VarScan 2 variant calling branch of the pipeline to generate a consensus sequence by integrating high frequency variant calls into the reference genome.
 
@@ -241,7 +241,7 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 
 ### Cutadapt
 
-In the variant calling branch of the pipeline we are using [iVar trim](#ivar-trim) to remove primer sequences from the aligned BAM files for amplicon data. Similarly, we use [Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) in the *de novo* assembly branch as an alternative option to remove and clean the primer sequences directly from FastQ files.
+In the variant calling branch of the pipeline we are using [iVar trim](#ivar-trim) to remove primer sequences from the aligned BAM files for amplicon data. Since in the *de novo* assembly branch we don't align the reads, we use [Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) as an alternative option to remove and clean the primer sequences directly from FastQ files.
 
 **Output files:**
 
