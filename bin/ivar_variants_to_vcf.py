@@ -39,6 +39,7 @@ def ivar_variants_to_vcf(FileIn,FileOut):
               '##FORMAT=<ID=ALT_FREQ,Number=1,Type=String,Description="Frequency of alternate base">\n')
     header += '#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t'+filename+'\n'
 
+    varCountDict = {'SNP':0, 'INS':0, 'DEL':0}
     OutDir = os.path.dirname(FileOut)
     make_dir(OutDir)
     fout = open(FileOut,'w')
@@ -63,8 +64,19 @@ def ivar_variants_to_vcf(FileIn,FileOut):
                 SAMPLE='1:'+line[4]+':'+line[5]+':'+line[6]+':'+line[7]+':'+line[8]+':'+line[9]+':'+line[10]
                 line = CHROM+'\t'+POS+'\t'+ID+'\t'+REF+'\t'+ALT+'\t'+QUAL+'\t'+FILTER+'\t'+INFO+'\t'+FORMAT+'\t'+SAMPLE+'\n'
                 fout.write(line)
+
+                if ALT[0] == '+':
+                    varCountDict['INS'] += 1
+                elif ALT[0] == '-':
+                    varCountDict['DEL'] += 1
+                else:
+                    varCountDict['SNP'] += 1
     fout.close()
 
+    ## Print variant counts to screen
+    varCountList = [(k, str(v)) for k, v in sorted(varCountDict.items())]
+    print('\t'.join(['sample'] + [x[0] for x in varCountList]))
+    print('\t'.join([filename] + [x[1] for x in varCountList]))
 
 def main(args=None):
     args = parse_args(args)

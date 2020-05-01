@@ -176,10 +176,12 @@ module_order:
             - './minia/snpeff/*'
 
 report_section_order:
-    software_versions:
+    ivar_variants:
         order: -1000
-    nf-core-viralrecon-summary:
+    software_versions:
         order: -1001
+    nf-core-viralrecon-summary:
+        order: -1002
 
 custom_plot_config:
     picard-insertsize:

@@ -180,6 +180,7 @@ ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
 ////////////////////////////////////////////////////
 
 ch_blast_outfmt6_header = file("$baseDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
+ch_ivar_variants_header_mqc = file("$baseDir/assets/headers/ivar_variants_header_mqc.txt", checkIfExists: true)
 
 ////////////////////////////////////////////////////
 /* --                   AWS                    -- */
@@ -1191,7 +1192,9 @@ process IVAR_VARIANTS {
     label 'process_medium'
     publishDir "${params.outdir}/variants/ivar/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
-                      if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      if (filename.endsWith(".bcftools_stats.txt")) "bcftools_stats/$filename"
+                      else if (filename.endsWith(".log")) "log/$filename"
+                      else if (filename.endsWith("_mqc.tsv")) null
                       else filename
                 }
 
@@ -1200,13 +1203,16 @@ process IVAR_VARIANTS {
 
     input:
     tuple val(sample), val(single_end), path(bam) from ch_sort_bam_ivar_variants
+    path header from ch_ivar_variants_header_mqc
     path fasta from ch_fasta
     path gff from ch_gff
 
     output:
     tuple val(sample), val(single_end), path("*.vcf.gz*") into ch_ivar_variants_vcf
     path "*.bcftools_stats.txt" into ch_ivar_variants_bcftools_mqc
-    path "*.tsv"
+    path "*.counts_mqc.tsv" into ch_ivar_variants_count_mqc
+    path "${sample}.tsv"
+    path "*.log"
 
     script:
     features = params.gff ? "-g $gff" : ""
@@ -1219,10 +1225,12 @@ process IVAR_VARIANTS {
         ${bam[0]} \\
         | ivar variants -p $sample -r $fasta $features
 
-    ivar_variants_to_vcf.py ${sample}.tsv ${sample}.vcf
+    ivar_variants_to_vcf.py ${sample}.tsv ${sample}.vcf > ${sample}.variant.counts.log
     bgzip -c ${sample}.vcf > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
+
+    cat $header ${sample}.variant.counts.log > ${sample}.variant.counts_mqc.tsv
     """
 }
 
@@ -2741,6 +2749,7 @@ process MULTIQC {
     path ('varscan2/quast/highfreq/*') from ch_varscan2_quast_mqc.collect().ifEmpty([])
     path ('ivar/flagstat/*') from ch_ivar_trim_flagstat_mqc.collect().ifEmpty([])
     path ('ivar/bcftools/*') from ch_ivar_variants_bcftools_mqc.collect().ifEmpty([])
+    path ('ivar/variants/*') from ch_ivar_variants_count_mqc.collect().ifEmpty([])
     path ('ivar/snpeff/*') from ch_ivar_snpeff_mqc.collect().ifEmpty([])
     path ('ivar/quast/*') from ch_ivar_quast_mqc.collect().ifEmpty([])
     path ('spades/bcftools/*') from ch_spades_vg_bcftools_mqc.collect().ifEmpty([])
