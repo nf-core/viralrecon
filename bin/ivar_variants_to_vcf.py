@@ -75,7 +75,7 @@ def ivar_variants_to_vcf(FileIn,FileOut):
 
     fout.close()
 
-    ## Print variant counts to screen
+    ## Print variant counts
     varCountList = [(k, str(v)) for k, v in sorted(varCountDict.items())]
     print('\t'.join(['sample'] + [x[0] for x in varCountList]))
     print('\t'.join([filename] + [x[1] for x in varCountList]))
