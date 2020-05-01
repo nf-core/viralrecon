@@ -861,6 +861,7 @@ process SORT_BAM {
  */
 if (params.protocol != 'amplicon') {
     ch_ivar_trim_flagstat_mqc = Channel.empty()
+    ch_ivar_trim_log_mqc = Channel.empty()
 } else {
     process IVAR_TRIM {
         tag "$sample"
@@ -1527,6 +1528,7 @@ if (!params.skip_kraken2) {
                 ch_kraken2_metaspades
                 ch_kraken2_unicycler
                 ch_kraken2_minia }
+    ch_kraken2_report_mqc = Channel.empty()
 }
 
 ////////////////////////////////////////////////////
