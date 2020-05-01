@@ -53,6 +53,15 @@ def ivar_variants_to_vcf(FileIn,FileOut):
                 ID='.'
                 REF=line[2]
                 ALT=line[3]
+                if ALT[0] == '+':
+                    ALT = REF + ALT[1:]
+                    varCountDict['INS'] += 1
+                elif ALT[0] == '-':
+                    REF += ALT[1:]
+                    ALT = line[2]
+                    varCountDict['DEL'] += 1
+                else:
+                    varCountDict['SNP'] += 1
                 QUAL='.'
                 pass_test=line[13]
                 if pass_test == 'TRUE':
@@ -65,15 +74,9 @@ def ivar_variants_to_vcf(FileIn,FileOut):
                 line = CHROM+'\t'+POS+'\t'+ID+'\t'+REF+'\t'+ALT+'\t'+QUAL+'\t'+FILTER+'\t'+INFO+'\t'+FORMAT+'\t'+SAMPLE+'\n'
                 fout.write(line)
 
-                if ALT[0] == '+':
-                    varCountDict['INS'] += 1
-                elif ALT[0] == '-':
-                    varCountDict['DEL'] += 1
-                else:
-                    varCountDict['SNP'] += 1
     fout.close()
 
-    ## Print variant counts to screen
+    ## Print variant counts to pass to MultiQC
     varCountList = [(k, str(v)) for k, v in sorted(varCountDict.items())]
     print('\t'.join(['sample'] + [x[0] for x in varCountList]))
     print('\t'.join([filename] + [x[1] for x in varCountList]))
