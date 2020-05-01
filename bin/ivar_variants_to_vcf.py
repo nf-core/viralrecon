@@ -54,10 +54,11 @@ def ivar_variants_to_vcf(FileIn,FileOut):
                 REF=line[2]
                 ALT=line[3]
                 if ALT[0] == '+':
+                    ALT = REF + ALT[1:]
                     varCountDict['INS'] += 1
                 elif ALT[0] == '-':
                     REF += ALT[1:]
-                    ALT = REF
+                    ALT = line[2]
                     varCountDict['DEL'] += 1
                 else:
                     varCountDict['SNP'] += 1
