@@ -67,8 +67,6 @@ def ivar_variants_to_vcf(FileIn,FileOut):
                     FILTER='PASS'
                 else:
                     FILTER='FAIL'
-
-                if alt[0] == "-":
                 INFO='DP='+line[11]
                 FORMAT='GT:REF_DP:REF_RV:REF_QUAL:ALT_DP:ALT_RV:ALT_QUAL:ALT_FREQ'
                 SAMPLE='1:'+line[4]+':'+line[5]+':'+line[6]+':'+line[7]+':'+line[8]+':'+line[9]+':'+line[10]
