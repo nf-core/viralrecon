@@ -180,6 +180,7 @@ ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
 ////////////////////////////////////////////////////
 
 ch_blast_outfmt6_header = file("$baseDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
+ch_ivar_variants_header_mqc = file("$baseDir/assets/headers/ivar_variants_header_mqc.txt", checkIfExists: true)
 
 ////////////////////////////////////////////////////
 /* --                   AWS                    -- */
@@ -860,6 +861,7 @@ process SORT_BAM {
  */
 if (params.protocol != 'amplicon') {
     ch_ivar_trim_flagstat_mqc = Channel.empty()
+    ch_ivar_trim_log_mqc = Channel.empty()
 } else {
     process IVAR_TRIM {
         tag "$sample"
@@ -883,7 +885,7 @@ if (params.protocol != 'amplicon') {
         output:
         tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_ivar_trim_bam
         path "*.{flagstat,idxstats,stats}" into ch_ivar_trim_flagstat_mqc
-        path "*.log"
+        path "*.log" into ch_ivar_trim_log_mqc
 
         script:
         exclude_reads = params.ivar_exclude_reads ? "" : "-e"
@@ -993,7 +995,8 @@ process VARSCAN2 {
     tuple val(sample), val(single_end), path("*.lowfreq.vcf.gz*") into ch_varscan2_lowfreq_snpeff
     path "*.highfreq.bcftools_stats.txt" into ch_varscan2_bcftools_highfreq_mqc
     path "*.lowfreq.bcftools_stats.txt" into ch_varscan2_bcftools_lowfreq_mqc
-    path "*.log"
+    path "*.highfreq.varscan2.log" into ch_varscan2_log_highfreq_mqc
+    path "*.lowfreq.varscan2.log" into ch_varscan2_log_lowfreq_mqc
     path "*.pileup"
 
     script:
@@ -1191,7 +1194,9 @@ process IVAR_VARIANTS {
     label 'process_medium'
     publishDir "${params.outdir}/variants/ivar/variants", mode: params.publish_dir_mode,
         saveAs: { filename ->
-                      if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      if (filename.endsWith(".bcftools_stats.txt")) "bcftools_stats/$filename"
+                      else if (filename.endsWith(".log")) "log/$filename"
+                      else if (filename.endsWith("_mqc.tsv")) null
                       else filename
                 }
 
@@ -1200,13 +1205,16 @@ process IVAR_VARIANTS {
 
     input:
     tuple val(sample), val(single_end), path(bam) from ch_sort_bam_ivar_variants
+    path header from ch_ivar_variants_header_mqc
     path fasta from ch_fasta
     path gff from ch_gff
 
     output:
     tuple val(sample), val(single_end), path("*.vcf.gz*") into ch_ivar_variants_vcf
     path "*.bcftools_stats.txt" into ch_ivar_variants_bcftools_mqc
-    path "*.tsv"
+    path "*.counts_mqc.tsv" into ch_ivar_variants_count_mqc
+    path "${sample}.tsv"
+    path "*.log"
 
     script:
     features = params.gff ? "-g $gff" : ""
@@ -1219,10 +1227,12 @@ process IVAR_VARIANTS {
         ${bam[0]} \\
         | ivar variants -p $sample -r $fasta $features
 
-    ivar_variants_to_vcf.py ${sample}.tsv ${sample}.vcf
+    ivar_variants_to_vcf.py ${sample}.tsv ${sample}.vcf > ${sample}.variant.counts.log
     bgzip -c ${sample}.vcf > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
+
+    cat $header ${sample}.variant.counts.log > ${sample}.variant.counts_mqc.tsv
     """
 }
 
@@ -1491,8 +1501,9 @@ if (!params.skip_kraken2) {
                                                                   ch_kraken2_metaspades,
                                                                   ch_kraken2_unicycler,
                                                                   ch_kraken2_minia
+        path "*.report.txt" into ch_kraken2_report_mqc
         path "*.host*"
-        path "*.report.txt"
+
 
         script:
         pe = single_end ? "" : "--paired"
@@ -1517,6 +1528,7 @@ if (!params.skip_kraken2) {
                 ch_kraken2_metaspades
                 ch_kraken2_unicycler
                 ch_kraken2_minia }
+    ch_kraken2_report_mqc = Channel.empty()
 }
 
 ////////////////////////////////////////////////////
@@ -2727,22 +2739,27 @@ process MULTIQC {
     path (multiqc_config) from ch_multiqc_config
     path (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
     path ('fastqc/*') from ch_fastqc_raw_reports_mqc.collect().ifEmpty([])
-    path ('fastp/*') from ch_fastp_mqc.collect().ifEmpty([])
+    path ('fastp/log/*') from ch_fastp_mqc.collect().ifEmpty([])
     path ('fastp/fastqc/*') from ch_fastp_fastqc_mqc.collect().ifEmpty([])
-    path ('cutadapt/*') from ch_cutadapt_mqc.collect().ifEmpty([])
-    path ('cutadapt/fastqc/*') from ch_cutadapt_fastqc_mqc.collect().ifEmpty([])
-    path ('bowtie2/*') from ch_bowtie2_mqc.collect().ifEmpty([])
+    path ('bowtie2/log/*') from ch_bowtie2_mqc.collect().ifEmpty([])
     path ('bowtie2/flagstat/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
+    path ('ivar/trim/flagstat/*') from ch_ivar_trim_flagstat_mqc.collect().ifEmpty([])
+    path ('ivar/trim/log/*') from ch_ivar_trim_log_mqc.collect().ifEmpty([])
     path ('picard/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
     path ('varscan2/bcftools/highfreq/*') from ch_varscan2_bcftools_highfreq_mqc.collect().ifEmpty([])
-    path ('varscan2/bcftools/lowfreq/*') from ch_varscan2_bcftools_lowfreq_mqc.collect().ifEmpty([])
+    path ('varscan2/variants/highfreq/*') from ch_varscan2_log_highfreq_mqc.collect().ifEmpty([])
     path ('varscan2/snpeff/highfreq/*') from ch_varscan2_snpeff_highfreq_mqc.collect().ifEmpty([])
-    path ('varscan2/snpeff/lowfreq/*') from ch_varscan2_snpeff_lowfreq_mqc.collect().ifEmpty([])
     path ('varscan2/quast/highfreq/*') from ch_varscan2_quast_mqc.collect().ifEmpty([])
-    path ('ivar/flagstat/*') from ch_ivar_trim_flagstat_mqc.collect().ifEmpty([])
-    path ('ivar/bcftools/*') from ch_ivar_variants_bcftools_mqc.collect().ifEmpty([])
-    path ('ivar/snpeff/*') from ch_ivar_snpeff_mqc.collect().ifEmpty([])
-    path ('ivar/quast/*') from ch_ivar_quast_mqc.collect().ifEmpty([])
+    path ('varscan2/bcftools/lowfreq/*') from ch_varscan2_bcftools_lowfreq_mqc.collect().ifEmpty([])
+    path ('varscan2/variants/lowfreq/*') from ch_varscan2_log_lowfreq_mqc.collect().ifEmpty([])
+    path ('varscan2/snpeff/lowfreq/*') from ch_varscan2_snpeff_lowfreq_mqc.collect().ifEmpty([])
+    path ('ivar/variants/bcftools/*') from ch_ivar_variants_bcftools_mqc.collect().ifEmpty([])
+    path ('ivar/variants/counts/*') from ch_ivar_variants_count_mqc.collect().ifEmpty([])
+    path ('ivar/variants/snpeff/*') from ch_ivar_snpeff_mqc.collect().ifEmpty([])
+    path ('ivar/consensus/quast/*') from ch_ivar_quast_mqc.collect().ifEmpty([])
+    path ('cutadapt/log/*') from ch_cutadapt_mqc.collect().ifEmpty([])
+    path ('cutadapt/fastqc/*') from ch_cutadapt_fastqc_mqc.collect().ifEmpty([])
+    path ('kraken2/*') from ch_kraken2_report_mqc.collect().ifEmpty([])
     path ('spades/bcftools/*') from ch_spades_vg_bcftools_mqc.collect().ifEmpty([])
     path ('spades/snpeff/*') from ch_spades_snpeff_mqc.collect().ifEmpty([])
     path ('spades/quast/*') from ch_quast_spades_mqc.collect().ifEmpty([])
