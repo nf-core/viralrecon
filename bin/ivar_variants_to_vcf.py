@@ -53,24 +53,28 @@ def ivar_variants_to_vcf(FileIn,FileOut):
                 ID='.'
                 REF=line[2]
                 ALT=line[3]
+                if ALT[0] == '+':
+                    varCountDict['INS'] += 1
+                elif ALT[0] == '-':
+                    REF += ALT[1:]
+                    ALT = REF
+                    varCountDict['DEL'] += 1
+                else:
+                    varCountDict['SNP'] += 1
                 QUAL='.'
                 pass_test=line[13]
                 if pass_test == 'TRUE':
                     FILTER='PASS'
                 else:
                     FILTER='FAIL'
+
+                if alt[0] == "-":
                 INFO='DP='+line[11]
                 FORMAT='GT:REF_DP:REF_RV:REF_QUAL:ALT_DP:ALT_RV:ALT_QUAL:ALT_FREQ'
                 SAMPLE='1:'+line[4]+':'+line[5]+':'+line[6]+':'+line[7]+':'+line[8]+':'+line[9]+':'+line[10]
                 line = CHROM+'\t'+POS+'\t'+ID+'\t'+REF+'\t'+ALT+'\t'+QUAL+'\t'+FILTER+'\t'+INFO+'\t'+FORMAT+'\t'+SAMPLE+'\n'
                 fout.write(line)
 
-                if ALT[0] == '+':
-                    varCountDict['INS'] += 1
-                elif ALT[0] == '-':
-                    varCountDict['DEL'] += 1
-                else:
-                    varCountDict['SNP'] += 1
     fout.close()
 
     ## Print variant counts to screen
