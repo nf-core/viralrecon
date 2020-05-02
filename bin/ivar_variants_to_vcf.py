@@ -2,6 +2,7 @@
 import os
 import sys
 import re
+import errno
 import argparse
 
 def parse_args(args=None):
@@ -12,6 +13,14 @@ def parse_args(args=None):
     parser.add_argument('FILE_IN', help="Input tsv file.")
     parser.add_argument('FILE_OUT', help="Full path to output vcf file")
     return parser.parse_args(args)
+
+def make_dir(path):
+    if not len(path) == 0:
+        try:
+            os.makedirs(path)
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
 
 def ivar_variants_to_vcf(FileIn,FileOut):
     filename = os.path.splitext(FileIn)[0]
@@ -30,6 +39,9 @@ def ivar_variants_to_vcf(FileIn,FileOut):
               '##FORMAT=<ID=ALT_FREQ,Number=1,Type=String,Description="Frequency of alternate base">\n')
     header += '#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t'+filename+'\n'
 
+    varCountDict = {'SNP':0, 'INS':0, 'DEL':0}
+    OutDir = os.path.dirname(FileOut)
+    make_dir(OutDir)
     fout = open(FileOut,'w')
     fout.write(header)
     with open(FileIn) as f:
@@ -41,6 +53,15 @@ def ivar_variants_to_vcf(FileIn,FileOut):
                 ID='.'
                 REF=line[2]
                 ALT=line[3]
+                if ALT[0] == '+':
+                    ALT = REF + ALT[1:]
+                    varCountDict['INS'] += 1
+                elif ALT[0] == '-':
+                    REF += ALT[1:]
+                    ALT = line[2]
+                    varCountDict['DEL'] += 1
+                else:
+                    varCountDict['SNP'] += 1
                 QUAL='.'
                 pass_test=line[13]
                 if pass_test == 'TRUE':
@@ -52,8 +73,13 @@ def ivar_variants_to_vcf(FileIn,FileOut):
                 SAMPLE='1:'+line[4]+':'+line[5]+':'+line[6]+':'+line[7]+':'+line[8]+':'+line[9]+':'+line[10]
                 line = CHROM+'\t'+POS+'\t'+ID+'\t'+REF+'\t'+ALT+'\t'+QUAL+'\t'+FILTER+'\t'+INFO+'\t'+FORMAT+'\t'+SAMPLE+'\n'
                 fout.write(line)
+
     fout.close()
 
+    ## Print variant counts to pass to MultiQC
+    varCountList = [(k, str(v)) for k, v in sorted(varCountDict.items())]
+    print('\t'.join(['sample'] + [x[0] for x in varCountList]))
+    print('\t'.join([filename] + [x[1] for x in varCountList]))
 
 def main(args=None):
     args = parse_args(args)

@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        parameters: [--skip_adapter_trimming, --skip_amplicon_trimming, --skip_assembly, --skip_variants]
+        parameters: [--skip_adapter_trimming, --skip_amplicon_trimming, --skip_assembly, --skip_variants, --skip_kraken2]
     steps:
       - uses: actions/checkout@v2
       - name: Install Nextflow
@@ -56,7 +56,7 @@ jobs:
      runs-on: ubuntu-latest
      strategy:
        matrix:
-         parameters: [--skip_sra, --gff false, '']
+         parameters: [--skip_sra, '']
      steps:
        - uses: actions/checkout@v2
        - name: Install Nextflow
@@ -70,3 +70,25 @@ jobs:
        - name: Run pipeline with minimal data via SRA ids and various options
          run: |
            nextflow run ${GITHUB_WORKSPACE} -profile test_sra,docker ${{ matrix.parameters }}
+
+  test_sispa:
+     env:
+       NXF_VER: '19.10.0'
+       NXF_ANSI_LOG: false
+     runs-on: ubuntu-latest
+     strategy:
+       matrix:
+         parameters: [--gff false, '']
+     steps:
+       - uses: actions/checkout@v2
+       - name: Install Nextflow
+         run: |
+           wget -qO- get.nextflow.io | bash
+           sudo mv nextflow /usr/local/bin/
+       - name: Pull docker image
+         run: |
+           docker pull nfcore/viralrecon:dev
+           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+       - name: Run pipeline with minimal SISPA data and various options
+         run: |
+           nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }}
