@@ -10,9 +10,9 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 * [Preprocessing](#Preprocessing)
   * [parallel-fastq-dump](#parallel-fastq-dump) - Download samples from SRA
+  * [cat](#cat) - Merge re-sequenced FastQ files
   * [FastQC](#fastqc) - Raw read QC
   * [fastp](#fastp) - Adapter and quality trimming
-  * [cat](#cat) - Merge re-sequenced FastQ files
 * [Variant calling](#variant-calling)
   * [Bowtie 2](#bowtie-2) - Read alignment relative to reference genome
   * [SAMtools](#samtools) - Sort, index and generate metrics for alignments
@@ -51,6 +51,10 @@ Please see the [usage docs](usage.md#supported-public-repository-ids) for a list
 
 > **NB:** Downloaded FastQ files will only be saved in the results directory if the `--save_sra_fastq` parameter is supplied.  
 > **NB:** A metadata (`*.sra_runinfo.txt`) and warnings (`*.sra_warnings.txt`) file is also saved in the `pipeline_info/` directory.
+
+### cat
+
+If multiple libraries/runs have been provided for the same sample in the input samplesheet (e.g. to increase sequencing depth) then these will be merged at the very beginning of the pipeline in order to have consistent sample naming throughout the pipeline.
 
 ### FastQC
 
@@ -92,10 +96,6 @@ Please see the [usage docs](usage.md#supported-public-repository-ids) for a list
 </p>
 
 > **NB:** Post-trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
-
-### cat
-
-The initial QC and adapter trimming for each sample is performed at the run-level e.g. if a sample has been sequenced more than once to increase sequencing depth. This has the advantage of being able to assess each library individually, and the ability to process multiple libraries from the same sample in parallel. If applicable, these samples are subsequently merged using the Linux `cat` command after the fastp adapter trimming step.
 
 ## Variant calling
 
