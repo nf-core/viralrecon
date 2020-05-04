@@ -6,23 +6,19 @@ report_comment: >
 export_plots: true
 
 fn_clean_exts:
-    - 'fastq.gz'
-    - '.trimmed'
-    - '.trim'
-    - '.fastp'
-    - '.merged'
-    - '.sorted.bam'
-    - '.bowtie2'
-    - '.ptrim'
-    - '.highfreq'
-    - '.lowfreq'
-    - '.consensus'
-    - '.consensus.masked'
-    - '.snpEff'
-    - '.vcf.gz'
-    - '.scaffolds'
-    - '.meta'
-    - '.assembly'
+     - '.merged'
+     - '.trim'
+     - '.fastp'
+     - '.sorted.bam'
+     - '.bowtie2'
+     - '.ptrim'
+     - '.highfreq'
+     - '.lowfreq'
+     - '.consensus'
+     - '.consensus.masked'
+     - '.snpEff'
+     - '.vcf.gz'
+     - '.scaffolds'
 
 extra_fn_clean_exts:
     - type: regex
