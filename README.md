@@ -20,9 +20,9 @@ We have integrated a number of options in the pipeline to allow you to run speci
 ## Pipeline summary
 
 1. Download samples via SRA, ENA or GEO ids ([`ENA FTP`](https://ena-docs.readthedocs.io/en/latest/retrieval/file-download.html), [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump); *if required*)
-2. Raw read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-3. Adapter trimming ([`fastp`](https://github.com/OpenGene/fastp))
-4. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html))
+2. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html))
+3. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+4. Adapter trimming ([`fastp`](https://github.com/OpenGene/fastp))
 5. Variant calling
     1. Read alignment ([`Bowtie 2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml))
     2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
