@@ -2773,17 +2773,7 @@ process MULTIQC {
     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
     custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
     """
-    multiqc . -f $rtitle $rfilename $custom_config_file \\
-        -m custom_content \\
-        -m fastqc \\
-        -m fastp \\
-        -m cutadapt \\
-        -m bowtie2 \\
-        -m samtools \\
-        -m picard \\
-        -m bcftools \\
-        -m snpeff \\
-        -m quast
+    multiqc . -f $rtitle $rfilename $custom_config_file
     """
 }
 

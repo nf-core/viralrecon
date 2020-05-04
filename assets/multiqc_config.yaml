@@ -5,24 +5,17 @@ report_comment: >
 
 export_plots: true
 
-fn_clean_exts:
-     - '.merged'
-     - '.trim'
-     - '.fastp'
-     - '.sorted.bam'
-     - '.bowtie2'
-     - '.ptrim'
-     - '.highfreq'
-     - '.lowfreq'
-     - '.consensus'
-     - '.consensus.masked'
-     - '.snpEff'
-     - '.vcf.gz'
-     - '.scaffolds'
-
-extra_fn_clean_exts:
-    - type: regex
-      pattern: '.[k][0-9]+.*'
+run_modules:
+    - custom_content
+    - fastqc
+    - fastp
+    - bowtie2
+    - samtools
+    - picard
+    - bcftools
+    - snpeff
+    - quast
+    - cutadapt
 
 module_order:
     - fastqc:
@@ -186,3 +179,15 @@ custom_plot_config:
 
 bcftools:
     collapse_complementary_changes: true
+
+extra_fn_clean_exts:
+     - '.trim'
+     - '.bowtie2'
+     - '.ptrim'
+     - '.highfreq'
+     - '.lowfreq'
+     - '.consensus'
+     - '.snpEff'
+     - '.scaffolds'
+     - type: regex
+       pattern: '.[k][0-9]+.*'
