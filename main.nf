@@ -567,9 +567,62 @@ if (!params.skip_sra || !isOffline()) {
 }
 
 ch_reads_all
-    .map { [ it[0], it[1], it[4] ] }
-    .into { ch_reads_fastqc
+    .map { [ it[0].split('_')[0..-2].join('_'), it[1], it[4] ] }
+    .groupTuple(by: [0, 1])
+    .map { [ it[0], it[1], it[2].flatten() ] }
+    .into { ch_reads_merged
             ch_reads_fastp }
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+/* --                                                                     -- */
+/* --                     MERGE RESEQUENCED FASTQ                         -- */
+/* --                                                                     -- */
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+* STEP 2: Merge FastQ files with the same sample identifier
+*/
+process CAT_FASTQ {
+    tag "$sample"
+
+    input:
+    tuple val(sample), val(single_end), path(reads) from ch_reads_merged
+
+    output:
+    tuple val(sample), val(single_end), path("*.merged.fastq.gz") into ch_cat_fastqc,
+                                                                       ch_cat_fastp
+
+    script:
+    readList = reads.collect{it.toString()}
+    if (!single_end) {
+        if (readList.size > 2) {
+            def read1 = []
+            def read2 = []
+            readList.eachWithIndex{ v, ix -> ( ix & 1 ? read2 : read1 ) << v }
+            """
+            cat ${read1.sort().join(' ')} > ${sample}_1.merged.fastq.gz
+            cat ${read2.sort().join(' ')} > ${sample}_2.merged.fastq.gz
+            """
+        } else {
+            """
+            ln -s ${reads[0]} ${sample}_1.merged.fastq.gz
+            ln -s ${reads[1]} ${sample}_2.merged.fastq.gz
+            """
+        }
+    } else {
+        if (readList.size > 1) {
+            """
+            cat ${readList.sort().join(' ')} > ${sample}.merged.fastq.gz
+            """
+        } else {
+            """
+            ln -s $reads ${sample}.merged.fastq.gz
+            """
+        }
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -580,7 +633,7 @@ ch_reads_all
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * STEP 2: FastQC on raw input reads
+ * STEP 3: FastQC on input reads after merging libraries from the same sample
  */
 process FASTQC {
     tag "$sample"
@@ -594,23 +647,14 @@ process FASTQC {
     !params.skip_fastqc && !params.skip_qc
 
     input:
-    tuple val(sample), val(single_end), path(reads) from ch_reads_fastqc
+    tuple val(sample), val(single_end), path(reads) from ch_cat_fastqc
 
     output:
     path "*.{zip,html}" into ch_fastqc_raw_reports_mqc
 
     script:
-    // Added soft-links to original fastqs for consistent naming in MultiQC
     """
-    if $single_end; then
-        [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
-        fastqc --quiet --threads $task.cpus ${sample}.fastq.gz
-    else
-        [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
-        [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-        fastqc --quiet --threads $task.cpus ${sample}_1.fastq.gz
-        fastqc --quiet --threads $task.cpus ${sample}_2.fastq.gz
-    fi
+    fastqc --quiet --threads $task.cpus *.fastq.gz
     """
 }
 
@@ -623,7 +667,7 @@ process FASTQC {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
-* STEP 3: Fastp adapter trimming and quality filtering
+* STEP 4: Fastp adapter trimming and quality filtering
 */
 if (!params.skip_adapter_trimming) {
     process FASTP {
@@ -643,10 +687,12 @@ if (!params.skip_adapter_trimming) {
         !params.skip_variants || !params.skip_assembly
 
         input:
-        tuple val(sample), val(single_end), path(reads) from ch_reads_fastp
+        tuple val(sample), val(single_end), path(reads) from ch_cat_fastp
 
         output:
-        tuple val(sample), val(single_end), path("*.trim.fastq.gz") into ch_fastp_reads
+        tuple val(sample), val(single_end), path("*.trim.fastq.gz") into ch_fastp_bowtie2,
+                                                                         ch_fastp_cutadapt,
+                                                                         ch_fastp_kraken2
         path "*.{log,fastp.html,json}" into ch_fastp_mqc
         path "*_fastqc.{zip,html}" into ch_fastp_fastqc_mqc
         path "*.fail.fastq.gz"
@@ -682,68 +728,11 @@ if (!params.skip_adapter_trimming) {
     }
 } else {
     ch_reads_fastp
-        .set { ch_fastp_reads }
-
+        .into { ch_fastp_bowtie2
+                ch_fastp_cutadapt
+                ch_fastp_kraken2 }
     ch_fastp_mqc = Channel.empty()
     ch_fastp_fastqc_mqc = Channel.empty()
-}
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-/* --                                                                     -- */
-/* --                     MERGE RESEQUENCED FASTQ                         -- */
-/* --                                                                     -- */
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-/*
-* STEP 4: Merge FastQ files with the same sample identifier
-*/
-ch_fastp_reads
-    .map { [ it[0].split('_')[0..-2].join('_'), it[1], it[2] ] }
-    .groupTuple(by: [0, 1])
-    .map { [ it[0], it[1], it[2].flatten() ] }
-    .set { ch_fastp_reads }
-
-process CAT_FASTQ {
-    tag "$sample"
-
-    input:
-    tuple val(sample), val(single_end), path(reads) from ch_fastp_reads
-
-    output:
-    tuple val(sample), val(single_end), path("*.merged.fastq.gz") into ch_fastq_bowtie2,
-                                                                       ch_fastq_cutadapt,
-                                                                       ch_fastq_kraken2
-
-    script:
-    readList = reads.collect{it.toString()}
-    if (!single_end) {
-        if (readList.size > 2) {
-            def read1 = []
-            def read2 = []
-            readList.eachWithIndex{ v, ix -> ( ix & 1 ? read2 : read1 ) << v }
-            """
-            cat ${read1.sort().join(' ')} > ${sample}_1.merged.fastq.gz
-            cat ${read2.sort().join(' ')} > ${sample}_2.merged.fastq.gz
-            """
-        } else {
-            """
-            ln -s ${reads[0]} ${sample}_1.merged.fastq.gz
-            ln -s ${reads[1]} ${sample}_2.merged.fastq.gz
-            """
-        }
-    } else {
-        if (readList.size > 1) {
-            """
-            cat ${readList.sort().join(' ')} > ${sample}.merged.fastq.gz
-            """
-        } else {
-            """
-            ln -s $reads ${sample}.merged.fastq.gz
-            """
-        }
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -800,7 +789,7 @@ process BOWTIE2 {
     !params.skip_variants
 
     input:
-    tuple val(sample), val(single_end), path(reads) from ch_fastq_bowtie2
+    tuple val(sample), val(single_end), path(reads) from ch_fastp_bowtie2
     path index from ch_index
 
     output:
@@ -1442,7 +1431,7 @@ if (params.protocol == 'amplicon' && !params.skip_amplicon_trimming) {
         !params.skip_assembly
 
         input:
-        tuple val(sample), val(single_end), path(reads) from ch_fastq_cutadapt
+        tuple val(sample), val(single_end), path(reads) from ch_fastp_cutadapt
         path amplicons from ch_amplicon_fasta
 
         output:
@@ -1469,7 +1458,7 @@ if (params.protocol == 'amplicon' && !params.skip_amplicon_trimming) {
         fastqc --quiet --threads $task.cpus *.ptrim.fastq.gz
         """
     }
-    ch_fastq_kraken2 = ch_cutadapt_kraken2
+    ch_fastp_kraken2 = ch_cutadapt_kraken2
 
 } else {
     ch_cutadapt_mqc = Channel.empty()
@@ -1493,7 +1482,7 @@ if (!params.skip_kraken2) {
         !params.skip_assembly
 
         input:
-        tuple val(sample), val(single_end), path(reads) from ch_fastq_kraken2
+        tuple val(sample), val(single_end), path(reads) from ch_fastp_kraken2
         path db from ch_kraken2_db
 
         output:
@@ -1523,7 +1512,7 @@ if (!params.skip_kraken2) {
         """
     }
 } else {
-    ch_fastq_kraken2
+    ch_fastp_kraken2
         .into { ch_kraken2_spades
                 ch_kraken2_metaspades
                 ch_kraken2_unicycler
