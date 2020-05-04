@@ -570,8 +570,7 @@ ch_reads_all
     .map { [ it[0].split('_')[0..-2].join('_'), it[1], it[4] ] }
     .groupTuple(by: [0, 1])
     .map { [ it[0], it[1], it[2].flatten() ] }
-    .into { ch_reads_merged
-            ch_reads_fastp }
+    .set { ch_reads_all }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -588,7 +587,7 @@ process CAT_FASTQ {
     tag "$sample"
 
     input:
-    tuple val(sample), val(single_end), path(reads) from ch_reads_merged
+    tuple val(sample), val(single_end), path(reads) from ch_reads_all
 
     output:
     tuple val(sample), val(single_end), path("*.merged.fastq.gz") into ch_cat_fastqc,
@@ -727,7 +726,7 @@ if (!params.skip_adapter_trimming) {
         """
     }
 } else {
-    ch_reads_fastp
+    ch_cat_fastp
         .into { ch_fastp_bowtie2
                 ch_fastp_cutadapt
                 ch_fastp_kraken2 }
