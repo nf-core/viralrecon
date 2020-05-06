@@ -984,7 +984,7 @@ process PICARD_METRICS {
         avail_mem = task.memory.toGiga()
     }
     program = params.protocol == 'amplicon' ? "ivar" : "bowtie2"
-    prefix = params.protocol == 'amplicon' ? "${sample}.trim" : "${sample}"
+    prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
     """
     picard -Xmx${avail_mem}g CollectMultipleMetrics \\
         INPUT=${bam[0]} \\
