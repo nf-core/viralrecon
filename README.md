@@ -38,6 +38,10 @@ We have integrated a number of options in the pipeline to allow you to run speci
             * Consensus sequence generation ([`iVar`](https://github.com/andersen-lab/ivar))
             * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
             * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
+        * Call variants ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html))
+            * Consensus sequence generation ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
+            * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
+            * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
 6. _De novo_ assembly
     1. Primer trimming ([`Cutadapt`](https://cutadapt.readthedocs.io/en/stable/guide.html); *amplicon data only*)
     2. Removal of host reads ([`Kraken 2`](http://ccb.jhu.edu/software/kraken2/))
