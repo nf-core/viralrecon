@@ -40,6 +40,7 @@
   * [`--callers`](#-callers)
   * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
   * [`--filter_dups`](#--filter_dups)
+  * [`--bcftools_min_qual`](#--bcftools_min_qual)
   * [`--save_align_intermeds`](#--save_align_intermeds)
   * [`--save_pileup`](#--save_pileup)
   * [`--skip_snpeff`](#--skip_snpeff)
@@ -352,7 +353,11 @@ Skip the amplicon trimming step performed by Cutadapt. Use this if your input Fa
 
 By default, trimmed FastQ files will not be saved to the results directory. Specify this flag (or set to true in your config file) to copy these files to the results directory when complete (Default: false).
 
-## Alignments
+## Variant calling
+
+### `--callers`
+
+Specify which variant calling algorithms you would like to use. Available options are `varscan2`, `ivar` and `bcftools` (Default: 'varscan2,ivar,bcftools').
 
 ### `--ivar_exclude_reads`
 
@@ -362,15 +367,13 @@ This option unsets the `-e` parameter in `ivar trim` to discard reads without pr
 
 Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false). Note that unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation.
 
+### `--bcftools_min_qual`
+
+When performing variant calling with BCFTools skip bases with baseQ/BAQ smaller than this number (Default: 20).
+
 ### `--save_align_intermeds`
 
 By default, intermediate [BAM](https://samtools.github.io/hts-specs/) files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set to true to also save other intermediate BAM files (Default: false).
-
-## Variant calling
-
-### `--callers`
-
-Specify which variant calling algorithms you would like to use. Available options are `varscan2` and `ivar` (Default: 'varscan2,ivar').
 
 ### `--save_pileup`
 
