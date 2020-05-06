@@ -203,6 +203,7 @@ bcftools:
 extra_fn_clean_exts:
      - '.trim'
      - '.bowtie2'
+     - '.mkD'
      - '.ptrim'
      - '.highfreq'
      - '.lowfreq'
