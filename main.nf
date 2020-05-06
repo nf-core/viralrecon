@@ -57,9 +57,10 @@ def helpMessage() {
       --save_trimmed [bool]             Save the trimmed FastQ files in the results directory (Default: false)
 
     Variant calling
-      --callers [str]                 Specify which variant calling algorithms you would like to use (Default:'varscan2,ivar')
+      --callers [str]                 Specify which variant calling algorithms you would like to use (Default:'varscan2,ivar,bcftools')
       --ivar_exclude_reads [bool]     Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
       --filter_dups [bool]            Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false)
+      --bcftools_min_qual [int]       When performing variant calling with BCFTools skip bases with baseQ/BAQ smaller than this number (Default: 20)
       --save_align_intermeds [bool]   Save the intermediate BAM files from the alignment steps (Default: false)
       --save_pileup [bool]            Save Pileup files generated during variant calling (Default: false)
       --skip_snpeff [bool]            Skip SnpEff and SnpSift annotation of variants (Default: false)
@@ -137,7 +138,7 @@ if (params.protocol == 'amplicon' && !params.skip_variants && !params.amplicon_b
 }
 if (params.amplicon_bed) { ch_amplicon_bed = file(params.amplicon_bed, checkIfExists: true) }
 
-callerList = [ 'varscan2', 'ivar']
+callerList = [ 'varscan2', 'ivar', 'bcftools']
 callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((callerList + callers).unique().size() != callerList.size()) {
     exit 1, "Invalid variant calller option: ${params.callers}. Valid options: ${callerList.join(', ')}"
@@ -248,6 +249,7 @@ if (!params.skip_variants) {
     summary['Variant Calling Tools'] = params.callers
     if (params.ivar_exclude_reads)	 summary['iVar Trim Exclude']  = 'Yes'
     if (params.filter_dups)          summary['Remove Duplicate Reads']  = 'Yes'
+    summary['BCFTools Min Qual']     = params.bcftools_min_qual
     if (params.save_align_intermeds) summary['Save Align Intermeds'] =  'Yes'
     if (params.save_pileup)          summary['Save Pileup'] = 'Yes'
     if (params.skip_snpeff)          summary['Save SnpEff'] = 'Yes'
@@ -940,10 +942,12 @@ process PICARD_MARKDUPLICATES {
 
     output:
     tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_markdup_bam_metrics,
+                                                                            ch_markdup_bam_varscan2,
+                                                                            ch_markdup_bam_varscan2_consensus,
                                                                             ch_markdup_bam_ivar_variants,
                                                                             ch_markdup_bam_ivar_consensus,
-                                                                            ch_markdup_bam_varscan2,
-                                                                            ch_markdup_bam_varscan2_bcftools
+                                                                            ch_markdup_bam_bcftools,
+                                                                            ch_markdup_bam_bcftools_consensus
     path "*.{flagstat,idxstats,stats}" into ch_markdup_bam_flagstat_mqc
     path "*.txt" into ch_markdup_bam_metrics_mqc
 
@@ -1046,8 +1050,8 @@ process VARSCAN2 {
     path fasta from ch_fasta
 
     output:
-    tuple val(sample), val(single_end), path("*.highfreq.vcf.gz*") into ch_varscan2_highfreq_snpeff,
-                                                                        ch_varscan2_highfreq_consensus
+    tuple val(sample), val(single_end), path("*.highfreq.vcf.gz*") into ch_varscan2_highfreq_consensus,
+                                                                        ch_varscan2_highfreq_snpeff
     tuple val(sample), val(single_end), path("*.lowfreq.vcf.gz*") into ch_varscan2_lowfreq_snpeff
     path "*.highfreq.bcftools_stats.txt" into ch_varscan2_bcftools_highfreq_mqc
     path "*.lowfreq.bcftools_stats.txt" into ch_varscan2_bcftools_lowfreq_mqc
@@ -1092,7 +1096,7 @@ process VARSCAN2 {
 /*
  * STEP 5.6.1.1: Genome consensus generation with BCFtools and masked with BEDTools
  */
-process VARSCAN2_BCFTOOLS {
+process VARSCAN2_CONSENSUS {
     tag "$sample"
     label 'process_medium'
     publishDir "${params.outdir}/variants/varscan2/consensus", mode: params.publish_dir_mode
@@ -1101,12 +1105,12 @@ process VARSCAN2_BCFTOOLS {
     !params.skip_variants && 'varscan2' in callers
 
     input:
-    tuple val(sample), val(single_end), path(bam), path(vcf) from ch_markdup_bam_varscan2_bcftools.join(ch_varscan2_highfreq_consensus, by: [0,1])
+    tuple val(sample), val(single_end), path(bam), path(vcf) from ch_markdup_bam_varscan2_consensus.join(ch_varscan2_highfreq_consensus, by: [0,1])
     path fasta from ch_fasta
 
     output:
-    tuple val(sample), val(single_end), path("*consensus.masked.fa") into ch_bcftools_consensus_masked
-    tuple val(sample), val(single_end), path("*consensus.fa")
+    tuple val(sample), val(single_end), path("*consensus.masked.fa") into ch_varscan2_consensus_masked
+    path "*consensus.fa"
 
     script:
     """
@@ -1216,10 +1220,10 @@ process VARSCAN2_QUAST {
     publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode
 
     when:
-    !params.skip_variants && 'varscan2' in callerList && !params.skip_variants_quast
+    !params.skip_variants && 'varscan2' in callers && !params.skip_variants_quast
 
     input:
-    path consensus from ch_bcftools_consensus_masked.collect{ it[2] }
+    path consensus from ch_varscan2_consensus_masked.collect{ it[2] }
     path fasta from ch_fasta
     path gff from ch_gff
 
@@ -1248,7 +1252,7 @@ process VARSCAN2_QUAST {
 process IVAR_VARIANTS {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/ivar/variants", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/variants/ivar", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".bcftools_stats.txt")) "bcftools_stats/$filename"
                       else if (filename.endsWith(".log")) "log/$filename"
@@ -1407,6 +1411,176 @@ process IVAR_QUAST {
         ${consensus.join(' ')}
     """
 }
+
+////////////////////////////////////////////////////
+/* --              BCFTOOLS                    -- */
+////////////////////////////////////////////////////
+
+/*
+ * STEP 5.6.3: Variant calling with BCFTools
+ */
+process BCFTOOLS_VARIANTS {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+                      else filename
+                }
+
+    when:
+    !params.skip_variants && 'bcftools' in callers
+
+    input:
+    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_bcftools
+    path fasta from ch_fasta
+
+    output:
+    tuple val(sample), val(single_end), path("*.vcf.gz*") into ch_bcftools_variants_consensus,
+                                                               ch_bcftools_variants_snpeff
+    path "*.bcftools_stats.txt" into ch_bcftools_variants_mqc
+
+    script:
+    """
+    bcftools mpileup \\
+        --threads $task.cpus \\
+        --min-BQ $params.bcftools_min_qual \\
+        --max-depth 50000 \\
+        --annotate FORMAT/AD,FORMAT/ADF,FORMAT/ADR,FORMAT/DP,FORMAT/SP,INFO/AD,INFO/ADF,INFO/ADR \\
+        -f $fasta \\
+        ${bam[0]} \\
+        | bcftools call --ploidy 1 -Ov -m -A -M \\
+        | bcftools view --include 'INFO/DP>=5' -Oz -o ${sample}.vcf.gz
+    tabix -p vcf -f ${sample}.vcf.gz
+    bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
+    """
+}
+
+// /*
+//  * STEP 5.6.3.1: Genome consensus generation with BCFtools and masked with BEDTools
+//  */
+// process BCFTOOLS_CONSENSUS {
+//     tag "$sample"
+//     label 'process_medium'
+//     publishDir "${params.outdir}/variants/bcftools/consensus", mode: params.publish_dir_mode
+//
+//     when:
+//     !params.skip_variants && 'bcftools' in callers
+//
+//     input:
+//     tuple val(sample), val(single_end), path(bam), path(vcf) from ch_markdup_bam_bcftools_consensus.join(ch_bcftools_variants_consensus, by: [0,1])
+//     path fasta from ch_fasta
+//
+//     output:
+//     tuple val(sample), val(single_end), path("*consensus.masked.fa") into ch_bcftools_consensus_masked
+//     path "*consensus.fa"
+//
+//     script:
+//     """
+//     cat $fasta | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
+//
+//     bedtools genomecov \\
+//         -bga \\
+//         -ibam ${bam[0]} \\
+//         -g $fasta \\
+//         | awk '\$4 < 20' | bedtools merge > ${sample}.mask.bed
+//
+//     bedtools maskfasta \\
+//         -fi ${sample}.consensus.fa \\
+//         -bed ${sample}.mask.bed \\
+//         -fo ${sample}.consensus.masked.fa
+//     sed -i 's/${index_base}/${sample}/g' ${sample}.consensus.masked.fa
+//     header=\$(head -n1 ${sample}.consensus.masked.fa | sed 's/>//g')
+//     sed -i "s/\${header}/${sample}/g" ${sample}.consensus.masked.fa
+//     """
+// }
+
+/*
+ * STEP 5.6.3.2: BCFTools variant calling annotation with SnpEff and SnpSift
+ */
+process BCFTOOLS_SNPEFF {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/bcftools/snpeff", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants && 'bcftools' in callers && params.gff && !params.skip_snpeff
+
+    input:
+    tuple val(sample), val(single_end), path(vcf) from ch_bcftools_variants_snpeff
+    path fasta from ch_fasta
+    path gff from ch_gff
+
+    output:
+    path "*.snpEff.csv" into ch_bcftools_snpeff_mqc
+    path "*.vcf.gz*"
+    path "*.{txt,html}"
+
+    script:
+    """
+    mkdir -p ./data/genomes/ && cd ./data/genomes/
+    ln -s ../../$fasta ${index_base}.fa
+    cd ../../
+
+    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
+    ln -s ../../$gff genes.gff
+    cd ../../
+    echo "${index_base}.genome : ${index_base}" > snpeff.config
+    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
+
+    snpEff ${index_base} \\
+        -config ./snpeff.config \\
+        -dataDir ./data ${vcf[0]} \\
+        -csvStats ${sample}.snpEff.csv \\
+        | bgzip -c > ${sample}.snpEff.vcf.gz
+    tabix -p vcf -f ${sample}.snpEff.vcf.gz
+    mv snpEff_summary.html ${sample}.snpEff.summary.html
+
+    SnpSift extractFields -s "," \\
+        -e "." \\
+        ${sample}.snpEff.vcf.gz \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > ${sample}.snpSift.table.txt
+    	"""
+}
+
+// /*
+//  * STEP 5.6.3.3: BCFTools consensus sequence report with QUAST
+//  */
+// process BCFTOOLS_QUAST {
+//     label 'process_medium'
+//     publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode
+//
+//     when:
+//     !params.skip_variants && 'bcftools' in callers && !params.skip_variants_quast
+//
+//     input:
+//     path consensus from ch_bcftools_consensus_masked.collect{ it[2] }
+//     path fasta from ch_fasta
+//     path gff from ch_gff
+//
+//     output:
+//     path "quast" into ch_bcftools_quast_mqc
+//
+//     script:
+//     features = params.gff ? "--features $gff" : ""
+//     """
+//     quast.py \\
+//         --output-dir quast \\
+//         -r $fasta \\
+//         $features \\
+//         --threads $task.cpus \\
+//         ${consensus.join(' ')}
+//     """
+// }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -2815,6 +2989,9 @@ process MULTIQC {
     path ('ivar/variants/counts/*') from ch_ivar_variants_count_mqc.collect().ifEmpty([])
     path ('ivar/variants/snpeff/*') from ch_ivar_snpeff_mqc.collect().ifEmpty([])
     path ('ivar/consensus/quast/*') from ch_ivar_quast_mqc.collect().ifEmpty([])
+    //path ('bcftools/variants/bcftools/*') from ch_bcftools_variants_mqc.collect().ifEmpty([])
+    //path ('bcftools/variants/snpeff/*') from ch_bcftools_snpeff_mqc.collect().ifEmpty([])
+    //path ('bcftools/consensus/quast/*') from ch_bcftools_quast_mqc.collect().ifEmpty([])
     path ('cutadapt/log/*') from ch_cutadapt_mqc.collect().ifEmpty([])
     path ('cutadapt/fastqc/*') from ch_cutadapt_fastqc_mqc.collect().ifEmpty([])
     path ('kraken2/*') from ch_kraken2_report_mqc.collect().ifEmpty([])
