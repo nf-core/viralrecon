@@ -206,11 +206,11 @@ Remove duplicate reads from alignments as identified by picard MarkDuplicates (D
 
 **Output files:**
 
-* `variants/ivar/variants/`
+* `variants/ivar/`
   * `*.tsv`: Tab separated file with the variant calls.
   * `*.vcf.gz`: Variants VCF file.
   * `*.vcf.gz.tbi`: Variants VCF index file.
-* `variants/ivar/variants/bcftools/`
+* `variants/ivar/bcftools/`
   * `*.bcftools_stats.txt`: Statistics and counts for variants in VCF files.
 * `variants/ivar/consensus/`
   * `*.consensus.fa`: Fasta file representing the consensus sequence.
