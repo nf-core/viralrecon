@@ -822,7 +822,7 @@ process SORT_BAM {
                       if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                       else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
                       else if (filename.endsWith(".stats")) "samtools_stats/$filename"
-                      else filename
+                      else params.save_align_intermeds ? filename : null
                 }
 
     when:
@@ -862,7 +862,7 @@ if (params.protocol != 'amplicon') {
                           else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
                           else if (filename.endsWith(".stats")) "samtools_stats/$filename"
                           else if (filename.endsWith(".log")) "log/$filename"
-                          else filename
+                          else params.save_align_intermeds ? filename : null
                     }
 
         when:
