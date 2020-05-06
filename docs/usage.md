@@ -35,6 +35,7 @@
 * [Variant calling](#variant-calling)
   * [`--callers`](#-callers)
   * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
+  * [`--filter_dups`](#--filter_dups)
   * [`--save_align_intermeds`](#--save_align_intermeds)
   * [`--save_pileup`](#--save_pileup)
   * [`--skip_snpeff`](#--skip_snpeff)
@@ -336,6 +337,10 @@ By default, trimmed FastQ files will not be saved to the results directory. Spec
 ### `--ivar_exclude_reads`
 
 This option unsets the `-e` parameter in `ivar trim` to discard reads without primers (Default: false).
+
+### `--filter_dups`
+
+Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false). Note that unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation.
 
 ### `--save_align_intermeds`
 
