@@ -55,6 +55,7 @@ def helpMessage() {
     Variant calling
       --callers [str]                 Specify which variant calling algorithms you would like to use (Default:'varscan2,ivar')
       --ivar_exclude_reads [bool]     Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
+      --filter_dups [bool]            Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false)
       --save_align_intermeds [bool]   Save the intermediate BAM files from the alignment steps (Default: false)
       --save_pileup [bool]            Save Pileup files generated during variant calling (Default: false)
       --skip_snpeff [bool]            Skip SnpEff and SnpSift annotation of variants (Default: false)
@@ -235,6 +236,7 @@ if (params.save_trimmed)             summary['Save Trimmed'] = 'Yes'
 if (!params.skip_variants) {
     summary['Variant Calling Tools'] = params.callers
     if (params.ivar_exclude_reads)	 summary['iVar Trim Exclude']  = 'Yes'
+    if (params.filter_dups)          summary['Remove Duplicate Reads']  = 'Yes'
     if (params.save_align_intermeds) summary['Save Align Intermeds'] =  'Yes'
     if (params.save_pileup)          summary['Save Pileup'] = 'Yes'
     if (params.skip_snpeff)          summary['Save SnpEff'] = 'Yes'
@@ -898,15 +900,65 @@ if (params.protocol != 'amplicon') {
     ch_sort_bam = ch_ivar_trim_bam
 }
 
-ch_sort_bam
-    .into { ch_sort_bam_metrics
-            ch_sort_bam_ivar_variants
-            ch_sort_bam_ivar_consensus
-            ch_sort_bam_varscan2
-            ch_sort_bam_varscan2_bcftools }
+/*
+ * STEP 5.4: Picard MarkDuplicates
+ */
+process PICARD_MARKDUPLICATES {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/${program}", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
+                      else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
+                      else if (filename.endsWith(".stats")) "samtools_stats/$filename"
+                      else if (filename.endsWith(".metrics.txt")) "picard_metrics/$filename"
+                      else filename
+                }
+
+    when:
+    !params.skip_variants
+
+    input:
+    tuple val(sample), val(single_end), path(bam) from ch_sort_bam
+    path fasta from ch_fasta
+
+    output:
+    tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_markdup_bam_metrics,
+                                                                            ch_markdup_bam_ivar_variants,
+                                                                            ch_markdup_bam_ivar_consensus,
+                                                                            ch_markdup_bam_varscan2,
+                                                                            ch_markdup_bam_varscan2_bcftools
+    path "*.{flagstat,idxstats,stats}" into ch_markdup_bam_flagstat_mqc
+    path "*.txt" into ch_markdup_bam_metrics_mqc
+
+    script:
+    def avail_mem = 3
+    if (!task.memory) {
+        log.info "[Picard MarkDuplicates] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this."
+    } else {
+        avail_mem = task.memory.toGiga()
+    }
+    program = params.protocol == 'amplicon' ? "ivar" : "bowtie2"
+    prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
+    keep_dup = params.filter_dups ? "true" : "false"
+    """
+    picard -Xmx${avail_mem}g MarkDuplicates \\
+        INPUT=${bam[0]} \\
+        OUTPUT=${prefix}.sorted.bam \\
+        ASSUME_SORTED=true \\
+        REMOVE_DUPLICATES=$keep_dup \\
+        METRICS_FILE=${prefix}.MarkDuplicates.metrics.txt \\
+        VALIDATION_STRINGENCY=LENIENT \\
+        TMP_DIR=tmp
+    samtools index ${prefix}.sorted.bam
+    samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
+    samtools flagstat ${prefix}.sorted.bam > ${prefix}.sorted.bam.flagstat
+    samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
+    """
+}
 
 /*
- * STEP 5.4: Picard CollectMultipleMetrics and CollectWgsMetrics
+ * STEP 5.5: Picard CollectMultipleMetrics and CollectWgsMetrics
  */
 process PICARD_METRICS {
     tag "$sample"
@@ -917,7 +969,7 @@ process PICARD_METRICS {
     !params.skip_variants && !params.skip_picard_metrics && !params.skip_qc
 
     input:
-    tuple val(sample), val(single_end), path(bam) from ch_sort_bam_metrics
+    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_metrics
     path fasta from ch_fasta
 
     output:
@@ -956,7 +1008,7 @@ process PICARD_METRICS {
 ////////////////////////////////////////////////////
 
 /*
- * STEP 5.5.1: Variant calling with VarScan 2
+ * STEP 5.6.1: Variant calling with VarScan 2
  */
 process VARSCAN2 {
     tag "$sample"
@@ -974,7 +1026,7 @@ process VARSCAN2 {
     !params.skip_variants && 'varscan2' in callers
 
     input:
-    tuple val(sample), val(single_end), path(bam) from ch_sort_bam_varscan2
+    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_varscan2
     path fasta from ch_fasta
 
     output:
@@ -1022,7 +1074,7 @@ process VARSCAN2 {
 }
 
 /*
- * STEP 5.5.1.1: Genome consensus generation with BCFtools and masked with BEDTools
+ * STEP 5.6.1.1: Genome consensus generation with BCFtools and masked with BEDTools
  */
 process VARSCAN2_BCFTOOLS {
     tag "$sample"
@@ -1033,7 +1085,7 @@ process VARSCAN2_BCFTOOLS {
     !params.skip_variants && 'varscan2' in callers
 
     input:
-    tuple val(sample), val(single_end), path(bam), path(vcf) from ch_sort_bam_varscan2_bcftools.join(ch_varscan2_highfreq_consensus, by: [0,1])
+    tuple val(sample), val(single_end), path(bam), path(vcf) from ch_markdup_bam_varscan2_bcftools.join(ch_varscan2_highfreq_consensus, by: [0,1])
     path fasta from ch_fasta
 
     output:
@@ -1061,7 +1113,7 @@ process VARSCAN2_BCFTOOLS {
 }
 
 /*
- * STEP 5.5.1.2: VarScan 2 variant calling annotation with SnpEff and SnpSift
+ * STEP 5.6.1.2: VarScan 2 variant calling annotation with SnpEff and SnpSift
  */
 process VARSCAN2_SNPEFF {
     tag "$sample"
@@ -1141,7 +1193,7 @@ process VARSCAN2_SNPEFF {
 }
 
 /*
- * STEP 5.5.1.3: VarScan 2 consensus sequence report with QUAST
+ * STEP 5.6.1.3: VarScan 2 consensus sequence report with QUAST
  */
 process VARSCAN2_QUAST {
     label 'process_medium'
@@ -1175,7 +1227,7 @@ process VARSCAN2_QUAST {
 ////////////////////////////////////////////////////
 
 /*
- * STEP 5.5.2: Variant calling with iVar
+ * STEP 5.6.2: Variant calling with iVar
  */
 process IVAR_VARIANTS {
     tag "$sample"
@@ -1192,7 +1244,7 @@ process IVAR_VARIANTS {
     !params.skip_variants && 'ivar' in callers
 
     input:
-    tuple val(sample), val(single_end), path(bam) from ch_sort_bam_ivar_variants
+    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_ivar_variants
     path header from ch_ivar_variants_header_mqc
     path fasta from ch_fasta
     path gff from ch_gff
@@ -1225,7 +1277,7 @@ process IVAR_VARIANTS {
 }
 
 /*
- * STEP 5.5.2.1: Generate consensus sequence with iVar
+ * STEP 5.6.2.1: Generate consensus sequence with iVar
  */
 process IVAR_CONSENSUS {
     tag "$sample"
@@ -1236,7 +1288,7 @@ process IVAR_CONSENSUS {
     !params.skip_variants && 'ivar' in callers
 
     input:
-    tuple val(sample), val(single_end), path(bam) from ch_sort_bam_ivar_consensus
+    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_ivar_consensus
     path fasta from ch_fasta
 
     output:
@@ -1257,7 +1309,7 @@ process IVAR_CONSENSUS {
 }
 
 /*
- * STEP 5.5.2.2: iVar variant calling annotation with SnpEff and SnpSift
+ * STEP 5.6.2.2: iVar variant calling annotation with SnpEff and SnpSift
  */
 process IVAR_SNPEFF {
     tag "$sample"
@@ -1311,7 +1363,7 @@ process IVAR_SNPEFF {
 }
 
 /*
- * STEP 5.5.2.3: iVar consensus sequence report with QUAST
+ * STEP 5.6.2.3: iVar consensus sequence report with QUAST
  */
 process IVAR_QUAST {
     label 'process_medium'
@@ -2733,7 +2785,9 @@ process MULTIQC {
     path ('bowtie2/flagstat/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
     path ('ivar/trim/flagstat/*') from ch_ivar_trim_flagstat_mqc.collect().ifEmpty([])
     path ('ivar/trim/log/*') from ch_ivar_trim_log_mqc.collect().ifEmpty([])
-    path ('picard/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
+    path ('picard/markdup/*') from ch_markdup_bam_flagstat_mqc.collect().ifEmpty([])
+    path ('picard/markdup/*') from ch_markdup_bam_metrics_mqc.collect().ifEmpty([])
+    path ('picard/metrics/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
     path ('varscan2/bcftools/highfreq/*') from ch_varscan2_bcftools_highfreq_mqc.collect().ifEmpty([])
     path ('varscan2/variants/highfreq/*') from ch_varscan2_log_highfreq_mqc.collect().ifEmpty([])
     path ('varscan2/snpeff/highfreq/*') from ch_varscan2_snpeff_highfreq_mqc.collect().ifEmpty([])

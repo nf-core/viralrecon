@@ -48,11 +48,21 @@ module_order:
         info: 'This section of the report shows SAMTools counts/statistics after primer sequence removal with iVar.'
         path_filters:
             - './ivar/trim/flagstat/*'
+    - samtools:
+        name: 'VARIANTS: SAMTools (MarkDuplicates)'
+        info: 'This section of the report shows SAMTools counts/statistics after duplicate removal with picard MarkDuplicates.'
+        path_filters:
+            - './picard/markdup/*'
+    - picard:
+        name: 'VARIANTS: Picard'
+        info: 'This section of the report shows picard MarkDuplicates results after mapping (if "--protocol amplicon" this will be after primer sequence removal with iVar).'
+        path_filters:
+            - './picard/markdup/*'
     - picard:
         name: 'VARIANTS: Picard'
         info: 'This section of the report shows picard CollectMultipleMetrics results after mapping (if "--protocol amplicon" this will be after primer sequence removal with iVar).'
         path_filters:
-            - './picard/*'
+            - './picard/metrics/*'
     - bcftools:
         name: 'VARIANTS: BCFTools (VarScan 2; high freq)'
         info: 'This section of the report shows BCFTools stats results for high frequency variants (allele frequency >= 0.8) called by VarScan 2.'
