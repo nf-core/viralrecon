@@ -17,7 +17,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [Bowtie 2](#bowtie-2) - Read alignment relative to reference genome
   * [SAMtools](#samtools) - Sort, index and generate metrics for alignments
   * [iVar trim](#ivar-trim) - Primer sequence removal for amplicon data
-  * [picard-tools](#picard-tools) - Whole genome coverage and alignment metrics
+  * [picard MarkDuplicates](#picard-markduplicates) - Duplicate read marking and removal
+  * [picard CollectMultipleMetrics](#picard-collectmultiplemetrics) - Whole genome coverage and alignment metrics
   * [VarScan 2, BCFTools, BEDTools](#varscan-2-bcftools-bedtools) **|** [iVar variants and iVar consensus](#ivar-variants-and-ivar-consensus) - Variant calling and consensus sequence generation
     * [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
     * [QUAST](#quast) - Consensus assessment report
@@ -143,7 +144,18 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 * `variants/ivar/samtools_stats/`
   * SAMtools `*.flagstat`, `*.idxstats` and `*.stats` files generated from the primer trimmed alignment files.
 
-### picard-tools
+### picard MarkDuplicates
+
+TODO: Update this section
+
+Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false). Note that unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation.
+
+**Output files:**
+
+* `variants/<bowtie2/ivar>/`  
+  Alignment QC files from picard CollectMultipleMetrics and the metrics file from CollectWgsMetrics in `*_metrics` text format and plotted in `*.pdf` format.
+
+### picard CollectMultipleMetrics
 
 [picard-tools](https://broadinstitute.github.io/picard/command-line-overview.html) is a set of command-line tools for manipulating high-throughput sequencing data. We use picard-tools in this pipeline to obtain mapping and coverage metrics. If `--protocol amplicon` is set then these metrics will be obtained from the iVar trimmed alignments as opposed to the original Bowtie 2 alignments.
 
