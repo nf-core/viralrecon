@@ -48,9 +48,13 @@ def helpMessage() {
       --skip_kraken2 [bool]           Skip Kraken2 process for removing host classified reads (Default: false)
 
     Read trimming
-      --skip_adapter_trimming [bool]  Skip the adapter trimming step with fastp (Default: false)
-      --skip_amplicon_trimming [bool] Skip the amplicon trimming step with Cutadapt (Default: false)
-      --save_trimmed [bool]           Save the trimmed FastQ files in the results directory (Default: false)
+      --cut_mean_quality [int]          The mean quality requirement option shared by fastp cut_front, cut_tail or cut_sliding options. Range: 1~36 (Default: 30 (Q30))
+      --qualified_quality_phred [int]   The quality value that a base is qualified. Default 30 means phred quality >=Q30 is qualified (Default: 30)
+      --unqualified_percent_limit [int] Percentage of bases that are allowed to be unqualified (0~100) (Default: 10)
+      --min_trim_length [int]           Reads shorter than this length after trimming will be discarded (Default: 50)
+      --skip_adapter_trimming [bool]    Skip the adapter trimming step with fastp (Default: false)
+      --skip_amplicon_trimming [bool]   Skip the amplicon trimming step with Cutadapt (Default: false)
+      --save_trimmed [bool]             Save the trimmed FastQ files in the results directory (Default: false)
 
     Variant calling
       --callers [str]                 Specify which variant calling algorithms you would like to use (Default:'varscan2,ivar')
@@ -230,7 +234,14 @@ if (!params.skip_kraken2) {
 } else {
     summary['Skip Kraken2']          = 'Yes'
 }
-if (params.skip_adapter_trimming)    summary['Skip Adapter Trimming'] = 'Yes'
+if (!params.skip_adapter_trimming)  {
+    if (params.cut_mean_quality)          summary['Cut Mean Quality'] = params.cut_mean_quality
+    if (params.qualified_quality_phred)   summary['Qualified Phred'] = params.qualified_quality_phred
+    if (params.unqualified_percent_limit) summary['Unqualified Perc Limit'] = params.unqualified_percent_limit
+    if (params.min_trim_length)           summary['Min Trim Length'] = params.min_trim_length
+} else {
+    summary['Skip Adapter Trimming'] = 'Yes'
+}
 if (params.skip_amplicon_trimming)   summary['Skip Amplicon Trimming'] = 'Yes'
 if (params.save_trimmed)             summary['Save Trimmed'] = 'Yes'
 if (!params.skip_variants) {
@@ -719,6 +730,11 @@ if (!params.skip_adapter_trimming) {
             $autodetect \\
             --cut_front \\
             --cut_tail \\
+            --cut_mean_quality $params.cut_mean_quality \\
+            --qualified_quality_phred $params.qualified_quality_phred \\
+            --unqualified_percent_limit $params.unqualified_percent_limit \\
+            --length_required $params.min_trim_length \\
+            --trim_poly_x \\
             --thread $task.cpus \\
             --json ${sample}.fastp.json \\
             --html ${sample}.fastp.html \\
@@ -2786,7 +2802,7 @@ process MULTIQC {
     path ('ivar/trim/flagstat/*') from ch_ivar_trim_flagstat_mqc.collect().ifEmpty([])
     path ('ivar/trim/log/*') from ch_ivar_trim_log_mqc.collect().ifEmpty([])
     path ('picard/markdup/*') from ch_markdup_bam_flagstat_mqc.collect().ifEmpty([])
-    path ('picard/markdup/*') from ch_markdup_bam_metrics_mqc.collect().ifEmpty([])
+    path ('picard/metrics/*') from ch_markdup_bam_metrics_mqc.collect().ifEmpty([])
     path ('picard/metrics/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
     path ('varscan2/bcftools/highfreq/*') from ch_varscan2_bcftools_highfreq_mqc.collect().ifEmpty([])
     path ('varscan2/variants/highfreq/*') from ch_varscan2_log_highfreq_mqc.collect().ifEmpty([])

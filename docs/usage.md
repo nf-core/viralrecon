@@ -29,6 +29,10 @@
   * [`--save_kraken2_fastq`](#--save_kraken2_fastq)
   * [`--skip_kraken2`](#--skip_kraken2)
 * [Read trimming](#read-trimming)
+  * [`--cut_mean_quality`](#--cut_mean_quality)
+  * [`--qualified_quality_phred`](#--qualified_quality_phred)
+  * [`--unqualified_percent_limit`](#--unqualified_percent_limit)
+  * [`--min_trim_length`](#--min_trim_length)
   * [`--skip_adapter_trimming`](#--skip_adapter_trimming)
   * [`--skip_amplicon_trimming`](#--skip_amplicon_trimming)
   * [`--save_trimmed`](#--save_trimmed)
@@ -319,6 +323,22 @@ Save the host and viral FastQ files in the results directory (Default: false).
 Skip Kraken 2 process for removing host classified reads (Default: false).
 
 ## Read trimming
+
+### `--cut_mean_quality`
+
+The mean quality requirement option shared by fastp cut_front, cut_tail or cut_sliding options. Range: 1~36 (Default: 30 (Q30)).
+
+### `--qualified_quality_phred`
+
+The quality value that a base is qualified. Default 30 means phred quality >=Q30 is qualified (Default: 30).
+
+### `--unqualified_percent_limit`
+
+Percentage of bases that are allowed to be unqualified (0~100) (Default: 10).
+
+### `--min_trim_length`
+
+Reads shorter than this length after trimming will be discarded (Default: 50).
 
 ### `--skip_adapter_trimming`
 
