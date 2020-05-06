@@ -54,13 +54,8 @@ module_order:
         path_filters:
             - './picard/markdup/*'
     - picard:
-        name: 'VARIANTS: Picard'
-        info: 'This section of the report shows picard MarkDuplicates results after mapping (if "--protocol amplicon" this will be after primer sequence removal with iVar).'
-        path_filters:
-            - './picard/markdup/*'
-    - picard:
-        name: 'VARIANTS: Picard'
-        info: 'This section of the report shows picard CollectMultipleMetrics results after mapping (if "--protocol amplicon" this will be after primer sequence removal with iVar).'
+        name: 'VARIANTS: Picard Metrics'
+        info: 'This section of the report shows picard CollectMultipleMetrics and MarkDuplicates results after mapping (if "--protocol amplicon" this will be after primer sequence removal with iVar).'
         path_filters:
             - './picard/metrics/*'
     - bcftools:
