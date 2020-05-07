@@ -12,7 +12,7 @@ def parse_args(args=None):
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
     parser.add_argument('FILE_IN', help="Input tsv file.")
     parser.add_argument('FILE_OUT', help="Full path to output vcf file.")
-    parser.add_argument('-po', '--pass_only', dest="PASS_ONLY", help="Only output variants that are tagged as PASS.",action='store_true')
+    parser.add_argument('-po', '--pass_only', dest="PASS_ONLY", help="Only output variants that PASS all filters.",action='store_true')
     parser.add_argument('-ma', '--min_allele_freq', type=float, dest="MIN_ALLELE_FREQ", default=0, help="Only output variants where allele frequency greater than this number (default: 0).")
 
     return parser.parse_args(args)
