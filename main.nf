@@ -60,9 +60,10 @@ def helpMessage() {
       --callers [str]                   Specify which variant calling algorithms you would like to use (Default:'varscan2,ivar,bcftools')
       --ivar_exclude_reads [bool]       Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
       --filter_dups [bool]              Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false)
-      --bcftools_min_qual [int]         When performing variant calling with BCFTools skip bases with baseQ/BAQ smaller than this number (Default: 20)
+      --min_base_qual [int]             When performing variant calling skip bases with baseQ/BAQ smaller than this number (Default: 20)
+      --max_allele_freq [float]         Maximum allele frequency threshold for filtering variant calls (Default: 0.8)
       --save_align_intermeds [bool]     Save the intermediate BAM files from the alignment steps (Default: false)
-      --save_pileup [bool]              Save Pileup files generated during variant calling (Default: false)
+      --save_mpileup [bool]             Save MPileup files generated during variant calling (Default: false)
       --skip_snpeff [bool]              Skip SnpEff and SnpSift annotation of variants (Default: false)
       --skip_variants_quast [bool]      Skip generation of QUAST aggregated report for consensus sequences (Default: false)
       --skip_variants [bool]            Skip variant calling steps in the pipeline (Default: false)
@@ -249,9 +250,10 @@ if (!params.skip_variants) {
     summary['Variant Calling Tools'] = params.callers
     if (params.ivar_exclude_reads)	 summary['iVar Trim Exclude']  = 'Yes'
     if (params.filter_dups)          summary['Remove Duplicate Reads']  = 'Yes'
-    summary['BCFTools Min Qual']     = params.bcftools_min_qual
+    summary['Min Base Quality']      = params.min_base_qual
+    summary['Max Allele Freq']       = params.max_allele_freq
     if (params.save_align_intermeds) summary['Save Align Intermeds'] =  'Yes'
-    if (params.save_pileup)          summary['Save Pileup'] = 'Yes'
+    if (params.save_mpileup)         summary['Save MPileup'] = 'Yes'
     if (params.skip_snpeff)          summary['Save SnpEff'] = 'Yes'
     if (params.skip_variants_quast)  summary['Save Variants QUAST'] = 'Yes'
 } else {
@@ -793,6 +795,39 @@ process BOWTIE2_INDEX {
 }
 
 /*
+ * PREPROCESSING: Build SnpEff database for viral genome
+ */
+process MAKE_SNPEFF_DB {
+    tag "$fasta"
+    label 'process_low'
+    if (params.save_reference) {
+        publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
+    }
+
+    when:
+    (!params.skip_variants || !params.skip_assembly) && params.gff && !params.skip_snpeff
+
+    input:
+    path ("SnpEffDB/genomes/${index_base}.fa") from ch_fasta
+    path ("SnpEffDB/${index_base}/genes.gff") from ch_gff
+
+    output:
+    tuple path("SnpEffDB"), path("*.config") into ch_snpeff_db_varscan2,
+                                                  ch_snpeff_db_ivar,
+                                                  ch_snpeff_db_bcftools,
+                                                  ch_snpeff_db_spades,
+                                                  ch_snpeff_db_metaspades,
+                                                  ch_snpeff_db_unicycler,
+                                                  ch_snpeff_db_minia
+
+    script:
+    """
+    echo "${index_base}.genome : ${index_base}" > snpeff.config
+    snpEff build -config snpeff.config -dataDir ./SnpEffDB -gff3 -v ${index_base}
+    """
+}
+
+/*
  * STEP 5.1: Map read(s) with Bowtie 2
  */
 process BOWTIE2 {
@@ -942,10 +977,8 @@ process PICARD_MARKDUPLICATES {
 
     output:
     tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_markdup_bam_metrics,
-                                                                            ch_markdup_bam_varscan2,
+                                                                            ch_markdup_bam_mpileup,
                                                                             ch_markdup_bam_varscan2_consensus,
-                                                                            ch_markdup_bam_ivar_variants,
-                                                                            ch_markdup_bam_ivar_consensus,
                                                                             ch_markdup_bam_bcftools,
                                                                             ch_markdup_bam_bcftools_consensus
     path "*.{flagstat,idxstats,stats}" into ch_markdup_bam_flagstat_mqc
@@ -1028,6 +1061,44 @@ process PICARD_METRICS {
 ////////////////////////////////////////////////////
 
 /*
+ * STEP 5.6: Create mpileup file for all variant callers
+ */
+process SAMTOOLS_MPILEUP {
+    tag "$sample"
+    label 'process_medium'
+    if (params.save_mpileup) {
+        publishDir "${params.outdir}/variants/${program}/mpileup", mode: params.publish_dir_mode
+    }
+
+    when:
+    !params.skip_variants
+
+    input:
+    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_mpileup
+    path fasta from ch_fasta
+
+    output:
+    tuple val(sample), val(single_end), path("*.mpileup") into ch_mpileup_varscan2,
+                                                               ch_mpileup_ivar_variants,
+                                                               ch_mpileup_ivar_consensus,
+                                                               ch_mpileup_ivar_bcftools
+
+    script:
+    program = params.protocol == 'amplicon' ? "ivar" : "bowtie2"
+    prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
+    """
+    samtools mpileup \\
+        --count-orphans \\
+        --no-BAQ \\
+        --max-depth 50000 \\
+        --fasta-ref $fasta \\
+        --min-BQ $params.min_base_qual \\
+        --output ${prefix}.mpileup \\
+        ${bam[0]}
+    """
+}
+
+/*
  * STEP 5.6.1: Variant calling with VarScan 2
  */
 process VARSCAN2 {
@@ -1035,61 +1106,50 @@ process VARSCAN2 {
     label 'process_medium'
     publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode,
         saveAs: { filename ->
-            		      if (filename.endsWith("vcf.gz")) filename
-                      else if (filename.endsWith("vcf.gz.tbi")) filename
-                      else if (filename.endsWith(".log")) "log/$filename"
+                      if (filename.endsWith(".log")) "log/$filename"
                       else if (filename.endsWith(".txt")) "bcftools_stats/$filename"
-                      else params.save_pileup ? filename : null
+                      else filename
                 }
 
     when:
     !params.skip_variants && 'varscan2' in callers
 
     input:
-    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_varscan2
+    tuple val(sample), val(single_end), path(mpileup) from ch_mpileup_varscan2
     path fasta from ch_fasta
 
     output:
-    tuple val(sample), val(single_end), path("*.highfreq.vcf.gz*") into ch_varscan2_highfreq_consensus,
-                                                                        ch_varscan2_highfreq_snpeff
-    tuple val(sample), val(single_end), path("*.lowfreq.vcf.gz*") into ch_varscan2_lowfreq_snpeff
-    path "*.highfreq.bcftools_stats.txt" into ch_varscan2_bcftools_highfreq_mqc
-    path "*.lowfreq.bcftools_stats.txt" into ch_varscan2_bcftools_lowfreq_mqc
-    path "*.highfreq.varscan2.log" into ch_varscan2_log_highfreq_mqc
-    path "*.lowfreq.varscan2.log" into ch_varscan2_log_lowfreq_mqc
-    path "*.pileup"
+    tuple val(sample), val(single_end), path("${prefix}.vcf.gz*") into ch_varscan2_highfreq_consensus,
+                                                                       ch_varscan2_highfreq_snpeff
+    tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_varscan2_lowfreq_snpeff
+    path "${prefix}.bcftools_stats.txt" into ch_varscan2_bcftools_highfreq_mqc
+    path "*.varscan2.log" into ch_varscan2_log_mqc
+    path "${sample}.bcftools_stats.txt"
 
     script:
+    prefix = "${sample}.AF${params.max_allele_freq}"
     """
-    samtools mpileup \\
-        --count-orphans \\
-        --max-depth 20000 \\
-        --min-BQ 0 \\
-        --fasta-ref $fasta \\
-        ${bam[0]} \\
-        > ${sample}.pileup
-
     varscan mpileup2cns \\
-        ${sample}.pileup \\
-        --min-var-freq 0.02 \\
+        $mpileup \\
+        --min-coverage 10 \\
+        --min-reads2 5 \\
+        --min-avg-qual $params.min_base_qual \\
+        --min-var-freq 0.03 \\
         --p-value 0.99 \\
-        --variants \\
         --output-vcf 1 \\
-        2> ${sample}.lowfreq.varscan2.log \\
-        | bgzip -c > ${sample}.lowfreq.vcf.gz
-    tabix -p vcf -f ${sample}.lowfreq.vcf.gz
-    bcftools stats ${sample}.lowfreq.vcf.gz > ${sample}.lowfreq.bcftools_stats.txt
+        --variants \\
+        2> ${sample}.varscan2.log \\
+        | bgzip -c > ${sample}.vcf.gz
+    tabix -p vcf -f ${sample}.vcf.gz
+    bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
 
-    varscan mpileup2cns \\
-        ${sample}.pileup \\
-        --min-var-freq 0.8 \\
-        --p-value 0.05 \\
-        --variants \\
-        --output-vcf 1 \\
-        2> ${sample}.highfreq.varscan2.log \\
-        | bgzip -c > ${sample}.highfreq.vcf.gz
-    tabix -p vcf -f ${sample}.highfreq.vcf.gz
-    bcftools stats ${sample}.highfreq.vcf.gz > ${sample}.highfreq.bcftools_stats.txt
+    bcftools filter \\
+        -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq' \\
+        --output-type z \\
+        --output ${prefix}.vcf.gz \\
+        ${sample}.vcf.gz
+    tabix -p vcf -f ${prefix}.vcf.gz
+    bcftools stats ${prefix}.vcf.gz > ${prefix}.bcftools_stats.txt
     """
 }
 
@@ -1109,26 +1169,26 @@ process VARSCAN2_CONSENSUS {
     path fasta from ch_fasta
 
     output:
-    tuple val(sample), val(single_end), path("*consensus.masked.fa") into ch_varscan2_consensus_masked
+    tuple val(sample), val(single_end), path("*consensus.masked.fa") into ch_varscan2_consensus
     path "*consensus.fa"
 
     script:
+    prefix = "${sample}.AF${params.max_allele_freq}"
     """
-    cat $fasta | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
+    cat $fasta | bcftools consensus ${vcf[0]} > ${prefix}.consensus.fa
 
     bedtools genomecov \\
         -bga \\
         -ibam ${bam[0]} \\
         -g $fasta \\
-        | awk '\$4 < 20' | bedtools merge > ${sample}.mask.bed
+        | awk '\$4 < 20' | bedtools merge > ${prefix}.mask.bed
 
     bedtools maskfasta \\
-        -fi ${sample}.consensus.fa \\
-        -bed ${sample}.mask.bed \\
-        -fo ${sample}.consensus.masked.fa
-    sed -i 's/${index_base}/${sample}/g' ${sample}.consensus.masked.fa
-    header=\$(head -n1 ${sample}.consensus.masked.fa | sed 's/>//g')
-    sed -i "s/\${header}/${sample}/g" ${sample}.consensus.masked.fa
+        -fi ${prefix}.consensus.fa \\
+        -bed ${prefix}.mask.bed \\
+        -fo ${prefix}.consensus.masked.fa
+    header=\$(head -n 1 ${prefix}.consensus.masked.fa | sed 's/>//g')
+    sed -i "s/\${header}/${sample}/g" ${prefix}.consensus.masked.fa
     """
 }
 
@@ -1145,38 +1205,29 @@ process VARSCAN2_SNPEFF {
 
     input:
     tuple val(sample), val(single_end), path(highfreq_vcf), path(lowfreq_vcf) from ch_varscan2_highfreq_snpeff.join(ch_varscan2_lowfreq_snpeff, by: [0,1])
-    path fasta from ch_fasta
-    path gff from ch_gff
+    tuple file(db), file(config) from ch_snpeff_db_varscan2
 
     output:
-    path "*.highfreq.snpEff.csv" into ch_varscan2_snpeff_highfreq_mqc
-    path "*.lowfreq.snpEff.csv" into ch_varscan2_snpeff_lowfreq_mqc
+    path "${prefix}.snpEff.csv" into ch_varscan2_snpeff_highfreq_mqc
+    path "${sample}.snpEff.csv"
     path "*.vcf.gz*"
     path "*.{txt,html}"
 
     script:
+    prefix = "${sample}.AF${params.max_allele_freq}"
     """
-    mkdir -p ./data/genomes/ && cd ./data/genomes/
-    ln -s ../../$fasta ${index_base}.fa
-    cd ../../
-
-    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
-    ln -s ../../$gff genes.gff
-    cd ../../
-    echo "${index_base}.genome : ${index_base}" > snpeff.config
-    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
-
     snpEff ${index_base} \\
-        -config ./snpeff.config \\
-        -dataDir ./data ${highfreq_vcf[0]} \\
-        -csvStats ${sample}.highfreq.snpEff.csv \\
-        | bgzip -c > ${sample}.highfreq.snpEff.vcf.gz
-    tabix -p vcf -f ${sample}.highfreq.snpEff.vcf.gz
-    mv snpEff_summary.html ${sample}.highfreq.snpEff.summary.html
+        -config $config \\
+        -dataDir $db \\
+        ${lowfreq_vcf[0]} \\
+        -csvStats ${sample}.snpEff.csv \\
+        | bgzip -c > ${sample}.snpEff.vcf.gz
+    tabix -p vcf -f ${sample}.snpEff.vcf.gz
+    mv snpEff_summary.html ${sample}.snpEff.summary.html
 
     SnpSift extractFields -s "," \\
         -e "." \\
-        ${sample}.highfreq.snpEff.vcf.gz \\
+        ${sample}.snpEff.vcf.gz \\
         CHROM POS REF ALT \\
         "ANN[*].GENE" "ANN[*].GENEID" \\
         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
@@ -1186,19 +1237,20 @@ process VARSCAN2_SNPEFF {
         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-        > ${sample}.highfreq.snpSift.table.txt
+        > ${sample}.snpSift.table.txt
 
     snpEff ${index_base} \\
-        -config ./snpeff.config \\
-        -dataDir ./data ${lowfreq_vcf[0]} \\
-        -csvStats ${sample}.lowfreq.snpEff.csv \\
-        | bgzip -c > ${sample}.lowfreq.snpEff.vcf.gz
-    tabix -p vcf -f ${sample}.lowfreq.snpEff.vcf.gz
-    mv snpEff_summary.html ${sample}.lowfreq.snpEff.summary.html
+        -config $config \\
+        -dataDir $db \\
+        ${highfreq_vcf[0]} \\
+        -csvStats ${prefix}.snpEff.csv \\
+        | bgzip -c > ${prefix}.snpEff.vcf.gz
+    tabix -p vcf -f ${prefix}.snpEff.vcf.gz
+    mv snpEff_summary.html ${prefix}.snpEff.summary.html
 
     SnpSift extractFields -s "," \\
         -e "." \\
-        ${sample}.lowfreq.snpEff.vcf.gz \\
+        ${prefix}.snpEff.vcf.gz \\
         CHROM POS REF ALT \\
         "ANN[*].GENE" "ANN[*].GENEID" \\
         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
@@ -1208,7 +1260,7 @@ process VARSCAN2_SNPEFF {
         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-        > ${sample}.lowfreq.snpSift.table.txt
+        > ${prefix}.snpSift.table.txt
     	"""
 }
 
@@ -1217,24 +1269,24 @@ process VARSCAN2_SNPEFF {
  */
 process VARSCAN2_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/varscan2/quast", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && 'varscan2' in callers && !params.skip_variants_quast
 
     input:
-    path consensus from ch_varscan2_consensus_masked.collect{ it[2] }
+    path consensus from ch_varscan2_consensus.collect{ it[2] }
     path fasta from ch_fasta
     path gff from ch_gff
 
     output:
-    path "quast" into ch_varscan2_quast_mqc
+    path "AF${params.max_allele_freq}" into ch_varscan2_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
     """
     quast.py \\
-        --output-dir quast \\
+        --output-dir AF${params.max_allele_freq} \\
         -r $fasta \\
         $features \\
         --threads $task.cpus \\
@@ -1264,35 +1316,38 @@ process IVAR_VARIANTS {
     !params.skip_variants && 'ivar' in callers
 
     input:
-    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_ivar_variants
+    tuple val(sample), val(single_end), path(mpileup) from ch_mpileup_ivar_variants
     path header from ch_ivar_variants_header_mqc
     path fasta from ch_fasta
     path gff from ch_gff
 
     output:
-    tuple val(sample), val(single_end), path("*.vcf.gz*") into ch_ivar_variants_vcf
-    path "*.bcftools_stats.txt" into ch_ivar_variants_bcftools_mqc
-    path "*.counts_mqc.tsv" into ch_ivar_variants_count_mqc
+    tuple val(sample), val(single_end), path("${prefix}.vcf.gz*") into ch_ivar_highfreq_snpeff
+    tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_ivar_lowfreq_snpeff
+    path "${prefix}.bcftools_stats.txt" into ch_ivar_bcftools_highfreq_mqc
+    path "${prefix}.variant.counts_mqc.tsv" into ch_ivar_count_highfreq_mqc
+    path "${sample}.variant.counts_mqc.tsv" into ch_ivar_count_lowfreq_mqc
+    path "${sample}.bcftools_stats.txt"
     path "${sample}.tsv"
     path "*.log"
 
     script:
     features = params.gff ? "-g $gff" : ""
+    prefix = "${sample}.AF${params.max_allele_freq}"
     """
-    samtools mpileup \\
-        -A \\
-        -d 6000000 \\
-        -B \\
-        -Q 0 \\
-        ${bam[0]} \\
-        | ivar variants -p $sample -r $fasta $features
+    cat $mpileup | ivar variants -q $params.min_base_qual -t 0.03 -m 5 -r $fasta -p $sample $features
 
     ivar_variants_to_vcf.py ${sample}.tsv ${sample}.vcf > ${sample}.variant.counts.log
     bgzip -c ${sample}.vcf > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
-
     cat $header ${sample}.variant.counts.log > ${sample}.variant.counts_mqc.tsv
+
+    ivar_variants_to_vcf.py ${sample}.tsv ${prefix}.vcf --pass_only --min_allele_freq $params.max_allele_freq > ${prefix}.variant.counts.log
+    bgzip -c ${prefix}.vcf > ${prefix}.vcf.gz
+    tabix -p vcf -f ${prefix}.vcf.gz
+    bcftools stats ${prefix}.vcf.gz > ${prefix}.bcftools_stats.txt
+    cat $header ${prefix}.variant.counts.log > ${prefix}.variant.counts_mqc.tsv
     """
 }
 
@@ -1308,23 +1363,17 @@ process IVAR_CONSENSUS {
     !params.skip_variants && 'ivar' in callers
 
     input:
-    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_ivar_consensus
+    tuple val(sample), val(single_end), path(mpileup) from ch_mpileup_ivar_consensus
     path fasta from ch_fasta
 
     output:
-    tuple val(sample), val(single_end), path("*.fa") into ch_ivar_consensus_fasta
+    tuple val(sample), val(single_end), path("*.fa") into ch_ivar_consensus
     path "*.txt"
 
     script:
+    prefix = "${sample}.AF${params.max_allele_freq}"
     """
-    samtools mpileup \\
-        -A \\
-        -d 6000000 \\
-        -B \\
-        -Q 0 \\
-        --reference $fasta \\
-        ${bam[0]} \\
-        | ivar consensus -p ${sample}.consensus -n N
+    cat $mpileup | ivar consensus -q $params.min_base_qual -t $params.max_allele_freq -m 10 -n N -p ${prefix}.consensus
     """
 }
 
@@ -1340,32 +1389,27 @@ process IVAR_SNPEFF {
     !params.skip_variants && 'ivar' in callers && params.gff && !params.skip_snpeff
 
     input:
-    tuple val(sample), val(single_end), path(vcf) from ch_ivar_variants_vcf
-    path fasta from ch_fasta
-    path gff from ch_gff
+    tuple val(sample), val(single_end), path(highfreq_vcf), path(lowfreq_vcf) from ch_ivar_highfreq_snpeff.join(ch_ivar_lowfreq_snpeff, by: [0,1])
+    tuple file(db), file(config) from ch_snpeff_db_ivar
 
     output:
-    path "*.snpEff.csv" into ch_ivar_snpeff_mqc
+    path "${prefix}.snpEff.csv" into ch_ivar_snpeff_highfreq_mqc
+    path "${sample}.snpEff.csv"
     path "*.vcf.gz*"
     path "*.{txt,html}"
 
     script:
+    prefix = "${sample}.AF${params.max_allele_freq}"
     """
-    mkdir -p ./data/genomes/ && cd ./data/genomes/
-    ln -s ../../$fasta ${index_base}.fa
-    cd ../../
-    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
-    ln -s ../../$gff genes.gff
-    cd ../../
-    echo "${index_base}.genome : ${index_base}" > snpeff.config
-    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
     snpEff ${index_base} \\
-        -config ./snpeff.config \\
-        -dataDir ./data ${vcf[0]} \\
+        -config $config \\
+        -dataDir $db \\
+        ${lowfreq_vcf[0]} \\
         -csvStats ${sample}.snpEff.csv \\
         | bgzip -c > ${sample}.snpEff.vcf.gz
     tabix -p vcf -f ${sample}.snpEff.vcf.gz
     mv snpEff_summary.html ${sample}.snpEff.summary.html
+
     SnpSift extractFields -s "," \\
         -e "." \\
         ${sample}.snpEff.vcf.gz \\
@@ -1379,7 +1423,30 @@ process IVAR_SNPEFF {
         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
         > ${sample}.snpSift.table.txt
-    	"""
+
+    snpEff ${index_base} \\
+        -config $config \\
+        -dataDir $db \\
+        ${highfreq_vcf[0]} \\
+        -csvStats ${prefix}.snpEff.csv \\
+        | bgzip -c > ${prefix}.snpEff.vcf.gz
+    tabix -p vcf -f ${prefix}.snpEff.vcf.gz
+    mv snpEff_summary.html ${prefix}.snpEff.summary.html
+
+    SnpSift extractFields -s "," \\
+        -e "." \\
+        ${prefix}.snpEff.vcf.gz \\
+        CHROM POS REF ALT \\
+        "ANN[*].GENE" "ANN[*].GENEID" \\
+        "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+        "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+        "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+        "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+        "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+        "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+        "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+        > ${prefix}.snpSift.table.txt
+   	"""
 }
 
 /*
@@ -1387,24 +1454,24 @@ process IVAR_SNPEFF {
  */
 process IVAR_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/variants/ivar", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/ivar/quast", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && 'ivar' in callers && !params.skip_variants_quast
 
     input:
-    path consensus from ch_ivar_consensus_fasta.collect{ it[2] }
+    path consensus from ch_ivar_consensus.collect{ it[2] }
     path fasta from ch_fasta
     path gff from ch_gff
 
     output:
-    path "quast" into ch_ivar_quast_mqc
+    path "AF${params.max_allele_freq}" into ch_ivar_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
     """
     quast.py \\
-        --output-dir quast \\
+        --output-dir AF${params.max_allele_freq} \\
         -r $fasta \\
         $features \\
         --threads $task.cpus \\
@@ -1444,13 +1511,13 @@ process BCFTOOLS_VARIANTS {
     """
     bcftools mpileup \\
         --threads $task.cpus \\
-        --min-BQ $params.bcftools_min_qual \\
+        --min-BQ $params.min_base_qual \\
         --max-depth 50000 \\
         --annotate FORMAT/AD,FORMAT/ADF,FORMAT/ADR,FORMAT/DP,FORMAT/SP,INFO/AD,INFO/ADF,INFO/ADR \\
         -f $fasta \\
         ${bam[0]} \\
-        | bcftools call --ploidy 1 -Ov -m -A -M \\
-        | bcftools view --include 'INFO/DP>=5' -Oz -o ${sample}.vcf.gz
+        | bcftools call --output-type v --ploidy 1 --keep-alts --keep-masked-ref --multiallelic-caller \\
+        | bcftools view --output-file ${sample}.vcf.gz --output-type z --include 'INFO/DP>=5'
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
     """
@@ -1508,8 +1575,7 @@ process BCFTOOLS_SNPEFF {
 
     input:
     tuple val(sample), val(single_end), path(vcf) from ch_bcftools_variants_snpeff
-    path fasta from ch_fasta
-    path gff from ch_gff
+    tuple file(db), file(config) from ch_snpeff_db_bcftools
 
     output:
     path "*.snpEff.csv" into ch_bcftools_snpeff_mqc
@@ -1518,19 +1584,10 @@ process BCFTOOLS_SNPEFF {
 
     script:
     """
-    mkdir -p ./data/genomes/ && cd ./data/genomes/
-    ln -s ../../$fasta ${index_base}.fa
-    cd ../../
-
-    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
-    ln -s ../../$gff genes.gff
-    cd ../../
-    echo "${index_base}.genome : ${index_base}" > snpeff.config
-    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
-
     snpEff ${index_base} \\
-        -config ./snpeff.config \\
-        -dataDir ./data ${vcf[0]} \\
+        -config $config \\
+        -dataDir $db \\
+        ${vcf[0]} \\
         -csvStats ${sample}.snpEff.csv \\
         | bgzip -c > ${sample}.snpEff.vcf.gz
     tabix -p vcf -f ${sample}.snpEff.vcf.gz
@@ -2003,8 +2060,7 @@ process SPADES_SNPEFF {
 
     input:
     tuple val(sample), val(single_end), path(vcf) from ch_spades_vg_vcf
-    path fasta from ch_fasta
-    path gff from ch_gff
+    tuple file(db), file(config) from ch_snpeff_db_spades
 
     output:
     path "*.snpEff.csv" into ch_spades_snpeff_mqc
@@ -2013,21 +2069,15 @@ process SPADES_SNPEFF {
 
     script:
     """
-    mkdir -p ./data/genomes/ && cd ./data/genomes/
-    ln -s ../../$fasta ${index_base}.fa
-    cd ../../
-    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
-    ln -s ../../$gff genes.gff
-    cd ../../
-    echo "${index_base}.genome : ${index_base}" > snpeff.config
-    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
     snpEff ${index_base} \\
-        -config ./snpeff.config \\
-        -dataDir ./data ${vcf[0]} \\
+        -config $config \\
+        -dataDir $db \\
+        ${vcf[0]} \\
         -csvStats ${sample}.snpEff.csv \\
         | bgzip -c > ${sample}.snpEff.vcf.gz
     tabix -p vcf -f ${sample}.snpEff.vcf.gz
     mv snpEff_summary.html ${sample}.snpEff.summary.html
+
     SnpSift extractFields -s "," \\
         -e "." \\
         ${sample}.snpEff.vcf.gz \\
@@ -2287,8 +2337,7 @@ process METASPADES_SNPEFF {
 
     input:
     tuple val(sample), val(single_end), path(vcf) from ch_metaspades_vg_vcf
-    path fasta from ch_fasta
-    path gff from ch_gff
+    tuple file(db), file(config) from ch_snpeff_db_metaspades
 
     output:
     path "*.snpEff.csv" into ch_metaspades_snpeff_mqc
@@ -2297,21 +2346,15 @@ process METASPADES_SNPEFF {
 
     script:
     """
-    mkdir -p ./data/genomes/ && cd ./data/genomes/
-    ln -s ../../$fasta ${index_base}.fa
-    cd ../../
-    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
-    ln -s ../../$gff genes.gff
-    cd ../../
-    echo "${index_base}.genome : ${index_base}" > snpeff.config
-    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
     snpEff ${index_base} \\
-        -config ./snpeff.config \\
-        -dataDir ./data ${vcf[0]} \\
+        -config $config \\
+        -dataDir $db \\
+        ${vcf[0]} \\
         -csvStats ${sample}.snpEff.csv \\
         | bgzip -c > ${sample}.snpEff.vcf.gz
     tabix -p vcf -f ${sample}.snpEff.vcf.gz
     mv snpEff_summary.html ${sample}.snpEff.summary.html
+
     SnpSift extractFields -s "," \\
         -e "." \\
         ${sample}.snpEff.vcf.gz \\
@@ -2569,8 +2612,7 @@ process UNICYCLER_SNPEFF {
 
     input:
     tuple val(sample), val(single_end), path(vcf) from ch_unicycler_vg_vcf
-    path fasta from ch_fasta
-    path gff from ch_gff
+    tuple file(db), file(config) from ch_snpeff_db_unicycler
 
     output:
     path "*.snpEff.csv" into ch_unicycler_snpeff_mqc
@@ -2579,21 +2621,15 @@ process UNICYCLER_SNPEFF {
 
     script:
     """
-    mkdir -p ./data/genomes/ && cd ./data/genomes/
-    ln -s ../../$fasta ${index_base}.fa
-    cd ../../
-    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
-    ln -s ../../$gff genes.gff
-    cd ../../
-    echo "${index_base}.genome : ${index_base}" > snpeff.config
-    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
     snpEff ${index_base} \\
-        -config ./snpeff.config \\
-        -dataDir ./data ${vcf[0]} \\
+        -config $config \\
+        -dataDir $db \\
+        ${vcf[0]} \\
         -csvStats ${sample}.snpEff.csv \\
         | bgzip -c > ${sample}.snpEff.vcf.gz
     tabix -p vcf -f ${sample}.snpEff.vcf.gz
     mv snpEff_summary.html ${sample}.snpEff.summary.html
+
     SnpSift extractFields -s "," \\
         -e "." \\
         ${sample}.snpEff.vcf.gz \\
@@ -2843,8 +2879,7 @@ process MINIA_SNPEFF {
 
     input:
     tuple val(sample), val(single_end), path(vcf) from ch_minia_vg_vcf
-    path fasta from ch_fasta
-    path gff from ch_gff
+    tuple file(db), file(config) from ch_snpeff_db_minia
 
     output:
     path "*.snpEff.csv" into ch_minia_snpeff_mqc
@@ -2853,21 +2888,15 @@ process MINIA_SNPEFF {
 
     script:
     """
-    mkdir -p ./data/genomes/ && cd ./data/genomes/
-    ln -s ../../$fasta ${index_base}.fa
-    cd ../../
-    mkdir -p ./data/${index_base}/ && cd ./data/${index_base}/
-    ln -s ../../$gff genes.gff
-    cd ../../
-    echo "${index_base}.genome : ${index_base}" > snpeff.config
-    snpEff build -config ./snpeff.config -dataDir ./data -gff3 -v ${index_base}
     snpEff ${index_base} \\
-        -config ./snpeff.config \\
-        -dataDir ./data ${vcf[0]} \\
+        -config $config \\
+        -dataDir $db \\
+        ${vcf[0]} \\
         -csvStats ${sample}.snpEff.csv \\
         | bgzip -c > ${sample}.snpEff.vcf.gz
     tabix -p vcf -f ${sample}.snpEff.vcf.gz
     mv snpEff_summary.html ${sample}.snpEff.summary.html
+
     SnpSift extractFields -s "," \\
         -e "." \\
         ${sample}.snpEff.vcf.gz \\
@@ -2978,17 +3007,15 @@ process MULTIQC {
     path ('picard/markdup/*') from ch_markdup_bam_flagstat_mqc.collect().ifEmpty([])
     path ('picard/metrics/*') from ch_markdup_bam_metrics_mqc.collect().ifEmpty([])
     path ('picard/metrics/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
+    path ('varscan2/counts/lowfreq/*') from ch_varscan2_log_mqc.collect().ifEmpty([])
     path ('varscan2/bcftools/highfreq/*') from ch_varscan2_bcftools_highfreq_mqc.collect().ifEmpty([])
-    path ('varscan2/variants/highfreq/*') from ch_varscan2_log_highfreq_mqc.collect().ifEmpty([])
     path ('varscan2/snpeff/highfreq/*') from ch_varscan2_snpeff_highfreq_mqc.collect().ifEmpty([])
     path ('varscan2/quast/highfreq/*') from ch_varscan2_quast_mqc.collect().ifEmpty([])
-    path ('varscan2/bcftools/lowfreq/*') from ch_varscan2_bcftools_lowfreq_mqc.collect().ifEmpty([])
-    path ('varscan2/variants/lowfreq/*') from ch_varscan2_log_lowfreq_mqc.collect().ifEmpty([])
-    path ('varscan2/snpeff/lowfreq/*') from ch_varscan2_snpeff_lowfreq_mqc.collect().ifEmpty([])
-    path ('ivar/variants/bcftools/*') from ch_ivar_variants_bcftools_mqc.collect().ifEmpty([])
-    path ('ivar/variants/counts/*') from ch_ivar_variants_count_mqc.collect().ifEmpty([])
-    path ('ivar/variants/snpeff/*') from ch_ivar_snpeff_mqc.collect().ifEmpty([])
-    path ('ivar/consensus/quast/*') from ch_ivar_quast_mqc.collect().ifEmpty([])
+    path ('ivar/variants/counts/lowfreq/*') from ch_ivar_count_lowfreq_mqc.collect().ifEmpty([])
+    path ('ivar/variants/counts/highfreq/*') from ch_ivar_count_highfreq_mqc.collect().ifEmpty([])
+    path ('ivar/variants/bcftools/highfreq/*') from ch_ivar_bcftools_highfreq_mqc.collect().ifEmpty([])
+    path ('ivar/variants/snpeff/highfreq/*') from ch_ivar_snpeff_highfreq_mqc.collect().ifEmpty([])
+    path ('ivar/consensus/quast/highfreq/*') from ch_ivar_quast_mqc.collect().ifEmpty([])
     path ('bcftools/variants/bcftools/*') from ch_bcftools_variants_mqc.collect().ifEmpty([])
     path ('bcftools/variants/snpeff/*') from ch_bcftools_snpeff_mqc.collect().ifEmpty([])
     //path ('bcftools/consensus/quast/*') from ch_bcftools_quast_mqc.collect().ifEmpty([])
