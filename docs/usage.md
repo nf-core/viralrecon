@@ -40,7 +40,8 @@
   * [`--callers`](#-callers)
   * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
   * [`--filter_dups`](#--filter_dups)
-  * [`--bcftools_min_qual`](#--bcftools_min_qual)
+  * [`--min_base_qual`](#--min_base_qual)
+  * [`--max_allele_freq`](#--max_allele_freq)
   * [`--save_align_intermeds`](#--save_align_intermeds)
   * [`--save_pileup`](#--save_pileup)
   * [`--skip_snpeff`](#--skip_snpeff)
@@ -367,9 +368,13 @@ This option unsets the `-e` parameter in `ivar trim` to discard reads without pr
 
 Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false). Note that unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation.
 
-### `--bcftools_min_qual`
+### `--min_base_qual`
 
-When performing variant calling with BCFTools skip bases with baseQ/BAQ smaller than this number (Default: 20).
+When performing variant calling skip bases with baseQ/BAQ smaller than this number (Default: 20).
+
+### `--max_allele_freq`
+
+Maximum allele frequency threshold for filtering variant calls (Default: 0.8).
 
 ### `--save_align_intermeds`
 
