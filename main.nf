@@ -61,6 +61,7 @@ def helpMessage() {
       --ivar_exclude_reads [bool]       Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
       --filter_dups [bool]              Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false)
       --min_base_qual [int]             When performing variant calling skip bases with baseQ/BAQ smaller than this number (Default: 20)
+      --min_coverage [int]              When performing variant calling skip positions with an overall read depth smaller than this number (Default: 10)
       --max_allele_freq [float]         Maximum allele frequency threshold for filtering variant calls (Default: 0.8)
       --save_align_intermeds [bool]     Save the intermediate BAM files from the alignment steps (Default: false)
       --save_mpileup [bool]             Save MPileup files generated during variant calling (Default: false)
@@ -251,6 +252,7 @@ if (!params.skip_variants) {
     if (params.ivar_exclude_reads)	 summary['iVar Trim Exclude']  = 'Yes'
     if (params.filter_dups)          summary['Remove Duplicate Reads']  = 'Yes'
     summary['Min Base Quality']      = params.min_base_qual
+    summary['Min Read Depth']        = params.min_coverage
     summary['Max Allele Freq']       = params.max_allele_freq
     if (params.save_align_intermeds) summary['Save Align Intermeds'] =  'Yes'
     if (params.save_mpileup)         summary['Save MPileup'] = 'Yes'
@@ -1128,7 +1130,7 @@ process VARSCAN2 {
     """
     varscan mpileup2cns \\
         $mpileup \\
-        --min-coverage 10 \\
+        --min-coverage $params.min_coverage \\
         --min-reads2 5 \\
         --min-avg-qual $params.min_base_qual \\
         --min-var-freq 0.03 \\
@@ -1178,7 +1180,7 @@ process VARSCAN2_CONSENSUS {
         -bga \\
         -ibam ${bam[0]} \\
         -g $fasta \\
-        | awk '\$4 < 20' | bedtools merge > ${prefix}.mask.bed
+        | awk '\$4 < $params.min_coverage' | bedtools merge > ${prefix}.mask.bed
 
     bedtools maskfasta \\
         -fi ${prefix}.consensus.fa \\
@@ -1332,7 +1334,7 @@ process IVAR_VARIANTS {
     features = params.gff ? "-g $gff" : ""
     prefix = "${sample}.AF${params.max_allele_freq}"
     """
-    cat $mpileup | ivar variants -q $params.min_base_qual -t 0.03 -m 5 -r $fasta -p $sample $features
+    cat $mpileup | ivar variants -q $params.min_base_qual -t 0.03 -m $params.min_coverage -r $fasta -p $sample $features
 
     ivar_variants_to_vcf.py ${sample}.tsv ${sample}.vcf > ${sample}.variant.counts.log
     bgzip -c ${sample}.vcf > ${sample}.vcf.gz
@@ -1370,7 +1372,7 @@ process IVAR_CONSENSUS {
     script:
     prefix = "${sample}.AF${params.max_allele_freq}"
     """
-    cat $mpileup | ivar consensus -q $params.min_base_qual -t $params.max_allele_freq -m 10 -n N -p ${prefix}.consensus
+    cat $mpileup | ivar consensus -q $params.min_base_qual -t $params.max_allele_freq -m $params.min_coverage -n N -p ${prefix}.consensus
     """
 }
 
@@ -1515,7 +1517,7 @@ process BCFTOOLS_VARIANTS {
         --annotate FORMAT/AD,FORMAT/ADF,FORMAT/ADR,FORMAT/DP,FORMAT/SP,INFO/AD,INFO/ADF,INFO/ADR \\
         ${bam[0]} \\
         | bcftools call --output-type v --ploidy 1 --keep-alts --keep-masked-ref --multiallelic-caller \\
-        | bcftools view --output-file ${sample}.vcf.gz --output-type z --include 'INFO/DP>=5'
+        | bcftools view --output-file ${sample}.vcf.gz --output-type z --include 'INFO/DP>=$params.min_coverage'
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
     """
@@ -1548,7 +1550,7 @@ process BCFTOOLS_VARIANTS {
 //         -bga \\
 //         -ibam ${bam[0]} \\
 //         -g $fasta \\
-//         | awk '\$4 < 20' | bedtools merge > ${sample}.mask.bed
+//         | awk '\$4 < $params.min_coverage' | bedtools merge > ${sample}.mask.bed
 //
 //     bedtools maskfasta \\
 //         -fi ${sample}.consensus.fa \\

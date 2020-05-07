@@ -42,6 +42,7 @@
   * [`--filter_dups`](#--filter_dups)
   * [`--min_base_qual`](#--min_base_qual)
   * [`--max_allele_freq`](#--max_allele_freq)
+  * [`--min_coverage`](#--min_coverage)
   * [`--save_align_intermeds`](#--save_align_intermeds)
   * [`--save_pileup`](#--save_pileup)
   * [`--skip_snpeff`](#--skip_snpeff)
@@ -371,6 +372,10 @@ Remove duplicate reads from alignments as identified by picard MarkDuplicates (D
 ### `--min_base_qual`
 
 When performing variant calling skip bases with baseQ/BAQ smaller than this number (Default: 20).
+
+### `--min_coverage`
+
+When performing variant calling skip positions with an overall read depth smaller than this number (Default: 10).
 
 ### `--max_allele_freq`
 
