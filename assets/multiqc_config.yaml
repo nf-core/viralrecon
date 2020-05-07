@@ -218,6 +218,4 @@ extra_fn_clean_exts:
      - '.snpEff'
      - '.scaffolds'
      - type: regex
-       pattern: '.[k][0-9]+.*'
-     - type: regex
-       pattern: '.[AF][0-9]+*'
+       pattern: '.(AF|K)[0-9]+.*'
