@@ -11,7 +11,10 @@ def parse_args(args=None):
 
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
     parser.add_argument('FILE_IN', help="Input tsv file.")
-    parser.add_argument('FILE_OUT', help="Full path to output vcf file")
+    parser.add_argument('FILE_OUT', help="Full path to output vcf file.")
+    parser.add_argument('-po', '--pass_only', dest="PASS_ONLY", help="Only output variants that are tagged as PASS.",action='store_true')
+    parser.add_argument('-ma', '--min_allele_freq', type=float, dest="MIN_ALLELE_FREQ", default=0, help="Only output variants where allele frequency greater than this number (default: 0).")
+
     return parser.parse_args(args)
 
 def make_dir(path):
@@ -22,7 +25,7 @@ def make_dir(path):
             if exception.errno != errno.EEXIST:
                 raise
 
-def ivar_variants_to_vcf(FileIn,FileOut):
+def ivar_variants_to_vcf(FileIn,FileOut,passOnly=False,minAF=0):
     filename = os.path.splitext(FileIn)[0]
     header = ('##fileformat=VCFv4.2\n'
               '##source=iVar\n'
@@ -53,15 +56,14 @@ def ivar_variants_to_vcf(FileIn,FileOut):
                 ID='.'
                 REF=line[2]
                 ALT=line[3]
+                var_type = 'SNP'
                 if ALT[0] == '+':
                     ALT = REF + ALT[1:]
-                    varCountDict['INS'] += 1
+                    var_type = 'INS'
                 elif ALT[0] == '-':
                     REF += ALT[1:]
                     ALT = line[2]
-                    varCountDict['DEL'] += 1
-                else:
-                    varCountDict['SNP'] += 1
+                    var_type = 'DEL'
                 QUAL='.'
                 pass_test=line[13]
                 if pass_test == 'TRUE':
@@ -71,9 +73,15 @@ def ivar_variants_to_vcf(FileIn,FileOut):
                 INFO='DP='+line[11]
                 FORMAT='GT:REF_DP:REF_RV:REF_QUAL:ALT_DP:ALT_RV:ALT_QUAL:ALT_FREQ'
                 SAMPLE='1:'+line[4]+':'+line[5]+':'+line[6]+':'+line[7]+':'+line[8]+':'+line[9]+':'+line[10]
-                line = CHROM+'\t'+POS+'\t'+ID+'\t'+REF+'\t'+ALT+'\t'+QUAL+'\t'+FILTER+'\t'+INFO+'\t'+FORMAT+'\t'+SAMPLE+'\n'
-                fout.write(line)
-
+                oline = CHROM+'\t'+POS+'\t'+ID+'\t'+REF+'\t'+ALT+'\t'+QUAL+'\t'+FILTER+'\t'+INFO+'\t'+FORMAT+'\t'+SAMPLE+'\n'
+                writeLine = True
+                if passOnly and FILTER != 'PASS':
+                    writeLine = False
+                if float(line[10]) < minAF:
+                    writeLine = False
+                if writeLine:
+                    varCountDict[var_type] += 1
+                    fout.write(oline)
     fout.close()
 
     ## Print variant counts to pass to MultiQC
@@ -83,7 +91,7 @@ def ivar_variants_to_vcf(FileIn,FileOut):
 
 def main(args=None):
     args = parse_args(args)
-    ivar_variants_to_vcf(args.FILE_IN,args.FILE_OUT)
+    ivar_variants_to_vcf(args.FILE_IN,args.FILE_OUT,args.PASS_ONLY,args.MIN_ALLELE_FREQ)
 
 
 if __name__ == '__main__':
