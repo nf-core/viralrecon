@@ -909,7 +909,7 @@ if (params.protocol != 'amplicon') {
     process IVAR_TRIM {
         tag "$sample"
         label 'process_medium'
-        publishDir "${params.outdir}/variants/ivar", mode: params.publish_dir_mode,
+        publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                           else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
@@ -959,7 +959,7 @@ if (params.protocol != 'amplicon') {
 process PICARD_MARKDUPLICATES {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/${program}", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                       else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
@@ -991,7 +991,6 @@ process PICARD_MARKDUPLICATES {
     } else {
         avail_mem = task.memory.toGiga()
     }
-    program = params.protocol == 'amplicon' ? "ivar" : "bowtie2"
     prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
     keep_dup = params.filter_dups ? "true" : "false"
     """
@@ -1016,7 +1015,7 @@ process PICARD_MARKDUPLICATES {
 process PICARD_METRICS {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/${program}/picard_metrics", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/bowtie2/picard_metrics", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && !params.skip_picard_metrics && !params.skip_qc
@@ -1036,7 +1035,6 @@ process PICARD_METRICS {
     } else {
         avail_mem = task.memory.toGiga()
     }
-    program = params.protocol == 'amplicon' ? "ivar" : "bowtie2"
     prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
     """
     picard -Xmx${avail_mem}g CollectMultipleMetrics \\
@@ -1067,7 +1065,7 @@ process SAMTOOLS_MPILEUP {
     tag "$sample"
     label 'process_medium'
     if (params.save_mpileup) {
-        publishDir "${params.outdir}/variants/${program}/mpileup", mode: params.publish_dir_mode
+        publishDir "${params.outdir}/variants/bowtie2/mpileup", mode: params.publish_dir_mode
     }
 
     when:
@@ -1084,7 +1082,6 @@ process SAMTOOLS_MPILEUP {
                                                                ch_mpileup_ivar_bcftools
 
     script:
-    program = params.protocol == 'amplicon' ? "ivar" : "bowtie2"
     prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
     """
     samtools mpileup \\
@@ -1510,11 +1507,12 @@ process BCFTOOLS_VARIANTS {
     script:
     """
     bcftools mpileup \\
-        --threads $task.cpus \\
-        --min-BQ $params.min_base_qual \\
+        --count-orphans \\
+        --no-BAQ \\
         --max-depth 50000 \\
+        --fasta-ref $fasta \\
+        --min-BQ $params.min_base_qual \\
         --annotate FORMAT/AD,FORMAT/ADF,FORMAT/ADR,FORMAT/DP,FORMAT/SP,INFO/AD,INFO/ADF,INFO/ADR \\
-        -f $fasta \\
         ${bam[0]} \\
         | bcftools call --output-type v --ploidy 1 --keep-alts --keep-masked-ref --multiallelic-caller \\
         | bcftools view --output-file ${sample}.vcf.gz --output-type z --include 'INFO/DP>=5'
