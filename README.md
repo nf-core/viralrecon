@@ -27,14 +27,19 @@ We have integrated a number of options in the pipeline to allow you to run speci
     1. Read alignment ([`Bowtie 2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml))
     2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
     3. Primer sequence removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
-    4. Alignment-level QC ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/), [`picard`](https://broadinstitute.github.io/picard/))
-    5. Choice of multiple variant calling routes
+    4. Duplicate read marking ([`picard`](https://broadinstitute.github.io/picard/); *removal optional*)
+    5. Alignment-level QC ([`picard`](https://broadinstitute.github.io/picard/), [`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
+    6. Choice of multiple variant calling routes
         * Call variants ([`VarScan 2`](http://dkoboldt.github.io/varscan/))
             * Consensus sequence generation ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
             * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
             * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
         * Call variants ([`iVar`](https://github.com/andersen-lab/ivar))
             * Consensus sequence generation ([`iVar`](https://github.com/andersen-lab/ivar))
+            * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
+            * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
+        * Call variants ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html))
+            * Consensus sequence generation ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
             * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
             * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
 6. _De novo_ assembly

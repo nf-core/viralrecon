@@ -179,7 +179,14 @@ def check_samplesheet(FileIn,OutPrefix,getAsperaLinks=False,ignoreSRAErrors=Fals
                                                 sampleInfoList.append([run, '1', '1', '0', '', '', '', ''])
                                         elif library.lower() == 'paired':
                                             if fastq_files != '':
-                                                sampleInfoList.append([exp, '0', '1', '1'] + fastq_files.split(';') + fastq_md5.split(';'))
+                                                fq_files = fastq_files.split(';')[-2:]
+                                                if fq_files[0].find('_1.fastq.gz') != -1 and fq_files[1].find('_2.fastq.gz') != -1:
+                                                    sampleInfoList.append([exp, '0', '1', '1'] + fq_files + fastq_md5.split(';')[-2:])
+                                                else:
+                                                    errorStr = "Invalid FastQ files found for database id:'{}'! User provided id:'{}'.".format(run,sample)
+                                                    if not ignoreSRAErrors:
+                                                        print_error(errorStr,line)
+                                                    sraWarningList.append(errorStr)
                                             else:
                                                 sampleInfoList.append([run, '0', '1', '0', '', '', '', ''])
                                         else:
