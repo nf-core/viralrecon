@@ -198,7 +198,7 @@ Remove duplicate reads from alignments as identified by picard MarkDuplicates (D
   <img width="600" src="images/mqc_bcftools_plot.png" alt="MultiQC - BCFTools variant counts"/>
 </p>
 
-> **NB:** Output Pileup files will only be saved in the results directory if the `--save_pileup` parameter is supplied.
+> **NB:** Output Pileup files will only be saved in the results directory if the `--save_mpileup` parameter is supplied.
 
 ### iVar variants and iVar consensus
 
