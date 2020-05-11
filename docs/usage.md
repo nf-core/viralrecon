@@ -45,7 +45,7 @@
   * [`--min_coverage`](#--min_coverage)
   * [`--save_align_intermeds`](#--save_align_intermeds)
   * [`--save_mpileup`](#--save_mpileup)
-  * [`--skip_markdups`](#--skip_markdups)
+  * [`--skip_markduplicates`](#--skip_markduplicates)
   * [`--skip_snpeff`](#--skip_snpeff)
   * [`--skip_variants_quast`](#--skip_variants_quast)
   * [`--skip_variants`](#--skip_variants)
@@ -390,7 +390,7 @@ By default, intermediate [BAM](https://samtools.github.io/hts-specs/) files will
 
 Save Pileup files in the results directory. These tend to be quite large so are not saved by default (Default: false).
 
-### `--skip_markdups`
+### `--skip_markduplicates`
 
 Skip picard MarkDuplicates step (Default: false).
 

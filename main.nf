@@ -65,7 +65,7 @@ def helpMessage() {
       --max_allele_freq [float]         Maximum allele frequency threshold for filtering variant calls (Default: 0.8)
       --save_align_intermeds [bool]     Save the intermediate BAM files from the alignment steps (Default: false)
       --save_mpileup [bool]             Save MPileup files generated during variant calling (Default: false)
-      --skip_markdups [bool]            Skip picard MarkDuplicates step (Default: false)
+      --skip_markduplicates [bool]      Skip picard MarkDuplicates step (Default: false)
       --skip_snpeff [bool]              Skip SnpEff and SnpSift annotation of variants (Default: false)
       --skip_variants_quast [bool]      Skip generation of QUAST aggregated report for consensus sequences (Default: false)
       --skip_variants [bool]            Skip variant calling steps in the pipeline (Default: false)
@@ -257,7 +257,7 @@ if (!params.skip_variants) {
     summary['Max Allele Freq']       = params.max_allele_freq
     if (params.save_align_intermeds) summary['Save Align Intermeds'] =  'Yes'
     if (params.save_mpileup)         summary['Save MPileup'] = 'Yes'
-    if (params.skip_markdups)        summary['Skip MarkDuplicates'] = 'Yes'
+    if (params.skip_markduplicates)  summary['Skip MarkDuplicates'] = 'Yes'
     if (params.skip_snpeff)          summary['Skip SnpEff'] = 'Yes'
     if (params.skip_variants_quast)  summary['Skip Variants QUAST'] = 'Yes'
 } else {
@@ -960,7 +960,7 @@ if (params.protocol != 'amplicon') {
 /*
  * STEP 5.4: Picard MarkDuplicates
  */
-if (params.skip_markdups) {
+if (params.skip_markduplicates) {
     ch_ivar_trim_bam
         .into { ch_markdup_bam_metrics
                 ch_markdup_bam_mpileup
@@ -1050,7 +1050,7 @@ process PICARD_METRICS {
     } else {
         avail_mem = task.memory.toGiga()
     }
-    suffix = params.skip_markdups  ? "" : ".mkD"
+    suffix = params.skip_markduplicates ? "" : ".mkD"
     prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}" : "${sample}${suffix}"
     """
     picard -Xmx${avail_mem}g CollectMultipleMetrics \\
@@ -1098,7 +1098,7 @@ process SAMTOOLS_MPILEUP {
                                                                ch_mpileup_ivar_bcftools
 
     script:
-    suffix = params.skip_markdups  ? "" : ".mkD"
+    suffix = params.skip_markduplicates ? "" : ".mkD"
     prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}" : "${sample}${suffix}"
     """
     samtools mpileup \\
