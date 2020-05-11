@@ -44,7 +44,8 @@
   * [`--max_allele_freq`](#--max_allele_freq)
   * [`--min_coverage`](#--min_coverage)
   * [`--save_align_intermeds`](#--save_align_intermeds)
-  * [`--save_pileup`](#--save_pileup)
+  * [`--save_mpileup`](#--save_mpileup)
+  * [`--skip_markdups`](#--skip_markdups)
   * [`--skip_snpeff`](#--skip_snpeff)
   * [`--skip_variants_quast`](#--skip_variants_quast)
   * [`--skip_variants`](#--skip_variants)
@@ -385,9 +386,13 @@ Maximum allele frequency threshold for filtering variant calls (Default: 0.8).
 
 By default, intermediate [BAM](https://samtools.github.io/hts-specs/) files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set to true to also save other intermediate BAM files (Default: false).
 
-### `--save_pileup`
+### `--save_mpileup`
 
 Save Pileup files in the results directory. These tend to be quite large so are not saved by default (Default: false).
+
+### `--skip_markdups`
+
+Skip picard MarkDuplicates step (Default: false).
 
 ### `--skip_snpeff`
 
