@@ -65,6 +65,7 @@ def helpMessage() {
       --max_allele_freq [float]         Maximum allele frequency threshold for filtering variant calls (Default: 0.8)
       --save_align_intermeds [bool]     Save the intermediate BAM files from the alignment steps (Default: false)
       --save_mpileup [bool]             Save MPileup files generated during variant calling (Default: false)
+      --skip_markduplicates [bool]      Skip picard MarkDuplicates step (Default: false)
       --skip_snpeff [bool]              Skip SnpEff and SnpSift annotation of variants (Default: false)
       --skip_variants_quast [bool]      Skip generation of QUAST aggregated report for consensus sequences (Default: false)
       --skip_variants [bool]            Skip variant calling steps in the pipeline (Default: false)
@@ -256,8 +257,9 @@ if (!params.skip_variants) {
     summary['Max Allele Freq']       = params.max_allele_freq
     if (params.save_align_intermeds) summary['Save Align Intermeds'] =  'Yes'
     if (params.save_mpileup)         summary['Save MPileup'] = 'Yes'
-    if (params.skip_snpeff)          summary['Save SnpEff'] = 'Yes'
-    if (params.skip_variants_quast)  summary['Save Variants QUAST'] = 'Yes'
+    if (params.skip_markduplicates)  summary['Skip MarkDuplicates'] = 'Yes'
+    if (params.skip_snpeff)          summary['Skip SnpEff'] = 'Yes'
+    if (params.skip_variants_quast)  summary['Skip Variants QUAST'] = 'Yes'
 } else {
     summary['Skip Variant Calling']  = 'Yes'
 }
@@ -887,8 +889,7 @@ process SORT_BAM {
     tuple val(sample), val(single_end), path(bam) from ch_bowtie2_bam
 
     output:
-    tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_sort_bam,
-                                                                            ch_sort_bam_ivar
+    tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_sort_bam
     path "*.{flagstat,idxstats,stats}" into ch_sort_bam_flagstat_mqc
 
     script:
@@ -905,6 +906,8 @@ process SORT_BAM {
  * STEP 5.3: Trim amplicon sequences with iVar
  */
 if (params.protocol != 'amplicon') {
+    ch_sort_bam
+        .set { ch_ivar_trim_bam }
     ch_ivar_trim_flagstat_mqc = Channel.empty()
     ch_ivar_trim_log_mqc = Channel.empty()
 } else {
@@ -924,7 +927,7 @@ if (params.protocol != 'amplicon') {
         !params.skip_variants
 
         input:
-        tuple val(sample), val(single_end), path(bam) from ch_sort_bam_ivar
+        tuple val(sample), val(single_end), path(bam) from ch_sort_bam
         path bed from ch_amplicon_bed
 
         output:
@@ -952,63 +955,73 @@ if (params.protocol != 'amplicon') {
         samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
         """
     }
-    ch_sort_bam = ch_ivar_trim_bam
 }
 
 /*
  * STEP 5.4: Picard MarkDuplicates
  */
-process PICARD_MARKDUPLICATES {
-    tag "$sample"
-    label 'process_medium'
-    publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
-        saveAs: { filename ->
-                      if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
-                      else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
-                      else if (filename.endsWith(".stats")) "samtools_stats/$filename"
-                      else if (filename.endsWith(".metrics.txt")) "picard_metrics/$filename"
-                      else filename
-                }
+if (params.skip_markduplicates) {
+    ch_ivar_trim_bam
+        .into { ch_markdup_bam_metrics
+                ch_markdup_bam_mpileup
+                ch_markdup_bam_varscan2_consensus
+                ch_markdup_bam_bcftools
+                ch_markdup_bam_bcftools_consensus }
+    ch_markdup_bam_flagstat_mqc = Channel.empty()
+    ch_markdup_bam_metrics_mqc = Channel.empty()
+} else {
+    process PICARD_MARKDUPLICATES {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
+            saveAs: { filename ->
+                          if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
+                          else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
+                          else if (filename.endsWith(".stats")) "samtools_stats/$filename"
+                          else if (filename.endsWith(".metrics.txt")) "picard_metrics/$filename"
+                          else filename
+                    }
 
-    when:
-    !params.skip_variants
+        when:
+        !params.skip_variants
 
-    input:
-    tuple val(sample), val(single_end), path(bam) from ch_sort_bam
-    path fasta from ch_fasta
+        input:
+        tuple val(sample), val(single_end), path(bam) from ch_ivar_trim_bam
+        path fasta from ch_fasta
 
-    output:
-    tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_markdup_bam_metrics,
-                                                                            ch_markdup_bam_mpileup,
-                                                                            ch_markdup_bam_varscan2_consensus,
-                                                                            ch_markdup_bam_bcftools,
-                                                                            ch_markdup_bam_bcftools_consensus
-    path "*.{flagstat,idxstats,stats}" into ch_markdup_bam_flagstat_mqc
-    path "*.txt" into ch_markdup_bam_metrics_mqc
+        output:
+        tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_markdup_bam_metrics,
+                                                                                ch_markdup_bam_mpileup,
+                                                                                ch_markdup_bam_varscan2_consensus,
+                                                                                ch_markdup_bam_bcftools,
+                                                                                ch_markdup_bam_bcftools_consensus
+        path "*.{flagstat,idxstats,stats}" into ch_markdup_bam_flagstat_mqc
+        path "*.txt" into ch_markdup_bam_metrics_mqc
 
-    script:
-    def avail_mem = 3
-    if (!task.memory) {
-        log.info "[Picard MarkDuplicates] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this."
-    } else {
-        avail_mem = task.memory.toGiga()
+        script:
+        def avail_mem = 3
+        if (!task.memory) {
+            log.info "[Picard MarkDuplicates] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this."
+        } else {
+            avail_mem = task.memory.toGiga()
+        }
+        prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
+        keep_dup = params.filter_dups ? "true" : "false"
+        """
+        picard -Xmx${avail_mem}g MarkDuplicates \\
+            INPUT=${bam[0]} \\
+            OUTPUT=${prefix}.sorted.bam \\
+            ASSUME_SORTED=true \\
+            REMOVE_DUPLICATES=$keep_dup \\
+            METRICS_FILE=${prefix}.MarkDuplicates.metrics.txt \\
+            VALIDATION_STRINGENCY=LENIENT \\
+            TMP_DIR=tmp
+        samtools index ${prefix}.sorted.bam
+        samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
+        samtools flagstat ${prefix}.sorted.bam > ${prefix}.sorted.bam.flagstat
+        samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
+        """
     }
-    prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
-    keep_dup = params.filter_dups ? "true" : "false"
-    """
-    picard -Xmx${avail_mem}g MarkDuplicates \\
-        INPUT=${bam[0]} \\
-        OUTPUT=${prefix}.sorted.bam \\
-        ASSUME_SORTED=true \\
-        REMOVE_DUPLICATES=$keep_dup \\
-        METRICS_FILE=${prefix}.MarkDuplicates.metrics.txt \\
-        VALIDATION_STRINGENCY=LENIENT \\
-        TMP_DIR=tmp
-    samtools index ${prefix}.sorted.bam
-    samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
-    samtools flagstat ${prefix}.sorted.bam > ${prefix}.sorted.bam.flagstat
-    samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
-    """
 }
 
 /*
@@ -1037,7 +1050,8 @@ process PICARD_METRICS {
     } else {
         avail_mem = task.memory.toGiga()
     }
-    prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
+    suffix = params.skip_markduplicates ? "" : ".mkD"
+    prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}" : "${sample}${suffix}"
     """
     picard -Xmx${avail_mem}g CollectMultipleMetrics \\
         INPUT=${bam[0]} \\
@@ -1084,7 +1098,8 @@ process SAMTOOLS_MPILEUP {
                                                                ch_mpileup_ivar_bcftools
 
     script:
-    prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
+    suffix = params.skip_markduplicates ? "" : ".mkD"
+    prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}" : "${sample}${suffix}"
     """
     samtools mpileup \\
         --count-orphans \\
@@ -1828,6 +1843,7 @@ if (!params.skip_kraken2) {
 process SPADES {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".png")) "bandage/$filename"
@@ -1874,6 +1890,7 @@ process SPADES {
 process SPADES_BLAST {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/spades/blast", mode: params.publish_dir_mode
 
     when:
@@ -1965,6 +1982,7 @@ process SPADES_PLASMIDID {
  */
 process SPADES_QUAST {
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
 
     when:
@@ -2104,6 +2122,7 @@ process SPADES_SNPEFF {
 process METASPADES {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode,
     saveAs: { filename ->
                   if (filename.endsWith(".png")) "bandage/$filename"
@@ -2151,6 +2170,7 @@ process METASPADES {
 process METASPADES_BLAST {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/metaspades/blast", mode: params.publish_dir_mode
 
     when:
@@ -2242,6 +2262,7 @@ process METASPADES_PLASMIDID {
  */
 process METASPADES_QUAST {
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
 
     when:
@@ -2381,6 +2402,7 @@ process METASPADES_SNPEFF {
 process UNICYCLER {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode,
     saveAs: { filename ->
                   if (filename.endsWith(".png")) "bandage/$filename"
@@ -2426,6 +2448,7 @@ process UNICYCLER {
 process UNICYCLER_BLAST {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/unicycler/blast", mode: params.publish_dir_mode
 
     when:
@@ -2517,6 +2540,7 @@ process UNICYCLER_PLASMIDID {
  */
 process UNICYCLER_QUAST {
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
 
     when:
