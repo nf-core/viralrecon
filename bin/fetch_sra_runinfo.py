@@ -109,12 +109,12 @@ def fetch_sra_runinfo(FileIn,OutPrefix):
                                 if not run_id in run_ids:
                                     if total_out == 0:
                                         header = sorted(row.keys())
-                                        fout.write('"{}"'.format('"\t "'.join(sorted(header))) + '\n')
+                                        fout.write('{}\n'.format('\t'.join(sorted(header))))
                                     else:
                                         if header != sorted(row.keys()):
                                             print("ERROR: Metadata columns do not match for id {}!\nLine: '{}'".format(run_id,line.strip()))
                                             sys.exit(1)
-                                    fout.write('"{}"'.format('"\t "'.join([row[x] for x in header])) + '\n')
+                                    fout.write('{}\n'.format('\t'.join([row[x] for x in header])))
                                     total_out += 1
                                     run_ids.append(run_id)
                         seen_ids.append(db_id)
