@@ -1828,6 +1828,7 @@ if (!params.skip_kraken2) {
 process SPADES {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".png")) "bandage/$filename"
@@ -1874,6 +1875,7 @@ process SPADES {
 process SPADES_BLAST {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/spades/blast", mode: params.publish_dir_mode
 
     when:
@@ -1965,6 +1967,7 @@ process SPADES_PLASMIDID {
  */
 process SPADES_QUAST {
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
 
     when:
@@ -2104,6 +2107,7 @@ process SPADES_SNPEFF {
 process METASPADES {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode,
     saveAs: { filename ->
                   if (filename.endsWith(".png")) "bandage/$filename"
@@ -2151,6 +2155,7 @@ process METASPADES {
 process METASPADES_BLAST {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/metaspades/blast", mode: params.publish_dir_mode
 
     when:
@@ -2242,6 +2247,7 @@ process METASPADES_PLASMIDID {
  */
 process METASPADES_QUAST {
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
 
     when:
@@ -2381,6 +2387,7 @@ process METASPADES_SNPEFF {
 process UNICYCLER {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode,
     saveAs: { filename ->
                   if (filename.endsWith(".png")) "bandage/$filename"
@@ -2426,6 +2433,7 @@ process UNICYCLER {
 process UNICYCLER_BLAST {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/unicycler/blast", mode: params.publish_dir_mode
 
     when:
@@ -2517,6 +2525,7 @@ process UNICYCLER_PLASMIDID {
  */
 process UNICYCLER_QUAST {
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
 
     when:
