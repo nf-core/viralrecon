@@ -20,9 +20,10 @@ PREFIX_LIST = sorted(list(set([re.search(ID_REGEX,x).group() for x in SRA_IDS + 
 def parse_args(args=None):
     Description = 'Download and create a run information metadata file from SRA/ENA/GEO identifiers.'
     Epilog = """Example usage: python fetch_sra_runinfo.py <FILE_IN> <FILE_OUT>"""
+    
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
     parser.add_argument('FILE_IN', help="File containing database identifiers, one per line.")
-    parser.add_argument('FILE_OUT', help="Output file.")
+    parser.add_argument('FILE_OUT', help="Output file in tab-delimited format.")
     parser.add_argument('-pl', '--platform', type=str, dest="PLATFORM", default='', help="Comma-separated list of platforms to use for filtering. Accepted values = 'ILLUMINA', 'OXFORD_NANOPORE' (default: '').")
     parser.add_argument('-ll', '--library_layout', type=str, dest="LIBRARY_LAYOUT", default='', help="Comma-separated list of library layouts to use for filtering. Accepted values = 'SINGLE', 'PAIRED' (default: '').")
     return parser.parse_args(args)
