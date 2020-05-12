@@ -19,11 +19,26 @@ PREFIX_LIST = sorted(list(set([re.search(ID_REGEX,x).group() for x in SRA_IDS + 
 
 def parse_args(args=None):
     Description = 'Download and create a run information metadata file from SRA/ENA/GEO identifiers.'
-    Epilog = """Example usage: python fetch_sra_runinfo.py <FILE_IN> <OUT_PREFIX>"""
+    Epilog = """Example usage: python fetch_sra_runinfo.py <FILE_IN> <FILE_OUT>"""
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
     parser.add_argument('FILE_IN', help="File containing database identifiers, one per line.")
-    parser.add_argument('OUT_PREFIX', help="Output file prefix.")
+    parser.add_argument('FILE_OUT', help="Output file.")
+    parser.add_argument('-pl', '--platform', type=str, dest="PLATFORM", default='', help="Comma-separated list of platforms to use for filtering. Accepted values = 'ILLUMINA', 'OXFORD_NANOPORE' (default: '').")
+    parser.add_argument('-ll', '--library_layout', type=str, dest="LIBRARY_LAYOUT", default='', help="Comma-separated list of library layouts to use for filtering. Accepted values = 'SINGLE', 'PAIRED' (default: '').")
     return parser.parse_args(args)
+
+
+def validate_csv_param(param,validVals,param_desc):
+    validList = []
+    if param:
+        userVals = param.split(',')
+        intersect = list(set(userVals) & set(validVals))
+        if len(intersect) == len(userVals):
+            validList = intersect
+        else:
+            print("ERROR: Please provide a valid {} parameter!\nProvided values = {}\nAccepted values = {}".format(param_desc,param,','.join(validVals)))
+            sys.exit(1)
+    return validList
 
 
 def make_dir(path):
@@ -71,12 +86,13 @@ def gse_to_srx(db_id):
     return ids
 
 
-def fetch_sra_runinfo(FileIn,OutPrefix):
+def fetch_sra_runinfo(FileIn,FileOut,platformList=[],libraryLayoutList=[]):
     total_out = 0
     seen_ids = []; run_ids = []
     header = []
+    make_dir(os.path.dirname(FileOut))
     fin = open(FileIn,'r')
-    fout = open(os.path.join(os.path.dirname(OutPrefix),'{}.runinfo.txt'.format(OutPrefix)),'w')
+    fout = open(FileOut,'w')
     while True:
         line = fin.readline()
         if line:
@@ -107,15 +123,25 @@ def fetch_sra_runinfo(FileIn,OutPrefix):
                             for row in csv_dict:
                                 run_id = row['run_accession']
                                 if not run_id in run_ids:
-                                    if total_out == 0:
-                                        header = sorted(row.keys())
-                                        fout.write('{}\n'.format('\t'.join(sorted(header))))
-                                    else:
-                                        if header != sorted(row.keys()):
-                                            print("ERROR: Metadata columns do not match for id {}!\nLine: '{}'".format(run_id,line.strip()))
-                                            sys.exit(1)
-                                    fout.write('{}\n'.format('\t'.join([row[x] for x in header])))
-                                    total_out += 1
+
+                                    writeID = True
+                                    if platformList:
+                                        if row['instrument_platform'] not in platformList:
+                                            writeID = False
+                                    if libraryLayoutList:
+                                        if row['library_layout'] not in libraryLayoutList:
+                                            writeID = False
+
+                                    if writeID:
+                                        if total_out == 0:
+                                            header = sorted(row.keys())
+                                            fout.write('{}\n'.format('\t'.join(sorted(header))))
+                                        else:
+                                            if header != sorted(row.keys()):
+                                                print("ERROR: Metadata columns do not match for id {}!\nLine: '{}'".format(run_id,line.strip()))
+                                                sys.exit(1)
+                                        fout.write('{}\n'.format('\t'.join([row[x] for x in header])))
+                                        total_out += 1
                                     run_ids.append(run_id)
                         seen_ids.append(db_id)
                 else:
@@ -134,8 +160,9 @@ def fetch_sra_runinfo(FileIn,OutPrefix):
 
 def main(args=None):
     args = parse_args(args)
-    fetch_sra_runinfo(args.FILE_IN,args.OUT_PREFIX)
-
+    platformList = validate_csv_param(args.PLATFORM,validVals=['ILLUMINA', 'OXFORD_NANOPORE'],param_desc='--platform')
+    libraryLayoutList = validate_csv_param(args.LIBRARY_LAYOUT,validVals=['SINGLE', 'PAIRED'],param_desc='--library_layout')
+    fetch_sra_runinfo(args.FILE_IN,args.FILE_OUT,platformList,libraryLayoutList)
 
 if __name__ == '__main__':
     sys.exit(main())
