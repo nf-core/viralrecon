@@ -90,19 +90,20 @@ def check_samplesheet(FileIn,FileOut):
             break
 
     ## Write validated samplesheet with appropriate columns
-    OutDir = os.path.dirname(FileOut)
-    make_dir(OutDir)
-    fout = open(FileOut,'w')
-    fout.write(','.join(['sample_id', 'single_end', 'is_sra', 'is_ftp', 'fastq_1', 'fastq_2', 'md5_1', 'md5_2']) + '\n')
-    for sample in sorted(sampleRunDict.keys()):
+    if len(sampleRunDict) > 0:
+        OutDir = os.path.dirname(FileOut)
+        make_dir(OutDir)
+        fout = open(FileOut,'w')
+        fout.write(','.join(['sample_id', 'single_end', 'is_sra', 'is_ftp', 'fastq_1', 'fastq_2', 'md5_1', 'md5_2']) + '\n')
+        for sample in sorted(sampleRunDict.keys()):
 
-        ## Check that multiple runs of the same sample are of the same datatype
-        if not all(x[:2] == sampleRunDict[sample][0][:2] for x in sampleRunDict[sample]):
-            print_error("Multiple runs of a sample must be of the same datatype","Sample: {}".format(sample))
+            ## Check that multiple runs of the same sample are of the same datatype
+            if not all(x[:2] == sampleRunDict[sample][0][:2] for x in sampleRunDict[sample]):
+                print_error("Multiple runs of a sample must be of the same datatype","Sample: {}".format(sample))
 
-        for idx,val in enumerate(sampleRunDict[sample]):
-            fout.write(','.join(["{}_T{}".format(sample,idx+1)] + val) + '\n')
-    fout.close()
+            for idx,val in enumerate(sampleRunDict[sample]):
+                fout.write(','.join(["{}_T{}".format(sample,idx+1)] + val) + '\n')
+        fout.close()
 
 
 def main(args=None):
