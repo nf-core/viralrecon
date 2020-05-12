@@ -74,7 +74,7 @@ def helpMessage() {
       --assemblers [str]                Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler,minia')
       --minia_kmer [int]                Kmer size to use when running minia (Default: 31)
       --skip_blast [bool]               Skip blastn of assemblies relative to reference genome (Default: false)
-      --skip_abacas [bool]              Skip ABACUS process for assembly contiguation (Default: false)
+      --skip_abacas [bool]              Skip ABACAS process for assembly contiguation (Default: false)
       --skip_plasmidid [bool]           Skip assembly report generation by PlasmidID (Default: false)
       --skip_vg [bool]                  Skip variant graph creation and variant calling relative to reference (Default: false)
       --skip_assembly_quast [bool]      Skip generation of QUAST aggregated report for assemblies (Default: false)
