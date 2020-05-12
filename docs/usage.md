@@ -14,7 +14,6 @@
   * [`--amplicon_bed`](#--amplicon_bed)
   * [`--amplicon_fasta`](#--amplicon_fasta)
 * [SRA download](#sra-download)
-  * [`--ignore_sra_errors`](#--ignore_sra_errors)
   * [`--save_sra_fastq`](#--save_sra_fastq)
   * [`--skip_sra`](#--skip_sra)
 * [Reference genomes](#reference-genomes)
@@ -246,10 +245,6 @@ AAGGTGTCTGCAATTCATAGCTCT
 ```
 
 ## SRA download
-
-### `--ignore_sra_errors`
-
-Ignore validation errors when checking SRA identifiers that would otherwise cause the pipeline to fail (Default: false).
 
 ### `--save_sra_fastq`
 
