@@ -155,8 +155,6 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 
 Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced from your sample were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation. By default, the pipeline uses picard MarkDuplicates to *mark* the duplicate reads identified amongst the alignments to allow you to guage the overall level of duplication in your samples. However, you can also choose to remove any reads identified as duplicates via the `--filter_dups` parameter.
 
-The value of `<SUFFIX>` in the output file names below will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
-
 **Output files:**
 
 * `variants/bowtie2/`
@@ -167,11 +165,11 @@ The value of `<SUFFIX>` in the output file names below will depend on the precee
 * `variants/bowtie2/picard_metrics/`
   * `<SAMPLE>.<SUFFIX>.MarkDuplicates.metrics.txt`: Metrics file from MarkDuplicates.
 
+> **NB:** The value of `<SUFFIX>` in the output file names above will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
+
 ### picard CollectMultipleMetrics
 
 [picard-tools](https://broadinstitute.github.io/picard/command-line-overview.html) is a set of command-line tools for manipulating high-throughput sequencing data. We use picard-tools in this pipeline to obtain mapping and coverage metrics.
-
-The value of `<SUFFIX>` in the output file names below will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
 
 **Output files:**
 
@@ -183,6 +181,8 @@ The value of `<SUFFIX>` in the output file names below will depend on the precee
   <img width="600" src="images/mqc_picard_insert_size_plot.png" alt="MultiQC - Picard insert size plot"/>
 </p>
 
+> **NB:** The value of `<SUFFIX>` in the output file names above will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
+
 ### VarScan 2, BCFTools, BEDTools
 
 [VarScan 2](http://dkoboldt.github.io/varscan/) is a platform-independent software tool to detect variants in NGS data. In this pipeline, VarScan 2 is used in conjunction with SAMtools in order to call both high and low frequency variants.
@@ -190,8 +190,6 @@ The value of `<SUFFIX>` in the output file names below will depend on the precee
 [BCFtools](http://samtools.github.io/bcftools/bcftools.html) is a set of utilities that manipulate variant calls in [VCF](https://vcftools.github.io/specs.html) and its binary counterpart BCF format. BCFTools is used in the variant calling and *de novo* assembly steps of this pipeline to obtain basic statistics from the VCF output. It is also used in the VarScan 2 variant calling branch of the pipeline to generate a consensus sequence by integrating high frequency variant calls into the reference genome.
 
 [BEDTools](https://bedtools.readthedocs.io/en/latest/) is a swiss-army knife of tools for a wide-range of genomics analysis tasks. In this pipeline we use `bedtools genomecov` to compute the per-base mapped read coverage in bedGraph format, and `bedtools maskfasta` to mask sequences in a Fasta file based on intervals defined in a feature file. This may be useful for creating your own masked genome file based on custom annotations or for masking all but your target regions when aligning sequence data from a targeted capture experiment.
-
-The value of `<MAX_ALLELE_FREQ>` in the output file names below is determined by the `--max_allele_freq` parameter (Default: 0.8).
 
 **Output files:**
 
@@ -215,6 +213,7 @@ The value of `<MAX_ALLELE_FREQ>` in the output file names below is determined by
   <img width="600" src="images/mqc_bcftools_plot.png" alt="MultiQC - BCFTools variant counts"/>
 </p>
 
+> **NB:** The value of `<MAX_ALLELE_FREQ>` in the output file names above is determined by the `--max_allele_freq` parameter (Default: 0.8).  
 > **NB:** Output mpileup files will only be saved in the  directory if the `--save_mpileup` parameter is supplied. The naming convention for these files will depend on the preceeding steps that were run in the pipeline as described in the paragraph explaining the value of `<SUFFIX>` in the section above.
 
 ### iVar variants and iVar consensus
@@ -262,8 +261,6 @@ The functionality to call variants with BCFTools was inspired by work carried ou
 
 [SnpSift](http://snpeff.sourceforge.net/SnpSift.html) annotates genomic variants using databases, filters, and manipulates genomic annotated variants. After annotation with SnpEff, you can use SnpSift to help filter large genomic datasets in order to find the most significant variants.
 
-The value of `<CALLER>` in the output file names below is determined by the `--callers` parameter (Default:'varscan2,ivar,bcftools'). If applicable, you will have two sets of files where the file name prefix will be `<SAMPLE>` for low-frequency variants and `<SAMPLE>.AF<MAX_ALLELE_FREQ>` for high frequency variants.
-
 **Output files:**
 
 * `variants/<CALLER>/snpeff/`
@@ -278,16 +275,18 @@ The value of `<CALLER>` in the output file names below is determined by the `--c
   <img width="600" src="images/mqc_snpeff_plot.png" alt="MultiQC - SnpEff annotation counts"/>
 </p>
 
+> **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'varscan2,ivar,bcftools'). If applicable, you will have two sets of files where the file name prefix will be `<SAMPLE>` for low-frequency variants and `<SAMPLE>.AF<MAX_ALLELE_FREQ>` for high frequency variants.
+
 ### QUAST
 
 [QUAST](http://bioinf.spbau.ru/quast) is used to generate a single report with which to evaluate the quality of the consensus sequence across all of the samples provided to the pipeline. The HTML results can be opened within any browser (we recommend using Google Chrome). Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
-
-The value of `<CALLER>` in the output file names below is determined by the `--callers` parameter (Default:'varscan2,ivar,bcftools'). The value of `<MAX_ALLELE_FREQ>` in the output directory name below is determined by the `--max_allele_freq` parameter (Default: 0.8).
 
 **Output files:**
 
 * `variants/<CALLER>/quast/AF<MAX_ALLELE_FREQ>/`
   * `report.html`: Results report in HTML format. Also available in various other file formats i.e. `report.pdf`, `report.tex`, `report.tsv` and `report.txt`.
+
+> **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'varscan2,ivar,bcftools') and the value of `<MAX_ALLELE_FREQ>` is determined by the `--max_allele_freq` parameter (Default: 0.8).
 
 ## De novo assembly
 
@@ -317,8 +316,8 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 **Output files:**
 
 * `assembly/kraken2/`
-  * `*.host.fastq.gz`: Reads that were classified to the host database.
-  * `*.viral.fastq.gz`: Reads that were unclassified to the host database.
+  * `*.host*.fastq.gz`: Reads that were classified to the host database.
+  * `*.viral*.fastq.gz`: Reads that were unclassified to the host database.
   * `*.kraken2.report.txt`: Kraken 2 taxonomic report. See [here](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual#sample-report-output-format) for a detailed description of the format.
 
 > **NB:** Output FastQ files will only be saved in the results directory if the `--save_kraken2_fastq` parameter is supplied.
@@ -370,16 +369,18 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 **Output files:**
 
-* `assembly/minia/`
+* `assembly/minia/<MINIA_KMER>/`
   * `*.scaffolds.fa`: Minia scaffold assembly.
+
+> **NB:** The value of `<MINIA_KMER>` in the output directory name above is determined by the `--minia_kmer` parameter (Default: 31).
 
 ### Minimap2, seqwish, vg
 
-[`Minimap2`](https://github.com/lh3/minimap2) is a versatile sequence alignment program that aligns DNA or mRNA sequences against a large reference database. Minimap2 was used to generate all-versus-all alignments between scaffold assembly contigs and contigs from a reference genome.
+[`Minimap2`](https://github.com/lh3/minimap2) is a versatile sequence alignment program that aligns DNA or mRNA sequences against a large reference database. Minimap2 was used to generate all-versus-all alignments between scaffold assembly contigs and the reference genome.
 
-[`seqwish`](https://github.com/ekg/seqwish) implements a lossless conversion from pairwise alignments between sequences to a variation graph encoding the sequences and their alignments. Seqwish was used to induce a genome variation graph from all-versus-all alignments between scaffold assembly contigs and contigs from a reference genome.
+[`seqwish`](https://github.com/ekg/seqwish) implements a lossless conversion from pairwise alignments between sequences to a variation graph encoding the sequences and their alignments. seqwish was used to induce a genome variation graph from the all-versus-all alignment generated by Minimap2.
 
-[`vg`](https://github.com/vgteam/vg) is a collection of tools for working with genome variation graphs. vg was used to call variants from the genome variation graph induced from all-versus-all alignments between scaffold assembly contigs and contigs from a reference genome.
+[`vg`](https://github.com/vgteam/vg) is a collection of tools for working with genome variation graphs. vg was used to call variants from the genome variation graph generated by seqwish.
 
 [`Bandage`](https://github.com/rrwick/Bandage), a Bioinformatics Application for Navigating De novo Assembly Graphs Easily, is a GUI program that allows users to interact with the assembly graphs made by de novo assemblers and other graphs in GFA format. Bandage was used to render induced genome variation graphs as static PNG and SVG images.
 
@@ -395,7 +396,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.png`: Bandage visualisation for induced genome variation graph in PNG format.
   * `*.svg`: Bandage visualisation for induced genome variation graph in SVG format.
 
-> **NB:** By default, these files will be generated relative to the assemblies for each assembler.
+> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
 
 ### Assembly SnpEff and SnpSift
 
@@ -413,7 +414,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.snpEff.vcf.gz.tbi`: Index for VCF file with variant annotations.
   * `*.snpSift.table.txt`: SnpSift summary table.
 
-> **NB:** By default, these files will be generated relative to the variants called relative to each assembler.
+> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
 
 ### BLAST
 
@@ -425,7 +426,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.blast.txt`: BLAST results against the target virus.
   * `*.blast.filt.header.txt`: Filtered BLAST results.
 
-> **NB:** By default, these files will be generated relative to the assemblies for each assembler.
+> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
 
 ### ABACAS
 
@@ -444,7 +445,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.unused_contigs.out`: Information on contigs that have a mapping information but could not be used in the ordering.
 * `assembly/<ASSEMBLER>/abacas/nucmer/`: Folder containing the files generated by the NUCmer algorithm used by ABACAS.
 
-> **NB:** By default, these files will be generated relative to the assemblies for each assembler.
+> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
 
 ### PlasmidID
 
@@ -459,7 +460,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `fasta_files`: Folder with fasta files that correspond to the selection of contigs/scaffolds required to reconstruct the reference genome generated in the `images/` folder.
   * `log/`: Log files.
 
-> **NB:** By default, these files will be generated relative to the assemblies for each assembler.
+> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
 
 ### Assembly QUAST
 
@@ -474,7 +475,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   <img width="600" src="images/mqc_quast_plot.png" alt="MultiQC - QUAST contig counts"/>
 </p>
 
-> **NB:** By default, these files will be generated relative to the assemblies for each assembler.
+> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
 
 ## Workflow reporting and genomes
 
