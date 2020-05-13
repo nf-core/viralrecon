@@ -133,6 +133,8 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
   <img width="600" src="images/mqc_samtools_stats_plot.png" alt="MultiQC - SAMtools alignment scores plot"/>
 </p>
 
+> **NB:** BAM files and their associated indices will only be saved in the results directory if the `--save_align_intermeds` parameter is supplied.
+
 ### iVar trim
 
 If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pasteur.fr/docs/ivar/1.0/manualpage.html) is used to trim amplicon primer sequences from the aligned reads. iVar uses the primer positions supplied in `--amplicon_bed` to soft clip primer sequences from a coordinate sorted BAM file.
@@ -147,16 +149,23 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 * `variants/bowtie2/log/`
   * `<SAMPLE>.trim.ivar.log`: iVar trim log file obtained from stdout.
 
+> **NB:** Post-trimmed BAM files and their associated indices will only be saved in the results directory if the `--save_align_intermeds` parameter is supplied.
+
 ### picard MarkDuplicates
 
-TODO: Update this section
+Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced were derived via true biological duplication (i.e. sequencing independent template fragments from the sample) or as a result of PCR biases introduced during the library preparation. By default, the pipeline uses picard MarkDuplicates to *mark* the duplicate reads identified amongst the alignments to allow you to guage the overall level of duplication in your samples. However, you can also choose to remove any reads identified as duplicates via the `--filter_dups` parameter.
 
-Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false). Note that unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation.
+The value of `<SUFFIX>` in the output files below will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this will be `trim.mkD` and if not then  `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
 
 **Output files:**
 
-* `variants/<bowtie2/ivar>/`  
-  Alignment QC files from picard CollectMultipleMetrics and the metrics file from CollectWgsMetrics in `*_metrics` text format and plotted in `*.pdf` format.
+* `variants/bowtie2/`
+  * `<SAMPLE>.<SUFFIX>.sorted.bam`: Coordinate sorted BAM file after duplicate marking.
+  * `<SAMPLE>.<SUFFIX>.sorted.bam.bai`: Index file for coordinate sorted BAM file after duplicate marking.
+* `variants/bowtie2/samtools_stats/`
+  * SAMtools `<SAMPLE>.<SUFFIX>.flagstat`, `<SAMPLE>.<SUFFIX>.idxstats` and `<SAMPLE>.<SUFFIX>.stats` files generated from the duplicate marked alignment files.
+* `variants/bowtie2/picard_metrics/`
+  * `<SAMPLE>.<SUFFIX>..MarkDuplicates.metrics.txt`: Metrics file from MarkDuplicates.
 
 ### picard CollectMultipleMetrics
 
