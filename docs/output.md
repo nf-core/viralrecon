@@ -57,7 +57,7 @@ Please see the [usage docs](usage.md#supported-public-repository-ids) for a list
 
 ### cat
 
-If multiple libraries/runs have been provided for the same sample in the input samplesheet (e.g. to increase sequencing depth) then these will be merged at the very beginning of the pipeline in order to have consistent sample naming throughout the pipeline.
+If multiple libraries/runs have been provided for the same sample in the input samplesheet (e.g. to increase sequencing depth) then these will be merged at the very beginning of the pipeline in order to have consistent sample naming throughout the pipeline. Please refer to the [usage docs](usage.md#format) to see how to specify these samples in the input samplesheet.
 
 ### FastQC
 
@@ -109,11 +109,9 @@ If multiple libraries/runs have been provided for the same sample in the input s
 **Output files:**
 
 * `variants/bowtie2/`
-  * `*.sorted.bam`: Coordinate sorted BAM file containing read alignment information.
-  * `*.sorted.bam.bai`: Index file for coordinate sorted BAM file.
-  * `<SAMPLE>.bam`: Original output BAM file containing mapped reads. Only present if `--save_align_intermeds` parameter is supplied.
+  * `<SAMPLE>.bam`: Original BAM file created by Bowtie 2. Only present if `--save_align_intermeds` parameter is supplied.
 * `variants/bowtie2/log/`
-  * `*.log`: Bowtie 2 mapping log file.
+  * `<SAMPLE>.bowtie2.log`: Bowtie 2 mapping log file.
 
 <p align="center">
   <img width="600" src="images/mqc_bowtie2_plot.png" alt="MultiQC - Bowtie2 alignment score plot"/>
@@ -125,8 +123,11 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 
 **Output files:**
 
+* `variants/bowtie2/`
+  * `<SAMPLE>.sorted.bam`: Coordinate sorted BAM file containing read alignment information.
+  * `<SAMPLE>.sorted.bam.bai`: Index file for coordinate sorted BAM file.
 * `variants/bowtie2/samtools_stats/`
-  * SAMtools `*.flagstat`, `*.idxstats` and `*.stats` files generated from the alignment files.
+  * SAMtools `<SAMPLE>.sorted.bam.flagstat`, `<SAMPLE>.sorted.bam.idxstats` and `<SAMPLE>.sorted.bam.stats` files generated from the alignment files.
 
 <p align="center">
   <img width="600" src="images/mqc_samtools_stats_plot.png" alt="MultiQC - SAMtools alignment scores plot"/>
@@ -134,17 +135,17 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 
 ### iVar trim
 
-If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pasteur.fr/docs/ivar/1.0/manualpage.html) is used to trim amplicon primer sequences from the reads. iVar uses the primer positions supplied in `--amplicon_bed` to soft clip primer sequences from a coordinate sorted BAM file.
+If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pasteur.fr/docs/ivar/1.0/manualpage.html) is used to trim amplicon primer sequences from the aligned reads. iVar uses the primer positions supplied in `--amplicon_bed` to soft clip primer sequences from a coordinate sorted BAM file.
 
 **Output files:**
 
-* `variants/ivar/`
-  * `*.trim.sorted.bam`: Coordinate sorted BAM file after primer trimming.
-  * `*.trim.sorted.bam.bai`: Index file for coordinate sorted BAM file after primer trimming.
-* `variants/ivar/log/`
-  * `*.trim.ivar.log`: iVar trim log file obtained from stdout.
-* `variants/ivar/samtools_stats/`
-  * SAMtools `*.flagstat`, `*.idxstats` and `*.stats` files generated from the primer trimmed alignment files.
+* `variants/bowtie2/`
+  * `<SAMPLE>.trim.sorted.bam`: Coordinate sorted BAM file after primer trimming.
+  * `<SAMPLE>.trim.sorted.bam.bai`: Index file for coordinate sorted BAM file after primer trimming.
+* `variants/bowtie2/samtools_stats/`
+  * SAMtools `<SAMPLE>.trim.flagstat`, `<SAMPLE>.trim.idxstats` and `<SAMPLE>.trim.stats` files generated from the primer trimmed alignment files.
+* `variants/bowtie2/log/`
+  * `<SAMPLE>.trim.ivar.log`: iVar trim log file obtained from stdout.
 
 ### picard MarkDuplicates
 
