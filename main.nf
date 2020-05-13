@@ -56,7 +56,7 @@ def helpMessage() {
       --save_trimmed [bool]             Save the trimmed FastQ files in the results directory (Default: false)
 
     Variant calling
-      --callers [str]                   Specify which variant calling algorithms you would like to use (Default:'varscan2,ivar,bcftools')
+      --callers [str]                   Specify which variant calling algorithms you would like to use (Default: 'varscan2,ivar,bcftools')
       --ivar_exclude_reads [bool]       Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
       --filter_dups [bool]              Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false)
       --min_base_qual [int]             When performing variant calling skip bases with baseQ/BAQ smaller than this number (Default: 20)
@@ -70,7 +70,7 @@ def helpMessage() {
       --skip_variants [bool]            Skip variant calling steps in the pipeline (Default: false)
 
     De novo assembly
-      --assemblers [str]                Specify which assembly algorithms you would like to use (Default:'spades,metaspades,unicycler,minia')
+      --assemblers [str]                Specify which assembly algorithms you would like to use (Default: 'spades,metaspades,unicycler,minia')
       --minia_kmer [int]                Kmer size to use when running minia (Default: 31)
       --skip_blast [bool]               Skip blastn of assemblies relative to reference genome (Default: false)
       --skip_abacas [bool]              Skip ABACAS process for assembly contiguation (Default: false)
@@ -522,7 +522,7 @@ if (!params.skip_sra || !isOffline()) {
         label 'error_retry'
         publishDir "${params.outdir}/preprocess/sra", mode: params.publish_dir_mode,
             saveAs: { filename ->
-                          if (filename.endsWith(".md5")) filename
+                          if (filename.endsWith(".md5")) "md5/$filename"
                           else params.save_sra_fastq ? filename : null
                     }
 
