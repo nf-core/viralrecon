@@ -19,13 +19,13 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [iVar trim](#ivar-trim) - Primer sequence removal for amplicon data
   * [picard MarkDuplicates](#picard-markduplicates) - Duplicate read marking and removal
   * [picard CollectMultipleMetrics](#picard-collectmultiplemetrics) - Whole genome coverage and alignment metrics
-  * [VarScan 2, BCFTools, BEDTools](#varscan-2-bcftools-bedtools) *||* [iVar variants and iVar consensus](#ivar-variants-and-ivar-consensus) *||* [BCFTools and BEDTools](#bcftools-bedtools) - Variant calling and consensus sequence generation
+  * [VarScan 2, BCFTools, BEDTools](#varscan-2-bcftools-bedtools) *||* [iVar variants and iVar consensus](#ivar-variants-and-ivar-consensus) *||* [BCFTools and BEDTools](#bcftools-and-bedtools) - Variant calling and consensus sequence generation
     * [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
     * [QUAST](#quast) - Consensus assessment report
 * [De novo assembly](#de-novo-assembly)
   * [Cutadapt](#cutadapt) - Primer trimming for amplicon data
   * [Kraken 2](#kraken-2) - Removal of host reads
-  * [SPAdes](#spades) *||* [metaSPAdes](#metaspades) *||* [metaSPAdes](#metaspades) *||* [minia](#minia) - Viral genome assembly
+  * [SPAdes](#spades) *||* [metaSPAdes](#metaspades) *||* [Unicycler](#unicycler) *||* [minia](#minia) - Viral genome assembly
     * [BLAST](#blast) - Blast to reference assembly
     * [ABACAS](#abacas) - Order contigs according to reference genome
     * [PlasmidID](#plasmidid) - Assembly report and visualisation
