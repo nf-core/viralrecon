@@ -42,6 +42,7 @@ def ivar_variants_to_vcf(FileIn,FileOut,passOnly=False,minAF=0):
               '##FORMAT=<ID=ALT_FREQ,Number=1,Type=String,Description="Frequency of alternate base">\n')
     header += '#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t'+filename+'\n'
 
+    varList = []
     varCountDict = {'SNP':0, 'INS':0, 'DEL':0}
     OutDir = os.path.dirname(FileOut)
     make_dir(OutDir)
@@ -79,6 +80,10 @@ def ivar_variants_to_vcf(FileIn,FileOut,passOnly=False,minAF=0):
                     writeLine = False
                 if float(line[10]) < minAF:
                     writeLine = False
+                if (CHROM,POS,REF,ALT) in varList:
+                    writeLine = False
+                else:
+                    varList.append((CHROM,POS,REF,ALT))
                 if writeLine:
                     varCountDict[var_type] += 1
                     fout.write(oline)

@@ -31,7 +31,6 @@ def helpMessage() {
       --protocol [str]                  Specifies the type of protocol used for sequencing i.e. "metagenomic" or "amplicon" (Default: "metagenomic")
 
     SRA download
-      --ignore_sra_errors [bool]        Ignore validation errors when checking SRA identifiers that would otherwise cause the pipeline to fail (Default: false)
       --save_sra_fastq [bool]           Save FastQ files created from SRA identifiers in the results directory (Default: false)
       --skip_sra [bool]                 Skip steps involving the download and validation of FastQ files using SRA identifiers (Default: false)
 
@@ -227,7 +226,6 @@ summary['Viral Genome']              = params.genome ?: 'Not supplied'
 summary['Viral Fasta File']          = params.fasta
 if (params.gff)                      summary['Viral GFF'] = params.gff
 if (params.save_reference)           summary['Save Genome Indices'] = 'Yes'
-if (params.ignore_sra_errors)        summary['Ignore SRA Errors'] = params.ignore_sra_errors
 if (params.save_sra_fastq)           summary['Save SRA FastQ'] = params.save_sra_fastq
 if (params.skip_sra)                 summary['Skip SRA Download'] = params.skip_sra
 if (!params.skip_kraken2) {
@@ -433,7 +431,7 @@ process CHECK_SAMPLESHEET {
     tag "$samplesheet"
     publishDir "${params.outdir}/", mode: params.publish_dir_mode,
         saveAs: { filename ->
-                      if (filename.endsWith(".txt")) "preprocess/sra/$filename"
+                      if (filename.endsWith(".tsv")) "preprocess/sra/$filename"
                       else "pipeline_info/$filename"
                 }
 
@@ -441,14 +439,29 @@ process CHECK_SAMPLESHEET {
     path samplesheet from ch_input
 
     output:
-    path "*.csv" into ch_samplesheet_reformat
-    path "*.txt" optional true
+    path "samplesheet.valid.csv" into ch_samplesheet_reformat
+    path "sra_run_info.tsv" optional true
 
-    script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
-    ignore = params.ignore_sra_errors ? "--ignore_sra_errors" : ""
-    skip = (params.skip_sra || isOffline()) ? "--skip_sra" : ""
+    script:  // These scripts are bundled with the pipeline, in nf-core/viralrecon/bin/
+    run_sra = !params.skip_sra && !isOffline()
     """
-    check_samplesheet.py $samplesheet samplesheet.pass $ignore $skip
+    awk -F, '{if(\$1 != "" && \$2 != "") {print \$0}}' $samplesheet > nonsra_id.csv
+    check_samplesheet.py nonsra_id.csv nonsra.samplesheet.csv
+
+    if $run_sra
+    then
+        awk -F, '{if(\$1 != "" && \$2 == "" && \$3 == "") {print \$1}}' $samplesheet > sra_id.list
+        fetch_sra_runinfo.py sra_id.list sra_run_info.tsv --platform ILLUMINA --library_layout SINGLE,PAIRED
+        sra_runinfo_to_samplesheet.py sra_run_info.tsv sra.samplesheet.csv
+    fi
+
+    if [ -f nonsra.samplesheet.csv ]
+    then
+        head -n 1 nonsra.samplesheet.csv > samplesheet.valid.csv
+    else
+        head -n 1 sra.samplesheet.csv > samplesheet.valid.csv
+    fi
+    tail -n +2 -q *sra.samplesheet.csv >> samplesheet.valid.csv
     """
 }
 
