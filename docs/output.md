@@ -213,7 +213,7 @@ The value of `<SUFFIX>` in the output files below will depend on the preceeding 
   <img width="600" src="images/mqc_bcftools_plot.png" alt="MultiQC - BCFTools variant counts"/>
 </p>
 
-> **NB:** Output Pileup files will only be saved in the results directory if the `--save_mpileup` parameter is supplied.
+> **NB:** Output mpileup files will only be saved in the results directory if the `--save_mpileup` parameter is supplied. The naming convention for these files will depend on the preceeding steps that were run in the pipeline as described in the paragraph explaining the value of `<SUFFIX>` in the section above.
 
 ### iVar variants and iVar consensus
 
