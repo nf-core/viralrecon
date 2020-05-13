@@ -815,7 +815,7 @@ process BOWTIE2_INDEX {
  * PREPROCESSING: Build SnpEff database for viral genome
  */
 process MAKE_SNPEFF_DB {
-    tag "$fasta"
+    tag "${index_base}.fa"
     label 'process_low'
     if (params.save_reference) {
         publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
