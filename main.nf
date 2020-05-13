@@ -2059,9 +2059,9 @@ process SPADES_VG {
     vg convert -x ${sample}.vg > ${sample}.xg
 
     samtools faidx $fasta
+    vg snarls ${sample}.xg > ${sample}.snarls
     for chrom in `cat ${fasta}.fai | cut -f1`
     do
-        vg snarls ${sample}.xg > ${sample}.snarls
         vg deconstruct -p \$chrom ${sample}.xg -r ${sample}.snarls --threads $task.cpus \\
             | bcftools sort -O v -T ./ \\
             | bgzip -c > ${sample}.\$chrom.vcf.gz
@@ -2340,9 +2340,9 @@ process METASPADES_VG {
     vg convert -x ${sample}.vg > ${sample}.xg
 
     samtools faidx $fasta
+    vg snarls ${sample}.xg > ${sample}.snarls
     for chrom in `cat ${fasta}.fai | cut -f1`
     do
-        vg snarls ${sample}.xg > ${sample}.snarls
         vg deconstruct -p \$chrom ${sample}.xg -r ${sample}.snarls --threads $task.cpus \\
             | bcftools sort -O v -T ./ \\
             | bgzip -c > ${sample}.\$chrom.vcf.gz
@@ -2619,9 +2619,9 @@ process UNICYCLER_VG {
     vg convert -x ${sample}.vg > ${sample}.xg
 
     samtools faidx $fasta
+    vg snarls ${sample}.xg > ${sample}.snarls
     for chrom in `cat ${fasta}.fai | cut -f1`
     do
-        vg snarls ${sample}.xg > ${sample}.snarls
         vg deconstruct -p \$chrom ${sample}.xg -r ${sample}.snarls --threads $task.cpus \\
             | bcftools sort -O v -T ./ \\
             | bgzip -c > ${sample}.\$chrom.vcf.gz
@@ -2887,9 +2887,9 @@ process MINIA_VG {
     vg convert -x ${sample}.vg > ${sample}.xg
 
     samtools faidx $fasta
+    vg snarls ${sample}.xg > ${sample}.snarls
     for chrom in `cat ${fasta}.fai | cut -f1`
     do
-        vg snarls ${sample}.xg > ${sample}.snarls
         vg deconstruct -p \$chrom ${sample}.xg -r ${sample}.snarls --threads $task.cpus \\
             | bcftools sort -O v -T ./ \\
             | bgzip -c > ${sample}.\$chrom.vcf.gz
