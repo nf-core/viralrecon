@@ -32,12 +32,12 @@ dependencies:
   - bioconda::ivar=1.2.2
   - bioconda::bcftools=1.9
   - bioconda::varscan=2.4.4
-  - bioconda::snpeff=4.3.1t
+  - bioconda::snpeff=4.5covid19
   - bioconda::snpsift=4.3.1t
 
   ## assembly
   - bioconda::cutadapt=2.10
-  - bioconda::kraken2=2.0.8_beta
+  - bioconda::kraken2=2.0.9beta
   - bioconda::spades=3.14.0
   - bioconda::unicycler=0.4.7
   - bioconda::minia=3.2.2
