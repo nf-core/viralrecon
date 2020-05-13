@@ -417,7 +417,7 @@ Skip blastn of assemblies relative to reference genome (Default: false).
 
 ### `--skip_abacas`
 
-Skip ABACUS process for assembly contiguation (Default: false).
+Skip ABACAS process for assembly contiguation (Default: false).
 
 ### `--skip_plasmidid`
 
