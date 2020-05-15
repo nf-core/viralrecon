@@ -9,7 +9,7 @@ channels:
 dependencies:
   ## conda-forge packages
   - conda-forge::python=3.6.10
-  - conda-forge::markdown=3.2.1
+  - conda-forge::markdown=3.2.2
   - conda-forge::pymdown-extensions=7.1
   - conda-forge::pygments=2.6.1
   - conda-forge::pigz=2.3.4
@@ -28,7 +28,7 @@ dependencies:
 
   ## variants
   - bioconda::bowtie2=2.3.5.1
-  - bioconda::picard=2.22.5
+  - bioconda::picard=2.22.6
   - bioconda::ivar=1.2.2
   - bioconda::bcftools=1.9
   - bioconda::varscan=2.4.4
