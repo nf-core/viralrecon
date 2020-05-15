@@ -7,9 +7,9 @@ channels:
   - defaults
   - hcc
 dependencies:
- ## conda-forge packages
+  ## conda-forge packages
   - conda-forge::python=3.6.10
-  - conda-forge::markdown=3.2.1
+  - conda-forge::markdown=3.2.2
   - conda-forge::pymdown-extensions=7.1
   - conda-forge::pygments=2.6.1
   - conda-forge::pigz=2.3.4
@@ -28,7 +28,7 @@ dependencies:
 
   ## variants
   - bioconda::bowtie2=2.3.5.1
-  - bioconda::picard=2.22.4
+  - bioconda::picard=2.22.6
   - bioconda::ivar=1.2.2
   - bioconda::bcftools=1.9
   - bioconda::varscan=2.4.4
@@ -43,7 +43,7 @@ dependencies:
   - bioconda::minia=3.2.2
   - bioconda::minimap2=2.17
   - bioconda::seqwish=0.4.1
-  - bioconda::vg=1.23.0
+  - bioconda::vg=1.24.0
   - bioconda::quast=5.0.2
   - bioconda::blast=2.9.0
   - bioconda::plasmidid=1.5.2
