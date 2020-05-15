@@ -1352,7 +1352,6 @@ process IVAR_VARIANTS {
     tuple val(sample), val(single_end), path("${prefix}.vcf.gz*") into ch_ivar_highfreq_snpeff
     tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_ivar_lowfreq_snpeff
     path "${prefix}.bcftools_stats.txt" into ch_ivar_bcftools_highfreq_mqc
-    path "${prefix}.variant.counts_mqc.tsv" into ch_ivar_count_highfreq_mqc
     path "${sample}.variant.counts_mqc.tsv" into ch_ivar_count_lowfreq_mqc
     path "${sample}.bcftools_stats.txt"
     path "${sample}.tsv"
@@ -1374,7 +1373,6 @@ process IVAR_VARIANTS {
     bgzip -c ${prefix}.vcf > ${prefix}.vcf.gz
     tabix -p vcf -f ${prefix}.vcf.gz
     bcftools stats ${prefix}.vcf.gz > ${prefix}.bcftools_stats.txt
-    cat $header ${prefix}.variant.counts.log > ${prefix}.variant.counts_mqc.tsv
     """
 }
 
@@ -3053,7 +3051,6 @@ process MULTIQC {
     path ('varscan2/snpeff/highfreq/*') from ch_varscan2_snpeff_highfreq_mqc.collect().ifEmpty([])
     path ('varscan2/quast/highfreq/*') from ch_varscan2_quast_mqc.collect().ifEmpty([])
     path ('ivar/variants/counts/lowfreq/*') from ch_ivar_count_lowfreq_mqc.collect().ifEmpty([])
-    path ('ivar/variants/counts/highfreq/*') from ch_ivar_count_highfreq_mqc.collect().ifEmpty([])
     path ('ivar/variants/bcftools/highfreq/*') from ch_ivar_bcftools_highfreq_mqc.collect().ifEmpty([])
     path ('ivar/variants/snpeff/highfreq/*') from ch_ivar_snpeff_highfreq_mqc.collect().ifEmpty([])
     path ('ivar/consensus/quast/highfreq/*') from ch_ivar_quast_mqc.collect().ifEmpty([])
