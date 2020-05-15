@@ -221,7 +221,7 @@ module_order:
 
 report_section_order:
     ivar_variants:
-        before: quast_varscan2
+        after: quast_varscan2
     software_versions:
         order: -1001
     nf-core-viralrecon-summary:
