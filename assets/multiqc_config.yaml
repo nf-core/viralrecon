@@ -5,6 +5,8 @@ report_comment: >
 
 export_plots: true
 
+data_format: 'yaml'
+
 run_modules:
     - custom_content
     - fastqc
