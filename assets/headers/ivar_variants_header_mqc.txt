@@ -3,6 +3,6 @@
 #description: "is calculated from the total number of variants called by
 #              <a href='https://andersen-lab.github.io/ivar/html/manualpage.html' target='_blank'>iVar</a>."
 #plot_type: 'bargraph'
-#anchor: 'nfcore_viralrecon-ivar_variants'
+#anchor: 'ivar_variants'
 #pconfig:
 #    title: 'iVar variant counts'
