@@ -3082,7 +3082,7 @@ process MULTIQC {
     output:
     path "*multiqc_report.html" into ch_multiqc_report
     path "*_data"
-    path "multiqc_plots"
+    path "*.tsv"
 
     script:
     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
