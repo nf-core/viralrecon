@@ -448,9 +448,9 @@ process CHECK_SAMPLESHEET {
     awk -F, '{if(\$1 != "" && \$2 != "") {print \$0}}' $samplesheet > nonsra_id.csv
     check_samplesheet.py nonsra_id.csv nonsra.samplesheet.csv
 
-    if $run_sra
+    awk -F, '{if(\$1 != "" && \$2 == "" && \$3 == "") {print \$1}}' $samplesheet > sra_id.list
+    if $run_sra && [ -s sra_id.list ]
     then
-        awk -F, '{if(\$1 != "" && \$2 == "" && \$3 == "") {print \$1}}' $samplesheet > sra_id.list
         fetch_sra_runinfo.py sra_id.list sra_run_info.tsv --platform ILLUMINA --library_layout SINGLE,PAIRED
         sra_runinfo_to_samplesheet.py sra_run_info.tsv sra.samplesheet.csv
     fi
@@ -1853,7 +1853,7 @@ if (!params.skip_kraken2) {
  */
 process SPADES {
     tag "$sample"
-    label 'process_medium'
+    label 'process_high'
     label 'error_ignore'
     publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode,
         saveAs: { filename ->
@@ -2133,7 +2133,7 @@ process SPADES_SNPEFF {
  */
 process METASPADES {
     tag "$sample"
-    label 'process_medium'
+    label 'process_high'
     label 'error_ignore'
     publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode,
     saveAs: { filename ->
@@ -2414,7 +2414,7 @@ process METASPADES_SNPEFF {
  */
 process UNICYCLER {
     tag "$sample"
-    label 'process_medium'
+    label 'process_high'
     label 'error_ignore'
     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode,
     saveAs: { filename ->
@@ -2693,7 +2693,7 @@ process UNICYCLER_SNPEFF {
  */
 process MINIA {
     tag "$sample"
-    label 'process_medium'
+    label 'process_high'
     label 'error_ignore'
     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}", mode: params.publish_dir_mode
 
