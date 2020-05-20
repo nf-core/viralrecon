@@ -3028,7 +3028,11 @@ process get_software_versions {
  */
 // TODO nf-core: Check MultiQC log and config to see if everything is working as expected
 process MULTIQC {
-    publishDir "${params.outdir}/multiqc", mode: params.publish_dir_mode
+  publishDir "${params.outdir}", mode: params.publish_dir_mode,
+      saveAs: { filename ->
+                    if (filename.endsWith(".tsv")) filename
+                    else "multiqc/$filename"
+              }
 
     when:
     !params.skip_multiqc
@@ -3086,6 +3090,7 @@ process MULTIQC {
     custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
     """
     multiqc . -f $rtitle $rfilename $custom_config_file
+    multiqc_to_custom_tsv.py --multiqc_data_dir multiqc_data --out_file viralrecon_summary_metrics.tsv
     """
 }
 
