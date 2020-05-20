@@ -3028,11 +3028,11 @@ process get_software_versions {
  */
 // TODO nf-core: Check MultiQC log and config to see if everything is working as expected
 process MULTIQC {
-  publishDir "${params.outdir}", mode: params.publish_dir_mode,
-      saveAs: { filename ->
-                    if (filename.endsWith(".tsv")) filename
-                    else "multiqc/$filename"
-              }
+    publishDir "${params.outdir}", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".tsv")) filename
+                      else "multiqc/$filename"
+                }
 
     when:
     !params.skip_multiqc
