@@ -3030,7 +3030,8 @@ process get_software_versions {
 process MULTIQC {
     publishDir "${params.outdir}", mode: params.publish_dir_mode,
         saveAs: { filename ->
-                      if (filename.endsWith(".tsv")) filename
+                      if (filename.endsWith("assembly_metrics.tsv")) "assembly/$filename"
+                      else if (filename.endsWith("variants_metrics.tsv")) "variants/$filename"
                       else "multiqc/$filename"
                 }
 
@@ -3090,7 +3091,7 @@ process MULTIQC {
     custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
     """
     multiqc . -f $rtitle $rfilename $custom_config_file
-    multiqc_to_custom_tsv.py --multiqc_data_dir multiqc_data --out_file viralrecon_summary_metrics.tsv
+    multiqc_to_custom_tsv.py --multiqc_data_dir multiqc_data --out_prefix viralrecon
     """
 }
 
