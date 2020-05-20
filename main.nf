@@ -3091,7 +3091,7 @@ process MULTIQC {
     custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
     """
     multiqc . -f $rtitle $rfilename $custom_config_file
-    multiqc_to_custom_tsv.py --multiqc_data_dir multiqc_data --out_prefix viralrecon
+    multiqc_to_custom_tsv.py
     """
 }
 
