@@ -5,7 +5,6 @@ import sys
 import errno
 import argparse
 import yaml
-from collections import OrderedDict
 
 
 def parse_args(args=None):
@@ -37,31 +36,17 @@ def find_tag(d, tag):
                 yield i
 
 
-# Load YAML as an ordered dict
-# From https://stackoverflow.com/a/21912744
-def yaml_ordered_load(stream):
-    class OrderedLoader(yaml.SafeLoader):
-        pass
-    def construct_mapping(loader, node):
-        loader.flatten_mapping(node)
-        return OrderedDict(loader.construct_pairs(node))
-    OrderedLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-        construct_mapping)
-    return yaml.load(stream, OrderedLoader)
-
-
-def yaml_fields_to_dict(YAMLFile,AppendDict={},FieldMappingDict={}):
+def yaml_fields_to_dict(YAMLFile,AppendDict={},FieldMappingList=[]):
     with open(YAMLFile) as f:
-        yaml_dict = yaml_ordered_load(f)
+        yaml_dict = yaml.safe_load(f)
         for k in yaml_dict.keys():
             key = k
             if YAMLFile.find('multiqc_picard_insertSize') != -1:
                 key = k[:-3]
             if key not in AppendDict:
-                AppendDict[key] = OrderedDict()
-            if FieldMappingDict != {}:
-                for i,j in FieldMappingDict.items():
+                AppendDict[key] = {}
+            if FieldMappingList != []:
+                for i,j in FieldMappingList:
                     val = list(find_tag(yaml_dict[k], j[0]))
                     if len(val) != 0:
                         val = val[0]
@@ -78,126 +63,121 @@ def yaml_fields_to_dict(YAMLFile,AppendDict={},FieldMappingDict={}):
     return AppendDict
 
 
+def metrics_dict_to_file(FileFieldList,MultiQCDataDir,OutFile,SectionHeader='## METRICS',append=False):
+    MetricsDict = {}
+    FieldList = []
+    for yamlFile,mappingList in FileFieldList:
+        yamlFile = os.path.join(MultiQCDataDir,yamlFile)
+        if os.path.exists(yamlFile):
+            MetricsDict = yaml_fields_to_dict(YAMLFile=yamlFile,AppendDict=MetricsDict,FieldMappingList=mappingList)
+            FieldList += [x[0] for x in mappingList]
+    if MetricsDict != {}:
+        make_dir(os.path.dirname(OutFile))
+        if append:
+            fout = open(OutFile,'a')
+        else:
+            fout = open(OutFile,'w')
+        header = ['Sample'] + FieldList
+        fout.write('{}\n'.format(SectionHeader))
+        fout.write('{}\n'.format('\t'.join(header)))
+        for k in sorted(MetricsDict.keys()):
+            rowList = [k]
+            for field in FieldList:
+                if field in MetricsDict[k]:
+                    rowList.append(MetricsDict[k][field])
+                else:
+                    rowList.append('NA')
+            fout.write('{}\n'.format('\t'.join(map(str,rowList))))
+        fout.close()
+    return MetricsDict
+
+
 def main(args=None):
     args = parse_args(args)
 
     ## File names for MultiQC YAML along with fields to fetch from each file
     VariantFileFieldList = [
-        ('multiqc_fastp.yaml',                                     OrderedDict([('# Input reads', ['before_filtering','total_reads']),
-                                                                                ('# Trimmed reads (fastp)', ['after_filtering','total_reads'])])),
-        ('multiqc_samtools_flagstat_samtools_bowtie2.yaml',        OrderedDict([('% Mapped reads (viral)', ['mapped_passed_pct'])])),
-        ('multiqc_ivar_summary.yaml',                              OrderedDict([('# Reads trimmed (iVar)', ['trimmed_reads'])])),
-        ('multiqc_samtools_flagstat_samtools_ivar.yaml',           OrderedDict([('# Trimmed reads (iVar)', ['flagstat_total'])])),
-        ('multiqc_samtools_flagstat_samtools_markduplicates.yaml', OrderedDict([('# Duplicate reads', ['duplicates_passed'])])),
-                                                                                ('# Reads after MarkDuplicates', ['flagstat_total']),
-        ('multiqc_picard_insertSize.yaml',                         OrderedDict([('Insert size mean', ['MEAN_INSERT_SIZE']),
-                                                                                ('Insert size std dev', ['STANDARD_DEVIATION'])])),
-        ('multiqc_picard_wgsmetrics.yaml',                         OrderedDict([('Coverage mean', ['MEAN_COVERAGE']),
-                                                                                ('Coverage std dev', ['SD_COVERAGE']),
-                                                                                ('% Coverage > 10x', ['PCT_10X'])])),
-        ('multiqc_bcftools_stats_bcftools_varscan2.yaml',          OrderedDict([('# High conf SNPs (VarScan 2)', ['number_of_SNPs']),
-                                                                                ('# High conf INDELs (VarScan 2)', ['number_of_indels'])])),
-        ('multiqc_snpeff_snpeff_varscan2.yaml',                    OrderedDict([('# Missense variants (VarScan 2)', ['MISSENSE'])])),
-        ('multiqc_quast_quast_varscan2.yaml',                      OrderedDict([('# Ns per 100kb consensus (VarScan 2)', ["# N's per 100 kbp"])])),
-        ('multiqc_bcftools_stats_bcftools_ivar.yaml',              OrderedDict([('# High conf SNPs (iVar)', ['number_of_SNPs']),
-                                                                                ('# High conf INDELs (iVar)', ['number_of_indels'])])),
-        ('multiqc_snpeff_snpeff_ivar.yaml',                        OrderedDict([('# Missense variants (iVar)', ['MISSENSE'])])),
-        ('multiqc_quast_quast_ivar.yaml',                          OrderedDict([('# Ns per 100kb consensus (iVar)', ["# N's per 100 kbp"])])),
-        ('multiqc_bcftools_stats_bcftools_bcftools.yaml',          OrderedDict([('# High conf SNPs (BCFTools)', ['number_of_SNPs']),
-                                                                                ('# High conf INDELs (BCFTools)', ['number_of_indels'])])),
-        ('multiqc_snpeff_snpeff_bcftools.yaml',                    OrderedDict([('# Missense variants (BCFTools)', ['MISSENSE'])])),
-        ('multiqc_quast_quast_bcftools.yaml',                      OrderedDict([('# Ns per 100kb consensus (BCFTools)', ["# N's per 100 kbp"])])),
+        ('multiqc_fastp.yaml',                                     [('# Input reads', ['before_filtering','total_reads']),
+                                                                    ('# Trimmed reads (fastp)', ['after_filtering','total_reads'])]),
+        ('multiqc_samtools_flagstat_samtools_bowtie2.yaml',        [('% Mapped reads (viral)', ['mapped_passed_pct'])]),
+        ('multiqc_ivar_summary.yaml',                              [('# Reads trimmed (iVar)', ['trimmed_reads'])]),
+        ('multiqc_samtools_flagstat_samtools_ivar.yaml',           [('# Trimmed reads (iVar)', ['flagstat_total'])]),
+        ('multiqc_samtools_flagstat_samtools_markduplicates.yaml', [('# Duplicate reads', ['duplicates_passed']),
+                                                                    ('# Reads after MarkDuplicates', ['flagstat_total'])]),
+        ('multiqc_picard_insertSize.yaml',                         [('Insert size mean', ['MEAN_INSERT_SIZE']),
+                                                                    ('Insert size std dev', ['STANDARD_DEVIATION'])]),
+        ('multiqc_picard_wgsmetrics.yaml',                         [('Coverage mean', ['MEAN_COVERAGE']),
+                                                                    ('Coverage std dev', ['SD_COVERAGE']),
+                                                                    ('% Coverage > 10x', ['PCT_10X'])]),
+        ('multiqc_bcftools_stats_bcftools_varscan2.yaml',          [('# High conf SNPs (VarScan 2)', ['number_of_SNPs']),
+                                                                    ('# High conf INDELs (VarScan 2)', ['number_of_indels'])]),
+        ('multiqc_snpeff_snpeff_varscan2.yaml',                    [('# Missense variants (VarScan 2)', ['MISSENSE'])]),
+        ('multiqc_quast_quast_varscan2.yaml',                      [('# Ns per 100kb consensus (VarScan 2)', ["# N's per 100 kbp"])]),
+        ('multiqc_bcftools_stats_bcftools_ivar.yaml',              [('# High conf SNPs (iVar)', ['number_of_SNPs']),
+                                                                    ('# High conf INDELs (iVar)', ['number_of_indels'])]),
+        ('multiqc_snpeff_snpeff_ivar.yaml',                        [('# Missense variants (iVar)', ['MISSENSE'])]),
+        ('multiqc_quast_quast_ivar.yaml',                          [('# Ns per 100kb consensus (iVar)', ["# N's per 100 kbp"])]),
+        ('multiqc_bcftools_stats_bcftools_bcftools.yaml',          [('# High conf SNPs (BCFTools)', ['number_of_SNPs']),
+                                                                    ('# High conf INDELs (BCFTools)', ['number_of_indels'])]),
+        ('multiqc_snpeff_snpeff_bcftools.yaml',                    [('# Missense variants (BCFTools)', ['MISSENSE'])]),
+        ('multiqc_quast_quast_bcftools.yaml',                      [('# Ns per 100kb consensus (BCFTools)', ["# N's per 100 kbp"])]),
     ]
 
     AssemblyFileFieldList = [
-        ('multiqc_fastp.yaml',                                     OrderedDict([('# Input reads', ['before_filtering','total_reads'])])),
-        #('multiqc_fastqc_fastqc_cutadapt.yaml',                    OrderedDict([('# Trimmed reads (Cutadapt)', ['Total Sequences'])])), ## HAVE TO MULTIPLY BY 2 FOR PE READS?
-        ('multiqc_quast_quast_spades.yaml',                        OrderedDict([('# Contigs (SPAdes)', ['# contigs']),
-                                                                                ('# Contigs > 5kb (SPAdes)', ['# contigs (>= 5000 bp)']),
-                                                                                ('Largest contig (SPAdes)', ['Largest contig']),
-                                                                                ('% Genome fraction (SPAdes)', ['Genome fraction (%)']),
-                                                                                ('N50 (SPAdes)', ['N50'])])),
-        ('multiqc_bcftools_stats_bcftools_spades.yaml',            OrderedDict([('# SNPs (SPAdes)', ['number_of_SNPs']),
-                                                                                ('# INDELs (SPAdes)', ['number_of_indels'])])),
-        ('multiqc_snpeff_snpeff_spades.yaml',                      OrderedDict([('# Missense variants (SPAdes)', ['MISSENSE'])])),
-        ('multiqc_quast_quast_metaspades.yaml',                    OrderedDict([('# Contigs (metaSPAdes)', ['# contigs']),
-                                                                                ('# Contigs > 5kb (metaSPAdes)', ['# contigs (>= 5000 bp)']),
-                                                                                ('Largest contig (metaSPAdes)', ['Largest contig']),
-                                                                                ('% Genome fraction (metaSPAdes)', ['Genome fraction (%)']),
-                                                                                ('N50 (metaSPAdes)', ['N50'])])),
-        ('multiqc_bcftools_stats_bcftools_metaspades.yaml',        OrderedDict([('# SNPs (metaSPAdes)', ['number_of_SNPs']),
-                                                                                ('# INDELs (metaSPAdes)', ['number_of_indels'])])),
-        ('multiqc_snpeff_snpeff_metaspades.yaml',                  OrderedDict([('# Missense variants (metaSPAdes)', ['MISSENSE'])])),
-        ('multiqc_quast_quast_unicycler.yaml',                     OrderedDict([('# Contigs (Unicycler)', ['# contigs']),
-                                                                                ('# Contigs > 5kb (Unicycler)', ['# contigs (>= 5000 bp)']),
-                                                                                ('Largest contig (Unicycler)', ['Largest contig']),
-                                                                                ('% Genome fraction (Unicycler)', ['Genome fraction (%)']),
-                                                                                ('N50 (Unicycler)', ['N50'])])),
-        ('multiqc_bcftools_stats_bcftools_unicycler.yaml',         OrderedDict([('# SNPs (Unicycler)', ['number_of_SNPs']),
-                                                                                ('# INDELs (Unicycler)', ['number_of_indels'])])),
-        ('multiqc_snpeff_snpeff_unicycler.yaml',                   OrderedDict([('# Missense variants (Unicycler)', ['MISSENSE'])])),
-        ('multiqc_quast_quast_minia.yaml',                         OrderedDict([('# Contigs (minia)', ['# contigs']),
-                                                                                ('# Contigs > 5kb (minia)', ['# contigs (>= 5000 bp)']),
-                                                                                ('Largest contig (minia)', ['Largest contig']),
-                                                                                ('% Genome fraction (minia)', ['Genome fraction (%)']),
-                                                                                ('N50 (minia)', ['N50'])])),
-        ('multiqc_bcftools_stats_bcftools_minia.yaml',             OrderedDict([('# SNPs (minia)', ['number_of_SNPs']),
-                                                                                ('# INDELs (minia)', ['number_of_indels'])])),
-        ('multiqc_snpeff_snpeff_minia.yaml',                       OrderedDict([('# Missense variants (minia)', ['MISSENSE'])]))
+        ('multiqc_fastp.yaml',                                     [('# Input reads', ['before_filtering','total_reads'])]),
+        #('multiqc_fastqc_fastqc_cutadapt.yaml',                    [('# Trimmed reads (Cutadapt)', ['Total Sequences'])]), ## HAVE TO MULTIPLY BY 2 FOR PE READS?
+        ('multiqc_quast_quast_spades.yaml',                        [('# Contigs (SPAdes)', ['# contigs']),
+                                                                    ('# Contigs > 5kb (SPAdes)', ['# contigs (>= 5000 bp)']),
+                                                                    ('Largest contig (SPAdes)', ['Largest contig']),
+                                                                    ('% Genome fraction (SPAdes)', ['Genome fraction (%)']),
+                                                                    ('N50 (SPAdes)', ['N50'])]),
+        ('multiqc_bcftools_stats_bcftools_spades.yaml',            [('# SNPs (SPAdes)', ['number_of_SNPs']),
+                                                                    ('# INDELs (SPAdes)', ['number_of_indels'])]),
+        ('multiqc_snpeff_snpeff_spades.yaml',                      [('# Missense variants (SPAdes)', ['MISSENSE'])]),
+        ('multiqc_quast_quast_metaspades.yaml',                    [('# Contigs (metaSPAdes)', ['# contigs']),
+                                                                    ('# Contigs > 5kb (metaSPAdes)', ['# contigs (>= 5000 bp)']),
+                                                                    ('Largest contig (metaSPAdes)', ['Largest contig']),
+                                                                    ('% Genome fraction (metaSPAdes)', ['Genome fraction (%)']),
+                                                                    ('N50 (metaSPAdes)', ['N50'])]),
+        ('multiqc_bcftools_stats_bcftools_metaspades.yaml',        [('# SNPs (metaSPAdes)', ['number_of_SNPs']),
+                                                                    ('# INDELs (metaSPAdes)', ['number_of_indels'])]),
+        ('multiqc_snpeff_snpeff_metaspades.yaml',                  [('# Missense variants (metaSPAdes)', ['MISSENSE'])]),
+        ('multiqc_quast_quast_unicycler.yaml',                     [('# Contigs (Unicycler)', ['# contigs']),
+                                                                    ('# Contigs > 5kb (Unicycler)', ['# contigs (>= 5000 bp)']),
+                                                                    ('Largest contig (Unicycler)', ['Largest contig']),
+                                                                    ('% Genome fraction (Unicycler)', ['Genome fraction (%)']),
+                                                                    ('N50 (Unicycler)', ['N50'])]),
+        ('multiqc_bcftools_stats_bcftools_unicycler.yaml',         [('# SNPs (Unicycler)', ['number_of_SNPs']),
+                                                                    ('# INDELs (Unicycler)', ['number_of_indels'])]),
+        ('multiqc_snpeff_snpeff_unicycler.yaml',                   [('# Missense variants (Unicycler)', ['MISSENSE'])]),
+        ('multiqc_quast_quast_minia.yaml',                         [('# Contigs (minia)', ['# contigs']),
+                                                                    ('# Contigs > 5kb (minia)', ['# contigs (>= 5000 bp)']),
+                                                                    ('Largest contig (minia)', ['Largest contig']),
+                                                                    ('% Genome fraction (minia)', ['Genome fraction (%)']),
+                                                                    ('N50 (minia)', ['N50'])]),
+        ('multiqc_bcftools_stats_bcftools_minia.yaml',             [('# SNPs (minia)', ['number_of_SNPs']),
+                                                                    ('# INDELs (minia)', ['number_of_indels'])]),
+        ('multiqc_snpeff_snpeff_minia.yaml',                       [('# Missense variants (minia)', ['MISSENSE'])])
     ]
 
-    ## Get variant calling metrics
-    VariantMetricsDict = {}
-    VariantFieldList = []
-    for yamlFile,mappingDict in VariantFileFieldList:
-        yamlFile = os.path.join(args.MULTIQC_DATA_DIR,yamlFile)
-        if os.path.exists(yamlFile):
-            VariantMetricsDict = yaml_fields_to_dict(YAMLFile=yamlFile,AppendDict=VariantMetricsDict,FieldMappingDict=mappingDict)
-            VariantFieldList += mappingDict.keys()
+    ## Write variant calling metrics to file
+    MetricsDict = metrics_dict_to_file(FileFieldList=VariantFileFieldList,
+                                       MultiQCDataDir=args.MULTIQC_DATA_DIR,
+                                       OutFile=args.OUT_FILE,
+                                       SectionHeader='## METRICS: VARIANT CALLING',
+                                       append=False)
 
-    ## Get assembly metrics
-    AssemblyMetricsDict = {}
-    AssemblyFieldList = []
-    for yamlFile,mappingDict in AssemblyFileFieldList:
-        yamlFile = os.path.join(args.MULTIQC_DATA_DIR,yamlFile)
-        if os.path.exists(yamlFile):
-            AssemblyMetricsDict = yaml_fields_to_dict(YAMLFile=yamlFile,AppendDict=AssemblyMetricsDict,FieldMappingDict=mappingDict)
-            AssemblyFieldList += mappingDict.keys()
-
-    ## Write to file
-    if VariantMetricsDict != {}:
-        make_dir(os.path.dirname(args.OUT_FILE))
-        fout = open(args.OUT_FILE,'w')
-        header = ['Sample'] + VariantFieldList
-        fout.write('## Variant-calling metrics\n')
-        fout.write('{}\n'.format('\t'.join(header)))
-        for k in sorted(VariantMetricsDict.keys()):
-            rowList = [k]
-            for field in VariantFieldList:
-                if field in VariantMetricsDict[k]:
-                    rowList.append(VariantMetricsDict[k][field])
-                else:
-                    rowList.append('NA')
-            fout.write('{}\n'.format('\t'.join(map(str,rowList))))
-        fout.close()
-
-    if AssemblyMetricsDict != {}:
-        spacing = '\n'
-        if VariantMetricsDict == {}:
-            spacing = ''
-        fout = open(args.OUT_FILE,'a')
-        header = ['Sample'] + AssemblyFieldList
-        fout.write('{}## De novo assembly metrics\n'.format(spacing))
-        fout.write('{}\n'.format('\t'.join(header)))
-        for k in sorted(AssemblyMetricsDict.keys()):
-            rowList = [k]
-            for field in AssemblyFieldList:
-                if field in AssemblyMetricsDict[k]:
-                    rowList.append(AssemblyMetricsDict[k][field])
-                else:
-                    rowList.append('NA')
-            fout.write('{}\n'.format('\t'.join(map(str,rowList))))
-        fout.close()
+    ## Write de novo assembly metrics to file
+    append = True
+    SectionHeader = '\n## METRICS: DE NOVO ASSEMBLY'
+    if MetricsDict == {}:
+        append = False
+        SectionHeader = SectionHeader.strip()
+    metrics_dict_to_file(FileFieldList=AssemblyFileFieldList,
+                         MultiQCDataDir=args.MULTIQC_DATA_DIR,
+                         OutFile=args.OUT_FILE,
+                         SectionHeader=SectionHeader,
+                         append=append)
 
 
 if __name__ == '__main__':
