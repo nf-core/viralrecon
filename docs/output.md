@@ -102,6 +102,8 @@ If multiple libraries/runs have been provided for the same sample in the input s
 
 ## Variant calling
 
+A file called `summary_variants_metrics.tsv` containing a selection of read and variant calling metrics will be saved in the `variants/` results directory.
+
 ### Bowtie 2
 
 [Bowtie 2](http://bio-bwa.sourceforge.net/) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. Bowtie 2 supports gapped, local, and paired-end alignment modes.
@@ -289,6 +291,8 @@ The functionality to call variants with BCFTools was inspired by work carried ou
 > **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'varscan2,ivar,bcftools') and the value of `<MAX_ALLELE_FREQ>` is determined by the `--max_allele_freq` parameter (Default: 0.8).
 
 ## De novo assembly
+
+A file called `summary_assembly_metrics.tsv` containing a selection of read and *de novo* assembly related metrics will be saved in the `assembly/` results directory.
 
 ### Cutadapt
 
