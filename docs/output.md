@@ -70,11 +70,7 @@ If multiple libraries/runs have been provided for the same sample in the input s
 * `preprocess/fastqc/zips/`
   * `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
 
-<p align="center">
-  <img width="600" src="images/mqc_fastqc_plot.png" alt="MultiQC - FastQC per base sequence plot"/>
-</p>
-
-![MultiQC - FastQC per base sequence plot](images/mqc_fastqc_plot_screenshot.png)
+![MultiQC - FastQC per base sequence plot](images/mqc_fastqc_plot.png)
 
 > **NB:** The FastQC plots in this directory are generated relative to the raw, input reads. They may contain adapter sequence and regions of low quality. To see how your reads look after trimming please refer to the FastQC reports in the `preprocess/fastp/fastqc/` directory.
 
@@ -96,11 +92,7 @@ If multiple libraries/runs have been provided for the same sample in the input s
 * `preprocess/fastp/fastqc/zips/`
   * `*.trim_fastqc.zip`: Zip archive containing the FastQC report.
 
-<p align="center">
-  <img width="600" src="images/mqc_fastp_plot.png" alt="MultiQC - fastp filtered reads plot"/>
-</p>
-
-![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot_screenshot.png)
+![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
 
 > **NB:** Post-trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
 
@@ -119,9 +111,7 @@ A file called `summary_variants_metrics.tsv` containing a selection of read and 
 * `variants/bowtie2/log/`
   * `<SAMPLE>.bowtie2.log`: Bowtie 2 mapping log file.
 
-<p align="center">
-  <img width="600" src="images/mqc_bowtie2_plot.png" alt="MultiQC - Bowtie2 alignment score plot"/>
-</p>
+![MultiQC - Bowtie2 alignment score plot](images/mqc_bowtie2_plot.png)
 
 ### SAMtools
 
@@ -135,9 +125,7 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 * `variants/bowtie2/samtools_stats/`
   * SAMtools `<SAMPLE>.sorted.bam.flagstat`, `<SAMPLE>.sorted.bam.idxstats` and `<SAMPLE>.sorted.bam.stats` files generated from the alignment files.
 
-<p align="center">
-  <img width="600" src="images/mqc_samtools_stats_plot.png" alt="MultiQC - SAMtools alignment scores plot"/>
-</p>
+![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
 
 > **NB:** BAM files and their associated indices will only be saved in the results directory if the `--save_align_intermeds` parameter is supplied.
 
@@ -155,6 +143,8 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 * `variants/bowtie2/log/`
   * `<SAMPLE>.trim.ivar.log`: iVar trim log file obtained from stdout.
 
+![MultiQC - iVar trim primer heatmap](images/mqc_ivar_trim_plot.png)
+
 > **NB:** Post-trimmed BAM files and their associated indices will only be saved in the results directory if the `--save_align_intermeds` parameter is supplied.
 
 ### picard MarkDuplicates
@@ -171,6 +161,8 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 * `variants/bowtie2/picard_metrics/`
   * `<SAMPLE>.<SUFFIX>.MarkDuplicates.metrics.txt`: Metrics file from MarkDuplicates.
 
+![MultiQC - Picard MarkDuplicates metrics plot](images/mqc_picard_duplicates_plot.png)
+
 > **NB:** The value of `<SUFFIX>` in the output file names above will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
 
 ### picard CollectMultipleMetrics
@@ -183,9 +175,9 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
   * `<SAMPLE>.<SUFFIX>.CollectMultipleMetrics.*`: Alignment QC files from picard CollectMultipleMetrics in `*_metrics` textual format and plotted in `*.pdf` format.
   * `<SAMPLE>.<SUFFIX>.CollectWgsMetrics.coverage_metrics`: Coverage metrics file from CollectWgsMetrics.
 
-<p align="center">
-  <img width="600" src="images/mqc_picard_insert_size_plot.png" alt="MultiQC - Picard insert size plot"/>
-</p>
+![MultiQC - Picard whole genome coverage plot](images/mqc_picard_wgs_coverage_plot.png)
+
+![MultiQC - Picard insert size plot](images/mqc_picard_insert_size_plot.png)
 
 > **NB:** The value of `<SUFFIX>` in the output file names above will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
 
@@ -215,9 +207,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 * `variants/bowtie2/mpileup/`
   * `<SAMPLE>.<SUFFIX>.mpileup`: mpileup files summarize all the data from aligned reads at a given genomic position. Each row of the mpileup file gives similar information to a single vertical column of reads as visualised in IGV.
 
-<p align="center">
-  <img width="600" src="images/mqc_bcftools_plot.png" alt="MultiQC - BCFTools variant counts"/>
-</p>
+![MultiQC - VarScan 2 variants called plot](images/mqc_varscan2_plot.png)
 
 > **NB:** The value of `<MAX_ALLELE_FREQ>` in the output file names above is determined by the `--max_allele_freq` parameter (Default: 0.8).  
 > **NB:** Output mpileup files will only be saved in the  directory if the `--save_mpileup` parameter is supplied. The naming convention for these files will depend on the preceeding steps that were run in the pipeline as described in the paragraph explaining the value of `<SUFFIX>` in the section above.
@@ -244,6 +234,8 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
   * `<SAMPLE>.bcftools_stats.txt`: Statistics and counts obtained from low frequency variants VCF file.
   * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.bcftools_stats.txt`: Statistics and counts obtained from high frequency variants VCF file.
 
+![MultiQC - iVar variants called plot](images/mqc_ivar_variants_plot.png)
+
 ### BCFTools and BEDTools
 
 [BCFtools](http://samtools.github.io/bcftools/bcftools.html) can be used to call variants directly from BAM alignment files. The functionality to call variants with BCFTools in this pipeline was inspired by work carried out by [Conor Walker](https://github.com/conorwalker/covid19/blob/3cb26ec399417bedb7e60487415c78a405f517d6/scripts/call_variants.sh). In contrast to VarScan 2 and iVar, the original variant calls obtained by BCFTools are not filtered further by a higher allele frequency. It seems that the default calls obtained by BCFTools appear to be comparable with the high frequency variants generated by VarScan 2 and iVar.
@@ -258,6 +250,8 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
   * `<SAMPLE>.consensus.masked.fa`: Masked consensus Fasta file.
 * `variants/bcftools/bcftools_stats/`
   * `<SAMPLE>.bcftools_stats.txt`: Statistics and counts obtained from VCF file.
+
+![MultiQC - BCFTools variant counts](images/mqc_bcftools_stats_plot.png)
 
 ### SnpEff and SnpSift
 
@@ -275,9 +269,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
   * `*.snpEff.vcf.gz.tbi`: Index for VCF file with variant annotations.
   * `*.snpSift.table.txt`: SnpSift summary table.
 
-<p align="center">
-  <img width="600" src="images/mqc_snpeff_plot.png" alt="MultiQC - SnpEff annotation counts"/>
-</p>
+![MultiQC - SnpEff annotation counts](images/mqc_snpeff_plot.png)
 
 > **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'varscan2,ivar,bcftools'). If applicable, you will have two sets of files where the file name prefix will be `<SAMPLE>` for low-frequency variants and `<SAMPLE>.AF<MAX_ALLELE_FREQ>` for high frequency variants.
 
@@ -435,9 +427,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 * `assembly/<ASSEMBLER>/quast/`
   * `report.html`: Results report in HTML format. Also available in various other file formats i.e. `report.pdf`, `report.tex`, `report.tsv` and `report.txt`.
 
-<p align="center">
-  <img width="600" src="images/mqc_quast_plot.png" alt="MultiQC - QUAST contig counts"/>
-</p>
+![MultiQC - QUAST contig counts](images/mqc_quast_plot.png)
 
 > **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
 
@@ -528,3 +518,5 @@ A number of genome-specific files are generated by the pipeline because they are
   * Reports generated by the pipeline: `pipeline_report.html`, `pipeline_report.txt` and `software_versions.csv`.
   * Reformatted samplesheet files used as input to the pipeline: `samplesheet.valid.csv`.
   * Documentation for interpretation of results in HTML format: `results_description.html`.
+
+![MultiQC - Software versions plot](images/mqc_versions_plot.png.png)
