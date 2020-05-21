@@ -615,8 +615,8 @@ ch_reads_all
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
-* STEP 2: Merge FastQ files with the same sample identifier
-*/
+ * STEP 2: Merge FastQ files with the same sample identifier
+ */
 process CAT_FASTQ {
     tag "$sample"
 
@@ -700,8 +700,8 @@ process FASTQC {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
-* STEP 4: Fastp adapter trimming and quality filtering
-*/
+ * STEP 4: Fastp adapter trimming and quality filtering
+ */
 if (!params.skip_adapter_trimming) {
     process FASTP {
         tag "$sample"
@@ -1399,6 +1399,8 @@ process IVAR_CONSENSUS {
     prefix = "${sample}.AF${params.max_allele_freq}"
     """
     cat $mpileup | ivar consensus -q $params.min_base_qual -t $params.max_allele_freq -m $params.min_coverage -n N -p ${prefix}.consensus
+    header=\$(head -n1 ${prefix}.consensus.fa | sed 's/>//g')
+    sed -i "s/\${header}/${sample}/g" ${prefix}.consensus.fa
     """
 }
 
