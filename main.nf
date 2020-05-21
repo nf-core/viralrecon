@@ -448,9 +448,9 @@ process CHECK_SAMPLESHEET {
     awk -F, '{if(\$1 != "" && \$2 != "") {print \$0}}' $samplesheet > nonsra_id.csv
     check_samplesheet.py nonsra_id.csv nonsra.samplesheet.csv
 
-    if $run_sra
+    awk -F, '{if(\$1 != "" && \$2 == "" && \$3 == "") {print \$1}}' $samplesheet > sra_id.list
+    if $run_sra && [ -s sra_id.list ]
     then
-        awk -F, '{if(\$1 != "" && \$2 == "" && \$3 == "") {print \$1}}' $samplesheet > sra_id.list
         fetch_sra_runinfo.py sra_id.list sra_run_info.tsv --platform ILLUMINA --library_layout SINGLE,PAIRED
         sra_runinfo_to_samplesheet.py sra_run_info.tsv sra.samplesheet.csv
     fi
@@ -1853,7 +1853,7 @@ if (!params.skip_kraken2) {
  */
 process SPADES {
     tag "$sample"
-    label 'process_medium'
+    label 'process_high'
     label 'error_ignore'
     publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode,
         saveAs: { filename ->
@@ -2133,7 +2133,7 @@ process SPADES_SNPEFF {
  */
 process METASPADES {
     tag "$sample"
-    label 'process_medium'
+    label 'process_high'
     label 'error_ignore'
     publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode,
     saveAs: { filename ->
@@ -2414,7 +2414,7 @@ process METASPADES_SNPEFF {
  */
 process UNICYCLER {
     tag "$sample"
-    label 'process_medium'
+    label 'process_high'
     label 'error_ignore'
     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode,
     saveAs: { filename ->
@@ -2693,7 +2693,7 @@ process UNICYCLER_SNPEFF {
  */
 process MINIA {
     tag "$sample"
-    label 'process_medium'
+    label 'process_high'
     label 'error_ignore'
     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}", mode: params.publish_dir_mode
 
@@ -3028,7 +3028,12 @@ process get_software_versions {
  */
 // TODO nf-core: Check MultiQC log and config to see if everything is working as expected
 process MULTIQC {
-    publishDir "${params.outdir}/multiqc", mode: params.publish_dir_mode
+    publishDir "${params.outdir}", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith("assembly_metrics.tsv")) "assembly/$filename"
+                      else if (filename.endsWith("variants_metrics.tsv")) "variants/$filename"
+                      else "multiqc/$filename"
+                }
 
     when:
     !params.skip_multiqc
@@ -3078,7 +3083,7 @@ process MULTIQC {
     output:
     path "*multiqc_report.html" into ch_multiqc_report
     path "*_data"
-    path "multiqc_plots"
+    path "*.tsv"
 
     script:
     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
@@ -3086,6 +3091,7 @@ process MULTIQC {
     custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
     """
     multiqc . -f $rtitle $rfilename $custom_config_file
+    multiqc_to_custom_tsv.py
     """
 }
 
