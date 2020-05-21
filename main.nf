@@ -1539,6 +1539,7 @@ process BCFTOOLS_VARIANTS {
     script:
     prefix = "${sample}.AF${params.max_allele_freq}"
     """
+    echo "$sample" > sample_name.list
     bcftools mpileup \\
         --count-orphans \\
         --no-BAQ \\
@@ -1549,6 +1550,7 @@ process BCFTOOLS_VARIANTS {
         ${bam[0]} \\
         | bcftools call --output-type v --ploidy 1 --keep-alts --keep-masked-ref --multiallelic-caller --variants-only \\
         | bcftools view --output-file ${sample}.vcf.gz --output-type z --include 'INFO/DP>=$params.min_coverage'
+    bcftools reheader --samples sample_name.list
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
     """
