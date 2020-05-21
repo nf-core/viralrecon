@@ -1156,6 +1156,7 @@ process VARSCAN2 {
     script:
     prefix = "${sample}.AF${params.max_allele_freq}"
     """
+    echo "$sample" > sample_name.list
     varscan mpileup2cns \\
         $mpileup \\
         --min-coverage $params.min_coverage \\
@@ -1164,6 +1165,7 @@ process VARSCAN2 {
         --min-var-freq 0.03 \\
         --p-value 0.99 \\
         --output-vcf 1 \\
+        --vcf-sample-list sample_name.list \\
         --variants \\
         2> ${sample}.varscan2.log \\
         | bgzip -c > ${sample}.vcf.gz
