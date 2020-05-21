@@ -1549,8 +1549,8 @@ process BCFTOOLS_VARIANTS {
         --annotate FORMAT/AD,FORMAT/ADF,FORMAT/ADR,FORMAT/DP,FORMAT/SP,INFO/AD,INFO/ADF,INFO/ADR \\
         ${bam[0]} \\
         | bcftools call --output-type v --ploidy 1 --keep-alts --keep-masked-ref --multiallelic-caller --variants-only \\
+        | bcftools reheader --samples sample_name.list \\
         | bcftools view --output-file ${sample}.vcf.gz --output-type z --include 'INFO/DP>=$params.min_coverage'
-    bcftools reheader --samples sample_name.list
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
     """
