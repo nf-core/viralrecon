@@ -615,8 +615,8 @@ ch_reads_all
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
-* STEP 2: Merge FastQ files with the same sample identifier
-*/
+ * STEP 2: Merge FastQ files with the same sample identifier
+ */
 process CAT_FASTQ {
     tag "$sample"
 
@@ -700,8 +700,8 @@ process FASTQC {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
-* STEP 4: Fastp adapter trimming and quality filtering
-*/
+ * STEP 4: Fastp adapter trimming and quality filtering
+ */
 if (!params.skip_adapter_trimming) {
     process FASTP {
         tag "$sample"
@@ -1156,6 +1156,7 @@ process VARSCAN2 {
     script:
     prefix = "${sample}.AF${params.max_allele_freq}"
     """
+    echo "$sample" > sample_name.list
     varscan mpileup2cns \\
         $mpileup \\
         --min-coverage $params.min_coverage \\
@@ -1164,6 +1165,7 @@ process VARSCAN2 {
         --min-var-freq 0.03 \\
         --p-value 0.99 \\
         --output-vcf 1 \\
+        --vcf-sample-list sample_name.list \\
         --variants \\
         2> ${sample}.varscan2.log \\
         | bgzip -c > ${sample}.vcf.gz
@@ -1399,6 +1401,8 @@ process IVAR_CONSENSUS {
     prefix = "${sample}.AF${params.max_allele_freq}"
     """
     cat $mpileup | ivar consensus -q $params.min_base_qual -t $params.max_allele_freq -m $params.min_coverage -n N -p ${prefix}.consensus
+    header=\$(head -n1 ${prefix}.consensus.fa | sed 's/>//g')
+    sed -i "s/\${header}/${sample}/g" ${prefix}.consensus.fa
     """
 }
 
@@ -1534,6 +1538,7 @@ process BCFTOOLS_VARIANTS {
 
     script:
     """
+    echo "$sample" > sample_name.list
     bcftools mpileup \\
         --count-orphans \\
         --no-BAQ \\
@@ -1542,51 +1547,52 @@ process BCFTOOLS_VARIANTS {
         --min-BQ $params.min_base_qual \\
         --annotate FORMAT/AD,FORMAT/ADF,FORMAT/ADR,FORMAT/DP,FORMAT/SP,INFO/AD,INFO/ADF,INFO/ADR \\
         ${bam[0]} \\
-        | bcftools call --output-type v --ploidy 1 --keep-alts --keep-masked-ref --multiallelic-caller \\
+        | bcftools call --output-type v --ploidy 1 --keep-alts --keep-masked-ref --multiallelic-caller --variants-only \\
+        | bcftools reheader --samples sample_name.list \\
         | bcftools view --output-file ${sample}.vcf.gz --output-type z --include 'INFO/DP>=$params.min_coverage'
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
     """
 }
 
-// /*
-//  * STEP 5.6.3.1: Genome consensus generation with BCFtools and masked with BEDTools
-//  */
-// process BCFTOOLS_CONSENSUS {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bcftools/consensus", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_variants && 'bcftools' in callers
-//
-//     input:
-//     tuple val(sample), val(single_end), path(bam), path(vcf) from ch_markdup_bam_bcftools_consensus.join(ch_bcftools_variants_consensus, by: [0,1])
-//     path fasta from ch_fasta
-//
-//     output:
-//     tuple val(sample), val(single_end), path("*consensus.masked.fa") into ch_bcftools_consensus_masked
-//     path "*consensus.fa"
-//
-//     script:
-//     """
-//     cat $fasta | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
-//
-//     bedtools genomecov \\
-//         -bga \\
-//         -ibam ${bam[0]} \\
-//         -g $fasta \\
-//         | awk '\$4 < $params.min_coverage' | bedtools merge > ${sample}.mask.bed
-//
-//     bedtools maskfasta \\
-//         -fi ${sample}.consensus.fa \\
-//         -bed ${sample}.mask.bed \\
-//         -fo ${sample}.consensus.masked.fa
-//     sed -i 's/${index_base}/${sample}/g' ${sample}.consensus.masked.fa
-//     header=\$(head -n1 ${sample}.consensus.masked.fa | sed 's/>//g')
-//     sed -i "s/\${header}/${sample}/g" ${sample}.consensus.masked.fa
-//     """
-// }
+/*
+ * STEP 5.6.3.1: Genome consensus generation with BCFtools and masked with BEDTools
+ */
+process BCFTOOLS_CONSENSUS {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/bcftools/consensus", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants && 'bcftools' in callers
+
+    input:
+    tuple val(sample), val(single_end), path(bam), path(vcf) from ch_markdup_bam_bcftools_consensus.join(ch_bcftools_variants_consensus, by: [0,1])
+    path fasta from ch_fasta
+
+    output:
+    tuple val(sample), val(single_end), path("*consensus.masked.fa") into ch_bcftools_consensus_masked
+    path "*consensus.fa"
+
+    script:
+    """
+    cat $fasta | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
+
+    bedtools genomecov \\
+        -bga \\
+        -ibam ${bam[0]} \\
+        -g $fasta \\
+        | awk '\$4 < $params.min_coverage' | bedtools merge > ${sample}.mask.bed
+
+    bedtools maskfasta \\
+        -fi ${sample}.consensus.fa \\
+        -bed ${sample}.mask.bed \\
+        -fo ${sample}.consensus.masked.fa
+    sed -i 's/${index_base}/${sample}/g' ${sample}.consensus.masked.fa
+    header=\$(head -n1 ${sample}.consensus.masked.fa | sed 's/>//g')
+    sed -i "s/\${header}/${sample}/g" ${sample}.consensus.masked.fa
+    """
+}
 
 /*
  * STEP 5.6.3.2: BCFTools variant calling annotation with SnpEff and SnpSift
@@ -1635,35 +1641,35 @@ process BCFTOOLS_SNPEFF {
     	"""
 }
 
-// /*
-//  * STEP 5.6.3.3: BCFTools consensus sequence report with QUAST
-//  */
-// process BCFTOOLS_QUAST {
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode
-//
-//     when:
-//     !params.skip_variants && 'bcftools' in callers && !params.skip_variants_quast
-//
-//     input:
-//     path consensus from ch_bcftools_consensus_masked.collect{ it[2] }
-//     path fasta from ch_fasta
-//     path gff from ch_gff
-//
-//     output:
-//     path "quast" into ch_bcftools_quast_mqc
-//
-//     script:
-//     features = params.gff ? "--features $gff" : ""
-//     """
-//     quast.py \\
-//         --output-dir quast \\
-//         -r $fasta \\
-//         $features \\
-//         --threads $task.cpus \\
-//         ${consensus.join(' ')}
-//     """
-// }
+/*
+ * STEP 5.6.3.3: BCFTools consensus sequence report with QUAST
+ */
+process BCFTOOLS_QUAST {
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants && 'bcftools' in callers && !params.skip_variants_quast
+
+    input:
+    path consensus from ch_bcftools_consensus_masked.collect{ it[2] }
+    path fasta from ch_fasta
+    path gff from ch_gff
+
+    output:
+    path "quast" into ch_bcftools_quast_mqc
+
+    script:
+    features = params.gff ? "--features $gff" : ""
+    """
+    quast.py \\
+        --output-dir quast \\
+        -r $fasta \\
+        $features \\
+        --threads $task.cpus \\
+        ${consensus.join(' ')}
+    """
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -3061,7 +3067,7 @@ process MULTIQC {
     path ('ivar/consensus/quast/highfreq/*') from ch_ivar_quast_mqc.collect().ifEmpty([])
     path ('bcftools/variants/bcftools/*') from ch_bcftools_variants_mqc.collect().ifEmpty([])
     path ('bcftools/variants/snpeff/*') from ch_bcftools_snpeff_mqc.collect().ifEmpty([])
-    //path ('bcftools/consensus/quast/*') from ch_bcftools_quast_mqc.collect().ifEmpty([])
+    path ('bcftools/consensus/quast/*') from ch_bcftools_quast_mqc.collect().ifEmpty([])
     path ('cutadapt/log/*') from ch_cutadapt_mqc.collect().ifEmpty([])
     path ('cutadapt/fastqc/*') from ch_cutadapt_fastqc_mqc.collect().ifEmpty([])
     path ('kraken2/*') from ch_kraken2_report_mqc.collect().ifEmpty([])
