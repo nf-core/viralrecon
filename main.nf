@@ -1537,7 +1537,6 @@ process BCFTOOLS_VARIANTS {
     path "*.bcftools_stats.txt" into ch_bcftools_variants_mqc
 
     script:
-    prefix = "${sample}.AF${params.max_allele_freq}"
     """
     echo "$sample" > sample_name.list
     bcftools mpileup \\
