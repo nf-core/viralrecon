@@ -74,6 +74,8 @@ If multiple libraries/runs have been provided for the same sample in the input s
   <img width="600" src="images/mqc_fastqc_plot.png" alt="MultiQC - FastQC per base sequence plot"/>
 </p>
 
+![MultiQC - FastQC per base sequence plot](images/mqc_fastqc_plot_screenshot.png)
+
 > **NB:** The FastQC plots in this directory are generated relative to the raw, input reads. They may contain adapter sequence and regions of low quality. To see how your reads look after trimming please refer to the FastQC reports in the `preprocess/fastp/fastqc/` directory.
 
 ### fastp
@@ -97,6 +99,8 @@ If multiple libraries/runs have been provided for the same sample in the input s
 <p align="center">
   <img width="600" src="images/mqc_fastp_plot.png" alt="MultiQC - fastp filtered reads plot"/>
 </p>
+
+![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot_screenshot.png)
 
 > **NB:** Post-trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
 
