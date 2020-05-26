@@ -37,6 +37,8 @@ def find_tag(d, tag):
 
 
 def yaml_fields_to_dict(YAMLFile,AppendDict={},FieldMappingList=[],ValidSampleList=[]):
+    intFields = ['number_of_SNPs', 'number_of_indels', 'MISSENSE',
+                 '# contigs (>= 0 bp)', '# contigs (>= 5000 bp)', 'Largest contig']
     with open(YAMLFile) as f:
         yaml_dict = yaml.safe_load(f)
         for k in yaml_dict.keys():
@@ -59,7 +61,7 @@ def yaml_fields_to_dict(YAMLFile,AppendDict={},FieldMappingList=[],ValidSampleLi
                         val = val[0]
                         if len(j) == 2:
                             val = list(find_tag(val, j[1]))[0]
-                        if j[0] in ['number_of_SNPs', 'number_of_indels', 'MISSENSE']:
+                        if j[0] in intFields:
                             val = int(val)
                         if i not in AppendDict[key]:
                             AppendDict[key][i] = val
@@ -131,24 +133,25 @@ def main(args=None):
 
     AssemblyFileFieldList = [
         ('multiqc_fastp.yaml',                                     [('# Input reads', ['before_filtering','total_reads'])]),
-        #('multiqc_cutadapt.yaml',                                  [('# Trimmed reads (Cutadapt)', ['r_written'])]),
-        #('multiqc_kraken.yaml',                                  [('# Trimmed reads (Cutadapt)', ['r_written'])]),
+        #('multiqc_cutadapt.yaml',                                 [('# Trimmed reads (Cutadapt)', ['r_written'])]),
+        #('multiqc_kraken.yaml',                                   [('% Host reads', ['r_written']),
+        #                                                           ('% Unclassified reads', ['r_written'])]),
         ('multiqc_quast_quast_spades.yaml',                        [('# Contigs (SPAdes)', ['# contigs (>= 0 bp)']),
                                                                     ('# Contigs > 5kb (SPAdes)', ['# contigs (>= 5000 bp)']),
                                                                     ('Largest contig (SPAdes)', ['Largest contig']),
                                                                     ('% Genome fraction (SPAdes)', ['Genome fraction (%)']),
                                                                     ('N50 (SPAdes)', ['N50'])]),
-        ('multiqc_quast_quast_metaspades.yaml',                    [('# Contigs (metaSPAdes)', ['# contigs']),
+        ('multiqc_quast_quast_metaspades.yaml',                    [('# Contigs (metaSPAdes)', ['# contigs (>= 0 bp)']),
                                                                     ('# Contigs > 5kb (metaSPAdes)', ['# contigs (>= 5000 bp)']),
                                                                     ('Largest contig (metaSPAdes)', ['Largest contig']),
                                                                     ('% Genome fraction (metaSPAdes)', ['Genome fraction (%)']),
                                                                     ('N50 (metaSPAdes)', ['N50'])]),
-        ('multiqc_quast_quast_unicycler.yaml',                     [('# Contigs (Unicycler)', ['# contigs']),
+        ('multiqc_quast_quast_unicycler.yaml',                     [('# Contigs (Unicycler)', ['# contigs (>= 0 bp)']),
                                                                     ('# Contigs > 5kb (Unicycler)', ['# contigs (>= 5000 bp)']),
                                                                     ('Largest contig (Unicycler)', ['Largest contig']),
                                                                     ('% Genome fraction (Unicycler)', ['Genome fraction (%)']),
                                                                     ('N50 (Unicycler)', ['N50'])]),
-        ('multiqc_quast_quast_minia.yaml',                         [('# Contigs (minia)', ['# contigs']),
+        ('multiqc_quast_quast_minia.yaml',                         [('# Contigs (minia)', ['# contigs (>= 0 bp)']),
                                                                     ('# Contigs > 5kb (minia)', ['# contigs (>= 5000 bp)']),
                                                                     ('Largest contig (minia)', ['Largest contig']),
                                                                     ('% Genome fraction (minia)', ['Genome fraction (%)']),
