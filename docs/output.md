@@ -1,6 +1,6 @@
 # ![nf-core/viralrecon](images/nf-core-viralrecon_logo.png)
 
-This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
+This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline. Please click [here](https://raw.githack.com/nf-core/viralrecon/master/docs/html/multiqc_report.html) to see an example MultiQC report generated using the parameters defined in [this](../conf/test_full.config) file to run the pipeline on [samples](https://zenodo.org/record/3735111) which were prepared from the [ncov-2019 ARTIC Network V1 amplicon set](https://artic.network/ncov-2019) and sequenced on the Illumina MiSeq platform in 301bp paired-end format.
 
 The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
@@ -98,7 +98,7 @@ If multiple libraries/runs have been provided for the same sample in the input s
 
 ## Variant calling
 
-A file called `summary_variants_metrics.tsv` containing a selection of read and variant calling metrics will be saved in the `variants/` results directory.
+A file called `summary_variants_metrics_mqc.tsv` containing a selection of read and variant calling metrics will be saved in the `variants/` results directory. The same metrics have also been added to the top of the MultiQC report.
 
 ### Bowtie 2
 
@@ -286,7 +286,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 ## De novo assembly
 
-A file called `summary_assembly_metrics.tsv` containing a selection of read and *de novo* assembly related metrics will be saved in the `assembly/` results directory.
+A file called `summary_assembly_metrics_mqc.tsv` containing a selection of read and *de novo* assembly related metrics will be saved in the `assembly/` results directory. The same metrics have also been added to the top of the MultiQC report.
 
 ### Cutadapt
 
