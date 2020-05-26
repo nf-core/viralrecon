@@ -3099,6 +3099,7 @@ process MULTIQC {
     """
     multiqc . -f $rtitle $rfilename $custom_config_file
     multiqc_to_custom_tsv.py
+    multiqc . -f $rtitle $rfilename $custom_config_file
     """
 }
 
