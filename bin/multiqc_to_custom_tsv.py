@@ -131,7 +131,7 @@ def main(args=None):
 
     AssemblyFileFieldList = [
         ('multiqc_fastp.yaml',                                     [('# Input reads', ['before_filtering','total_reads'])]),
-        ('multiqc_cutadapt.yaml',                                  [('# Trimmed reads (Cutadapt)', ['r_written'])]),
+        #('multiqc_cutadapt.yaml',                                  [('# Trimmed reads (Cutadapt)', ['r_written'])]),
         #('multiqc_kraken.yaml',                                  [('# Trimmed reads (Cutadapt)', ['r_written'])]),
         ('multiqc_quast_quast_spades.yaml',                        [('# Contigs (SPAdes)', ['# contigs (>= 0 bp)']),
                                                                     ('# Contigs > 5kb (SPAdes)', ['# contigs (>= 5000 bp)']),
