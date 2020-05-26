@@ -81,9 +81,7 @@ The nf-core/viralrecon pipeline comes with documentation about the pipeline, fou
 
 ## Credits
 
-nf-core/viralrecon was originally written by Sarai Varona, Miguel Juliá and Sara Monzon from [BU-ISCIII](https://github.com/BU-ISCIII) and co-ordinated by Isabel Cuesta for the [Institute of Health Carlos III](https://eng.isciii.es/eng.isciii.es/Paginas/Inicio.html), Spain.
-
-Through collaboration with the nf-core community the pipeline has now been updated substantially to include additional processing steps and to standardise inputs/outputs.
+nf-core/viralrecon was originally written by Sarai Varona, Miguel Juliá and Sara Monzon from [BU-ISCIII](https://github.com/BU-ISCIII) and co-ordinated by Isabel Cuesta for the [Institute of Health Carlos III](https://eng.isciii.es/eng.isciii.es/Paginas/Inicio.html), Spain. Through collaboration with the nf-core community the pipeline has now been updated substantially to include additional processing steps, to standardise inputs/outputs and to improve the pipeline reporting.
 
 Many thanks to others who have helped out and contributed along the way too, including (but not limited to):
 
