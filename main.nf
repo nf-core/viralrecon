@@ -1835,6 +1835,7 @@ if (!params.skip_kraken2) {
             --unclassified-out $unclassified \\
             --classified-out $classified \\
             --report ${sample}.kraken2.report.txt \\
+            --report-zero-counts \\
             $pe \\
             --gzip-compressed \\
             $reads
