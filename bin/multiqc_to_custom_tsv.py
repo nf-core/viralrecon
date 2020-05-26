@@ -36,18 +36,25 @@ def find_tag(d, tag):
                 yield i
 
 
-def yaml_fields_to_dict(YAMLFile,AppendDict={},FieldMappingList=[]):
+def yaml_fields_to_dict(YAMLFile,AppendDict={},FieldMappingList=[],ValidSampleList=[]):
     with open(YAMLFile) as f:
         yaml_dict = yaml.safe_load(f)
         for k in yaml_dict.keys():
             key = k
-            if YAMLFile.find('multiqc_picard_insertSize') != -1:
+            if os.path.basename(YAMLFile).startswith('multiqc_picard_insertSize'):
                 key = k[:-3]
+            if os.path.basename(YAMLFile).startswith('multiqc_cutadapt'):
+                names = [x for x in ValidSampleList if key.startswith(x)]
+                if names != []:
+                    key = names[0]
             if key not in AppendDict:
                 AppendDict[key] = {}
             if FieldMappingList != []:
                 for i,j in FieldMappingList:
                     val = list(find_tag(yaml_dict[k], j[0]))
+                    ## Fix for Cutadapt reporting reads/pairs as separate values
+                    if j[0] == 'r_written' and len(val) == 0:
+                        val = [list(find_tag(yaml_dict[k], 'pairs_written'))[0] * 2]
                     if len(val) != 0:
                         val = val[0]
                         if len(j) == 2:
@@ -63,14 +70,17 @@ def yaml_fields_to_dict(YAMLFile,AppendDict={},FieldMappingList=[]):
     return AppendDict
 
 
-def metrics_dict_to_file(FileFieldList,MultiQCDataDir,OutFile):
+def metrics_dict_to_file(FileFieldList,MultiQCDataDir,OutFile,ValidSampleList=[]):
     MetricsDict = {}
     FieldList = []
     for yamlFile,mappingList in FileFieldList:
         yamlFile = os.path.join(MultiQCDataDir,yamlFile)
         if os.path.exists(yamlFile):
-            MetricsDict = yaml_fields_to_dict(YAMLFile=yamlFile,AppendDict=MetricsDict,FieldMappingList=mappingList)
+            MetricsDict = yaml_fields_to_dict(YAMLFile=yamlFile,AppendDict=MetricsDict,FieldMappingList=mappingList,ValidSampleList=ValidSampleList)
             FieldList += [x[0] for x in mappingList]
+        else:
+            print('WARNING: File does not exist: {}'.format(yamlFile))
+
     if MetricsDict != {}:
         make_dir(os.path.dirname(OutFile))
         fout = open(OutFile,'w')
@@ -121,7 +131,8 @@ def main(args=None):
 
     AssemblyFileFieldList = [
         ('multiqc_fastp.yaml',                                     [('# Input reads', ['before_filtering','total_reads'])]),
-        #('multiqc_fastqc_fastqc_cutadapt.yaml',                    [('# Trimmed reads (Cutadapt)', ['Total Sequences'])]), ## HAVE TO MULTIPLY BY 2 FOR PE READS?
+        ('multiqc_cutadapt.yaml',                                  [('# Trimmed reads (Cutadapt)', ['r_written'])]),
+        #('multiqc_kraken.yaml',                                  [('# Trimmed reads (Cutadapt)', ['r_written'])]),
         ('multiqc_quast_quast_spades.yaml',                        [('# Contigs (SPAdes)', ['# contigs (>= 0 bp)']),
                                                                     ('# Contigs > 5kb (SPAdes)', ['# contigs (>= 5000 bp)']),
                                                                     ('Largest contig (SPAdes)', ['Largest contig']),
@@ -156,15 +167,28 @@ def main(args=None):
         ('multiqc_snpeff_snpeff_minia.yaml',                       [('# Missense variants (minia)', ['MISSENSE'])])
     ]
 
+    ## Dictionary of samples being single-end/paired-end
+    isPEDict = {}
+    yamlFile = os.path.join(args.MULTIQC_DATA_DIR,'multiqc_fastp.yaml')
+    if os.path.exists(yamlFile):
+        MetricsDict = yaml_fields_to_dict(YAMLFile=yamlFile,AppendDict={},FieldMappingList=[('command', ['command'])])
+        for sample,val in MetricsDict.items():
+            if MetricsDict[sample]['command'].find('--out2') != -1:
+                isPEDict[sample] = True
+            else:
+                isPEDict[sample] = False
+
     ## Write variant calling metrics to file
     metrics_dict_to_file(FileFieldList=VariantFileFieldList,
                          MultiQCDataDir=args.MULTIQC_DATA_DIR,
-                         OutFile=args.OUT_PREFIX+'_variants_metrics.tsv')
+                         OutFile=args.OUT_PREFIX+'_variants_metrics_mqc.tsv',
+                         ValidSampleList=isPEDict.keys())
 
     ## Write de novo assembly metrics to file
     metrics_dict_to_file(FileFieldList=AssemblyFileFieldList,
                          MultiQCDataDir=args.MULTIQC_DATA_DIR,
-                         OutFile=args.OUT_PREFIX+'_assembly_metrics.tsv')
+                         OutFile=args.OUT_PREFIX+'_assembly_metrics_mqc.tsv',
+                         ValidSampleList=isPEDict.keys())
 
 
 if __name__ == '__main__':
