@@ -106,9 +106,9 @@ A file called `summary_variants_metrics_mqc.tsv` containing a selection of read 
 
 **Output files:**
 
-* `variants/bowtie2/`
+* `variants/bam/`
   * `<SAMPLE>.bam`: Original BAM file created by Bowtie 2. Only present if `--save_align_intermeds` parameter is supplied.
-* `variants/bowtie2/log/`
+* `variants/bam/log/`
   * `<SAMPLE>.bowtie2.log`: Bowtie 2 mapping log file.
 
 ![MultiQC - Bowtie2 alignment score plot](images/mqc_bowtie2_plot.png)
@@ -119,10 +119,10 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 
 **Output files:**
 
-* `variants/bowtie2/`
+* `variants/bam/`
   * `<SAMPLE>.sorted.bam`: Coordinate sorted BAM file containing read alignment information.
   * `<SAMPLE>.sorted.bam.bai`: Index file for coordinate sorted BAM file.
-* `variants/bowtie2/samtools_stats/`
+* `variants/bam/samtools_stats/`
   * SAMtools `<SAMPLE>.sorted.bam.flagstat`, `<SAMPLE>.sorted.bam.idxstats` and `<SAMPLE>.sorted.bam.stats` files generated from the alignment files.
 
 ![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
@@ -135,12 +135,12 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 
 **Output files:**
 
-* `variants/bowtie2/`
+* `variants/bam/`
   * `<SAMPLE>.trim.sorted.bam`: Coordinate sorted BAM file after primer trimming.
   * `<SAMPLE>.trim.sorted.bam.bai`: Index file for coordinate sorted BAM file after primer trimming.
-* `variants/bowtie2/samtools_stats/`
+* `variants/bam/samtools_stats/`
   * SAMtools `<SAMPLE>.trim.flagstat`, `<SAMPLE>.trim.idxstats` and `<SAMPLE>.trim.stats` files generated from the primer trimmed alignment files.
-* `variants/bowtie2/log/`
+* `variants/bam/log/`
   * `<SAMPLE>.trim.ivar.log`: iVar trim log file obtained from stdout.
 
 ![MultiQC - iVar trim primer heatmap](images/mqc_ivar_trim_plot.png)
@@ -153,12 +153,12 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 **Output files:**
 
-* `variants/bowtie2/`
+* `variants/bam/`
   * `<SAMPLE>.<SUFFIX>.sorted.bam`: Coordinate sorted BAM file after duplicate marking.
   * `<SAMPLE>.<SUFFIX>.sorted.bam.bai`: Index file for coordinate sorted BAM file after duplicate marking.
-* `variants/bowtie2/samtools_stats/`
+* `variants/bam/samtools_stats/`
   * SAMtools `<SAMPLE>.<SUFFIX>.flagstat`, `<SAMPLE>.<SUFFIX>.idxstats` and `<SAMPLE>.<SUFFIX>.stats` files generated from the duplicate marked alignment files.
-* `variants/bowtie2/picard_metrics/`
+* `variants/bam/picard_metrics/`
   * `<SAMPLE>.<SUFFIX>.MarkDuplicates.metrics.txt`: Metrics file from MarkDuplicates.
 
 ![MultiQC - Picard MarkDuplicates metrics plot](images/mqc_picard_duplicates_plot.png)
@@ -171,7 +171,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 **Output files:**
 
-* `variants/bowtie2/picard_metrics/`  
+* `variants/bam/picard_metrics/`  
   * `<SAMPLE>.<SUFFIX>.CollectMultipleMetrics.*`: Alignment QC files from picard CollectMultipleMetrics in `*_metrics` textual format and plotted in `*.pdf` format.
   * `<SAMPLE>.<SUFFIX>.CollectWgsMetrics.coverage_metrics`: Coverage metrics file from CollectWgsMetrics.
 
@@ -204,7 +204,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 * `variants/varscan2/bcftools_stats/`
   * `<SAMPLE>.bcftools_stats.txt`: Statistics and counts obtained from low frequency variants VCF file.
   * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.bcftools_stats.txt`: Statistics and counts obtained from high frequency variants VCF file.
-* `variants/bowtie2/mpileup/`
+* `variants/bam/mpileup/`
   * `<SAMPLE>.<SUFFIX>.mpileup`: mpileup files summarize all the data from aligned reads at a given genomic position. Each row of the mpileup file gives similar information to a single vertical column of reads as visualised in IGV.
 
 ![MultiQC - VarScan 2 variants called plot](images/mqc_varscan2_plot.png)
