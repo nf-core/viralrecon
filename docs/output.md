@@ -303,6 +303,8 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 * `assembly/cutadapt/fastqc/zips/`
   * `*.ptrim_fastqc.zip`: Zip archive containing the FastQC report.
 
+![MultiQC - Cutadapt filtered reads plot](images/mqc_cutadapt_plot.png)
+
 > **NB:** Trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
 
 ### Kraken 2
@@ -317,6 +319,8 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.host*.fastq.gz`: Reads that were classified to the host database.
   * `*.viral*.fastq.gz`: Reads that were unclassified to the host database.
   * `*.kraken2.report.txt`: Kraken 2 taxonomic report. See [here](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual#sample-report-output-format) for a detailed description of the format.
+
+![MultiQC - Kraken 2 classification plot](images/mqc_kraken2_plot.png)
 
 > **NB:** Output FastQ files will only be saved in the results directory if the `--save_kraken2_fastq` parameter is supplied.
 
