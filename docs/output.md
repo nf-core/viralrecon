@@ -1,6 +1,6 @@
 # ![nf-core/viralrecon](images/nf-core-viralrecon_logo.png)
 
-This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
+This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline. Please click [here](https://raw.githack.com/nf-core/viralrecon/master/docs/html/multiqc_report.html) to see an example MultiQC report generated using the parameters defined in [this](../conf/test_full.config) file to run the pipeline on [samples](https://zenodo.org/record/3735111) which were prepared from the [ncov-2019 ARTIC Network V1 amplicon set](https://artic.network/ncov-2019) and sequenced on the Illumina MiSeq platform in 301bp paired-end format.
 
 The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
@@ -41,7 +41,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 ### parallel-fastq-dump
 
-Please see the [usage docs](usage.md#supported-public-repository-ids) for a list of supported public repository identifiers and how to provide them to the pipeline. The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well as their associated md5sums. If a download link exists, the files will be downloaded by FTP otherwise they will be downloaded using [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump).
+Please see the [usage docs](usage.md#supported-public-repository-ids) for a list of supported public repository identifiers and how to provide them to the pipeline. The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well as their associated md5sums. If a download link exists, the files will be downloaded by FTP otherwise they will be downloaded using [parallel-fastq-dump](https://github.com/rvalieris/parallel-fastq-dump).
 
 **Output files:**
 
@@ -98,7 +98,7 @@ If multiple libraries/runs have been provided for the same sample in the input s
 
 ## Variant calling
 
-A file called `summary_variants_metrics.tsv` containing a selection of read and variant calling metrics will be saved in the `variants/` results directory.
+A file called `summary_variants_metrics_mqc.tsv` containing a selection of read and variant calling metrics will be saved in the `variants/` results directory. The same metrics have also been added to the top of the MultiQC report.
 
 ### Bowtie 2
 
@@ -106,9 +106,9 @@ A file called `summary_variants_metrics.tsv` containing a selection of read and 
 
 **Output files:**
 
-* `variants/bowtie2/`
+* `variants/bam/`
   * `<SAMPLE>.bam`: Original BAM file created by Bowtie 2. Only present if `--save_align_intermeds` parameter is supplied.
-* `variants/bowtie2/log/`
+* `variants/bam/log/`
   * `<SAMPLE>.bowtie2.log`: Bowtie 2 mapping log file.
 
 ![MultiQC - Bowtie2 alignment score plot](images/mqc_bowtie2_plot.png)
@@ -119,10 +119,10 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 
 **Output files:**
 
-* `variants/bowtie2/`
+* `variants/bam/`
   * `<SAMPLE>.sorted.bam`: Coordinate sorted BAM file containing read alignment information.
   * `<SAMPLE>.sorted.bam.bai`: Index file for coordinate sorted BAM file.
-* `variants/bowtie2/samtools_stats/`
+* `variants/bam/samtools_stats/`
   * SAMtools `<SAMPLE>.sorted.bam.flagstat`, `<SAMPLE>.sorted.bam.idxstats` and `<SAMPLE>.sorted.bam.stats` files generated from the alignment files.
 
 ![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
@@ -135,12 +135,12 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 
 **Output files:**
 
-* `variants/bowtie2/`
+* `variants/bam/`
   * `<SAMPLE>.trim.sorted.bam`: Coordinate sorted BAM file after primer trimming.
   * `<SAMPLE>.trim.sorted.bam.bai`: Index file for coordinate sorted BAM file after primer trimming.
-* `variants/bowtie2/samtools_stats/`
+* `variants/bam/samtools_stats/`
   * SAMtools `<SAMPLE>.trim.flagstat`, `<SAMPLE>.trim.idxstats` and `<SAMPLE>.trim.stats` files generated from the primer trimmed alignment files.
-* `variants/bowtie2/log/`
+* `variants/bam/log/`
   * `<SAMPLE>.trim.ivar.log`: iVar trim log file obtained from stdout.
 
 ![MultiQC - iVar trim primer heatmap](images/mqc_ivar_trim_plot.png)
@@ -153,12 +153,12 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 **Output files:**
 
-* `variants/bowtie2/`
+* `variants/bam/`
   * `<SAMPLE>.<SUFFIX>.sorted.bam`: Coordinate sorted BAM file after duplicate marking.
   * `<SAMPLE>.<SUFFIX>.sorted.bam.bai`: Index file for coordinate sorted BAM file after duplicate marking.
-* `variants/bowtie2/samtools_stats/`
+* `variants/bam/samtools_stats/`
   * SAMtools `<SAMPLE>.<SUFFIX>.flagstat`, `<SAMPLE>.<SUFFIX>.idxstats` and `<SAMPLE>.<SUFFIX>.stats` files generated from the duplicate marked alignment files.
-* `variants/bowtie2/picard_metrics/`
+* `variants/bam/picard_metrics/`
   * `<SAMPLE>.<SUFFIX>.MarkDuplicates.metrics.txt`: Metrics file from MarkDuplicates.
 
 ![MultiQC - Picard MarkDuplicates metrics plot](images/mqc_picard_duplicates_plot.png)
@@ -171,7 +171,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 **Output files:**
 
-* `variants/bowtie2/picard_metrics/`  
+* `variants/bam/picard_metrics/`  
   * `<SAMPLE>.<SUFFIX>.CollectMultipleMetrics.*`: Alignment QC files from picard CollectMultipleMetrics in `*_metrics` textual format and plotted in `*.pdf` format.
   * `<SAMPLE>.<SUFFIX>.CollectWgsMetrics.coverage_metrics`: Coverage metrics file from CollectWgsMetrics.
 
@@ -204,7 +204,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 * `variants/varscan2/bcftools_stats/`
   * `<SAMPLE>.bcftools_stats.txt`: Statistics and counts obtained from low frequency variants VCF file.
   * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.bcftools_stats.txt`: Statistics and counts obtained from high frequency variants VCF file.
-* `variants/bowtie2/mpileup/`
+* `variants/bam/mpileup/`
   * `<SAMPLE>.<SUFFIX>.mpileup`: mpileup files summarize all the data from aligned reads at a given genomic position. Each row of the mpileup file gives similar information to a single vertical column of reads as visualised in IGV.
 
 ![MultiQC - VarScan 2 variants called plot](images/mqc_varscan2_plot.png)
@@ -286,7 +286,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 ## De novo assembly
 
-A file called `summary_assembly_metrics.tsv` containing a selection of read and *de novo* assembly related metrics will be saved in the `assembly/` results directory.
+A file called `summary_assembly_metrics_mqc.tsv` containing a selection of read and *de novo* assembly related metrics will be saved in the `assembly/` results directory. The same metrics have also been added to the top of the MultiQC report.
 
 ### Cutadapt
 
@@ -303,6 +303,8 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 * `assembly/cutadapt/fastqc/zips/`
   * `*.ptrim_fastqc.zip`: Zip archive containing the FastQC report.
 
+![MultiQC - Cutadapt filtered reads plot](images/mqc_cutadapt_plot.png)
+
 > **NB:** Trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
 
 ### Kraken 2
@@ -317,6 +319,8 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.host*.fastq.gz`: Reads that were classified to the host database.
   * `*.viral*.fastq.gz`: Reads that were unclassified to the host database.
   * `*.kraken2.report.txt`: Kraken 2 taxonomic report. See [here](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual#sample-report-output-format) for a detailed description of the format.
+
+![MultiQC - Kraken 2 classification plot](images/mqc_kraken2_plot.png)
 
 > **NB:** Output FastQ files will only be saved in the results directory if the `--save_kraken2_fastq` parameter is supplied.
 
@@ -433,13 +437,13 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 ### Minimap2, seqwish, vg
 
-[`Minimap2`](https://github.com/lh3/minimap2) is a versatile sequence alignment program that aligns DNA or mRNA sequences against a large reference database. Minimap2 was used to generate all-versus-all alignments between scaffold assembly contigs and the reference genome.
+[Minimap2](https://github.com/lh3/minimap2) is a versatile sequence alignment program that aligns DNA or mRNA sequences against a large reference database. Minimap2 was used to generate all-versus-all alignments between scaffold assembly contigs and the reference genome.
 
-[`seqwish`](https://github.com/ekg/seqwish) implements a lossless conversion from pairwise alignments between sequences to a variation graph encoding the sequences and their alignments. seqwish was used to induce a genome variation graph from the all-versus-all alignment generated by Minimap2.
+[seqwish](https://github.com/ekg/seqwish) implements a lossless conversion from pairwise alignments between sequences to a variation graph encoding the sequences and their alignments. seqwish was used to induce a genome variation graph from the all-versus-all alignment generated by Minimap2.
 
-[`vg`](https://github.com/vgteam/vg) is a collection of tools for working with genome variation graphs. vg was used to call variants from the genome variation graph generated by seqwish.
+[vg](https://github.com/vgteam/vg) is a collection of tools for working with genome variation graphs. vg was used to call variants from the genome variation graph generated by seqwish.
 
-[`Bandage`](https://github.com/rrwick/Bandage), a Bioinformatics Application for Navigating De novo Assembly Graphs Easily, is a GUI program that allows users to interact with the assembly graphs made by de novo assemblers and other graphs in GFA format. Bandage was used to render induced genome variation graphs as static PNG and SVG images.
+[Bandage](https://github.com/rrwick/Bandage), a Bioinformatics Application for Navigating De novo Assembly Graphs Easily, is a GUI program that allows users to interact with the assembly graphs made by de novo assemblers and other graphs in GFA format. Bandage was used to render induced genome variation graphs as static PNG and SVG images.
 
 **Output files:**
 
@@ -479,11 +483,13 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [MultiQC](http://multiqc.info) is a visualization tool that generates a single HTML report summarizing all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in the report data directory.
 
-Results generated by MultiQC collate pipeline QC from FastQC, fastp, Cutadapt, Bowtie 2, samtools flagstat, samtools idxstats, samtools stats, picard CollectMultipleMetrics and CollectWgsMetrics, BCFTools stats, SnpEff and QUAST.
+Results generated by MultiQC collate pipeline QC from FastQC, fastp, Cutadapt, Bowtie 2, Kraken 2, VarScan 2, iVar, samtools flagstat, samtools idxstats, samtools stats, picard CollectMultipleMetrics and CollectWgsMetrics, BCFTools, SnpEff and QUAST.
 
 The default [`multiqc config file`](../assets/multiqc_config.yaml) has been written in a way in which to structure these QC metrics to make them more interpretable in the final report.
 
 The pipeline has special steps which also allow the software versions to be reported in the MultiQC output for future traceability. For more information about how to use MultiQC reports, see <http://multiqc.info>.
+
+Please click [here](https://raw.githack.com/nf-core/viralrecon/master/docs/html/multiqc_report.html) to see an example MultiQC report generated using the parameters defined in [this](../conf/test_full.config) file to run the pipeline on [samples](https://zenodo.org/record/3735111) which were prepared from the [ncov-2019 ARTIC Network V1 amplicon set](https://artic.network/ncov-2019) and sequenced on the Illumina MiSeq platform in 301bp paired-end format.
 
 **Output files:**
 

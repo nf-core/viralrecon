@@ -28,7 +28,7 @@ dependencies:
 
   ## variants
   - bioconda::bowtie2=2.3.5.1
-  - bioconda::picard=2.22.6
+  - bioconda::picard=2.22.8
   - bioconda::ivar=1.2.2
   - bioconda::bcftools=1.9
   - bioconda::varscan=2.4.4
@@ -40,7 +40,7 @@ dependencies:
   - bioconda::kraken2=2.0.9beta
   - bioconda::spades=3.14.0
   - bioconda::unicycler=0.4.7
-  - bioconda::minia=3.2.2
+  - bioconda::minia=3.2.3
   - bioconda::minimap2=2.17
   - bioconda::seqwish=0.4.1
   - bioconda::vg=1.24.0

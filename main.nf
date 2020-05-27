@@ -850,7 +850,7 @@ process MAKE_SNPEFF_DB {
 process BOWTIE2 {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/variants/bam", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".log")) "log/$filename"
                       else params.save_align_intermeds ? filename : null
@@ -887,12 +887,12 @@ process BOWTIE2 {
 process SORT_BAM {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
+    publishDir "${params.outdir}/variants/bam", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                       else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
                       else if (filename.endsWith(".stats")) "samtools_stats/$filename"
-                      else params.save_align_intermeds ? filename : null
+                      else (params.protocol != 'amplicon' && params.skip_markduplicates) || params.save_align_intermeds ? filename : null
                 }
 
     when:
@@ -927,13 +927,13 @@ if (params.protocol != 'amplicon') {
     process IVAR_TRIM {
         tag "$sample"
         label 'process_medium'
-        publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
+        publishDir "${params.outdir}/variants/bam", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                           else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
                           else if (filename.endsWith(".stats")) "samtools_stats/$filename"
                           else if (filename.endsWith(".log")) "log/$filename"
-                          else params.save_align_intermeds ? filename : null
+                          else params.skip_markduplicates || params.save_align_intermeds ? filename : null
                     }
 
         when:
@@ -986,7 +986,7 @@ if (params.skip_markduplicates) {
     process PICARD_MARKDUPLICATES {
         tag "$sample"
         label 'process_medium'
-        publishDir "${params.outdir}/variants/bowtie2", mode: params.publish_dir_mode,
+        publishDir "${params.outdir}/variants/bam", mode: params.publish_dir_mode,
             saveAs: { filename ->
                           if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
                           else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
@@ -1043,7 +1043,7 @@ if (params.skip_markduplicates) {
 process PICARD_METRICS {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/bowtie2/picard_metrics", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/bam/picard_metrics", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && !params.skip_picard_metrics && !params.skip_qc
@@ -1094,7 +1094,7 @@ process SAMTOOLS_MPILEUP {
     tag "$sample"
     label 'process_medium'
     if (params.save_mpileup) {
-        publishDir "${params.outdir}/variants/bowtie2/mpileup", mode: params.publish_dir_mode
+        publishDir "${params.outdir}/variants/bam/mpileup", mode: params.publish_dir_mode
     }
 
     when:
@@ -1835,6 +1835,7 @@ if (!params.skip_kraken2) {
             --unclassified-out $unclassified \\
             --classified-out $classified \\
             --report ${sample}.kraken2.report.txt \\
+            --report-zero-counts \\
             $pe \\
             --gzip-compressed \\
             $reads
@@ -3098,6 +3099,7 @@ process MULTIQC {
     """
     multiqc . -f $rtitle $rfilename $custom_config_file
     multiqc_to_custom_tsv.py
+    multiqc . -f $rtitle $rfilename $custom_config_file
     """
 }
 

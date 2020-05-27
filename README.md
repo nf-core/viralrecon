@@ -11,11 +11,11 @@
 
 **nfcore/viralrecon** is a bioinformatics analysis pipeline used to perform assembly and intrahost/low-frequency variant calling for viral samples. The pipeline currently supports metagenomics and amplicon sequencing data derived from the Illumina sequencing platform.
 
-This pipeline is a re-implementation of the [SARS_Cov2_consensus-nf](https://github.com/BU-ISCIII/SARS_Cov2_consensus-nf) and [SARS_Cov2_assembly-nf](https://github.com/BU-ISCIII/SARS_Cov2_assembly-nf) pipelines initially developed by [Sarai Varona](https://github.com/svarona) and [Sara Monzon](https://github.com/saramonzon) from [BU-ISCIII](https://github.com/BU-ISCIII). Porting both of these pipelines to nf-core is an international collaboration between numerous contributors and developers. We appreciated the need to have a portable, reproducible and scalable pipeline for the analysis of COVID-19 sequencing samples and so the Avengers Assembled! Please come and join us and add yourself to the contributor list :)
+This pipeline is a re-implementation of the [SARS_Cov2_consensus-nf](https://github.com/BU-ISCIII/SARS_Cov2_consensus-nf) and [SARS_Cov2_assembly-nf](https://github.com/BU-ISCIII/SARS_Cov2_assembly-nf) pipelines initially developed by [Sarai Varona](https://github.com/svarona) and [Sara Monzon](https://github.com/saramonzon) from [BU-ISCIII](https://github.com/BU-ISCIII). Porting both of these pipelines to nf-core was an international collaboration between numerous contributors and developers, led by [Harshil Patel](https://github.com/drpatelh) from the [The Bioinformatics & Biostatistics Group](https://www.crick.ac.uk/research/science-technology-platforms/bioinformatics-and-biostatistics/) at [The Francis Crick Institute](https://www.crick.ac.uk/), London. We appreciated the need to have a portable, reproducible and scalable pipeline for the analysis of COVID-19 sequencing samples and so the Avengers Assembled! Please come and join us and add yourself to the contributor list :)
+
+We have integrated a number of options in the pipeline to allow you to run specific aspects of the workflow if you so wish. For example, you can skip all of the assembly steps with the `--skip_assembly` parameter. See [usage docs](docs/usage.md) for all of the available options when running the pipeline. Please click [here](https://raw.githack.com/nf-core/viralrecon/master/docs/html/multiqc_report.html) to see an example MultiQC report generated using the parameters defined in [this](../conf/test_full.config) file to run the pipeline on [samples](https://zenodo.org/record/3735111) which were prepared from the [ncov-2019 ARTIC Network V1 amplicon set](https://artic.network/ncov-2019) and sequenced on the Illumina MiSeq platform in 301bp paired-end format.
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with docker containers making installation trivial and results highly reproducible.
-
-We have integrated a number of options in the pipeline to allow you to run specific aspects of the workflow if you so wish. For example, you can skip all of the assembly steps with the `--skip_assembly` parameter. See [usage docs](docs/usage.md) for all of the available options when running the pipeline.
 
 ## Pipeline summary
 
@@ -40,9 +40,9 @@ We have integrated a number of options in the pipeline to allow you to run speci
         * Contiguate assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
         * Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))
         * Assembly assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
-        * Call variants relative to reference ([`Minimap2`](https://github.com/lh3/minimap2), [`seqwish`](https://github.com/ekg/seqwish), [`vg`](https://github.com/vgteam/vg))
+        * Call variants relative to reference ([`Minimap2`](https://github.com/lh3/minimap2), [`seqwish`](https://github.com/ekg/seqwish), [`vg`](https://github.com/vgteam/vg), [`Bandage`](https://github.com/rrwick/Bandage))
         * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
-7. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/), [`Bandage`](https://github.com/rrwick/Bandage))
+7. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
 
 ## Quick Start
 
@@ -81,8 +81,7 @@ The nf-core/viralrecon pipeline comes with documentation about the pipeline, fou
 
 ## Credits
 
-nf-core/viralrecon was originally written by Sarai Varona, Miguel Juliá and Sara Monzon from [BU-ISCIII](https://github.com/BU-ISCIII) and co-ordinated by Isabel Cuesta for the [Institute of Health Carlos III](https://eng.isciii.es/eng.isciii.es/Paginas/Inicio.html), Spain.
-Through collaboration with the nf-core community the pipeline has now been updated substantially to include additional processing steps and to standardise inputs/outputs.
+nf-core/viralrecon was originally written by Sarai Varona, Miguel Juliá and Sara Monzon from [BU-ISCIII](https://github.com/BU-ISCIII) and co-ordinated by Isabel Cuesta for the [Institute of Health Carlos III](https://eng.isciii.es/eng.isciii.es/Paginas/Inicio.html), Spain. Through collaboration with the nf-core community the pipeline has now been updated substantially to include additional processing steps, to standardise inputs/outputs and to improve the pipeline reporting.
 
 Many thanks to others who have helped out and contributed along the way too, including (but not limited to):
 
@@ -93,7 +92,6 @@ Many thanks to others who have helped out and contributed along the way too, inc
 | [Edgar Garriga Nogales](https://github.com/edgano)        | [Centre for Genomic Regulation, Spain](https://www.crg.eu/)                           |
 | [Erik Garrison](https://github.com/ekg)                   | [UCSC, USA](https://www.ucsc.edu/)                                                    |
 | [Gisela Gabernet](https://github.com/ggabernet)           | [QBiC, University of Tübingen, Germany](https://portal.qbic.uni-tuebingen.de/portal/) |
-| [Harshil Patel](https://github.com/drpatelh)              | [The Francis Crick Institute, UK](https://www.crick.ac.uk/)                           |
 | [Joao Curado](https://github.com/jcurado-flomics)         | [Flomics Biotech, Spain](https://www.flomics.com/)                                    |
 | [Jose Espinosa-Carrasco](https://github.com/JoseEspinosa) | [Centre for Genomic Regulation, Spain](https://www.crg.eu/)                           |
 | [Katrin Sameith](https://github.com/ktrns)                | [DRESDEN-concept Genome Center, Germany](https://genomecenter.tu-dresden.de)          |
