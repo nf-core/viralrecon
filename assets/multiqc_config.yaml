@@ -223,10 +223,6 @@ module_order:
             - './minia/snpeff/*'
 
 report_section_order:
-    #summary_variants_metrics:
-    #    after: fastqc_raw
-    #summary_assembly_metrics:
-    #    before: variants_metrics
     ivar_variants:
         before: quast_varscan2
     software_versions:
