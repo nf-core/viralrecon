@@ -3033,7 +3033,6 @@ process get_software_versions {
 /*
  * STEP 7: MultiQC
  */
-// TODO nf-core: Check MultiQC log and config to see if everything is working as expected
 process MULTIQC {
     publishDir "${params.outdir}", mode: params.publish_dir_mode,
         saveAs: { filename ->
