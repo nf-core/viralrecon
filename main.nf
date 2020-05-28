@@ -28,7 +28,7 @@ def helpMessage() {
                                         Available: conda, docker, singularity, test, awsbatch, <institute> and more
 
     Generic
-      --protocol [str]                  Specifies the type of protocol used for sequencing i.e. "metagenomic" or "amplicon" (Default: "metagenomic")
+      --protocol [str]                  Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplicon' (Default: 'metagenomic')
 
     SRA download
       --save_sra_fastq [bool]           Save FastQ files created from SRA identifiers in the results directory (Default: false)
