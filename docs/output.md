@@ -115,7 +115,7 @@ A file called `summary_variants_metrics_mqc.tsv` containing a selection of read 
 
 ### SAMtools
 
-Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/) to coordinate sort and index the alignments, as well as to generate read mapping statistics.
+Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/) to sort them by coordinate, for indexing, as well as to generate read mapping statistics.
 
 **Output files:**
 
