@@ -59,6 +59,7 @@ def helpMessage() {
       --callers [str]                   Specify which variant calling algorithms you would like to use (Default: 'varscan2,ivar,bcftools')
       --ivar_exclude_reads [bool]       Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
       --filter_dups [bool]              Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false)
+      --filter_unmapped [bool]          Remove unmapped reads from alignments (Default: false)
       --min_base_qual [int]             When performing variant calling skip bases with baseQ/BAQ smaller than this number (Default: 20)
       --min_coverage [int]              When performing variant calling skip positions with an overall read depth smaller than this number (Default: 10)
       --max_allele_freq [float]         Maximum allele frequency threshold for filtering variant calls (Default: 0.8)
@@ -250,6 +251,7 @@ if (!params.skip_variants) {
     summary['Variant Calling Tools'] = params.callers
     if (params.ivar_exclude_reads)	 summary['iVar Trim Exclude']  = 'Yes'
     if (params.filter_dups)          summary['Remove Duplicate Reads']  = 'Yes'
+    if (params.filter_unmapped)      summary['Remove Unmapped Reads']  = 'Yes'
     summary['Min Base Quality']      = params.min_base_qual
     summary['Min Read Depth']        = params.min_coverage
     summary['Max Allele Freq']       = params.max_allele_freq
@@ -869,6 +871,7 @@ process BOWTIE2 {
 
     script:
     input_reads = single_end ? "-U $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
+    filter = params.filter_unmapped ? "-F4" : ""
     """
     bowtie2 \\
         --threads $task.cpus \\
@@ -877,7 +880,7 @@ process BOWTIE2 {
         -x ${index}/${index_base} \\
         $input_reads \\
         2> ${sample}.bowtie2.log \\
-        | samtools view -@ $task.cpus -b -h -O BAM -o ${sample}.bam -
+        | samtools view -@ $task.cpus -b -h -O BAM -o ${sample}.bam $filter -
     """
 }
 
