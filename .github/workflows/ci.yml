@@ -22,7 +22,7 @@ jobs:
       - name: Pull docker image
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.0.0
       - name: Run pipeline with test data
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker
@@ -44,7 +44,7 @@ jobs:
       - name: Pull docker image
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.0.0
       - name: Run pipeline with test amplicon data with various options
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }}
@@ -66,7 +66,7 @@ jobs:
        - name: Pull docker image
          run: |
            docker pull nfcore/viralrecon:dev
-           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+           docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.0.0
        - name: Run pipeline with minimal data via SRA ids and various options
          run: |
            nextflow run ${GITHUB_WORKSPACE} -profile test_sra,docker ${{ matrix.parameters }}
@@ -88,7 +88,7 @@ jobs:
        - name: Pull docker image
          run: |
            docker pull nfcore/viralrecon:dev
-           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+           docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.0.0
        - name: Run pipeline with minimal SISPA data and various options
          run: |
            nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }}
