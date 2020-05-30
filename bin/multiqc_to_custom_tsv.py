@@ -49,26 +49,30 @@ def yaml_fields_to_dict(YAMLFile,AppendDict={},FieldMappingList=[],ValidSampleLi
                 names = [x for x in ValidSampleList if key.startswith(x)]
                 if names != []:
                     key = names[0]
-            if key not in AppendDict:
-                AppendDict[key] = {}
-            if FieldMappingList != []:
-                for i,j in FieldMappingList:
-                    val = list(find_tag(yaml_dict[k], j[0]))
-                    ## Fix for Cutadapt reporting reads/pairs as separate values
-                    if j[0] == 'r_written' and len(val) == 0:
-                        val = [list(find_tag(yaml_dict[k], 'pairs_written'))[0] * 2]
-                    if len(val) != 0:
-                        val = val[0]
-                        if len(j) == 2:
-                            val = list(find_tag(val, j[1]))[0]
-                        if j[0] in intFields:
-                            val = int(val)
-                        if i not in AppendDict[key]:
-                            AppendDict[key][i] = val
-                        else:
-                            print('WARNING: {} key already exists in dictionary so will be overwritten. YAML file {}.'.format(i,YAMLFile))
-            else:
-                AppendDict[key] = yaml_dict[k]
+            inclSample = True
+            if len(ValidSampleList) != 0 and key not in ValidSampleList:
+                inclSample = False
+            if inclSample:
+                if key not in AppendDict:
+                    AppendDict[key] = {}
+                if FieldMappingList != []:
+                    for i,j in FieldMappingList:
+                        val = list(find_tag(yaml_dict[k], j[0]))
+                        ## Fix for Cutadapt reporting reads/pairs as separate values
+                        if j[0] == 'r_written' and len(val) == 0:
+                            val = [list(find_tag(yaml_dict[k], 'pairs_written'))[0] * 2]
+                        if len(val) != 0:
+                            val = val[0]
+                            if len(j) == 2:
+                                val = list(find_tag(val, j[1]))[0]
+                            if j[0] in intFields:
+                                val = int(val)
+                            if i not in AppendDict[key]:
+                                AppendDict[key][i] = val
+                            else:
+                                print('WARNING: {} key already exists in dictionary so will be overwritten. YAML file {}.'.format(i,YAMLFile))
+                else:
+                    AppendDict[key] = yaml_dict[k]
     return AppendDict
 
 
@@ -108,7 +112,6 @@ def main(args=None):
         ('multiqc_fastp.yaml',                                     [('# Input reads', ['before_filtering','total_reads']),
                                                                     ('# Trimmed reads (fastp)', ['after_filtering','total_reads'])]),
         ('multiqc_samtools_flagstat_samtools_bowtie2.yaml',        [('% Mapped reads (viral)', ['mapped_passed_pct'])]),
-        ('multiqc_ivar_summary.yaml',                              [('# Reads trimmed (iVar)', ['trimmed_reads'])]),
         ('multiqc_samtools_flagstat_samtools_ivar.yaml',           [('# Trimmed reads (iVar)', ['flagstat_total'])]),
         ('multiqc_samtools_flagstat_samtools_markduplicates.yaml', [('# Duplicate reads', ['duplicates_passed']),
                                                                     ('# Reads after MarkDuplicates', ['flagstat_total'])]),
@@ -133,26 +136,21 @@ def main(args=None):
 
     AssemblyFileFieldList = [
         ('multiqc_fastp.yaml',                                     [('# Input reads', ['before_filtering','total_reads'])]),
-        #('multiqc_cutadapt.yaml',                                 [('# Trimmed reads (Cutadapt)', ['r_written'])]),
-        #('multiqc_kraken.yaml',                                   [('% Host reads', ['r_written']),
-        #                                                           ('% Unclassified reads', ['r_written'])]),
+        ('multiqc_cutadapt.yaml',                                  [('# Trimmed reads (Cutadapt)', ['r_written'])]),
+        ('multiqc_general_stats.yaml',                             [('% Unclassified reads', ['ASSEMBLY: Kraken 2_mqc-generalstats-assembly_kraken_2-Unclassified'])]),
         ('multiqc_quast_quast_spades.yaml',                        [('# Contigs (SPAdes)', ['# contigs (>= 0 bp)']),
-                                                                    ('# Contigs > 5kb (SPAdes)', ['# contigs (>= 5000 bp)']),
                                                                     ('Largest contig (SPAdes)', ['Largest contig']),
                                                                     ('% Genome fraction (SPAdes)', ['Genome fraction (%)']),
                                                                     ('N50 (SPAdes)', ['N50'])]),
         ('multiqc_quast_quast_metaspades.yaml',                    [('# Contigs (metaSPAdes)', ['# contigs (>= 0 bp)']),
-                                                                    ('# Contigs > 5kb (metaSPAdes)', ['# contigs (>= 5000 bp)']),
                                                                     ('Largest contig (metaSPAdes)', ['Largest contig']),
                                                                     ('% Genome fraction (metaSPAdes)', ['Genome fraction (%)']),
                                                                     ('N50 (metaSPAdes)', ['N50'])]),
         ('multiqc_quast_quast_unicycler.yaml',                     [('# Contigs (Unicycler)', ['# contigs (>= 0 bp)']),
-                                                                    ('# Contigs > 5kb (Unicycler)', ['# contigs (>= 5000 bp)']),
                                                                     ('Largest contig (Unicycler)', ['Largest contig']),
                                                                     ('% Genome fraction (Unicycler)', ['Genome fraction (%)']),
                                                                     ('N50 (Unicycler)', ['N50'])]),
         ('multiqc_quast_quast_minia.yaml',                         [('# Contigs (minia)', ['# contigs (>= 0 bp)']),
-                                                                    ('# Contigs > 5kb (minia)', ['# contigs (>= 5000 bp)']),
                                                                     ('Largest contig (minia)', ['Largest contig']),
                                                                     ('% Genome fraction (minia)', ['Genome fraction (%)']),
                                                                     ('N50 (minia)', ['N50'])]),
@@ -174,7 +172,7 @@ def main(args=None):
     isPEDict = {}
     yamlFile = os.path.join(args.MULTIQC_DATA_DIR,'multiqc_fastp.yaml')
     if os.path.exists(yamlFile):
-        MetricsDict = yaml_fields_to_dict(YAMLFile=yamlFile,AppendDict={},FieldMappingList=[('command', ['command'])])
+        MetricsDict = yaml_fields_to_dict(YAMLFile=yamlFile,AppendDict={},FieldMappingList=[('command', ['command'])],ValidSampleList=[])
         for sample,val in MetricsDict.items():
             if MetricsDict[sample]['command'].find('--out2') != -1:
                 isPEDict[sample] = True
