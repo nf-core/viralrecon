@@ -24,7 +24,7 @@ dependencies:
   - bioconda::fastp=0.20.1
   - bioconda::samtools=1.9
   - bioconda::bedtools=2.29.2
-  - bioconda::multiqc=1.8
+  - bioconda::multiqc=1.9
 
   ## variants
   - bioconda::bowtie2=2.3.5.1
