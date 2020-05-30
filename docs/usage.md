@@ -39,6 +39,7 @@
   * [`--callers`](#-callers)
   * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
   * [`--filter_dups`](#--filter_dups)
+  * [`--filter_unmapped`](#--filter_unmapped)
   * [`--min_base_qual`](#--min_base_qual)
   * [`--max_allele_freq`](#--max_allele_freq)
   * [`--min_coverage`](#--min_coverage)
@@ -364,6 +365,10 @@ This option unsets the `-e` parameter in `ivar trim` to discard reads without pr
 ### `--filter_dups`
 
 Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false). Note that unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation.
+
+### `--filter_unmapped`
+
+Remove unmapped reads from alignments (Default: false).
 
 ### `--min_base_qual`
 
