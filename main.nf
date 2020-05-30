@@ -3039,8 +3039,8 @@ process get_software_versions {
 process MULTIQC {
     publishDir "${params.outdir}", mode: params.publish_dir_mode,
         saveAs: { filename ->
-                      if (filename.endsWith("assembly_metrics.tsv")) "assembly/$filename"
-                      else if (filename.endsWith("variants_metrics.tsv")) "variants/$filename"
+                      if (filename.endsWith("assembly_metrics_mqc.tsv")) "assembly/$filename"
+                      else if (filename.endsWith("variants_metrics_mqc.tsv")) "variants/$filename"
                       else "multiqc/$filename"
                 }
 
