@@ -1174,7 +1174,8 @@ process VARSCAN2 {
         | bgzip -c > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
-
+    sed -i.bak '/LC_ALL/d' ${sample}.varscan2.log
+    
     bcftools filter \\
         -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq' \\
         --output-type z \\
@@ -3039,8 +3040,8 @@ process get_software_versions {
 process MULTIQC {
     publishDir "${params.outdir}", mode: params.publish_dir_mode,
         saveAs: { filename ->
-                      if (filename.endsWith("assembly_metrics.tsv")) "assembly/$filename"
-                      else if (filename.endsWith("variants_metrics.tsv")) "variants/$filename"
+                      if (filename.endsWith("assembly_metrics_mqc.tsv")) "assembly/$filename"
+                      else if (filename.endsWith("variants_metrics_mqc.tsv")) "variants/$filename"
                       else "multiqc/$filename"
                 }
 
