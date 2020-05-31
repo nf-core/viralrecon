@@ -1174,7 +1174,8 @@ process VARSCAN2 {
         | bgzip -c > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
-
+    sed -i.bak '/LC_ALL/d' ${sample}.varscan2.log
+    
     bcftools filter \\
         -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq' \\
         --output-type z \\
