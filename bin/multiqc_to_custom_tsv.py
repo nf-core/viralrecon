@@ -137,7 +137,7 @@ def main(args=None):
     AssemblyFileFieldList = [
         ('multiqc_fastp.yaml',                                     [('# Input reads', ['before_filtering','total_reads'])]),
         ('multiqc_cutadapt.yaml',                                  [('# Trimmed reads (Cutadapt)', ['r_written'])]),
-        ('multiqc_general_stats.yaml',                             [('% Unclassified reads (Kraken 2)', ['ASSEMBLY: Kraken 2_mqc-generalstats-assembly_kraken_2-Unclassified'])]),
+        ('multiqc_general_stats.yaml',                             [('% Non-host reads (Kraken 2)', ['ASSEMBLY: Kraken 2_mqc-generalstats-assembly_kraken_2-Unclassified'])]),
         ('multiqc_quast_quast_spades.yaml',                        [('# Contigs (SPAdes)', ['# contigs (>= 0 bp)']),
                                                                     ('Largest contig (SPAdes)', ['Largest contig']),
                                                                     ('% Genome fraction (SPAdes)', ['Genome fraction (%)']),
