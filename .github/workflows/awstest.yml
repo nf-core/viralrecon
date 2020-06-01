@@ -5,7 +5,7 @@ name: nf-core AWS test
 on:
   push:
     branches:
-      - dev
+      - master
   release:
     types: [published]
 
