@@ -6,7 +6,6 @@
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/viralrecon.svg)](https://hub.docker.com/r/nfcore/viralrecon)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
 
 ## Introduction
 
@@ -116,8 +115,6 @@ If you would like to contribute to this pipeline, please see the [contributing g
 For further information or help, don't hesitate to get in touch on [Slack](https://nfcore.slack.com/channels/viralrecon) (you can join with [this invite](https://nf-co.re/join/slack)).
 
 ## Citation
-
-If you use  nf-core/viralrecon for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX)
 
 You can cite the `nf-core` publication as follows:
 
