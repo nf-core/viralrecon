@@ -6,6 +6,7 @@
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/viralrecon.svg)](https://hub.docker.com/r/nfcore/viralrecon)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3872730.svg)](https://doi.org/10.5281/zenodo.3872730)
 
 ## Introduction
 
@@ -116,6 +117,10 @@ For further information or help, don't hesitate to get in touch on [Slack](https
 
 ## Citation
 
+If you use nf-core/viralrecon for your analysis, please cite it using the following doi: [10.5281/zenodo.3872730](https://doi.org/10.5281/zenodo.3872730)
+
+An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](https://github.com/nf-core/viralrecon/blob/master/CITATIONS.md) file.
+
 You can cite the `nf-core` publication as follows:
 
 > **The nf-core framework for community-curated bioinformatics pipelines.**
@@ -124,5 +129,3 @@ You can cite the `nf-core` publication as follows:
 >
 > _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
 > ReadCube: [Full Access Link](https://rdcu.be/b1GjZ)
-
-An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](https://github.com/nf-core/viralrecon/blob/master/CITATIONS.md) file.
