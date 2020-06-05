@@ -5,13 +5,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unpublished Version / DEV]
 
+### `Dependencies`
+
+* Add r-ggplot2 `3.3.1`
+* Add r-tidyr `1.1.0`
+* Add r-stringr `1.4.0`
+* Add aspera-cli `3.9.1`
+
 ## [1.0.0] - 2020-06-01
 
 Initial release of nf-core/viralrecon, created with the [nf-core](http://nf-co.re/) template.
 
 This pipeline is a re-implementation of the [SARS_Cov2_consensus-nf](https://github.com/BU-ISCIII/SARS_Cov2_consensus-nf) and [SARS_Cov2_assembly-nf](https://github.com/BU-ISCIII/SARS_Cov2_assembly-nf) pipelines initially developed by [Sarai Varona](https://github.com/svarona) and [Sara Monzon](https://github.com/saramonzon) from [BU-ISCIII](https://github.com/BU-ISCIII). Porting both of these pipelines to nf-core was an international collaboration between numerous contributors and developers, led by [Harshil Patel](https://github.com/drpatelh) from the [The Bioinformatics & Biostatistics Group](https://www.crick.ac.uk/research/science-technology-platforms/bioinformatics-and-biostatistics/) at [The Francis Crick Institute](https://www.crick.ac.uk/), London. We appreciated the need to have a portable, reproducible and scalable pipeline for the analysis of COVID-19 sequencing samples and so the Avengers Assembled!
 
-### Pipeline summary
+### `Pipeline summary`
 
 1. Download samples via SRA, ENA or GEO ids ([`ENA FTP`](https://ena-docs.readthedocs.io/en/latest/retrieval/file-download.html), [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump); *if required*)
 2. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html); *if required*)
