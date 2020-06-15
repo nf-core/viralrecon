@@ -18,7 +18,7 @@ library(scales)
 
 option_list <- list(make_option(c("-i", "--region_file"), type="character", default=NULL, help="mosdepth regions output file (typically ends with *.regions.bed.gz)", metavar="path"),
                     make_option(c("-s", "--sample_name"), type="character", default=NULL, help="Sample name for plot title. If not provided will be extracted from --region_file", metavar="string"),
-                    make_option(c("-o", "--out_file"), type="character", default=NULL, help="Full path to pdf output file", metavar="path"))
+                    make_option(c("-o", "--out_file"), type="character", default=NULL, help="Full path to pdf output file. If not provide will be extracted from --region_file", metavar="path"))
 
 opt_parser <- OptionParser(option_list=option_list)
 opt <- parse_args(opt_parser)
