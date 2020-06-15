@@ -48,6 +48,9 @@
 * [Minimap2](https://www.ncbi.nlm.nih.gov/pubmed/29750242/)
   > Li H. Minimap2: pairwise alignment for nucleotide sequences. Bioinformatics. 2018 Sep 15;34(18):3094-3100. doi: 10.1093/bioinformatics/bty191. PubMed PMID: 29750242; PubMed Central PMCID: PMC6137996.
 
+* [mosdepth](https://www.ncbi.nlm.nih.gov/pubmed/29096012)
+  > Pedersen BS, Quinlan AR. Mosdepth: Quick Coverage Calculation for Genomes and Exomes. Bioinformatics. 2018 Mar 1;34(5):867-868. doi: 10.1093/bioinformatics/btx699. PMID: 29096012 PMCID: PMC6030888.
+
 * [MultiQC](https://www.ncbi.nlm.nih.gov/pubmed/27312411/)
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
 
