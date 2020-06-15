@@ -15,10 +15,6 @@ dependencies:
   - conda-forge::pigz=2.3.4
   - conda-forge::r-base=3.6.2
   - conda-forge::bc=1.07.1
-  - conda-forge::r-ggplot2=3.3.1
-  - conda-forge::r-tidyr=1.1.0
-  - conda-forge::r-stringr=1.4.0
-  - hcc::aspera-cli=3.9.1
 
   ## bioconda packages
   ## common
