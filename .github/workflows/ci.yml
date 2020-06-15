@@ -11,7 +11,7 @@ on:
 
 jobs:
   test:
-    name: Run default workflow tests
+    name: Test default workflow
     # Only run on push if this is the nf-core dev branch (merged PRs)
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
     runs-on: ubuntu-latest
@@ -53,7 +53,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker
 
   parameters:
-    name: Run workflow tests for multiple parameters
+    name: Test workflow parameters
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
     runs-on: ubuntu-latest
     env:
@@ -93,7 +93,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }}
 
   test_sra:
-    name: Run workflow tests on SRA downloaded data
+    name: Test SRA workflow
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
     runs-on: ubuntu-latest
     env:
@@ -133,7 +133,7 @@ jobs:
           nextflow run ${GITHUB_WORKSPACE} -profile test_sra,docker ${{ matrix.parameters }}
 
   test_sispa:
-    name: Run workflow tests for SISPA data
+    name: Test SISPA workflow
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
     runs-on: ubuntu-latest
     env:
