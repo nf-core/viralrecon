@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### `Added`
 
+* [#112](https://github.com/nf-core/viralrecon/issues/112) - Per-amplicon coverage plot
 * [nf-core/tools#616](https://github.com/nf-core/tools/pull/616) - Updated GitHub Actions to build Docker image and push to Docker Hub
+* Parameters:
+  * `--skip_mosdepth` to skip genome-wide and amplicon coverage plot generation from mosdepth output
+
+### `Removed`
+
+* Parameters:
+  * `--skip_qc`
 
 ### `Dependencies`
 
