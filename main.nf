@@ -1092,12 +1092,17 @@ process PICARD_METRICS {
 }
 
 /*
- * STEP 5.6.1: mosdepth genome-wide coverage plots
+ * STEP 5.6.1: mosdepth genome-wide coverage
  */
 process MOSDEPTH_GENOME {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/bam/mosdepth/genome", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/bam/mosdepth/genome", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".pdf")) "plots/$filename"
+                      else if (filename.endsWith(".tsv")) "plots/$filename"
+                      else filename
+                }
 
     when:
     !params.skip_variants && !params.skip_mosdepth
@@ -1106,18 +1111,31 @@ process MOSDEPTH_GENOME {
     tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_mosdepth_genome
 
     output:
-    path "*.{pdf,txt,gz,csi}"
+    path "*.{txt,gz,csi,tsv,pdf}"
 
     script:
     suffix = params.skip_markduplicates ? "" : ".mkD"
     prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}.genome" : "${sample}${suffix}.genome"
+    plot_suffix = params.protocol == 'amplicon' ? ".trim${suffix}.genome" : "${suffix}.genome"
     """
     mosdepth --by 200 --fast-mode $prefix ${bam[0]}
+
+    plot_mosdepth_regions.r \\
+        --input_files ${prefix}.regions.bed.gz \\
+        --input_suffix ${plot_suffix}.regions.bed.gz \\
+        --output_dir ./ \\
+        --output_suffix ${plot_suffix}.regions
+
+    plot_mosdepth_dist.r \\
+        --input_files ${prefix}.mosdepth.global.dist.txt \\
+        --input_suffix ${plot_suffix}.mosdepth.global.dist.txt \\
+        --output_dir ./ \\
+        --output_suffix ${plot_suffix}.mosdepth.global.dist
     """
 }
 
 /*
- * STEP 5.6.2: mosdepth amplicon coverage plots
+ * STEP 5.6.2: mosdepth amplicon coverage
  */
 process MOSDEPTH_AMPLICON {
     tag "$sample"
@@ -1132,7 +1150,9 @@ process MOSDEPTH_AMPLICON {
     path bed from ch_amplicon_bed
 
     output:
-    path "*.{pdf,txt,gz,csi}"
+    path "*.global.dist.txt" into ch_mosdepth_amplicon_region_dist
+    path "*.regions.bed.gz" into ch_mosdepth_amplicon_region_bed
+    path "*.{summary.txt,region.dist.txt,per-base.bed.gz,thresholds.bed.gz,csi}"
 
     script:
     suffix = params.skip_markduplicates ? "" : ".mkD"
@@ -1143,14 +1163,45 @@ process MOSDEPTH_AMPLICON {
         --right_primer_suffix $params.amplicon_right_suffix \\
         $bed \\
         amplicon.collapsed.bed
-    mosdepth --by amplicon.collapsed.bed --fast-mode --thresholds 1,10,50,100,500 ${prefix} ${bam[0]}
+    mosdepth --by amplicon.collapsed.bed --fast-mode --thresholds 0,1,10,50,100,500 ${prefix} ${bam[0]}
     """
 }
-//plot_mosdepth_regions.r --region_file "${prefix}.regions.bed.gz" --sample_name $sample
-// plot_mosdepth_regions.r \\
-//     --region_file "${prefix}.regions.bed.gz" \\
-//     --sample_name $sample \\
-//     --out_file "${prefix}.coverage.pdf"
+
+/*
+ * STEP 5.6.3: mosdepth amplicon coverage plots
+ */
+process MOSDEPTH_AMPLICON_PLOT {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/bam/mosdepth/amplicon/plots", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants && !params.skip_mosdepth && params.protocol == 'amplicon'
+
+    input:
+    path dist from ch_mosdepth_amplicon_region_dist.collect()
+    path bed from ch_mosdepth_amplicon_region_bed.collect()
+
+    output:
+    path "*.{tsv,pdf}"
+
+    script:
+    suffix = params.skip_markduplicates ? "" : ".mkD"
+    suffix = ".trim${suffix}.amplicon"
+    """
+    plot_mosdepth_regions.r \\
+        --input_files ${bed.join(',')} \\
+        --input_suffix ${suffix}.regions.bed.gz \\
+        --output_dir ./ \\
+        --output_suffix ${suffix}.regions
+
+    plot_mosdepth_dist.r \\
+        --input_files ${dist.join(',')} \\
+        --input_suffix ${suffix}.mosdepth.global.dist.txt \\
+        --output_dir ./ \\
+        --output_suffix ${suffix}.mosdepth.global.dist
+    """
+}
 
 ////////////////////////////////////////////////////
 /* --              VARSCAN2                    -- */
