@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [nf-core/tools#616](https://github.com/nf-core/tools/pull/616) - Updated GitHub Actions to build Docker image and push to Docker Hub
 * Parameters:
   * `--skip_mosdepth` to skip genome-wide and amplicon coverage plot generation from mosdepth output
+  * `--amplicon_left_suffix` to provide left primer suffix used in name field of `--amplicon_bed`
+  * `--amplicon_right_suffix` to provide right primer suffix used in name field of `--amplicon_bed`
 
 ### `Removed`
 
