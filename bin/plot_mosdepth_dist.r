@@ -44,6 +44,8 @@ if (!file.exists(OUTDIR)) {
   dir.create(OUTDIR,recursive=TRUE)
 }
 
+OUTSUFFIX <- trimws(opt$output_suffix, "both", whitespace = "\\.")
+
 ################################################
 ################################################
 ## READ IN DATA                               ##
@@ -79,7 +81,7 @@ for (sample in unique(dat$sample)) {
             xlab('Coverage') +
             ggtitle(paste(sample,' genome coverage'))
 
-      outfile <- paste(OUTDIR,sample,".",opt$output_suffix,".coverage.pdf", sep='')
+      outfile <- paste(OUTDIR,sample,".",OUTSUFFIX,".coverage.pdf", sep='')
       ggsave(file=outfile, plot, height=4, width=8, units="in")
 }
 
@@ -89,20 +91,22 @@ for (sample in unique(dat$sample)) {
 ################################################
 ################################################
 
-plot <- ggplot(dat,aes(x=coverage,y=frequency,colour=sample)) +
-        geom_line(stat="identity") +
-        theme_bw() +
-        scale_x_continuous(expand=c(0, 0)) +
-        scale_y_continuous(limits=c(0,1),
-                           breaks=seq(0,1,0.2),
-                           labels=seq(0,1,0.2),
-                           expand=c(0, 0)) +
-        ylab('Proportion of genome at coverage') +
-        xlab('Coverage') +
-        ggtitle(paste('All samples genome coverage'))
+if (length(INPUT_FILES) > 1) {
+    plot <- ggplot(dat,aes(x=coverage,y=frequency,colour=sample)) +
+            geom_line(stat="identity") +
+            theme_bw() +
+            scale_x_continuous(expand=c(0, 0)) +
+            scale_y_continuous(limits=c(0,1),
+                               breaks=seq(0,1,0.2),
+                               labels=seq(0,1,0.2),
+                               expand=c(0, 0)) +
+            ylab('Proportion of genome at coverage') +
+            xlab('Coverage') +
+            ggtitle(paste('All samples genome coverage'))
 
-outfile <- paste(OUTDIR,"all_samples.",opt$output_suffix,".coverage.pdf", sep='')
-ggsave(file=outfile, plot, height=6, width=12, units="in")
+    outfile <- paste(OUTDIR,"all_samples.",OUTSUFFIX,".coverage.pdf", sep='')
+    ggsave(file=outfile, plot, height=6, width=12, units="in")
+}
 
 ################################################
 ################################################
