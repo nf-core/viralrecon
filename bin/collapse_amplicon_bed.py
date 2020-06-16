@@ -42,7 +42,7 @@ def collapse_amplicon_bed(FileIn,FileOut,LeftPrimerSuffix,RightPrimerSuffix):
         line = fin.readline()
         if line:
             chrom,start,end,name,score,strand = line.strip().split('\t')
-            amplicon = re.sub(r'(?:{}|{})'.format(LeftPrimerSuffix,RightPrimerSuffix),'',name)
+            amplicon = re.sub(r'(?:{}|{}).*'.format(LeftPrimerSuffix,RightPrimerSuffix),'',name)
             if amplicon not in IntervalDict:
                 IntervalDict[amplicon] = []
             IntervalDict[amplicon].append((chrom,int(start),int(end),score))
