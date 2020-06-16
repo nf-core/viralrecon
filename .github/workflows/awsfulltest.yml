@@ -8,6 +8,7 @@ on:
 
 jobs:
   run-awstest:
+    if: github.repository == 'nf-core/viralrecon'
     name: Run AWS test
     runs-on: ubuntu-latest
     steps:
