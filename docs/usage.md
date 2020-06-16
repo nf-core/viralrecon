@@ -46,6 +46,8 @@
   * [`--save_align_intermeds`](#--save_align_intermeds)
   * [`--save_mpileup`](#--save_mpileup)
   * [`--skip_markduplicates`](#--skip_markduplicates)
+  * [`--skip_picard_metrics`](#--skip_picard_metrics)
+  * [`--skip_mosdepth`](#--skip_mosdepth)
   * [`--skip_snpeff`](#--skip_snpeff)
   * [`--skip_variants_quast`](#--skip_variants_quast)
   * [`--skip_variants`](#--skip_variants)
@@ -60,9 +62,7 @@
   * [`--skip_assembly`](#--skip_assembly)  
 * [Skipping QC steps](#skipping-qc-steps)
   * `--skip_fastqc`
-  * `--skip_picard_metrics`
   * `--skip_multiqc`
-  * `--skip_qc`
 * [Job resources](#job-resources)
   * [Automatic resubmission](#automatic-resubmission)
   * [Custom resource requests](#custom-resource-requests)
@@ -394,6 +394,14 @@ Save Pileup files in the results directory. These tend to be quite large so are 
 
 Skip picard MarkDuplicates step (Default: false).
 
+### `--skip_picard_metrics`
+
+Skip Picard CollectMultipleMetrics and CollectWgsMetrics (Default: false).
+
+### `--skip_mosdepth`
+
+Skip genome-wide and amplicon coverage plot generation from mosdepth output (Default: false).
+
 ### `--skip_snpeff`
 
 Skip SnpEff and SnpSift annotation of variants (Default: false).
@@ -447,9 +455,7 @@ The pipeline contains a large number of quality control steps. Sometimes, it may
 | Step                      | Description                                              |
 |---------------------------|----------------------------------------------------------|
 | `--skip_fastqc`           | Skip FastQC                                              |
-| `--skip_picard_metrics`   | Skip Picard CollectMultipleMetrics and CollectWgsMetrics |
 | `--skip_multiqc`          | Skip MultiQC                                             |
-| `--skip_qc`               | Skip all QC steps except for MultiQC                     |
 
 ## Job resources
 
