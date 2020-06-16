@@ -5,6 +5,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unpublished Version / DEV]
 
+### `Added`
+
+* [nf-core/tools#616](https://github.com/nf-core/tools/pull/616) - Updated GitHub Actions to build Docker image and push to Docker Hub
+
+### `Dependencies`
+
+* Add mosdepth `0.2.6`
+* Add bioconductor-complexheatmap `2.2.0`
+* Add r-optparse `1.6.6`
+* Add r-tidyr `1.1.0`
+* Add r-tidyverse `1.3.0`
+* Add r-ggplot2 `3.3.1`
+* Add r-reshape2 `1.4.4`
+* Add r-viridis `0.5.1`
+* Update sra-tools `2.10.3` -> `2.10.7`
+* Update bowtie2 `2.3.5.1` -> `2.4.1`
+* Update picard `2.22.8` -> `2.23.0`
+* Update minia `3.2.3` -> `3.2.4`
+* Update plasmidid `1.5.2` -> `1.6.2`
+
 ## [1.0.0] - 2020-06-01
 
 Initial release of nf-core/viralrecon, created with the [nf-core](http://nf-co.re/) template.
