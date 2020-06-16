@@ -3,34 +3,30 @@ report_comment: >
     analysis pipeline. For information about how to interpret these results, please see the
     <a href="https://github.com/nf-core/viralrecon" target="_blank">documentation</a>.
 
-export_plots: true
+data_format: 'yaml'
 
-fn_clean_exts:
-    - 'fastq.gz'
-    - '.trimmed'
-    - '.trim'
-    - '.fastp'
-    - '.merged'
-    - '.sorted.bam'
-    - '.bowtie2'
-    - '.ptrim'
-    - '.highfreq'
-    - '.lowfreq'
-    - '.consensus'
-    - '.consensus.masked'
-    - '.snpEff'
-    - '.vcf.gz'
-    - '.scaffolds'
-    - '.meta'
-    - '.assembly'
+run_modules:
+    - custom_content
+    - fastqc
+    - fastp
+    - bowtie2
+    - samtools
+    - picard
+    - varscan2
+    - ivar
+    - bcftools
+    - snpeff
+    - quast
+    - cutadapt
+    - kraken
 
-extra_fn_clean_exts:
-    - type: regex
-      pattern: '.[k][0-9]+.*'
+exclude_modules:
+    - 'general_stats'
 
 module_order:
     - fastqc:
         name: 'PREPROCESS: FastQC (raw reads)'
+        anchor: 'fastqc_raw'
         info: 'This section of the report shows FastQC results for the raw reads before adapter trimming.'
         path_filters:
             - './fastqc/*'
@@ -38,9 +34,10 @@ module_order:
         name: 'PREPROCESS: fastp (adapter trimming)'
         info: 'This section of the report shows fastp results for reads after adapter and quality trimming.'
         path_filters:
-            - './fastp/*'
+            - './fastp/log/*'
     - fastqc:
         name: 'PREPROCESS: FastQC (adapter trimming)'
+        anchor: 'fastqc_fastp'
         info: 'This section of the report shows FastQC results for reads after adapter and quality trimming.'
         path_filters:
             - './fastp/fastqc/*'
@@ -48,143 +45,232 @@ module_order:
         name: 'VARIANTS: Bowtie 2'
         info: 'This section of the report shows Bowtie 2 mapping results for reads after adapter trimming and quality trimming.'
         path_filters:
-            - './bowtie2/*'
+            - './bowtie2/log/*'
     - samtools:
         name: 'VARIANTS: SAMTools (raw)'
+        anchor: 'samtools_bowtie2'
         info: 'This section of the report shows SAMTools counts/statistics after mapping with Bowtie 2.'
         path_filters:
             - './bowtie2/flagstat/*'
+    - ivar:
+        name: 'VARIANTS: iVar trim'
+        info: 'This section of the report shows counts observed for each amplicon primer per sample as detected by iVar trim.'
+        path_filters:
+            - './ivar/trim/log/*'
     - samtools:
         name: 'VARIANTS: SAMTools (iVar)'
+        anchor: 'samtools_ivar'
         info: 'This section of the report shows SAMTools counts/statistics after primer sequence removal with iVar.'
         path_filters:
-            - './ivar/flagstat/*'
-    - picard:
-        name: 'VARIANTS: Picard'
-        info: 'This section of the report shows picard CollectMultipleMetrics results after mapping (if "--protocol amplicon" this will be after primer sequence removal with iVar).'
+            - './ivar/trim/flagstat/*'
+    - samtools:
+        name: 'VARIANTS: SAMTools (MarkDuplicates)'
+        anchor: 'samtools_markduplicates'
+        info: 'This section of the report shows SAMTools counts/statistics after duplicate removal with picard MarkDuplicates.'
         path_filters:
-            - './picard/*'
+            - './picard/markdup/*'
+    - picard:
+        name: 'VARIANTS: Picard Metrics'
+        info: 'This section of the report shows picard CollectMultipleMetrics and MarkDuplicates results after mapping (if "--protocol amplicon" this will be after primer sequence removal with iVar).'
+        path_filters:
+            - './picard/metrics/*'
+    - varscan2:
+        name: 'VARIANTS: VarScan 2'
+        info: 'This section of the report shows total number of variants called by VarScan 2 broken down by those that were reported or not.'
+        path_filters:
+            - './varscan2/counts/lowfreq/*'
     - bcftools:
         name: 'VARIANTS: BCFTools (VarScan 2; high freq)'
-        info: 'This section of the report shows BCFTools stats results for high frequency variants (allele frequency >= 0.8) called by VarScan 2.'
+        anchor: 'bcftools_varscan2'
+        info: 'This section of the report shows BCFTools stats results for high frequency variants called by VarScan 2. The allele frequency filtering threshold can be set by the --max_allele_freq parameter (Default: 0.8).'
         path_filters:
             - './varscan2/bcftools/highfreq/*'
     - snpeff:
         name: 'VARIANTS: SnpEff (VarScan 2; high freq)'
-        info: 'This section of the report shows SnpEff results for high frequency variants (allele frequency >= 0.8) called by VarScan 2.'
+        anchor: 'snpeff_varscan2'
+        info: 'This section of the report shows SnpEff results for high frequency variants called by VarScan 2. The allele frequency filtering threshold can be set by the --max_allele_freq parameter (Default: 0.8).'
         path_filters:
             - './varscan2/snpeff/highfreq/*'
     - quast:
         name: 'VARIANTS: QUAST (VarScan 2; high freq)'
-        info: 'This section of the report shows QUAST results for consensus sequences generated from high frequency variants (allele frequency >= 0.8) with VarScan 2.'
+        anchor: 'quast_varscan2'
+        info: 'This section of the report shows QUAST results for consensus sequences generated from high frequency variants with VarScan 2. The allele frequency filtering threshold can be set by the --max_allele_freq parameter (Default: 0.8).'
         path_filters:
             - './varscan2/quast/highfreq/*'
     - bcftools:
-        name: 'VARIANTS: BCFTools (VarScan 2; low freq)'
-        info: 'This section of the report shows BCFTools stats results for low frequency variants (allele frequency >= 0.02) called by VarScan 2.'
+        name: 'VARIANTS: BCFTools (iVar; high freq)'
+        anchor: 'bcftools_ivar'
+        info: 'This section of the report shows BCFTools stats results for high frequency variants called by iVar. The allele frequency filtering threshold can be set by the --max_allele_freq parameter (Default: 0.8).'
         path_filters:
-            - './varscan2/bcftools/lowfreq/*'
+            - './ivar/variants/bcftools/highfreq/*'
     - snpeff:
-        name: 'VARIANTS: SnpEff (VarScan 2; low freq)'
-        info: 'This section of the report shows SnpEff results for low frequency variants (allele frequency >= 0.02) called by VarScan 2.'
+        name: 'VARIANTS: SnpEff (iVar; high freq)'
+        anchor: 'snpeff_ivar'
+        info: 'This section of the report shows SnpEff results for high frequency variants called by iVar. The allele frequency filtering threshold can be set by the --max_allele_freq parameter (Default: 0.8).'
         path_filters:
-            - './varscan2/snpeff/lowfreq/*'
-    - bcftools:
-        name: 'VARIANTS: BCFTools (iVar)'
-        info: 'This section of the report shows BCFTools stats results for variants called by iVar.'
-        path_filters:
-            - './ivar/bcftools/*'
-    - snpeff:
-        name: 'VARIANTS: SnpEff (iVar)'
-        info: 'This section of the report shows SnpEff results for variants called by iVar.'
-        path_filters:
-            - './ivar/snpeff/*'
+            - './ivar/variants/snpeff/highfreq/*'
     - quast:
-        name: 'VARIANTS: QUAST (iVar)'
-        info: 'This section of the report shows QUAST results for consensus sequence generated by iVar.'
+        name: 'VARIANTS: QUAST (iVar; high freq)'
+        anchor: 'quast_ivar'
+        info: 'This section of the report shows QUAST results for consensus sequences generated from high frequency variants with iVar. The allele frequency filtering threshold can be set by the --max_allele_freq parameter (Default: 0.8).'
         path_filters:
-            - './ivar/quast/*'
+            - './ivar/consensus/quast/highfreq/*'
+    - bcftools:
+        name: 'VARIANTS: BCFTools (BCFTools)'
+        anchor: 'bcftools_bcftools'
+        info: 'This section of the report shows BCFTools stats results for variants called by BCFTools.'
+        path_filters:
+            - './bcftools/variants/bcftools/*'
+    - snpeff:
+        name: 'VARIANTS: SnpEff (BCFTools)'
+        anchor: 'snpeff_bcftools'
+        info: 'This section of the report shows SnpEff results for variants called by BCFTools.'
+        path_filters:
+            - './bcftools/variants/snpeff/*'
+    - quast:
+        name: 'VARIANTS: QUAST (BCFTools)'
+        anchor: 'quast_bcftools'
+        info: 'This section of the report shows QUAST results for consensus sequence generated from BCFTools variants.'
+        path_filters:
+            - './bcftools/consensus/quast/*'
     - cutadapt:
         name: 'ASSEMBLY: Cutadapt (primer trimming)'
         info: 'This section of the report shows Cutadapt results for reads after primer sequence trimming.'
         path_filters:
-            - './cutadapt/*'
+            - './cutadapt/log/*'
     - fastqc:
         name: 'ASSEMBLY: FastQC (primer trimming)'
+        anchor: 'fastqc_cutadapt'
         info: 'This section of the report shows FastQC results for reads after primer sequence trimming with Cutadapt.'
         path_filters:
             - './cutadapt/fastqc/*'
+    - kraken:
+        name: 'ASSEMBLY: Kraken 2'
+        info: 'This section of the report shows Kraken 2 classification results for reads after primer sequence trimming with Cutadapt.'
+        path_filters:
+            - './kraken2/*'
     - quast:
         name: 'ASSEMBLY: QUAST (SPAdes)'
+        anchor: 'quast_spades'
         info: 'This section of the report shows QUAST results from SPAdes de novo assembly.'
         path_filters:
             - './spades/quast/*'
     - bcftools:
         name: 'ASSEMBLY: BCFTools (SPAdes)'
+        anchor: 'bcftools_spades'
         info: 'This section of the report shows BCFTools stats results for variants called in the SPAdes assembly relative to the reference.'
         path_filters:
             - './spades/bcftools/*'
     - snpeff:
         name: 'ASSEMBLY: SnpEff (SPAdes)'
+        anchor: 'snpeff_spades'
         info: 'This section of the report shows SnpEff results for variants called in the SPAdes assembly relative to the reference.'
         path_filters:
             - './spades/snpeff/*'
     - quast:
         name: 'ASSEMBLY: QUAST (MetaSPAdes)'
+        anchor: 'quast_metaspades'
         info: 'This section of the report shows QUAST results from MetaSPAdes de novo assembly.'
         path_filters:
             - './metaspades/quast/*'
     - bcftools:
         name: 'ASSEMBLY: BCFTools (MetaSPAdes)'
+        anchor: 'bcftools_metaspades'
         info: 'This section of the report shows BCFTools stats results for variants called in the MetaSPAdes assembly relative to the reference.'
         path_filters:
             - './metaspades/bcftools/*'
     - snpeff:
         name: 'ASSEMBLY: SnpEff (MetaSPAdes)'
+        anchor: 'snpeff_metaspades'
         info: 'This section of the report shows SnpEff results for variants called in the MetaSPAdes assembly relative to the reference.'
         path_filters:
             - './metaspades/snpeff/*'
     - quast:
         name: 'ASSEMBLY: QUAST (Unicycler)'
+        anchor: 'quast_unicycler'
         info: 'This section of the report shows QUAST results from Unicycler de novo assembly.'
         path_filters:
             - './unicycler/quast/*'
     - bcftools:
         name: 'ASSEMBLY: BCFTools (Unicycler)'
+        anchor: 'bcftools_unicycler'
         info: 'This section of the report shows BCFTools stats results for variants called in the Unicycler assembly relative to the reference.'
         path_filters:
             - './unicycler/bcftools/*'
     - snpeff:
         name: 'ASSEMBLY: SnpEff (Unicycler)'
+        anchor: 'snpeff_unicycler'
         info: 'This section of the report shows SnpEff results for variants called in the Unicycler assembly relative to the reference.'
         path_filters:
             - './unicycler/snpeff/*'
     - quast:
         name: 'ASSEMBLY: QUAST (minia)'
+        anchor: 'quast_minia'
         info: 'This section of the report shows QUAST results from minia de novo assembly.'
         path_filters:
             - './minia/quast/*'
     - bcftools:
         name: 'ASSEMBLY: BCFTools (minia)'
+        anchor: 'bcftools_minia'
         info: 'This section of the report shows BCFTools stats results for variants called in the minia assembly relative to the reference.'
         path_filters:
             - './minia/bcftools/*'
     - snpeff:
         name: 'ASSEMBLY: SnpEff (minia)'
+        anchor: 'snpeff_minia'
         info: 'This section of the report shows SnpEff results for variants called in the minia assembly relative to the reference.'
         path_filters:
             - './minia/snpeff/*'
 
 report_section_order:
+    summary_assembly_metrics:
+      before: summary_variants_metrics
+    ivar_variants:
+        before: quast_varscan2
     software_versions:
-        order: -1000
-    nf-core-viralrecon-summary:
         order: -1001
+    nf-core-viralrecon-summary:
+        order: -1002
 
 custom_plot_config:
-    picard-insertsize:
+    picard_insert_size:
         cpswitch_c_active: False
         smooth_points: 1000
 
 bcftools:
     collapse_complementary_changes: true
+
+# See https://github.com/ewels/MultiQC_TestData/blob/master/data/custom_content/with_config/table_headerconfig/multiqc_config.yaml
+custom_data:
+    summary_variants_metrics:
+        section_name: 'Variant calling metrics'
+        description: 'generated by the nf-core/viralrecon pipeline'
+        plot_type: 'table'
+        pconfig:
+            id: 'summary_variants_metrics_plot'
+            table_title: 'Variant calling metrics'
+            namespace: 'Variant calling metrics'
+            format: '{:.0f}'
+    summary_assembly_metrics:
+        section_name: 'De novo assembly metrics'
+        description: 'generated by the nf-core/viralrecon pipeline'
+        plot_type: 'table'
+        pconfig:
+            id: 'summary_assembly_metrics_plot'
+            table_title: 'De novo assembly metrics'
+            namespace: 'De novo assembly metrics'
+            format: '{:.0f}'
+
+extra_fn_clean_exts:
+     - '.trim'
+     - '.bowtie2'
+     - '.mkD'
+     - '.ptrim'
+     - '.highfreq'
+     - '.lowfreq'
+     - '.consensus'
+     - '.snpEff'
+     - '.scaffolds'
+     - '.kraken2'
+     - type: regex
+       pattern: '.(AF|k)[0-9]+.*'

@@ -14,7 +14,6 @@
   * [`--amplicon_bed`](#--amplicon_bed)
   * [`--amplicon_fasta`](#--amplicon_fasta)
 * [SRA download](#sra-download)
-  * [`--ignore_sra_errors`](#--ignore_sra_errors)
   * [`--save_sra_fastq`](#--save_sra_fastq)
   * [`--skip_sra`](#--skip_sra)
 * [Reference genomes](#reference-genomes)
@@ -29,14 +28,24 @@
   * [`--save_kraken2_fastq`](#--save_kraken2_fastq)
   * [`--skip_kraken2`](#--skip_kraken2)
 * [Read trimming](#read-trimming)
+  * [`--cut_mean_quality`](#--cut_mean_quality)
+  * [`--qualified_quality_phred`](#--qualified_quality_phred)
+  * [`--unqualified_percent_limit`](#--unqualified_percent_limit)
+  * [`--min_trim_length`](#--min_trim_length)
   * [`--skip_adapter_trimming`](#--skip_adapter_trimming)
   * [`--skip_amplicon_trimming`](#--skip_amplicon_trimming)
   * [`--save_trimmed`](#--save_trimmed)
 * [Variant calling](#variant-calling)
   * [`--callers`](#-callers)
   * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
+  * [`--filter_dups`](#--filter_dups)
+  * [`--filter_unmapped`](#--filter_unmapped)
+  * [`--min_base_qual`](#--min_base_qual)
+  * [`--max_allele_freq`](#--max_allele_freq)
+  * [`--min_coverage`](#--min_coverage)
   * [`--save_align_intermeds`](#--save_align_intermeds)
-  * [`--save_pileup`](#--save_pileup)
+  * [`--save_mpileup`](#--save_mpileup)
+  * [`--skip_markduplicates`](#--skip_markduplicates)
   * [`--skip_snpeff`](#--skip_snpeff)
   * [`--skip_variants_quast`](#--skip_variants_quast)
   * [`--skip_variants`](#--skip_variants)
@@ -238,10 +247,6 @@ AAGGTGTCTGCAATTCATAGCTCT
 
 ## SRA download
 
-### `--ignore_sra_errors`
-
-Ignore validation errors when checking SRA identifiers that would otherwise cause the pipeline to fail (Default: false).
-
 ### `--save_sra_fastq`
 
 Save FastQ files created from SRA identifiers in the results directory (Default: false).
@@ -319,6 +324,22 @@ Skip Kraken 2 process for removing host classified reads (Default: false).
 
 ## Read trimming
 
+### `--cut_mean_quality`
+
+The mean quality requirement option shared by fastp cut_front, cut_tail or cut_sliding options. Range: 1~36 (Default: 30 (Q30)).
+
+### `--qualified_quality_phred`
+
+The quality value that a base is qualified. Default 30 means phred quality >=Q30 is qualified (Default: 30).
+
+### `--unqualified_percent_limit`
+
+Percentage of bases that are allowed to be unqualified (0~100) (Default: 10).
+
+### `--min_trim_length`
+
+Reads shorter than this length after trimming will be discarded (Default: 50).
+
 ### `--skip_adapter_trimming`
 
 Skip the adapter trimming step performed by fastp. Use this if your input FastQ files have already been trimmed outside of the workflow or if you're very confident that there is no adapter contamination in your data (Default: false).
@@ -331,25 +352,47 @@ Skip the amplicon trimming step performed by Cutadapt. Use this if your input Fa
 
 By default, trimmed FastQ files will not be saved to the results directory. Specify this flag (or set to true in your config file) to copy these files to the results directory when complete (Default: false).
 
-## Alignments
+## Variant calling
+
+### `--callers`
+
+Specify which variant calling algorithms you would like to use. Available options are `varscan2`, `ivar` and `bcftools` (Default: 'varscan2,ivar,bcftools').
 
 ### `--ivar_exclude_reads`
 
 This option unsets the `-e` parameter in `ivar trim` to discard reads without primers (Default: false).
 
+### `--filter_dups`
+
+Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false). Note that unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation.
+
+### `--filter_unmapped`
+
+Remove unmapped reads from alignments (Default: false).
+
+### `--min_base_qual`
+
+When performing variant calling skip bases with baseQ/BAQ smaller than this number (Default: 20).
+
+### `--min_coverage`
+
+When performing variant calling skip positions with an overall read depth smaller than this number (Default: 10).
+
+### `--max_allele_freq`
+
+Maximum allele frequency threshold for filtering variant calls (Default: 0.8).
+
 ### `--save_align_intermeds`
 
 By default, intermediate [BAM](https://samtools.github.io/hts-specs/) files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set to true to also save other intermediate BAM files (Default: false).
 
-## Variant calling
-
-### `--callers`
-
-Specify which variant calling algorithms you would like to use. Available options are `varscan2` and `ivar` (Default: 'varscan2,ivar').
-
-### `--save_pileup`
+### `--save_mpileup`
 
 Save Pileup files in the results directory. These tend to be quite large so are not saved by default (Default: false).
+
+### `--skip_markduplicates`
+
+Skip picard MarkDuplicates step (Default: false).
 
 ### `--skip_snpeff`
 
@@ -379,7 +422,7 @@ Skip blastn of assemblies relative to reference genome (Default: false).
 
 ### `--skip_abacas`
 
-Skip ABACUS process for assembly contiguation (Default: false).
+Skip ABACAS process for assembly contiguation (Default: false).
 
 ### `--skip_plasmidid`
 
