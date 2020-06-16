@@ -82,7 +82,7 @@ for (sample in unique(dat$sample)) {
             ggtitle(paste(sample,' genome coverage'))
 
       outfile <- paste(OUTDIR,sample,".",OUTSUFFIX,".coverage.pdf", sep='')
-      ggsave(file=outfile, plot, height=4, width=8, units="in")
+      ggsave(file=outfile, plot, height=6, width=12, units="in")
 }
 
 ################################################

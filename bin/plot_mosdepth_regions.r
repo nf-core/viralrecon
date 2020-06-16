@@ -105,7 +105,7 @@ for (sample in unique(dat$sample)) {
                 ggtitle(paste(sample,'per amplicon coverage'))
 
           outfile <- paste(OUTDIR,sample,".",OUTSUFFIX,".coverage.pdf", sep='')
-          ggsave(file=outfile, plot, width=16, height=3+(0.3*length(unique(sample_dat$region))), units="cm")
+          ggsave(file=outfile, plot, height=3+(0.3*length(unique(sample_dat$region))), width=16, units="cm")
     } else {
         plot <- ggplot(sample_dat,aes(x=end,y=coverage)) +
                 geom_ribbon(aes(ymin=0, ymax=coverage), fill="#D55E00", data=) +
@@ -120,7 +120,7 @@ for (sample in unique(dat$sample)) {
                 ggtitle(paste(sample,'coverage'))
 
         outfile <- paste(OUTDIR,sample,".",OUTSUFFIX,".coverage.pdf", sep='')
-        ggsave(file=outfile, plot, width=12, height=6, units="in")
+        ggsave(file=outfile, plot, height=6, width=12, units="in")
     }
 }
 
@@ -150,10 +150,10 @@ if (ncol(dat) == 6 && length(INPUT_FILES) > 1) {
                        col                 = viridis(50))
 
     ## Size of heatmaps scaled based on matrix dimensions: https://jokergoo.github.io/ComplexHeatmap-reference/book/other-tricks.html#set-the-same-cell-size-for-different-heatmaps-with-different-dimensions
-    width = 0.1969*ncol(mat) + (2*1.3150)
     height = 0.1969*nrow(mat) + 1.3150
+    width = 0.1969*ncol(mat) + (2*1.3150)
     outfile <- paste(OUTDIR,"all_samples.",OUTSUFFIX,".heatmap.pdf", sep='')
-    pdf(file=outfile, width=width, height=height)
+    pdf(file=outfile, height=height, width=width)
     draw(heatmap)
     dev.off()
 }
