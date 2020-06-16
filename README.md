@@ -29,7 +29,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     3. Primer sequence removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
     4. Duplicate read marking ([`picard`](https://broadinstitute.github.io/picard/); *removal optional*)
     5. Alignment-level QC ([`picard`](https://broadinstitute.github.io/picard/), [`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
-    6. Choice of multiple variant calling and consensus sequence generation routes ([`VarScan 2`](http://dkoboldt.github.io/varscan/), [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/) *||* [`iVar variants and consensus`](https://github.com/andersen-lab/ivar) *||* [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
+    6. Genome-wide and amplicon coverage QC plots ([`mosdepth`](https://github.com/brentp/mosdepth/))
+    7. Choice of multiple variant calling and consensus sequence generation routes ([`VarScan 2`](http://dkoboldt.github.io/varscan/), [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/) *||* [`iVar variants and consensus`](https://github.com/andersen-lab/ivar) *||* [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
         * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
         * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
 6. _De novo_ assembly
@@ -44,7 +45,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
         * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
 7. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
 
-Note that the pipeline has a number of options to allow you to run only specific aspects of the workflow if you so wish.
+> **NB:** The pipeline has a number of options to allow you to run only specific aspects of the workflow if you so wish.
 For example, you can skip all of the assembly steps with the `--skip_assembly` parameter.
 See the [usage docs](docs/usage.md) for all of the available options when running the pipeline.
 

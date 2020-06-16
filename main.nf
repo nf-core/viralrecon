@@ -1119,7 +1119,7 @@ process MOSDEPTH {
 ////////////////////////////////////////////////////
 
 /*
- * STEP 5.6: Create mpileup file for all variant callers
+ * STEP 5.7: Create mpileup file for all variant callers
  */
 process SAMTOOLS_MPILEUP {
     tag "$sample"
@@ -1157,7 +1157,7 @@ process SAMTOOLS_MPILEUP {
 }
 
 /*
- * STEP 5.6.1: Variant calling with VarScan 2
+ * STEP 5.7.1: Variant calling with VarScan 2
  */
 process VARSCAN2 {
     tag "$sample"
@@ -1215,7 +1215,7 @@ process VARSCAN2 {
 }
 
 /*
- * STEP 5.6.1.1: Genome consensus generation with BCFtools and masked with BEDTools
+ * STEP 5.7.1.1: Genome consensus generation with BCFtools and masked with BEDTools
  */
 process VARSCAN2_CONSENSUS {
     tag "$sample"
@@ -1254,7 +1254,7 @@ process VARSCAN2_CONSENSUS {
 }
 
 /*
- * STEP 5.6.1.2: VarScan 2 variant calling annotation with SnpEff and SnpSift
+ * STEP 5.7.1.2: VarScan 2 variant calling annotation with SnpEff and SnpSift
  */
 process VARSCAN2_SNPEFF {
     tag "$sample"
@@ -1326,7 +1326,7 @@ process VARSCAN2_SNPEFF {
 }
 
 /*
- * STEP 5.6.1.3: VarScan 2 consensus sequence report with QUAST
+ * STEP 5.7.1.3: VarScan 2 consensus sequence report with QUAST
  */
 process VARSCAN2_QUAST {
     label 'process_medium'
@@ -1360,7 +1360,7 @@ process VARSCAN2_QUAST {
 ////////////////////////////////////////////////////
 
 /*
- * STEP 5.6.2: Variant calling with iVar
+ * STEP 5.7.2: Variant calling with iVar
  */
 process IVAR_VARIANTS {
     tag "$sample"
@@ -1411,7 +1411,7 @@ process IVAR_VARIANTS {
 }
 
 /*
- * STEP 5.6.2.1: Generate consensus sequence with iVar
+ * STEP 5.7.2.1: Generate consensus sequence with iVar
  */
 process IVAR_CONSENSUS {
     tag "$sample"
@@ -1439,7 +1439,7 @@ process IVAR_CONSENSUS {
 }
 
 /*
- * STEP 5.6.2.2: iVar variant calling annotation with SnpEff and SnpSift
+ * STEP 5.7.2.2: iVar variant calling annotation with SnpEff and SnpSift
  */
 process IVAR_SNPEFF {
     tag "$sample"
@@ -1511,7 +1511,7 @@ process IVAR_SNPEFF {
 }
 
 /*
- * STEP 5.6.2.3: iVar consensus sequence report with QUAST
+ * STEP 5.7.2.3: iVar consensus sequence report with QUAST
  */
 process IVAR_QUAST {
     label 'process_medium'
@@ -1545,7 +1545,7 @@ process IVAR_QUAST {
 ////////////////////////////////////////////////////
 
 /*
- * STEP 5.6.3: Variant calling with BCFTools
+ * STEP 5.7.3: Variant calling with BCFTools
  */
 process BCFTOOLS_VARIANTS {
     tag "$sample"
@@ -1588,7 +1588,7 @@ process BCFTOOLS_VARIANTS {
 }
 
 /*
- * STEP 5.6.3.1: Genome consensus generation with BCFtools and masked with BEDTools
+ * STEP 5.7.3.1: Genome consensus generation with BCFtools and masked with BEDTools
  */
 process BCFTOOLS_CONSENSUS {
     tag "$sample"
@@ -1627,7 +1627,7 @@ process BCFTOOLS_CONSENSUS {
 }
 
 /*
- * STEP 5.6.3.2: BCFTools variant calling annotation with SnpEff and SnpSift
+ * STEP 5.7.3.2: BCFTools variant calling annotation with SnpEff and SnpSift
  */
 process BCFTOOLS_SNPEFF {
     tag "$sample"
@@ -1674,7 +1674,7 @@ process BCFTOOLS_SNPEFF {
 }
 
 /*
- * STEP 5.6.3.3: BCFTools consensus sequence report with QUAST
+ * STEP 5.7.3.3: BCFTools consensus sequence report with QUAST
  */
 process BCFTOOLS_QUAST {
     label 'process_medium'
