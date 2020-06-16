@@ -47,6 +47,8 @@ if (!file.exists(OUTDIR)) {
   dir.create(OUTDIR,recursive=TRUE)
 }
 
+OUTSUFFIX <- trimws(opt$output_suffix, "both", whitespace = "\\.")
+
 ################################################
 ################################################
 ## READ IN DATA                               ##
@@ -63,14 +65,14 @@ for (input_file in INPUT_FILES) {
 ## Reformat table
 if (ncol(dat) == 6) {
     colnames(dat) <- c('chrom', 'start','end', 'region', 'coverage', 'sample')
-    dat$region <- factor(dat$region, levels=unique(dat$region[order(dat$start, decreasing=TRUE)]))
+    dat$region <- factor(dat$region, levels=unique(dat$region[order(dat$start)]))
 } else {
     colnames(dat) <- c('chrom', 'start','end', 'coverage', 'sample')
 }
 dat$sample <- factor(dat$sample, levels=sort(unique(dat$sample)))
 
 ## Write merged coverage data for all samples to file
-outfile <- paste(OUTDIR,"all_samples.",opt$output_suffix,".coverage.tsv", sep='')
+outfile <- paste(OUTDIR,"all_samples.",OUTSUFFIX,".coverage.tsv", sep='')
 write.table(dat, file=outfile, col.names=TRUE, row.names=FALSE, sep='\t', quote=FALSE)
 
 ################################################
@@ -81,7 +83,7 @@ write.table(dat, file=outfile, col.names=TRUE, row.names=FALSE, sep='\t', quote=
 
 for (sample in unique(dat$sample)) {
     sample_dat <- dat[dat$sample == sample,]
-    outfile <- paste(OUTDIR,sample,".",opt$output_suffix,".coverage.tsv", sep='')
+    outfile <- paste(OUTDIR,sample,".",OUTSUFFIX,".coverage.tsv", sep='')
     write.table(sample_dat,file=outfile, col.names=TRUE, row.names=FALSE, sep='\t', quote=FALSE)
     sample_dat$coverage <- sample_dat$coverage + 1
 
@@ -102,7 +104,7 @@ for (sample in unique(dat$sample)) {
                 xlab('Amplicon') +
                 ggtitle(paste(sample,'per amplicon coverage'))
 
-          outfile <- paste(OUTDIR,sample,".",opt$output_suffix,".coverage.pdf", sep='')
+          outfile <- paste(OUTDIR,sample,".",OUTSUFFIX,".coverage.pdf", sep='')
           ggsave(file=outfile, plot, width=16, height=3+(0.3*length(unique(sample_dat$region))), units="cm")
     } else {
         plot <- ggplot(sample_dat,aes(x=end,y=coverage)) +
@@ -115,10 +117,10 @@ for (sample in unique(dat$sample)) {
                                    expand=c(0, 0)) +
                 ylab(bquote('log'[10]~'(Coverage+1)')) +
                 xlab('Position (bp)') +
-                ggtitle(paste(SAMPLE_NAME,'coverage'))
+                ggtitle(paste(sample,'coverage'))
 
-        outfile <- paste(OUTDIR,sample,".",opt$output_suffix,".coverage.pdf", sep='')
-        ggsave(file=outfile, plot, width=12, height=6, units="cm")
+        outfile <- paste(OUTDIR,sample,".",OUTSUFFIX,".coverage.pdf", sep='')
+        ggsave(file=outfile, plot, width=12, height=6, units="in")
     }
 }
 
@@ -150,7 +152,7 @@ if (ncol(dat) == 6 && length(INPUT_FILES) > 1) {
     ## Size of heatmaps scaled based on matrix dimensions: https://jokergoo.github.io/ComplexHeatmap-reference/book/other-tricks.html#set-the-same-cell-size-for-different-heatmaps-with-different-dimensions
     width = 0.1969*ncol(mat) + (2*1.3150)
     height = 0.1969*nrow(mat) + 1.3150
-    outfile <- paste(OUTDIR,"all_samples.",opt$output_suffix,".heatmap.pdf", sep='')
+    outfile <- paste(OUTDIR,"all_samples.",OUTSUFFIX,".heatmap.pdf", sep='')
     pdf(file=outfile, width=width, height=height)
     draw(heatmap)
     dev.off()
