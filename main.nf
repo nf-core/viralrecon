@@ -66,6 +66,8 @@ def helpMessage() {
       --save_align_intermeds [bool]     Save the intermediate BAM files from the alignment steps (Default: false)
       --save_mpileup [bool]             Save MPileup files generated during variant calling (Default: false)
       --skip_markduplicates [bool]      Skip picard MarkDuplicates step (Default: false)
+      --skip_picard_metrics [bool]      Skip Picard CollectMultipleMetrics and CollectWgsMetrics (Default: false)
+      --skip_mosdepth [bool]            Skip genome-wide and amplicon coverage plot generation from mosdepth output (Default: false)
       --skip_snpeff [bool]              Skip SnpEff and SnpSift annotation of variants (Default: false)
       --skip_variants_quast [bool]      Skip generation of QUAST aggregated report for consensus sequences (Default: false)
       --skip_variants [bool]            Skip variant calling steps in the pipeline (Default: false)
@@ -82,9 +84,7 @@ def helpMessage() {
 
     QC
       --skip_fastqc [bool]              Skip FastQC (Default: false)
-      --skip_picard_metrics             Skip Picard CollectMultipleMetrics and CollectWgsMetrics (Default: false)
       --skip_multiqc [bool]             Skip MultiQC (Default: false)
-      --skip_qc [bool]                  Skip all QC steps apart from MultiQC (Default: false)
 
     Other options:
       --outdir [file]                   The output directory where the results will be saved
@@ -256,8 +256,10 @@ if (!params.skip_variants) {
     summary['Min Read Depth']        = params.min_coverage
     summary['Max Allele Freq']       = params.max_allele_freq
     if (params.save_align_intermeds) summary['Save Align Intermeds'] =  'Yes'
-    if (params.save_mpileup)         summary['Save MPileup'] = 'Yes'
+    if (params.save_mpileup)         summary['Save mpileup'] = 'Yes'
     if (params.skip_markduplicates)  summary['Skip MarkDuplicates'] = 'Yes'
+    if (params.skip_picard_metrics)  summary['Skip Picard Metrics'] = 'Yes'
+    if (params.skip_mosdepth)        summary['Skip mosdepth'] = 'Yes'
     if (params.skip_snpeff)          summary['Skip SnpEff'] = 'Yes'
     if (params.skip_variants_quast)  summary['Skip Variants QUAST'] = 'Yes'
 } else {
@@ -274,12 +276,7 @@ if (!params.skip_assembly) {
 } else {
     summary['Skip Assembly']         = 'Yes'
 }
-if (!params.skip_qc) {
-    if (params.skip_fastqc)          summary['Skip FastQC'] = 'Yes'
-    if (params.skip_picard_metrics)  summary['Skip Picard Metrics'] = 'Yes'
-} else {
-    summary['Skip QC'] = 'Yes'
-}
+if (params.skip_fastqc)              summary['Skip FastQC'] = 'Yes'
 if (params.skip_multiqc)             summary['Skip MultiQC'] = 'Yes'
 summary['Max Resources']             = "$params.max_memory memory, $params.max_cpus cpus, $params.max_time time per job"
 if (workflow.containerEngine)        summary['Container'] = "$workflow.containerEngine - $workflow.container"
@@ -679,7 +676,7 @@ process FASTQC {
                 }
 
     when:
-    !params.skip_fastqc && !params.skip_qc
+    !params.skip_fastqc
 
     input:
     tuple val(sample), val(single_end), path(reads) from ch_cat_fastqc
@@ -979,6 +976,7 @@ if (params.protocol != 'amplicon') {
 if (params.skip_markduplicates) {
     ch_ivar_trim_bam
         .into { ch_markdup_bam_metrics
+                ch_markdup_bam_mosdepth
                 ch_markdup_bam_mpileup
                 ch_markdup_bam_varscan2_consensus
                 ch_markdup_bam_bcftools
@@ -1007,6 +1005,7 @@ if (params.skip_markduplicates) {
 
         output:
         tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_markdup_bam_metrics,
+                                                                                ch_markdup_bam_mosdepth,
                                                                                 ch_markdup_bam_mpileup,
                                                                                 ch_markdup_bam_varscan2_consensus,
                                                                                 ch_markdup_bam_bcftools,
@@ -1049,7 +1048,7 @@ process PICARD_METRICS {
     publishDir "${params.outdir}/variants/bam/picard_metrics", mode: params.publish_dir_mode
 
     when:
-    !params.skip_variants && !params.skip_picard_metrics && !params.skip_qc
+    !params.skip_variants && !params.skip_picard_metrics
 
     input:
     tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_metrics
@@ -1083,6 +1082,35 @@ process PICARD_METRICS {
         REFERENCE_SEQUENCE=$fasta \\
         VALIDATION_STRINGENCY=LENIENT \\
         TMP_DIR=tmp
+    """
+}
+
+/*
+ * STEP 5.6: mosdepth genome-wide and amplicon coverage plots
+ */
+process MOSDEPTH {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/bam/mosdepth", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants && !params.skip_mosdepth
+
+    input:
+    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_mosdepth
+
+    output:
+    path "*.{pdf,txt,gz,csi}"
+
+    script:
+    suffix = params.skip_markduplicates ? "" : ".mkD"
+    prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}" : "${sample}${suffix}"
+    """
+    mosdepth --by 200 --fast-mode ${prefix}.genome ${bam[0]}
+    plot_mosdepth_regions.r \\
+        --region_file "${prefix}.genome.regions.bed.gz" \\
+        --sample_name $sample \\
+        --out_file "${prefix}.genome.coverage.pdf"
     """
 }
 
@@ -1175,7 +1203,7 @@ process VARSCAN2 {
     tabix -p vcf -f ${sample}.vcf.gz
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
     sed -i.bak '/LC_ALL/d' ${sample}.varscan2.log
-    
+
     bcftools filter \\
         -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq' \\
         --output-type z \\
@@ -2998,7 +3026,7 @@ process get_software_versions {
                 }
 
     output:
-    path 'software_versions_mqc.yaml' into ch_software_versions_yaml
+    path "software_versions_mqc.yaml" into ch_software_versions_yaml
     path "software_versions.csv"
 
     script:
