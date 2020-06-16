@@ -386,11 +386,11 @@ Maximum allele frequency threshold for filtering variant calls (Default: 0.8).
 
 ### `--amplicon_left_suffix`
 
-Suffix used in name field of `--amplicon_bed` to indicate left primer position (Default: '_LEFT').
+Suffix used in name field of `--amplicon_bed` to indicate left primer position (Default: '\_LEFT').
 
 ### `--amplicon_right_suffix`
 
-Suffix used in name field of `--amplicon_bed` to indicate right primer position (Default: '_RIGHT').
+Suffix used in name field of `--amplicon_bed` to indicate right primer position (Default: '\_RIGHT').
 
 ### `--save_align_intermeds`
 
