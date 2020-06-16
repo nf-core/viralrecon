@@ -1113,7 +1113,6 @@ process MOSDEPTH_GENOME {
     prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}.genome" : "${sample}${suffix}.genome"
     """
     mosdepth --by 200 --fast-mode $prefix ${bam[0]}
-    plot_mosdepth_regions.r --region_file "${prefix}.regions.bed.gz" --sample_name $sample
     """
 }
 
@@ -1139,10 +1138,15 @@ process MOSDEPTH_AMPLICON {
     suffix = params.skip_markduplicates ? "" : ".mkD"
     prefix = "${sample}.trim${suffix}.amplicon"
     """
-    collapse_amplicon_bed.py $bed amplicon.collapsed.bed $params.amplicon_left_suffix $params.amplicon_right_suffix
+    collapse_amplicon_bed.py \\
+        --left_primer_suffix $params.amplicon_left_suffix \\
+        --right_primer_suffix $params.amplicon_right_suffix \\
+        $bed \\
+        amplicon.collapsed.bed
     mosdepth --by amplicon.collapsed.bed --fast-mode --thresholds 1,10,50,100,500 ${prefix} ${bam[0]}
     """
 }
+//plot_mosdepth_regions.r --region_file "${prefix}.regions.bed.gz" --sample_name $sample
 // plot_mosdepth_regions.r \\
 //     --region_file "${prefix}.regions.bed.gz" \\
 //     --sample_name $sample \\
