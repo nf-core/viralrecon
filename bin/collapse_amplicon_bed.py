@@ -13,8 +13,8 @@ def parse_args(args=None):
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
     parser.add_argument('FILE_IN', help="Input BED file.")
     parser.add_argument('FILE_OUT', help="Output BED file.")
-    parser.add_argument('-ls', '--left_primer_suffix', type=str, dest="LEFT_PRIMER_SUFFIX", default='_LEFT', help="Suffix for left primer in name column of BED file (default: '_LEFT').")
-    parser.add_argument('-rs', '--right_primer_suffix', type=str, dest="RIGHT_PRIMER_SUFFIX", default='_RIGHT', help="Suffix for right primer in name column of BED file (default: '_RIGHT').")
+    parser.add_argument('-lp', '--left_primer_suffix', type=str, dest="LEFT_PRIMER_SUFFIX", default='_LEFT', help="Suffix for left primer in name column of BED file (default: '_LEFT').")
+    parser.add_argument('-rp', '--right_primer_suffix', type=str, dest="RIGHT_PRIMER_SUFFIX", default='_RIGHT', help="Suffix for right primer in name column of BED file (default: '_RIGHT').")
     return parser.parse_args(args)
 
 
