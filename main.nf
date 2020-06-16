@@ -976,7 +976,8 @@ if (params.protocol != 'amplicon') {
 if (params.skip_markduplicates) {
     ch_ivar_trim_bam
         .into { ch_markdup_bam_metrics
-                ch_markdup_bam_mosdepth
+                ch_markdup_bam_mosdepth_genome
+                ch_markdup_bam_mosdepth_amplicon
                 ch_markdup_bam_mpileup
                 ch_markdup_bam_varscan2_consensus
                 ch_markdup_bam_bcftools
@@ -1005,7 +1006,8 @@ if (params.skip_markduplicates) {
 
         output:
         tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_markdup_bam_metrics,
-                                                                                ch_markdup_bam_mosdepth,
+                                                                                ch_markdup_bam_mosdepth_genome,
+                                                                                ch_markdup_bam_mosdepth_amplicon,
                                                                                 ch_markdup_bam_mpileup,
                                                                                 ch_markdup_bam_varscan2_consensus,
                                                                                 ch_markdup_bam_bcftools,
@@ -1086,33 +1088,60 @@ process PICARD_METRICS {
 }
 
 /*
- * STEP 5.6: mosdepth genome-wide and amplicon coverage plots
+ * STEP 5.6.1: mosdepth genome-wide coverage plots
  */
-process MOSDEPTH {
+process MOSDEPTH_GENOME {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/bam/mosdepth", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/bam/mosdepth/genome", mode: params.publish_dir_mode
 
     when:
     !params.skip_variants && !params.skip_mosdepth
 
     input:
-    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_mosdepth
+    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_mosdepth_genome
 
     output:
     path "*.{pdf,txt,gz,csi}"
 
     script:
     suffix = params.skip_markduplicates ? "" : ".mkD"
-    prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}" : "${sample}${suffix}"
+    prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}.genome" : "${sample}${suffix}.genome"
     """
-    mosdepth --by 200 --fast-mode ${prefix}.genome ${bam[0]}
-    plot_mosdepth_regions.r \\
-        --region_file "${prefix}.genome.regions.bed.gz" \\
-        --sample_name $sample \\
-        --out_file "${prefix}.genome.coverage.pdf"
+    mosdepth --by 200 --fast-mode $prefix ${bam[0]}
+    plot_mosdepth_regions.r --region_file "${prefix}.regions.bed.gz" --sample_name $sample
     """
 }
+
+/*
+ * STEP 5.6.2: mosdepth amplicon coverage plots
+ */
+process MOSDEPTH_AMPLICON {
+    tag "$sample"
+    label 'process_medium'
+    publishDir "${params.outdir}/variants/bam/mosdepth/amplicon", mode: params.publish_dir_mode
+
+    when:
+    !params.skip_variants && !params.skip_mosdepth && params.protocol == 'amplicon'
+
+    input:
+    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_mosdepth_amplicon
+    path bed from ch_amplicon_bed
+
+    output:
+    path "*.{pdf,txt,gz,csi}"
+
+    script:
+    suffix = params.skip_markduplicates ? "" : ".mkD"
+    prefix = "${sample}.trim${suffix}.amplicon"
+    """
+    mosdepth --by $bed --fast-mode --thresholds 1,10,50,100,500 ${prefix} ${bam[0]}
+    """
+}
+// plot_mosdepth_regions.r \\
+//     --region_file "${prefix}.regions.bed.gz" \\
+//     --sample_name $sample \\
+//     --out_file "${prefix}.coverage.pdf"
 
 ////////////////////////////////////////////////////
 /* --              VARSCAN2                    -- */
