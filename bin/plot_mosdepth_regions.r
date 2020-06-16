@@ -47,8 +47,6 @@ if (!file.exists(OUTDIR)) {
   dir.create(OUTDIR,recursive=TRUE)
 }
 
-#bin/plot_mosdepth_regions.r -i /camp/stp/babs/working/patelh/code/nextflow/nfcore/viralrecon/results/variants/bam/mosdepth/amplicon/SAMPLE1_PE.trim.mkD.amplicon.regions.bed.gz,/camp/stp/babs/working/patelh/code/nextflow/nfcore/viralrecon/results/variants/bam/mosdepth/amplicon/SAMPLE3_SE.trim.mkD.amplicon.regions.bed.gz -s .trim.mkD.amplicon.regions.bed.gz -o ./test
-
 ################################################
 ################################################
 ## READ IN DATA                               ##
