@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Update bowtie2 `2.3.5.1` -> `2.4.1`
 * Update picard `2.22.8` -> `2.23.0`
 * Update minia `3.2.3` -> `3.2.4`
-* Update plasmidid `1.5.2` -> `1.6.2`
+* Update plasmidid `1.5.2` -> `1.6.3`
 
 ## [1.0.0] - 2020-06-01
 
