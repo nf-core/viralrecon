@@ -143,6 +143,7 @@ if (ncol(dat) == 6 && length(INPUT_FILES) > 1) {
                        column_names_side   = "bottom",
                        rect_gp             = gpar(col="white", lwd=1),
                        show_heatmap_legend = TRUE,
+                       heatmap_legend_param = list(title_gp=gpar(fontsize = 8), labels_gp=gpar(fontsize=6), direction="horizontal"),
                        row_names_gp        = gpar(fontsize=6),
                        column_names_gp     = gpar(fontsize=6),
                        height              = unit(5, "mm")*nrow(mat),
@@ -150,11 +151,11 @@ if (ncol(dat) == 6 && length(INPUT_FILES) > 1) {
                        col                 = viridis(50))
 
     ## Size of heatmaps scaled based on matrix dimensions: https://jokergoo.github.io/ComplexHeatmap-reference/book/other-tricks.html#set-the-same-cell-size-for-different-heatmaps-with-different-dimensions
-    height = 0.1969*nrow(mat) + 1.3150
-    width = 0.1969*ncol(mat) + (2*1.3150)
+    height = 0.1969*nrow(mat) + 1.6
+    width = 0.1969*ncol(mat) + (2*0.7)
     outfile <- paste(OUTDIR,"all_samples.",OUTSUFFIX,".heatmap.pdf", sep='')
     pdf(file=outfile, height=height, width=width)
-    draw(heatmap)
+    draw(heatmap, heatmap_legend_side="top")
     dev.off()
 }
 
