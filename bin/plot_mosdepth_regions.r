@@ -100,6 +100,7 @@ for (sample in unique(dat$sample)) {
                                    breaks=10^c(0:10),
                                    labels=trans_format('log10', math_format(10^.x)),
                                    expand=c(0, 0)) +
+                expand_limits(y=1) +
                 ylab(bquote('log'[10]~'(Coverage+1)')) +
                 xlab('Amplicon') +
                 ggtitle(paste(sample,'per amplicon coverage'))
@@ -115,6 +116,7 @@ for (sample in unique(dat$sample)) {
                                    breaks=10^c(0:10),
                                    labels=trans_format('log10', math_format(10^.x)),
                                    expand=c(0, 0)) +
+                expand_limits(y=1) +
                 ylab(bquote('log'[10]~'(Coverage+1)')) +
                 xlab('Position (bp)') +
                 ggtitle(paste(sample,'coverage'))
@@ -151,7 +153,7 @@ if (ncol(dat) == 6 && length(INPUT_FILES) > 1) {
                        col                 = viridis(50))
 
     ## Size of heatmaps scaled based on matrix dimensions: https://jokergoo.github.io/ComplexHeatmap-reference/book/other-tricks.html#set-the-same-cell-size-for-different-heatmaps-with-different-dimensions
-    height = 0.1969*nrow(mat) + 1.6
+    height = 0.1969*nrow(mat) + 2
     width = 0.1969*ncol(mat) + (2*0.7)
     outfile <- paste(OUTDIR,"all_samples.",OUTSUFFIX,".heatmap.pdf", sep='')
     pdf(file=outfile, height=height, width=width)
