@@ -97,7 +97,7 @@ for (sample in unique(dat$sample)) {
                 coord_flip() +
                 scale_x_discrete(expand=c(0, 0)) +
                 scale_y_continuous(trans=log10_trans(),
-                                   breaks=trans_breaks('log10', function(x) 10^x),
+                                   breaks=10^c(0:10),
                                    labels=trans_format('log10', math_format(10^.x)),
                                    expand=c(0, 0)) +
                 ylab(bquote('log'[10]~'(Coverage+1)')) +
@@ -112,7 +112,7 @@ for (sample in unique(dat$sample)) {
                 theme_bw() +
                 scale_x_continuous(expand=c(0, 0)) +
                 scale_y_continuous(trans=log10_trans(),
-                                   breaks=trans_breaks('log10', function(x) 10^x),
+                                   breaks=10^c(0:10),
                                    labels=trans_format('log10', math_format(10^.x)),
                                    expand=c(0, 0)) +
                 ylab(bquote('log'[10]~'(Coverage+1)')) +
