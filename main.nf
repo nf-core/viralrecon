@@ -1111,6 +1111,7 @@ process MOSDEPTH_GENOME {
     tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_mosdepth_genome
 
     output:
+    path "*.global.dist.txt" into ch_mosdepth_genome_mqc
     path "*.{txt,gz,csi,tsv,pdf}"
 
     script:
@@ -1129,12 +1130,6 @@ process MOSDEPTH_GENOME {
         --input_suffix ${plot_suffix}.regions.bed.gz \\
         --output_dir ./ \\
         --output_suffix ${plot_suffix}.regions
-
-    plot_mosdepth_dist.r \\
-        --input_files ${prefix}.mosdepth.global.dist.txt \\
-        --input_suffix ${plot_suffix}.mosdepth.global.dist.txt \\
-        --output_dir ./ \\
-        --output_suffix ${plot_suffix}.mosdepth.global.dist
     """
 }
 
@@ -1155,9 +1150,8 @@ if (params.protocol == 'amplicon') {
         path bed from ch_amplicon_bed
 
         output:
-        path "*.global.dist.txt" into ch_mosdepth_amplicon_region_dist
         path "*.regions.bed.gz" into ch_mosdepth_amplicon_region_bed
-        path "*.{summary.txt,region.dist.txt,per-base.bed.gz,thresholds.bed.gz,csi}"
+        path "*.{txt,gz,csi}"
 
         script:
         suffix = params.skip_markduplicates ? "" : ".mkD"
@@ -1187,7 +1181,6 @@ if (params.protocol == 'amplicon') {
         !params.skip_variants && !params.skip_mosdepth
 
         input:
-        path dist from ch_mosdepth_amplicon_region_dist.collect()
         path bed from ch_mosdepth_amplicon_region_bed.collect()
 
         output:
@@ -1202,12 +1195,6 @@ if (params.protocol == 'amplicon') {
             --input_suffix ${suffix}.regions.bed.gz \\
             --output_dir ./ \\
             --output_suffix ${suffix}.regions
-
-        plot_mosdepth_dist.r \\
-            --input_files ${dist.join(',')} \\
-            --input_suffix ${suffix}.mosdepth.global.dist.txt \\
-            --output_dir ./ \\
-            --output_suffix ${suffix}.mosdepth.global.dist
         """
     }
 }
@@ -3187,6 +3174,7 @@ process MULTIQC {
     path ('picard/markdup/*') from ch_markdup_bam_flagstat_mqc.collect().ifEmpty([])
     path ('picard/metrics/*') from ch_markdup_bam_metrics_mqc.collect().ifEmpty([])
     path ('picard/metrics/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
+    path ('mosdepth/genome/*') from ch_mosdepth_genome_mqc.collect().ifEmpty([])
     path ('varscan2/counts/lowfreq/*') from ch_varscan2_log_mqc.collect().ifEmpty([])
     path ('varscan2/bcftools/highfreq/*') from ch_varscan2_bcftools_highfreq_mqc.collect().ifEmpty([])
     path ('varscan2/snpeff/highfreq/*') from ch_varscan2_snpeff_highfreq_mqc.collect().ifEmpty([])
