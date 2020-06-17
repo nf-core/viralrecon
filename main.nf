@@ -1118,7 +1118,11 @@ process MOSDEPTH_GENOME {
     prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}.genome" : "${sample}${suffix}.genome"
     plot_suffix = params.protocol == 'amplicon' ? ".trim${suffix}.genome" : "${suffix}.genome"
     """
-    mosdepth --by 200 --fast-mode $prefix ${bam[0]}
+    mosdepth \\
+        --by 200 \\
+        --fast-mode \\
+        $prefix \\
+        ${bam[0]}
 
     plot_mosdepth_regions.r \\
         --input_files ${prefix}.regions.bed.gz \\
@@ -1135,72 +1139,77 @@ process MOSDEPTH_GENOME {
 }
 
 /*
- * STEP 5.6.2: mosdepth amplicon coverage
+ * STEP 5.6.2: mosdepth amplicon coverage and plots
  */
-process MOSDEPTH_AMPLICON {
-    tag "$sample"
-    label 'process_medium'
-    publishDir "${params.outdir}/variants/bam/mosdepth/amplicon", mode: params.publish_dir_mode
+if (params.protocol == 'amplicon') {
+    process MOSDEPTH_AMPLICON {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/variants/bam/mosdepth/amplicon", mode: params.publish_dir_mode
 
-    when:
-    !params.skip_variants && !params.skip_mosdepth && params.protocol == 'amplicon'
+        when:
+        !params.skip_variants && !params.skip_mosdepth
 
-    input:
-    tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_mosdepth_amplicon
-    path bed from ch_amplicon_bed
+        input:
+        tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_mosdepth_amplicon
+        path bed from ch_amplicon_bed
 
-    output:
-    path "*.global.dist.txt" into ch_mosdepth_amplicon_region_dist
-    path "*.regions.bed.gz" into ch_mosdepth_amplicon_region_bed
-    path "*.{summary.txt,region.dist.txt,per-base.bed.gz,thresholds.bed.gz,csi}"
+        output:
+        path "*.global.dist.txt" into ch_mosdepth_amplicon_region_dist
+        path "*.regions.bed.gz" into ch_mosdepth_amplicon_region_bed
+        path "*.{summary.txt,region.dist.txt,per-base.bed.gz,thresholds.bed.gz,csi}"
 
-    script:
-    suffix = params.skip_markduplicates ? "" : ".mkD"
-    prefix = "${sample}.trim${suffix}.amplicon"
-    """
-    collapse_amplicon_bed.py \\
-        --left_primer_suffix $params.amplicon_left_suffix \\
-        --right_primer_suffix $params.amplicon_right_suffix \\
-        $bed \\
-        amplicon.collapsed.bed
-    mosdepth --by amplicon.collapsed.bed --fast-mode --thresholds 0,1,10,50,100,500 ${prefix} ${bam[0]}
-    """
-}
+        script:
+        suffix = params.skip_markduplicates ? "" : ".mkD"
+        prefix = "${sample}.trim${suffix}.amplicon"
+        """
+        collapse_amplicon_bed.py \\
+            --left_primer_suffix $params.amplicon_left_suffix \\
+            --right_primer_suffix $params.amplicon_right_suffix \\
+            $bed \\
+            amplicon.collapsed.bed
 
-/*
- * STEP 5.6.3: mosdepth amplicon coverage plots
- */
-process MOSDEPTH_AMPLICON_PLOT {
-    tag "$sample"
-    label 'process_medium'
-    publishDir "${params.outdir}/variants/bam/mosdepth/amplicon/plots", mode: params.publish_dir_mode
+        mosdepth \\
+            --by amplicon.collapsed.bed \\
+            --fast-mode \\
+            --thresholds 0,1,10,50,100,500 \\
+            ${prefix} \\
+            ${bam[0]}
+        """
+    }
 
-    when:
-    !params.skip_variants && !params.skip_mosdepth && params.protocol == 'amplicon'
+    process MOSDEPTH_AMPLICON_PLOT {
+        tag "$sample"
+        label 'process_medium'
+        publishDir "${params.outdir}/variants/bam/mosdepth/amplicon/plots", mode: params.publish_dir_mode
 
-    input:
-    path dist from ch_mosdepth_amplicon_region_dist.collect()
-    path bed from ch_mosdepth_amplicon_region_bed.collect()
+        when:
+        !params.skip_variants && !params.skip_mosdepth
 
-    output:
-    path "*.{tsv,pdf}"
+        input:
+        path dist from ch_mosdepth_amplicon_region_dist.collect()
+        path bed from ch_mosdepth_amplicon_region_bed.collect()
 
-    script:
-    suffix = params.skip_markduplicates ? "" : ".mkD"
-    suffix = ".trim${suffix}.amplicon"
-    """
-    plot_mosdepth_regions.r \\
-        --input_files ${bed.join(',')} \\
-        --input_suffix ${suffix}.regions.bed.gz \\
-        --output_dir ./ \\
-        --output_suffix ${suffix}.regions
+        output:
+        path "*.{tsv,pdf}"
 
-    plot_mosdepth_dist.r \\
-        --input_files ${dist.join(',')} \\
-        --input_suffix ${suffix}.mosdepth.global.dist.txt \\
-        --output_dir ./ \\
-        --output_suffix ${suffix}.mosdepth.global.dist
-    """
+        script:
+        suffix = params.skip_markduplicates ? "" : ".mkD"
+        suffix = ".trim${suffix}.amplicon"
+        """
+        plot_mosdepth_regions.r \\
+            --input_files ${bed.join(',')} \\
+            --input_suffix ${suffix}.regions.bed.gz \\
+            --output_dir ./ \\
+            --output_suffix ${suffix}.regions
+
+        plot_mosdepth_dist.r \\
+            --input_files ${dist.join(',')} \\
+            --input_suffix ${suffix}.mosdepth.global.dist.txt \\
+            --output_dir ./ \\
+            --output_suffix ${suffix}.mosdepth.global.dist
+        """
+    }
 }
 
 ////////////////////////////////////////////////////
