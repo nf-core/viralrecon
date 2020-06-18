@@ -212,6 +212,10 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 ![MultiQC - mosdepth coverage plot](images/mqc_mosdepth_plot.png)
 
+![R - Sample per-amplicon coverage plot](images/r_amplicon_barplot.png)
+
+![R - Sample genome-wide coverage plot](images/r_genome_coverage.png)
+
 <details markdown="1">
   <summary>Output files</summary>
 
