@@ -44,7 +44,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 Please see the [usage docs](https://github.com/nf-core/viralrecon/blob/master/docs/usage.md#supported-public-repository-ids) for a list of supported public repository identifiers and how to provide them to the pipeline. The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well as their associated md5sums. If a download link exists, the files will be downloaded by FTP otherwise they will be downloaded using [parallel-fastq-dump](https://github.com/rvalieris/parallel-fastq-dump).
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `preprocess/sra/`
   * `sra_run_info.tsv`: Run information file for all samples to be downloaded from the ENA/SRA.
@@ -56,6 +57,8 @@ Please see the [usage docs](https://github.com/nf-core/viralrecon/blob/master/do
 
 > **NB:** Downloaded FastQ files will only be saved in the results directory if the `--save_sra_fastq` parameter is supplied.  
 
+</details>
+
 ### cat
 
 If multiple libraries/runs have been provided for the same sample in the input samplesheet (e.g. to increase sequencing depth) then these will be merged at the very beginning of the pipeline in order to have consistent sample naming throughout the pipeline. Please refer to the [usage docs](https://github.com/nf-core/viralrecon/blob/dev/docs/usage.md#format) to see how to specify these samples in the input samplesheet.
@@ -64,22 +67,28 @@ If multiple libraries/runs have been provided for the same sample in the input s
 
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
-**Output files:**
+![MultiQC - FastQC per base sequence plot](images/mqc_fastqc_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `preprocess/fastqc/`
   * `*_fastqc.html`: FastQC report containing quality metrics.
 * `preprocess/fastqc/zips/`
   * `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
 
-![MultiQC - FastQC per base sequence plot](images/mqc_fastqc_plot.png)
-
 > **NB:** The FastQC plots in this directory are generated relative to the raw, input reads. They may contain adapter sequence and regions of low quality. To see how your reads look after trimming please refer to the FastQC reports in the `preprocess/fastp/fastqc/` directory.
+
+</details>
 
 ### fastp
 
 [fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast, all-in-one preprocessing for FastQ files. It has been developed in C++ with multithreading support to achieve higher performance. fastp is used in this pipeline for standard adapter trimming and quality filtering.
 
-**Output files:**
+![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `preprocess/fastp/`
   * `*.fastp.html`: Trimming report in html format.
@@ -93,9 +102,9 @@ If multiple libraries/runs have been provided for the same sample in the input s
 * `preprocess/fastp/fastqc/zips/`
   * `*.trim_fastqc.zip`: Zip archive containing the FastQC report.
 
-![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
-
 > **NB:** Post-trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
+
+</details>
 
 ## Variant calling
 
@@ -105,20 +114,26 @@ A file called `summary_variants_metrics_mqc.tsv` containing a selection of read 
 
 [Bowtie 2](http://bio-bwa.sourceforge.net/) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. Bowtie 2 supports gapped, local, and paired-end alignment modes.
 
-**Output files:**
+![MultiQC - Bowtie2 alignment score plot](images/mqc_bowtie2_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `variants/bam/`
   * `<SAMPLE>.bam`: Original BAM file created by Bowtie 2. Only present if `--save_align_intermeds` parameter is supplied.
 * `variants/bam/log/`
   * `<SAMPLE>.bowtie2.log`: Bowtie 2 mapping log file.
 
-![MultiQC - Bowtie2 alignment score plot](images/mqc_bowtie2_plot.png)
+</details>
 
 ### SAMtools
 
 Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/) to sort them by coordinate, for indexing, as well as to generate read mapping statistics.
 
-**Output files:**
+![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `variants/bam/`
   * `<SAMPLE>.sorted.bam`: Coordinate sorted BAM file containing read alignment information.
@@ -126,15 +141,18 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 * `variants/bam/samtools_stats/`
   * SAMtools `<SAMPLE>.sorted.bam.flagstat`, `<SAMPLE>.sorted.bam.idxstats` and `<SAMPLE>.sorted.bam.stats` files generated from the alignment files.
 
-![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
-
 > **NB:** BAM files and their associated indices will only be saved in the results directory if the `--save_align_intermeds` parameter is supplied.
+
+</details>
 
 ### iVar trim
 
 If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pasteur.fr/docs/ivar/1.0/manualpage.html) is used to trim amplicon primer sequences from the aligned reads. iVar uses the primer positions supplied in `--amplicon_bed` to soft clip primer sequences from a coordinate sorted BAM file.
 
-**Output files:**
+![MultiQC - iVar trim primer heatmap](images/mqc_ivar_trim_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `variants/bam/`
   * `<SAMPLE>.trim.sorted.bam`: Coordinate sorted BAM file after primer trimming.
@@ -144,15 +162,18 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 * `variants/bam/log/`
   * `<SAMPLE>.trim.ivar.log`: iVar trim log file obtained from stdout.
 
-![MultiQC - iVar trim primer heatmap](images/mqc_ivar_trim_plot.png)
-
 > **NB:** Post-trimmed BAM files and their associated indices will only be saved in the results directory if the `--save_align_intermeds` parameter is supplied.
+
+</details>
 
 ### picard MarkDuplicates
 
 Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced from your sample were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation. By default, the pipeline uses picard MarkDuplicates to *mark* the duplicate reads identified amongst the alignments to allow you to guage the overall level of duplication in your samples. However, you can also choose to remove any reads identified as duplicates via the `--filter_dups` parameter.
 
-**Output files**
+![MultiQC - Picard MarkDuplicates metrics plot](images/mqc_picard_duplicates_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `variants/bam/`
   * `<SAMPLE>.<SUFFIX>.sorted.bam`: Coordinate sorted BAM file after duplicate marking.
@@ -162,25 +183,28 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 * `variants/bam/picard_metrics/`
   * `<SAMPLE>.<SUFFIX>.MarkDuplicates.metrics.txt`: Metrics file from MarkDuplicates.
 
-![MultiQC - Picard MarkDuplicates metrics plot](images/mqc_picard_duplicates_plot.png)
-
 > **NB:** The value of `<SUFFIX>` in the output file names above will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
+
+</details>
 
 ### picard CollectMultipleMetrics
 
 [picard-tools](https://broadinstitute.github.io/picard/command-line-overview.html) is a set of command-line tools for manipulating high-throughput sequencing data. We use picard-tools in this pipeline to obtain mapping and coverage metrics.
 
-**Output files:**
+![MultiQC - Picard whole genome coverage plot](images/mqc_picard_wgs_coverage_plot.png)
+
+![MultiQC - Picard insert size plot](images/mqc_picard_insert_size_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `variants/bam/picard_metrics/`  
   * `<SAMPLE>.<SUFFIX>.CollectMultipleMetrics.*`: Alignment QC files from picard CollectMultipleMetrics in `*_metrics` textual format and plotted in `*.pdf` format.
   * `<SAMPLE>.<SUFFIX>.CollectWgsMetrics.coverage_metrics`: Coverage metrics file from CollectWgsMetrics.
 
-![MultiQC - Picard whole genome coverage plot](images/mqc_picard_wgs_coverage_plot.png)
-
-![MultiQC - Picard insert size plot](images/mqc_picard_insert_size_plot.png)
-
 > **NB:** The value of `<SUFFIX>` in the output file names above will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
+
+</details>
 
 ### mosdepth
 
@@ -217,7 +241,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
   * `<SAMPLE>.<SUFFIX>.amplicon.regions.coverage.pdf`: Bar plot showing per-amplicon coverage for an individual sample.
   * `<SAMPLE>.<SUFFIX>.amplicon.regions.coverage.tsv`: File containing per-amplicon coverage values for the above plot.
 
-> **NB:** The value of `<SUFFIX>` in the output file names above will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
+> NB: The value of `<SUFFIX>` in the output file names above will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
 
 </details>
 
@@ -229,7 +253,10 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 [BEDTools](https://bedtools.readthedocs.io/en/latest/) is a swiss-army knife of tools for a wide-range of genomics analysis tasks. In this pipeline we use `bedtools genomecov` to compute the per-base mapped read coverage in bedGraph format, and `bedtools maskfasta` to mask sequences in a Fasta file based on intervals defined in a feature file. This may be useful for creating your own masked genome file based on custom annotations or for masking all but your target regions when aligning sequence data from a targeted capture experiment.
 
-**Output files:**
+![MultiQC - VarScan 2 variants called plot](images/mqc_varscan2_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `variants/varscan2/`
   * `<SAMPLE>.vcf.gz`: Low frequency variants VCF file.
@@ -247,16 +274,19 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 * `variants/bam/mpileup/`
   * `<SAMPLE>.<SUFFIX>.mpileup`: mpileup files summarize all the data from aligned reads at a given genomic position. Each row of the mpileup file gives similar information to a single vertical column of reads as visualised in IGV.
 
-![MultiQC - VarScan 2 variants called plot](images/mqc_varscan2_plot.png)
-
 > **NB:** The value of `<MAX_ALLELE_FREQ>` in the output file names above is determined by the `--max_allele_freq` parameter (Default: 0.8).  
 > **NB:** Output mpileup files will only be saved in the  directory if the `--save_mpileup` parameter is supplied. The naming convention for these files will depend on the preceeding steps that were run in the pipeline as described in the paragraph explaining the value of `<SUFFIX>` in the section above.
+
+</details>
 
 ### iVar variants and iVar consensus
 
 [iVar](https://github.com/andersen-lab/ivar/blob/master/docs/MANUAL.md) is a computational package that contains functions broadly useful for viral amplicon-based sequencing. We use iVar in this pipeline to [trim primer sequences](#ivar-trim) for amplicon input data as well as to call variants and for consensus sequence generation.
 
-**Output files:**
+![MultiQC - iVar variants called plot](images/mqc_ivar_variants_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `variants/ivar/`
   * `<SAMPLE>.tsv`: Low frequency variants in TSV format.
@@ -274,13 +304,16 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
   * `<SAMPLE>.bcftools_stats.txt`: Statistics and counts obtained from low frequency variants VCF file.
   * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.bcftools_stats.txt`: Statistics and counts obtained from high frequency variants VCF file.
 
-![MultiQC - iVar variants called plot](images/mqc_ivar_variants_plot.png)
+</details>
 
 ### BCFTools and BEDTools
 
 [BCFtools](http://samtools.github.io/bcftools/bcftools.html) can be used to call variants directly from BAM alignment files. The functionality to call variants with BCFTools in this pipeline was inspired by work carried out by [Conor Walker](https://github.com/conorwalker/covid19/blob/3cb26ec399417bedb7e60487415c78a405f517d6/scripts/call_variants.sh). In contrast to VarScan 2 and iVar, the original variant calls obtained by BCFTools are not filtered further by a higher allele frequency. It seems that the default calls obtained by BCFTools appear to be comparable with the high frequency variants generated by VarScan 2 and iVar.
 
-**Output files:**
+![MultiQC - BCFTools variant counts](images/mqc_bcftools_stats_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `variants/bcftools/`
   * `<SAMPLE>.vcf.gz`: Variants VCF file.
@@ -291,7 +324,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 * `variants/bcftools/bcftools_stats/`
   * `<SAMPLE>.bcftools_stats.txt`: Statistics and counts obtained from VCF file.
 
-![MultiQC - BCFTools variant counts](images/mqc_bcftools_stats_plot.png)
+</details>
 
 ### SnpEff and SnpSift
 
@@ -299,7 +332,10 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 [SnpSift](http://snpeff.sourceforge.net/SnpSift.html) annotates genomic variants using databases, filters, and manipulates genomic annotated variants. After annotation with SnpEff, you can use SnpSift to help filter large genomic datasets in order to find the most significant variants.
 
-**Output files:**
+![MultiQC - SnpEff annotation counts](images/mqc_snpeff_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `variants/<CALLER>/snpeff/`
   * `*.snpEff.csv`: Variant annotation csv file.
@@ -309,20 +345,23 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
   * `*.snpEff.vcf.gz.tbi`: Index for VCF file with variant annotations.
   * `*.snpSift.table.txt`: SnpSift summary table.
 
-![MultiQC - SnpEff annotation counts](images/mqc_snpeff_plot.png)
-
 > **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'varscan2,ivar,bcftools'). If applicable, you will have two sets of files where the file name prefix will be `<SAMPLE>` for low-frequency variants and `<SAMPLE>.AF<MAX_ALLELE_FREQ>` for high frequency variants.
+
+</details>
 
 ### QUAST
 
 [QUAST](http://bioinf.spbau.ru/quast) is used to generate a single report with which to evaluate the quality of the consensus sequence across all of the samples provided to the pipeline. The HTML results can be opened within any browser (we recommend using Google Chrome). Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `variants/<CALLER>/quast/AF<MAX_ALLELE_FREQ>/`
   * `report.html`: Results report in HTML format. Also available in various other file formats i.e. `report.pdf`, `report.tex`, `report.tsv` and `report.txt`.
 
 > **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'varscan2,ivar,bcftools') and the value of `<MAX_ALLELE_FREQ>` is determined by the `--max_allele_freq` parameter (Default: 0.8).
+
+</details>
 
 ## De novo assembly
 
@@ -332,7 +371,10 @@ A file called `summary_assembly_metrics_mqc.tsv` containing a selection of read 
 
 In the variant calling branch of the pipeline we are using [iVar trim](#ivar-trim) to remove primer sequences from the aligned BAM files for amplicon data. Since in the *de novo* assembly branch we don't align the reads, we use [Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) as an alternative option to remove and clean the primer sequences directly from FastQ files.
 
-**Output files:**
+![MultiQC - Cutadapt filtered reads plot](images/mqc_cutadapt_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `assembly/cutadapt/`
   * `*.ptrim.fastq.gz`: FastQ files after primer sequence trimming.
@@ -343,9 +385,9 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 * `assembly/cutadapt/fastqc/zips/`
   * `*.ptrim_fastqc.zip`: Zip archive containing the FastQC report.
 
-![MultiQC - Cutadapt filtered reads plot](images/mqc_cutadapt_plot.png)
-
 > **NB:** Trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
+
+</details>
 
 ### Kraken 2
 
@@ -353,16 +395,19 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 
 We used a Kraken 2 database in this workflow to filter out reads specific to the host genome. The remainder of the reads are then passed to numerous *de novo* assembly algorithms in order to reconstruct the viral genome.
 
-**Output files:**
+![MultiQC - Kraken 2 classification plot](images/mqc_kraken2_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `assembly/kraken2/`
   * `*.host*.fastq.gz`: Reads that were classified to the host database.
   * `*.viral*.fastq.gz`: Reads that were unclassified to the host database.
   * `*.kraken2.report.txt`: Kraken 2 taxonomic report. See [here](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual#sample-report-output-format) for a detailed description of the format.
 
-![MultiQC - Kraken 2 classification plot](images/mqc_kraken2_plot.png)
-
 > **NB:** Output FastQ files will only be saved in the results directory if the `--save_kraken2_fastq` parameter is supplied.
+
+</details>
 
 ### SPAdes
 
@@ -370,7 +415,8 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [Bandage](https://rrwick.github.io/Bandage/) is a program for visualising *de novo* assembly graphs. By displaying connections which are not present in the contigs file, Bandage opens up new possibilities for analysing *de novo* assemblies.
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `assembly/spades/`
   * `*.scaffolds.fa`: SPAdes scaffold assembly.
@@ -379,11 +425,14 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.png`: Bandage visualisation for SPAdes assembly graph in PNG format.
   * `*.svg`: Bandage visualisation for SPAdes assembly graph in SVG format.
 
+</details>
+
 ### metaSPAdes
 
 [metaSPAdes](http://cab.spbu.ru/software/meta-spades/) is a de Bruijn graph-based assembler that is distributed with SPAdes and executed via the `--meta` option. It can be used for the simultaneous reconstruction of multiple genomes as observed in metagenomics data.
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `assembly/metaspades/`
   * `*.scaffolds.fa`: metaSPAdes scaffold assembly.
@@ -392,11 +441,14 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.png`: Bandage visualisation for metaSPAdes assembly graph in PNG format.
   * `*.svg`: Bandage visualisation for metaSPAdes assembly graph in SVG format.
 
+</details>
+
 ### Unicycler
 
 [Unicycler](https://github.com/rrwick/Unicycler) is an assembly pipeline for bacterial genomes. It can assemble Illumina-only read sets where it functions as a SPAdes-optimiser.
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `assembly/unicycler/`
   * `*.scaffolds.fa`: Unicycler scaffold assembly.
@@ -405,22 +457,28 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.png`: Bandage visualisation for Unicycler assembly graph in PNG format.
   * `*.svg`: Bandage visualisation for Unicycler assembly graph in SVG format.
 
+</details>
+
 ### minia
 
 [Minia](https://github.com/GATB/minia) is a short-read assembler based on a de Bruijn graph, capable of assembling a human genome on a desktop computer in a day. The output of Minia is a set of contigs. Minia produces results of similar contiguity and accuracy to other de Bruijn assemblers.
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `assembly/minia/<MINIA_KMER>/`
   * `*.scaffolds.fa`: Minia scaffold assembly.
 
 > **NB:** The value of `<MINIA_KMER>` in the output directory name above is determined by the `--minia_kmer` parameter (Default: 31).
 
+</details>
+
 ### BLAST
 
 [blastn](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch) is used to align the assembled contigs against the virus reference genome.
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `assembly/<ASSEMBLER>/blast/`
   * `*.blast.txt`: BLAST results against the target virus.
@@ -428,11 +486,14 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 > **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
 
+</details>
+
 ### ABACAS
 
 [ABACAS](https://www.sanger.ac.uk/science/tools/pagit) was developed to rapidly contiguate (align, order, orientate), visualize and design primers to close gaps on shotgun assembled contigs based on a reference sequence.
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `assembly/<ASSEMBLER>/abacas/`
   * `*.abacas.bin`: Bin file that contains contigs that are not used in ordering.
@@ -447,11 +508,14 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 > **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
 
+</details>
+
 ### PlasmidID
 
 [PlasmidID](https://github.com/BU-ISCIII/plasmidID) was used to graphically represent the alignment of the reference genome relative to a given assembly. This helps to visualize the coverage of the reference genome in the assembly. To find more information about the output files refer to the [documentation](https://github.com/BU-ISCIII/plasmidID/wiki/Understanding-the-image:-track-by-track).
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `assembly/<ASSEMBLER>/plasmidid/<SAMPLE>/`
   * `images/<SAMPLE>_<REF_NAME>.png`: PNG file with the visualization of the alignment between the viral assembly and the reference viral genome.
@@ -462,18 +526,23 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 > **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
 
+</details>
+
 ### Assembly QUAST
 
 [QUAST](http://bioinf.spbau.ru/quast) is used to generate a single report with which to evaluate the quality of the *de novo* assemblies across all of the samples provided to the pipeline. The HTML results can be opened within any browser (we recommend using Google Chrome). Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
 
-**Output files:**
+![MultiQC - QUAST contig counts](images/mqc_quast_plot.png)
+
+<details>
+  <summary>Output files</summary>
 
 * `assembly/<ASSEMBLER>/quast/`
   * `report.html`: Results report in HTML format. Also available in various other file formats i.e. `report.pdf`, `report.tex`, `report.tsv` and `report.txt`.
 
-![MultiQC - QUAST contig counts](images/mqc_quast_plot.png)
-
 > **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
+
+</details>
 
 ### Minimap2, seqwish, vg
 
@@ -485,7 +554,8 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [Bandage](https://github.com/rrwick/Bandage), a Bioinformatics Application for Navigating De novo Assembly Graphs Easily, is a GUI program that allows users to interact with the assembly graphs made by de novo assemblers and other graphs in GFA format. Bandage was used to render induced genome variation graphs as static PNG and SVG images.
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `assembly/<ASSEMBLER>/variants/`
   * `*.gfa`: Induced genome variation graph.
@@ -499,13 +569,16 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 > **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
 
+</details>
+
 ### Assembly SnpEff and SnpSift
 
 [SnpEff](http://snpeff.sourceforge.net/SnpEff.html) is a genetic variant annotation and functional effect prediction toolbox. It annotates and predicts the effects of genetic variants on genes and proteins (such as amino acid changes).
 
 [SnpSift](http://snpeff.sourceforge.net/SnpSift.html) annotates genomic variants using databases, filters, and manipulates genomic annotated variants. After annotation with SnpEff, you can use SnpSift to help filter large genomic datasets in order to find the most significant variants.
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `assembly/<ASSEMBLER>/variants/snpeff/`
   * `*.snpEff.csv`: Variant annotation csv file.
@@ -516,6 +589,8 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.snpSift.table.txt`: SnpSift summary table.
 
 > **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
+
+</details>
 
 ## Workflow reporting and genomes
 
@@ -531,18 +606,22 @@ The pipeline has special steps which also allow the software versions to be repo
 
 Please click [here](https://raw.githack.com/nf-core/viralrecon/master/docs/html/multiqc_report.html) to see an example MultiQC report generated using the parameters defined in [this configuration file](https://github.com/nf-core/viralrecon/blob/master/conf/test_full.config) to run the pipeline on [samples](https://zenodo.org/record/3735111) which were prepared from the [ncov-2019 ARTIC Network V1 amplicon set](https://artic.network/ncov-2019) and sequenced on the Illumina MiSeq platform in 301bp paired-end format.
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `multiqc/`  
   * `multiqc_report.html`: a standalone HTML file that can be viewed in your web browser.
   * `multiqc_data/`: directory containing parsed statistics from the different tools used in the pipeline.
   * `multiqc_plots/`: directory containing static images from the report in various formats.
 
+</details>
+
 ### Reference genome files
 
 A number of genome-specific files are generated by the pipeline because they are required for the downstream processing of the results. If the `--save_reference` parameter is provided then the Bowtie 2 alignment indices, BLAST and Kraken 2 databases downloaded/generated by the pipeline will be saved in the `genome/` directory. It is recommended to use the `--save_reference` parameter if you are using the pipeline to build a Kraken 2 database for the host genome. This can be quite a time-consuming process and it permits their reuse for future runs of the pipeline or for other purposes.
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `genome/`  
   * `BlastDB/`: BLAST database for viral genome.
@@ -553,14 +632,19 @@ A number of genome-specific files are generated by the pipeline because they are
   * Unzipped genome fasta file for viral genome
   * Unzipped genome annotation GFF file for viral genome
 
+</details>
+
 ### Pipeline information
 
 [Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
 
-**Output files:**
+<details>
+  <summary>Output files</summary>
 
 * `pipeline_info/`
   * Reports generated by Nextflow: `execution_report.html`, `execution_timeline.html`, `execution_trace.txt` and `pipeline_dag.dot`/`pipeline_dag.svg`.
   * Reports generated by the pipeline: `pipeline_report.html`, `pipeline_report.txt` and `software_versions.csv`.
   * Reformatted samplesheet files used as input to the pipeline: `samplesheet.valid.csv`.
   * Documentation for interpretation of results in HTML format: `results_description.html`.
+
+</details>
