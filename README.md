@@ -116,7 +116,7 @@ Many thanks to others who have helped out and contributed along the way too, inc
 | [Alison Meynert](https://github.com/ameynert)             | [University of Edinburgh, Scotland](https://www.ed.ac.uk/)                            |
 | [Anton Korobeynikov](https://github.com/asl)              | [Saint Petersburg State University](https://english.spbu.ru/)                         |
 | [Artem Babaian](https://github.com/ababaian)              | [University of British Columbia, Canada](https://www.ubc.ca/)                         |
-| Dmitry Meleshko                                           | [Saint Petersburg State University](https://english.spbu.ru/)                         |
+| [Dmitry Meleshko](https://github.com/1dayac)              | [Saint Petersburg State University](https://english.spbu.ru/)                         |
 | [Edgar Garriga Nogales](https://github.com/edgano)        | [Centre for Genomic Regulation, Spain](https://www.crg.eu/)                           |
 | [Erik Garrison](https://github.com/ekg)                   | [UCSC, USA](https://www.ucsc.edu/)                                                    |
 | [Gisela Gabernet](https://github.com/ggabernet)           | [QBiC, University of Tübingen, Germany](https://portal.qbic.uni-tuebingen.de/portal/) |
