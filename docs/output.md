@@ -67,8 +67,6 @@ If multiple libraries/runs have been provided for the same sample in the input s
 
 [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
 
-![MultiQC - FastQC per base sequence plot](images/mqc_fastqc_plot.png)
-
 <details markdown="1">
   <summary>Output files</summary>
 
@@ -81,11 +79,11 @@ If multiple libraries/runs have been provided for the same sample in the input s
 
 </details>
 
+![MultiQC - FastQC per base sequence plot](images/mqc_fastqc_plot.png)
+
 ### fastp
 
 [fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast, all-in-one preprocessing for FastQ files. It has been developed in C++ with multithreading support to achieve higher performance. fastp is used in this pipeline for standard adapter trimming and quality filtering.
-
-![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -106,6 +104,8 @@ If multiple libraries/runs have been provided for the same sample in the input s
 
 </details>
 
+![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
+
 ## Variant calling
 
 A file called `summary_variants_metrics_mqc.tsv` containing a selection of read and variant calling metrics will be saved in the `variants/` results directory. The same metrics have also been added to the top of the MultiQC report.
@@ -113,8 +113,6 @@ A file called `summary_variants_metrics_mqc.tsv` containing a selection of read 
 ### Bowtie 2
 
 [Bowtie 2](http://bio-bwa.sourceforge.net/) is an ultrafast and memory-efficient tool for aligning sequencing reads to long reference sequences. Bowtie 2 supports gapped, local, and paired-end alignment modes.
-
-![MultiQC - Bowtie2 alignment score plot](images/mqc_bowtie2_plot.png)
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -126,11 +124,11 @@ A file called `summary_variants_metrics_mqc.tsv` containing a selection of read 
 
 </details>
 
+![MultiQC - Bowtie2 alignment score plot](images/mqc_bowtie2_plot.png)
+
 ### SAMtools
 
 Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/) to sort them by coordinate, for indexing, as well as to generate read mapping statistics.
-
-![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -145,11 +143,11 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 
 </details>
 
+![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
+
 ### iVar trim
 
 If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pasteur.fr/docs/ivar/1.0/manualpage.html) is used to trim amplicon primer sequences from the aligned reads. iVar uses the primer positions supplied in `--amplicon_bed` to soft clip primer sequences from a coordinate sorted BAM file.
-
-![MultiQC - iVar trim primer heatmap](images/mqc_ivar_trim_plot.png)
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -166,11 +164,11 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 
 </details>
 
+![MultiQC - iVar trim primer heatmap](images/mqc_ivar_trim_plot.png)
+
 ### picard MarkDuplicates
 
 Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced from your sample were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation. By default, the pipeline uses picard MarkDuplicates to *mark* the duplicate reads identified amongst the alignments to allow you to guage the overall level of duplication in your samples. However, you can also choose to remove any reads identified as duplicates via the `--filter_dups` parameter.
-
-![MultiQC - Picard MarkDuplicates metrics plot](images/mqc_picard_duplicates_plot.png)
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -187,13 +185,11 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 </details>
 
+![MultiQC - Picard MarkDuplicates metrics plot](images/mqc_picard_duplicates_plot.png)
+
 ### picard CollectMultipleMetrics
 
 [picard-tools](https://broadinstitute.github.io/picard/command-line-overview.html) is a set of command-line tools for manipulating high-throughput sequencing data. We use picard-tools in this pipeline to obtain mapping and coverage metrics.
-
-![MultiQC - Picard whole genome coverage plot](images/mqc_picard_wgs_coverage_plot.png)
-
-![MultiQC - Picard insert size plot](images/mqc_picard_insert_size_plot.png)
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -206,15 +202,13 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 </details>
 
+![MultiQC - Picard whole genome coverage plot](images/mqc_picard_wgs_coverage_plot.png)
+
+![MultiQC - Picard insert size plot](images/mqc_picard_insert_size_plot.png)
+
 ### mosdepth
 
 [mosdepth](mosdepth) is a fast BAM/CRAM depth calculation for WGS, exome, or targeted sequencing. mosdepth is used in this pipeline to obtain genome-wide coverage values in 200bp windows and for `--protocol amplicon` to obtain amplicon/region-specific coverage metrics. The results are then either rendered in MultiQC (genome-wide coverage) or are plotted using custom `R` scripts.
-
-![R - Sample genome-wide coverage plot](images/r_genome_coverage.png)
-
-<p markdown="1" align="center">
-  <img src="images/r_amplicon_barplot.png" alt="R - Sample per-amplicon coverage plot">
-</p>
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -251,6 +245,12 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 </details>
 
+![R - Sample genome-wide coverage plot](images/r_genome_coverage.png)
+
+<p markdown="1" align="center">
+  <img src="images/r_amplicon_barplot.png" alt="R - Sample per-amplicon coverage plot">
+</p>
+
 ### VarScan 2, BCFTools, BEDTools
 
 [VarScan 2](http://dkoboldt.github.io/varscan/) is a platform-independent software tool to detect variants in NGS data. In this pipeline, VarScan 2 is used in conjunction with SAMtools in order to call both high and low frequency variants.
@@ -258,8 +258,6 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 [BCFtools](http://samtools.github.io/bcftools/bcftools.html) is a set of utilities that manipulate variant calls in [VCF](https://vcftools.github.io/specs.html) and its binary counterpart BCF format. BCFTools is used in the variant calling and *de novo* assembly steps of this pipeline to obtain basic statistics from the VCF output. It is also used in the VarScan 2 variant calling branch of the pipeline to generate a consensus sequence by integrating high frequency variant calls into the reference genome.
 
 [BEDTools](https://bedtools.readthedocs.io/en/latest/) is a swiss-army knife of tools for a wide-range of genomics analysis tasks. In this pipeline we use `bedtools genomecov` to compute the per-base mapped read coverage in bedGraph format, and `bedtools maskfasta` to mask sequences in a Fasta file based on intervals defined in a feature file. This may be useful for creating your own masked genome file based on custom annotations or for masking all but your target regions when aligning sequence data from a targeted capture experiment.
-
-![MultiQC - VarScan 2 variants called plot](images/mqc_varscan2_plot.png)
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -285,11 +283,11 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 </details>
 
+![MultiQC - VarScan 2 variants called plot](images/mqc_varscan2_plot.png)
+
 ### iVar variants and iVar consensus
 
 [iVar](https://github.com/andersen-lab/ivar/blob/master/docs/MANUAL.md) is a computational package that contains functions broadly useful for viral amplicon-based sequencing. We use iVar in this pipeline to [trim primer sequences](#ivar-trim) for amplicon input data as well as to call variants and for consensus sequence generation.
-
-![MultiQC - iVar variants called plot](images/mqc_ivar_variants_plot.png)
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -312,11 +310,11 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 </details>
 
+![MultiQC - iVar variants called plot](images/mqc_ivar_variants_plot.png)
+
 ### BCFTools and BEDTools
 
 [BCFtools](http://samtools.github.io/bcftools/bcftools.html) can be used to call variants directly from BAM alignment files. The functionality to call variants with BCFTools in this pipeline was inspired by work carried out by [Conor Walker](https://github.com/conorwalker/covid19/blob/3cb26ec399417bedb7e60487415c78a405f517d6/scripts/call_variants.sh). In contrast to VarScan 2 and iVar, the original variant calls obtained by BCFTools are not filtered further by a higher allele frequency. It seems that the default calls obtained by BCFTools appear to be comparable with the high frequency variants generated by VarScan 2 and iVar.
-
-![MultiQC - BCFTools variant counts](images/mqc_bcftools_stats_plot.png)
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -332,13 +330,13 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 </details>
 
+![MultiQC - BCFTools variant counts](images/mqc_bcftools_stats_plot.png)
+
 ### SnpEff and SnpSift
 
 [SnpEff](http://snpeff.sourceforge.net/SnpEff.html) is a genetic variant annotation and functional effect prediction toolbox. It annotates and predicts the effects of genetic variants on genes and proteins (such as amino acid changes).
 
 [SnpSift](http://snpeff.sourceforge.net/SnpSift.html) annotates genomic variants using databases, filters, and manipulates genomic annotated variants. After annotation with SnpEff, you can use SnpSift to help filter large genomic datasets in order to find the most significant variants.
-
-![MultiQC - SnpEff annotation counts](images/mqc_snpeff_plot.png)
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -354,6 +352,8 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 > **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'varscan2,ivar,bcftools'). If applicable, you will have two sets of files where the file name prefix will be `<SAMPLE>` for low-frequency variants and `<SAMPLE>.AF<MAX_ALLELE_FREQ>` for high frequency variants.
 
 </details>
+
+![MultiQC - SnpEff annotation counts](images/mqc_snpeff_plot.png)
 
 ### QUAST
 
@@ -377,8 +377,6 @@ A file called `summary_assembly_metrics_mqc.tsv` containing a selection of read 
 
 In the variant calling branch of the pipeline we are using [iVar trim](#ivar-trim) to remove primer sequences from the aligned BAM files for amplicon data. Since in the *de novo* assembly branch we don't align the reads, we use [Cutadapt](https://cutadapt.readthedocs.io/en/stable/guide.html) as an alternative option to remove and clean the primer sequences directly from FastQ files.
 
-![MultiQC - Cutadapt filtered reads plot](images/mqc_cutadapt_plot.png)
-
 <details markdown="1">
   <summary>Output files</summary>
 
@@ -395,13 +393,13 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 
 </details>
 
+![MultiQC - Cutadapt filtered reads plot](images/mqc_cutadapt_plot.png)
+
 ### Kraken 2
 
 [Kraken 2](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual) is a sequence classifier that assigns taxonomic labels to DNA sequences. Kraken 2 examines the k-mers within a query sequence and uses the information within those k-mers to query a database. That database maps k-mers to the lowest common ancestor (LCA) of all genomes known to contain a given k-mer.
 
 We used a Kraken 2 database in this workflow to filter out reads specific to the host genome. The remainder of the reads are then passed to numerous *de novo* assembly algorithms in order to reconstruct the viral genome.
-
-![MultiQC - Kraken 2 classification plot](images/mqc_kraken2_plot.png)
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -414,6 +412,8 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 > **NB:** Output FastQ files will only be saved in the results directory if the `--save_kraken2_fastq` parameter is supplied.
 
 </details>
+
+![MultiQC - Kraken 2 classification plot](images/mqc_kraken2_plot.png)
 
 ### SPAdes
 
@@ -538,8 +538,6 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [QUAST](http://bioinf.spbau.ru/quast) is used to generate a single report with which to evaluate the quality of the *de novo* assemblies across all of the samples provided to the pipeline. The HTML results can be opened within any browser (we recommend using Google Chrome). Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
 
-![MultiQC - QUAST contig counts](images/mqc_quast_plot.png)
-
 <details markdown="1">
   <summary>Output files</summary>
 
@@ -549,6 +547,8 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 > **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
 
 </details>
+
+![MultiQC - QUAST contig counts](images/mqc_quast_plot.png)
 
 ### Minimap2, seqwish, vg
 
