@@ -104,7 +104,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'NC_045512.2' -profile docker
+nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'MN908947.3' -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -222,10 +222,10 @@ Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplic
 If the `--protocol amplicon` parameter is provided then iVar is used to trim amplicon primer sequences after read alignment and before variant calling. iVar uses the primer positions relative to the viral genome supplied in `--amplicon_bed` to soft clip primer sequences from a coordinate sorted BAM file. The file must be in [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format as highlighted below:
 
 ```bash
-NC_045512.2 30 54 nCoV-2019_1_LEFT 60 -
-NC_045512.2 385 410 nCoV-2019_1_RIGHT 60 +
-NC_045512.2 320 342 nCoV-2019_2_LEFT 60 -
-NC_045512.2 704 726 nCoV-2019_2_RIGHT 60 +
+MN908947.3 30 54 nCoV-2019_1_LEFT 60 -
+MN908947.3 385 410 nCoV-2019_1_RIGHT 60 +
+MN908947.3 320 342 nCoV-2019_2_LEFT 60 -
+MN908947.3 704 726 nCoV-2019_2_RIGHT 60 +
 ```
 
 ### `--amplicon_fasta`
