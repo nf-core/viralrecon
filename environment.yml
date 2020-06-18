@@ -54,6 +54,6 @@ dependencies:
   - bioconda::vg=1.24.0
   - bioconda::quast=5.0.2
   - bioconda::blast=2.9.0
-  - bioconda::plasmidid=1.6.2
+  - bioconda::plasmidid=1.6.3
   - bioconda::bandage=0.8.1
   - hcc::abacas=1.3.1

@@ -44,9 +44,11 @@ def yaml_fields_to_dict(YAMLFile,AppendDict={},FieldMappingList=[],ValidSampleLi
         for k in yaml_dict.keys():
             key = k
             if os.path.basename(YAMLFile).startswith('multiqc_picard_insertSize'):
-                key = k[:-3]
+                if k[-3:] == '_FR':
+                    key = k[:-3]
             if os.path.basename(YAMLFile).startswith('multiqc_cutadapt'):
-                names = [x for x in ValidSampleList if key.startswith(x)]
+                names = [x for x in ValidSampleList if key[:-2] == x]
+                names += [x for x in ValidSampleList if key == x]
                 if names != []:
                     key = names[0]
             inclSample = True

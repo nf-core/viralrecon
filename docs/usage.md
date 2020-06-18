@@ -5,87 +5,89 @@
 * [Table of contents](#table-of-contents)
 * [Introduction](#introduction)
 * [Running the pipeline](#running-the-pipeline)
-  * [Updating the pipeline](#updating-the-pipeline)
-  * [Reproducibility](#reproducibility)
+    * [Updating the pipeline](#updating-the-pipeline)
+    * [Reproducibility](#reproducibility)
 * [Main arguments](#main-arguments)
-  * [`-profile`](#-profile)
-  * [`--input`](#--input)
-  * [`--protocol`](#--protocol)
-  * [`--amplicon_bed`](#--amplicon_bed)
-  * [`--amplicon_fasta`](#--amplicon_fasta)
+    * [`-profile`](#-profile)
+    * [`--input`](#--input)
+    * [`--protocol`](#--protocol)
+    * [`--amplicon_bed`](#--amplicon_bed)
+    * [`--amplicon_fasta`](#--amplicon_fasta)
 * [SRA download](#sra-download)
-  * [`--save_sra_fastq`](#--save_sra_fastq)
-  * [`--skip_sra`](#--skip_sra)
+    * [`--save_sra_fastq`](#--save_sra_fastq)
+    * [`--skip_sra`](#--skip_sra)
 * [Reference genomes](#reference-genomes)
-  * [`--genome`](#--genome)
-  * [`--fasta`](#--fasta)
-  * [`--gff`](#--gff)
-  * [`--save_reference`](#--save_reference)
-* [Kraken 2](#kraken-2)
-  * [`--kraken2_db`](#--kraken2_db)
-  * [`--kraken2_db_name`](#--kraken2_db_name)
-  * [`--kraken2_use_ftp`](#--kraken2_use_ftp)
-  * [`--save_kraken2_fastq`](#--save_kraken2_fastq)
-  * [`--skip_kraken2`](#--skip_kraken2)
+    * [`--genome`](#--genome)
+    * [`--fasta`](#--fasta)
+    * [`--gff`](#--gff)
+    * [`--save_reference`](#--save_reference)
 * [Read trimming](#read-trimming)
-  * [`--cut_mean_quality`](#--cut_mean_quality)
-  * [`--qualified_quality_phred`](#--qualified_quality_phred)
-  * [`--unqualified_percent_limit`](#--unqualified_percent_limit)
-  * [`--min_trim_length`](#--min_trim_length)
-  * [`--skip_adapter_trimming`](#--skip_adapter_trimming)
-  * [`--skip_amplicon_trimming`](#--skip_amplicon_trimming)
-  * [`--save_trimmed`](#--save_trimmed)
+    * [`--cut_mean_quality`](#--cut_mean_quality)
+    * [`--qualified_quality_phred`](#--qualified_quality_phred)
+    * [`--unqualified_percent_limit`](#--unqualified_percent_limit)
+    * [`--min_trim_length`](#--min_trim_length)
+    * [`--skip_adapter_trimming`](#--skip_adapter_trimming)
+    * [`--skip_amplicon_trimming`](#--skip_amplicon_trimming)
+    * [`--save_trimmed`](#--save_trimmed)
+* [Kraken 2](#kraken-2)
+    * [`--kraken2_db`](#--kraken2_db)
+    * [`--kraken2_db_name`](#--kraken2_db_name)
+    * [`--kraken2_use_ftp`](#--kraken2_use_ftp)
+    * [`--save_kraken2_fastq`](#--save_kraken2_fastq)
+    * [`--skip_kraken2`](#--skip_kraken2)
 * [Variant calling](#variant-calling)
-  * [`--callers`](#-callers)
-  * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
-  * [`--filter_dups`](#--filter_dups)
-  * [`--filter_unmapped`](#--filter_unmapped)
-  * [`--min_base_qual`](#--min_base_qual)
-  * [`--max_allele_freq`](#--max_allele_freq)
-  * [`--min_coverage`](#--min_coverage)
-  * [`--save_align_intermeds`](#--save_align_intermeds)
-  * [`--save_mpileup`](#--save_mpileup)
-  * [`--skip_markduplicates`](#--skip_markduplicates)
-  * [`--skip_snpeff`](#--skip_snpeff)
-  * [`--skip_variants_quast`](#--skip_variants_quast)
-  * [`--skip_variants`](#--skip_variants)
+    * [`--callers`](#-callers)
+    * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
+    * [`--filter_dups`](#--filter_dups)
+    * [`--filter_unmapped`](#--filter_unmapped)
+    * [`--min_base_qual`](#--min_base_qual)
+    * [`--max_allele_freq`](#--max_allele_freq)
+    * [`--amplicon_left_suffix`](#--amplicon_left_suffix)
+    * [`--amplicon_right_suffix`](#--amplicon_right_suffix)
+    * [`--min_coverage`](#--min_coverage)
+    * [`--save_align_intermeds`](#--save_align_intermeds)
+    * [`--save_mpileup`](#--save_mpileup)
+    * [`--skip_markduplicates`](#--skip_markduplicates)
+    * [`--skip_picard_metrics`](#--skip_picard_metrics)
+    * [`--skip_mosdepth`](#--skip_mosdepth)
+    * [`--skip_snpeff`](#--skip_snpeff)
+    * [`--skip_variants_quast`](#--skip_variants_quast)
+    * [`--skip_variants`](#--skip_variants)
 * [De novo assembly](#de-novo-assembly)
-  * [`--assemblers`](#--assemblers)
-  * [`--minia_kmer`](#--minia_kmer)
-  * [`--skip_blast`](#--skip_blast)
-  * [`--skip_abacas`](#--skip_abacas)
-  * [`--skip_plasmidid`](#--skip_plasmidid)
-  * [`--skip_vg`](#--skip_vg)
-  * [`--skip_assembly_quast`](#--skip_assembly_quast)
-  * [`--skip_assembly`](#--skip_assembly)  
+    * [`--assemblers`](#--assemblers)
+    * [`--minia_kmer`](#--minia_kmer)
+    * [`--skip_blast`](#--skip_blast)
+    * [`--skip_abacas`](#--skip_abacas)
+    * [`--skip_plasmidid`](#--skip_plasmidid)
+    * [`--skip_vg`](#--skip_vg)
+    * [`--skip_assembly_quast`](#--skip_assembly_quast)
+    * [`--skip_assembly`](#--skip_assembly)  
 * [Skipping QC steps](#skipping-qc-steps)
-  * `--skip_fastqc`
-  * `--skip_picard_metrics`
-  * `--skip_multiqc`
-  * `--skip_qc`
+    * `--skip_fastqc`
+    * `--skip_multiqc`
 * [Job resources](#job-resources)
-  * [Automatic resubmission](#automatic-resubmission)
-  * [Custom resource requests](#custom-resource-requests)
+    * [Automatic resubmission](#automatic-resubmission)
+    * [Custom resource requests](#custom-resource-requests)
 * [AWS Batch specific parameters](#aws-batch-specific-parameters)
-  * [`--awsqueue`](#--awsqueue)
-  * [`--awsregion`](#--awsregion)
-  * [`--awscli`](#--awscli)
+    * [`--awsqueue`](#--awsqueue)
+    * [`--awsregion`](#--awsregion)
+    * [`--awscli`](#--awscli)
 * [Other command line parameters](#other-command-line-parameters)
-  * [`--outdir`](#--outdir)
-  * [`--email`](#--email)
-  * [`--email_on_fail`](#--email_on_fail)
-  * [`--max_multiqc_email_size`](#--max_multiqc_email_size)
-  * [`-name`](#-name)
-  * [`-resume`](#-resume)
-  * [`-c`](#-c)
-  * [`--custom_config_version`](#--custom_config_version)
-  * [`--custom_config_base`](#--custom_config_base)
-  * [`--max_memory`](#--max_memory)
-  * [`--max_time`](#--max_time)
-  * [`--max_cpus`](#--max_cpus)
-  * [`--plaintext_email`](#--plaintext_email)
-  * [`--monochrome_logs`](#--monochrome_logs)
-  * [`--multiqc_config`](#--multiqc_config)
+    * [`--outdir`](#--outdir)
+    * [`--email`](#--email)
+    * [`--email_on_fail`](#--email_on_fail)
+    * [`--max_multiqc_email_size`](#--max_multiqc_email_size)
+    * [`-name`](#-name)
+    * [`-resume`](#-resume)
+    * [`-c`](#-c)
+    * [`--custom_config_version`](#--custom_config_version)
+    * [`--custom_config_base`](#--custom_config_base)
+    * [`--max_memory`](#--max_memory)
+    * [`--max_time`](#--max_time)
+    * [`--max_cpus`](#--max_cpus)
+    * [`--plaintext_email`](#--plaintext_email)
+    * [`--monochrome_logs`](#--monochrome_logs)
+    * [`--multiqc_config`](#--multiqc_config)
 
 ## Introduction
 
@@ -102,7 +104,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'NC_045512.2' -profile docker
+nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'MN908947.3' -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -150,18 +152,18 @@ They are loaded in sequence, so later profiles can overwrite earlier profiles.
 If `-profile` is not specified, the pipeline will run locally and expect all software to be installed and available on the `PATH`. This is _not_ recommended.
 
 * `docker`
-  * A generic configuration profile to be used with [Docker](http://docker.com/)
-  * Pulls software from dockerhub: [`nfcore/viralrecon`](http://hub.docker.com/r/nfcore/viralrecon/)
+    * A generic configuration profile to be used with [Docker](http://docker.com/)
+    * Pulls software from dockerhub: [`nfcore/viralrecon`](http://hub.docker.com/r/nfcore/viralrecon/)
 * `singularity`
-  * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
-  * Pulls software from DockerHub: [`nfcore/viralrecon`](http://hub.docker.com/r/nfcore/viralrecon/)
+    * A generic configuration profile to be used with [Singularity](http://singularity.lbl.gov/)
+    * Pulls software from DockerHub: [`nfcore/viralrecon`](http://hub.docker.com/r/nfcore/viralrecon/)
 * `conda`
-  * Please only use Conda as a last resort i.e. when it is not possible to run the pipeline with Docker or Singularity.
-  * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
-  * Pulls most software from [Bioconda](https://bioconda.github.io/)
+    * Please only use Conda as a last resort i.e. when it is not possible to run the pipeline with Docker or Singularity.
+    * A generic configuration profile to be used with [Conda](https://conda.io/docs/)
+    * Pulls most software from [Bioconda](https://bioconda.github.io/)
 * `test`
-  * A profile with a complete configuration for automated testing
-  * Includes links to test data so needs no other parameters
+    * A profile with a complete configuration for automated testing
+    * Includes links to test data so needs no other parameters
 
 ### `--input`
 
@@ -220,10 +222,10 @@ Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplic
 If the `--protocol amplicon` parameter is provided then iVar is used to trim amplicon primer sequences after read alignment and before variant calling. iVar uses the primer positions relative to the viral genome supplied in `--amplicon_bed` to soft clip primer sequences from a coordinate sorted BAM file. The file must be in [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format as highlighted below:
 
 ```bash
-NC_045512.2 30 54 nCoV-2019_1_LEFT 60 -
-NC_045512.2 385 410 nCoV-2019_1_RIGHT 60 +
-NC_045512.2 320 342 nCoV-2019_2_LEFT 60 -
-NC_045512.2 704 726 nCoV-2019_2_RIGHT 60 +
+MN908947.3 30 54 nCoV-2019_1_LEFT 60 -
+MN908947.3 385 410 nCoV-2019_1_RIGHT 60 +
+MN908947.3 320 342 nCoV-2019_2_LEFT 60 -
+MN908947.3 704 726 nCoV-2019_2_RIGHT 60 +
 ```
 
 ### `--amplicon_fasta`
@@ -300,28 +302,6 @@ Full path to viral [GFF](http://www.gmod.org/wiki/GFF3) annotation file (Default
 
 If the Bowtie2 index is generated by the pipeline use this parameter to save it to your results folder. These can then be used for future pipeline runs, reducing processing times (Default: false).
 
-## Kraken 2
-
-### `--kraken2_db`
-
-Full path to Kraken 2 database built from host genome (Default: '<https://zenodo.org/record/3738199/files/kraken2_human.tar.gz>').
-
-### `--kraken2_db_name`
-
-Name for host genome as recognised by Kraken 2 when using the `kraken2 build` command (Default: 'human').
-
-### `--kraken2_use_ftp`
-
-Option for Kraken 2 using ftp download instead of rsync (Default: false).
-
-### `--save_kraken2_fastq`
-
-Save the host and viral FastQ files in the results directory (Default: false).
-
-### `--skip_kraken2`
-
-Skip Kraken 2 process for removing host classified reads (Default: false).
-
 ## Read trimming
 
 ### `--cut_mean_quality`
@@ -351,6 +331,28 @@ Skip the amplicon trimming step performed by Cutadapt. Use this if your input Fa
 ### `--save_trimmed`
 
 By default, trimmed FastQ files will not be saved to the results directory. Specify this flag (or set to true in your config file) to copy these files to the results directory when complete (Default: false).
+
+## Kraken 2
+
+### `--kraken2_db`
+
+Full path to Kraken 2 database built from host genome (Default: '<https://zenodo.org/record/3738199/files/kraken2_human.tar.gz>').
+
+### `--kraken2_db_name`
+
+Name for host genome as recognised by Kraken 2 when using the `kraken2 build` command (Default: 'human').
+
+### `--kraken2_use_ftp`
+
+Option for Kraken 2 using ftp download instead of rsync (Default: false).
+
+### `--save_kraken2_fastq`
+
+Save the host and viral FastQ files in the results directory (Default: false).
+
+### `--skip_kraken2`
+
+Skip Kraken 2 process for removing host classified reads (Default: false).
 
 ## Variant calling
 
@@ -382,6 +384,14 @@ When performing variant calling skip positions with an overall read depth smalle
 
 Maximum allele frequency threshold for filtering variant calls (Default: 0.8).
 
+### `--amplicon_left_suffix`
+
+Suffix used in name field of `--amplicon_bed` to indicate left primer position (Default: '\_LEFT').
+
+### `--amplicon_right_suffix`
+
+Suffix used in name field of `--amplicon_bed` to indicate right primer position (Default: '\_RIGHT').
+
 ### `--save_align_intermeds`
 
 By default, intermediate [BAM](https://samtools.github.io/hts-specs/) files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set to true to also save other intermediate BAM files (Default: false).
@@ -393,6 +403,14 @@ Save Pileup files in the results directory. These tend to be quite large so are 
 ### `--skip_markduplicates`
 
 Skip picard MarkDuplicates step (Default: false).
+
+### `--skip_picard_metrics`
+
+Skip Picard CollectMultipleMetrics and CollectWgsMetrics (Default: false).
+
+### `--skip_mosdepth`
+
+Skip genome-wide and amplicon coverage plot generation from mosdepth output (Default: false).
 
 ### `--skip_snpeff`
 
@@ -447,9 +465,7 @@ The pipeline contains a large number of quality control steps. Sometimes, it may
 | Step                      | Description                                              |
 |---------------------------|----------------------------------------------------------|
 | `--skip_fastqc`           | Skip FastQC                                              |
-| `--skip_picard_metrics`   | Skip Picard CollectMultipleMetrics and CollectWgsMetrics |
 | `--skip_multiqc`          | Skip MultiQC                                             |
-| `--skip_qc`               | Skip all QC steps except for MultiQC                     |
 
 ## Job resources
 

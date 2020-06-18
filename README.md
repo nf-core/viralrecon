@@ -11,9 +11,7 @@
 
 ## Introduction
 
-**nfcore/viralrecon** is a bioinformatics analysis pipeline used to perform assembly and intra-host/low-frequency variant calling for viral samples.
-
-The pipeline supports short-read Illumina sequencing data from both shotgun (e.g. sequencing directly from clinical samples) and enrichment-based library preparation methods (e.g. amplicon-based: [ARTIC SARS-CoV-2 enrichment protocol](https://artic.network/ncov-2019); or probe-capture-based).
+**nfcore/viralrecon** is a bioinformatics analysis pipeline used to perform assembly and intra-host/low-frequency variant calling for viral samples. The pipeline supports short-read Illumina sequencing data from both shotgun (e.g. sequencing directly from clinical samples) and enrichment-based library preparation methods (e.g. amplicon-based: [ARTIC SARS-CoV-2 enrichment protocol](https://artic.network/ncov-2019); or probe-capture-based).
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with Docker containers making installation trivial and results highly reproducible. Furthermore, automated continuous integration tests that run the pipeline on a full-sized dataset using AWS cloud ensure that the code is stable.
 
@@ -29,7 +27,8 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
     3. Primer sequence removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
     4. Duplicate read marking ([`picard`](https://broadinstitute.github.io/picard/); *removal optional*)
     5. Alignment-level QC ([`picard`](https://broadinstitute.github.io/picard/), [`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
-    6. Choice of multiple variant calling and consensus sequence generation routes ([`VarScan 2`](http://dkoboldt.github.io/varscan/), [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/) *||* [`iVar variants and consensus`](https://github.com/andersen-lab/ivar) *||* [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
+    6. Genome-wide and amplicon coverage QC plots ([`mosdepth`](https://github.com/brentp/mosdepth/))
+    7. Choice of multiple variant calling and consensus sequence generation routes ([`VarScan 2`](http://dkoboldt.github.io/varscan/), [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/) *||* [`iVar variants and consensus`](https://github.com/andersen-lab/ivar) *||* [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
         * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
         * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
 6. _De novo_ assembly
@@ -44,7 +43,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool
         * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
 7. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
 
-Note that the pipeline has a number of options to allow you to run only specific aspects of the workflow if you so wish.
+> **NB:** The pipeline has a number of options to allow you to run only specific aspects of the workflow if you so wish.
 For example, you can skip all of the assembly steps with the `--skip_assembly` parameter.
 See the [usage docs](docs/usage.md) for all of the available options when running the pipeline.
 
@@ -68,9 +67,26 @@ Numerous QC and reporting steps are included in the pipeline in order to collate
 
 4. Start running your own analysis!
 
-    ```bash
-    nextflow run nf-core/viralrecon -profile <docker/singularity/conda/institute> --input samplesheet.csv --genome 'NC_045512.2' -profile docker
-    ```
+    * Typical command for shotgun analysis:
+
+        ```bash
+        nextflow run nf-core/viralrecon \
+            --input samplesheet.csv \
+            --genome 'MN908947.3' \
+            -profile <docker/singularity/conda/institute>
+        ```
+
+    * Typical command for amplicon analysis:
+
+        ```bash
+        nextflow run nf-core/viralrecon \
+            --input samplesheet.csv \
+            --genome 'MN908947.3' \
+            --protocol amplicon \
+            --amplicon_bed ./nCoV-2019.artic.V3.bed \
+            --skip_assembly \
+            -profile <docker/singularity/conda/institute>
+        ```
 
 See the [usage documentation](docs/usage.md) for all of the available options when running the pipeline.
 
@@ -98,6 +114,9 @@ Many thanks to others who have helped out and contributed along the way too, inc
 | [Aengus Stewart](https://github.com/stewarta)             | [The Francis Crick Institute, UK](https://www.crick.ac.uk/)                           |
 | [Alexander Peltzer](https://github.com/apeltzer)          | [Boehringer Ingelheim, Germany](https://www.boehringer-ingelheim.de/)                 |
 | [Alison Meynert](https://github.com/ameynert)             | [University of Edinburgh, Scotland](https://www.ed.ac.uk/)                            |
+| [Anton Korobeynikov](https://github.com/asl)              | [Saint Petersburg State University, Russia](https://english.spbu.ru/)                 |
+| [Artem Babaian](https://github.com/ababaian)              | [University of British Columbia, Canada](https://www.ubc.ca/)                         |
+| [Dmitry Meleshko](https://github.com/1dayac)              | [Saint Petersburg State University, Russia](https://english.spbu.ru/)                 |
 | [Edgar Garriga Nogales](https://github.com/edgano)        | [Centre for Genomic Regulation, Spain](https://www.crg.eu/)                           |
 | [Erik Garrison](https://github.com/ekg)                   | [UCSC, USA](https://www.ucsc.edu/)                                                    |
 | [Gisela Gabernet](https://github.com/ggabernet)           | [QBiC, University of Tübingen, Germany](https://portal.qbic.uni-tuebingen.de/portal/) |
