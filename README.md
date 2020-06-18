@@ -11,9 +11,7 @@
 
 ## Introduction
 
-**nfcore/viralrecon** is a bioinformatics analysis pipeline used to perform assembly and intra-host/low-frequency variant calling for viral samples.
-
-The pipeline supports short-read Illumina sequencing data from both shotgun (e.g. sequencing directly from clinical samples) and enrichment-based library preparation methods (e.g. amplicon-based: [ARTIC SARS-CoV-2 enrichment protocol](https://artic.network/ncov-2019); or probe-capture-based).
+**nfcore/viralrecon** is a bioinformatics analysis pipeline used to perform assembly and intra-host/low-frequency variant calling for viral samples. The pipeline supports short-read Illumina sequencing data from both shotgun (e.g. sequencing directly from clinical samples) and enrichment-based library preparation methods (e.g. amplicon-based: [ARTIC SARS-CoV-2 enrichment protocol](https://artic.network/ncov-2019); or probe-capture-based).
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with Docker containers making installation trivial and results highly reproducible. Furthermore, automated continuous integration tests that run the pipeline on a full-sized dataset using AWS cloud ensure that the code is stable.
 
@@ -69,8 +67,25 @@ Numerous QC and reporting steps are included in the pipeline in order to collate
 
 4. Start running your own analysis!
 
+    * Typical command for shotgun analysis:
+
     ```bash
-    nextflow run nf-core/viralrecon -profile <docker/singularity/conda/institute> --input samplesheet.csv --genome 'NC_045512.2' -profile docker
+    nextflow run nf-core/viralrecon \
+        --input samplesheet.csv \
+        --genome 'MN908947.3' \
+        -profile <docker/singularity/conda/institute>
+    ```
+
+    * Typical command for amplicon analysis:
+
+    ```bash
+    nextflow run nf-core/viralrecon \
+        --input samplesheet.csv \
+        --genome 'MN908947.3' \
+        --protocol amplicon \
+        --amplicon_bed ./nCoV-2019.artic.V3.bed \
+        --skip_assembly \
+        -profile <docker/singularity/conda/institute>
     ```
 
 See the [usage documentation](docs/usage.md) for all of the available options when running the pipeline.
