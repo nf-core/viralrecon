@@ -210,11 +210,11 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 [mosdepth](mosdepth) is a fast BAM/CRAM depth calculation for WGS, exome, or targeted sequencing. mosdepth is used in this pipeline to obtain genome-wide coverage values in 200bp windows and for `--protocol amplicon` to obtain amplicon/region-specific coverage metrics. The results are then either rendered in MultiQC (genome-wide coverage) or are plotted using custom `R` scripts.
 
-![MultiQC - mosdepth coverage plot](images/mqc_mosdepth_plot.png)
-
 ![R - Sample genome-wide coverage plot](images/r_genome_coverage.png)
 
-![R - Sample per-amplicon coverage plot](images/r_amplicon_barplot.png)
+<p markdown="1" align="center">
+  <img src="images/r_amplicon_barplot.png" alt="R - Sample per-amplicon coverage plot">
+</p>
 
 <details markdown="1">
   <summary>Output files</summary>
