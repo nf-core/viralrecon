@@ -69,24 +69,24 @@ Numerous QC and reporting steps are included in the pipeline in order to collate
 
     * Typical command for shotgun analysis:
 
-    ```bash
-    nextflow run nf-core/viralrecon \
-        --input samplesheet.csv \
-        --genome 'MN908947.3' \
-        -profile <docker/singularity/conda/institute>
-    ```
+        ```bash
+        nextflow run nf-core/viralrecon \
+            --input samplesheet.csv \
+            --genome 'MN908947.3' \
+            -profile <docker/singularity/conda/institute>
+        ```
 
     * Typical command for amplicon analysis:
 
-    ```bash
-    nextflow run nf-core/viralrecon \
-        --input samplesheet.csv \
-        --genome 'MN908947.3' \
-        --protocol amplicon \
-        --amplicon_bed ./nCoV-2019.artic.V3.bed \
-        --skip_assembly \
-        -profile <docker/singularity/conda/institute>
-    ```
+        ```bash
+        nextflow run nf-core/viralrecon \
+            --input samplesheet.csv \
+            --genome 'MN908947.3' \
+            --protocol amplicon \
+            --amplicon_bed ./nCoV-2019.artic.V3.bed \
+            --skip_assembly \
+            -profile <docker/singularity/conda/institute>
+        ```
 
 See the [usage documentation](docs/usage.md) for all of the available options when running the pipeline.
 
