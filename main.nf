@@ -17,7 +17,7 @@ def helpMessage() {
 
     The typical command for running the pipeline is as follows:
 
-    nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'NC_045512.2' -profile docker
+    nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'MN908947.3' -profile docker
 
     Mandatory arguments
       --input [file]                    Comma-separated file containing information about the samples in the experiment (see docs/usage.md)
@@ -233,19 +233,11 @@ if (params.gff)                      summary['Viral GFF'] = params.gff
 if (params.save_reference)           summary['Save Genome Indices'] = 'Yes'
 if (params.save_sra_fastq)           summary['Save SRA FastQ'] = params.save_sra_fastq
 if (params.skip_sra)                 summary['Skip SRA Download'] = params.skip_sra
-if (!params.skip_kraken2) {
-    if (params.kraken2_db)           summary['Host Kraken2 DB'] = params.kraken2_db
-    if (params.kraken2_db_name)      summary['Host Kraken2 Name'] = params.kraken2_db_name
-    if (params.kraken2_use_ftp)      summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
-    if (params.save_kraken2_fastq)   summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
-} else {
-    summary['Skip Kraken2']          = 'Yes'
-}
 if (!params.skip_adapter_trimming)  {
-    if (params.cut_mean_quality)          summary['Cut Mean Quality'] = params.cut_mean_quality
-    if (params.qualified_quality_phred)   summary['Qualified Phred'] = params.qualified_quality_phred
-    if (params.unqualified_percent_limit) summary['Unqualified Perc Limit'] = params.unqualified_percent_limit
-    if (params.min_trim_length)           summary['Min Trim Length'] = params.min_trim_length
+    if (params.cut_mean_quality)          summary['Fastp Mean Qual'] = params.cut_mean_quality
+    if (params.qualified_quality_phred)   summary['Fastp Qual Phred'] = params.qualified_quality_phred
+    if (params.unqualified_percent_limit) summary['Fastp Unqual % Limit'] = params.unqualified_percent_limit
+    if (params.min_trim_length)           summary['Fastp Min Trim Length'] = params.min_trim_length
 } else {
     summary['Skip Adapter Trimming'] = 'Yes'
 }
@@ -268,6 +260,14 @@ if (!params.skip_variants) {
     if (params.skip_variants_quast)  summary['Skip Variants QUAST'] = 'Yes'
 } else {
     summary['Skip Variant Calling']  = 'Yes'
+}
+if (!params.skip_kraken2 && !params.skip_assembly) {
+    if (params.kraken2_db)           summary['Host Kraken2 DB'] = params.kraken2_db
+    if (params.kraken2_db_name)      summary['Host Kraken2 Name'] = params.kraken2_db_name
+    if (params.kraken2_use_ftp)      summary['Kraken2 Use FTP'] = params.kraken2_use_ftp
+    if (params.save_kraken2_fastq)   summary['Save Kraken2 FastQ'] = params.save_kraken2_fastq
+} else {
+    summary['Skip Kraken2']          = 'Yes'
 }
 if (!params.skip_assembly) {
     summary['Assembly Tools']        = params.assemblers
@@ -393,7 +393,7 @@ if (params.gff) {
 /*
  * PREPROCESSING: Uncompress Kraken2 database
  */
-if (!params.skip_kraken2 && params.kraken2_db) {
+if (!params.skip_kraken2 && params.kraken2_db && !params.skip_assembly) {
     file(params.kraken2_db, checkIfExists: true)
     if (params.kraken2_db.endsWith('.tar.gz')) {
         process UNTAR_KRAKEN2_DB {
@@ -1862,7 +1862,7 @@ if (!isOffline()) {
 /*
  * STEP 6.1: Amplicon trimming with Cutadapt
  */
-if (params.protocol == 'amplicon' && !params.skip_amplicon_trimming) {
+if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_amplicon_trimming) {
     process CUTADAPT {
         tag "$sample"
         label 'process_medium'
@@ -1873,9 +1873,6 @@ if (params.protocol == 'amplicon' && !params.skip_amplicon_trimming) {
                           else if (filename.endsWith(".log")) "log/$filename"
                           else params.save_trimmed ? filename : null
                     }
-
-        when:
-        !params.skip_assembly
 
         input:
         tuple val(sample), val(single_end), path(reads) from ch_fastp_cutadapt
@@ -1915,7 +1912,7 @@ if (params.protocol == 'amplicon' && !params.skip_amplicon_trimming) {
 /*
  * STEP 6.2: Filter reads with Kraken2
  */
-if (!params.skip_kraken2) {
+if (!params.skip_kraken2 && !params.skip_assembly) {
     process KRAKEN2 {
         tag "$db"
         label 'process_high'
@@ -1924,9 +1921,6 @@ if (!params.skip_kraken2) {
                           if (filename.endsWith(".txt")) filename
                           else params.save_kraken2_fastq ? filename : null
                     }
-
-        when:
-        !params.skip_assembly
 
         input:
         tuple val(sample), val(single_end), path(reads) from ch_fastp_kraken2
