@@ -1066,6 +1066,7 @@ if (params.skip_markduplicates) {
 process PICARD_METRICS {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/variants/bam/picard_metrics", mode: params.publish_dir_mode
 
     when:
@@ -1261,6 +1262,7 @@ process SAMTOOLS_MPILEUP {
 process VARSCAN2 {
     tag "$sample"
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".log")) "log/$filename"
