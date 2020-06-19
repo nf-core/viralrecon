@@ -57,7 +57,10 @@ def helpMessage() {
 
     Variant calling
       --callers [str]                   Specify which variant calling algorithms you would like to use (Default: 'varscan2,ivar,bcftools')
-      --ivar_exclude_reads [bool]       Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
+      --ivar_trim_noprimer_reads [bool] Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
+      --ivar_trim_min_len [int]         Minimum length of read to retain after trimming (Default: 30)
+      --ivar_trim_min_qual [int]        Minimum quality threshold for sliding window to pass (Default: 20)
+      --ivar_trim_window_width [int]    Width of sliding window (Default: 4)
       --filter_dups [bool]              Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false)
       --filter_unmapped [bool]          Remove unmapped reads from alignments (Default: false)
       --min_base_qual [int]             When performing variant calling skip bases with baseQ/BAQ smaller than this number (Default: 20)
@@ -245,7 +248,10 @@ if (params.skip_amplicon_trimming)   summary['Skip Amplicon Trimming'] = 'Yes'
 if (params.save_trimmed)             summary['Save Trimmed'] = 'Yes'
 if (!params.skip_variants) {
     summary['Variant Calling Tools'] = params.callers
-    if (params.ivar_exclude_reads)	 summary['iVar Trim Exclude']  = 'Yes'
+    if (params.ivar_trim_noprimer_reads)	summary['iVar Trim Exclude']  = 'Yes'
+    summary['iVar Trim Min Len']     = params.ivar_trim_min_len
+    summary['iVar Trim Min Qual']    = params.ivar_trim_min_qual
+    summary['iVar Trim Window']      = params.ivar_trim_window_width
     if (params.filter_dups)          summary['Remove Duplicate Reads']  = 'Yes'
     if (params.filter_unmapped)      summary['Remove Unmapped Reads']  = 'Yes'
     summary['Min Base Quality']      = params.min_base_qual
@@ -953,7 +959,7 @@ if (params.protocol != 'amplicon') {
         path "*.log" into ch_ivar_trim_log_mqc
 
         script:
-        exclude_reads = params.ivar_exclude_reads ? "" : "-e"
+        exclude_reads = params.ivar_trim_noprimer_reads ? "" : "-e"
         prefix = "${sample}.trim"
         """
         samtools view -b -F 4 ${bam[0]} > ${sample}.mapped.bam
@@ -961,8 +967,11 @@ if (params.protocol != 'amplicon') {
 
         ivar trim \\
             -i ${sample}.mapped.bam \\
-            $exclude_reads \\
             -b $bed \\
+            -m $params.ivar_trim_min_len \\
+            -q $params.ivar_trim_min_qual \\
+            -s $params.ivar_trim_window_width \\
+            $exclude_reads \\
             -p $prefix > ${prefix}.ivar.log
 
         samtools sort -@ $task.cpus -o ${prefix}.sorted.bam -T $prefix ${prefix}.bam
