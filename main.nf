@@ -253,7 +253,7 @@ if (params.save_trimmed)             summary['Save Trimmed'] = 'Yes'
 if (!params.skip_variants) {
     summary['Variant Calling Tools'] = params.callers
     summary['Min Mapped Reads']      = params.min_mapped_reads
-    if (params.ivar_trim_noprimer)	 summary['iVar Trim Exclude']  = 'Yes'
+    if (params.ivar_trim_noprimer)   summary['iVar Trim Exclude']  = 'Yes'
     summary['iVar Trim Min Len']     = params.ivar_trim_min_len
     summary['iVar Trim Min Qual']    = params.ivar_trim_min_qual
     summary['iVar Trim Window']      = params.ivar_trim_window_width
@@ -954,7 +954,7 @@ def check_mapped(sample,flagstat,min_mapped_reads=500) {
     c_green = params.monochrome_logs ? '' : "\033[0;32m";
     c_red = params.monochrome_logs ? '' : "\033[0;31m";
     if (mapped < min_mapped_reads.toInteger()) {
-        log.info "#${c_red}################### FAILED MAPPED READ THRESHOLD! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($sample)    >> ${mapped} <<${c_reset}"
+        log.info "#${c_red}#### $sample >> ${mapped} << FAILED MAPPED READ THRESHOLD OF ${params.min_mapped_reads}! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ${c_reset}"
         fail_mapped_reads[sample] = mapped
         return false
     } else {
@@ -1105,7 +1105,6 @@ if (params.skip_markduplicates) {
 process PICARD_METRICS {
     tag "$sample"
     label 'process_medium'
-    label 'error_ignore'
     publishDir "${params.outdir}/variants/bam/picard_metrics", mode: params.publish_dir_mode
 
     when:
@@ -1301,7 +1300,6 @@ process SAMTOOLS_MPILEUP {
 process VARSCAN2 {
     tag "$sample"
     label 'process_medium'
-    label 'error_ignore'
     publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith(".log")) "log/$filename"
@@ -1473,7 +1471,6 @@ process VARSCAN2_SNPEFF {
  */
 process VARSCAN2_QUAST {
     label 'process_medium'
-    label 'error_ignore'
     publishDir "${params.outdir}/variants/varscan2/quast", mode: params.publish_dir_mode
 
     when:
@@ -1660,7 +1657,6 @@ process IVAR_SNPEFF {
  */
 process IVAR_QUAST {
     label 'process_medium'
-    label 'error_ignore'
     publishDir "${params.outdir}/variants/ivar/quast", mode: params.publish_dir_mode
 
     when:
@@ -1825,7 +1821,6 @@ process BCFTOOLS_SNPEFF {
  */
 process BCFTOOLS_QUAST {
     label 'process_medium'
-    label 'error_ignore'
     publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode
 
     when:
