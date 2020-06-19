@@ -383,7 +383,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
     * `README.txt`: File containing command used and file name mappings.
     * `sites.txt`: List of variants common to at least 2/3 callers in textual format. The last column indicates presence (1) or absence (0) amongst the 3 different callers.
 
-> **NB:** This process will only executed when all 3 variant callers are specified to run, as is by default i.e. `--callers varscan2,ivar,bcftools`.
+> **NB:** This process will only be executed when all 3 variant callers are specified to run, as is by default i.e. `--callers varscan2,ivar,bcftools`.
 
 </details>
 

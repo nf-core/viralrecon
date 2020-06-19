@@ -1294,6 +1294,7 @@ process VARSCAN2 {
         --min-var-freq $params.min_allele_freq \\
         --p-value 0.99 \\
         --output-vcf 1 \\
+        --strand-filter 0 \\
         --vcf-sample-list sample_name.list \\
         --variants \\
         2> ${sample}.varscan2.log \\
@@ -1816,7 +1817,7 @@ if (!params.skip_variants && callers.size() > 2) {
         .join(ch_ivar_highfreq_intersect, by: [0,1])
         .join(ch_bcftools_variants_intersect, by: [0,1])
         .set { ch_varscan2_highfreq_intersect }
-    
+
     process BCFTOOLS_ISEC {
         tag "$sample"
         label 'process_medium'
