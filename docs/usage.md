@@ -37,7 +37,10 @@
     * [`--skip_kraken2`](#--skip_kraken2)
 * [Variant calling](#variant-calling)
     * [`--callers`](#-callers)
-    * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
+    * [`--ivar_trim_noprimer_reads`](#--ivar_trim_noprimer_reads)
+    * [`--ivar_trim_min_len`](#--ivar_trim_min_len)
+    * [`--ivar_trim_min_qual`](#--ivar_trim_min_qual)
+    * [`--ivar_trim_window_width`](#--ivar_trim_window_width)
     * [`--filter_dups`](#--filter_dups)
     * [`--filter_unmapped`](#--filter_unmapped)
     * [`--min_base_qual`](#--min_base_qual)
@@ -360,9 +363,21 @@ Skip Kraken 2 process for removing host classified reads (Default: false).
 
 Specify which variant calling algorithms you would like to use. Available options are `varscan2`, `ivar` and `bcftools` (Default: 'varscan2,ivar,bcftools').
 
-### `--ivar_exclude_reads`
+### `--ivar_trim_noprimer_reads`
 
 This option unsets the `-e` parameter in `ivar trim` to discard reads without primers (Default: false).
+
+### `--ivar_trim_min_len`
+
+Minimum length of read to retain after trimming (Default: 30).
+
+### `--ivar_trim_min_qual`
+
+Minimum quality threshold for sliding window to pass (Default: 20).
+
+### `--ivar_trim_window_width`
+
+Width of sliding window (Default: 4).
 
 ### `--filter_dups`
 
