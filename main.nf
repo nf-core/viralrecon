@@ -57,15 +57,17 @@ def helpMessage() {
 
     Variant calling
       --callers [str]                   Specify which variant calling algorithms you would like to use (Default: 'varscan2,ivar,bcftools')
-      --ivar_trim_noprimer_reads [bool] Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
-      --ivar_trim_min_len [int]         Minimum length of read to retain after trimming (Default: 30)
+      --ivar_trim_noprimer [bool]       Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
+      --ivar_trim_min_len [int]         Minimum length of read to retain after trimming (Default: 20)
       --ivar_trim_min_qual [int]        Minimum quality threshold for sliding window to pass (Default: 20)
       --ivar_trim_window_width [int]    Width of sliding window (Default: 4)
       --filter_dups [bool]              Remove duplicate reads from alignments as identified by picard MarkDuplicates (Default: false)
       --filter_unmapped [bool]          Remove unmapped reads from alignments (Default: false)
+      --mpileup_depth [int]             SAMTools mpileup max per-file depth (Default: 0)
       --min_base_qual [int]             When performing variant calling skip bases with baseQ/BAQ smaller than this number (Default: 20)
       --min_coverage [int]              When performing variant calling skip positions with an overall read depth smaller than this number (Default: 10)
-      --max_allele_freq [float]         Maximum allele frequency threshold for filtering variant calls (Default: 0.8)
+      --min_allele_freq [float]         Minimum allele frequency threshold for calling variants (Default: 0.25)
+      --max_allele_freq [float]         Maximum allele frequency threshold for filtering variant calls (Default: 0.75)
       --amplicon_left_suffix [str]      Suffix used in name field of --amplicon_bed to indicate left primer position (Default: '_LEFT')
       --amplicon_right_suffix [str]     Suffix used in name field of --amplicon_bed to indicate right primer position (Default: '_RIGHT')
       --save_align_intermeds [bool]     Save the intermediate BAM files from the alignment steps (Default: false)
@@ -248,7 +250,7 @@ if (params.skip_amplicon_trimming)   summary['Skip Amplicon Trimming'] = 'Yes'
 if (params.save_trimmed)             summary['Save Trimmed'] = 'Yes'
 if (!params.skip_variants) {
     summary['Variant Calling Tools'] = params.callers
-    if (params.ivar_trim_noprimer_reads)	summary['iVar Trim Exclude']  = 'Yes'
+    if (params.ivar_trim_noprimer)	 summary['iVar Trim Exclude']  = 'Yes'
     summary['iVar Trim Min Len']     = params.ivar_trim_min_len
     summary['iVar Trim Min Qual']    = params.ivar_trim_min_qual
     summary['iVar Trim Window']      = params.ivar_trim_window_width
@@ -256,6 +258,7 @@ if (!params.skip_variants) {
     if (params.filter_unmapped)      summary['Remove Unmapped Reads']  = 'Yes'
     summary['Min Base Quality']      = params.min_base_qual
     summary['Min Read Depth']        = params.min_coverage
+    summary['Min Allele Freq']       = params.min_allele_freq
     summary['Max Allele Freq']       = params.max_allele_freq
     if (params.save_align_intermeds) summary['Save Align Intermeds'] =  'Yes'
     if (params.save_mpileup)         summary['Save mpileup'] = 'Yes'
@@ -959,7 +962,7 @@ if (params.protocol != 'amplicon') {
         path "*.log" into ch_ivar_trim_log_mqc
 
         script:
-        exclude_reads = params.ivar_trim_noprimer_reads ? "" : "-e"
+        exclude_reads = params.ivar_trim_noprimer ? "" : "-e"
         prefix = "${sample}.trim"
         """
         samtools view -b -F 4 ${bam[0]} > ${sample}.mapped.bam
@@ -1242,7 +1245,7 @@ process SAMTOOLS_MPILEUP {
     samtools mpileup \\
         --count-orphans \\
         --no-BAQ \\
-        --max-depth 50000 \\
+        --max-depth $params.mpileup_depth \\
         --fasta-ref $fasta \\
         --min-BQ $params.min_base_qual \\
         --output ${prefix}.mpileup \\
@@ -1287,7 +1290,7 @@ process VARSCAN2 {
         --min-coverage $params.min_coverage \\
         --min-reads2 5 \\
         --min-avg-qual $params.min_base_qual \\
-        --min-var-freq 0.03 \\
+        --min-var-freq $params.min_allele_freq \\
         --p-value 0.99 \\
         --output-vcf 1 \\
         --vcf-sample-list sample_name.list \\
@@ -1489,7 +1492,7 @@ process IVAR_VARIANTS {
     features = params.gff ? "-g $gff" : ""
     prefix = "${sample}.AF${params.max_allele_freq}"
     """
-    cat $mpileup | ivar variants -q $params.min_base_qual -t 0.03 -m $params.min_coverage -r $fasta -p $sample $features
+    cat $mpileup | ivar variants -q $params.min_base_qual -t $params.min_allele_freq -m $params.min_coverage -r $fasta $features -p $sample
 
     ivar_variants_to_vcf.py ${sample}.tsv ${sample}.vcf > ${sample}.variant.counts.log
     bgzip -c ${sample}.vcf > ${sample}.vcf.gz
@@ -1497,7 +1500,7 @@ process IVAR_VARIANTS {
     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
     cat $header ${sample}.variant.counts.log > ${sample}.variant.counts_mqc.tsv
 
-    ivar_variants_to_vcf.py ${sample}.tsv ${prefix}.vcf --pass_only --min_allele_freq $params.max_allele_freq > ${prefix}.variant.counts.log
+    ivar_variants_to_vcf.py ${sample}.tsv ${prefix}.vcf --pass_only --allele_freq_thresh $params.max_allele_freq > ${prefix}.variant.counts.log
     bgzip -c ${prefix}.vcf > ${prefix}.vcf.gz
     tabix -p vcf -f ${prefix}.vcf.gz
     bcftools stats ${prefix}.vcf.gz > ${prefix}.bcftools_stats.txt
@@ -1668,7 +1671,7 @@ process BCFTOOLS_VARIANTS {
     bcftools mpileup \\
         --count-orphans \\
         --no-BAQ \\
-        --max-depth 50000 \\
+        --max-depth $params.mpileup_depth \\
         --fasta-ref $fasta \\
         --min-BQ $params.min_base_qual \\
         --annotate FORMAT/AD,FORMAT/ADF,FORMAT/ADR,FORMAT/DP,FORMAT/SP,INFO/AD,INFO/ADF,INFO/ADR \\
