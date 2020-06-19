@@ -10,9 +10,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#112](https://github.com/nf-core/viralrecon/issues/112) - Per-amplicon coverage plot
 * [nf-core/tools#616](https://github.com/nf-core/tools/pull/616) - Updated GitHub Actions to build Docker image and push to Docker Hub
 * Parameters:
-    * `--skip_mosdepth` to skip genome-wide and amplicon coverage plot generation from mosdepth output
-    * `--amplicon_left_suffix` to provide left primer suffix used in name field of `--amplicon_bed`
-    * `--amplicon_right_suffix` to provide right primer suffix used in name field of `--amplicon_bed`
+    * `--skip_mosdepth` - skip genome-wide and amplicon coverage plot generation from mosdepth output
+    * `--amplicon_left_suffix` - to provide left primer suffix used in name field of `--amplicon_bed`
+    * `--amplicon_right_suffix` - to provide right primer suffix used in name field of `--amplicon_bed`
+    * Unify parameter specification with COG-UK pipeline:
+        * `--min_allele_freq` - minimum allele frequency threshold for calling variants
+        * `--mpileup_depth` - SAMTools mpileup max per-file depth
+        * `--ivar_exclude_reads` renamed to `--ivar_trim_noprimer`
+        * `--ivar_trim_min_len` - minimum length of read to retain after primer trimming
+        * `--ivar_trim_min_qual` - minimum quality threshold for sliding window to pass
+        * `--ivar_trim_window_width` - width of sliding window
 
 ### `Removed`
 

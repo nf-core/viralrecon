@@ -37,10 +37,15 @@
     * [`--skip_kraken2`](#--skip_kraken2)
 * [Variant calling](#variant-calling)
     * [`--callers`](#-callers)
-    * [`--ivar_exclude_reads`](#--ivar_exclude_reads)
+    * [`--ivar_trim_noprimer`](#--ivar_trim_noprimer)
+    * [`--ivar_trim_min_len`](#--ivar_trim_min_len)
+    * [`--ivar_trim_min_qual`](#--ivar_trim_min_qual)
+    * [`--ivar_trim_window_width`](#--ivar_trim_window_width)
     * [`--filter_dups`](#--filter_dups)
     * [`--filter_unmapped`](#--filter_unmapped)
+    * [`--mpileup_depth`](#--mpileup_depth)
     * [`--min_base_qual`](#--min_base_qual)
+    * [`--min_allele_freq`](#--min_allele_freq)
     * [`--max_allele_freq`](#--max_allele_freq)
     * [`--amplicon_left_suffix`](#--amplicon_left_suffix)
     * [`--amplicon_right_suffix`](#--amplicon_right_suffix)
@@ -360,9 +365,21 @@ Skip Kraken 2 process for removing host classified reads (Default: false).
 
 Specify which variant calling algorithms you would like to use. Available options are `varscan2`, `ivar` and `bcftools` (Default: 'varscan2,ivar,bcftools').
 
-### `--ivar_exclude_reads`
+### `--ivar_trim_noprimer`
 
 This option unsets the `-e` parameter in `ivar trim` to discard reads without primers (Default: false).
+
+### `--ivar_trim_min_len`
+
+Minimum length of read to retain after trimming (Default: 20).
+
+### `--ivar_trim_min_qual`
+
+Minimum quality threshold for sliding window to pass (Default: 20).
+
+### `--ivar_trim_window_width`
+
+Width of sliding window (Default: 4).
 
 ### `--filter_dups`
 
@@ -372,6 +389,10 @@ Remove duplicate reads from alignments as identified by picard MarkDuplicates (D
 
 Remove unmapped reads from alignments (Default: false).
 
+### `--mpileup_depth`
+
+SAMTools mpileup max per-file depth (Default: 0). See [here](https://github.com/connor-lab/ncov2019-artic-nf/pull/51) for an explanation of the default value choice.
+
 ### `--min_base_qual`
 
 When performing variant calling skip bases with baseQ/BAQ smaller than this number (Default: 20).
@@ -380,9 +401,13 @@ When performing variant calling skip bases with baseQ/BAQ smaller than this numb
 
 When performing variant calling skip positions with an overall read depth smaller than this number (Default: 10).
 
+### `--min_allele_freq`
+
+Minimum allele frequency threshold for calling variants (Default: 0.25).
+
 ### `--max_allele_freq`
 
-Maximum allele frequency threshold for filtering variant calls (Default: 0.8).
+Maximum allele frequency threshold for filtering variant calls (Default: 0.75).
 
 ### `--amplicon_left_suffix`
 
