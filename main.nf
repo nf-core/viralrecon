@@ -1434,6 +1434,7 @@ process VARSCAN2_SNPEFF {
  */
 process VARSCAN2_QUAST {
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/variants/varscan2/quast", mode: params.publish_dir_mode
 
     when:
@@ -1620,6 +1621,7 @@ process IVAR_SNPEFF {
  */
 process IVAR_QUAST {
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/variants/ivar/quast", mode: params.publish_dir_mode
 
     when:
@@ -1784,6 +1786,7 @@ process BCFTOOLS_SNPEFF {
  */
 process BCFTOOLS_QUAST {
     label 'process_medium'
+    label 'error_ignore'
     publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode
 
     when:
