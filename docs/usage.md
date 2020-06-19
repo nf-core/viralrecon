@@ -37,6 +37,7 @@
     * [`--skip_kraken2`](#--skip_kraken2)
 * [Variant calling](#variant-calling)
     * [`--callers`](#-callers)
+    * [`--min_mapped_reads`](#-min_mapped_reads)
     * [`--ivar_trim_noprimer`](#--ivar_trim_noprimer)
     * [`--ivar_trim_min_len`](#--ivar_trim_min_len)
     * [`--ivar_trim_min_qual`](#--ivar_trim_min_qual)
@@ -365,6 +366,10 @@ Skip Kraken 2 process for removing host classified reads (Default: false).
 ### `--callers`
 
 Specify which variant calling algorithms you would like to use. Available options are `varscan2`, `ivar` and `bcftools` (Default: 'varscan2,ivar,bcftools').
+
+### `--min_mapped_reads`
+
+Minimum number of mapped reads below which samples are removed from further processing (Default: 1000). Some downstream steps in the pipeline will fail if this threshold is too low.
 
 ### `--ivar_trim_noprimer`
 

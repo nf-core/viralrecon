@@ -57,6 +57,7 @@ def helpMessage() {
 
     Variant calling
       --callers [str]                   Specify which variant calling algorithms you would like to use (Default: 'varscan2,ivar,bcftools')
+      --min_mapped_reads [int]          Minimum number of mapped reads below which samples are removed from further processing (Default: 1000)
       --ivar_trim_noprimer [bool]       Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
       --ivar_trim_min_len [int]         Minimum length of read to retain after trimming (Default: 20)
       --ivar_trim_min_qual [int]        Minimum quality threshold for sliding window to pass (Default: 20)
@@ -251,6 +252,7 @@ if (params.skip_amplicon_trimming)   summary['Skip Amplicon Trimming'] = 'Yes'
 if (params.save_trimmed)             summary['Save Trimmed'] = 'Yes'
 if (!params.skip_variants) {
     summary['Variant Calling Tools'] = params.callers
+    summary['Min Mapped Reads']      = params.min_mapped_reads
     if (params.ivar_trim_noprimer)	 summary['iVar Trim Exclude']  = 'Yes'
     summary['iVar Trim Min Len']     = params.ivar_trim_min_len
     summary['iVar Trim Min Qual']    = params.ivar_trim_min_qual
@@ -918,7 +920,7 @@ process SORT_BAM {
     tuple val(sample), val(single_end), path(bam) from ch_bowtie2_bam
 
     output:
-    tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_sort_bam
+    tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}"), path("*.flagstat") into ch_sort_bam
     path "*.{flagstat,idxstats,stats}" into ch_sort_bam_flagstat_mqc
 
     script:
@@ -930,6 +932,43 @@ process SORT_BAM {
     samtools stats ${sample}.sorted.bam > ${sample}.sorted.bam.stats
     """
 }
+
+// Get total number of mapped reads from flagstat file
+def get_mapped_from_flagstat(flagstat) {
+    def mapped = 0
+    flagstat.eachLine { line ->
+        if (line.contains(' mapped (')) {
+            mapped = line.tokenize().first().toInteger()
+        }
+    }
+    return mapped
+}
+
+// Function that checks the number of mapped reads from flagstat output
+// and returns true if > params.min_mapped_reads and otherwise false
+pass_mapped_reads = [:]
+fail_mapped_reads = [:]
+def check_mapped(sample,flagstat,min_mapped_reads=500) {
+    mapped = get_mapped_from_flagstat(flagstat)
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_red = params.monochrome_logs ? '' : "\033[0;31m";
+    if (mapped < min_mapped_reads.toInteger()) {
+        log.info "#${c_red}################### FAILED MAPPED READ THRESHOLD! IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ($sample)    >> ${mapped} <<${c_reset}"
+        fail_mapped_reads[sample] = mapped
+        return false
+    } else {
+        //log.info "-${c_green}           Passed mapped read threshold > bowtie2 ($sample)   >> ${mapped} <<${c_reset}"
+        pass_mapped_reads[sample] = mapped
+        return true
+    }
+}
+
+// Remove samples that failed mapped read threshold
+ch_sort_bam
+    .filter { sample, single_end, bam, flagstat -> check_mapped(sample,flagstat,params.min_mapped_reads) }
+    .map { it[0..2] }
+    .set { ch_sort_bam }
 
 /*
  * STEP 5.3: Trim amplicon sequences with iVar
@@ -3206,6 +3245,7 @@ process get_software_versions {
  * STEP 7: MultiQC
  */
 process MULTIQC {
+    label 'process_medium'
     publishDir "${params.outdir}", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith("assembly_metrics_mqc.tsv")) "assembly/$filename"
@@ -3298,6 +3338,9 @@ workflow.onComplete {
 
     // Set up the e-mail variables
     def subject = "[nf-core/viralrecon] Successful: $workflow.runName"
+    if (fail_mapped_reads.size() > 0) {
+        subject = "[nf-core/viralrecon] Partially Successful (${fail_mapped_reads.size()} skipped): $workflow.runName"
+    }
     if (!workflow.success) {
         subject = "[nf-core/viralrecon] FAILED: $workflow.runName"
     }
@@ -3320,6 +3363,8 @@ workflow.onComplete {
     if (workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
     if (workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
     if (workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
+    email_fields['fail_mapped_reads'] = fail_mapped_reads.keySet()
+    email_fields['min_mapped_reads'] = params.min_mapped_reads
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
@@ -3389,6 +3434,28 @@ workflow.onComplete {
     c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_red = params.monochrome_logs ? '' : "\033[0;31m";
     c_reset = params.monochrome_logs ? '' : "\033[0m";
+
+    if (pass_mapped_reads.size() > 0) {
+        idx = 0
+        sample_mapped = ''
+        total_count = pass_mapped_reads.size() + fail_mapped_reads.size()
+        for (sample in pass_mapped_reads) {
+            sample_mapped += "    ${sample.key}: ${sample.value}\n"
+            idx += 1
+            if (idx > 5) {
+                sample_mapped += "    ..see pipeline reports for full list\n"
+                break
+            }
+        }
+        //log.info "[${c_purple}nf-core/viralrecon${c_reset}] ${c_green}${pass_mapped_reads.size()}/${total_count} samples passed minimum mapped reads check\n${sample_mapped}${c_reset}"
+    }
+    if (fail_mapped_reads.size() > 0) {
+        sample_mapped = ''
+        fail_mapped_reads.each { sample, value ->
+            sample_mapped += "    ${sample}: ${value}\n"
+        }
+        log.info "[${c_purple}nf-core/viralrecon${c_reset}] ${c_red} WARNING - ${fail_mapped_reads.size()} samples skipped due to low number of mapped reads!\n${sample_mapped}${c_reset}"
+    }
 
     if (workflow.stats.ignoredCount > 0 && workflow.success) {
         log.info "-${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}-"
