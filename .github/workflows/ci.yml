@@ -41,7 +41,7 @@ jobs:
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.1.0
 
       - name: Install Nextflow
         run: |
@@ -81,7 +81,7 @@ jobs:
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.1.0
 
       - name: Install Nextflow
         run: |
@@ -121,7 +121,7 @@ jobs:
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.1.0
 
       - name: Install Nextflow
         run: |
@@ -161,7 +161,7 @@ jobs:
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.1.0
 
       - name: Install Nextflow
         run: |
