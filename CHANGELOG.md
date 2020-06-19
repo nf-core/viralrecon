@@ -14,15 +14,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     * `--amplicon_left_suffix` - to provide left primer suffix used in name field of `--amplicon_bed`
     * `--amplicon_right_suffix` - to provide right primer suffix used in name field of `--amplicon_bed`
     * Unify parameter specification with COG-UK pipeline:
-        * `ivar trim`
-            * `--ivar_exclude_reads` renamed to `--ivar_trim_noprimer_reads`
-            * `--ivar_trim_min_len` - minimum length of read to retain after primer trimming
-            * `--ivar_trim_min_qual` - minimum quality threshold for sliding window to pass
-            * `--ivar_trim_window_width` - width of sliding window
-        * `ivar variants`
-            *
-        * `ivar consensus`
-            *
+        * `--min_allele_freq` - minimum allele frequency threshold for calling variants
+        * `--mpileup_depth` - SAMTools mpileup max per-file depth
+        * `--ivar_exclude_reads` renamed to `--ivar_trim_noprimer`
+        * `--ivar_trim_min_len` - minimum length of read to retain after primer trimming
+        * `--ivar_trim_min_qual` - minimum quality threshold for sliding window to pass
+        * `--ivar_trim_window_width` - width of sliding window
 
 ### `Removed`
 
