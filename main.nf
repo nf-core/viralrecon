@@ -256,6 +256,7 @@ if (!params.skip_variants) {
     summary['iVar Trim Window']      = params.ivar_trim_window_width
     if (params.filter_dups)          summary['Remove Duplicate Reads']  = 'Yes'
     if (params.filter_unmapped)      summary['Remove Unmapped Reads']  = 'Yes'
+    summary['Mpileup Depth']         = params.mpileup_depth
     summary['Min Base Quality']      = params.min_base_qual
     summary['Min Read Depth']        = params.min_coverage
     summary['Min Allele Freq']       = params.min_allele_freq
