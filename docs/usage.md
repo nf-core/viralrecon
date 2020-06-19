@@ -47,6 +47,7 @@
     * [`--min_base_qual`](#--min_base_qual)
     * [`--min_allele_freq`](#--min_allele_freq)
     * [`--max_allele_freq`](#--max_allele_freq)
+    * [`--varscan2_strand_filter`](#--varscan2_strand_filter)
     * [`--amplicon_left_suffix`](#--amplicon_left_suffix)
     * [`--amplicon_right_suffix`](#--amplicon_right_suffix)
     * [`--min_coverage`](#--min_coverage)
@@ -408,6 +409,10 @@ Minimum allele frequency threshold for calling variants (Default: 0.25).
 ### `--max_allele_freq`
 
 Maximum allele frequency threshold for filtering variant calls (Default: 0.75).
+
+### `--varscan2_strand_filter`
+
+Ignore Varscan 2 variants with >90% support on one strand (Default: true). Note: the strand filter will be switched off for amplicon data by default because this sort of bias may be expected.
 
 ### `--amplicon_left_suffix`
 

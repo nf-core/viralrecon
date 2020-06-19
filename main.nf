@@ -68,6 +68,7 @@ def helpMessage() {
       --min_coverage [int]              When performing variant calling skip positions with an overall read depth smaller than this number (Default: 10)
       --min_allele_freq [float]         Minimum allele frequency threshold for calling variants (Default: 0.25)
       --max_allele_freq [float]         Maximum allele frequency threshold for filtering variant calls (Default: 0.75)
+      --varscan2_strand_filter [bool]   Ignore Varscan 2 variants with >90% support on one strand (Default: true)
       --amplicon_left_suffix [str]      Suffix used in name field of --amplicon_bed to indicate left primer position (Default: '_LEFT')
       --amplicon_right_suffix [str]     Suffix used in name field of --amplicon_bed to indicate right primer position (Default: '_RIGHT')
       --save_align_intermeds [bool]     Save the intermediate BAM files from the alignment steps (Default: false)
@@ -261,6 +262,7 @@ if (!params.skip_variants) {
     summary['Min Read Depth']        = params.min_coverage
     summary['Min Allele Freq']       = params.min_allele_freq
     summary['Max Allele Freq']       = params.max_allele_freq
+    if (params.varscan2_strand_filter) summary['Varscan2 Strand Filter'] = 'Yes'
     if (params.save_align_intermeds) summary['Save Align Intermeds'] =  'Yes'
     if (params.save_mpileup)         summary['Save mpileup'] = 'Yes'
     if (params.skip_markduplicates)  summary['Skip MarkDuplicates'] = 'Yes'
@@ -1252,7 +1254,7 @@ process SAMTOOLS_MPILEUP {
         ${bam[0]}
     """
 }
-
+println(params.protocol != 'amplicon' && params.varscan2_strand_filter)
 /*
  * STEP 5.7.1: Variant calling with VarScan 2
  */
@@ -1284,6 +1286,7 @@ process VARSCAN2 {
 
     script:
     prefix = "${sample}.AF${params.max_allele_freq}"
+    strand = params.protocol != 'amplicon' && params.varscan2_strand_filter ? "--strand-filter 1" : "--strand-filter 0"
     """
     echo "$sample" > sample_name.list
     varscan mpileup2cns \\
@@ -1294,9 +1297,9 @@ process VARSCAN2 {
         --min-var-freq $params.min_allele_freq \\
         --p-value 0.99 \\
         --output-vcf 1 \\
-        --strand-filter 0 \\
         --vcf-sample-list sample_name.list \\
         --variants \\
+        $strand \\
         2> ${sample}.varscan2.log \\
         | bgzip -c > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
