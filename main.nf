@@ -1186,7 +1186,6 @@ if (params.protocol == 'amplicon') {
     }
 
     process MOSDEPTH_AMPLICON_PLOT {
-        tag "$sample"
         label 'process_medium'
         publishDir "${params.outdir}/variants/bam/mosdepth/amplicon/plots", mode: params.publish_dir_mode
 
@@ -1276,7 +1275,8 @@ process VARSCAN2 {
 
     output:
     tuple val(sample), val(single_end), path("${prefix}.vcf.gz*") into ch_varscan2_highfreq_consensus,
-                                                                       ch_varscan2_highfreq_snpeff
+                                                                       ch_varscan2_highfreq_snpeff,
+                                                                       ch_varscan2_highfreq_intersect
     tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_varscan2_lowfreq_snpeff
     path "${prefix}.bcftools_stats.txt" into ch_varscan2_bcftools_highfreq_mqc
     path "*.varscan2.log" into ch_varscan2_log_mqc
@@ -1481,7 +1481,8 @@ process IVAR_VARIANTS {
     path gff from ch_gff
 
     output:
-    tuple val(sample), val(single_end), path("${prefix}.vcf.gz*") into ch_ivar_highfreq_snpeff
+    tuple val(sample), val(single_end), path("${prefix}.vcf.gz*") into ch_ivar_highfreq_snpeff,
+                                                                       ch_ivar_highfreq_intersect
     tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_ivar_lowfreq_snpeff
     path "${prefix}.bcftools_stats.txt" into ch_ivar_bcftools_highfreq_mqc
     path "${sample}.variant.counts_mqc.tsv" into ch_ivar_count_mqc
@@ -1663,7 +1664,8 @@ process BCFTOOLS_VARIANTS {
 
     output:
     tuple val(sample), val(single_end), path("*.vcf.gz*") into ch_bcftools_variants_consensus,
-                                                               ch_bcftools_variants_snpeff
+                                                               ch_bcftools_variants_snpeff,
+                                                               ch_bcftools_variants_intersect
     path "*.bcftools_stats.txt" into ch_bcftools_variants_mqc
 
     script:
@@ -1799,6 +1801,43 @@ process BCFTOOLS_QUAST {
         --threads $task.cpus \\
         ${consensus.join(' ')}
     """
+}
+
+////////////////////////////////////////////////////
+/* --            INTERSECT VARIANTS            -- */
+////////////////////////////////////////////////////
+
+/*
+ * STEP 5.8: Intersect variants with BCFTools
+ */
+if (!params.skip_variants && callers.size() > 2) {
+
+    ch_varscan2_highfreq_intersect
+        .join(ch_ivar_highfreq_intersect, by: [0,1])
+        .join(ch_bcftools_variants_intersect, by: [0,1])
+        .set { ch_varscan2_highfreq_intersect }
+    
+    process BCFTOOLS_ISEC {
+        tag "$sample"
+        label 'process_medium'
+        label 'error_ignore'
+        publishDir "${params.outdir}/variants/intersect", mode: params.publish_dir_mode
+
+        input:
+        tuple val(sample), val(single_end), path('varscan2/*'), path('ivar/*'), path('bcftools/*') from ch_varscan2_highfreq_intersect
+
+        output:
+        path "$sample"
+
+        script:
+        """
+        bcftools isec  \\
+            --nfiles +2 \\
+            --output-type z \\
+            -p $sample \\
+            */*.vcf.gz
+        """
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
