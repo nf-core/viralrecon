@@ -316,7 +316,7 @@ if (params.email || params.email_on_fail) {
     summary['E-mail on failure']     = params.email_on_fail
     summary['MultiQC maxsize']       = params.max_multiqc_email_size
 }
-log.info summary.collect { k,v -> "${k.padRight(21)}: $v" }.join("\n")
+log.info summary.collect { k,v -> "${k.padRight(22)}: $v" }.join("\n")
 log.info "-\033[2m--------------------------------------------------\033[0m-"
 
 // Check the hostnames against configured profiles
@@ -1254,7 +1254,7 @@ process SAMTOOLS_MPILEUP {
         ${bam[0]}
     """
 }
-println(params.protocol != 'amplicon' && params.varscan2_strand_filter)
+
 /*
  * STEP 5.7.1: Variant calling with VarScan 2
  */
