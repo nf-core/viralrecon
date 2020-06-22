@@ -954,7 +954,7 @@ def check_mapped(sample,flagstat,min_mapped_reads=500) {
     c_green = params.monochrome_logs ? '' : "\033[0;32m";
     c_red = params.monochrome_logs ? '' : "\033[0;31m";
     if (mapped < min_mapped_reads.toInteger()) {
-        log.info "#${c_red}#### $sample FAILED MAPPED READ THRESHOLD - ${mapped} < ${params.min_mapped_reads}. IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! ${c_reset}"
+        log.info "${c_red}>>>> $sample FAILED MAPPED READ THRESHOLD: ${mapped} < ${params.min_mapped_reads}. IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! <<<<${c_reset}"
         fail_mapped_reads[sample] = mapped
         return false
     } else {
@@ -3363,7 +3363,7 @@ workflow.onComplete {
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
-    println(fail_mapped_reads.keySet())
+
     // On success try attach the multiqc report
     def mqc_report = null
     try {
