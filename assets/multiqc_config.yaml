@@ -160,6 +160,8 @@ module_order:
     - kraken:
         name: 'ASSEMBLY: Kraken 2'
         info: 'This section of the report shows Kraken 2 classification results for reads after primer sequence trimming with Cutadapt.'
+        path_filters:
+            - './kraken2/*.txt'
     - quast:
         name: 'ASSEMBLY: QUAST (SPAdes)'
         anchor: 'quast_spades'
@@ -283,8 +285,6 @@ sp:
         fn: '*.varscan2.log'
     cutadapt:
         fn: '*.cutadapt.log'
-    kraken:
-        fn: '*.kraken2.report.txt'
     picard/alignment_metrics:
         fn: '*.alignment_summary_metrics'
     picard/insertsize:
