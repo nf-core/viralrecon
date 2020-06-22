@@ -1221,6 +1221,7 @@ if (params.protocol == 'amplicon') {
         mosdepth \\
             --by amplicon.collapsed.bed \\
             --fast-mode \\
+            --use-median \\
             --thresholds 0,1,10,50,100,500 \\
             ${prefix} \\
             ${bam[0]}
