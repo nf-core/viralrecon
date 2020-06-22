@@ -1472,7 +1472,10 @@ process VARSCAN2_SNPEFF {
  */
 process VARSCAN2_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/variants/varscan2/quast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/varscan2/quast", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_variants && 'varscan2' in callers && !params.skip_variants_quast
@@ -1484,7 +1487,7 @@ process VARSCAN2_QUAST {
 
     output:
     path "AF${params.max_allele_freq}"
-    path "AF${params.max_allele_freq}/report.tsv" into ch_varscan2_quast_mqc
+    path "report.tsv" into ch_varscan2_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1495,6 +1498,7 @@ process VARSCAN2_QUAST {
         $features \\
         --threads $task.cpus \\
         ${consensus.join(' ')}
+    ln -s AF${params.max_allele_freq}/report.tsv
     """
 }
 
@@ -1659,7 +1663,10 @@ process IVAR_SNPEFF {
  */
 process IVAR_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/variants/ivar/quast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/ivar/quast", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_variants && 'ivar' in callers && !params.skip_variants_quast
@@ -1671,7 +1678,7 @@ process IVAR_QUAST {
 
     output:
     path "AF${params.max_allele_freq}"
-    path "AF${params.max_allele_freq}/report.tsv" into ch_ivar_quast_mqc
+    path "report.tsv" into ch_ivar_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1682,6 +1689,7 @@ process IVAR_QUAST {
         $features \\
         --threads $task.cpus \\
         ${consensus.join(' ')}
+    ln -s AF${params.max_allele_freq}/report.tsv
     """
 }
 
@@ -1824,7 +1832,10 @@ process BCFTOOLS_SNPEFF {
  */
 process BCFTOOLS_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_variants && 'bcftools' in callers && !params.skip_variants_quast
@@ -1836,7 +1847,7 @@ process BCFTOOLS_QUAST {
 
     output:
     path "quast"
-    path "quast/report.tsv" into ch_bcftools_quast_mqc
+    path "report.tsv" into ch_bcftools_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1847,6 +1858,7 @@ process BCFTOOLS_QUAST {
         $features \\
         --threads $task.cpus \\
         ${consensus.join(' ')}
+    ln -s quast/report.tsv
     """
 }
 
@@ -2211,7 +2223,10 @@ process SPADES_PLASMIDID {
 process SPADES_QUAST {
     label 'process_medium'
     label 'error_ignore'
-    publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_assembly && 'spades' in assemblers && !params.skip_assembly_quast
@@ -2223,7 +2238,7 @@ process SPADES_QUAST {
 
     output:
     path "quast"
-    path "quast/report.tsv" into ch_quast_spades_mqc
+    path "report.tsv" into ch_quast_spades_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2234,6 +2249,7 @@ process SPADES_QUAST {
         $features \\
         --threads $task.cpus \\
         ${scaffolds.join(' ')}
+    ln -s quast/report.tsv
     """
 }
 
@@ -2493,7 +2509,10 @@ process METASPADES_PLASMIDID {
 process METASPADES_QUAST {
     label 'process_medium'
     label 'error_ignore'
-    publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !params.skip_assembly_quast
@@ -2505,7 +2524,7 @@ process METASPADES_QUAST {
 
     output:
     path "quast"
-    path "quast/report.tsv" into ch_quast_metaspades_mqc
+    path "report.tsv" into ch_quast_metaspades_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2516,6 +2535,7 @@ process METASPADES_QUAST {
         $features \\
         --threads $task.cpus \\
         ${scaffolds.join(' ')}
+    ln -s quast/report.tsv
     """
 }
 
@@ -2773,7 +2793,10 @@ process UNICYCLER_PLASMIDID {
 process UNICYCLER_QUAST {
     label 'process_medium'
     label 'error_ignore'
-    publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_assembly_quast
@@ -2785,7 +2808,7 @@ process UNICYCLER_QUAST {
 
     output:
     path "quast"
-    path "quast/report.tsv" into ch_quast_unicycler_mqc
+    path "report.tsv" into ch_quast_unicycler_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2796,6 +2819,7 @@ process UNICYCLER_QUAST {
         $features \\
         --threads $task.cpus \\
         ${scaffolds.join(' ')}
+    ln -s quast/report.tsv
     """
 }
 
@@ -3042,7 +3066,10 @@ process MINIA_PLASMIDID {
 process MINIA_QUAST {
     label 'process_medium'
     label 'error_ignore'
-    publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_assembly && 'minia' in assemblers && !params.skip_assembly_quast
@@ -3054,7 +3081,7 @@ process MINIA_QUAST {
 
     output:
     path "quast"
-    path "quast/report.tsv" into ch_quast_minia_mqc
+    path "report.tsv" into ch_quast_minia_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -3065,6 +3092,7 @@ process MINIA_QUAST {
         $features \\
         --threads $task.cpus \\
         ${scaffolds.join(' ')}
+    ln -s quast/report.tsv
     """
 }
 
