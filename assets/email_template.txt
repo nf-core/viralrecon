@@ -11,7 +11,7 @@ Run Name: $runName
 
 <% if (!success){
     out << """####################################################
-## nf-core/viralrecon completed unsuccessfully! ##
+## nf-core/viralrecon completed unsuccessfully!   ##
 ####################################################\n
 The exit status of the task that caused the workflow execution to fail was: $exitStatus.
 The full error message was:
@@ -29,7 +29,7 @@ due to failing the minimum mapped read threshold (less than ${min_mapped_reads})
 """
 } else {
     out << """####################################################
-## nf-core/viralrecon completed successfully! ##
+## nf-core/viralrecon completed successfully!     ##
 ####################################################\n
 """
 }
