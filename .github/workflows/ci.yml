@@ -35,7 +35,7 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
+        run: docker build --no-cache . -t nfcore/viralrecon:1.1.0
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
@@ -75,7 +75,7 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
+        run: docker build --no-cache . -t nfcore/viralrecon:1.1.0
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
@@ -115,7 +115,7 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
+        run: docker build --no-cache . -t nfcore/viralrecon:1.1.0
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
@@ -155,7 +155,7 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
+        run: docker build --no-cache . -t nfcore/viralrecon:1.1.0
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
