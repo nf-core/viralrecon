@@ -103,7 +103,7 @@ for (sample in unique(dat$sample)) {
                 expand_limits(y=1) +
                 ylab(bquote('log'[10]~'(Coverage+1)')) +
                 xlab('Amplicon') +
-                ggtitle(paste(sample,'per amplicon coverage'))
+                ggtitle(paste(sample,'median coverage per amplicon'))
 
           outfile <- paste(OUTDIR,sample,".",OUTSUFFIX,".coverage.pdf", sep='')
           ggsave(file=outfile, plot, height=3+(0.3*length(unique(sample_dat$region))), width=16, units="cm")
@@ -137,7 +137,7 @@ if (ncol(dat) == 6 && length(INPUT_FILES) > 1) {
     rownames(mat) <- mat[,1]
     mat <- t(as.matrix(log10(mat[,-1] + 1)))
     heatmap <- Heatmap(mat,
-                       column_title         = "Heatmap to show amplicon coverage across multiple samples",
+                       column_title         = "Heatmap to show median amplicon coverage across samples",
                        name                 = "log10(Coverage+1)",
                        cluster_rows         = TRUE,
                        cluster_columns      = FALSE,
