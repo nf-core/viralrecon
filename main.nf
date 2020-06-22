@@ -743,8 +743,9 @@ if (!params.skip_adapter_trimming) {
         tuple val(sample), val(single_end), path("*.trim.fastq.gz") into ch_fastp_bowtie2,
                                                                          ch_fastp_cutadapt,
                                                                          ch_fastp_kraken2
-        path "*.{log,fastp.html,json}" into ch_fastp_mqc
+        path "*.json" into ch_fastp_mqc
         path "*_fastqc.{zip,html}" into ch_fastp_fastqc_mqc
+        path "*.{log,fastp.html}"
         path "*.fail.fastq.gz"
 
         script:
@@ -1482,7 +1483,8 @@ process VARSCAN2_QUAST {
     path gff from ch_gff
 
     output:
-    path "AF${params.max_allele_freq}" into ch_varscan2_quast_mqc
+    path "AF${params.max_allele_freq}"
+    path "AF${params.max_allele_freq}/report.tsv" into ch_varscan2_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1668,7 +1670,8 @@ process IVAR_QUAST {
     path gff from ch_gff
 
     output:
-    path "AF${params.max_allele_freq}" into ch_ivar_quast_mqc
+    path "AF${params.max_allele_freq}"
+    path "AF${params.max_allele_freq}/report.tsv" into ch_ivar_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1832,7 +1835,8 @@ process BCFTOOLS_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast" into ch_bcftools_quast_mqc
+    path "quast"
+    path "quast/report.tsv" into ch_bcftools_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2218,7 +2222,8 @@ process SPADES_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast" into ch_quast_spades_mqc
+    path "quast"
+    path "quast/report.tsv" into ch_quast_spades_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2499,7 +2504,8 @@ process METASPADES_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast" into ch_quast_metaspades_mqc
+    path "quast"
+    path "quast/report.tsv" into ch_quast_metaspades_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2778,7 +2784,8 @@ process UNICYCLER_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast" into ch_quast_unicycler_mqc
+    path "quast"
+    path "quast/report.tsv" into ch_quast_unicycler_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -3046,7 +3053,8 @@ process MINIA_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast" into ch_quast_minia_mqc
+    path "quast"
+    path "quast/report.tsv" into ch_quast_minia_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
