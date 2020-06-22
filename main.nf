@@ -3216,28 +3216,31 @@ process get_software_versions {
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     parallel-fastq-dump --version > v_parallel_fastq_dump.txt
+    sra-pileup --version > v_sratools.txt
     fastqc --version > v_fastqc.txt
     fastp --version 2> v_fastp.txt
     bowtie2 --version > v_bowtie2.txt
     samtools --version > v_samtools.txt
     bedtools --version > v_bedtools.txt
+    mosdepth --version > v_mosdepth.txt
     picard CollectMultipleMetrics --version &> v_picard.txt || true
     ivar -v > v_ivar.txt
     echo \$(varscan 2>&1) > v_varscan.txt
+    bcftools -v > v_bcftools.txt
     snpEff -version > v_snpeff.txt
     echo \$(SnpSift 2>&1) > v_snpsift.txt
-    bcftools -v > v_bcftools.txt
+    quast.py --version > v_quast.txt
     cutadapt --version > v_cutadapt.txt
     kraken2 --version > v_kraken2.txt
     spades.py --version > v_spades.txt
     unicycler --version > v_unicycler.txt
     minia --version > v_minia.txt
-    minimap2 --version > v_minimap2.txt
-    vg version > v_vg.txt
     blastn -version > v_blast.txt
     abacas.pl -v &> v_abacas.txt || true
-    quast.py --version > v_quast.txt
+    plasmidID -v > v_plasmidid.txt  || true
     Bandage --version > v_bandage.txt
+    minimap2 --version > v_minimap2.txt
+    vg version > v_vg.txt
     echo \$(R --version 2>&1) > v_R.txt
     multiqc --version > v_multiqc.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
