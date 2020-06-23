@@ -103,7 +103,7 @@ for (sample in unique(dat$sample)) {
                 expand_limits(y=1) +
                 ylab(bquote('log'[10]~'(Coverage+1)')) +
                 xlab('Amplicon') +
-                ggtitle(paste(sample,'per amplicon coverage'))
+                ggtitle(paste(sample,'median coverage per amplicon'))
 
           outfile <- paste(OUTDIR,sample,".",OUTSUFFIX,".coverage.pdf", sep='')
           ggsave(file=outfile, plot, height=3+(0.3*length(unique(sample_dat$region))), width=16, units="cm")
@@ -135,29 +135,33 @@ for (sample in unique(dat$sample)) {
 if (ncol(dat) == 6 && length(INPUT_FILES) > 1) {
     mat <- spread(dat[,c("sample", "region", "coverage")], sample, coverage, fill=NA, convert=FALSE)
     rownames(mat) <- mat[,1]
-    mat <- as.matrix(log10(mat[,-1] + 1))
+    mat <- t(as.matrix(log10(mat[,-1] + 1)))
     heatmap <- Heatmap(mat,
-                       name                = "log10(Coverage+1)",
-                       cluster_rows        = FALSE,
-                       cluster_columns     = FALSE,
-                       show_row_names      = TRUE,
-                       show_column_names   = TRUE,
-                       column_names_side   = "bottom",
-                       rect_gp             = gpar(col="white", lwd=1),
-                       show_heatmap_legend = TRUE,
-                       heatmap_legend_param = list(title_gp=gpar(fontsize = 8), labels_gp=gpar(fontsize=6), direction="horizontal"),
-                       row_names_gp        = gpar(fontsize=6),
-                       column_names_gp     = gpar(fontsize=6),
-                       height              = unit(5, "mm")*nrow(mat),
-                       width               = unit(5, "mm")*ncol(mat),
-                       col                 = viridis(50))
+                       column_title         = "Heatmap to show median amplicon coverage across samples",
+                       name                 = "log10(Coverage+1)",
+                       cluster_rows         = TRUE,
+                       cluster_columns      = FALSE,
+                       show_row_names       = TRUE,
+                       show_column_names    = TRUE,
+                       column_title_side    = "top",
+                       column_names_side    = "bottom",
+                       row_names_side       = "right",
+                       rect_gp              = gpar(col="white", lwd=1),
+                       show_heatmap_legend  = TRUE,
+                       heatmap_legend_param = list(title_gp=gpar(fontsize=12, fontface="bold"), labels_gp=gpar(fontsize=10), direction="horizontal"),
+                       column_title_gp      = gpar(fontsize=14, fontface="bold"),
+                       row_names_gp         = gpar(fontsize=10, fontface="bold"),
+                       column_names_gp      = gpar(fontsize=10, fontface="bold"),
+                       height               = unit(5, "mm")*nrow(mat),
+                       width                = unit(5, "mm")*ncol(mat),
+                       col                  = viridis(50))
 
     ## Size of heatmaps scaled based on matrix dimensions: https://jokergoo.github.io/ComplexHeatmap-reference/book/other-tricks.html#set-the-same-cell-size-for-different-heatmaps-with-different-dimensions
-    height = 0.1969*nrow(mat) + 2
-    width = 0.1969*ncol(mat) + (2*0.7)
+    height = 0.1969*nrow(mat) + (2*1.5)
+    width = 0.1969*ncol(mat) + (2*1.5)
     outfile <- paste(OUTDIR,"all_samples.",OUTSUFFIX,".heatmap.pdf", sep='')
     pdf(file=outfile, height=height, width=width)
-    draw(heatmap, heatmap_legend_side="top")
+    draw(heatmap, heatmap_legend_side="bottom")
     dev.off()
 }
 

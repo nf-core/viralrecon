@@ -37,6 +37,7 @@
     * [`--skip_kraken2`](#--skip_kraken2)
 * [Variant calling](#variant-calling)
     * [`--callers`](#-callers)
+    * [`--min_mapped_reads`](#-min_mapped_reads)
     * [`--ivar_trim_noprimer`](#--ivar_trim_noprimer)
     * [`--ivar_trim_min_len`](#--ivar_trim_min_len)
     * [`--ivar_trim_min_qual`](#--ivar_trim_min_qual)
@@ -47,6 +48,7 @@
     * [`--min_base_qual`](#--min_base_qual)
     * [`--min_allele_freq`](#--min_allele_freq)
     * [`--max_allele_freq`](#--max_allele_freq)
+    * [`--varscan2_strand_filter`](#--varscan2_strand_filter)
     * [`--amplicon_left_suffix`](#--amplicon_left_suffix)
     * [`--amplicon_right_suffix`](#--amplicon_right_suffix)
     * [`--min_coverage`](#--min_coverage)
@@ -365,6 +367,10 @@ Skip Kraken 2 process for removing host classified reads (Default: false).
 
 Specify which variant calling algorithms you would like to use. Available options are `varscan2`, `ivar` and `bcftools` (Default: 'varscan2,ivar,bcftools').
 
+### `--min_mapped_reads`
+
+Minimum number of mapped reads below which samples are removed from further processing (Default: 1000). Some downstream steps in the pipeline will fail if this threshold is too low.
+
 ### `--ivar_trim_noprimer`
 
 This option unsets the `-e` parameter in `ivar trim` to discard reads without primers (Default: false).
@@ -408,6 +414,10 @@ Minimum allele frequency threshold for calling variants (Default: 0.25).
 ### `--max_allele_freq`
 
 Maximum allele frequency threshold for filtering variant calls (Default: 0.75).
+
+### `--varscan2_strand_filter`
+
+Ignore Varscan 2 variants with >90% support on one strand (Default: true). Note: the strand filter will be switched off for amplicon data by default because this sort of bias may be expected.
 
 ### `--amplicon_left_suffix`
 

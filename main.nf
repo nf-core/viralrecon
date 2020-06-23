@@ -57,6 +57,7 @@ def helpMessage() {
 
     Variant calling
       --callers [str]                   Specify which variant calling algorithms you would like to use (Default: 'varscan2,ivar,bcftools')
+      --min_mapped_reads [int]          Minimum number of mapped reads below which samples are removed from further processing (Default: 1000)
       --ivar_trim_noprimer [bool]       Unset -e parameter for iVar trim. Reads with primers are included by default (Default: false)
       --ivar_trim_min_len [int]         Minimum length of read to retain after trimming (Default: 20)
       --ivar_trim_min_qual [int]        Minimum quality threshold for sliding window to pass (Default: 20)
@@ -68,6 +69,7 @@ def helpMessage() {
       --min_coverage [int]              When performing variant calling skip positions with an overall read depth smaller than this number (Default: 10)
       --min_allele_freq [float]         Minimum allele frequency threshold for calling variants (Default: 0.25)
       --max_allele_freq [float]         Maximum allele frequency threshold for filtering variant calls (Default: 0.75)
+      --varscan2_strand_filter [bool]   Ignore Varscan 2 variants with >90% support on one strand (Default: true)
       --amplicon_left_suffix [str]      Suffix used in name field of --amplicon_bed to indicate left primer position (Default: '_LEFT')
       --amplicon_right_suffix [str]     Suffix used in name field of --amplicon_bed to indicate right primer position (Default: '_RIGHT')
       --save_align_intermeds [bool]     Save the intermediate BAM files from the alignment steps (Default: false)
@@ -250,7 +252,8 @@ if (params.skip_amplicon_trimming)   summary['Skip Amplicon Trimming'] = 'Yes'
 if (params.save_trimmed)             summary['Save Trimmed'] = 'Yes'
 if (!params.skip_variants) {
     summary['Variant Calling Tools'] = params.callers
-    if (params.ivar_trim_noprimer)	 summary['iVar Trim Exclude']  = 'Yes'
+    summary['Min Mapped Reads']      = params.min_mapped_reads
+    if (params.ivar_trim_noprimer)   summary['iVar Trim Exclude']  = 'Yes'
     summary['iVar Trim Min Len']     = params.ivar_trim_min_len
     summary['iVar Trim Min Qual']    = params.ivar_trim_min_qual
     summary['iVar Trim Window']      = params.ivar_trim_window_width
@@ -261,6 +264,7 @@ if (!params.skip_variants) {
     summary['Min Read Depth']        = params.min_coverage
     summary['Min Allele Freq']       = params.min_allele_freq
     summary['Max Allele Freq']       = params.max_allele_freq
+    if (params.varscan2_strand_filter) summary['Varscan2 Strand Filter'] = 'Yes'
     if (params.save_align_intermeds) summary['Save Align Intermeds'] =  'Yes'
     if (params.save_mpileup)         summary['Save mpileup'] = 'Yes'
     if (params.skip_markduplicates)  summary['Skip MarkDuplicates'] = 'Yes'
@@ -314,7 +318,7 @@ if (params.email || params.email_on_fail) {
     summary['E-mail on failure']     = params.email_on_fail
     summary['MultiQC maxsize']       = params.max_multiqc_email_size
 }
-log.info summary.collect { k,v -> "${k.padRight(21)}: $v" }.join("\n")
+log.info summary.collect { k,v -> "${k.padRight(22)}: $v" }.join("\n")
 log.info "-\033[2m--------------------------------------------------\033[0m-"
 
 // Check the hostnames against configured profiles
@@ -739,8 +743,9 @@ if (!params.skip_adapter_trimming) {
         tuple val(sample), val(single_end), path("*.trim.fastq.gz") into ch_fastp_bowtie2,
                                                                          ch_fastp_cutadapt,
                                                                          ch_fastp_kraken2
-        path "*.{log,fastp.html,json}" into ch_fastp_mqc
+        path "*.json" into ch_fastp_mqc
         path "*_fastqc.{zip,html}" into ch_fastp_fastqc_mqc
+        path "*.{log,fastp.html}"
         path "*.fail.fastq.gz"
 
         script:
@@ -916,7 +921,7 @@ process SORT_BAM {
     tuple val(sample), val(single_end), path(bam) from ch_bowtie2_bam
 
     output:
-    tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_sort_bam
+    tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}"), path("*.flagstat") into ch_sort_bam
     path "*.{flagstat,idxstats,stats}" into ch_sort_bam_flagstat_mqc
 
     script:
@@ -928,6 +933,43 @@ process SORT_BAM {
     samtools stats ${sample}.sorted.bam > ${sample}.sorted.bam.stats
     """
 }
+
+// Get total number of mapped reads from flagstat file
+def get_mapped_from_flagstat(flagstat) {
+    def mapped = 0
+    flagstat.eachLine { line ->
+        if (line.contains(' mapped (')) {
+            mapped = line.tokenize().first().toInteger()
+        }
+    }
+    return mapped
+}
+
+// Function that checks the number of mapped reads from flagstat output
+// and returns true if > params.min_mapped_reads and otherwise false
+pass_mapped_reads = [:]
+fail_mapped_reads = [:]
+def check_mapped(sample,flagstat,min_mapped_reads=500) {
+    mapped = get_mapped_from_flagstat(flagstat)
+    c_reset = params.monochrome_logs ? '' : "\033[0m";
+    c_green = params.monochrome_logs ? '' : "\033[0;32m";
+    c_red = params.monochrome_logs ? '' : "\033[0;31m";
+    if (mapped < min_mapped_reads.toInteger()) {
+        log.info ">${c_red}>>>> $sample FAILED MAPPED READ THRESHOLD: ${mapped} < ${params.min_mapped_reads}. IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! <<<<${c_reset}<"
+        fail_mapped_reads[sample] = mapped
+        return false
+    } else {
+        //log.info "-${c_green}           Passed mapped read threshold > bowtie2 ($sample)   >> ${mapped} <<${c_reset}"
+        pass_mapped_reads[sample] = mapped
+        return true
+    }
+}
+
+// Remove samples that failed mapped read threshold
+ch_sort_bam
+    .filter { sample, single_end, bam, flagstat -> check_mapped(sample,flagstat,params.min_mapped_reads) }
+    .map { it[0..2] }
+    .set { ch_sort_bam }
 
 /*
  * STEP 5.3: Trim amplicon sequences with iVar
@@ -1179,6 +1221,7 @@ if (params.protocol == 'amplicon') {
         mosdepth \\
             --by amplicon.collapsed.bed \\
             --fast-mode \\
+            --use-median \\
             --thresholds 0,1,10,50,100,500 \\
             ${prefix} \\
             ${bam[0]}
@@ -1186,7 +1229,6 @@ if (params.protocol == 'amplicon') {
     }
 
     process MOSDEPTH_AMPLICON_PLOT {
-        tag "$sample"
         label 'process_medium'
         publishDir "${params.outdir}/variants/bam/mosdepth/amplicon/plots", mode: params.publish_dir_mode
 
@@ -1276,7 +1318,8 @@ process VARSCAN2 {
 
     output:
     tuple val(sample), val(single_end), path("${prefix}.vcf.gz*") into ch_varscan2_highfreq_consensus,
-                                                                       ch_varscan2_highfreq_snpeff
+                                                                       ch_varscan2_highfreq_snpeff,
+                                                                       ch_varscan2_highfreq_intersect
     tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_varscan2_lowfreq_snpeff
     path "${prefix}.bcftools_stats.txt" into ch_varscan2_bcftools_highfreq_mqc
     path "*.varscan2.log" into ch_varscan2_log_mqc
@@ -1284,6 +1327,7 @@ process VARSCAN2 {
 
     script:
     prefix = "${sample}.AF${params.max_allele_freq}"
+    strand = params.protocol != 'amplicon' && params.varscan2_strand_filter ? "--strand-filter 1" : "--strand-filter 0"
     """
     echo "$sample" > sample_name.list
     varscan mpileup2cns \\
@@ -1296,6 +1340,7 @@ process VARSCAN2 {
         --output-vcf 1 \\
         --vcf-sample-list sample_name.list \\
         --variants \\
+        $strand \\
         2> ${sample}.varscan2.log \\
         | bgzip -c > ${sample}.vcf.gz
     tabix -p vcf -f ${sample}.vcf.gz
@@ -1428,7 +1473,10 @@ process VARSCAN2_SNPEFF {
  */
 process VARSCAN2_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/variants/varscan2/quast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/varscan2/quast", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_variants && 'varscan2' in callers && !params.skip_variants_quast
@@ -1439,7 +1487,8 @@ process VARSCAN2_QUAST {
     path gff from ch_gff
 
     output:
-    path "AF${params.max_allele_freq}" into ch_varscan2_quast_mqc
+    path "AF${params.max_allele_freq}"
+    path "report.tsv" into ch_varscan2_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1450,6 +1499,7 @@ process VARSCAN2_QUAST {
         $features \\
         --threads $task.cpus \\
         ${consensus.join(' ')}
+    ln -s AF${params.max_allele_freq}/report.tsv
     """
 }
 
@@ -1481,7 +1531,8 @@ process IVAR_VARIANTS {
     path gff from ch_gff
 
     output:
-    tuple val(sample), val(single_end), path("${prefix}.vcf.gz*") into ch_ivar_highfreq_snpeff
+    tuple val(sample), val(single_end), path("${prefix}.vcf.gz*") into ch_ivar_highfreq_snpeff,
+                                                                       ch_ivar_highfreq_intersect
     tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_ivar_lowfreq_snpeff
     path "${prefix}.bcftools_stats.txt" into ch_ivar_bcftools_highfreq_mqc
     path "${sample}.variant.counts_mqc.tsv" into ch_ivar_count_mqc
@@ -1613,7 +1664,10 @@ process IVAR_SNPEFF {
  */
 process IVAR_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/variants/ivar/quast", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/ivar/quast", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_variants && 'ivar' in callers && !params.skip_variants_quast
@@ -1624,7 +1678,8 @@ process IVAR_QUAST {
     path gff from ch_gff
 
     output:
-    path "AF${params.max_allele_freq}" into ch_ivar_quast_mqc
+    path "AF${params.max_allele_freq}"
+    path "report.tsv" into ch_ivar_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1635,6 +1690,7 @@ process IVAR_QUAST {
         $features \\
         --threads $task.cpus \\
         ${consensus.join(' ')}
+    ln -s AF${params.max_allele_freq}/report.tsv
     """
 }
 
@@ -1663,7 +1719,8 @@ process BCFTOOLS_VARIANTS {
 
     output:
     tuple val(sample), val(single_end), path("*.vcf.gz*") into ch_bcftools_variants_consensus,
-                                                               ch_bcftools_variants_snpeff
+                                                               ch_bcftools_variants_snpeff,
+                                                               ch_bcftools_variants_intersect
     path "*.bcftools_stats.txt" into ch_bcftools_variants_mqc
 
     script:
@@ -1776,7 +1833,10 @@ process BCFTOOLS_SNPEFF {
  */
 process BCFTOOLS_QUAST {
     label 'process_medium'
-    publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_variants && 'bcftools' in callers && !params.skip_variants_quast
@@ -1787,7 +1847,8 @@ process BCFTOOLS_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast" into ch_bcftools_quast_mqc
+    path "quast"
+    path "report.tsv" into ch_bcftools_quast_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -1798,7 +1859,45 @@ process BCFTOOLS_QUAST {
         $features \\
         --threads $task.cpus \\
         ${consensus.join(' ')}
+    ln -s quast/report.tsv
     """
+}
+
+////////////////////////////////////////////////////
+/* --            INTERSECT VARIANTS            -- */
+////////////////////////////////////////////////////
+
+/*
+ * STEP 5.8: Intersect variants with BCFTools
+ */
+if (!params.skip_variants && callers.size() > 2) {
+
+    ch_varscan2_highfreq_intersect
+        .join(ch_ivar_highfreq_intersect, by: [0,1])
+        .join(ch_bcftools_variants_intersect, by: [0,1])
+        .set { ch_varscan2_highfreq_intersect }
+
+    process BCFTOOLS_ISEC {
+        tag "$sample"
+        label 'process_medium'
+        label 'error_ignore'
+        publishDir "${params.outdir}/variants/intersect", mode: params.publish_dir_mode
+
+        input:
+        tuple val(sample), val(single_end), path('varscan2/*'), path('ivar/*'), path('bcftools/*') from ch_varscan2_highfreq_intersect
+
+        output:
+        path "$sample"
+
+        script:
+        """
+        bcftools isec  \\
+            --nfiles +2 \\
+            --output-type z \\
+            -p $sample \\
+            */*.vcf.gz
+        """
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2125,7 +2224,10 @@ process SPADES_PLASMIDID {
 process SPADES_QUAST {
     label 'process_medium'
     label 'error_ignore'
-    publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_assembly && 'spades' in assemblers && !params.skip_assembly_quast
@@ -2136,7 +2238,8 @@ process SPADES_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast" into ch_quast_spades_mqc
+    path "quast"
+    path "report.tsv" into ch_quast_spades_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2147,6 +2250,7 @@ process SPADES_QUAST {
         $features \\
         --threads $task.cpus \\
         ${scaffolds.join(' ')}
+    ln -s quast/report.tsv
     """
 }
 
@@ -2406,7 +2510,10 @@ process METASPADES_PLASMIDID {
 process METASPADES_QUAST {
     label 'process_medium'
     label 'error_ignore'
-    publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_assembly && 'metaspades' in assemblers && !single_end && !params.skip_assembly_quast
@@ -2417,7 +2524,8 @@ process METASPADES_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast" into ch_quast_metaspades_mqc
+    path "quast"
+    path "report.tsv" into ch_quast_metaspades_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2428,6 +2536,7 @@ process METASPADES_QUAST {
         $features \\
         --threads $task.cpus \\
         ${scaffolds.join(' ')}
+    ln -s quast/report.tsv
     """
 }
 
@@ -2685,7 +2794,10 @@ process UNICYCLER_PLASMIDID {
 process UNICYCLER_QUAST {
     label 'process_medium'
     label 'error_ignore'
-    publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_assembly_quast
@@ -2696,7 +2808,8 @@ process UNICYCLER_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast" into ch_quast_unicycler_mqc
+    path "quast"
+    path "report.tsv" into ch_quast_unicycler_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2707,6 +2820,7 @@ process UNICYCLER_QUAST {
         $features \\
         --threads $task.cpus \\
         ${scaffolds.join(' ')}
+    ln -s quast/report.tsv
     """
 }
 
@@ -2953,7 +3067,10 @@ process MINIA_PLASMIDID {
 process MINIA_QUAST {
     label 'process_medium'
     label 'error_ignore'
-    publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (!filename.endsWith(".tsv")) filename
+                }
 
     when:
     !params.skip_assembly && 'minia' in assemblers && !params.skip_assembly_quast
@@ -2964,7 +3081,8 @@ process MINIA_QUAST {
     path gff from ch_gff
 
     output:
-    path "quast" into ch_quast_minia_mqc
+    path "quast"
+    path "report.tsv" into ch_quast_minia_mqc
 
     script:
     features = params.gff ? "--features $gff" : ""
@@ -2975,6 +3093,7 @@ process MINIA_QUAST {
         $features \\
         --threads $task.cpus \\
         ${scaffolds.join(' ')}
+    ln -s quast/report.tsv
     """
 }
 
@@ -3131,23 +3250,25 @@ process get_software_versions {
     bowtie2 --version > v_bowtie2.txt
     samtools --version > v_samtools.txt
     bedtools --version > v_bedtools.txt
+    mosdepth --version > v_mosdepth.txt
     picard CollectMultipleMetrics --version &> v_picard.txt || true
     ivar -v > v_ivar.txt
     echo \$(varscan 2>&1) > v_varscan.txt
+    bcftools -v > v_bcftools.txt
     snpEff -version > v_snpeff.txt
     echo \$(SnpSift 2>&1) > v_snpsift.txt
-    bcftools -v > v_bcftools.txt
+    quast.py --version > v_quast.txt
     cutadapt --version > v_cutadapt.txt
     kraken2 --version > v_kraken2.txt
     spades.py --version > v_spades.txt
     unicycler --version > v_unicycler.txt
     minia --version > v_minia.txt
-    minimap2 --version > v_minimap2.txt
-    vg version > v_vg.txt
     blastn -version > v_blast.txt
     abacas.pl -v &> v_abacas.txt || true
-    quast.py --version > v_quast.txt
+    plasmidID -v > v_plasmidid.txt  || true
     Bandage --version > v_bandage.txt
+    minimap2 --version > v_minimap2.txt
+    vg version > v_vg.txt
     echo \$(R --version 2>&1) > v_R.txt
     multiqc --version > v_multiqc.txt
     scrape_software_versions.py &> software_versions_mqc.yaml
@@ -3158,6 +3279,7 @@ process get_software_versions {
  * STEP 7: MultiQC
  */
 process MULTIQC {
+    label 'process_medium'
     publishDir "${params.outdir}", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       if (filename.endsWith("assembly_metrics_mqc.tsv")) "assembly/$filename"
@@ -3250,6 +3372,9 @@ workflow.onComplete {
 
     // Set up the e-mail variables
     def subject = "[nf-core/viralrecon] Successful: $workflow.runName"
+    if (fail_mapped_reads.size() > 0) {
+        subject = "[nf-core/viralrecon] Partially Successful (${fail_mapped_reads.size()} skipped): $workflow.runName"
+    }
     if (!workflow.success) {
         subject = "[nf-core/viralrecon] FAILED: $workflow.runName"
     }
@@ -3272,6 +3397,8 @@ workflow.onComplete {
     if (workflow.repository) email_fields['summary']['Pipeline repository Git URL'] = workflow.repository
     if (workflow.commitId) email_fields['summary']['Pipeline repository Git Commit'] = workflow.commitId
     if (workflow.revision) email_fields['summary']['Pipeline Git branch/tag'] = workflow.revision
+    email_fields['fail_mapped_reads'] = fail_mapped_reads.keySet()
+    email_fields['min_mapped_reads'] = params.min_mapped_reads
     email_fields['summary']['Nextflow Version'] = workflow.nextflow.version
     email_fields['summary']['Nextflow Build'] = workflow.nextflow.build
     email_fields['summary']['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
@@ -3341,6 +3468,28 @@ workflow.onComplete {
     c_purple = params.monochrome_logs ? '' : "\033[0;35m";
     c_red = params.monochrome_logs ? '' : "\033[0;31m";
     c_reset = params.monochrome_logs ? '' : "\033[0m";
+
+    if (pass_mapped_reads.size() > 0) {
+        idx = 0
+        sample_mapped = ''
+        total_count = pass_mapped_reads.size() + fail_mapped_reads.size()
+        for (sample in pass_mapped_reads) {
+            sample_mapped += "    ${sample.key}: ${sample.value}\n"
+            idx += 1
+            if (idx > 5) {
+                sample_mapped += "    ..see pipeline reports for full list\n"
+                break
+            }
+        }
+        //log.info "[${c_purple}nf-core/viralrecon${c_reset}] ${c_green}${pass_mapped_reads.size()}/${total_count} samples passed minimum mapped reads check\n${sample_mapped}${c_reset}"
+    }
+    if (fail_mapped_reads.size() > 0) {
+        sample_mapped = ''
+        fail_mapped_reads.each { sample, value ->
+            sample_mapped += "    ${sample}: ${value}\n"
+        }
+        log.info "[${c_purple}nf-core/viralrecon${c_reset}] ${c_red} WARNING - ${fail_mapped_reads.size()} samples skipped due to low number of mapped reads!\n${sample_mapped}${c_reset}"
+    }
 
     if (workflow.stats.ignoredCount > 0 && workflow.success) {
         log.info "-${c_purple}Warning, pipeline completed, but with errored process(es) ${c_reset}-"
