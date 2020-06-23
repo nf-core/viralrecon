@@ -201,5 +201,5 @@ jobs:
         run: |
           echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
           docker push nfcore/viralrecon:latest
-          docker tag nfcore/viralrecon:latest nfcore/viralrecon:${{ github.ref }}
-          docker push nfcore/viralrecon:${{ github.ref }}
+          docker tag nfcore/viralrecon:latest nfcore/viralrecon:${{ github.event.release.tag_name }}
+          docker push nfcore/viralrecon:${{ github.event.release.tag_name }}
