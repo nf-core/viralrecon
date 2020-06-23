@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Add mosdepth `0.2.6`
 * Add bioconductor-complexheatmap `2.2.0`
+* Add bioconductor-biostrings `2.54.0`
 * Add r-optparse `1.6.6`
 * Add r-tidyr `1.1.0`
 * Add r-tidyverse `1.3.0`

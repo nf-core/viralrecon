@@ -42,6 +42,7 @@ dependencies:
   - bioconda::snpeff=4.5covid19
   - bioconda::snpsift=4.3.1t
   - bioconda::bioconductor-complexheatmap=2.2.0
+  - bioconda::bioconductor-biostrings=2.54.0
 
   ## assembly
   - bioconda::cutadapt=2.10
