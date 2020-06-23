@@ -96,7 +96,7 @@ for (idx in 1:length(dat)) {
     base_tab <- base_tab[order(base_tab$base, decreasing=FALSE),]
     base_tab <- rbind(base_tab[c(bases_std, "N"),], base_tab[!rownames(base_tab) %in% c(bases_std, "N"),])
     base_tab$base <- factor(base_tab$base, levels=rownames(base_tab))
-    outfile <- paste(OUTDIR,PREFIXES[idx],".base_counts.txt", sep='')
+    outfile <- paste(OUTDIR, PREFIXES[idx], ".base_counts.tsv", sep='')
     write.table(base_tab, file=outfile, col.names=TRUE, row.names=FALSE, sep="\t", quote=FALSE)
 
     ## Barplot of base frequencies
@@ -107,7 +107,7 @@ for (idx in 1:length(dat)) {
                ylab("% Observed") +
                xlab("Base") +
                ggtitle(PREFIXES[idx])
-    outfile <- paste(OUTDIR,PREFIXES[idx],".base_counts.pdf", sep='')
+    outfile <- paste(OUTDIR, PREFIXES[idx], ".base_counts.pdf", sep='')
     ggsave(file=outfile, barplot, width=12, height=10, units="cm")
 
     ## Create a data frame of base coverage
@@ -120,20 +120,8 @@ for (idx in 1:length(dat)) {
     ## Stretches of N's
     N_rle <- Rle(base_dat[,"N"])
     N_dat <- data.frame(start=cumsum(runLength(N_rle))[runValue(N_rle)==1], width=runLength(N_rle)[runValue(N_rle)==1])
-    outfile <- paste(OUTDIR,PREFIXES[idx],".N_run.txt", sep='')
+    outfile <- paste(OUTDIR, PREFIXES[idx], ".N_run.tsv", sep='')
     write.table(N_dat, file=outfile, col.names=TRUE, row.names=FALSE, sep="\t", quote=FALSE)
-
-    ## Boxplot of N frequencies
-    boxplot <- ggplot(N_dat,aes(x="", y=width)) +
-               geom_boxplot() +
-               geom_jitter() +
-               theme_classic() +
-               theme(panel.border=element_rect(colour="black", fill=NA, size=1)) +
-               ylab("Stretch of consecutive Ns") +
-               xlab("") +
-               ggtitle(PREFIXES[idx])
-    outfile <- paste(OUTDIR,PREFIXES[idx], ".N_run.pdf", sep='')
-    ggsave(file=outfile, boxplot, width=8, height=10, units="cm")
 
     ## Running mean of bp density for standard bases
     run_k <- 1001
@@ -148,12 +136,12 @@ for (idx in 1:length(dat)) {
                 geom_line() +
                 theme_classic() +
                 theme(panel.border=element_rect(colour="black", fill=NA, size=1)) +
-                scale_y_continuous(breaks=c(0,1), labels=c(0,1)) +
+                scale_y_continuous(breaks=c(0,0.25,0.50,0.75,1)) +
                 xlab("Position (Kb)") +
                 ylab(paste("Base density (running mean k=",run_k,")", sep='')) +
                 ggtitle(PREFIXES[idx]) +
                 scale_colour_manual(values=base_cols)
-    outfile <- paste(OUTDIR,PREFIXES[idx], ".ACTG_density.pdf", sep='')
+    outfile <- paste(OUTDIR, PREFIXES[idx], ".ACTG_density.pdf", sep='')
     ggsave(file=outfile, lineplot, width=18, height=10, units="cm")
 
     ## Single base density plots, nucleotide resolution.
@@ -170,7 +158,7 @@ for (idx in 1:length(dat)) {
                     xlab("Position (Kb)") +
                     ylab(paste(obase,"density", sep=' ')) +
                     ggtitle(PREFIXES[idx])
-      outfile <- paste(OUTDIR,PREFIXES[idx], ".", obase, "_density.pdf", sep='')
+      outfile <- paste(OUTDIR, PREFIXES[idx], ".", obase, "_density.pdf", sep='')
       ggsave(file=outfile, lineplot, width=18, height=10, units="cm")
     }
 }
