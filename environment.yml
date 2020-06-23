@@ -1,6 +1,6 @@
 # You can use this file to create a conda environment for this pipeline:
 #   conda env create -f environment.yml
-name: nf-core-viralrecon-1.1.0dev
+name: nf-core-viralrecon-1.1.0
 channels:
   - conda-forge
   - bioconda
@@ -42,6 +42,7 @@ dependencies:
   - bioconda::snpeff=4.5covid19
   - bioconda::snpsift=4.3.1t
   - bioconda::bioconductor-complexheatmap=2.2.0
+  - bioconda::bioconductor-biostrings=2.54.0
 
   ## assembly
   - bioconda::cutadapt=2.10
@@ -54,6 +55,6 @@ dependencies:
   - bioconda::vg=1.24.0
   - bioconda::quast=5.0.2
   - bioconda::blast=2.9.0
-  - bioconda::plasmidid=1.6.2
+  - bioconda::plasmidid=1.6.3
   - bioconda::bandage=0.8.1
   - hcc::abacas=1.3.1

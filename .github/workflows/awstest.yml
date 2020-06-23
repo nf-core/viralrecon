@@ -7,7 +7,6 @@ on:
     branches:
       - master
       - dev # only for testing purposes, to be removed
-
 jobs:
   run-awstest:
     if: github.repository == 'nf-core/viralrecon'

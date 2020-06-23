@@ -35,13 +35,13 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
+        run: docker build --no-cache . -t nfcore/viralrecon:1.1.0
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.1.0
 
       - name: Install Nextflow
         run: |
@@ -61,7 +61,7 @@ jobs:
       NXF_ANSI_LOG: false
     strategy:
       matrix:
-        parameters: [--skip_adapter_trimming, --skip_markduplicates, --skip_variants, --skip_amplicon_trimming, --skip_kraken2, --skip_assembly]
+        parameters: [--skip_adapter_trimming, --skip_markduplicates, --skip_variants, --skip_amplicon_trimming, --skip_kraken2, --skip_assembly, '--callers ivar --assemblers spades']
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -75,13 +75,13 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
+        run: docker build --no-cache . -t nfcore/viralrecon:1.1.0
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.1.0
 
       - name: Install Nextflow
         run: |
@@ -115,13 +115,13 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
+        run: docker build --no-cache . -t nfcore/viralrecon:1.1.0
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.1.0
 
       - name: Install Nextflow
         run: |
@@ -155,13 +155,13 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
+        run: docker build --no-cache . -t nfcore/viralrecon:1.1.0
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.1.0
 
       - name: Install Nextflow
         run: |

@@ -3,17 +3,37 @@
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unpublished Version / DEV]
+## [1.1.0] - 2020-06-23
 
 ### `Added`
 
+* [#112](https://github.com/nf-core/viralrecon/issues/112) - Per-amplicon coverage plot
+* [#124](https://github.com/nf-core/viralrecon/issues/124) - Intersect variants across callers
 * [nf-core/tools#616](https://github.com/nf-core/tools/pull/616) - Updated GitHub Actions to build Docker image and push to Docker Hub
+* Parameters:
+    * `--min_mapped_reads` to circumvent failures for samples with low number of mapped reads
+    * `--varscan2_strand_filter` to toggle the default Varscan 2 strand filter
+    * `--skip_mosdepth` - skip genome-wide and amplicon coverage plot generation from mosdepth output
+    * `--amplicon_left_suffix` - to provide left primer suffix used in name field of `--amplicon_bed`
+    * `--amplicon_right_suffix` - to provide right primer suffix used in name field of `--amplicon_bed`
+    * Unify parameter specification with COG-UK pipeline:
+        * `--min_allele_freq` - minimum allele frequency threshold for calling variants
+        * `--mpileup_depth` - SAMTools mpileup max per-file depth
+        * `--ivar_exclude_reads` renamed to `--ivar_trim_noprimer`
+        * `--ivar_trim_min_len` - minimum length of read to retain after primer trimming
+        * `--ivar_trim_min_qual` - minimum quality threshold for sliding window to pass
+        * `--ivar_trim_window_width` - width of sliding window
 * [#118] Updated GitHub Actions AWS workflow for small and full size tests.
+
+### `Removed`
+
+* `--skip_qc` parameter
 
 ### `Dependencies`
 
 * Add mosdepth `0.2.6`
 * Add bioconductor-complexheatmap `2.2.0`
+* Add bioconductor-biostrings `2.54.0`
 * Add r-optparse `1.6.6`
 * Add r-tidyr `1.1.0`
 * Add r-tidyverse `1.3.0`
@@ -24,7 +44,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Update bowtie2 `2.3.5.1` -> `2.4.1`
 * Update picard `2.22.8` -> `2.23.0`
 * Update minia `3.2.3` -> `3.2.4`
-* Update plasmidid `1.5.2` -> `1.6.2`
+* Update plasmidid `1.5.2` -> `1.6.3`
 
 ## [1.0.0] - 2020-06-01
 
