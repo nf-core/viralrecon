@@ -35,13 +35,13 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:1.1.0
+        run: docker build --no-cache . -t nfcore/viralrecon:dev
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.1.0
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
       - name: Install Nextflow
         run: |
@@ -75,13 +75,13 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:1.1.0
+        run: docker build --no-cache . -t nfcore/viralrecon:dev
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.1.0
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
       - name: Install Nextflow
         run: |
@@ -115,13 +115,13 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:1.1.0
+        run: docker build --no-cache . -t nfcore/viralrecon:dev
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.1.0
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
       - name: Install Nextflow
         run: |
@@ -155,13 +155,13 @@ jobs:
 
       - name: Build new docker image
         if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:1.1.0
+        run: docker build --no-cache . -t nfcore/viralrecon:dev
 
       - name: Pull docker image
         if: ${{ !env.GIT_DIFF }}
         run: |
           docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:1.1.0
+          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
       - name: Install Nextflow
         run: |
