@@ -1399,7 +1399,7 @@ process VARSCAN2_CONSENSUS {
     header=\$(head -n 1 ${prefix}.consensus.masked.fa | sed 's/>//g')
     sed -i "s/\${header}/${sample}/g" ${prefix}.consensus.masked.fa
 
-    plot_base_density.r --fasta_files ${prefix}.consensus.masked.fa --prefixes $sample --output_dir ./
+    plot_base_density.r --fasta_files ${prefix}.consensus.masked.fa --prefixes $prefix --output_dir ./
     """
 }
 
@@ -1597,7 +1597,7 @@ process IVAR_CONSENSUS {
     header=\$(head -n1 ${prefix}.consensus.fa | sed 's/>//g')
     sed -i "s/\${header}/${sample}/g" ${prefix}.consensus.fa
 
-    plot_base_density.r --fasta_files ${prefix}.consensus.fa --prefixes $sample --output_dir ./
+    plot_base_density.r --fasta_files ${prefix}.consensus.fa --prefixes $prefix --output_dir ./
     """
 }
 
