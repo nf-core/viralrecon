@@ -1363,7 +1363,12 @@ process VARSCAN2 {
 process VARSCAN2_CONSENSUS {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/varscan2/consensus", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/varscan2/consensus", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".tsv")) "base_qc/$filename"
+                      else if (filename.endsWith(".pdf")) "base_qc/$filename"
+                      else filename
+                }
 
     when:
     !params.skip_variants && 'varscan2' in callers
@@ -1374,7 +1379,7 @@ process VARSCAN2_CONSENSUS {
 
     output:
     tuple val(sample), val(single_end), path("*consensus.masked.fa") into ch_varscan2_consensus
-    path "*consensus.fa"
+    path "*.{consensus.fa,tsv,pdf}"
 
     script:
     prefix = "${sample}.AF${params.max_allele_freq}"
@@ -1393,6 +1398,8 @@ process VARSCAN2_CONSENSUS {
         -fo ${prefix}.consensus.masked.fa
     header=\$(head -n 1 ${prefix}.consensus.masked.fa | sed 's/>//g')
     sed -i "s/\${header}/${sample}/g" ${prefix}.consensus.masked.fa
+
+    plot_base_density.r --fasta_files ${prefix}.consensus.masked.fa --prefixes $prefix --output_dir ./
     """
 }
 
@@ -1565,7 +1572,12 @@ process IVAR_VARIANTS {
 process IVAR_CONSENSUS {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/ivar/consensus", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/ivar/consensus", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".tsv")) "base_qc/$filename"
+                      else if (filename.endsWith(".pdf")) "base_qc/$filename"
+                      else filename
+                }
 
     when:
     !params.skip_variants && 'ivar' in callers
@@ -1576,7 +1588,7 @@ process IVAR_CONSENSUS {
 
     output:
     tuple val(sample), val(single_end), path("*.fa") into ch_ivar_consensus
-    path "*.txt"
+    path "*.{txt,tsv,pdf}"
 
     script:
     prefix = "${sample}.AF${params.max_allele_freq}"
@@ -1584,6 +1596,8 @@ process IVAR_CONSENSUS {
     cat $mpileup | ivar consensus -q $params.min_base_qual -t $params.max_allele_freq -m $params.min_coverage -n N -p ${prefix}.consensus
     header=\$(head -n1 ${prefix}.consensus.fa | sed 's/>//g')
     sed -i "s/\${header}/${sample}/g" ${prefix}.consensus.fa
+
+    plot_base_density.r --fasta_files ${prefix}.consensus.fa --prefixes $prefix --output_dir ./
     """
 }
 
@@ -1748,7 +1762,12 @@ process BCFTOOLS_VARIANTS {
 process BCFTOOLS_CONSENSUS {
     tag "$sample"
     label 'process_medium'
-    publishDir "${params.outdir}/variants/bcftools/consensus", mode: params.publish_dir_mode
+    publishDir "${params.outdir}/variants/bcftools/consensus", mode: params.publish_dir_mode,
+        saveAs: { filename ->
+                      if (filename.endsWith(".tsv")) "base_qc/$filename"
+                      else if (filename.endsWith(".pdf")) "base_qc/$filename"
+                      else filename
+                }
 
     when:
     !params.skip_variants && 'bcftools' in callers
@@ -1759,7 +1778,7 @@ process BCFTOOLS_CONSENSUS {
 
     output:
     tuple val(sample), val(single_end), path("*consensus.masked.fa") into ch_bcftools_consensus_masked
-    path "*consensus.fa"
+    path "*.{consensus.fa,tsv,pdf}"
 
     script:
     """
@@ -1778,6 +1797,8 @@ process BCFTOOLS_CONSENSUS {
     sed -i 's/${index_base}/${sample}/g' ${sample}.consensus.masked.fa
     header=\$(head -n1 ${sample}.consensus.masked.fa | sed 's/>//g')
     sed -i "s/\${header}/${sample}/g" ${sample}.consensus.masked.fa
+
+    plot_base_density.r --fasta_files ${sample}.consensus.masked.fa --prefixes $sample --output_dir ./
     """
 }
 
