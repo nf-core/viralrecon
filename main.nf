@@ -3245,7 +3245,6 @@ process get_software_versions {
     echo $workflow.manifest.version > v_pipeline.txt
     echo $workflow.nextflow.version > v_nextflow.txt
     parallel-fastq-dump --version > v_parallel_fastq_dump.txt
-    sra-pileup --version > v_sratools.txt
     fastqc --version > v_fastqc.txt
     fastp --version 2> v_fastp.txt
     bowtie2 --version > v_bowtie2.txt
