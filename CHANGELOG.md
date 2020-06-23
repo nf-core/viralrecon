@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
         * `--ivar_trim_min_len` - minimum length of read to retain after primer trimming
         * `--ivar_trim_min_qual` - minimum quality threshold for sliding window to pass
         * `--ivar_trim_window_width` - width of sliding window
+* [#118] Updated GitHub Actions AWS workflow for small and full size tests.
 
 ### `Removed`
 
