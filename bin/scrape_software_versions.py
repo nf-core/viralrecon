@@ -7,7 +7,6 @@ regexes = {
     'nf-core/viralrecon': ['v_pipeline.txt', r"(\S+)"],
     'Nextflow': ['v_nextflow.txt', r"(\S+)"],
     'parallel-fastq-dump': ['v_parallel_fastq_dump.txt', r"parallel-fastq-dump\s:\s(\S+)"],
-    'SRA-Tools': ['v_sratools.txt', r'"sra-pileup"\sversion\s(\S+)'],
     'FastQC': ['v_fastqc.txt', r"FastQC\sv(\S+)"],
     'fastp': ['v_fastp.txt', r"fastp\s(\S+)"],
     'Bowtie 2': ['v_bowtie2.txt', r"bowtie2-align-s\sversion\s(\S+)"],
@@ -39,7 +38,6 @@ results = OrderedDict()
 results['nf-core/viralrecon'] = '<span style="color:#999999;\">N/A</span>'
 results['Nextflow'] = '<span style="color:#999999;\">N/A</span>'
 results['parallel-fastq-dump'] = '<span style="color:#999999;\">N/A</span>'
-results['SRA-Tools'] = '<span style="color:#999999;\">N/A</span>'
 results['FastQC'] = '<span style="color:#999999;\">N/A</span>'
 results['fastp'] = '<span style="color:#999999;\">N/A</span>'
 results['Bowtie 2'] = '<span style="color:#999999;\">N/A</span>'
