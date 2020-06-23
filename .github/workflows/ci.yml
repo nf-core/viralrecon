@@ -61,7 +61,7 @@ jobs:
       NXF_ANSI_LOG: false
     strategy:
       matrix:
-        parameters: [--skip_adapter_trimming, --skip_markduplicates, --skip_variants, --skip_amplicon_trimming, --skip_kraken2, --skip_assembly]
+        parameters: [--skip_adapter_trimming, --skip_markduplicates, --skip_variants, --skip_amplicon_trimming, --skip_kraken2, --skip_assembly, '--callers ivar --assemblers spades']
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
