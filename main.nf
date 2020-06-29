@@ -2047,7 +2047,7 @@ if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_ampli
  */
 if (!params.skip_kraken2 && !params.skip_assembly) {
     process KRAKEN2 {
-        tag "$db"
+        tag "$sample"
         label 'process_high'
         publishDir "${params.outdir}/assembly/kraken2", mode: params.publish_dir_mode,
             saveAs: { filename ->
