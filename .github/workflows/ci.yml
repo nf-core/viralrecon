@@ -43,6 +43,18 @@ jobs:
           docker pull nfcore/viralrecon:dev
           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
+      - name: Restore workflow cache
+        uses: actions/cache@v2
+        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == "master" ) }}
+        with:
+          path: |
+            work
+            .nextflow
+          key: nfdata-${{ matrix.nxf_ver }}-${{ github.sha }}
+          restore-keys: |
+            nfdata-${{ matrix.nxf_ver }}-${{ github.sha }}
+            nfdata-${{ matrix.nxf_ver }}-
+
       - name: Install Nextflow
         run: |
           wget -qO- get.nextflow.io | bash
@@ -82,6 +94,18 @@ jobs:
         run: |
           docker pull nfcore/viralrecon:dev
           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+
+      - name: Restore workflow cache
+        uses: actions/cache@v2
+        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == "master" ) }}
+        with:
+          path: |
+            work
+            .nextflow
+          key: nfdata-${{ matrix.parameters }}-${{ github.sha }}
+          restore-keys: |
+            nfdata-${{ matrix.parameters }}-${{ github.sha }}
+            nfdata-${{ matrix.parameters }}-
 
       - name: Install Nextflow
         run: |
@@ -123,6 +147,18 @@ jobs:
           docker pull nfcore/viralrecon:dev
           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
+      - name: Restore workflow cache
+        uses: actions/cache@v2
+        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == "master" ) }}
+        with:
+          path: |
+            work
+            .nextflow
+          key: nfdata-${{ matrix.parameters }}-${{ github.sha }}
+          restore-keys: |
+            nfdata-${{ matrix.parameters }}-${{ github.sha }}
+            nfdata-${{ matrix.parameters }}-
+
       - name: Install Nextflow
         run: |
           wget -qO- get.nextflow.io | bash
@@ -162,6 +198,18 @@ jobs:
         run: |
           docker pull nfcore/viralrecon:dev
           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+
+      - name: Restore workflow cache
+        uses: actions/cache@v2
+        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == "master" ) }}
+        with:
+          path: |
+            work
+            .nextflow
+          key: nfdata-${{ matrix.parameters }}-${{ github.sha }}
+          restore-keys: |
+            nfdata-${{ matrix.parameters }}-${{ github.sha }}
+            nfdata-${{ matrix.parameters }}-
 
       - name: Install Nextflow
         run: |
