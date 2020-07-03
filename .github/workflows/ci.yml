@@ -45,7 +45,7 @@ jobs:
 
       - name: Restore workflow cache
         uses: actions/cache@v2
-        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == "master" ) }}
+        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
         with:
           path: |
             work
@@ -97,7 +97,7 @@ jobs:
 
       - name: Restore workflow cache
         uses: actions/cache@v2
-        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == "master" ) }}
+        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
         with:
           path: |
             work
@@ -149,7 +149,7 @@ jobs:
 
       - name: Restore workflow cache
         uses: actions/cache@v2
-        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == "master" ) }}
+        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
         with:
           path: |
             work
@@ -201,7 +201,7 @@ jobs:
 
       - name: Restore workflow cache
         uses: actions/cache@v2
-        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == "master" ) }}
+        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
         with:
           path: |
             work
