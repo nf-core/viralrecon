@@ -50,10 +50,10 @@ jobs:
           path: |
             work
             .nextflow
-          key: nfdata-${{ matrix.nxf_ver }}-${{ github.sha }}
+          key: nfdata-test-${{ matrix.nxf_ver }}-${{ github.sha }}
           restore-keys: |
-            nfdata-${{ matrix.nxf_ver }}-${{ github.sha }}
-            nfdata-${{ matrix.nxf_ver }}-
+            nfdata-test-${{ matrix.nxf_ver }}-${{ github.sha }}
+            nfdata-test-${{ matrix.nxf_ver }}-
 
       - name: Install Nextflow
         run: |
@@ -61,8 +61,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with test data
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker -resume
+        run: nextflow run ${GITHUB_WORKSPACE} -profile test,docker -resume
 
   parameters:
     name: Test workflow parameters
@@ -102,10 +101,10 @@ jobs:
           path: |
             work
             .nextflow
-          key: nfdata-${{ matrix.parameters }}-${{ github.sha }}
+          key: nfdata-parameters-${{ matrix.parameters }}-${{ github.sha }}
           restore-keys: |
-            nfdata-${{ matrix.parameters }}-${{ github.sha }}
-            nfdata-${{ matrix.parameters }}-
+            nfdata-parameters-${{ matrix.parameters }}-${{ github.sha }}
+            nfdata-parameters-${{ matrix.parameters }}-
 
       - name: Install Nextflow
         run: |
@@ -113,8 +112,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with test amplicon data with various options
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }} -resume
+        run: nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }} -resume
 
   test_sra:
     name: Test SRA workflow
@@ -154,10 +152,10 @@ jobs:
           path: |
             work
             .nextflow
-          key: nfdata-${{ matrix.parameters }}-${{ github.sha }}
+          key: nfdata-test_sra-${{ matrix.parameters }}-${{ github.sha }}
           restore-keys: |
-            nfdata-${{ matrix.parameters }}-${{ github.sha }}
-            nfdata-${{ matrix.parameters }}-
+            nfdata-test_sra-${{ matrix.parameters }}-${{ github.sha }}
+            nfdata-test_sra-${{ matrix.parameters }}-
 
       - name: Install Nextflow
         run: |
@@ -165,8 +163,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with minimal data via SRA ids and various options
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_sra,docker ${{ matrix.parameters }} -resume
+        run: nextflow run ${GITHUB_WORKSPACE} -profile test_sra,docker ${{ matrix.parameters }} -resume
 
   test_sispa:
     name: Test SISPA workflow
@@ -206,10 +203,10 @@ jobs:
           path: |
             work
             .nextflow
-          key: nfdata-${{ matrix.parameters }}-${{ github.sha }}
+          key: nfdata-test_sispa-${{ matrix.parameters }}-${{ github.sha }}
           restore-keys: |
-            nfdata-${{ matrix.parameters }}-${{ github.sha }}
-            nfdata-${{ matrix.parameters }}-
+            nfdata-test_sispa-${{ matrix.parameters }}-${{ github.sha }}
+            nfdata-test_sispa-${{ matrix.parameters }}-
 
       - name: Install Nextflow
         run: |
@@ -217,8 +214,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with minimal SISPA data and various options
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }} -resume
+        run: nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }} -resume
 
   push_dockerhub:
     name: Push new Docker image to Docker Hub
