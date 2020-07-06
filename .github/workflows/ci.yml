@@ -61,7 +61,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with test data
-        run: nextflow run ${GITHUB_WORKSPACE} -profile test,docker -resume
+        run: nextflow run . -profile test,docker -resume
 
   parameters:
     name: Test workflow parameters
@@ -112,7 +112,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with test amplicon data with various options
-        run: nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }} -resume
+        run: nextflow run . -profile test,docker ${{ matrix.parameters }} -resume
 
   test_sra:
     name: Test SRA workflow
@@ -163,7 +163,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with minimal data via SRA ids and various options
-        run: nextflow run ${GITHUB_WORKSPACE} -profile test_sra,docker ${{ matrix.parameters }} -resume
+        run: nextflow run . -profile test_sra,docker ${{ matrix.parameters }} -resume
 
   test_sispa:
     name: Test SISPA workflow
@@ -214,7 +214,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with minimal SISPA data and various options
-        run: nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }} -resume
+        run: nextflow run . -profile test_sispa,docker ${{ matrix.parameters }} -resume
 
   push_dockerhub:
     name: Push new Docker image to Docker Hub
