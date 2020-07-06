@@ -43,14 +43,25 @@ jobs:
           docker pull nfcore/viralrecon:dev
           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
+      - name: Restore workflow cache
+        uses: actions/cache@v2
+        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
+        with:
+          path: |
+            work
+            .nextflow
+          key: nfdata-test-${{ matrix.nxf_ver }}-${{ github.sha }}
+          restore-keys: |
+            nfdata-test-${{ matrix.nxf_ver }}-${{ github.sha }}
+            nfdata-test-${{ matrix.nxf_ver }}-
+
       - name: Install Nextflow
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with test data
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker
+        run: nextflow run . -profile test,docker -resume
 
   parameters:
     name: Test workflow parameters
@@ -83,14 +94,25 @@ jobs:
           docker pull nfcore/viralrecon:dev
           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
+      - name: Restore workflow cache
+        uses: actions/cache@v2
+        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
+        with:
+          path: |
+            work
+            .nextflow
+          key: nfdata-parameters-${{ matrix.parameters }}-${{ github.sha }}
+          restore-keys: |
+            nfdata-parameters-${{ matrix.parameters }}-${{ github.sha }}
+            nfdata-parameters-${{ matrix.parameters }}-
+
       - name: Install Nextflow
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with test amplicon data with various options
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }}
+        run: nextflow run . -profile test,docker ${{ matrix.parameters }} -resume
 
   test_sra:
     name: Test SRA workflow
@@ -123,14 +145,25 @@ jobs:
           docker pull nfcore/viralrecon:dev
           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
+      - name: Restore workflow cache
+        uses: actions/cache@v2
+        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
+        with:
+          path: |
+            work
+            .nextflow
+          key: nfdata-test_sra-${{ matrix.parameters }}-${{ github.sha }}
+          restore-keys: |
+            nfdata-test_sra-${{ matrix.parameters }}-${{ github.sha }}
+            nfdata-test_sra-${{ matrix.parameters }}-
+
       - name: Install Nextflow
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with minimal data via SRA ids and various options
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_sra,docker ${{ matrix.parameters }}
+        run: nextflow run . -profile test_sra,docker ${{ matrix.parameters }} -resume
 
   test_sispa:
     name: Test SISPA workflow
@@ -163,14 +196,25 @@ jobs:
           docker pull nfcore/viralrecon:dev
           docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
+      - name: Restore workflow cache
+        uses: actions/cache@v2
+        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
+        with:
+          path: |
+            work
+            .nextflow
+          key: nfdata-test_sispa-${{ matrix.parameters }}-${{ github.sha }}
+          restore-keys: |
+            nfdata-test_sispa-${{ matrix.parameters }}-${{ github.sha }}
+            nfdata-test_sispa-${{ matrix.parameters }}-
+
       - name: Install Nextflow
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with minimal SISPA data and various options
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }}
+        run: nextflow run . -profile test_sispa,docker ${{ matrix.parameters }} -resume
 
   push_dockerhub:
     name: Push new Docker image to Docker Hub
