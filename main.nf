@@ -1384,7 +1384,7 @@ process VARSCAN2_CONSENSUS {
     script:
     prefix = "${sample}.AF${params.max_allele_freq}"
     """
-    cat $fasta | sed -r '/^\s*$/d' | bcftools consensus ${vcf[0]} > ${prefix}.consensus.fa
+    cat $fasta | sed -r '/^[[:space:]]*$/d' | bcftools consensus ${vcf[0]} > ${prefix}.consensus.fa
 
     bedtools genomecov \\
         -bga \\
@@ -1782,7 +1782,7 @@ process BCFTOOLS_CONSENSUS {
 
     script:
     """
-    cat $fasta | sed -r '/^\s*$/d' | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
+    cat $fasta | sed -r '/^[[:space:]]*$/d' | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
 
     bedtools genomecov \\
         -bga \\
