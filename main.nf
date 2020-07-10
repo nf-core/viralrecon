@@ -1782,7 +1782,7 @@ process BCFTOOLS_CONSENSUS {
 
     script:
     """
-    cat $fasta | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
+    cat $fasta | sed -r '/^\s*$/d' | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
 
     bedtools genomecov \\
         -bga \\
