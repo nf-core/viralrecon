@@ -60,7 +60,7 @@ jobs:
             .nextflow
           key: nfdata-test-${{ matrix.nxf_ver }}-${{ github.sha }}
           restore-keys: |
-            nfdata-test-${{ matrix.nxf_ver }}-${{ github.sha }}-
+            nfdata-test-${{ matrix.nxf_ver }}-${{ github.sha }}
             nfdata-test-${{ matrix.nxf_ver }}-
 
 
