@@ -21,229 +21,240 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['19.10.0', '']
+        nxf_ver: ['']
+        # nxf_ver: ['19.10.0', '']
     steps:
+      - name: Install Nextflow
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+
       - name: Check out pipeline code
         uses: actions/checkout@v2
 
-      - name: Check if Dockerfile or Conda environment changed
-        uses: technote-space/get-diff-action@v1
-        with:
-          PREFIX_FILTER: |
-            Dockerfile
-            environment.yml
+      # - name: Check if Dockerfile or Conda environment changed
+      #   uses: technote-space/get-diff-action@v1
+      #   with:
+      #     PREFIX_FILTER: |
+      #       Dockerfile
+      #       environment.yml
 
-      - name: Build new docker image
-        if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
+      # - name: Build new docker image
+      #   if: env.GIT_DIFF
+      #   run: docker build --no-cache . -t nfcore/viralrecon:dev
 
-      - name: Pull docker image
-        if: ${{ !env.GIT_DIFF }}
-        run: |
-          docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+      # - name: Pull docker image
+      #   if: ${{ !env.GIT_DIFF }}
+      #   run: |
+      #     docker pull nfcore/viralrecon:dev
+      #     docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+
+
 
       - name: Restore workflow cache
         uses: actions/cache@v2
-        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
+        # if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
         with:
           path: |
             work
             .nextflow
           key: nfdata-test-${{ matrix.nxf_ver }}-${{ github.sha }}
           restore-keys: |
-            nfdata-test-${{ matrix.nxf_ver }}-${{ github.sha }}
+            nfdata-test-${{ matrix.nxf_ver }}-${{ github.sha }}-
             nfdata-test-${{ matrix.nxf_ver }}-
 
-      - name: Install Nextflow
-        run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
 
       - name: Run pipeline with test data
-        run: nextflow run . -profile test,docker -resume
+        run: nextflow run ${GITHUB_WORKSPACE} -profile test,docker -resume
 
-  parameters:
-    name: Test workflow parameters
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
-    runs-on: ubuntu-latest
-    env:
-      NXF_VER: '19.10.0'
-      NXF_ANSI_LOG: false
-    strategy:
-      matrix:
-        parameters: [--skip_adapter_trimming, --skip_markduplicates, --skip_variants, --skip_amplicon_trimming, --skip_kraken2, --skip_assembly, '--callers ivar --assemblers spades']
-    steps:
-      - name: Check out pipeline code
-        uses: actions/checkout@v2
-
-      - name: Check if Dockerfile or Conda environment changed
-        uses: technote-space/get-diff-action@v1
-        with:
-          PREFIX_FILTER: |
-            Dockerfile
-            environment.yml
-
-      - name: Build new docker image
-        if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
-
-      - name: Pull docker image
-        if: ${{ !env.GIT_DIFF }}
+      - name: sysinfo
         run: |
-          docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+          df -h
+          lscpu | egrep 'Model name|Socket|Thread|NUMA|CPU\(s\)'
+          awk '/MemTotal/ {print "RAM : "$2/1E6" GB"}' /proc/meminfo
+          docker image ls
 
-      - name: Restore workflow cache
-        uses: actions/cache@v2
-        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
-        with:
-          path: |
-            work
-            .nextflow
-          key: nfdata-parameters-${{ matrix.parameters }}-${{ github.sha }}
-          restore-keys: |
-            nfdata-parameters-${{ matrix.parameters }}-${{ github.sha }}
-            nfdata-parameters-${{ matrix.parameters }}-
+  # parameters:
+  #   name: Test workflow parameters
+  #   if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     NXF_VER: '19.10.0'
+  #     NXF_ANSI_LOG: false
+  #   strategy:
+  #     matrix:
+  #       parameters: [--skip_adapter_trimming, --skip_markduplicates, --skip_variants, --skip_amplicon_trimming, --skip_kraken2, --skip_assembly, '--callers ivar --assemblers spades']
+  #   steps:
+  #     - name: Check out pipeline code
+  #       uses: actions/checkout@v2
 
-      - name: Install Nextflow
-        run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
+  #     - name: Check if Dockerfile or Conda environment changed
+  #       uses: technote-space/get-diff-action@v1
+  #       with:
+  #         PREFIX_FILTER: |
+  #           Dockerfile
+  #           environment.yml
 
-      - name: Run pipeline with test amplicon data with various options
-        run: nextflow run . -profile test,docker ${{ matrix.parameters }} -resume
+  #     - name: Build new docker image
+  #       if: env.GIT_DIFF
+  #       run: docker build --no-cache . -t nfcore/viralrecon:dev
 
-  test_sra:
-    name: Test SRA workflow
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
-    runs-on: ubuntu-latest
-    env:
-      NXF_VER: '19.10.0'
-      NXF_ANSI_LOG: false
-    strategy:
-      matrix:
-        parameters: [--skip_sra, '']
-    steps:
-      - name: Check out pipeline code
-        uses: actions/checkout@v2
+  #     - name: Pull docker image
+  #       if: ${{ !env.GIT_DIFF }}
+  #       run: |
+  #         docker pull nfcore/viralrecon:dev
+  #         docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
-      - name: Check if Dockerfile or Conda environment changed
-        uses: technote-space/get-diff-action@v1
-        with:
-          PREFIX_FILTER: |
-            Dockerfile
-            environment.yml
+  #     - name: Restore workflow cache
+  #       uses: actions/cache@v2
+  #       if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
+  #       with:
+  #         path: |
+  #           work
+  #           .nextflow
+  #         key: nfdata-parameters-${{ matrix.parameters }}-${{ github.sha }}
+  #         restore-keys: |
+  #           nfdata-parameters-${{ matrix.parameters }}-${{ github.sha }}
+  #           nfdata-parameters-${{ matrix.parameters }}-
 
-      - name: Build new docker image
-        if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
+  #     - name: Install Nextflow
+  #       run: |
+  #         wget -qO- get.nextflow.io | bash
+  #         sudo mv nextflow /usr/local/bin/
 
-      - name: Pull docker image
-        if: ${{ !env.GIT_DIFF }}
-        run: |
-          docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+  #     - name: Run pipeline with test amplicon data with various options
+  #       run: nextflow run . -profile test,docker ${{ matrix.parameters }} -resume
 
-      - name: Restore workflow cache
-        uses: actions/cache@v2
-        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
-        with:
-          path: |
-            work
-            .nextflow
-          key: nfdata-test_sra-${{ matrix.parameters }}-${{ github.sha }}
-          restore-keys: |
-            nfdata-test_sra-${{ matrix.parameters }}-${{ github.sha }}
-            nfdata-test_sra-${{ matrix.parameters }}-
+  # test_sra:
+  #   name: Test SRA workflow
+  #   if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     NXF_VER: '19.10.0'
+  #     NXF_ANSI_LOG: false
+  #   strategy:
+  #     matrix:
+  #       parameters: [--skip_sra, '']
+  #   steps:
+  #     - name: Check out pipeline code
+  #       uses: actions/checkout@v2
 
-      - name: Install Nextflow
-        run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
+  #     - name: Check if Dockerfile or Conda environment changed
+  #       uses: technote-space/get-diff-action@v1
+  #       with:
+  #         PREFIX_FILTER: |
+  #           Dockerfile
+  #           environment.yml
 
-      - name: Run pipeline with minimal data via SRA ids and various options
-        run: nextflow run . -profile test_sra,docker ${{ matrix.parameters }} -resume
+  #     - name: Build new docker image
+  #       if: env.GIT_DIFF
+  #       run: docker build --no-cache . -t nfcore/viralrecon:dev
 
-  test_sispa:
-    name: Test SISPA workflow
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
-    runs-on: ubuntu-latest
-    env:
-      NXF_VER: '19.10.0'
-      NXF_ANSI_LOG: false
-    strategy:
-      matrix:
-        parameters: [--gff false, '']
-    steps:
-      - name: Check out pipeline code
-        uses: actions/checkout@v2
+  #     - name: Pull docker image
+  #       if: ${{ !env.GIT_DIFF }}
+  #       run: |
+  #         docker pull nfcore/viralrecon:dev
+  #         docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
-      - name: Check if Dockerfile or Conda environment changed
-        uses: technote-space/get-diff-action@v1
-        with:
-          PREFIX_FILTER: |
-            Dockerfile
-            environment.yml
+  #     - name: Restore workflow cache
+  #       uses: actions/cache@v2
+  #       if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
+  #       with:
+  #         path: |
+  #           work
+  #           .nextflow
+  #         key: nfdata-test_sra-${{ matrix.parameters }}-${{ github.sha }}
+  #         restore-keys: |
+  #           nfdata-test_sra-${{ matrix.parameters }}-${{ github.sha }}
+  #           nfdata-test_sra-${{ matrix.parameters }}-
 
-      - name: Build new docker image
-        if: env.GIT_DIFF
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
+  #     - name: Install Nextflow
+  #       run: |
+  #         wget -qO- get.nextflow.io | bash
+  #         sudo mv nextflow /usr/local/bin/
 
-      - name: Pull docker image
-        if: ${{ !env.GIT_DIFF }}
-        run: |
-          docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
+  #     - name: Run pipeline with minimal data via SRA ids and various options
+  #       run: nextflow run . -profile test_sra,docker ${{ matrix.parameters }} -resume
 
-      - name: Restore workflow cache
-        uses: actions/cache@v2
-        if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
-        with:
-          path: |
-            work
-            .nextflow
-          key: nfdata-test_sispa-${{ matrix.parameters }}-${{ github.sha }}
-          restore-keys: |
-            nfdata-test_sispa-${{ matrix.parameters }}-${{ github.sha }}
-            nfdata-test_sispa-${{ matrix.parameters }}-
+  # test_sispa:
+  #   name: Test SISPA workflow
+  #   if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     NXF_VER: '19.10.0'
+  #     NXF_ANSI_LOG: false
+  #   strategy:
+  #     matrix:
+  #       parameters: [--gff false, '']
+  #   steps:
+  #     - name: Check out pipeline code
+  #       uses: actions/checkout@v2
 
-      - name: Install Nextflow
-        run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
+  #     - name: Check if Dockerfile or Conda environment changed
+  #       uses: technote-space/get-diff-action@v1
+  #       with:
+  #         PREFIX_FILTER: |
+  #           Dockerfile
+  #           environment.yml
 
-      - name: Run pipeline with minimal SISPA data and various options
-        run: nextflow run . -profile test_sispa,docker ${{ matrix.parameters }} -resume
+  #     - name: Build new docker image
+  #       if: env.GIT_DIFF
+  #       run: docker build --no-cache . -t nfcore/viralrecon:dev
 
-  push_dockerhub:
-    name: Push new Docker image to Docker Hub
-    runs-on: ubuntu-latest
-    # Only run if the tests passed
-    needs: test
-    # Only run for the nf-core repo, for releases and merged PRs
-    if: ${{ github.repository == 'nf-core/viralrecon' && (github.event_name == 'release' || github.event_name == 'push') }}
-    env:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
-    steps:
-      - name: Check out pipeline code
-        uses: actions/checkout@v2
+  #     - name: Pull docker image
+  #       if: ${{ !env.GIT_DIFF }}
+  #       run: |
+  #         docker pull nfcore/viralrecon:dev
+  #         docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
-      - name: Build new docker image
-        run: docker build --no-cache . -t nfcore/viralrecon:latest
+  #     - name: Restore workflow cache
+  #       uses: actions/cache@v2
+  #       if: ${{ !(github.repository == 'nf-core/viralrecon' && github.head_ref == 'master' ) }}
+  #       with:
+  #         path: |
+  #           work
+  #           .nextflow
+  #         key: nfdata-test_sispa-${{ matrix.parameters }}-${{ github.sha }}
+  #         restore-keys: |
+  #           nfdata-test_sispa-${{ matrix.parameters }}-${{ github.sha }}
+  #           nfdata-test_sispa-${{ matrix.parameters }}-
 
-      - name: Push Docker image to DockerHub (dev)
-        if: ${{ github.event_name == 'push' }}
-        run: |
-          echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-          docker tag nfcore/viralrecon:latest nfcore/viralrecon:dev
-          docker push nfcore/viralrecon:dev
+  #     - name: Install Nextflow
+  #       run: |
+  #         wget -qO- get.nextflow.io | bash
+  #         sudo mv nextflow /usr/local/bin/
 
-      - name: Push Docker image to DockerHub (release)
-        if: ${{ github.event_name == 'release' }}
-        run: |
-          echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-          docker push nfcore/viralrecon:latest
-          docker tag nfcore/viralrecon:latest nfcore/viralrecon:${{ github.event.release.tag_name }}
-          docker push nfcore/viralrecon:${{ github.event.release.tag_name }}
+  #     - name: Run pipeline with minimal SISPA data and various options
+  #       run: nextflow run . -profile test_sispa,docker ${{ matrix.parameters }} -resume
+
+  # push_dockerhub:
+  #   name: Push new Docker image to Docker Hub
+  #   runs-on: ubuntu-latest
+  #   # Only run if the tests passed
+  #   needs: test
+  #   # Only run for the nf-core repo, for releases and merged PRs
+  #   if: ${{ github.repository == 'nf-core/viralrecon' && (github.event_name == 'release' || github.event_name == 'push') }}
+  #   env:
+  #     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  #     DOCKERHUB_PASS: ${{ secrets.DOCKERHUB_PASS }}
+  #   steps:
+  #     - name: Check out pipeline code
+  #       uses: actions/checkout@v2
+
+  #     - name: Build new docker image
+  #       run: docker build --no-cache . -t nfcore/viralrecon:latest
+
+  #     - name: Push Docker image to DockerHub (dev)
+  #       if: ${{ github.event_name == 'push' }}
+  #       run: |
+  #         echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+  #         docker tag nfcore/viralrecon:latest nfcore/viralrecon:dev
+  #         docker push nfcore/viralrecon:dev
+
+  #     - name: Push Docker image to DockerHub (release)
+  #       if: ${{ github.event_name == 'release' }}
+  #       run: |
+  #         echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+  #         docker push nfcore/viralrecon:latest
+  #         docker tag nfcore/viralrecon:latest nfcore/viralrecon:${{ github.event.release.tag_name }}
+  #         docker push nfcore/viralrecon:${{ github.event.release.tag_name }}
