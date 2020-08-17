@@ -20,11 +20,35 @@
                     "description": "Input FastQ files.",
                     "help_text": "Use this to specify the location of your input FastQ files. For example:\n\n```bash\n--input 'path/to/data/sample_*_{1,2}.fastq'\n```\n\nPlease note the following requirements:\n\n1. The path must be enclosed in quotes\n2. The path must have at least one `*` wildcard character\n3. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs.\n\nIf left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`"
                 },
-                "single_end": {
-                    "type": "boolean",
-                    "description": "Specifies that the input is single-end reads.",
-                    "fa_icon": "fas fa-align-center",
-                    "help_text": "By default, the pipeline expects paired-end data. If you have single-end data, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--input`. For example:\n\n```bash\n--single_end --input '*.fastq'\n```\n\nIt is not possible to run a mixture of single-end and paired-end files in one run."
+                "protocol": {
+                    "type": "string",
+                    "default": "metagenomic",
+                    "description": "Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplicon'.",
+                    "fa_icon": "fas fa-vials"
+                },
+                "amplicon_bed": {
+                    "type": "string",
+                    "description": "If the \"--protocol amplicon\" parameter is provided then iVar is used to trim amplicon primer sequences after read alignment and before variant calling.",
+                    "help_text": "iVar uses the primer positions relative to the viral genome supplied in this file to soft clip primer sequences from a coordinate sorted BAM file. The file must be in BED format as highlighted below:\n\n```\nMN908947.3 30 54 nCoV-2019_1_LEFT 60 -\nMN908947.3 385 410 nCoV-2019_1_RIGHT 60 +\nMN908947.3 320 342 nCoV-2019_2_LEFT 60 -\nMN908947.3 704 726 nCoV-2019_2_RIGHT 60 +\n```",
+                    "fa_icon": "fas fa-assistive-listening-systems"
+                },
+                "amplicon_fasta": {
+                    "type": "string",
+                    "description": "If the \"--protocol amplicon\" parameter is provided then Cutadapt is used to trim amplicon primer sequences from FastQ files before de novo assembly.",
+                    "help_text": "This file must contain amplicon primer sequences in Fasta format and is mandatory when --protocol amplicon is specified. An example is shown below:\n\n```\n>nCoV-2019_1_LEFT\nACCAACCAACTTTCGATCTCTTGT\n>nCoV-2019_1_RIGHT\nCATCTTTAAGATGTTGACGTGCCTC\n>nCoV-2019_2_LEFT\nCTGTTTTACAGGTTCGCGACGT\n>nCoV-2019_2_RIGHT\nTAAGGATCAGTGCCAAGCTCGT\n```",
+                    "fa_icon": "fas fa-assistive-listening-systems"
+                },
+                "amplicon_left_suffix": {
+                    "type": "string",
+                    "default": "_LEFT",
+                    "fa_icon": "fas fa-assistive-listening-systems",
+                    "description": "Suffix used in name field of \"--amplicon_bed\" to indicate left primer position."
+                },
+                "amplicon_right_suffix": {
+                    "type": "string",
+                    "default": "_RIGHT",
+                    "fa_icon": "fas fa-assistive-listening-systems",
+                    "description": "Suffix used in name field of \"--amplicon_bed\" to indicate right primer position."
                 },
                 "outdir": {
                     "type": "string",
@@ -49,9 +73,9 @@
             "properties": {
                 "genome": {
                     "type": "string",
-                    "description": "Name of iGenomes reference.",
+                    "description": "Name of viral reference genome.",
                     "fa_icon": "fas fa-book",
-                    "help_text": "If using a reference genome configured in the pipeline using iGenomes, use this parameter to give the ID for the reference. This is then used to build the full paths for all required reference genome files e.g. `--genome GRCh38`.\n\nSee the [nf-core website docs](https://nf-co.re/usage/reference_genomes) for more details."
+                    "help_text": "You can find the keys to specify the genomes in the [Genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config)."
                 },
                 "fasta": {
                     "type": "string",
@@ -59,21 +83,326 @@
                     "description": "Path to FASTA genome file.",
                     "help_text": "If you have no genome reference available, the pipeline can build one using a FASTA file. This requires additional time and resources, so it's better to use a pre-build index if possible."
                 },
-                "igenomes_base": {
+                "gff": {
                     "type": "string",
-                    "description": "Directory / URL base for iGenomes references.",
-                    "default": "s3://ngi-igenomes/igenomes/",
-                    "fa_icon": "fas fa-cloud-download-alt",
-                    "hidden": true
+                    "description": "Full path to GFF annotation file.",
+                    "fa_icon": "fas fa-file-invoice"
                 },
-                "igenomes_ignore": {
+                "save_reference": {
                     "type": "boolean",
-                    "description": "Do not load the iGenomes reference config.",
-                    "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
+                    "fa_icon": "fas fa-save",
+                    "description": "If generated by the pipeline save reference genome related files to the results folder."
                 }
             }
+        },
+        "sra_download": {
+            "title": "SRA download",
+            "type": "object",
+            "description": "Options for downloading publicy available data from the SRA.",
+            "default": "",
+            "fa_icon": "fas fa-cloud-download-alt",
+            "properties": {
+                "save_sra_fastq": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Save FastQ files created from SRA identifiers in the results directory."
+                },
+                "skip_sra": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip steps involving the download and validation of FastQ files using SRA identifiers."
+                }
+            }
+        },
+        "read_trimming_options": {
+            "title": "Read trimming options",
+            "type": "object",
+            "description": "Options to adjust read trimming criteria.",
+            "default": "",
+            "properties": {
+                "cut_mean_quality": {
+                    "type": "integer",
+                    "default": 30,
+                    "fa_icon": "fas fa-cut",
+                    "description": "The mean quality requirement option shared by fastp cut_front, cut_tail or cut_sliding options. Range: 1-36."
+                },
+                "qualified_quality_phred": {
+                    "type": "integer",
+                    "default": 30,
+                    "fa_icon": "fas fa-cut",
+                    "description": "The quality value that a base is qualified. Default 30 means phred quality >=Q30 is qualified."
+                },
+                "unqualified_percent_limit": {
+                    "type": "integer",
+                    "default": 10,
+                    "fa_icon": "fas fa-cut",
+                    "description": "Percentage of bases that are allowed to be unqualified (0~100)."
+                },
+                "min_trim_length": {
+                    "type": "integer",
+                    "default": 50,
+                    "fa_icon": "fas fa-cut",
+                    "description": "Reads shorter than this length after trimming will be discarded."
+                },
+                "save_trimmed": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Save the trimmed FastQ files in the results directory.",
+                    "help_text": "By default, trimmed FastQ files will not be saved to the results directory. Specify this flag (or set to true in your config file) to copy these files to the results directory when complete."
+                },
+                "skip_adapter_trimming": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip the adapter trimming step performed by fastp.",
+                    "help_text": "Use this if your input FastQ files have already been trimmed outside of the workflow or if you're very confident that there is no adapter contamination in your data."
+                },
+                "skip_amplicon_trimming": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip the amplicon trimming step performed by Cutadapt.",
+                    "help_text": "Use this if your input FastQ files have already been trimmed outside of the workflow or if you're very confident that there is no primer sequence contamination in your data."
+                }
+            },
+            "fa_icon": "fas fa-cut"
+        },
+        "kraken2_options": {
+            "title": "Kraken2 options",
+            "type": "object",
+            "description": "Options for host read filtering with Kraken2.",
+            "default": "",
+            "properties": {
+                "kraken2_db": {
+                    "type": "string",
+                    "default": "https://zenodo.org/record/3738199/files/kraken2_human.tar.gz",
+                    "fa_icon": "fab fa-gitkraken",
+                    "description": "Full path to Kraken2 database built from host genome."
+                },
+                "kraken2_db_name": {
+                    "type": "string",
+                    "default": "human",
+                    "fa_icon": "fab fa-gitkraken",
+                    "description": "Name for host genome as recognised by Kraken2 when using the \"kraken2 build\" command."
+                },
+                "kraken2_use_ftp": {
+                    "type": "boolean",
+                    "fa_icon": "fab fa-gitkraken",
+                    "description": "Option for Kraken2 using ftp download instead of rsync."
+                },
+                "save_kraken2_fastq": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Save the host and viral FastQ files in the results directory."
+                },
+                "skip_kraken2": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip Kraken2 process for removing host classified reads."
+                }
+            },
+            "fa_icon": "fab fa-gitkraken"
+        },
+        "variant_calling_options": {
+            "title": "Variant calling options",
+            "type": "object",
+            "description": "Various options for the variant calling branch of the pipeline.",
+            "default": "",
+            "properties": {
+                "callers": {
+                    "type": "string",
+                    "default": "varscan2,ivar,bcftools",
+                    "description": "Specify which variant calling algorithms you would like to use. Available options are varscan2, ivar and bcftools.",
+                    "fa_icon": "fas fa-phone-volume"
+                },
+                "min_mapped_reads": {
+                    "type": "integer",
+                    "default": 1000,
+                    "description": "Minimum number of mapped reads below which samples are removed from further processing. Some downstream steps in the pipeline will fail if this threshold is too low.",
+                    "fa_icon": "fas fa-hand-paper"
+                },
+                "ivar_trim_noprimer": {
+                    "type": "boolean",
+                    "description": "This option unsets the \"-e\" parameter in \"ivar trim\" to discard reads without primers.",
+                    "fa_icon": "fas fa-cut"
+                },
+                "ivar_trim_min_len": {
+                    "type": "integer",
+                    "default": 20,
+                    "description": "Minimum length of read to retain after trimming with \"ivar trim\".",
+                    "fa_icon": "fas fa-cut"
+                },
+                "ivar_trim_min_qual": {
+                    "type": "integer",
+                    "default": 20,
+                    "description": "Minimum quality threshold for sliding window to pass with \"ivar trim\".",
+                    "fa_icon": "fas fa-cut"
+                },
+                "ivar_trim_window_width": {
+                    "type": "integer",
+                    "default": 4,
+                    "description": "Width of sliding window with \"ivar trim\".",
+                    "fa_icon": "fas fa-cut"
+                },
+                "filter_dups": {
+                    "type": "boolean",
+                    "description": "Remove duplicate reads from alignments.",
+                    "help_text": "Note that unless you are using UMIs it is not possible to establish whether the fragments you have sequenced were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation.",
+                    "fa_icon": "fas fa-trash-alt"
+                },
+                "filter_unmapped": {
+                    "type": "boolean",
+                    "description": "Remove unmapped reads from alignments.",
+                    "fa_icon": "fas fa-trash-alt"
+                },
+                "mpileup_depth": {
+                    "type": "integer",
+                    "description": "\"samtools mpileup\" max per-file depth.",
+                    "help_text": "See [here](https://github.com/connor-lab/ncov2019-artic-nf/pull/51) for an explanation of the default value choice of 0.",
+                    "fa_icon": "fas fa-align-center"
+                },
+                "min_base_qual": {
+                    "type": "integer",
+                    "default": 20,
+                    "description": "When performing variant calling skip bases with baseQ/BAQ smaller than this number.",
+                    "fa_icon": "fas fa-hand-paper"
+                },
+                "min_coverage": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "When performing variant calling skip positions with an overall read depth smaller than this number.",
+                    "fa_icon": "fas fa-hand-paper"
+                },
+                "min_allele_freq": {
+                    "type": "number",
+                    "default": 0.25,
+                    "description": "Minimum allele frequency threshold for calling variants.",
+                    "fa_icon": "fas fa-hand-paper"
+                },
+                "max_allele_freq": {
+                    "type": "number",
+                    "default": 0.75,
+                    "description": "Maximum allele frequency threshold for filtering variant calls.",
+                    "fa_icon": "fab fa-acquisitions-incorporated"
+                },
+                "varscan2_strand_filter": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Ignore Varscan2 variants with >90% support on one strand.",
+                    "help_text": "The strand filter will be switched off for amplicon data by default because this sort of bias may be expected.",
+                    "fa_icon": "fas fa-exchange-alt"
+                },
+                "skip_variants": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Specify this parameter to skip all of the variant calling and mapping steps in the pipeline."
+                },
+                "save_align_intermeds": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Save the intermediate BAM files from the alignment step.",
+                    "help_text": "By default, intermediate BAM files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set this parameter to also save other intermediate BAM files."
+                },
+                "save_mpileup": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Save Pileup files in the results directory. These tend to be quite large so are not saved by default."
+                },
+                "skip_markduplicates": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip picard MarkDuplicates step."
+                },
+                "skip_picard_metrics": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip Picard CollectMultipleMetrics and CollectWgsMetrics steps."
+                },
+                "skip_mosdepth": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip genome-wide and amplicon coverage plot generation from mosdepth output."
+                },
+                "skip_snpeff": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip SnpEff and SnpSift annotation of variants."
+                },
+                "skip_variants_quast": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip generation of QUAST aggregated report for consensus sequences."
+                }
+            },
+            "fa_icon": "fas fa-dna"
+        },
+        "de_novo_assembly_options": {
+            "title": "De novo assembly options",
+            "type": "object",
+            "description": "Various options for the de novo assembly branch of the pipeline.",
+            "default": "",
+            "properties": {
+                "assemblers": {
+                    "type": "string",
+                    "default": "spades,metaspades,unicycler,minia",
+                    "description": "Specify which assembly algorithms you would like to use. Available options are spades, metaspades, unicycler and minia.",
+                    "fa_icon": "fas fa-random"
+                },
+                "minia_kmer": {
+                    "type": "integer",
+                    "default": 31,
+                    "description": "Kmer size to use when running minia.",
+                    "fa_icon": "fas fa-indent"
+                },
+                "skip_blast": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip blastn of assemblies relative to reference genome."
+                },
+                "skip_abacas": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip ABACAS process for assembly contiguation."
+                },
+                "skip_plasmidid": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip assembly report generation by PlasmidID."
+                },
+                "skip_vg": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip variant graph creation and variant calling relative to reference genome."
+                },
+                "skip_assembly_quast": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip generation of QUAST aggregated report for assemblies."
+                },
+                "skip_assembly": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Specify this parameter to skip all of the de novo assembly steps in the pipeline."
+                }
+            },
+            "fa_icon": "fas fa-random"
+        },
+        "process_skipping_options": {
+            "title": "Process skipping options",
+            "type": "object",
+            "description": "Options to skip various steps within the workflow.",
+            "default": "",
+            "properties": {
+                "skip_fastqc": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip FastQC."
+                },
+                "skip_multiqc": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip MultiQC."
+                }
+            },
+            "fa_icon": "fas fa-fast-forward"
         },
         "generic_options": {
             "title": "Generic options",
@@ -101,7 +430,7 @@
                         "link",
                         "copy",
                         "copyNoFollow",
-                        "mov"
+                        "move"
                     ]
                 },
                 "name": {
@@ -254,6 +583,24 @@
         },
         {
             "$ref": "#/definitions/institutional_config_options"
+        },
+        {
+            "$ref": "#/definitions/sra_download"
+        },
+        {
+            "$ref": "#/definitions/read_trimming_options"
+        },
+        {
+            "$ref": "#/definitions/kraken2_options"
+        },
+        {
+            "$ref": "#/definitions/variant_calling_options"
+        },
+        {
+            "$ref": "#/definitions/de_novo_assembly_options"
+        },
+        {
+            "$ref": "#/definitions/process_skipping_options"
         }
     ]
 }
