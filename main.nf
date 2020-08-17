@@ -192,6 +192,7 @@ ch_multiqc_config = file("$baseDir/assets/multiqc_config.yaml", checkIfExists: t
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
 ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
 ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
+ch_dummy_file = file("$baseDir/assets/dummy_file.txt", checkIfExists: true)
 
 ////////////////////////////////////////////////////
 /* --          HEADER FILES                    -- */
@@ -400,8 +401,7 @@ if (params.gff) {
         ch_gff = file(params.gff)
     }
 } else {
-    //See: https://nextflow-io.github.io/patterns/index.html#_optional_input
-    ch_gff = file('NO_FILE')
+    ch_gff = ch_dummy_file
 }
 
 /*
