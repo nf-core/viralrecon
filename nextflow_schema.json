@@ -20,12 +20,6 @@
                     "description": "Input FastQ files.",
                     "help_text": "Use this to specify the location of your input FastQ files. For example:\n\n```bash\n--input 'path/to/data/sample_*_{1,2}.fastq'\n```\n\nPlease note the following requirements:\n\n1. The path must be enclosed in quotes\n2. The path must have at least one `*` wildcard character\n3. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs.\n\nIf left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`"
                 },
-                "single_end": {
-                    "type": "boolean",
-                    "description": "Specifies that the input is single-end reads.",
-                    "fa_icon": "fas fa-align-center",
-                    "help_text": "By default, the pipeline expects paired-end data. If you have single-end data, you need to specify `--single_end` on the command line when you launch the pipeline. A normal glob pattern, enclosed in quotation marks, can then be used for `--input`. For example:\n\n```bash\n--single_end --input '*.fastq'\n```\n\nIt is not possible to run a mixture of single-end and paired-end files in one run."
-                },
                 "outdir": {
                     "type": "string",
                     "description": "The output directory where the results will be saved.",
@@ -58,20 +52,6 @@
                     "fa_icon": "fas fa-font",
                     "description": "Path to FASTA genome file.",
                     "help_text": "If you have no genome reference available, the pipeline can build one using a FASTA file. This requires additional time and resources, so it's better to use a pre-build index if possible."
-                },
-                "igenomes_base": {
-                    "type": "string",
-                    "description": "Directory / URL base for iGenomes references.",
-                    "default": "s3://ngi-igenomes/igenomes/",
-                    "fa_icon": "fas fa-cloud-download-alt",
-                    "hidden": true
-                },
-                "igenomes_ignore": {
-                    "type": "boolean",
-                    "description": "Do not load the iGenomes reference config.",
-                    "fa_icon": "fas fa-ban",
-                    "hidden": true,
-                    "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
                 }
             }
         },
@@ -255,5 +235,187 @@
         {
             "$ref": "#/definitions/institutional_config_options"
         }
-    ]
+    ],
+    "properties": {
+        "protocol": {
+            "type": "string",
+            "default": "metagenomic"
+        },
+        "amplicon_fasta": {
+            "type": "string"
+        },
+        "amplicon_bed": {
+            "type": "string"
+        },
+        "save_sra_fastq": {
+            "type": "boolean"
+        },
+        "skip_sra": {
+            "type": "boolean"
+        },
+        "save_reference": {
+            "type": "boolean"
+        },
+        "cut_mean_quality": {
+            "type": "integer",
+            "default": 30
+        },
+        "qualified_quality_phred": {
+            "type": "integer",
+            "default": 30
+        },
+        "unqualified_percent_limit": {
+            "type": "integer",
+            "default": 10
+        },
+        "min_trim_length": {
+            "type": "integer",
+            "default": 50
+        },
+        "skip_adapter_trimming": {
+            "type": "boolean"
+        },
+        "skip_amplicon_trimming": {
+            "type": "boolean"
+        },
+        "save_trimmed": {
+            "type": "boolean"
+        },
+        "kraken2_db": {
+            "type": "string",
+            "default": "https://zenodo.org/record/3738199/files/kraken2_human.tar.gz"
+        },
+        "kraken2_db_name": {
+            "type": "string",
+            "default": "human"
+        },
+        "kraken2_use_ftp": {
+            "type": "boolean"
+        },
+        "save_kraken2_fastq": {
+            "type": "boolean"
+        },
+        "skip_kraken2": {
+            "type": "boolean"
+        },
+        "callers": {
+            "type": "string",
+            "default": "varscan2,ivar,bcftools"
+        },
+        "min_mapped_reads": {
+            "type": "integer",
+            "default": 1000
+        },
+        "ivar_trim_noprimer": {
+            "type": "boolean"
+        },
+        "ivar_trim_min_len": {
+            "type": "integer",
+            "default": 20
+        },
+        "ivar_trim_min_qual": {
+            "type": "integer",
+            "default": 20
+        },
+        "ivar_trim_window_width": {
+            "type": "integer",
+            "default": 4
+        },
+        "filter_dups": {
+            "type": "boolean"
+        },
+        "filter_unmapped": {
+            "type": "boolean"
+        },
+        "mpileup_depth": {
+            "type": "integer"
+        },
+        "min_base_qual": {
+            "type": "integer",
+            "default": 20
+        },
+        "min_coverage": {
+            "type": "integer",
+            "default": 10
+        },
+        "min_allele_freq": {
+            "type": "number",
+            "default": 0.25
+        },
+        "max_allele_freq": {
+            "type": "number",
+            "default": 0.75
+        },
+        "varscan2_strand_filter": {
+            "type": "string",
+            "default": "true"
+        },
+        "amplicon_left_suffix": {
+            "type": "string",
+            "default": "_LEFT"
+        },
+        "amplicon_right_suffix": {
+            "type": "string",
+            "default": "_RIGHT"
+        },
+        "save_align_intermeds": {
+            "type": "boolean"
+        },
+        "save_mpileup": {
+            "type": "boolean"
+        },
+        "skip_markduplicates": {
+            "type": "boolean"
+        },
+        "skip_picard_metrics": {
+            "type": "boolean"
+        },
+        "skip_mosdepth": {
+            "type": "boolean"
+        },
+        "skip_snpeff": {
+            "type": "boolean"
+        },
+        "skip_variants_quast": {
+            "type": "boolean"
+        },
+        "skip_variants": {
+            "type": "boolean"
+        },
+        "assemblers": {
+            "type": "string",
+            "default": "spades,metaspades,unicycler,minia"
+        },
+        "minia_kmer": {
+            "type": "integer",
+            "default": 31
+        },
+        "skip_blast": {
+            "type": "boolean"
+        },
+        "skip_abacas": {
+            "type": "boolean"
+        },
+        "skip_plasmidid": {
+            "type": "boolean"
+        },
+        "skip_vg": {
+            "type": "boolean"
+        },
+        "skip_assembly_quast": {
+            "type": "boolean"
+        },
+        "skip_assembly": {
+            "type": "boolean"
+        },
+        "skip_fastqc": {
+            "type": "boolean"
+        },
+        "skip_multiqc": {
+            "type": "boolean"
+        },
+        "gff": {
+            "type": "string"
+        }
+    }
 }
