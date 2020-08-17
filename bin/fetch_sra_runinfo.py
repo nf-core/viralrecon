@@ -20,7 +20,7 @@ PREFIX_LIST = sorted(list(set([re.search(ID_REGEX,x).group() for x in SRA_IDS + 
 def parse_args(args=None):
     Description = 'Download and create a run information metadata file from SRA/ENA/GEO identifiers.'
     Epilog = """Example usage: python fetch_sra_runinfo.py <FILE_IN> <FILE_OUT>"""
-    
+
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
     parser.add_argument('FILE_IN', help="File containing database identifiers, one per line.")
     parser.add_argument('FILE_OUT', help="Output file in tab-delimited format.")
@@ -72,7 +72,8 @@ def id_to_srx(db_id):
 
 def id_to_erx(db_id):
     ids = []
-    url = 'http://www.ebi.ac.uk/ena/data/warehouse/filereport?accession={}&result=read_run'.format(db_id)
+    fields = ['run_accession', 'experiment_accession']
+    url = 'http://www.ebi.ac.uk/ena/data/warehouse/filereport?accession={}&result=read_run&fields={}'.format(db_id,','.join(fields))
     for row in csv.DictReader(fetch_url(url), delimiter='\t'):
         ids.append(row['experiment_accession'])
     return ids
@@ -87,11 +88,22 @@ def gse_to_srx(db_id):
     return ids
 
 
+def get_ena_fields():
+    fields = []
+    url = 'https://www.ebi.ac.uk/ena/portal/api/returnFields?dataPortal=ena&format=tsv&result=read_run'
+    for row in csv.DictReader(fetch_url(url), delimiter='\t'):
+        fields.append(row['columnId'])
+    return fields
+
+
+get_ena_fields()
+
 def fetch_sra_runinfo(FileIn,FileOut,platformList=[],libraryLayoutList=[]):
     total_out = 0
     seen_ids = []; run_ids = []
     header = []
     make_dir(os.path.dirname(FileOut))
+    ena_fields = get_ena_fields()
     fin = open(FileIn,'r')
     fout = open(FileOut,'w')
     while True:
@@ -119,7 +131,7 @@ def fetch_sra_runinfo(FileIn,FileOut,platformList=[],libraryLayoutList=[]):
 
                         ## Resolve/expand to get run identifier from ENA and write to file
                         for id in ids:
-                            url = 'http://www.ebi.ac.uk/ena/data/warehouse/filereport?accession={}&result=read_run'.format(id)
+                            url = 'http://www.ebi.ac.uk/ena/data/warehouse/filereport?accession={}&result=read_run&fields={}'.format(id,','.join(ena_fields))
                             csv_dict = csv.DictReader(fetch_url(url), delimiter='\t')
                             for row in csv_dict:
                                 run_id = row['run_accession']
