@@ -96,8 +96,6 @@ def get_ena_fields():
     return fields
 
 
-get_ena_fields()
-
 def fetch_sra_runinfo(FileIn,FileOut,platformList=[],libraryLayoutList=[]):
     total_out = 0
     seen_ids = []; run_ids = []
