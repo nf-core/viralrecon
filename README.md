@@ -5,7 +5,7 @@
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A519.10.0-brightgreen.svg)](https://www.nextflow.io/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3901628.svg)](https://doi.org/10.5281/zenodo.3901628)
 
-[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](http://bioconda.github.io/)
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg)](https://bioconda.github.io/)
 [![Docker](https://img.shields.io/docker/automated/nfcore/viralrecon.svg)](https://hub.docker.com/r/nfcore/viralrecon)
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23viralrecon-4A154B?logo=slack)](https://nfcore.slack.com/channels/viralrecon)
 
@@ -93,16 +93,7 @@ See the [usage documentation](docs/usage.md) for all of the available options wh
 
 ## Documentation
 
-The nf-core/viralrecon pipeline comes with documentation about the pipeline, found in the `docs/` directory:
-
-1. [Installation](https://nf-co.re/usage/installation)
-2. Pipeline configuration
-    * [Local installation](https://nf-co.re/usage/local_installation)
-    * [Adding your own system config](https://nf-co.re/usage/adding_own_config)
-    * [Reference genomes](docs/usage.md#reference-genomes)
-3. [Running the pipeline](docs/usage.md)
-4. [Output and how to interpret the results](docs/output.md)
-5. [Troubleshooting](https://nf-co.re/usage/troubleshooting)
+The nf-core/viralrecon pipeline comes with documentation about the pipeline which you can read at [https://nf-core/viralrecon/docs](https://nf-core/viralrecon/docs) or find in the [`docs/` directory](docs).
 
 ## Credits
 
@@ -142,7 +133,7 @@ Many thanks to others who have helped out and contributed along the way too, inc
 
 If you would like to contribute to this pipeline, please see the [contributing guidelines](https://github.com/nf-core/viralrecon/blob/master/.github/CONTRIBUTING.md).
 
-For further information or help, don't hesitate to get in touch on [Slack `#viralrecon` channel](https://nfcore.slack.com/channels/viralrecon) (you can join with [this invite](https://nf-co.re/join/slack)).
+For further information or help, don't hesitate to get in touch on the [Slack `#viralrecon` channel](https://nfcore.slack.com/channels/viralrecon) (you can join with [this invite](https://nf-co.re/join/slack)).
 
 ## Citation
 
