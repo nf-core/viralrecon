@@ -16,9 +16,10 @@
             "properties": {
                 "input": {
                     "type": "string",
-                    "fa_icon": "fas fa-dna",
-                    "description": "Input FastQ files.",
-                    "help_text": "Use this to specify the location of your input FastQ files. For example:\n\n```bash\n--input 'path/to/data/sample_*_{1,2}.fastq'\n```\n\nPlease note the following requirements:\n\n1. The path must be enclosed in quotes\n2. The path must have at least one `*` wildcard character\n3. When using the pipeline with paired end data, the path must use `{1,2}` notation to specify read pairs.\n\nIf left unspecified, a default pattern is used: `data/*{1,2}.fastq.gz`"
+                    "fa_icon": "fas fa-file-csv",
+                    "help_text": "You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/viralrecon/docs/usage#introduction).",
+                    "description": "Path to comma-separated file containing information about the samples you would like to analyse.",
+                    "default": "./samplesheet.csv"
                 },
                 "protocol": {
                     "type": "string",
@@ -28,13 +29,13 @@
                 },
                 "amplicon_bed": {
                     "type": "string",
-                    "description": "If the \"--protocol amplicon\" parameter is provided then iVar is used to trim amplicon primer sequences after read alignment and before variant calling.",
+                    "description": "If the '--protocol amplicon' parameter is provided then iVar is used to trim amplicon primer sequences after read alignment and before variant calling.",
                     "help_text": "iVar uses the primer positions relative to the viral genome supplied in this file to soft clip primer sequences from a coordinate sorted BAM file. The file must be in BED format as highlighted below:\n\n```\nMN908947.3 30 54 nCoV-2019_1_LEFT 60 -\nMN908947.3 385 410 nCoV-2019_1_RIGHT 60 +\nMN908947.3 320 342 nCoV-2019_2_LEFT 60 -\nMN908947.3 704 726 nCoV-2019_2_RIGHT 60 +\n```",
                     "fa_icon": "fas fa-assistive-listening-systems"
                 },
                 "amplicon_fasta": {
                     "type": "string",
-                    "description": "If the \"--protocol amplicon\" parameter is provided then Cutadapt is used to trim amplicon primer sequences from FastQ files before de novo assembly.",
+                    "description": "If the '--protocol amplicon' parameter is provided then Cutadapt is used to trim amplicon primer sequences from FastQ files before de novo assembly.",
                     "help_text": "This file must contain amplicon primer sequences in Fasta format and is mandatory when --protocol amplicon is specified. An example is shown below:\n\n```\n>nCoV-2019_1_LEFT\nACCAACCAACTTTCGATCTCTTGT\n>nCoV-2019_1_RIGHT\nCATCTTTAAGATGTTGACGTGCCTC\n>nCoV-2019_2_LEFT\nCTGTTTTACAGGTTCGCGACGT\n>nCoV-2019_2_RIGHT\nTAAGGATCAGTGCCAAGCTCGT\n```",
                     "fa_icon": "fas fa-assistive-listening-systems"
                 },
@@ -42,13 +43,13 @@
                     "type": "string",
                     "default": "_LEFT",
                     "fa_icon": "fas fa-assistive-listening-systems",
-                    "description": "Suffix used in name field of \"--amplicon_bed\" to indicate left primer position."
+                    "description": "Suffix used in name field of '--amplicon_bed' to indicate left primer position."
                 },
                 "amplicon_right_suffix": {
                     "type": "string",
                     "default": "_RIGHT",
                     "fa_icon": "fas fa-assistive-listening-systems",
-                    "description": "Suffix used in name field of \"--amplicon_bed\" to indicate right primer position."
+                    "description": "Suffix used in name field of '--amplicon_bed' to indicate right primer position."
                 },
                 "outdir": {
                     "type": "string",
@@ -181,7 +182,7 @@
                     "type": "string",
                     "default": "human",
                     "fa_icon": "fab fa-gitkraken",
-                    "description": "Name for host genome as recognised by Kraken2 when using the \"kraken2 build\" command."
+                    "description": "Name for host genome as recognised by Kraken2 when using the 'kraken2 build' command."
                 },
                 "kraken2_use_ftp": {
                     "type": "boolean",
@@ -221,25 +222,25 @@
                 },
                 "ivar_trim_noprimer": {
                     "type": "boolean",
-                    "description": "This option unsets the \"-e\" parameter in \"ivar trim\" to discard reads without primers.",
+                    "description": "This option unsets the '-e' parameter in 'ivar trim' to discard reads without primers.",
                     "fa_icon": "fas fa-cut"
                 },
                 "ivar_trim_min_len": {
                     "type": "integer",
                     "default": 20,
-                    "description": "Minimum length of read to retain after trimming with \"ivar trim\".",
+                    "description": "Minimum length of read to retain after trimming with 'ivar trim'.",
                     "fa_icon": "fas fa-cut"
                 },
                 "ivar_trim_min_qual": {
                     "type": "integer",
                     "default": 20,
-                    "description": "Minimum quality threshold for sliding window to pass with \"ivar trim\".",
+                    "description": "Minimum quality threshold for sliding window to pass with 'ivar trim'.",
                     "fa_icon": "fas fa-cut"
                 },
                 "ivar_trim_window_width": {
                     "type": "integer",
                     "default": 4,
-                    "description": "Width of sliding window with \"ivar trim\".",
+                    "description": "Width of sliding window with 'ivar trim'.",
                     "fa_icon": "fas fa-cut"
                 },
                 "filter_dups": {
@@ -255,7 +256,7 @@
                 },
                 "mpileup_depth": {
                     "type": "integer",
-                    "description": "\"samtools mpileup\" max per-file depth.",
+                    "description": "'samtools mpileup' max per-file depth.",
                     "help_text": "See [here](https://github.com/connor-lab/ncov2019-artic-nf/pull/51) for an explanation of the default value choice of 0.",
                     "fa_icon": "fas fa-align-center"
                 },
