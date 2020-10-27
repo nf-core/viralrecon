@@ -1,5 +1,5 @@
 {
-    "$schema": "https://json-schema.org/draft-07/schema",
+    "$schema": "http://json-schema.org/draft-07/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/viralrecon/master/nextflow_schema.json",
     "title": "nf-core/viralrecon pipeline parameters",
     "description": "Assembly and intrahost/low-frequency variant calling for viral samples",
@@ -101,7 +101,7 @@
                         "link",
                         "copy",
                         "copyNoFollow",
-                        "mov"
+                        "move"
                     ]
                 },
                 "name": {
