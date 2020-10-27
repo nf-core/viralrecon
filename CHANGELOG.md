@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Added`
 
-* Update template to tools `1.10.2`
+* Update pipeline template to nf-core/tools `1.11`
 
 ### `Removed`
 
@@ -23,18 +23,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [#124](https://github.com/nf-core/viralrecon/issues/124) - Intersect variants across callers
 * [nf-core/tools#616](https://github.com/nf-core/tools/pull/616) - Updated GitHub Actions to build Docker image and push to Docker Hub
 * Parameters:
-    * `--min_mapped_reads` to circumvent failures for samples with low number of mapped reads
-    * `--varscan2_strand_filter` to toggle the default Varscan 2 strand filter
-    * `--skip_mosdepth` - skip genome-wide and amplicon coverage plot generation from mosdepth output
-    * `--amplicon_left_suffix` - to provide left primer suffix used in name field of `--amplicon_bed`
-    * `--amplicon_right_suffix` - to provide right primer suffix used in name field of `--amplicon_bed`
-    * Unify parameter specification with COG-UK pipeline:
-        * `--min_allele_freq` - minimum allele frequency threshold for calling variants
-        * `--mpileup_depth` - SAMTools mpileup max per-file depth
-        * `--ivar_exclude_reads` renamed to `--ivar_trim_noprimer`
-        * `--ivar_trim_min_len` - minimum length of read to retain after primer trimming
-        * `--ivar_trim_min_qual` - minimum quality threshold for sliding window to pass
-        * `--ivar_trim_window_width` - width of sliding window
+  * `--min_mapped_reads` to circumvent failures for samples with low number of mapped reads
+  * `--varscan2_strand_filter` to toggle the default Varscan 2 strand filter
+  * `--skip_mosdepth` - skip genome-wide and amplicon coverage plot generation from mosdepth output
+  * `--amplicon_left_suffix` - to provide left primer suffix used in name field of `--amplicon_bed`
+  * `--amplicon_right_suffix` - to provide right primer suffix used in name field of `--amplicon_bed`
+  * Unify parameter specification with COG-UK pipeline:
+    * `--min_allele_freq` - minimum allele frequency threshold for calling variants
+    * `--mpileup_depth` - SAMTools mpileup max per-file depth
+    * `--ivar_exclude_reads` renamed to `--ivar_trim_noprimer`
+    * `--ivar_trim_min_len` - minimum length of read to retain after primer trimming
+    * `--ivar_trim_min_qual` - minimum quality threshold for sliding window to pass
+    * `--ivar_trim_window_width` - width of sliding window
 * [#118] Updated GitHub Actions AWS workflow for small and full size tests.
 
 ### `Removed`
