@@ -1389,7 +1389,6 @@ process VARSCAN2_CONSENSUS {
     bedtools genomecov \\
         -bga \\
         -ibam ${bam[0]} \\
-        -g $fasta \\
         | awk '\$4 < $params.min_coverage' | bedtools merge > ${prefix}.mask.bed
 
     bedtools maskfasta \\
@@ -1787,7 +1786,6 @@ process BCFTOOLS_CONSENSUS {
     bedtools genomecov \\
         -bga \\
         -ibam ${bam[0]} \\
-        -g $fasta \\
         | awk '\$4 < $params.min_coverage' | bedtools merge > ${sample}.mask.bed
 
     bedtools maskfasta \\

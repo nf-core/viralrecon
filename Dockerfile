@@ -7,7 +7,7 @@ COPY environment.yml /
 RUN conda env create --quiet -f /environment.yml && conda clean -a
 
 # For Bandage: otherwise it complains about missing libGL.so.1
-RUN apt-get install -y libgl1-mesa-glx && apt-get clean -y
+RUN apt-get update && apt-get install -y libgl1-mesa-glx && apt-get clean -y
 
 # Add conda installation dir to PATH (instead of doing 'conda activate')
 ENV PATH /opt/conda/envs/nf-core-viralrecon-1.2.0dev/bin:$PATH

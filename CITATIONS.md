@@ -83,6 +83,9 @@
 * [Trimmomatic](https://www.ncbi.nlm.nih.gov/pubmed/24695404/)
   > Bolger AM, Lohse M, Usadel B. Trimmomatic: a flexible trimmer for Illumina sequence data. Bioinformatics. 2014 Aug 1;30(15):2114-20. doi: 10.1093/bioinformatics/btu170. Epub 2014 Apr 1. PubMed PMID: 24695404; PubMed Central PMCID: PMC4103590.
 
+* [UCSC tools](https://www.ncbi.nlm.nih.gov/pubmed/20639541/)
+  > Kent WJ, Zweig AS, Barber G, Hinrichs AS, Karolchik D. BigWig and BigBed: enabling browsing of large distributed datasets. Bioinformatics. 2010 Sep 1;26(17):2204-7. doi: 10.1093/bioinformatics/btq351. Epub 2010 Jul 17. PubMed PMID: 20639541; PubMed Central PMCID: PMC2922891.
+
 * [Unicycler](https://www.ncbi.nlm.nih.gov/pubmed/28594827/)
   > Wick RR, Judd LM, Gorrie CL, Holt KE. Unicycler: Resolving bacterial genome assemblies from short and long sequencing reads. PLoS Comput Biol. 2017 Jun 8;13(6):e1005595. doi: 10.1371/journal.pcbi.1005595. eCollection 2017 Jun. PubMed PMID: 28594827; PubMed Central PMCID: PMC5481147.
 
