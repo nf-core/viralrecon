@@ -1,13 +1,13 @@
-FROM nfcore/base:1.9
+FROM nfcore/base:1.12
 LABEL authors="Sarai Varona and Sara Monzon" \
       description="Docker image containing all software requirements for the nf-core/viralrecon pipeline"
 
 # Install the conda environment
 COPY environment.yml /
-RUN conda env create -f /environment.yml && conda clean -a
+RUN conda env create --quiet -f /environment.yml && conda clean -a
 
 # For Bandage: otherwise it complains about missing libGL.so.1
-RUN apt-get install -y libgl1-mesa-glx && apt-get clean -y
+RUN apt-get update && apt-get install -y libgl1-mesa-glx && apt-get clean -y
 
 # Add conda installation dir to PATH (instead of doing 'conda activate')
 ENV PATH /opt/conda/envs/nf-core-viralrecon-1.2.0dev/bin:$PATH

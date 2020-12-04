@@ -188,17 +188,18 @@ if (params.fasta) {
 /* --          CONFIG FILES                    -- */
 ////////////////////////////////////////////////////
 
-ch_multiqc_config = file("$baseDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_config = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
-ch_output_docs = file("$baseDir/docs/output.md", checkIfExists: true)
-ch_output_docs_images = file("$baseDir/docs/images/", checkIfExists: true)
+ch_output_docs = file("$projectDir/docs/output.md", checkIfExists: true)
+ch_output_docs_images = file("$projectDir/docs/images/", checkIfExists: true)
+ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
 ////////////////////////////////////////////////////
 /* --          HEADER FILES                    -- */
 ////////////////////////////////////////////////////
 
-ch_blast_outfmt6_header = file("$baseDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
-ch_ivar_variants_header_mqc = file("$baseDir/assets/headers/ivar_variants_header_mqc.txt", checkIfExists: true)
+ch_blast_outfmt6_header = file("$projectDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
+ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_header_mqc.txt", checkIfExists: true)
 
 ////////////////////////////////////////////////////
 /* --                   AWS                    -- */
@@ -400,8 +401,7 @@ if (params.gff) {
         ch_gff = file(params.gff)
     }
 } else {
-    //See: https://nextflow-io.github.io/patterns/index.html#_optional_input
-    ch_gff = file('NO_FILE')
+    ch_gff = ch_dummy_file
 }
 
 /*
@@ -1389,7 +1389,6 @@ process VARSCAN2_CONSENSUS {
     bedtools genomecov \\
         -bga \\
         -ibam ${bam[0]} \\
-        -g $fasta \\
         | awk '\$4 < $params.min_coverage' | bedtools merge > ${prefix}.mask.bed
 
     bedtools maskfasta \\
@@ -1787,7 +1786,6 @@ process BCFTOOLS_CONSENSUS {
     bedtools genomecov \\
         -bga \\
         -ibam ${bam[0]} \\
-        -g $fasta \\
         | awk '\$4 < $params.min_coverage' | bedtools merge > ${sample}.mask.bed
 
     bedtools maskfasta \\
@@ -2047,7 +2045,7 @@ if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_ampli
  */
 if (!params.skip_kraken2 && !params.skip_assembly) {
     process KRAKEN2 {
-        tag "$db"
+        tag "$sample"
         label 'process_high'
         publishDir "${params.outdir}/assembly/kraken2", mode: params.publish_dir_mode,
             saveAs: { filename ->
@@ -3446,18 +3444,19 @@ workflow.onComplete {
 
     // Render the TXT template
     def engine = new groovy.text.GStringTemplateEngine()
-    def tf = new File("$baseDir/assets/email_template.txt")
+    def tf = new File("$projectDir/assets/email_template.txt")
     def txt_template = engine.createTemplate(tf).make(email_fields)
     def email_txt = txt_template.toString()
 
     // Render the HTML template
-    def hf = new File("$baseDir/assets/email_template.html")
+    def hf = new File("$projectDir/assets/email_template.html")
     def html_template = engine.createTemplate(hf).make(email_fields)
     def email_html = html_template.toString()
 
     // Render the sendmail template
-    def smail_fields = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, baseDir: "$baseDir", mqcFile: mqc_report, mqcMaxSize: params.max_multiqc_email_size.toBytes() ]
-    def sf = new File("$baseDir/assets/sendmail_template.txt")
+    def max_multiqc_email_size = params.max_multiqc_email_size as nextflow.util.MemoryUnit
+    def smail_fields = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, projectDir: "$projectDir", mqcFile: mqc_report, mqcMaxSize: max_multiqc_email_size.toBytes() ]
+    def sf = new File("$projectDir/assets/sendmail_template.txt")
     def sendmail_template = engine.createTemplate(sf).make(smail_fields)
     def sendmail_html = sendmail_template.toString()
 
@@ -3470,7 +3469,11 @@ workflow.onComplete {
             log.info "[nf-core/viralrecon] Sent summary e-mail to $email_address (sendmail)"
         } catch (all) {
             // Catch failures and try with plaintext
-            [ 'mail', '-s', subject, email_address ].execute() << email_txt
+            def mail_cmd = [ 'mail', '-s', subject, '--content-type=text/html', email_address ]
+            if ( mqc_report.size() <= params.max_multiqc_email_size.toBytes() ) {
+              mail_cmd += [ '-A', mqc_report ]
+            }
+            mail_cmd.execute() << email_html
             log.info "[nf-core/viralrecon] Sent summary e-mail to $email_address (mail)"
         }
     }
