@@ -150,13 +150,13 @@ if (params.protocol == 'amplicon' && !params.skip_variants && !params.amplicon_b
 }
 if (params.amplicon_bed) { ch_amplicon_bed = file(params.amplicon_bed, checkIfExists: true) }
 
-callerList = [ 'varscan2', 'ivar', 'bcftools', 'none']
+callerList = [ 'varscan2', 'ivar', 'bcftools']
 callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((callerList + callers).unique().size() != callerList.size()) {
     exit 1, "Invalid variant calller option: ${params.callers}. Valid options: ${callerList.join(', ')}"
 }
 
-assemblerList = [ 'spades', 'metaspades', 'unicycler', 'minia', 'none' ]
+assemblerList = [ 'spades', 'metaspades', 'unicycler', 'minia' ]
 assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
@@ -1384,7 +1384,7 @@ process VARSCAN2_CONSENSUS {
     script:
     prefix = "${sample}.AF${params.max_allele_freq}"
     """
-    cat $fasta | sed -r '/^[[:space:]]*$/d' | bcftools consensus ${vcf[0]} > ${prefix}.consensus.fa
+    cat $fasta | bcftools consensus ${vcf[0]} > ${prefix}.consensus.fa
 
     bedtools genomecov \\
         -bga \\
@@ -1781,7 +1781,7 @@ process BCFTOOLS_CONSENSUS {
 
     script:
     """
-    cat $fasta | sed -r '/^[[:space:]]*$/d' | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
+    cat $fasta | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
 
     bedtools genomecov \\
         -bga \\
