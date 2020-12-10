@@ -1792,12 +1792,17 @@ process BCFTOOLS_CONSENSUS {
         -bga \\
         -ibam ${bam[0]} \\
         -g $fasta \\
-        | awk '\$4 < $params.min_coverage' | bedtools merge > ${sample}.mask.bed
+        | awk '\$4 < $params.min_coverage' > ${sample}.lowcov.bed
+
+    parse_mask_bed.py ${vcf[0]} ${sample}.lowcov.bed ${sample}.lowcov.fix.bed
+
+    bedtools merge -i ${sample}.lowcov.fix.bed > ${sample}.mask.bed
 
     bedtools maskfasta \\
         -fi $fasta \\
         -bed ${sample}.mask.bed \\
         -fo ${index_base}.ref.masked.fa
+        
     cat ${index_base}.ref.masked.fa | bcftools consensus ${vcf[0]} > ${sample}.consensus.masked.fa
 
     sed -i 's/${index_base}/${sample}/g' ${sample}.consensus.masked.fa
