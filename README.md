@@ -52,9 +52,7 @@ On release, automated continuous integration tests run the pipeline on a full-si
         * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
 7. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
 
-> **NB:** The pipeline has a number of options to allow you to run only specific aspects of the workflow if you so wish.
-For example, you can skip all of the assembly steps with the `--skip_assembly` parameter.
-See the [usage docs](docs/usage.md) for all of the available options when running the pipeline.
+> **NB:** The pipeline has a number of options to allow you to run only specific aspects of the workflow if you so wish. For example, you can skip all of the assembly steps with the `--skip_assembly` parameter. See the [usage docs](docs/usage.md) for all of the available options when running the pipeline.
 
 ## Pipeline reporting
 
@@ -143,7 +141,7 @@ If you would like to contribute to this pipeline, please see the [contributing g
 
 For further information or help, don't hesitate to get in touch on the [Slack `#viralrecon` channel](https://nfcore.slack.com/channels/viralrecon) (you can join with [this invite](https://nf-co.re/join/slack)).
 
-## Citation
+## Citations
 
 If you use nf-core/viralrecon for your analysis, please cite it using the following doi: [10.5281/zenodo.3901628](https://doi.org/10.5281/zenodo.3901628)
 
@@ -156,4 +154,3 @@ You can cite the `nf-core` publication as follows:
 > Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
 >
 > _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
-> ReadCube: [Full Access Link](https://rdcu.be/b1GjZ)
