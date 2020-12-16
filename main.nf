@@ -150,13 +150,13 @@ if (params.protocol == 'amplicon' && !params.skip_variants && !params.amplicon_b
 }
 if (params.amplicon_bed) { ch_amplicon_bed = file(params.amplicon_bed, checkIfExists: true) }
 
-callerList = [ 'varscan2', 'ivar', 'bcftools']
+callerList = [ 'varscan2', 'ivar', 'bcftools', 'none']
 callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((callerList + callers).unique().size() != callerList.size()) {
     exit 1, "Invalid variant calller option: ${params.callers}. Valid options: ${callerList.join(', ')}"
 }
 
-assemblerList = [ 'spades', 'metaspades', 'unicycler', 'minia' ]
+assemblerList = [ 'spades', 'metaspades', 'unicycler', 'minia', 'none' ]
 assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
@@ -1287,6 +1287,7 @@ process SAMTOOLS_MPILEUP {
     """
     samtools mpileup \\
         --count-orphans \\
+        --ignore-overlaps \\
         --no-BAQ \\
         --max-depth $params.mpileup_depth \\
         --fasta-ref $fasta \\
@@ -1384,17 +1385,23 @@ process VARSCAN2_CONSENSUS {
     script:
     prefix = "${sample}.AF${params.max_allele_freq}"
     """
-    cat $fasta | bcftools consensus ${vcf[0]} > ${prefix}.consensus.fa
-
     bedtools genomecov \\
         -bga \\
         -ibam ${bam[0]} \\
-        | awk '\$4 < $params.min_coverage' | bedtools merge > ${prefix}.mask.bed
+        -g $fasta \\
+        | awk '\$4 < $params.min_coverage' > ${prefix}.lowcov.bed
+
+    parse_mask_bed.py ${vcf[0]} ${prefix}.lowcov.bed ${prefix}.lowcov.fix.bed
+
+    bedtools merge -i ${prefix}.lowcov.fix.bed > ${prefix}.mask.bed
 
     bedtools maskfasta \\
-        -fi ${prefix}.consensus.fa \\
+        -fi $fasta \\
         -bed ${prefix}.mask.bed \\
-        -fo ${prefix}.consensus.masked.fa
+        -fo ${index_base}.ref.masked.fa
+
+    cat ${index_base}.ref.masked.fa | bcftools consensus ${vcf[0]} > ${prefix}.consensus.masked.fa
+
     header=\$(head -n 1 ${prefix}.consensus.masked.fa | sed 's/>//g')
     sed -i "s/\${header}/${sample}/g" ${prefix}.consensus.masked.fa
 
@@ -1781,17 +1788,23 @@ process BCFTOOLS_CONSENSUS {
 
     script:
     """
-    cat $fasta | bcftools consensus ${vcf[0]} > ${sample}.consensus.fa
-
     bedtools genomecov \\
         -bga \\
         -ibam ${bam[0]} \\
-        | awk '\$4 < $params.min_coverage' | bedtools merge > ${sample}.mask.bed
+        -g $fasta \\
+        | awk '\$4 < $params.min_coverage' > ${sample}.lowcov.bed
+
+    parse_mask_bed.py ${vcf[0]} ${sample}.lowcov.bed ${sample}.lowcov.fix.bed
+
+    bedtools merge -i ${sample}.lowcov.fix.bed > ${sample}.mask.bed
 
     bedtools maskfasta \\
-        -fi ${sample}.consensus.fa \\
+        -fi $fasta \\
         -bed ${sample}.mask.bed \\
-        -fo ${sample}.consensus.masked.fa
+        -fo ${index_base}.ref.masked.fa
+        
+    cat ${index_base}.ref.masked.fa | bcftools consensus ${vcf[0]} > ${sample}.consensus.masked.fa
+
     sed -i 's/${index_base}/${sample}/g' ${sample}.consensus.masked.fa
     header=\$(head -n1 ${sample}.consensus.masked.fa | sed 's/>//g')
     sed -i "s/\${header}/${sample}/g" ${sample}.consensus.masked.fa
