@@ -8,10 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### `Fixed`
 
 * [#142](https://github.com/nf-core/viralrecon/issues/142) - Unknown method invocation `toBytes` on String type
+* [#138](https://github.com/nf-core/viralrecon/issues/138) - Problem masking the consensus sequence
 
 ### `Added`
 
-* Update pipeline template to nf-core/tools `1.12`
+* Update pipeline template to nf-core/tools `1.12.1`
 
 ### `Removed`
 
