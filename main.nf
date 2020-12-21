@@ -30,6 +30,9 @@ def helpMessage() {
     Generic
       --protocol [str]                  Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplicon' (Default: 'metagenomic')
 
+    Trim Primers
+      --trim_primer [bool]              Trim Primer using FBGIO (Default: 'true')
+
     SRA download
       --save_sra_fastq [bool]           Save FastQ files created from SRA identifiers in the results directory (Default: false)
       --skip_sra [bool]                 Skip steps involving the download and validation of FastQ files using SRA identifiers (Default: false)
@@ -136,6 +139,8 @@ if (!(workflow.runName ==~ /[a-z]+_[a-z]+/)) {
 
 if (params.input) { ch_input = file(params.input, checkIfExists: true) } else { exit 1, "Input samplesheet file not specified!" }
 
+if (params.trim_primer) { ch_primer_info = file(params.primer_info, checkIfExists: true) } else { exit 1, "Primer Infor file not specified!" }
+
 if (params.protocol != 'metagenomic' && params.protocol != 'amplicon') {
     exit 1, "Invalid protocol option: ${params.protocol}. Valid options: 'metagenomic' or 'amplicon'!"
 }
@@ -236,6 +241,7 @@ if (params.protocol == 'amplicon')   summary['Amplicon Left Suffix'] = params.am
 if (params.protocol == 'amplicon')   summary['Amplicon Right Suffix'] = params.amplicon_right_suffix
 summary['Viral Genome']              = params.genome ?: 'Not supplied'
 summary['Viral Fasta File']          = params.fasta
+if (params.trim_primer)              summary['FLEX primer info '] = params.primer_info
 if (params.gff)                      summary['Viral GFF'] = params.gff
 if (params.save_reference)           summary['Save Genome Indices'] = 'Yes'
 if (params.save_sra_fastq)           summary['Save SRA FastQ'] = params.save_sra_fastq
@@ -899,10 +905,39 @@ process BOWTIE2 {
         | samtools view -@ $task.cpus -b -h -O BAM -o ${sample}.bam $filter -
     """
 }
+if (params.trim_primer){
 
+    /*
+    Perform FGBIO Trim Primer
+    */
+    process FGBIO_TRIM_PRIMERS {
+        
+        echo true
+        tag "$sample"
+
+        input:
+        path primer_info_tab from ch_primer_info
+        tuple val(sample), val(single_end), path(bam) from ch_bowtie2_bam
+
+        output:
+        tuple val(sample), val(single_end), path("*.primerTrim.bam") into ch_fgbio_trim_primers_bam
+
+        script:
+        """
+        fgbio --sam-validation-stringency=LENIENT TrimPrimers -i $bam -o ${sample}.primerTrim.bam -p $primer_info_tab -H true
+        """
+    }
+
+}
 /*
  * STEP 5.2: Convert BAM to coordinate sorted BAM
  */
+if (params.trim_primer){
+    ch_bam = ch_fgbio_trim_primers_bam
+}
+else{
+    ch_bam = ch_bowtie2_bam
+}
 process SORT_BAM {
     tag "$sample"
     label 'process_medium'
@@ -918,7 +953,7 @@ process SORT_BAM {
     !params.skip_variants
 
     input:
-    tuple val(sample), val(single_end), path(bam) from ch_bowtie2_bam
+    tuple val(sample), val(single_end), path(bam) from ch_bam
 
     output:
     tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}"), path("*.flagstat") into ch_sort_bam
