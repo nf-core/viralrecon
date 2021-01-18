@@ -10,11 +10,10 @@ include {
     GUNZIP as GUNZIP_FASTA
     GUNZIP as GUNZIP_GFF               
     GUNZIP as GUNZIP_AMPLICON_BED
-    GUNZIP as GUNZIP_AMPLICON_FASTA    } from '../process/gunzip' addParams( options: params.genome_options        )
-include { UNTAR as UNTAR_BOWTIE2_INDEX } from '../process/untar'  addParams( options: params.bowtie2_index_options )
-include { UNTAR as UNTAR_KRAKEN2_DB    } from '../process/untar'  addParams( options: params.index_options         )
-
-// include { BOWTIE2_BUILD                } from '../../nf-core/software/bowtie2/build/main' addParams( options: params.bowtie2_index_options )
+    GUNZIP as GUNZIP_AMPLICON_FASTA    } from '../process/gunzip' addParams( options: params.genome_options               )
+include { UNTAR as UNTAR_BOWTIE2_INDEX } from '../process/untar'  addParams( options: params.bowtie2_index_options        )
+include { UNTAR as UNTAR_KRAKEN2_DB    } from '../process/untar'  addParams( options: params.index_options                )
+include { BOWTIE2_BUILD                } from '../process/bowtie2_build' addParams( options: params.bowtie2_index_options )
 
 workflow PREPARE_GENOME {
     take:
@@ -59,16 +58,16 @@ workflow PREPARE_GENOME {
             }
         }
 
-        // if (params.bowtie2_index) {
-        //     if (params.bowtie2_index.endsWith('.tar.gz')) {
-        //         ch_bowtie2_index = UNTAR_BOWTIE2_INDEX ( params.bowtie2_index ).untar
-        //     } else {
-        //         ch_bowtie2_index = file(params.bowtie2_index)
-        //     }
-        // } else {
-        //     ch_bowtie2_index   = BOWTIE2_BUILD ( ch_fasta ).index
-        //     ch_bowtie2_version = BOWTIE2_BUILD.out.version
-        // }
+        if (params.bowtie2_index) {
+            if (params.bowtie2_index.endsWith('.tar.gz')) {
+                ch_bowtie2_index = UNTAR_BOWTIE2_INDEX ( params.bowtie2_index ).untar
+            } else {
+                ch_bowtie2_index = file(params.bowtie2_index)
+            }
+        } else {
+            ch_bowtie2_index   = BOWTIE2_BUILD ( ch_fasta ).index
+            ch_bowtie2_version = BOWTIE2_BUILD.out.version
+        }
     }
     
     /*
