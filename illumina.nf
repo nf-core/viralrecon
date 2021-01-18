@@ -100,26 +100,20 @@ include { GET_SOFTWARE_VERSIONS              } from './modules/local/process/get
 def bowtie2_build_options    = modules['bowtie2_build']
 if (!params.save_reference) { bowtie2_build_options['publish_files'] = false }
 
-// def bowtie2_align_options         = modules['bowtie2_align']
-// if (params.save_align_intermeds) { bowtie2_align_options.publish_files.put('bam','') }
-// if (params.save_unaligned)       { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
+def bowtie2_align_options         = modules['bowtie2_align']
+if (params.save_align_intermeds) { bowtie2_align_options.publish_files.put('bam','') }
+if (params.save_unaligned)       { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
+bowtie2_align_options.args2      += params.filter_unmapped ? "-F4" : ""
 
-// def samtools_sort_options = modules['samtools_sort']
-// if (['star_salmon','bowtie2'].contains(params.aligner)) {
-//     if (params.save_align_intermeds || (!params.with_umi && params.skip_markduplicates)) {
-//         samtools_sort_options.publish_files.put('bam','')
-//         samtools_sort_options.publish_files.put('bai','')
-//     }
-// } else {
-//     if (params.save_align_intermeds || params.skip_markduplicates) {
-//         samtools_sort_options.publish_files.put('bam','')
-//         samtools_sort_options.publish_files.put('bai','')
-//     }
-// }
+def samtools_sort_options = modules['samtools_sort']
+if (params.save_align_intermeds || params.skip_markduplicates) {
+    samtools_sort_options.publish_files.put('bam','')
+    samtools_sort_options.publish_files.put('bai','')
+}
         
-include { INPUT_CHECK     } from './modules/local/subworkflow/input_check'    addParams( options: [:] )
-include { PREPARE_GENOME  } from './modules/local/subworkflow/prepare_genome' addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options )
-// include { ALIGN_BOWTIE2    } from './modules/local/subworkflow/align_bowtie2'   addParams( align_options: bowtie2_align_options, samtools_options: samtools_sort_options )
+include { INPUT_CHECK    } from './modules/local/subworkflow/input_check'    addParams( options: [:] )
+include { PREPARE_GENOME } from './modules/local/subworkflow/prepare_genome' addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options )
+include { ALIGN_BOWTIE2  } from './modules/local/subworkflow/align_bowtie2'  addParams( align_options: bowtie2_align_options, samtools_options: samtools_sort_options )
 
 ////////////////////////////////////////////////////
 /* --    IMPORT NF-CORE MODULES/SUBWORKFLOWS   -- */
@@ -205,54 +199,30 @@ workflow ILLUMINA {
     // ch_software_versions = ch_software_versions.mix(FASTQC_UMITOOLS_TRIMGALORE.out.fastqc_version.first().ifEmpty(null))
     // ch_software_versions = ch_software_versions.mix(FASTQC_UMITOOLS_TRIMGALORE.out.umitools_version.first().ifEmpty(null))
     // ch_software_versions = ch_software_versions.mix(FASTQC_UMITOOLS_TRIMGALORE.out.trimgalore_version.first().ifEmpty(null))
-
-    // /*
-    //  * MODULE: Remove ribosomal RNA reads
-    //  */
-    // ch_trimmed_reads     = FASTQC_UMITOOLS_TRIMGALORE.out.reads
-    // ch_sortmerna_multiqc = Channel.empty()
-    // if (params.remove_ribo_rna) {
-    //     ch_sortmerna_fasta = Channel.from(ch_ribo_db.readLines()).map { row -> file(row) }.collect()
-
-    //     SORTMERNA ( 
-    //         ch_trimmed_reads, 
-    //         ch_sortmerna_fasta
-    //     )
-    //     .reads
-    //     .set { ch_trimmed_reads }
-
-    //     ch_sortmerna_multiqc = SORTMERNA.out.log
-    //     ch_software_versions = ch_software_versions.mix(SORTMERNA.out.version.first().ifEmpty(null))
-    // }
-
-    // /*
-    //  * SUBWORKFLOW: Alignment with STAR and gene/transcript quantification with Salmon
-    //  */
     
-    // /*
-    //  * SUBWORKFLOW: Alignment with BOWTIE2
-    //  */
-    // ch_genome_bam        = Channel.empty()
-    // ch_genome_bai        = Channel.empty()
-    // ch_samtools_stats    = Channel.empty()
-    // ch_samtools_flagstat = Channel.empty()
-    // ch_samtools_idxstats = Channel.empty()
-    // ch_bowtie2_multiqc    = Channel.empty()
-    // if (!params.skip_alignment && params.aligner == 'bowtie2') {        
-    //     ALIGN_BOWTIE2 (
-    //         ch_trimmed_reads,
-    //         PREPARE_GENOME.out.bowtie2_index,
-    //         PREPARE_GENOME.out.splicesites
-    //     )
-    //     ch_genome_bam        = ALIGN_BOWTIE2.out.bam
-    //     ch_genome_bai        = ALIGN_BOWTIE2.out.bai
-    //     ch_samtools_stats    = ALIGN_BOWTIE2.out.stats
-    //     ch_samtools_flagstat = ALIGN_BOWTIE2.out.flagstat
-    //     ch_samtools_idxstats = ALIGN_BOWTIE2.out.idxstats
-    //     ch_bowtie2_multiqc    = ALIGN_BOWTIE2.out.summary
-    //     ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.bowtie2_version.first().ifEmpty(null))
-    //     ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
-    // }
+    /*
+     * SUBWORKFLOW: Alignment with Bowtie2
+     */
+    ch_sorted_bam        = Channel.empty()
+    ch_sorted_bai        = Channel.empty()
+    ch_samtools_stats    = Channel.empty()
+    ch_samtools_flagstat = Channel.empty()
+    ch_samtools_idxstats = Channel.empty()
+    ch_bowtie2_multiqc   = Channel.empty()
+    if (!params.skip_variants) {
+        ALIGN_BOWTIE2 (
+            ch_cat_fastq,
+            PREPARE_GENOME.out.bowtie2_index
+        )
+        ch_sorted_bam        = ALIGN_BOWTIE2.out.bam
+        ch_sorted_bai        = ALIGN_BOWTIE2.out.bai
+        ch_samtools_stats    = ALIGN_BOWTIE2.out.stats
+        ch_samtools_flagstat = ALIGN_BOWTIE2.out.flagstat
+        ch_samtools_idxstats = ALIGN_BOWTIE2.out.idxstats
+        ch_bowtie2_multiqc   = ALIGN_BOWTIE2.out.log_out
+        ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.bowtie2_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
+    }
 
     // /*
     //  * Filter channels to get samples that passed STAR minimum mapping percentage
@@ -498,36 +468,6 @@ workflow ILLUMINA {
 // /* --                                                                     -- */
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
-
-// /*
-//  * PREPROCESSING: Build Bowtie2 index for viral genome
-//  */
-// process BOWTIE2_INDEX {
-//     tag "$fasta"
-//     label 'process_medium'
-//     if (params.save_reference) {
-//         publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
-//     }
-
-//     when:
-//     !params.skip_variants
-
-//     input:
-//     path fasta from ch_fasta
-
-//     output:
-//     path "Bowtie2Index" into ch_index
-
-//     script:
-//     """
-//     bowtie2-build \\
-//         --seed 1 \\
-//         --threads $task.cpus \\
-//         $fasta \\
-//         $index_base
-//     mkdir Bowtie2Index && mv ${index_base}* Bowtie2Index
-//     """
-// }
 
 // /*
 //  * PREPROCESSING: Build SnpEff database for viral genome
