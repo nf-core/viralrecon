@@ -1389,11 +1389,9 @@ process VARSCAN2_CONSENSUS {
         -bga \\
         -ibam ${bam[0]} \\
         -g $fasta \\
-        | awk '\$4 < $params.min_coverage' > ${prefix}.lowcov.bed
+        | awk '\$4 < $params.min_coverage' | bedtools merge > ${prefix}.merged.bed
 
-    parse_mask_bed.py ${vcf[0]} ${prefix}.lowcov.bed ${prefix}.lowcov.fix.bed
-
-    bedtools merge -i ${prefix}.lowcov.fix.bed > ${prefix}.mask.bed
+    parse_mask_bed.py ${vcf[0]} ${prefix}.merged.bed ${prefix}.mask.bed
 
     bedtools maskfasta \\
         -fi $fasta \\
@@ -1792,17 +1790,15 @@ process BCFTOOLS_CONSENSUS {
         -bga \\
         -ibam ${bam[0]} \\
         -g $fasta \\
-        | awk '\$4 < $params.min_coverage' > ${sample}.lowcov.bed
+        | awk '\$4 < $params.min_coverage' | bedtools merge > ${sample}.merged.bed
 
-    parse_mask_bed.py ${vcf[0]} ${sample}.lowcov.bed ${sample}.lowcov.fix.bed
-
-    bedtools merge -i ${sample}.lowcov.fix.bed > ${sample}.mask.bed
+    parse_mask_bed.py ${vcf[0]} ${sample}.merged.bed ${sample}.mask.bed
 
     bedtools maskfasta \\
         -fi $fasta \\
         -bed ${sample}.mask.bed \\
         -fo ${index_base}.ref.masked.fa
-        
+
     cat ${index_base}.ref.masked.fa | bcftools consensus ${vcf[0]} > ${sample}.consensus.masked.fa
 
     sed -i 's/${index_base}/${sample}/g' ${sample}.consensus.masked.fa
