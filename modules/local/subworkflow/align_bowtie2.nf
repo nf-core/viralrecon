@@ -1,35 +1,34 @@
 /*
- * Alignment with HISAT2
+ * Alignment with BOWTIE2
  */
 
 params.align_options    = [:]
 params.samtools_options = [:]
 
-include { HISAT2_ALIGN      } from '../../nf-core/software/hisat2/align/main'    addParams( options: params.align_options    )
+include { BOWTIE2_ALIGN     } from '../process/bowtie2_align'                    addParams( options: params.align_options    )
 include { BAM_SORT_SAMTOOLS } from '../../nf-core/subworkflow/bam_sort_samtools' addParams( options: params.samtools_options )
 
-workflow ALIGN_HISAT2 {
+workflow ALIGN_BOWTIE2 {
     take:
-    reads       // channel: [ val(meta), [ reads ] ]
-    index       // channel: /path/to/star/index/
-    splicesites // channel: /path/to/genome.splicesites.txt
+    reads // channel: [ val(meta), [ reads ] ]
+    index // channel: /path/to/bowtie2/index/
     
     main:
     /*
-     * Map reads with HISAT2
+     * Map reads with BOWTIE2
      */
-    HISAT2_ALIGN ( reads, index, splicesites )
+    BOWTIE2_ALIGN ( reads, index )
 
     /*
      * Sort, index BAM file and run samtools stats, flagstat and idxstats
      */
-    BAM_SORT_SAMTOOLS ( HISAT2_ALIGN.out.bam )
+    BAM_SORT_SAMTOOLS ( BOWTIE2_ALIGN.out.bam )
 
     emit:
-    orig_bam         = HISAT2_ALIGN.out.bam           // channel: [ val(meta), bam   ]
-    summary          = HISAT2_ALIGN.out.summary       // channel: [ val(meta), log   ]
-    fastq            = HISAT2_ALIGN.out.fastq         // channel: [ val(meta), fastq ]
-    hisat2_version   = HISAT2_ALIGN.out.version       //    path: *.version.txt
+    orig_bam         = BOWTIE2_ALIGN.out.bam          // channel: [ val(meta), bam   ]
+    log_out          = BOWTIE2_ALIGN.out.log_out      // channel: [ val(meta), log   ]
+    fastq            = BOWTIE2_ALIGN.out.fastq        // channel: [ val(meta), fastq ]
+    bowtie2_version  = BOWTIE2_ALIGN.out.version      //    path: *.version.txt
 
     bam              = BAM_SORT_SAMTOOLS.out.bam      // channel: [ val(meta), [ bam ] ]
     bai              = BAM_SORT_SAMTOOLS.out.bai      // channel: [ val(meta), [ bai ] ]
