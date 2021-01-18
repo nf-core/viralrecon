@@ -47,50 +47,48 @@ def find_dels_vcf(VcfIn):
 
 def parse_mask_bed(BedIn,BedOut,indels_pos_len):
     fout = open(BedOut,'w')
-    indels_postions=[]
+    indels_positions=[]
     for pos in indels_pos_len:
-        indels_postions.append(pos)
+        indels_positions.append(pos)
     with open(BedIn) as b:
         for line in b:
             line = re.split("\t", line)
             ref_genome=line[0]
             init_pos=line[1]
             end_pos=line[2]
-            coverage=line[3]
             range_length=int(end_pos)-int(init_pos)
-            oline=ref_genome+'\t'+init_pos+'\t'+end_pos+'\t'+coverage
-            if len(indels_postions) > 0:
-                for position in indels_postions:
-                    if int(position) in range(int(init_pos),int(end_pos)):
-                        indels_postions.remove(position)
-                        indel_whole_length=indels_pos_len[position]
-                        if end_pos == position:
-                            new_end_pos=int(end_pos)-1
-                            if int(new_end_pos) > int(init_pos):
-                                oline=ref_genome+'\t'+str(new_init_pos)+'\t'+end_pos+'\t'+coverage
-                                fout.write(oline)
-                                break
-                            else:
-                                None #If the indel has size enought to cover all range, remove that line
-                                break
-                        else:
-                            end_pos1=int(position)-1
-                            init_pos2=int(position)+indel_whole_length-1
-                            if int(end_pos1) > int(init_pos):
-                                oline=ref_genome+'\t'+init_pos+'\t'+str(end_pos1)+'\t'+coverage
-                                fout.write(oline)
-                            if int(end_pos) > int(init_pos2):
-                                oline=ref_genome+'\t'+str(init_pos2)+'\t'+end_pos+'\t'+coverage
-                                fout.write(oline)
-                            break
-                    else:
-                        oline=ref_genome+'\t'+init_pos+'\t'+end_pos+'\t'+coverage
-                        fout.write(oline)
-                        break
-            else:
-                oline=ref_genome+'\t'+init_pos+'\t'+end_pos+'\t'+coverage
+            oline=ref_genome+'\t'+init_pos+'\t'+end_pos
+            test=True
+            for position in indels_positions:
+                indel_init_pos = position
+                indel_whole_length=indels_pos_len[position]
+                indel_end_pos = int(indel_init_pos) + int(indel_whole_length)
+                if int(init_pos) in range(int(indel_init_pos), int(indel_end_pos)) or int(end_pos) in range(int(indel_init_pos), int(indel_end_pos)):                        ###Remove the line
+                    test=False
+                    break
+                    #if end_pos == position:
+                                #new_end_pos=int(end_pos)-1
+                                #if int(new_end_pos) > int(init_pos):
+                                    #oline=ref_genome+'\t'+str(new_init_pos)+'\t'+end_pos
+                                    #fout.write(oline)
+                                    #break
+                                #else:
+                                    #None #If the indel has size enought to cover all range, remove that line
+                                    #break
+                            #else:
+                                #end_pos1=int(position)-1
+                                #init_pos2=int(position)+indel_whole_length-1
+                                #if int(end_pos1) > int(init_pos):
+                                    #oline=ref_genome+'\t'+init_pos+'\t'+str(end_pos1)
+                                    #fout.write(oline)
+                                #if int(end_pos) > int(init_pos2):
+                                    #oline=ref_genome+'\t'+str(init_pos2)+'\t'+end_pos
+                                    #fout.write(oline)
+                                #break
+                else:
+                    oline=ref_genome+'\t'+init_pos+'\t'+end_pos
+            if test:
                 fout.write(oline)
-
 ########More def functions
 def main(args=None):
     args = parse_args(args)
