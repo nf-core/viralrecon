@@ -98,7 +98,7 @@ include { GET_SOFTWARE_VERSIONS              } from './modules/local/process/get
 //  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //  */
 def bowtie2_build_options    = modules['bowtie2_build']
-// if (!params.save_reference) { bowtie2_build_options['publish_files'] = false }
+if (!params.save_reference) { bowtie2_build_options['publish_files'] = false }
 
 // def bowtie2_align_options         = modules['bowtie2_align']
 // if (params.save_align_intermeds) { bowtie2_align_options.publish_files.put('bam','') }
