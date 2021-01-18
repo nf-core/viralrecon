@@ -22,6 +22,11 @@ if (params.fasta) { ch_fasta = file(params.fasta) } else { exit 1, 'Genome fasta
 if (params.gff)   { ch_gff   = file(params.gff)   }
 
 // Check optional parameters
+def platformList = ['illumina']
+if (!platformList.contains(params.platform)) {
+    exit 1, "Invalid platform option: ${params.platform}. Valid options: ${platformList.join(', ')}"
+}
+
 def protocolList = ['metagenomic', 'amplicon']
 if (!protocolList.contains(params.protocol)) {
     exit 1, "Invalid protocol option: ${params.protocol}. Valid options: ${protocolList.join(', ')}"
@@ -75,14 +80,14 @@ def modules = params.modules.clone()
 def publish_genome_options = params.save_reference ? [publish_dir: 'genome']       : [publish_files: false]
 def publish_index_options  = params.save_reference ? [publish_dir: 'genome/index'] : [publish_files: false]
 
-// def cat_fastq_options          = modules['cat_fastq']
-// if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
+def cat_fastq_options          = modules['cat_fastq']
+if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
 
 // def multiqc_options         = modules['multiqc']
 // multiqc_options.args       += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 // if (params.skip_alignment)  { multiqc_options['publish_dir'] = '' }
 
-// include { CAT_FASTQ                          } from './modules/local/process/cat_fastq'                   addParams( options: cat_fastq_options                                           ) 
+include { CAT_FASTQ                          } from './modules/local/process/cat_fastq'                   addParams( options: cat_fastq_options                                           ) 
 // include { MULTIQC                            } from './modules/local/process/multiqc'                     addParams( options: multiqc_options                                             )
 include { GET_SOFTWARE_VERSIONS              } from './modules/local/process/get_software_versions'       addParams( options: [publish_files : ['csv':'']]                                )
 
@@ -152,28 +157,36 @@ workflow ILLUMINA {
         ch_dummy_file
     )
     
+    /*
+     * SUBWORKFLOW: Read in samplesheet, validate and stage input files
+     */
+    INPUT_CHECK ( 
+        ch_input
+    )
+    .map {
+        meta, fastq ->
+            meta.id = meta.id.split('_')[0..-2].join('_')
+            [ meta, fastq ] 
+    }
+    .groupTuple(by: [0])
+    .branch {
+        meta, fastq ->
+            single  : fastq.size() == 1
+                return [ meta, fastq.flatten() ]
+            multiple: fastq.size() > 1
+                return [ meta, fastq.flatten() ]
+    }
+    .set { ch_fastq }
     
-    // /*
-    //  * SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //  */
-    // INPUT_CHECK ( 
-    //     ch_input
-    // )
-    // .map {
-    //     meta, fastq ->
-    //         meta.id = meta.id.split('_')[0..-2].join('_')
-    //         [ meta, fastq ] }
-    // .groupTuple(by: [0])
-    // .map { it ->  [ it[0], it[1].flatten() ] }
-    // .set { ch_cat_fastq }
-
-    // /*
-    //  * MODULE: Concatenate FastQ files from same sample if required
-    //  */
-    // CAT_FASTQ ( 
-    //     ch_cat_fastq
-    // )
-
+    /*
+     * MODULE: Concatenate FastQ files from same sample if required
+     */
+    CAT_FASTQ ( 
+        ch_fastq.multiple
+    )
+    .mix(ch_fastq.single)
+    .set { ch_cat_fastq }
+    
     // /*
     //  * SUBWORKFLOW: Read QC, extract UMI and trim adapters
     //  */
@@ -367,97 +380,6 @@ workflow ILLUMINA {
 //         }
 //     }
 // }
-
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                 UNZIP/UNTAR REFERENCE FILES                         -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                     PARSE DESIGN FILE                               -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-
-// /*
-//  * PREPROCESSING: Reformat samplesheet and check validity
-//  */
-// process CHECK_SAMPLESHEET {
-//     tag "$samplesheet"
-//     publishDir "${params.outdir}/", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".tsv")) "preprocess/sra/$filename"
-//                       else "pipeline_info/$filename"
-//                 }
-
-//     input:
-//     path samplesheet from ch_input
-
-//     output:
-//     path "samplesheet.valid.csv" into ch_samplesheet_reformat
-//     path "sra_run_info.tsv" optional true
-
-//     script:  // These scripts are bundled with the pipeline, in nf-core/viralrecon/bin/
-//     run_sra = !params.skip_sra && !isOffline()
-//     """
-//     awk -F, '{if(\$1 != "" && \$2 != "") {print \$0}}' $samplesheet > nonsra_id.csv
-//     check_samplesheet.py nonsra_id.csv nonsra.samplesheet.csv
-
-//     awk -F, '{if(\$1 != "" && \$2 == "" && \$3 == "") {print \$1}}' $samplesheet > sra_id.list
-//     if $run_sra && [ -s sra_id.list ]
-//     then
-//         fetch_sra_runinfo.py sra_id.list sra_run_info.tsv --platform ILLUMINA --library_layout SINGLE,PAIRED
-//         sra_runinfo_to_samplesheet.py sra_run_info.tsv sra.samplesheet.csv
-//     fi
-
-//     if [ -f nonsra.samplesheet.csv ]
-//     then
-//         head -n 1 nonsra.samplesheet.csv > samplesheet.valid.csv
-//     else
-//         head -n 1 sra.samplesheet.csv > samplesheet.valid.csv
-//     fi
-//     tail -n +2 -q *sra.samplesheet.csv >> samplesheet.valid.csv
-//     """
-// }
-
-// // Function to get list of [ sample, single_end?, is_sra?, is_ftp?, [ fastq_1, fastq_2 ], [ md5_1, md5_2] ]
-// def validate_input(LinkedHashMap sample) {
-//     def sample_id = sample.sample_id
-//     def single_end = sample.single_end.toBoolean()
-//     def is_sra = sample.is_sra.toBoolean()
-//     def is_ftp = sample.is_ftp.toBoolean()
-//     def fastq_1 = sample.fastq_1
-//     def fastq_2 = sample.fastq_2
-//     def md5_1 = sample.md5_1
-//     def md5_2 = sample.md5_2
-
-//     def array = []
-//     if (!is_sra) {
-//         if (single_end) {
-//             array = [ sample_id, single_end, is_sra, is_ftp, [ file(fastq_1, checkIfExists: true) ] ]
-//         } else {
-//             array = [ sample_id, single_end, is_sra, is_ftp, [ file(fastq_1, checkIfExists: true), file(fastq_2, checkIfExists: true) ] ]
-//         }
-//     } else {
-//         array = [ sample_id, single_end, is_sra, is_ftp, [ fastq_1, fastq_2 ], [ md5_1, md5_2 ] ]
-//     }
-
-//     return array
-// }
-
-// /*
-//  * Create channels for input fastq files
-//  */
-// ch_samplesheet_reformat
-//     .splitCsv(header:true, sep:',')
-//     .map { validate_input(it) }
-//     .into { ch_reads_all
-//             ch_reads_sra }
 
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
