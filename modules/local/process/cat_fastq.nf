@@ -28,8 +28,14 @@ process CAT_FASTQ {
 
     script:
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
-    readList     = reads.collect{it.toString()}
-    if (!meta.single_end) {
+    def readList = reads.collect{ it.toString() }
+    if (meta.single_end) {
+        if (readList.size > 1) {
+            """
+            cat ${readList.sort().join(' ')} > ${prefix}.merged.fastq.gz
+            """
+        }
+    } else {
         if (readList.size > 2) {
             def read1 = []
             def read2 = []
@@ -37,21 +43,6 @@ process CAT_FASTQ {
             """
             cat ${read1.sort().join(' ')} > ${prefix}_1.merged.fastq.gz
             cat ${read2.sort().join(' ')} > ${prefix}_2.merged.fastq.gz
-            """
-        } else {
-            """
-            ln -s ${reads[0]} ${prefix}_1.merged.fastq.gz
-            ln -s ${reads[1]} ${prefix}_2.merged.fastq.gz
-            """
-        }
-    } else {
-        if (readList.size > 1) {
-            """
-            cat ${readList.sort().join(' ')} > ${prefix}.merged.fastq.gz
-            """
-        } else {
-            """
-            ln -s $reads ${prefix}.merged.fastq.gz
             """
         }
     }
