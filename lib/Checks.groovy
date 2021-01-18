@@ -97,5 +97,26 @@ class Checks {
             }
         }
         return val
-    }    
+    }  
+
+    // Print warning if genome fasta has more than one sequence
+    static void is_multifasta(fasta, log) {
+        def count = 0
+        def line  = null
+        fasta.withReader { reader ->
+            while (line = reader.readLine()) {
+                if (line.contains('>')) {
+                    count++
+                    if (count > 1) {
+                        log.warn "=============================================================================\n" +
+                                "  This pipeline does not officially support multi-fasta genome files!\n\n" + 
+                                "  The parameters and processes are tailored for viral genome analysis.\n" +
+                                "  Please amend the '--fasta' parameter.\n" +
+                                "==================================================================================="
+                        break
+                    }
+                }
+            }
+        }
+    }
 }
