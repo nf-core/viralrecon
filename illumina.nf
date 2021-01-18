@@ -8,6 +8,9 @@ params.summary_params = [:]
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
 
+// Check genome key exists if provided
+Checks.genome_exists(params, log)
+
 // Check input path parameters to see if they exist
 def checkPathParamList = [
     params.input, params.fasta, params.gff, 
@@ -156,6 +159,9 @@ workflow ILLUMINA {
     PREPARE_GENOME (
         ch_dummy_file
     )
+
+    // Check genome fasta only contains a single contig
+    Checks.is_multifasta(PREPARE_GENOME.out.fasta, log)
     
     /*
      * SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -367,70 +373,6 @@ workflow ILLUMINA {
 /* --                  THE END                 -- */
 ////////////////////////////////////////////////////
 
-// // Print warning if viral genome fasta has more than one sequence
-// def count = 0
-// ch_fasta.withReader { reader ->
-//     while (line = reader.readLine()) {
-//         if (line.contains('>')) {
-//             count++
-//             if (count > 1) {
-//                 log.info "[nf-core/viralrecon] WARNING: This pipeline does not support multi-fasta genome files. Please amend the '--fasta' parameter."
-//                 break
-//             }
-//         }
-//     }
-// }
-
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                     MERGE RESEQUENCED FASTQ                         -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-
-// /*
-//  * STEP 2: Merge FastQ files with the same sample identifier
-//  */
-// process CAT_FASTQ {
-//     tag "$sample"
-
-//     input:
-//     tuple val(sample), val(single_end), path(reads) from ch_reads_all
-
-//     output:
-//     tuple val(sample), val(single_end), path("*.merged.fastq.gz") into ch_cat_fastqc,
-//                                                                        ch_cat_fastp
-
-//     script:
-//     readList = reads.collect{it.toString()}
-//     if (!single_end) {
-//         if (readList.size > 2) {
-//             def read1 = []
-//             def read2 = []
-//             readList.eachWithIndex{ v, ix -> ( ix & 1 ? read2 : read1 ) << v }
-//             """
-//             cat ${read1.sort().join(' ')} > ${sample}_1.merged.fastq.gz
-//             cat ${read2.sort().join(' ')} > ${sample}_2.merged.fastq.gz
-//             """
-//         } else {
-//             """
-//             ln -s ${reads[0]} ${sample}_1.merged.fastq.gz
-//             ln -s ${reads[1]} ${sample}_2.merged.fastq.gz
-//             """
-//         }
-//     } else {
-//         if (readList.size > 1) {
-//             """
-//             cat ${readList.sort().join(' ')} > ${sample}.merged.fastq.gz
-//             """
-//         } else {
-//             """
-//             ln -s $reads ${sample}.merged.fastq.gz
-//             """
-//         }
-//     }
-// }
 
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
