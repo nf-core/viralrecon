@@ -52,9 +52,6 @@ Checks.aws_batch(workflow, params)
 // Check the hostnames against configured profiles
 Checks.hostname(workflow, params, log)
 
-// Check genome key exists if provided
-Checks.genome_exists(params, log)
-
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */
 ////////////////////////////////////////////////////
