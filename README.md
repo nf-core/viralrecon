@@ -81,7 +81,7 @@ Numerous QC and reporting steps are included in the pipeline in order to collate
         nextflow run nf-core/viralrecon \
             --input samplesheet.csv \
             --genome 'MN908947.3' \
-            -profile <docker/singularity/conda/institute>
+            -profile <docker/singularity/podman/conda/institute>
         ```
 
     * Typical command for amplicon analysis:
@@ -93,8 +93,18 @@ Numerous QC and reporting steps are included in the pipeline in order to collate
             --protocol amplicon \
             --amplicon_bed ./nCoV-2019.artic.V3.bed \
             --skip_assembly \
-            -profile <docker/singularity/conda/institute>
+            -profile <docker/singularity/podman/conda/institute>
         ```
+
+    * Typical command for downloading public data:
+
+        ```bash
+        nextflow run nf-core/viralrecon \
+            --public_data_ids ids.txt \
+            -profile <docker/singularity/podman/conda/institute>
+        ```
+
+    > **NB:** The commands to obtain public data and to run the main arm of the pipeline are completely independent. This is intentional because it allows you to download all of the raw data in an initial pipeline run (`results/public_data/`) and then to curate the auto-created samplesheet based on the available sample metadata before you run the pipeline again properly.
 
 See [usage docs](https://nf-co.re/viralrecon/usage) for all of the available options when running the pipeline.
 
