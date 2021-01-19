@@ -94,9 +94,17 @@ include { CAT_FASTQ                          } from './modules/local/process/cat
 // include { MULTIQC                            } from './modules/local/process/multiqc'                     addParams( options: multiqc_options                                             )
 include { GET_SOFTWARE_VERSIONS              } from './modules/local/process/get_software_versions'       addParams( options: [publish_files : ['csv':'']]                                )
 
-// /*
-//  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
-//  */
+/*
+ * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
+ */
+def fastp_options    = modules['fastp']
+fastp_options.args  += " --cut_mean_quality $params.cut_mean_quality"
+fastp_options.args  += " --qualified_quality_phred $params.qualified_quality_phred"
+fastp_options.args  += " --unqualified_percent_limit $params.unqualified_percent_limit"
+fastp_options.args  += " --length_required $params.min_trim_length"
+if (params.save_trimmed)      { fastp_options.publish_files.put('trim.fastq.gz','') }
+if (params.save_trimmed_fail) { fastp_options.publish_files.put('fail.fastq.gz','') }
+
 def bowtie2_build_options    = modules['bowtie2_build']
 if (!params.save_reference) { bowtie2_build_options['publish_files'] = false }
 
@@ -110,7 +118,8 @@ if (params.save_align_intermeds || params.skip_markduplicates) {
     samtools_sort_options.publish_files.put('bam','')
     samtools_sort_options.publish_files.put('bai','')
 }
-        
+
+include { FASTQC_FASTP   } from './modules/local/subworkflow/fastqc_fastp'   addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
 include { INPUT_CHECK    } from './modules/local/subworkflow/input_check'    addParams( options: [:] )
 include { PREPARE_GENOME } from './modules/local/subworkflow/prepare_genome' addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options )
 include { ALIGN_BOWTIE2  } from './modules/local/subworkflow/align_bowtie2'  addParams( align_options: bowtie2_align_options, samtools_options: samtools_sort_options )
@@ -127,11 +136,7 @@ include { ALIGN_BOWTIE2  } from './modules/local/subworkflow/align_bowtie2'  add
 /*
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
  */
-// def trimgalore_options    = modules['trimgalore']
-// trimgalore_options.args  += params.trim_nextseq > 0 ? " --nextseq ${params.trim_nextseq}" : ''
-// if (params.save_trimmed)  { trimgalore_options.publish_files.put('fq.gz','') }
 
-// include { FASTQC_FASTP           } from './modules/nf-core/subworkflow/fastqc_fastp' addParams( fastqc_options: modules['fastqc'], umitools_options: umitools_extract_options, trimgalore_options: trimgalore_options               )
 // include { MARK_DUPLICATES_PICARD } from './modules/nf-core/subworkflow/mark_duplicates_picard'     addParams( markduplicates_options: modules['picard_markduplicates'], samtools_options: modules['picard_markduplicates_samtools'] )
 
 ////////////////////////////////////////////////////
@@ -187,18 +192,16 @@ workflow ILLUMINA {
     .mix(ch_fastq.single)
     .set { ch_cat_fastq }
     
-    // /*
-    //  * SUBWORKFLOW: Read QC, extract UMI and trim adapters
-    //  */
-    // FASTQC_UMITOOLS_TRIMGALORE (
-    //     CAT_FASTQ.out.reads,
-    //     params.skip_fastqc || params.skip_qc,
-    //     params.with_umi,
-    //     params.skip_trimming
-    // )
-    // ch_software_versions = ch_software_versions.mix(FASTQC_UMITOOLS_TRIMGALORE.out.fastqc_version.first().ifEmpty(null))
-    // ch_software_versions = ch_software_versions.mix(FASTQC_UMITOOLS_TRIMGALORE.out.umitools_version.first().ifEmpty(null))
-    // ch_software_versions = ch_software_versions.mix(FASTQC_UMITOOLS_TRIMGALORE.out.trimgalore_version.first().ifEmpty(null))
+    /*
+     * SUBWORKFLOW: Read QC, extract UMI and trim adapters
+     */
+    FASTQC_FASTP (
+        ch_cat_fastq,
+        params.skip_fastqc || params.skip_qc,
+        params.skip_trimming
+    )
+    ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
+    ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
     
     /*
      * SUBWORKFLOW: Alignment with Bowtie2
@@ -211,7 +214,7 @@ workflow ILLUMINA {
     ch_bowtie2_multiqc   = Channel.empty()
     if (!params.skip_variants) {
         ALIGN_BOWTIE2 (
-            ch_cat_fastq,
+            FASTQC_FASTP.out.reads,
             PREPARE_GENOME.out.bowtie2_index
         )
         ch_sorted_bam        = ALIGN_BOWTIE2.out.bam
@@ -347,232 +350,12 @@ workflow ILLUMINA {
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
 // /* --                                                                     -- */
-// /* --                        FASTQ QC                                     -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-
-// /*
-//  * STEP 3: FastQC on input reads after merging libraries from the same sample
-//  */
-// process FASTQC {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/preprocess/fastqc", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       filename.endsWith(".zip") ? "zips/$filename" : filename
-//                 }
-
-//     when:
-//     !params.skip_fastqc
-
-//     input:
-//     tuple val(sample), val(single_end), path(reads) from ch_cat_fastqc
-
-//     output:
-//     path "*.{zip,html}" into ch_fastqc_raw_reports_mqc
-
-//     script:
-//     """
-//     fastqc --quiet --threads $task.cpus *.fastq.gz
-//     """
-// }
-
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                        ADAPTER TRIMMING                             -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-
-// /*
-//  * STEP 4: Fastp adapter trimming and quality filtering
-//  */
-// if (!params.skip_adapter_trimming) {
-//     process FASTP {
-//         tag "$sample"
-//         label 'process_medium'
-//         publishDir "${params.outdir}/preprocess/fastp", mode: params.publish_dir_mode,
-//             saveAs: { filename ->
-//                           if (filename.endsWith(".json")) filename
-//                           else if (filename.endsWith(".fastp.html")) filename
-//                           else if (filename.endsWith("_fastqc.html")) "fastqc/$filename"
-//                           else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
-//                           else if (filename.endsWith(".log")) "log/$filename"
-//                           else params.save_trimmed ? filename : null
-//                     }
-
-//         when:
-//         !params.skip_variants || !params.skip_assembly
-
-//         input:
-//         tuple val(sample), val(single_end), path(reads) from ch_cat_fastp
-
-//         output:
-//         tuple val(sample), val(single_end), path("*.trim.fastq.gz") into ch_fastp_bowtie2,
-//                                                                          ch_fastp_cutadapt,
-//                                                                          ch_fastp_kraken2
-//         path "*.json" into ch_fastp_mqc
-//         path "*_fastqc.{zip,html}" into ch_fastp_fastqc_mqc
-//         path "*.{log,fastp.html}"
-//         path "*.fail.fastq.gz"
-
-//         script:
-//         // Added soft-links to original fastqs for consistent naming in MultiQC
-//         autodetect = single_end ? "" : "--detect_adapter_for_pe"
-//         """
-//         IN_READS='--in1 ${sample}.fastq.gz'
-//         OUT_READS='--out1 ${sample}.trim.fastq.gz --failed_out ${sample}.fail.fastq.gz'
-//         if $single_end; then
-//             [ ! -f  ${sample}.fastq.gz ] && ln -s $reads ${sample}.fastq.gz
-//         else
-//             [ ! -f  ${sample}_1.fastq.gz ] && ln -s ${reads[0]} ${sample}_1.fastq.gz
-//             [ ! -f  ${sample}_2.fastq.gz ] && ln -s ${reads[1]} ${sample}_2.fastq.gz
-//             IN_READS='--in1 ${sample}_1.fastq.gz --in2 ${sample}_2.fastq.gz'
-//             OUT_READS='--out1 ${sample}_1.trim.fastq.gz --out2 ${sample}_2.trim.fastq.gz --unpaired1 ${sample}_1.fail.fastq.gz --unpaired2 ${sample}_2.fail.fastq.gz'
-//         fi
-
-//         fastp \\
-//             \$IN_READS \\
-//             \$OUT_READS \\
-//             $autodetect \\
-//             --cut_front \\
-//             --cut_tail \\
-//             --cut_mean_quality $params.cut_mean_quality \\
-//             --qualified_quality_phred $params.qualified_quality_phred \\
-//             --unqualified_percent_limit $params.unqualified_percent_limit \\
-//             --length_required $params.min_trim_length \\
-//             --trim_poly_x \\
-//             --thread $task.cpus \\
-//             --json ${sample}.fastp.json \\
-//             --html ${sample}.fastp.html \\
-//             2> ${sample}.fastp.log
-
-//         fastqc --quiet --threads $task.cpus *.trim.fastq.gz
-//         """
-//     }
-// } else {
-//     ch_cat_fastp
-//         .into { ch_fastp_bowtie2
-//                 ch_fastp_cutadapt
-//                 ch_fastp_kraken2 }
-//     ch_fastp_mqc = Channel.empty()
-//     ch_fastp_fastqc_mqc = Channel.empty()
-// }
-
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
 // /* --                  VARIANT CALLING PROCESSES                          -- */
 // /* --                                                                     -- */
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
 
-// /*
-//  * PREPROCESSING: Build SnpEff database for viral genome
-//  */
-// process MAKE_SNPEFF_DB {
-//     tag "${index_base}.fa"
-//     label 'process_low'
-//     if (params.save_reference) {
-//         publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
-//     }
 
-//     when:
-//     (!params.skip_variants || !params.skip_assembly) && params.gff && !params.skip_snpeff
-
-//     input:
-//     path ("SnpEffDB/genomes/${index_base}.fa") from ch_fasta
-//     path ("SnpEffDB/${index_base}/genes.gff") from ch_gff
-
-//     output:
-//     tuple path("SnpEffDB"), path("*.config") into ch_snpeff_db_varscan2,
-//                                                   ch_snpeff_db_ivar,
-//                                                   ch_snpeff_db_bcftools,
-//                                                   ch_snpeff_db_spades,
-//                                                   ch_snpeff_db_metaspades,
-//                                                   ch_snpeff_db_unicycler,
-//                                                   ch_snpeff_db_minia
-
-//     script:
-//     """
-//     echo "${index_base}.genome : ${index_base}" > snpeff.config
-//     snpEff build -config snpeff.config -dataDir ./SnpEffDB -gff3 -v ${index_base}
-//     """
-// }
-
-// /*
-//  * STEP 5.1: Map read(s) with Bowtie 2
-//  */
-// process BOWTIE2 {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bam", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".log")) "log/$filename"
-//                       else params.save_align_intermeds ? filename : null
-//                 }
-
-//     when:
-//     !params.skip_variants
-
-//     input:
-//     tuple val(sample), val(single_end), path(reads) from ch_fastp_bowtie2
-//     path index from ch_index
-
-//     output:
-//     tuple val(sample), val(single_end), path("*.bam") into ch_bowtie2_bam
-//     path "*.log" into ch_bowtie2_mqc
-
-//     script:
-//     input_reads = single_end ? "-U $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
-//     filter = params.filter_unmapped ? "-F4" : ""
-//     """
-//     bowtie2 \\
-//         --threads $task.cpus \\
-//         --local \\
-//         --very-sensitive-local \\
-//         -x ${index}/${index_base} \\
-//         $input_reads \\
-//         2> ${sample}.bowtie2.log \\
-//         | samtools view -@ $task.cpus -b -h -O BAM -o ${sample}.bam $filter -
-//     """
-// }
-
-// /*
-//  * STEP 5.2: Convert BAM to coordinate sorted BAM
-//  */
-// process SORT_BAM {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bam", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
-//                       else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
-//                       else if (filename.endsWith(".stats")) "samtools_stats/$filename"
-//                       else (params.protocol != 'amplicon' && params.skip_markduplicates) || params.save_align_intermeds ? filename : null
-//                 }
-
-//     when:
-//     !params.skip_variants
-
-//     input:
-//     tuple val(sample), val(single_end), path(bam) from ch_bowtie2_bam
-
-//     output:
-//     tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}"), path("*.flagstat") into ch_sort_bam
-//     path "*.{flagstat,idxstats,stats}" into ch_sort_bam_flagstat_mqc
-
-//     script:
-//     """
-//     samtools sort -@ $task.cpus -o ${sample}.sorted.bam -T $sample $bam
-//     samtools index ${sample}.sorted.bam
-//     samtools flagstat ${sample}.sorted.bam > ${sample}.sorted.bam.flagstat
-//     samtools idxstats ${sample}.sorted.bam > ${sample}.sorted.bam.idxstats
-//     samtools stats ${sample}.sorted.bam > ${sample}.sorted.bam.stats
-//     """
-// }
 
 // // Get total number of mapped reads from flagstat file
 // def get_mapped_from_flagstat(flagstat) {
