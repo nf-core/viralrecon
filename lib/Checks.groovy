@@ -119,4 +119,25 @@ class Checks {
             }
         }
     }
+
+    // Function that parses and returns the number of mapped reasds from flagstat files
+    static ArrayList get_flagstat_mapped_reads(workflow, params, log, flagstat) {
+        def mapped_reads = 0
+        flagstat.eachLine { line ->
+            if (line.contains(' mapped (')) {
+                mapped_reads = line.tokenize().first().toInteger()
+            }
+        }
+        
+        def pass = false
+        def logname = flagstat.getBaseName() - 'flagstat'
+        Map colors = Headers.log_colours(params.monochrome_logs)
+        if (mapped_reads <= params.min_mapped_reads.toInteger()) {
+            log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} [FAIL] Mapped read threshold >= ${params.min_mapped_reads}. IGNORING FOR FURTHER DOWNSTREAM ANALYSIS: ${mapped_reads} - $logname${colors.reset}."
+        } else {
+            pass = true
+            //log.info "-${colors.purple}[$workflow.manifest.name]${colors.green} [PASS] Mapped read threshold >=${params.min_mapped_reads}: ${mapped_reads} - $logname${colors.reset}."
+        }
+        return [ mapped_reads, pass ]
+    }
 }
