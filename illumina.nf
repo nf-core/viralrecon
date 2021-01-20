@@ -86,14 +86,20 @@ def publish_index_options  = params.save_reference ? [publish_dir: 'genome/index
 def cat_fastq_options          = modules['cat_fastq']
 if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
 
-// def multiqc_options         = modules['multiqc']
-// multiqc_options.args       += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
+def multiqc_options         = modules['multiqc']
+multiqc_options.args       += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 // if (params.skip_alignment)  { multiqc_options['publish_dir'] = '' }
 
-include { CAT_FASTQ                          } from './modules/local/process/cat_fastq'                   addParams( options: cat_fastq_options                                           ) 
-include { MULTIQC_CUSTOM_FAIL_MAPPED         } from './modules/local/process/multiqc_custom_fail_mapped'  addParams( options: [publish_files: false]     )
-// include { MULTIQC                            } from './modules/local/process/multiqc'                     addParams( options: multiqc_options                                             )
-include { GET_SOFTWARE_VERSIONS              } from './modules/local/process/get_software_versions'       addParams( options: [publish_files : ['csv':'']]                                )
+include { CAT_FASTQ                     } from './modules/local/process/cat_fastq'                  addParams( options: cat_fastq_options                   ) 
+include { MULTIQC_CUSTOM_FAIL_MAPPED    } from './modules/local/process/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]              )
+include { PICARD_COLLECTWGSMETRICS      } from './modules/local/process/picard_collectwgsmetrics'   addParams( options: modules['picard_collectwgsmetrics'] )
+include { COLLAPSE_AMPLICONS            } from './modules/local/process/collapse_amplicons'         addParams( options: modules['collapse_amplicons']       )
+include { MOSDEPTH as MOSDEPTH_GENOME   } from './modules/local/process/mosdepth'                   addParams( options: modules['mosdepth_genome']          )
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from './modules/local/process/mosdepth'                   addParams( options: modules['mosdepth_amplicon']        )
+// include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from './modules/local/process/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_genome']   )
+// include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from './modules/local/process/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_amplicon'] )
+include { GET_SOFTWARE_VERSIONS         } from './modules/local/process/get_software_versions'      addParams( options: [publish_files : ['csv':'']]        )
+include { MULTIQC                       } from './modules/local/process/multiqc'                    addParams( options: multiqc_options                     )
 
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -113,17 +119,28 @@ def bowtie2_align_options         = modules['bowtie2_align']
 if (params.save_align_intermeds) { bowtie2_align_options.publish_files.put('bam','') }
 if (params.save_unaligned)       { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
 bowtie2_align_options.args2      += params.filter_unmapped ? "-F4" : ""
-
-def samtools_sort_options = modules['samtools_sort']
+def bowtie2_sort_bam_options = modules['bowtie2_sort_bam']
 if (params.save_align_intermeds || params.skip_markduplicates) {
-    samtools_sort_options.publish_files.put('bam','')
-    samtools_sort_options.publish_files.put('bai','')
+    bowtie2_sort_bam_options.publish_files.put('bam','')
+    bowtie2_sort_bam_options.publish_files.put('bai','')
 }
 
-include { FASTQC_FASTP   } from './modules/local/subworkflow/fastqc_fastp'   addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
-include { INPUT_CHECK    } from './modules/local/subworkflow/input_check'    addParams( options: [:] )
-include { PREPARE_GENOME } from './modules/local/subworkflow/prepare_genome' addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options )
-include { ALIGN_BOWTIE2  } from './modules/local/subworkflow/align_bowtie2'  addParams( align_options: bowtie2_align_options, samtools_options: samtools_sort_options )
+def filter_bam_sort_bam_options = modules['filter_bam_sort_bam']
+
+def ivar_trim_options   = modules['ivar_trim']
+ivar_trim_options.args2 += params.ivar_trim_noprimer ? "" : " -e"
+ivar_trim_options.args2 += " -m $params.ivar_trim_min_len"
+ivar_trim_options.args2 += " -q $params.ivar_trim_min_qual"
+ivar_trim_options.args2 += " -s $params.ivar_trim_window_width"
+
+def ivar_trim_sort_bam_options = modules['ivar_trim_sort_bam']
+
+include { FASTQC_FASTP        } from './modules/local/subworkflow/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
+include { INPUT_CHECK         } from './modules/local/subworkflow/input_check'         addParams( options: [:] )
+include { PREPARE_GENOME      } from './modules/local/subworkflow/prepare_genome'      addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options )
+include { ALIGN_BOWTIE2       } from './modules/local/subworkflow/align_bowtie2'       addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options )
+include { FILTER_BAM_SAMTOOLS } from './modules/local/subworkflow/filter_bam_samtools' addParams( samtools_view_options: modules['filter_bam'], samtools_index_options: filter_bam_sort_bam_options )
+include { AMPLICON_TRIM_IVAR  } from './modules/local/subworkflow/amplicon_trim_ivar'  addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
 
 ////////////////////////////////////////////////////
 /* --    IMPORT NF-CORE MODULES/SUBWORKFLOWS   -- */
@@ -132,13 +149,17 @@ include { ALIGN_BOWTIE2  } from './modules/local/subworkflow/align_bowtie2'  add
 /*
  * MODULE: Installed directly from nf-core/modules
  */
-
+// suffix = params.skip_markduplicates ? "" : ".mkD"
+// prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}" : "${sample}${suffix}"
+include { PICARD_COLLECTMULTIPLEMETRICS } from './modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['picard_collectmultiplemetrics'] )
 
 /*
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
  */
-
-// include { MARK_DUPLICATES_PICARD } from './modules/nf-core/subworkflow/mark_duplicates_picard'     addParams( markduplicates_options: modules['picard_markduplicates'], samtools_options: modules['picard_markduplicates_samtools'] )
+// prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
+def markduplicates_options   = modules['picard_markduplicates']
+markduplicates_options.args += params.filter_dups ? " REMOVE_DUPLICATES=true" : ""
+include { MARK_DUPLICATES_PICARD } from './modules/nf-core/subworkflow/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['picard_markduplicates_sort_bam'] )
 
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */
@@ -264,23 +285,101 @@ workflow ILLUMINA {
         .set { ch_fail_mapping_multiqc }
     }
     
-    // /*
-    //  * SUBWORKFLOW: Mark duplicate reads
-    //  */
-    // ch_markduplicates_multiqc = Channel.empty()
-    // if (!params.skip_alignment && !params.skip_markduplicates) {
-    //     MARK_DUPLICATES_PICARD (
-    //         ch_genome_bam
-    //     )
-    //     ch_genome_bam             = MARK_DUPLICATES_PICARD.out.bam
-    //     ch_genome_bai             = MARK_DUPLICATES_PICARD.out.bai
-    //     ch_samtools_stats         = MARK_DUPLICATES_PICARD.out.stats
-    //     ch_samtools_flagstat      = MARK_DUPLICATES_PICARD.out.flagstat
-    //     ch_samtools_idxstats      = MARK_DUPLICATES_PICARD.out.idxstats
-    //     ch_markduplicates_multiqc = MARK_DUPLICATES_PICARD.out.metrics
-    //     ch_software_versions      = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
-    // }
+    /*
+     * SUBWORKFLOW: Filter unmapped reads from BAM and trim reads with iVar
+     */
+    ch_ivar_trim_multiqc = Channel.empty()
+    if (!params.skip_variants && params.protocol == 'amplicon') {
+        FILTER_BAM_SAMTOOLS (
+            ch_sorted_bam
+        )
+        ch_sorted_bam = FILTER_BAM_SAMTOOLS.out.bam
+        ch_sorted_bai = FILTER_BAM_SAMTOOLS.out.bai
 
+        AMPLICON_TRIM_IVAR (
+            ch_sorted_bam.join(ch_sorted_bai, by: [0]),
+            ch_amplicon_bed
+        )
+        ch_sorted_bam             = AMPLICON_TRIM_IVAR.out.bam
+        ch_sorted_bai             = AMPLICON_TRIM_IVAR.out.bai
+        // ch_samtools_stats         = AMPLICON_TRIM_IVAR.out.stats
+        // ch_samtools_flagstat      = AMPLICON_TRIM_IVAR.out.flagstat
+        // ch_samtools_idxstats      = AMPLICON_TRIM_IVAR.out.idxstats
+        ch_ivar_trim_multiqc      = AMPLICON_TRIM_IVAR.out.log_out
+        ch_software_versions      = ch_software_versions.mix(AMPLICON_TRIM_IVAR.out.ivar_version.first().ifEmpty(null))
+    }
+
+    /*
+     * SUBWORKFLOW: Mark duplicate reads
+     */
+    ch_markduplicates_multiqc = Channel.empty()
+    if (!params.skip_variants && !params.skip_markduplicates) {
+        MARK_DUPLICATES_PICARD (
+            ch_sorted_bam
+        )
+        ch_sorted_bam             = MARK_DUPLICATES_PICARD.out.bam
+        ch_sorted_bai             = MARK_DUPLICATES_PICARD.out.bai
+        // ch_samtools_stats         = MARK_DUPLICATES_PICARD.out.stats
+        // ch_samtools_flagstat      = MARK_DUPLICATES_PICARD.out.flagstat
+        // ch_samtools_idxstats      = MARK_DUPLICATES_PICARD.out.idxstats
+        ch_markduplicates_multiqc = MARK_DUPLICATES_PICARD.out.metrics
+        ch_software_versions      = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
+    }
+
+    /*
+     * SUBWORKFLOW: Picard metrics
+     */
+    ch_picard_collectmultiplemetrics_multiqc = Channel.empty()
+    ch_picard_collectwgsmetrics_multiqc      = Channel.empty()
+    if (!params.skip_variants && !params.skip_picard_metrics) {
+        PICARD_COLLECTMULTIPLEMETRICS (
+            ch_sorted_bam,
+            PREPARE_GENOME.out.fasta
+        )
+        ch_picard_collectmultiplemetrics_multiqc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
+
+        PICARD_COLLECTWGSMETRICS (
+            ch_sorted_bam,
+            PREPARE_GENOME.out.fasta
+        )
+        ch_picard_collectwgsmetrics_multiqc = PICARD_COLLECTWGSMETRICS.out.metrics
+    }
+
+    /*
+     * SUBWORKFLOW: Coverage QC plots
+     */
+    ch_mosdepth_multiqc = Channel.empty()
+    if (!params.skip_variants && !params.skip_mosdepth) {
+
+        MOSDEPTH_GENOME (
+            ch_sorted_bam.join(ch_sorted_bai, by: [0]),
+            ch_dummy_file,
+            200
+        )
+        ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
+        
+        // PLOT_MOSDEPTH_REGIONS_GENOME (
+        //     MOSDEPTH_GENOME.out.regions_bed.collect()
+        // )
+
+        if (params.protocol == 'amplicon') {
+
+            COLLAPSE_AMPLICONS (
+                ch_amplicon_bed
+            )
+
+            MOSDEPTH_AMPLICON (
+                ch_sorted_bam.join(ch_sorted_bai, by: [0]),
+                COLLAPSE_AMPLICONS.out.bed,
+                0
+            )
+
+            // PLOT_MOSDEPTH_REGIONS_AMPLICON ( 
+            //     MOSDEPTH_AMPLICON.out.regions_bed.collect()
+            // )
+        }
+    }
+    
     /*
      * MODULE: Pipeline reporting
      */
@@ -301,34 +400,14 @@ workflow ILLUMINA {
     //         GET_SOFTWARE_VERSIONS.out.yaml.collect(),
     //         ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
     //         ch_fail_mapping_multiqc.ifEmpty([]),
-    //         ch_fail_strand_multiqc.ifEmpty([]),
-    //         FASTQC_UMITOOLS_TRIMGALORE.out.fastqc_zip.collect{it[1]}.ifEmpty([]),
-    //         FASTQC_UMITOOLS_TRIMGALORE.out.trim_zip.collect{it[1]}.ifEmpty([]),
-    //         FASTQC_UMITOOLS_TRIMGALORE.out.trim_log.collect{it[1]}.ifEmpty([]),
-    //         ch_sortmerna_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_star_multiqc.collect{it[1]}.ifEmpty([]),
+    //         FASTQC_FASTP.out.fastqc_zip.collect{it[1]}.ifEmpty([]),
+    //         FASTQC_FASTP.out.trim_zip.collect{it[1]}.ifEmpty([]),
+    //         FASTQC_FASTP.out.trim_log.collect{it[1]}.ifEmpty([]),
     //         ch_bowtie2_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_rsem_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_salmon_multiqc.collect{it[1]}.ifEmpty([]),
     //         ch_samtools_stats.collect{it[1]}.ifEmpty([]),
     //         ch_samtools_flagstat.collect{it[1]}.ifEmpty([]),
     //         ch_samtools_idxstats.collect{it[1]}.ifEmpty([]),
     //         ch_markduplicates_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_featurecounts_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_aligner_pca_multiqc.collect().ifEmpty([]),
-    //         ch_aligner_clustering_multiqc.collect().ifEmpty([]),
-    //         ch_pseudoaligner_pca_multiqc.collect().ifEmpty([]),
-    //         ch_pseudoaligner_clustering_multiqc.collect().ifEmpty([]),
-    //         ch_preseq_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_qualimap_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_dupradar_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_bamstat_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_inferexperiment_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_innerdistance_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_junctionannotation_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_junctionsaturation_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_readdistribution_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_readduplication_multiqc.collect{it[1]}.ifEmpty([])
     //     )
     //     multiqc_report = MULTIQC.out.report.toList()
     // }
@@ -346,304 +425,6 @@ workflow ILLUMINA {
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
 ////////////////////////////////////////////////////
-
-
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                  VARIANT CALLING PROCESSES                          -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-
-
-
-// /*
-//  * STEP 5.3: Trim amplicon sequences with iVar
-//  */
-// if (params.protocol != 'amplicon') {
-//     ch_sort_bam
-//         .set { ch_ivar_trim_bam }
-//     ch_ivar_trim_flagstat_mqc = Channel.empty()
-//     ch_ivar_trim_log_mqc = Channel.empty()
-// } else {
-//     process IVAR_TRIM {
-//         tag "$sample"
-//         label 'process_medium'
-//         publishDir "${params.outdir}/variants/bam", mode: params.publish_dir_mode,
-//             saveAs: { filename ->
-//                           if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
-//                           else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
-//                           else if (filename.endsWith(".stats")) "samtools_stats/$filename"
-//                           else if (filename.endsWith(".log")) "log/$filename"
-//                           else params.skip_markduplicates || params.save_align_intermeds ? filename : null
-//                     }
-
-//         when:
-//         !params.skip_variants
-
-//         input:
-//         tuple val(sample), val(single_end), path(bam) from ch_sort_bam
-//         path bed from ch_amplicon_bed
-
-//         output:
-//         tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_ivar_trim_bam
-//         path "*.{flagstat,idxstats,stats}" into ch_ivar_trim_flagstat_mqc
-//         path "*.log" into ch_ivar_trim_log_mqc
-
-//         script:
-//         exclude_reads = params.ivar_trim_noprimer ? "" : "-e"
-//         prefix = "${sample}.trim"
-//         """
-//         samtools view -b -F 4 ${bam[0]} > ${sample}.mapped.bam
-//         samtools index ${sample}.mapped.bam
-
-//         ivar trim \\
-//             -i ${sample}.mapped.bam \\
-//             -b $bed \\
-//             -m $params.ivar_trim_min_len \\
-//             -q $params.ivar_trim_min_qual \\
-//             -s $params.ivar_trim_window_width \\
-//             $exclude_reads \\
-//             -p $prefix > ${prefix}.ivar.log
-
-//         samtools sort -@ $task.cpus -o ${prefix}.sorted.bam -T $prefix ${prefix}.bam
-//         samtools index ${prefix}.sorted.bam
-//         samtools flagstat ${prefix}.sorted.bam > ${prefix}.sorted.bam.flagstat
-//         samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
-//         samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
-//         """
-//     }
-// }
-
-// /*
-//  * STEP 5.4: Picard MarkDuplicates
-//  */
-// if (params.skip_markduplicates) {
-//     ch_ivar_trim_bam
-//         .into { ch_markdup_bam_metrics
-//                 ch_markdup_bam_mosdepth_genome
-//                 ch_markdup_bam_mosdepth_amplicon
-//                 ch_markdup_bam_mpileup
-//                 ch_markdup_bam_varscan2_consensus
-//                 ch_markdup_bam_bcftools
-//                 ch_markdup_bam_bcftools_consensus }
-//     ch_markdup_bam_flagstat_mqc = Channel.empty()
-//     ch_markdup_bam_metrics_mqc = Channel.empty()
-// } else {
-//     process PICARD_MARKDUPLICATES {
-//         tag "$sample"
-//         label 'process_medium'
-//         publishDir "${params.outdir}/variants/bam", mode: params.publish_dir_mode,
-//             saveAs: { filename ->
-//                           if (filename.endsWith(".flagstat")) "samtools_stats/$filename"
-//                           else if (filename.endsWith(".idxstats")) "samtools_stats/$filename"
-//                           else if (filename.endsWith(".stats")) "samtools_stats/$filename"
-//                           else if (filename.endsWith(".metrics.txt")) "picard_metrics/$filename"
-//                           else filename
-//                     }
-
-//         when:
-//         !params.skip_variants
-
-//         input:
-//         tuple val(sample), val(single_end), path(bam) from ch_ivar_trim_bam
-//         path fasta from ch_fasta
-
-//         output:
-//         tuple val(sample), val(single_end), path("*.sorted.{bam,bam.bai}") into ch_markdup_bam_metrics,
-//                                                                                 ch_markdup_bam_mosdepth_genome,
-//                                                                                 ch_markdup_bam_mosdepth_amplicon,
-//                                                                                 ch_markdup_bam_mpileup,
-//                                                                                 ch_markdup_bam_varscan2_consensus,
-//                                                                                 ch_markdup_bam_bcftools,
-//                                                                                 ch_markdup_bam_bcftools_consensus
-//         path "*.{flagstat,idxstats,stats}" into ch_markdup_bam_flagstat_mqc
-//         path "*.txt" into ch_markdup_bam_metrics_mqc
-
-//         script:
-//         def avail_mem = 3
-//         if (!task.memory) {
-//             log.info "[Picard MarkDuplicates] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this."
-//         } else {
-//             avail_mem = task.memory.toGiga()
-//         }
-//         prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
-//         keep_dup = params.filter_dups ? "true" : "false"
-//         """
-//         picard -Xmx${avail_mem}g MarkDuplicates \\
-//             INPUT=${bam[0]} \\
-//             OUTPUT=${prefix}.sorted.bam \\
-//             ASSUME_SORTED=true \\
-//             REMOVE_DUPLICATES=$keep_dup \\
-//             METRICS_FILE=${prefix}.MarkDuplicates.metrics.txt \\
-//             VALIDATION_STRINGENCY=LENIENT \\
-//             TMP_DIR=tmp
-//         samtools index ${prefix}.sorted.bam
-//         samtools idxstats ${prefix}.sorted.bam > ${prefix}.sorted.bam.idxstats
-//         samtools flagstat ${prefix}.sorted.bam > ${prefix}.sorted.bam.flagstat
-//         samtools stats ${prefix}.sorted.bam > ${prefix}.sorted.bam.stats
-//         """
-//     }
-// }
-
-// /*
-//  * STEP 5.5: Picard CollectMultipleMetrics and CollectWgsMetrics
-//  */
-// process PICARD_METRICS {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bam/picard_metrics", mode: params.publish_dir_mode
-
-//     when:
-//     !params.skip_variants && !params.skip_picard_metrics
-
-//     input:
-//     tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_metrics
-//     path fasta from ch_fasta
-
-//     output:
-//     path "*metrics" into ch_picard_metrics_mqc
-//     path "*.pdf"
-
-//     script:
-//     def avail_mem = 3
-//     if (!task.memory) {
-//         log.info "[Picard CollectMultipleMetrics] Available memory not known - defaulting to 3GB. Specify process memory requirements to change this."
-//     } else {
-//         avail_mem = task.memory.toGiga()
-//     }
-//     suffix = params.skip_markduplicates ? "" : ".mkD"
-//     prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}" : "${sample}${suffix}"
-//     """
-//     picard -Xmx${avail_mem}g CollectMultipleMetrics \\
-//         INPUT=${bam[0]} \\
-//         OUTPUT=${prefix}.CollectMultipleMetrics \\
-//         REFERENCE_SEQUENCE=$fasta \\
-//         VALIDATION_STRINGENCY=LENIENT \\
-//         TMP_DIR=tmp
-
-//     picard -Xmx${avail_mem}g CollectWgsMetrics \\
-//         COVERAGE_CAP=1000000 \\
-//         INPUT=${bam[0]} \\
-//         OUTPUT=${prefix}.CollectWgsMetrics.coverage_metrics \\
-//         REFERENCE_SEQUENCE=$fasta \\
-//         VALIDATION_STRINGENCY=LENIENT \\
-//         TMP_DIR=tmp
-//     """
-// }
-
-// /*
-//  * STEP 5.6.1: mosdepth genome-wide coverage
-//  */
-// process MOSDEPTH_GENOME {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bam/mosdepth/genome", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".pdf")) "plots/$filename"
-//                       else if (filename.endsWith(".tsv")) "plots/$filename"
-//                       else filename
-//                 }
-
-//     when:
-//     !params.skip_variants && !params.skip_mosdepth
-
-//     input:
-//     tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_mosdepth_genome
-
-//     output:
-//     path "*.global.dist.txt" into ch_mosdepth_genome_mqc
-//     path "*.{txt,gz,csi,tsv,pdf}"
-
-//     script:
-//     suffix = params.skip_markduplicates ? "" : ".mkD"
-//     prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}.genome" : "${sample}${suffix}.genome"
-//     plot_suffix = params.protocol == 'amplicon' ? ".trim${suffix}.genome" : "${suffix}.genome"
-//     """
-//     mosdepth \\
-//         --by 200 \\
-//         --fast-mode \\
-//         $prefix \\
-//         ${bam[0]}
-
-//     plot_mosdepth_regions.r \\
-//         --input_files ${prefix}.regions.bed.gz \\
-//         --input_suffix ${plot_suffix}.regions.bed.gz \\
-//         --output_dir ./ \\
-//         --output_suffix ${plot_suffix}.regions
-//     """
-// }
-
-// /*
-//  * STEP 5.6.2: mosdepth amplicon coverage and plots
-//  */
-// if (params.protocol == 'amplicon') {
-//     process MOSDEPTH_AMPLICON {
-//         tag "$sample"
-//         label 'process_medium'
-//         publishDir "${params.outdir}/variants/bam/mosdepth/amplicon", mode: params.publish_dir_mode
-
-//         when:
-//         !params.skip_variants && !params.skip_mosdepth
-
-//         input:
-//         tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_mosdepth_amplicon
-//         path bed from ch_amplicon_bed
-
-//         output:
-//         path "*.regions.bed.gz" into ch_mosdepth_amplicon_region_bed
-//         path "*.{txt,gz,csi}"
-
-//         script:
-//         suffix = params.skip_markduplicates ? "" : ".mkD"
-//         prefix = "${sample}.trim${suffix}.amplicon"
-//         """
-//         collapse_amplicon_bed.py \\
-//             --left_primer_suffix $params.amplicon_left_suffix \\
-//             --right_primer_suffix $params.amplicon_right_suffix \\
-//             $bed \\
-//             amplicon.collapsed.bed
-
-//         mosdepth \\
-//             --by amplicon.collapsed.bed \\
-//             --fast-mode \\
-//             --use-median \\
-//             --thresholds 0,1,10,50,100,500 \\
-//             ${prefix} \\
-//             ${bam[0]}
-//         """
-//     }
-
-//     process MOSDEPTH_AMPLICON_PLOT {
-//         label 'process_medium'
-//         publishDir "${params.outdir}/variants/bam/mosdepth/amplicon/plots", mode: params.publish_dir_mode
-
-//         when:
-//         !params.skip_variants && !params.skip_mosdepth
-
-//         input:
-//         path bed from ch_mosdepth_amplicon_region_bed.collect()
-
-//         output:
-//         path "*.{tsv,pdf}"
-
-//         script:
-//         suffix = params.skip_markduplicates ? "" : ".mkD"
-//         suffix = ".trim${suffix}.amplicon"
-//         """
-//         plot_mosdepth_regions.r \\
-//             --input_files ${bed.join(',')} \\
-//             --input_suffix ${suffix}.regions.bed.gz \\
-//             --output_dir ./ \\
-//             --output_suffix ${suffix}.regions
-//         """
-//     }
-// }
-
-// ////////////////////////////////////////////////////
-// /* --              VARSCAN2                    -- */
-// ////////////////////////////////////////////////////
 
 // /*
 //  * STEP 5.7: Create mpileup file for all variant callers
