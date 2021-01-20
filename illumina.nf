@@ -91,6 +91,7 @@ if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
 // if (params.skip_alignment)  { multiqc_options['publish_dir'] = '' }
 
 include { CAT_FASTQ                          } from './modules/local/process/cat_fastq'                   addParams( options: cat_fastq_options                                           ) 
+include { MULTIQC_CUSTOM_FAIL_MAPPED         } from './modules/local/process/multiqc_custom_fail_mapped'  addParams( options: [publish_files: false]     )
 // include { MULTIQC                            } from './modules/local/process/multiqc'                     addParams( options: multiqc_options                                             )
 include { GET_SOFTWARE_VERSIONS              } from './modules/local/process/get_software_versions'       addParams( options: [publish_files : ['csv':'']]                                )
 
@@ -144,9 +145,9 @@ include { ALIGN_BOWTIE2  } from './modules/local/subworkflow/align_bowtie2'  add
 ////////////////////////////////////////////////////
 
 // Info required for completion email and summary
-def multiqc_report      = []
-// def pass_percent_mapped = [:]
-// def fail_percent_mapped = [:]
+def multiqc_report    = []
+def pass_mapped_reads = [:]
+def fail_mapped_reads = [:]
 
 workflow ILLUMINA {
 
@@ -227,42 +228,42 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
     }
 
-    // /*
-    //  * Filter channels to get samples that passed STAR minimum mapping percentage
-    //  */
-    // ch_fail_mapping_multiqc = Channel.empty()
-    // if (!params.skip_alignment && params.aligner.contains('star')) {
-    //     ch_star_multiqc
-    //         .map { meta, align_log -> [ meta ] + Checks.get_star_percent_mapped(workflow, params, log, align_log) }
-    //         .set { ch_percent_mapped }
+    /*
+     * Filter channels to get samples that passed Bowtie2 minimum mapped reads threshold
+     */
+    ch_fail_mapping_multiqc = Channel.empty()
+    if (!params.skip_variants) {
+        ch_samtools_flagstat
+            .map { meta, flagstat -> [ meta ] + Checks.get_flagstat_mapped_reads(workflow, params, log, flagstat) }
+            .set { ch_mapped_reads }
 
-    //     ch_genome_bam
-    //         .join(ch_percent_mapped, by: [0])
-    //         .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
-    //         .set { ch_genome_bam }
+        ch_sorted_bam
+            .join(ch_mapped_reads, by: [0])
+            .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
+            .set { ch_sorted_bam }
 
-    //     ch_genome_bai
-    //         .join(ch_percent_mapped, by: [0])
-    //         .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
-    //         .set { ch_genome_bai }
+        ch_sorted_bai
+            .join(ch_mapped_reads, by: [0])
+            .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
+            .set { ch_sorted_bai }
 
-    //     ch_percent_mapped
-    //         .branch { meta, mapped, pass ->
-    //             pass: pass
-    //                 pass_percent_mapped[meta.id] = mapped
-    //                 return [ "$meta.id\t$mapped" ]
-    //             fail: !pass
-    //                 fail_percent_mapped[meta.id] = mapped
-    //                 return [ "$meta.id\t$mapped" ]
-    //         }
-    //         .set { ch_pass_fail_mapped }
+        ch_mapped_reads
+            .branch { meta, mapped, pass ->
+                pass: pass
+                    pass_mapped_reads[meta.id] = mapped
+                    return [ "$meta.id\t$mapped" ]
+                fail: !pass
+                    fail_mapped_reads[meta.id] = mapped
+                    return [ "$meta.id\t$mapped" ]
+            }
+            .set { ch_pass_fail_mapped }
 
-    //     MULTIQC_CUSTOM_FAIL_MAPPED ( 
-    //         ch_pass_fail_mapped.fail.collect()
-    //     )
-    //     .set { ch_fail_mapping_multiqc }
-    // }
-
+        MULTIQC_CUSTOM_FAIL_MAPPED ( 
+            ch_pass_fail_mapped.fail.collect()
+        )
+        .set { ch_fail_mapping_multiqc }
+    }
+    
     // /*
     //  * SUBWORKFLOW: Mark duplicate reads
     //  */
@@ -338,8 +339,8 @@ workflow ILLUMINA {
 ////////////////////////////////////////////////////
 
 // workflow.onComplete {
-//     Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_percent_mapped)
-//     Completion.summary(workflow, params, log, fail_percent_mapped, pass_percent_mapped)
+//     Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
+//     Completion.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
 // }
 
 ////////////////////////////////////////////////////
@@ -356,43 +357,6 @@ workflow ILLUMINA {
 // ///////////////////////////////////////////////////////////////////////////////
 
 
-
-// // Get total number of mapped reads from flagstat file
-// def get_mapped_from_flagstat(flagstat) {
-//     def mapped = 0
-//     flagstat.eachLine { line ->
-//         if (line.contains(' mapped (')) {
-//             mapped = line.tokenize().first().toInteger()
-//         }
-//     }
-//     return mapped
-// }
-
-// // Function that checks the number of mapped reads from flagstat output
-// // and returns true if > params.min_mapped_reads and otherwise false
-// pass_mapped_reads = [:]
-// fail_mapped_reads = [:]
-// def check_mapped(sample,flagstat,min_mapped_reads=500) {
-//     mapped = get_mapped_from_flagstat(flagstat)
-//     c_reset = params.monochrome_logs ? '' : "\033[0m";
-//     c_green = params.monochrome_logs ? '' : "\033[0;32m";
-//     c_red = params.monochrome_logs ? '' : "\033[0;31m";
-//     if (mapped < min_mapped_reads.toInteger()) {
-//         log.info ">${c_red}>>>> $sample FAILED MAPPED READ THRESHOLD: ${mapped} < ${params.min_mapped_reads}. IGNORING FOR FURTHER DOWNSTREAM ANALYSIS! <<<<${c_reset}<"
-//         fail_mapped_reads[sample] = mapped
-//         return false
-//     } else {
-//         //log.info "-${c_green}           Passed mapped read threshold > bowtie2 ($sample)   >> ${mapped} <<${c_reset}"
-//         pass_mapped_reads[sample] = mapped
-//         return true
-//     }
-// }
-
-// // Remove samples that failed mapped read threshold
-// ch_sort_bam
-//     .filter { sample, single_end, bam, flagstat -> check_mapped(sample,flagstat,params.min_mapped_reads) }
-//     .map { it[0..2] }
-//     .set { ch_sort_bam }
 
 // /*
 //  * STEP 5.3: Trim amplicon sequences with iVar
