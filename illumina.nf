@@ -97,6 +97,9 @@ varscan_mpileup2cns_options.args += " --min-avg-qual $params.min_base_qual"
 varscan_mpileup2cns_options.args += " --min-var-freq $params.min_allele_freq"
 varscan_mpileup2cns_options.args += (params.protocol != 'amplicon' && params.varscan2_strand_filter) ? " --strand-filter 1" : " --strand-filter 0"
 
+def varscan_bcftools_options   = modules['varscan_bcftools_filter']
+varscan_bcftools_options.args += " -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq'"
+
 def multiqc_options         = modules['multiqc']
 multiqc_options.args       += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 // if (params.skip_alignment)  { multiqc_options['publish_dir'] = '' }
@@ -111,28 +114,10 @@ include { MOSDEPTH as MOSDEPTH_AMPLICON } from './modules/local/mosdepth'       
 // include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from './modules/local/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_amplicon'] )
 include { SAMTOOLS_MPILEUP              } from './modules/local/samtools_mpileup'           addParams( options: samtools_mpileup_options            )
 include { VARSCAN_MPILEUP2CNS           } from './modules/local/varscan_mpileup2cns'        addParams( options: varscan_mpileup2cns_options         )
-include { BCFTOOLS_STATS                } from './modules/local/bcftools_stats'             addParams( options: [:]                                 )
+include { BCFTOOLS_FILTER               } from './modules/local/bcftools_filter'            addParams( options: modules['varscan_bcftools_filter']  )
+
 include { GET_SOFTWARE_VERSIONS         } from './modules/local/get_software_versions'      addParams( options: [publish_files : ['csv':'']]        )
 include { MULTIQC                       } from './modules/local/multiqc'                    addParams( options: multiqc_options                     )
-
-
-// Tabix options -p vcf -f
-// bgzip options -c
-
-//     | bgzip -c > ${sample}.vcf.gz
-//     tabix -p vcf -f ${sample}.vcf.gz
-//     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
-//     
-
-//     bcftools filter \\
-//         -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq' \\
-//         --output-type z \\
-//         --output ${prefix}.vcf.gz \\
-//         ${sample}.vcf.gz
-//     tabix -p vcf -f ${prefix}.vcf.gz
-//     bcftools stats ${prefix}.vcf.gz > ${prefix}.bcftools_stats.txt
-
-
 
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -168,12 +153,18 @@ ivar_trim_options.args2 += " -s $params.ivar_trim_window_width"
 
 def ivar_trim_sort_bam_options = modules['ivar_trim_sort_bam']
 
-include { FASTQC_FASTP        } from './subworkflows/local/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
-include { INPUT_CHECK         } from './subworkflows/local/input_check'         addParams( options: [:] )
-include { PREPARE_GENOME      } from './subworkflows/local/prepare_genome'      addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options )
-include { ALIGN_BOWTIE2       } from './subworkflows/local/align_bowtie2'       addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options )
-include { FILTER_BAM_SAMTOOLS } from './subworkflows/local/filter_bam_samtools' addParams( samtools_view_options: modules['filter_bam'], samtools_index_options: filter_bam_sort_bam_options )
-include { AMPLICON_TRIM_IVAR  } from './subworkflows/local/amplicon_trim_ivar'  addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
+def varscan_consensus_genomecov_options   = modules['varscan_consensus_genomecov']
+varscan_consensus_genomecov_options.args += " | awk '\$4 < ${params.min_coverage}'"
+
+include { FASTQC_FASTP          } from './subworkflows/local/fastqc_fastp'          addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
+include { INPUT_CHECK           } from './subworkflows/local/input_check'           addParams( options: [:] )
+include { PREPARE_GENOME        } from './subworkflows/local/prepare_genome'        addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options )
+include { ALIGN_BOWTIE2         } from './subworkflows/local/align_bowtie2'         addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options )
+include { FILTER_BAM_SAMTOOLS   } from './subworkflows/local/filter_bam_samtools'   addParams( samtools_view_options: modules['filter_bam'], samtools_index_options: filter_bam_sort_bam_options )
+include { AMPLICON_TRIM_IVAR    } from './subworkflows/local/amplicon_trim_ivar'    addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
+include { VCF_BGZIP_TABIX_STATS } from './subworkflows/local/vcf_bgzip_tabix_stats' addParams( bgzip_options: modules['varscan_bgzip'], tabix_options: modules['varscan_tabix'], stats_options: modules['varscan_stats'] )
+include { VCF_TABIX_STATS       } from './subworkflows/local/vcf_tabix_stats'       addParams( tabix_options: modules['varscan_bcftools_filter_tabix'], stats_options: modules['varscan_bcftools_filter_stats'] )
+include { MAKE_CONSENSUS        } from './subworkflows/local/make_consensus'        addParams( genomecov_options: varscan_consensus_genomecov_options, merge_options: modules['varscan_consensus_merge'], mask_options: modules['varscan_consensus_mask'], maskfasta_options: modules['varscan_consensus_maskfasta'], bcftools_options: modules['varscan_consensus_bcftools'], plot_bases_options: modules['varscan_consensus_plot'] )
 
 ////////////////////////////////////////////////////
 /* --    IMPORT NF-CORE MODULES/SUBWORKFLOWS   -- */
@@ -427,6 +418,27 @@ workflow ILLUMINA {
                 SAMTOOLS_MPILEUP.out.mpileup,
                 PREPARE_GENOME.out.fasta
             )
+
+            VCF_BGZIP_TABIX_STATS (
+                VARSCAN_MPILEUP2CNS.out.vcf
+            )
+
+            BCFTOOLS_FILTER (
+                VCF_BGZIP_TABIX_STATS.out.vcf
+            )
+
+            VCF_TABIX_STATS (
+                BCFTOOLS_FILTER.out.vcf
+            )
+
+            MAKE_CONSENSUS (
+                ch_sorted_bam
+                    .join(BCFTOOLS_FILTER.out.vcf, by: [0])
+                    .join(VCF_TABIX_STATS.out.tbi, by: [0]),
+                PREPARE_GENOME.out.fasta
+            )
+
+
         }
 
         // if ('ivar' in callers) {
@@ -490,57 +502,6 @@ workflow ILLUMINA {
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
 ////////////////////////////////////////////////////
-
-// /*
-//  * STEP 5.7.1.1: Genome consensus generation with BCFtools and masked with BEDTools
-//  */
-// process VARSCAN2_CONSENSUS {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/varscan2/consensus", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".tsv")) "base_qc/$filename"
-//                       else if (filename.endsWith(".pdf")) "base_qc/$filename"
-//                       else filename
-//                 }
-
-//     when:
-//     !params.skip_variants && 'varscan2' in callers
-
-//     input:
-//     tuple val(sample), val(single_end), path(bam), path(vcf) from ch_markdup_bam_varscan2_consensus.join(ch_varscan2_highfreq_consensus, by: [0,1])
-//     path fasta from ch_fasta
-
-//     output:
-//     tuple val(sample), val(single_end), path("*consensus.masked.fa") into ch_varscan2_consensus
-//     path "*.{consensus.fa,tsv,pdf}"
-
-//     script:
-//     prefix = "${sample}.AF${params.max_allele_freq}"
-//     """
-//     bedtools genomecov \\
-//         -bga \\
-//         -ibam ${bam[0]} \\
-//         -g $fasta \\
-//         | awk '\$4 < $params.min_coverage' > ${prefix}.lowcov.bed
-
-//     parse_mask_bed.py ${vcf[0]} ${prefix}.lowcov.bed ${prefix}.lowcov.fix.bed
-
-//     bedtools merge -i ${prefix}.lowcov.fix.bed > ${prefix}.mask.bed
-
-//     bedtools maskfasta \\
-//         -fi $fasta \\
-//         -bed ${prefix}.mask.bed \\
-//         -fo ${index_base}.ref.masked.fa
-
-//     cat ${index_base}.ref.masked.fa | bcftools consensus ${vcf[0]} > ${prefix}.consensus.masked.fa
-
-//     header=\$(head -n 1 ${prefix}.consensus.masked.fa | sed 's/>//g')
-//     sed -i "s/\${header}/${sample}/g" ${prefix}.consensus.masked.fa
-
-//     plot_base_density.r --fasta_files ${prefix}.consensus.masked.fa --prefixes $prefix --output_dir ./
-//     """
-// }
 
 // /*
 //  * STEP 5.7.1.2: VarScan 2 variant calling annotation with SnpEff and SnpSift
