@@ -36,13 +36,3 @@ process BCFTOOLS_FILTER {
     echo \$(bcftools --version 2>&1) | sed 's/^.*bcftools //; s/ .*\$//' > ${software}.version.txt
     """
 }
-
-// -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq' \\
-// --output-type z \\
-
-//     bcftools filter \\
-//         -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq' \\
-//         --output-type z \\
-//         --output ${prefix}.vcf.gz \\
-//         ${sample}.vcf.gz
-//     tabix -p vcf -f ${prefix}.vcf.gz
