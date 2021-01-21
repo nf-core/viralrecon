@@ -5,9 +5,9 @@
 params.samtools_view_options  = [:]
 params.samtools_index_options = [:]
 
-include { SAMTOOLS_VIEW      } from '../process/samtools_view'                     addParams( options: params.samtools_view_options  )
-include { SAMTOOLS_INDEX     } from '../../nf-core/software/samtools/index/main'   addParams( options: params.samtools_index_options )
-include { BAM_STATS_SAMTOOLS } from '../../nf-core/subworkflow/bam_stats_samtools' addParams( options: params.samtools_index_options )
+include { SAMTOOLS_VIEW      } from '../../modules/local/samtools_view'                  addParams( options: params.samtools_view_options  )
+include { SAMTOOLS_INDEX     } from '../../modules/nf-core/software/samtools/index/main' addParams( options: params.samtools_index_options )
+include { BAM_STATS_SAMTOOLS } from '../nf-core/bam_stats_samtools'                      addParams( options: params.samtools_index_options )
 
 workflow FILTER_BAM_SAMTOOLS {
     take:

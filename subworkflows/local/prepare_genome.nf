@@ -10,10 +10,10 @@ include {
     GUNZIP as GUNZIP_FASTA
     GUNZIP as GUNZIP_GFF               
     GUNZIP as GUNZIP_AMPLICON_BED
-    GUNZIP as GUNZIP_AMPLICON_FASTA    } from '../process/gunzip' addParams( options: params.genome_options               )
-include { UNTAR as UNTAR_BOWTIE2_INDEX } from '../process/untar'  addParams( options: params.bowtie2_index_options        )
-include { UNTAR as UNTAR_KRAKEN2_DB    } from '../process/untar'  addParams( options: params.index_options                )
-include { BOWTIE2_BUILD                } from '../process/bowtie2_build' addParams( options: params.bowtie2_index_options )
+    GUNZIP as GUNZIP_AMPLICON_FASTA    } from '../../modules/local/gunzip'        addParams( options: params.genome_options        )
+include { UNTAR as UNTAR_BOWTIE2_INDEX } from '../../modules/local/untar'         addParams( options: params.bowtie2_index_options )
+include { UNTAR as UNTAR_KRAKEN2_DB    } from '../../modules/local/untar'         addParams( options: params.index_options         )
+include { BOWTIE2_BUILD                } from '../../modules/local/bowtie2_build' addParams( options: params.bowtie2_index_options )
 
 workflow PREPARE_GENOME {
     take:

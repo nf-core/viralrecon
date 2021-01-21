@@ -6,9 +6,9 @@ params.fastqc_raw_options  = [:]
 params.fastqc_trim_options = [:]
 params.fastp_options       = [:]
 
-include { FASTQC as FASTQC_RAW  } from '../../nf-core/software/fastqc/main' addParams( options: params.fastqc_raw_options  )
-include { FASTQC as FASTQC_TRIM } from '../../nf-core/software/fastqc/main' addParams( options: params.fastqc_trim_options )
-include { FASTP                 } from '../process/fastp'                   addParams( options: params.fastp_options       )
+include { FASTQC as FASTQC_RAW  } from '../../modules/nf-core/software/fastqc/main' addParams( options: params.fastqc_raw_options  )
+include { FASTQC as FASTQC_TRIM } from '../../modules/nf-core/software/fastqc/main' addParams( options: params.fastqc_trim_options )
+include { FASTP                 } from '../../modules/local/fastp'                  addParams( options: params.fastp_options       )
 
 workflow FASTQC_FASTP {
     take:
