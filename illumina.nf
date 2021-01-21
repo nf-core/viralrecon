@@ -86,20 +86,53 @@ def publish_index_options  = params.save_reference ? [publish_dir: 'genome/index
 def cat_fastq_options          = modules['cat_fastq']
 if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
 
+def samtools_mpileup_options    = modules['samtools_mpileup']
+samtools_mpileup_options.args  += " --max-depth $params.mpileup_depth"
+samtools_mpileup_options.args  += " --min-BQ $params.min_base_qual"
+if (params.save_mpileup) { samtools_mpileup_options.publish_files.put('mpileup','') }
+
+def varscan_mpileup2cns_options = modules['varscan_mpileup2cns']
+varscan_mpileup2cns_options.args += " --min-coverage $params.min_coverage"
+varscan_mpileup2cns_options.args += " --min-avg-qual $params.min_base_qual"
+varscan_mpileup2cns_options.args += " --min-var-freq $params.min_allele_freq"
+varscan_mpileup2cns_options.args += (params.protocol != 'amplicon' && params.varscan2_strand_filter) ? " --strand-filter 1" : " --strand-filter 0"
+
 def multiqc_options         = modules['multiqc']
 multiqc_options.args       += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 // if (params.skip_alignment)  { multiqc_options['publish_dir'] = '' }
 
-include { CAT_FASTQ                     } from './modules/local/process/cat_fastq'                  addParams( options: cat_fastq_options                   ) 
-include { MULTIQC_CUSTOM_FAIL_MAPPED    } from './modules/local/process/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]              )
-include { PICARD_COLLECTWGSMETRICS      } from './modules/local/process/picard_collectwgsmetrics'   addParams( options: modules['picard_collectwgsmetrics'] )
-include { COLLAPSE_AMPLICONS            } from './modules/local/process/collapse_amplicons'         addParams( options: modules['collapse_amplicons']       )
-include { MOSDEPTH as MOSDEPTH_GENOME   } from './modules/local/process/mosdepth'                   addParams( options: modules['mosdepth_genome']          )
-include { MOSDEPTH as MOSDEPTH_AMPLICON } from './modules/local/process/mosdepth'                   addParams( options: modules['mosdepth_amplicon']        )
-// include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from './modules/local/process/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_genome']   )
-// include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from './modules/local/process/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_amplicon'] )
-include { GET_SOFTWARE_VERSIONS         } from './modules/local/process/get_software_versions'      addParams( options: [publish_files : ['csv':'']]        )
-include { MULTIQC                       } from './modules/local/process/multiqc'                    addParams( options: multiqc_options                     )
+include { CAT_FASTQ                     } from './modules/local/cat_fastq'                  addParams( options: cat_fastq_options                   ) 
+include { MULTIQC_CUSTOM_FAIL_MAPPED    } from './modules/local/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]              )
+include { PICARD_COLLECTWGSMETRICS      } from './modules/local/picard_collectwgsmetrics'   addParams( options: modules['picard_collectwgsmetrics'] )
+include { COLLAPSE_AMPLICONS            } from './modules/local/collapse_amplicons'         addParams( options: modules['collapse_amplicons']       )
+include { MOSDEPTH as MOSDEPTH_GENOME   } from './modules/local/mosdepth'                   addParams( options: modules['mosdepth_genome']          )
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from './modules/local/mosdepth'                   addParams( options: modules['mosdepth_amplicon']        )
+// include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from './modules/local/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_genome']   )
+// include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from './modules/local/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_amplicon'] )
+include { SAMTOOLS_MPILEUP              } from './modules/local/samtools_mpileup'           addParams( options: samtools_mpileup_options            )
+include { VARSCAN_MPILEUP2CNS           } from './modules/local/varscan_mpileup2cns'        addParams( options: varscan_mpileup2cns_options         )
+include { BCFTOOLS_STATS                } from './modules/local/bcftools_stats'             addParams( options: [:]                                 )
+include { GET_SOFTWARE_VERSIONS         } from './modules/local/get_software_versions'      addParams( options: [publish_files : ['csv':'']]        )
+include { MULTIQC                       } from './modules/local/multiqc'                    addParams( options: multiqc_options                     )
+
+
+// Tabix options -p vcf -f
+// bgzip options -c
+
+//     | bgzip -c > ${sample}.vcf.gz
+//     tabix -p vcf -f ${sample}.vcf.gz
+//     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
+//     
+
+//     bcftools filter \\
+//         -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq' \\
+//         --output-type z \\
+//         --output ${prefix}.vcf.gz \\
+//         ${sample}.vcf.gz
+//     tabix -p vcf -f ${prefix}.vcf.gz
+//     bcftools stats ${prefix}.vcf.gz > ${prefix}.bcftools_stats.txt
+
+
 
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -135,12 +168,12 @@ ivar_trim_options.args2 += " -s $params.ivar_trim_window_width"
 
 def ivar_trim_sort_bam_options = modules['ivar_trim_sort_bam']
 
-include { FASTQC_FASTP        } from './modules/local/subworkflow/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
-include { INPUT_CHECK         } from './modules/local/subworkflow/input_check'         addParams( options: [:] )
-include { PREPARE_GENOME      } from './modules/local/subworkflow/prepare_genome'      addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options )
-include { ALIGN_BOWTIE2       } from './modules/local/subworkflow/align_bowtie2'       addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options )
-include { FILTER_BAM_SAMTOOLS } from './modules/local/subworkflow/filter_bam_samtools' addParams( samtools_view_options: modules['filter_bam'], samtools_index_options: filter_bam_sort_bam_options )
-include { AMPLICON_TRIM_IVAR  } from './modules/local/subworkflow/amplicon_trim_ivar'  addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
+include { FASTQC_FASTP        } from './subworkflows/local/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
+include { INPUT_CHECK         } from './subworkflows/local/input_check'         addParams( options: [:] )
+include { PREPARE_GENOME      } from './subworkflows/local/prepare_genome'      addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options )
+include { ALIGN_BOWTIE2       } from './subworkflows/local/align_bowtie2'       addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options )
+include { FILTER_BAM_SAMTOOLS } from './subworkflows/local/filter_bam_samtools' addParams( samtools_view_options: modules['filter_bam'], samtools_index_options: filter_bam_sort_bam_options )
+include { AMPLICON_TRIM_IVAR  } from './subworkflows/local/amplicon_trim_ivar'  addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
 
 ////////////////////////////////////////////////////
 /* --    IMPORT NF-CORE MODULES/SUBWORKFLOWS   -- */
@@ -159,7 +192,7 @@ include { PICARD_COLLECTMULTIPLEMETRICS } from './modules/nf-core/software/picar
 // prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
 def markduplicates_options   = modules['picard_markduplicates']
 markduplicates_options.args += params.filter_dups ? " REMOVE_DUPLICATES=true" : ""
-include { MARK_DUPLICATES_PICARD } from './modules/nf-core/subworkflow/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['picard_markduplicates_sort_bam'] )
+include { MARK_DUPLICATES_PICARD } from './subworkflows/nf-core/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['picard_markduplicates_sort_bam'] )
 
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */
@@ -379,6 +412,38 @@ workflow ILLUMINA {
             // )
         }
     }
+
+    /*
+     * SUBWORKFLOW: Variant calling
+     */
+    if (!params.skip_variants) {
+        SAMTOOLS_MPILEUP (
+            ch_sorted_bam,
+            PREPARE_GENOME.out.fasta
+        )
+
+        if ('varscan2' in callers) {
+            VARSCAN_MPILEUP2CNS (
+                SAMTOOLS_MPILEUP.out.mpileup,
+                PREPARE_GENOME.out.fasta
+            )
+        }
+
+        // if ('ivar' in callers) {
+        //     // VARSCAN_MPILEUP2CNS (
+        //     //     SAMTOOLS_MPILEUP.out.mpileup,
+        //     //     PREPARE_GENOME.out.fasta
+        //     // )
+        // }
+
+        // if ('bcftools' in callers) {
+        //     // VARSCAN_MPILEUP2CNS (
+        //     //     SAMTOOLS_MPILEUP.out.mpileup,
+        //     //     PREPARE_GENOME.out.fasta
+        //     // )
+        // }
+
+    }
     
     /*
      * MODULE: Pipeline reporting
@@ -425,106 +490,6 @@ workflow ILLUMINA {
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
 ////////////////////////////////////////////////////
-
-// /*
-//  * STEP 5.7: Create mpileup file for all variant callers
-//  */
-// process SAMTOOLS_MPILEUP {
-//     tag "$sample"
-//     label 'process_medium'
-//     if (params.save_mpileup) {
-//         publishDir "${params.outdir}/variants/bam/mpileup", mode: params.publish_dir_mode
-//     }
-
-//     when:
-//     !params.skip_variants
-
-//     input:
-//     tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_mpileup
-//     path fasta from ch_fasta
-
-//     output:
-//     tuple val(sample), val(single_end), path("*.mpileup") into ch_mpileup_varscan2,
-//                                                                ch_mpileup_ivar_variants,
-//                                                                ch_mpileup_ivar_consensus,
-//                                                                ch_mpileup_ivar_bcftools
-
-//     script:
-//     suffix = params.skip_markduplicates ? "" : ".mkD"
-//     prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}" : "${sample}${suffix}"
-//     """
-//     samtools mpileup \\
-//         --count-orphans \\
-//         --ignore-overlaps \\
-//         --no-BAQ \\
-//         --max-depth $params.mpileup_depth \\
-//         --fasta-ref $fasta \\
-//         --min-BQ $params.min_base_qual \\
-//         --output ${prefix}.mpileup \\
-//         ${bam[0]}
-//     """
-// }
-
-// /*
-//  * STEP 5.7.1: Variant calling with VarScan 2
-//  */
-// process VARSCAN2 {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/varscan2", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".log")) "log/$filename"
-//                       else if (filename.endsWith(".txt")) "bcftools_stats/$filename"
-//                       else filename
-//                 }
-
-//     when:
-//     !params.skip_variants && 'varscan2' in callers
-
-//     input:
-//     tuple val(sample), val(single_end), path(mpileup) from ch_mpileup_varscan2
-//     path fasta from ch_fasta
-
-//     output:
-//     tuple val(sample), val(single_end), path("${prefix}.vcf.gz*") into ch_varscan2_highfreq_consensus,
-//                                                                        ch_varscan2_highfreq_snpeff,
-//                                                                        ch_varscan2_highfreq_intersect
-//     tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_varscan2_lowfreq_snpeff
-//     path "${prefix}.bcftools_stats.txt" into ch_varscan2_bcftools_highfreq_mqc
-//     path "*.varscan2.log" into ch_varscan2_log_mqc
-//     path "${sample}.bcftools_stats.txt"
-
-//     script:
-//     prefix = "${sample}.AF${params.max_allele_freq}"
-//     strand = params.protocol != 'amplicon' && params.varscan2_strand_filter ? "--strand-filter 1" : "--strand-filter 0"
-//     """
-//     echo "$sample" > sample_name.list
-//     varscan mpileup2cns \\
-//         $mpileup \\
-//         --min-coverage $params.min_coverage \\
-//         --min-reads2 5 \\
-//         --min-avg-qual $params.min_base_qual \\
-//         --min-var-freq $params.min_allele_freq \\
-//         --p-value 0.99 \\
-//         --output-vcf 1 \\
-//         --vcf-sample-list sample_name.list \\
-//         --variants \\
-//         $strand \\
-//         2> ${sample}.varscan2.log \\
-//         | bgzip -c > ${sample}.vcf.gz
-//     tabix -p vcf -f ${sample}.vcf.gz
-//     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
-//     sed -i.bak '/LC_ALL/d' ${sample}.varscan2.log
-
-//     bcftools filter \\
-//         -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq' \\
-//         --output-type z \\
-//         --output ${prefix}.vcf.gz \\
-//         ${sample}.vcf.gz
-//     tabix -p vcf -f ${prefix}.vcf.gz
-//     bcftools stats ${prefix}.vcf.gz > ${prefix}.bcftools_stats.txt
-//     """
-// }
 
 // /*
 //  * STEP 5.7.1.1: Genome consensus generation with BCFtools and masked with BEDTools
