@@ -21,7 +21,7 @@ process BCFTOOLS_STATS {
     tuple val(meta), path(vcf)
 
     output:
-    tuple val(meta), path("*.txt"), emit: txt
+    tuple val(meta), path("*.txt"), emit: stats
     path  "*.version.txt"         , emit: version
 
     script:
