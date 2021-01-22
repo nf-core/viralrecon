@@ -4,7 +4,7 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 def options    = initOptions(params.options)
 
-process BCFTOOLS_FILTER {
+process BCFTOOLS_MPILEUP {
     tag "$meta.id"
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -18,31 +18,32 @@ process BCFTOOLS_FILTER {
     }
 
     input:
-    tuple val(meta), path(vcf)
+    tuple val(meta), path(bam)
+    path  fasta
 
     output:
-    tuple val(meta), path("*.gz"), emit: vcf
-    path  "*.version.txt"        , emit: version
+    tuple val(meta), path("*.gz") , emit: vcf
+    tuple val(meta), path("*.tbi"), emit: tbi
+    tuple val(meta), path("*.txt"), emit: txt
+    path  "*.version.txt"         , emit: version
 
     script:
     def software = getSoftwareName(task.process)
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
-    bcftools filter \\
-        --output ${prefix}.vcf.gz \\
+    echo "${meta.id}" > sample_name.list
+
+    bcftools mpileup \\
+        --fasta-ref $fasta \\
         $options.args \\
-        $vcf
-    
+        $bam \\
+        | bcftools call --output-type v $options.args2 \\
+        | bcftools reheader --samples sample_name.list \\
+        | bcftools view --output-file ${prefix}.vcf.gz --output-type z $options.args3'
+
+    tabix -p vcf -f ${prefix}.vcf.gz
+    bcftools stats ${prefix}.vcf.gz > ${prefix}.bcftools_stats.txt
+
     echo \$(bcftools --version 2>&1) | sed 's/^.*bcftools //; s/ .*\$//' > ${software}.version.txt
     """
 }
-
-// -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq' \\
-// --output-type z \\
-
-//     bcftools filter \\
-//         -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq' \\
-//         --output-type z \\
-//         --output ${prefix}.vcf.gz \\
-//         ${sample}.vcf.gz
-//     tabix -p vcf -f ${prefix}.vcf.gz
