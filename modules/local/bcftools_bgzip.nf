@@ -28,7 +28,7 @@ process BCFTOOLS_BGZIP {
     def software = getSoftwareName(task.process)
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
-    bgzip $options.args $vcf > ${prefix}.vcf.gz
+    bgzip -c $options.args $vcf > ${prefix}.vcf.gz
     echo \$(bcftools --version 2>&1) | sed 's/^.*bcftools //; s/ .*\$//' > ${software}.version.txt
     """
 }
