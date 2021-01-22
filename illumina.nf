@@ -87,46 +87,56 @@ def cat_fastq_options          = modules['cat_fastq']
 if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
 
 def samtools_mpileup_options    = modules['samtools_mpileup']
-samtools_mpileup_options.args  += " --max-depth $params.mpileup_depth"
-samtools_mpileup_options.args  += " --min-BQ $params.min_base_qual"
 if (params.save_mpileup) { samtools_mpileup_options.publish_files.put('mpileup','') }
 
 def varscan_mpileup2cns_options = modules['varscan_mpileup2cns']
-varscan_mpileup2cns_options.args += " --min-coverage $params.min_coverage"
-varscan_mpileup2cns_options.args += " --min-avg-qual $params.min_base_qual"
 varscan_mpileup2cns_options.args += " --min-var-freq $params.min_allele_freq"
 varscan_mpileup2cns_options.args += (params.protocol != 'amplicon' && params.varscan2_strand_filter) ? " --strand-filter 1" : " --strand-filter 0"
 
 def varscan_bcftools_options   = modules['varscan_bcftools_filter']
 varscan_bcftools_options.args += " -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq'"
 
+def ivar_variants_options = modules['ivar_variants']
+ivar_variants_options.args += " -t $params.min_allele_freq"
+
+def ivar_consensus_options = modules['ivar_consensus']
+ivar_consensus_options.args += " -t $params.max_allele_freq"
+
+def ivar_variants_to_vcf_highfreq_options   = modules['ivar_variants_to_vcf_highfreq']
+ivar_variants_to_vcf_highfreq_options.args += " --allele_freq_thresh $params.max_allele_freq"
+
 def multiqc_options         = modules['multiqc']
 multiqc_options.args       += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 // if (params.skip_alignment)  { multiqc_options['publish_dir'] = '' }
 
-include { CAT_FASTQ                     } from './modules/local/cat_fastq'                  addParams( options: cat_fastq_options                   ) 
-include { MULTIQC_CUSTOM_FAIL_MAPPED    } from './modules/local/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]              )
-include { PICARD_COLLECTWGSMETRICS      } from './modules/local/picard_collectwgsmetrics'   addParams( options: modules['picard_collectwgsmetrics'] )
-include { COLLAPSE_AMPLICONS            } from './modules/local/collapse_amplicons'         addParams( options: modules['collapse_amplicons']       )
-include { MOSDEPTH as MOSDEPTH_GENOME   } from './modules/local/mosdepth'                   addParams( options: modules['mosdepth_genome']          )
-include { MOSDEPTH as MOSDEPTH_AMPLICON } from './modules/local/mosdepth'                   addParams( options: modules['mosdepth_amplicon']        )
-// include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from './modules/local/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_genome']   )
-// include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from './modules/local/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_amplicon'] )
-include { SAMTOOLS_MPILEUP              } from './modules/local/samtools_mpileup'           addParams( options: samtools_mpileup_options            )
-include { VARSCAN_MPILEUP2CNS           } from './modules/local/varscan_mpileup2cns'        addParams( options: varscan_mpileup2cns_options         )
-include { BCFTOOLS_FILTER               } from './modules/local/bcftools_filter'            addParams( options: modules['varscan_bcftools_filter']  )
+include { CAT_FASTQ                  } from './modules/local/cat_fastq'                  addParams( options: cat_fastq_options                   ) 
+include { MULTIQC_CUSTOM_FAIL_MAPPED } from './modules/local/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]              )
+include { PICARD_COLLECTWGSMETRICS   } from './modules/local/picard_collectwgsmetrics'   addParams( options: modules['picard_collectwgsmetrics'] )
+include { COLLAPSE_AMPLICONS         } from './modules/local/collapse_amplicons'         addParams( options: modules['collapse_amplicons']       )
+include { SAMTOOLS_MPILEUP           } from './modules/local/samtools_mpileup'           addParams( options: samtools_mpileup_options            )
+include { VARSCAN_MPILEUP2CNS        } from './modules/local/varscan_mpileup2cns'        addParams( options: varscan_mpileup2cns_options         )
+include { BCFTOOLS_FILTER            } from './modules/local/bcftools_filter'            addParams( options: modules['varscan_bcftools_filter']  )
+include { IVAR_VARIANTS              } from './modules/local/ivar_variants'              addParams( options: ivar_variants_options               )
+include { IVAR_CONSENSUS             } from './modules/local/ivar_consensus'             addParams( options: ivar_consensus_options              )
+include { BCFTOOLS_MPILEUP           } from './modules/local/bcftools_mpileup'           addParams( options: modules['bcftools_mpileup']         ) 
+include { BCFTOOLS_ISEC              } from './modules/local/bcftools_isec'              addParams( options: modules['bcftools_isec']            ) 
+include { GET_SOFTWARE_VERSIONS      } from './modules/local/get_software_versions'      addParams( options: [publish_files : ['csv':'']]        )
+include { MULTIQC                    } from './modules/local/multiqc'                    addParams( options: multiqc_options                     )
 
-include { GET_SOFTWARE_VERSIONS         } from './modules/local/get_software_versions'      addParams( options: [publish_files : ['csv':'']]        )
-include { MULTIQC                       } from './modules/local/multiqc'                    addParams( options: multiqc_options                     )
+include { MOSDEPTH as MOSDEPTH_GENOME                             } from './modules/local/mosdepth'              addParams( options: modules['mosdepth_genome']                )
+include { MOSDEPTH as MOSDEPTH_AMPLICON                           } from './modules/local/mosdepth'              addParams( options: modules['mosdepth_amplicon']              )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from './modules/local/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_genome']   )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from './modules/local/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_amplicon'] )
+include { IVAR_VARIANTS_TO_VCF as IVAR_VARIANTS_TO_VCF_LOWFREQ    } from './modules/local/ivar_variants_to_vcf'  addParams( options: modules['ivar_variants_to_vcf_lowfreq']   )
+include { IVAR_VARIANTS_TO_VCF as IVAR_VARIANTS_TO_VCF_HIGHFREQ   } from './modules/local/ivar_variants_to_vcf'  addParams( options: ivar_variants_to_vcf_highfreq_options     )
+include { QUAST as QUAST_VARSCAN                                  } from './modules/local/quast'                 addParams( quast_options: modules['varscan_quast']            )
+include { QUAST as QUAST_IVAR                                     } from './modules/local/quast'                 addParams( quast_options: modules['ivar_quast']               )
+include { QUAST as QUAST_BCFTOOLS                                 } from './modules/local/quast'                 addParams( quast_options: modules['bcftools_quast']           )
 
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
  */
 def fastp_options    = modules['fastp']
-fastp_options.args  += " --cut_mean_quality $params.cut_mean_quality"
-fastp_options.args  += " --qualified_quality_phred $params.qualified_quality_phred"
-fastp_options.args  += " --unqualified_percent_limit $params.unqualified_percent_limit"
-fastp_options.args  += " --length_required $params.min_trim_length"
 if (params.save_trimmed)      { fastp_options.publish_files.put('trim.fastq.gz','') }
 if (params.save_trimmed_fail) { fastp_options.publish_files.put('fail.fastq.gz','') }
 
@@ -146,25 +156,27 @@ if (params.save_align_intermeds || params.skip_markduplicates) {
 def filter_bam_sort_bam_options = modules['filter_bam_sort_bam']
 
 def ivar_trim_options   = modules['ivar_trim']
-ivar_trim_options.args2 += params.ivar_trim_noprimer ? "" : " -e"
-ivar_trim_options.args2 += " -m $params.ivar_trim_min_len"
-ivar_trim_options.args2 += " -q $params.ivar_trim_min_qual"
-ivar_trim_options.args2 += " -s $params.ivar_trim_window_width"
+ivar_trim_options.args += params.ivar_trim_noprimer ? "" : " -e"
 
 def ivar_trim_sort_bam_options = modules['ivar_trim_sort_bam']
 
-def varscan_consensus_genomecov_options   = modules['varscan_consensus_genomecov']
-varscan_consensus_genomecov_options.args += " | awk '\$4 < ${params.min_coverage}'"
-
-include { FASTQC_FASTP          } from './subworkflows/local/fastqc_fastp'          addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
-include { INPUT_CHECK           } from './subworkflows/local/input_check'           addParams( options: [:] )
-include { PREPARE_GENOME        } from './subworkflows/local/prepare_genome'        addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options )
-include { ALIGN_BOWTIE2         } from './subworkflows/local/align_bowtie2'         addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options )
-include { FILTER_BAM_SAMTOOLS   } from './subworkflows/local/filter_bam_samtools'   addParams( samtools_view_options: modules['filter_bam'], samtools_index_options: filter_bam_sort_bam_options )
-include { AMPLICON_TRIM_IVAR    } from './subworkflows/local/amplicon_trim_ivar'    addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
-include { VCF_BGZIP_TABIX_STATS } from './subworkflows/local/vcf_bgzip_tabix_stats' addParams( bgzip_options: modules['varscan_bgzip'], tabix_options: modules['varscan_tabix'], stats_options: modules['varscan_stats'] )
-include { VCF_TABIX_STATS       } from './subworkflows/local/vcf_tabix_stats'       addParams( tabix_options: modules['varscan_bcftools_filter_tabix'], stats_options: modules['varscan_bcftools_filter_stats'] )
-include { MAKE_CONSENSUS        } from './subworkflows/local/make_consensus'        addParams( genomecov_options: varscan_consensus_genomecov_options, merge_options: modules['varscan_consensus_merge'], mask_options: modules['varscan_consensus_mask'], maskfasta_options: modules['varscan_consensus_maskfasta'], bcftools_options: modules['varscan_consensus_bcftools'], plot_bases_options: modules['varscan_consensus_plot'] )
+include { FASTQC_FASTP          } from './subworkflows/local/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
+include { INPUT_CHECK           } from './subworkflows/local/input_check'         addParams( options: [:] )
+include { PREPARE_GENOME        } from './subworkflows/local/prepare_genome'      addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options )
+include { ALIGN_BOWTIE2         } from './subworkflows/local/align_bowtie2'       addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options )
+include { FILTER_BAM_SAMTOOLS   } from './subworkflows/local/filter_bam_samtools' addParams( samtools_view_options: modules['filter_bam'], samtools_index_options: filter_bam_sort_bam_options )
+include { AMPLICON_TRIM_IVAR    } from './subworkflows/local/amplicon_trim_ivar'  addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
+include { VCF_TABIX_STATS       } from './subworkflows/local/vcf_tabix_stats'     addParams( tabix_options: modules['varscan_bcftools_filter_tabix'], stats_options: modules['varscan_bcftools_filter_stats'] )
+include { MAKE_CONSENSUS as MAKE_CONSENSUS_VARSCAN                     } from './subworkflows/local/make_consensus'        addParams( genomecov_options: modules['varscan_consensus_genomecov'], merge_options: modules['varscan_consensus_merge'], mask_options: modules['varscan_consensus_mask'], maskfasta_options: modules['varscan_consensus_maskfasta'], bcftools_options: modules['varscan_consensus_bcftools'], plot_bases_options: modules['varscan_consensus_plot'] )
+include { MAKE_CONSENSUS as MAKE_CONSENSUS_BCFTOOLS                    } from './subworkflows/local/make_consensus'        addParams( genomecov_options: modules['bcftools_consensus_genomecov'], merge_options: modules['bcftools_consensus_merge'], mask_options: modules['bcftools_consensus_mask'], maskfasta_options: modules['bcftools_consensus_maskfasta'], bcftools_options: modules['bcftools_consensus_bcftools'], plot_bases_options: modules['bcftools_consensus_plot'] )
+include { VCF_BGZIP_TABIX_STATS as VCF_BGZIP_TABIX_STATS_VARSCAN       } from './subworkflows/local/vcf_bgzip_tabix_stats' addParams( bgzip_options: modules['varscan_bgzip'], tabix_options: modules['varscan_tabix'], stats_options: modules['varscan_stats'] )
+include { VCF_BGZIP_TABIX_STATS as VCF_BGZIP_TABIX_STATS_IVAR_LOWFREQ  } from './subworkflows/local/vcf_bgzip_tabix_stats' addParams( bgzip_options: modules['ivar_bgzip_lowfreq'], tabix_options: modules['ivar_tabix_lowfreq'], stats_options: modules['ivar_stats_lowfreq'] )
+include { VCF_BGZIP_TABIX_STATS as VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ } from './subworkflows/local/vcf_bgzip_tabix_stats' addParams( bgzip_options: modules['ivar_bgzip_highfreq'], tabix_options: modules['ivar_tabix_highfreq'], stats_options: modules['ivar_stats_highfreq'] )
+include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_VARSCAN_LOWFREQ             } from './subworkflows/local/snpeff_snpsift'        addParams( snpeff_options: modules['varscan_snpeff_lowfreq'], snpsift_options: modules['varscan_snpsift_lowfreq'], bgzip_options: modules['varscan_snpeff_lowfreq_bgzip'], tabix_options: modules['varscan_snpeff_lowfreq_tabix'], stats_options: modules['varscan_snpeff_lowfreq_stats'] )
+include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_VARSCAN_HIGHFREQ            } from './subworkflows/local/snpeff_snpsift'        addParams( snpeff_options: modules['varscan_snpeff_highfreq'], snpsift_options: modules['varscan_snpsift_highfreq'], bgzip_options: modules['varscan_snpeff_highfreq_bgzip'], tabix_options: modules['varscan_snpeff_highfreq_tabix'], stats_options: modules['varscan_snpeff_highfreq_stats'] )
+include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_IVAR_LOWFREQ                } from './subworkflows/local/snpeff_snpsift'        addParams( snpeff_options: modules['ivar_snpeff_lowfreq'], snpsift_options: modules['ivar_snpsift_lowfreq'], bgzip_options: modules['ivar_snpeff_lowfreq_bgzip'], tabix_options: modules['ivar_snpeff_lowfreq_tabix'], stats_options: modules['ivar_snpeff_lowfreq_stats'] )
+include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_IVAR_HIGHFREQ               } from './subworkflows/local/snpeff_snpsift'        addParams( snpeff_options: modules['ivar_snpeff_highfreq'], snpsift_options: modules['ivar_snpsift_highfreq'], bgzip_options: modules['ivar_snpeff_highfreq_bgzip'], tabix_options: modules['ivar_snpeff_highfreq_tabix'], stats_options: modules['ivar_snpeff_highfreq_stats'] )
+include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_BCFTOOLS                    } from './subworkflows/local/snpeff_snpsift'        addParams( snpeff_options: modules['bcftools_snpeff'], snpsift_options: modules['bcftools_snpsift'], bgzip_options: modules['bcftools_snpeff_bgzip'], tabix_options: modules['bcftools_snpeff_tabix'], stats_options: modules['bcftools_snpeff_stats'] )
 
 ////////////////////////////////////////////////////
 /* --    IMPORT NF-CORE MODULES/SUBWORKFLOWS   -- */
@@ -173,14 +185,11 @@ include { MAKE_CONSENSUS        } from './subworkflows/local/make_consensus'    
 /*
  * MODULE: Installed directly from nf-core/modules
  */
-// suffix = params.skip_markduplicates ? "" : ".mkD"
-// prefix = params.protocol == 'amplicon' ? "${sample}.trim${suffix}" : "${sample}${suffix}"
 include { PICARD_COLLECTMULTIPLEMETRICS } from './modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['picard_collectmultiplemetrics'] )
 
 /*
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
  */
-// prefix = params.protocol == 'amplicon' ? "${sample}.trim.mkD" : "${sample}.mkD"
 def markduplicates_options   = modules['picard_markduplicates']
 markduplicates_options.args += params.filter_dups ? " REMOVE_DUPLICATES=true" : ""
 include { MARK_DUPLICATES_PICARD } from './subworkflows/nf-core/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['picard_markduplicates_sort_bam'] )
@@ -351,7 +360,7 @@ workflow ILLUMINA {
     }
 
     /*
-     * SUBWORKFLOW: Picard metrics
+     * MODULE: Picard metrics
      */
     ch_picard_collectmultiplemetrics_multiqc = Channel.empty()
     ch_picard_collectwgsmetrics_multiqc      = Channel.empty()
@@ -370,7 +379,7 @@ workflow ILLUMINA {
     }
 
     /*
-     * SUBWORKFLOW: Coverage QC plots
+     * MODULE: Coverage QC plots
      */
     ch_mosdepth_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_mosdepth) {
@@ -405,56 +414,179 @@ workflow ILLUMINA {
     }
 
     /*
-     * SUBWORKFLOW: Variant calling
+     * MODULE: Make mpileup to re-use across callers
      */
     if (!params.skip_variants) {
         SAMTOOLS_MPILEUP (
             ch_sorted_bam,
             PREPARE_GENOME.out.fasta
         )
+    }
 
-        if ('varscan2' in callers) {
-            VARSCAN_MPILEUP2CNS (
-                SAMTOOLS_MPILEUP.out.mpileup,
-                PREPARE_GENOME.out.fasta
-            )
+    /*
+     * SUBWORKFLOW: Call variants with VarScan2
+     */
+    if (!params.skip_variants && 'varscan2' in callers) {
 
-            VCF_BGZIP_TABIX_STATS (
-                VARSCAN_MPILEUP2CNS.out.vcf
-            )
+        VARSCAN_MPILEUP2CNS (
+            SAMTOOLS_MPILEUP.out.mpileup,
+            PREPARE_GENOME.out.fasta
+        )
 
-            BCFTOOLS_FILTER (
-                VCF_BGZIP_TABIX_STATS.out.vcf
-            )
+        VCF_BGZIP_TABIX_STATS_VARSCAN (
+            VARSCAN_MPILEUP2CNS.out.vcf
+        )
 
-            VCF_TABIX_STATS (
-                BCFTOOLS_FILTER.out.vcf
-            )
+        BCFTOOLS_FILTER (
+            VCF_BGZIP_TABIX_STATS_VARSCAN.out.vcf
+        )
 
-            MAKE_CONSENSUS (
+        VCF_TABIX_STATS (
+            BCFTOOLS_FILTER.out.vcf
+        )
+
+        if (!params.skip_consensus) {
+            MAKE_CONSENSUS_VARSCAN (
                 ch_sorted_bam
                     .join(BCFTOOLS_FILTER.out.vcf, by: [0])
                     .join(VCF_TABIX_STATS.out.tbi, by: [0]),
                 PREPARE_GENOME.out.fasta
             )
 
-
+            if (!params.skip_variants_quast) {
+                QUAST_VARSCAN (
+                    MAKE_CONSENSUS_VARSCAN.out.fasta.collect{ it[1] },
+                    PREPARE_GENOME.out.fasta,
+                    PREPARE_GENOME.out.gff
+                )
+            }
         }
 
-        // if ('ivar' in callers) {
-        //     // VARSCAN_MPILEUP2CNS (
-        //     //     SAMTOOLS_MPILEUP.out.mpileup,
-        //     //     PREPARE_GENOME.out.fasta
-        //     // )
-        // }
+        if (params.gff && !params.skip_snpeff) {
+            SNPEFF_SNPSIFT_VARSCAN_LOWFREQ (
+                VCF_BGZIP_TABIX_STATS_VARSCAN.out.vcf,
+                PREPARE_GENOME.out.snpeff_db,
+                PREPARE_GENOME.out.snpeff_config,
+                PREPARE_GENOME.out.fasta,
+            )
 
-        // if ('bcftools' in callers) {
-        //     // VARSCAN_MPILEUP2CNS (
-        //     //     SAMTOOLS_MPILEUP.out.mpileup,
-        //     //     PREPARE_GENOME.out.fasta
-        //     // )
-        // }
+            SNPEFF_SNPSIFT_VARSCAN_HIGHFREQ (
+                BCFTOOLS_FILTER.out.vcf,
+                PREPARE_GENOME.out.snpeff_db,
+                PREPARE_GENOME.out.snpeff_config,
+                PREPARE_GENOME.out.fasta
+            )
+        }
+    }
 
+    /*
+     * SUBWORKFLOW: Call variants with IVar
+     */
+    if (!params.skip_variants && 'ivar' in callers) {
+
+        IVAR_VARIANTS (
+            SAMTOOLS_MPILEUP.out.mpileup,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gff
+        )
+
+        IVAR_VARIANTS_TO_VCF_LOWFREQ (
+            IVAR_VARIANTS.out.tsv,
+            ch_ivar_variants_header_mqc
+        )
+
+        VCF_BGZIP_TABIX_STATS_IVAR_LOWFREQ (
+            IVAR_VARIANTS_TO_VCF_LOWFREQ.out.vcf
+        )
+
+        IVAR_VARIANTS_TO_VCF_HIGHFREQ (
+            IVAR_VARIANTS.out.tsv,
+            ch_ivar_variants_header_mqc
+        )
+
+        VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ (
+            IVAR_VARIANTS_TO_VCF_HIGHFREQ.out.vcf
+        )
+
+        if (!params.skip_consensus) {
+            IVAR_CONSENSUS (
+                SAMTOOLS_MPILEUP.out.mpileup
+            )
+
+            if (!params.skip_variants_quast) {
+                QUAST_IVAR (
+                    IVAR_CONSENSUS.out.fasta.collect{ it[1] },
+                    PREPARE_GENOME.out.fasta,
+                    PREPARE_GENOME.out.gff
+                )
+            }
+        }
+
+        if (params.gff && !params.skip_snpeff) {
+            SNPEFF_SNPSIFT_IVAR_LOWFREQ (
+                VCF_BGZIP_TABIX_STATS_IVAR_LOWFREQ.out.vcf,
+                PREPARE_GENOME.out.snpeff_db,
+                PREPARE_GENOME.out.snpeff_config,
+                PREPARE_GENOME.out.fasta,
+            )
+
+            SNPEFF_SNPSIFT_IVAR_HIGHFREQ (
+                VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ.out.vcf,
+                PREPARE_GENOME.out.snpeff_db,
+                PREPARE_GENOME.out.snpeff_config,
+                PREPARE_GENOME.out.fasta
+            )
+        }
+    }
+
+    /*
+     * SUBWORKFLOW: Call variants with BCFTools
+     */
+    if (!params.skip_variants && 'bcftools' in callers) {
+        BCFTOOLS_MPILEUP (
+            ch_sorted_bam,
+            PREPARE_GENOME.out.fasta
+        )
+
+        if (!params.skip_consensus) {
+            MAKE_CONSENSUS_BCFTOOLS (
+                ch_sorted_bam
+                    .join(BCFTOOLS_MPILEUP.out.vcf, by: [0])
+                    .join(BCFTOOLS_MPILEUP.out.tbi, by: [0]),
+                PREPARE_GENOME.out.fasta
+            )
+
+            if (!params.skip_variants_quast) {
+                QUAST_BCFTOOLS (
+                    MAKE_CONSENSUS_BCFTOOLS.out.fasta.collect{ it[1] },
+                    PREPARE_GENOME.out.fasta,
+                    PREPARE_GENOME.out.gff
+                )
+            }
+        }
+
+        if (params.gff && !params.skip_snpeff) {
+            SNPEFF_SNPSIFT_BCFTOOLS (
+                BCFTOOLS_MPILEUP.out.vcf,
+                PREPARE_GENOME.out.snpeff_db,
+                PREPARE_GENOME.out.snpeff_config,
+                PREPARE_GENOME.out.fasta,
+            )
+        }
+    }
+
+    /*
+     * SUBWORKFLOW: Intersect variants across callers
+     */
+    if (!params.skip_variants && callers.size() > 2) {
+        BCFTOOLS_ISEC (
+            BCFTOOLS_FILTER.out.vcf
+                .join(VCF_TABIX_STATS.out.tbi, by: [0])
+                .join(VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ.out.vcf, by: [0])
+                .join(VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ.out.tbi, by: [0])
+                .join(BCFTOOLS_MPILEUP.out.vcf, by: [0])
+                .join(BCFTOOLS_MPILEUP.out.tbi, by: [0])
+        )
     }
     
     /*
@@ -464,12 +596,12 @@ workflow ILLUMINA {
         ch_software_versions.map { it }.collect()
     )
 
-    // /*
-    //  * MultiQC
-    //  */
-    // if (!params.skip_multiqc) {
-    //     workflow_summary    = Schema.params_summary_multiqc(workflow, params.summary_params)
-    //     ch_workflow_summary = Channel.value(workflow_summary)
+    /*
+     * MultiQC
+     */
+    if (!params.skip_multiqc) {
+        workflow_summary    = Schema.params_summary_multiqc(workflow, params.summary_params)
+        ch_workflow_summary = Channel.value(workflow_summary)
 
     //     MULTIQC (
     //         ch_multiqc_config,
@@ -487,7 +619,7 @@ workflow ILLUMINA {
     //         ch_markduplicates_multiqc.collect{it[1]}.ifEmpty([]),
     //     )
     //     multiqc_report = MULTIQC.out.report.toList()
-    // }
+    }
 }
 
 ////////////////////////////////////////////////////
@@ -502,529 +634,6 @@ workflow ILLUMINA {
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
 ////////////////////////////////////////////////////
-
-// /*
-//  * STEP 5.7.1.2: VarScan 2 variant calling annotation with SnpEff and SnpSift
-//  */
-// process VARSCAN2_SNPEFF {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/varscan2/snpeff", mode: params.publish_dir_mode
-
-//     when:
-//     !params.skip_variants && 'varscan2' in callers && params.gff && !params.skip_snpeff
-
-//     input:
-//     tuple val(sample), val(single_end), path(highfreq_vcf), path(lowfreq_vcf) from ch_varscan2_highfreq_snpeff.join(ch_varscan2_lowfreq_snpeff, by: [0,1])
-//     tuple file(db), file(config) from ch_snpeff_db_varscan2
-
-//     output:
-//     path "${prefix}.snpEff.csv" into ch_varscan2_snpeff_highfreq_mqc
-//     path "${sample}.snpEff.csv"
-//     path "*.vcf.gz*"
-//     path "*.{txt,html}"
-
-//     script:
-//     prefix = "${sample}.AF${params.max_allele_freq}"
-//     """
-//     snpEff ${index_base} \\
-//         -config $config \\
-//         -dataDir $db \\
-//         ${lowfreq_vcf[0]} \\
-//         -csvStats ${sample}.snpEff.csv \\
-//         | bgzip -c > ${sample}.snpEff.vcf.gz
-//     tabix -p vcf -f ${sample}.snpEff.vcf.gz
-//     mv snpEff_summary.html ${sample}.snpEff.summary.html
-
-//     SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${sample}.snpEff.vcf.gz \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${sample}.snpSift.table.txt
-
-//     snpEff ${index_base} \\
-//         -config $config \\
-//         -dataDir $db \\
-//         ${highfreq_vcf[0]} \\
-//         -csvStats ${prefix}.snpEff.csv \\
-//         | bgzip -c > ${prefix}.snpEff.vcf.gz
-//     tabix -p vcf -f ${prefix}.snpEff.vcf.gz
-//     mv snpEff_summary.html ${prefix}.snpEff.summary.html
-
-//     SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${prefix}.snpEff.vcf.gz \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${prefix}.snpSift.table.txt
-//     	"""
-// }
-
-// /*
-//  * STEP 5.7.1.3: VarScan 2 consensus sequence report with QUAST
-//  */
-// process VARSCAN2_QUAST {
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/varscan2/quast", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (!filename.endsWith(".tsv")) filename
-//                 }
-
-//     when:
-//     !params.skip_variants && 'varscan2' in callers && !params.skip_variants_quast
-
-//     input:
-//     path consensus from ch_varscan2_consensus.collect{ it[2] }
-//     path fasta from ch_fasta
-//     path gff from ch_gff
-
-//     output:
-//     path "AF${params.max_allele_freq}"
-//     path "report.tsv" into ch_varscan2_quast_mqc
-
-//     script:
-//     features = params.gff ? "--features $gff" : ""
-//     """
-//     quast.py \\
-//         --output-dir AF${params.max_allele_freq} \\
-//         -r $fasta \\
-//         $features \\
-//         --threads $task.cpus \\
-//         ${consensus.join(' ')}
-//     ln -s AF${params.max_allele_freq}/report.tsv
-//     """
-// }
-
-// ////////////////////////////////////////////////////
-// /* --                IVAR                      -- */
-// ////////////////////////////////////////////////////
-
-// /*
-//  * STEP 5.7.2: Variant calling with iVar
-//  */
-// process IVAR_VARIANTS {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/ivar", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".bcftools_stats.txt")) "bcftools_stats/$filename"
-//                       else if (filename.endsWith(".log")) "log/$filename"
-//                       else if (filename.endsWith("_mqc.tsv")) null
-//                       else filename
-//                 }
-
-//     when:
-//     !params.skip_variants && 'ivar' in callers
-
-//     input:
-//     tuple val(sample), val(single_end), path(mpileup) from ch_mpileup_ivar_variants
-//     path header from ch_ivar_variants_header_mqc
-//     path fasta from ch_fasta
-//     path gff from ch_gff
-
-//     output:
-//     tuple val(sample), val(single_end), path("${prefix}.vcf.gz*") into ch_ivar_highfreq_snpeff,
-//                                                                        ch_ivar_highfreq_intersect
-//     tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_ivar_lowfreq_snpeff
-//     path "${prefix}.bcftools_stats.txt" into ch_ivar_bcftools_highfreq_mqc
-//     path "${sample}.variant.counts_mqc.tsv" into ch_ivar_count_mqc
-//     path "${sample}.bcftools_stats.txt"
-//     path "${sample}.tsv"
-//     path "*.log"
-
-//     script:
-//     features = params.gff ? "-g $gff" : ""
-//     prefix = "${sample}.AF${params.max_allele_freq}"
-//     """
-//     cat $mpileup | ivar variants -q $params.min_base_qual -t $params.min_allele_freq -m $params.min_coverage -r $fasta $features -p $sample
-
-//     ivar_variants_to_vcf.py ${sample}.tsv ${sample}.vcf > ${sample}.variant.counts.log
-//     bgzip -c ${sample}.vcf > ${sample}.vcf.gz
-//     tabix -p vcf -f ${sample}.vcf.gz
-//     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
-//     cat $header ${sample}.variant.counts.log > ${sample}.variant.counts_mqc.tsv
-
-//     ivar_variants_to_vcf.py ${sample}.tsv ${prefix}.vcf --pass_only --allele_freq_thresh $params.max_allele_freq > ${prefix}.variant.counts.log
-//     bgzip -c ${prefix}.vcf > ${prefix}.vcf.gz
-//     tabix -p vcf -f ${prefix}.vcf.gz
-//     bcftools stats ${prefix}.vcf.gz > ${prefix}.bcftools_stats.txt
-//     """
-// }
-
-// /*
-//  * STEP 5.7.2.1: Generate consensus sequence with iVar
-//  */
-// process IVAR_CONSENSUS {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/ivar/consensus", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".tsv")) "base_qc/$filename"
-//                       else if (filename.endsWith(".pdf")) "base_qc/$filename"
-//                       else filename
-//                 }
-
-//     when:
-//     !params.skip_variants && 'ivar' in callers
-
-//     input:
-//     tuple val(sample), val(single_end), path(mpileup) from ch_mpileup_ivar_consensus
-//     path fasta from ch_fasta
-
-//     output:
-//     tuple val(sample), val(single_end), path("*.fa") into ch_ivar_consensus
-//     path "*.{txt,tsv,pdf}"
-
-//     script:
-//     prefix = "${sample}.AF${params.max_allele_freq}"
-//     """
-//     cat $mpileup | ivar consensus -q $params.min_base_qual -t $params.max_allele_freq -m $params.min_coverage -n N -p ${prefix}.consensus
-//     header=\$(head -n1 ${prefix}.consensus.fa | sed 's/>//g')
-//     sed -i "s/\${header}/${sample}/g" ${prefix}.consensus.fa
-
-//     plot_base_density.r --fasta_files ${prefix}.consensus.fa --prefixes $prefix --output_dir ./
-//     """
-// }
-
-// /*
-//  * STEP 5.7.2.2: iVar variant calling annotation with SnpEff and SnpSift
-//  */
-// process IVAR_SNPEFF {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/ivar/snpeff", mode: params.publish_dir_mode
-
-//     when:
-//     !params.skip_variants && 'ivar' in callers && params.gff && !params.skip_snpeff
-
-//     input:
-//     tuple val(sample), val(single_end), path(highfreq_vcf), path(lowfreq_vcf) from ch_ivar_highfreq_snpeff.join(ch_ivar_lowfreq_snpeff, by: [0,1])
-//     tuple file(db), file(config) from ch_snpeff_db_ivar
-
-//     output:
-//     path "${prefix}.snpEff.csv" into ch_ivar_snpeff_highfreq_mqc
-//     path "${sample}.snpEff.csv"
-//     path "*.vcf.gz*"
-//     path "*.{txt,html}"
-
-//     script:
-//     prefix = "${sample}.AF${params.max_allele_freq}"
-//     """
-//     snpEff ${index_base} \\
-//         -config $config \\
-//         -dataDir $db \\
-//         ${lowfreq_vcf[0]} \\
-//         -csvStats ${sample}.snpEff.csv \\
-//         | bgzip -c > ${sample}.snpEff.vcf.gz
-//     tabix -p vcf -f ${sample}.snpEff.vcf.gz
-//     mv snpEff_summary.html ${sample}.snpEff.summary.html
-
-//     SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${sample}.snpEff.vcf.gz \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${sample}.snpSift.table.txt
-
-//     snpEff ${index_base} \\
-//         -config $config \\
-//         -dataDir $db \\
-//         ${highfreq_vcf[0]} \\
-//         -csvStats ${prefix}.snpEff.csv \\
-//         | bgzip -c > ${prefix}.snpEff.vcf.gz
-//     tabix -p vcf -f ${prefix}.snpEff.vcf.gz
-//     mv snpEff_summary.html ${prefix}.snpEff.summary.html
-
-//     SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${prefix}.snpEff.vcf.gz \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${prefix}.snpSift.table.txt
-//    	"""
-// }
-
-// /*
-//  * STEP 5.7.2.3: iVar consensus sequence report with QUAST
-//  */
-// process IVAR_QUAST {
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/ivar/quast", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (!filename.endsWith(".tsv")) filename
-//                 }
-
-//     when:
-//     !params.skip_variants && 'ivar' in callers && !params.skip_variants_quast
-
-//     input:
-//     path consensus from ch_ivar_consensus.collect{ it[2] }
-//     path fasta from ch_fasta
-//     path gff from ch_gff
-
-//     output:
-//     path "AF${params.max_allele_freq}"
-//     path "report.tsv" into ch_ivar_quast_mqc
-
-//     script:
-//     features = params.gff ? "--features $gff" : ""
-//     """
-//     quast.py \\
-//         --output-dir AF${params.max_allele_freq} \\
-//         -r $fasta \\
-//         $features \\
-//         --threads $task.cpus \\
-//         ${consensus.join(' ')}
-//     ln -s AF${params.max_allele_freq}/report.tsv
-//     """
-// }
-
-// ////////////////////////////////////////////////////
-// /* --              BCFTOOLS                    -- */
-// ////////////////////////////////////////////////////
-
-// /*
-//  * STEP 5.7.3: Variant calling with BCFTools
-//  */
-// process BCFTOOLS_VARIANTS {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
-//                       else filename
-//                 }
-
-//     when:
-//     !params.skip_variants && 'bcftools' in callers
-
-//     input:
-//     tuple val(sample), val(single_end), path(bam) from ch_markdup_bam_bcftools
-//     path fasta from ch_fasta
-
-//     output:
-//     tuple val(sample), val(single_end), path("*.vcf.gz*") into ch_bcftools_variants_consensus,
-//                                                                ch_bcftools_variants_snpeff,
-//                                                                ch_bcftools_variants_intersect
-//     path "*.bcftools_stats.txt" into ch_bcftools_variants_mqc
-
-//     script:
-//     """
-//     echo "$sample" > sample_name.list
-//     bcftools mpileup \\
-//         --count-orphans \\
-//         --no-BAQ \\
-//         --max-depth $params.mpileup_depth \\
-//         --fasta-ref $fasta \\
-//         --min-BQ $params.min_base_qual \\
-//         --annotate FORMAT/AD,FORMAT/ADF,FORMAT/ADR,FORMAT/DP,FORMAT/SP,INFO/AD,INFO/ADF,INFO/ADR \\
-//         ${bam[0]} \\
-//         | bcftools call --output-type v --ploidy 1 --keep-alts --keep-masked-ref --multiallelic-caller --variants-only \\
-//         | bcftools reheader --samples sample_name.list \\
-//         | bcftools view --output-file ${sample}.vcf.gz --output-type z --include 'INFO/DP>=$params.min_coverage'
-//     tabix -p vcf -f ${sample}.vcf.gz
-//     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
-//     """
-// }
-
-// /*
-//  * STEP 5.7.3.1: Genome consensus generation with BCFtools and masked with BEDTools
-//  */
-// process BCFTOOLS_CONSENSUS {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bcftools/consensus", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".tsv")) "base_qc/$filename"
-//                       else if (filename.endsWith(".pdf")) "base_qc/$filename"
-//                       else filename
-//                 }
-
-//     when:
-//     !params.skip_variants && 'bcftools' in callers
-
-//     input:
-//     tuple val(sample), val(single_end), path(bam), path(vcf) from ch_markdup_bam_bcftools_consensus.join(ch_bcftools_variants_consensus, by: [0,1])
-//     path fasta from ch_fasta
-
-//     output:
-//     tuple val(sample), val(single_end), path("*consensus.masked.fa") into ch_bcftools_consensus_masked
-//     path "*.{consensus.fa,tsv,pdf}"
-
-//     script:
-//     """
-//     bedtools genomecov \\
-//         -bga \\
-//         -ibam ${bam[0]} \\
-//         -g $fasta \\
-//         | awk '\$4 < $params.min_coverage' > ${sample}.lowcov.bed
-
-//     parse_mask_bed.py ${vcf[0]} ${sample}.lowcov.bed ${sample}.lowcov.fix.bed
-
-//     bedtools merge -i ${sample}.lowcov.fix.bed > ${sample}.mask.bed
-
-//     bedtools maskfasta \\
-//         -fi $fasta \\
-//         -bed ${sample}.mask.bed \\
-//         -fo ${index_base}.ref.masked.fa
-        
-//     cat ${index_base}.ref.masked.fa | bcftools consensus ${vcf[0]} > ${sample}.consensus.masked.fa
-
-//     sed -i 's/${index_base}/${sample}/g' ${sample}.consensus.masked.fa
-//     header=\$(head -n1 ${sample}.consensus.masked.fa | sed 's/>//g')
-//     sed -i "s/\${header}/${sample}/g" ${sample}.consensus.masked.fa
-
-//     plot_base_density.r --fasta_files ${sample}.consensus.masked.fa --prefixes $sample --output_dir ./
-//     """
-// }
-
-// /*
-//  * STEP 5.7.3.2: BCFTools variant calling annotation with SnpEff and SnpSift
-//  */
-// process BCFTOOLS_SNPEFF {
-//     tag "$sample"
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bcftools/snpeff", mode: params.publish_dir_mode
-
-//     when:
-//     !params.skip_variants && 'bcftools' in callers && params.gff && !params.skip_snpeff
-
-//     input:
-//     tuple val(sample), val(single_end), path(vcf) from ch_bcftools_variants_snpeff
-//     tuple file(db), file(config) from ch_snpeff_db_bcftools
-
-//     output:
-//     path "*.snpEff.csv" into ch_bcftools_snpeff_mqc
-//     path "*.vcf.gz*"
-//     path "*.{txt,html}"
-
-//     script:
-//     """
-//     snpEff ${index_base} \\
-//         -config $config \\
-//         -dataDir $db \\
-//         ${vcf[0]} \\
-//         -csvStats ${sample}.snpEff.csv \\
-//         | bgzip -c > ${sample}.snpEff.vcf.gz
-//     tabix -p vcf -f ${sample}.snpEff.vcf.gz
-//     mv snpEff_summary.html ${sample}.snpEff.summary.html
-
-//     SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${sample}.snpEff.vcf.gz \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${sample}.snpSift.table.txt
-//     	"""
-// }
-
-// /*
-//  * STEP 5.7.3.3: BCFTools consensus sequence report with QUAST
-//  */
-// process BCFTOOLS_QUAST {
-//     label 'process_medium'
-//     publishDir "${params.outdir}/variants/bcftools", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (!filename.endsWith(".tsv")) filename
-//                 }
-
-//     when:
-//     !params.skip_variants && 'bcftools' in callers && !params.skip_variants_quast
-
-//     input:
-//     path consensus from ch_bcftools_consensus_masked.collect{ it[2] }
-//     path fasta from ch_fasta
-//     path gff from ch_gff
-
-//     output:
-//     path "quast"
-//     path "report.tsv" into ch_bcftools_quast_mqc
-
-//     script:
-//     features = params.gff ? "--features $gff" : ""
-//     """
-//     quast.py \\
-//         --output-dir quast \\
-//         -r $fasta \\
-//         $features \\
-//         --threads $task.cpus \\
-//         ${consensus.join(' ')}
-//     ln -s quast/report.tsv
-//     """
-// }
-
-// ////////////////////////////////////////////////////
-// /* --            INTERSECT VARIANTS            -- */
-// ////////////////////////////////////////////////////
-
-// /*
-//  * STEP 5.8: Intersect variants with BCFTools
-//  */
-// if (!params.skip_variants && callers.size() > 2) {
-
-//     ch_varscan2_highfreq_intersect
-//         .join(ch_ivar_highfreq_intersect, by: [0,1])
-//         .join(ch_bcftools_variants_intersect, by: [0,1])
-//         .set { ch_varscan2_highfreq_intersect }
-
-//     process BCFTOOLS_ISEC {
-//         tag "$sample"
-//         label 'process_medium'
-//         label 'error_ignore'
-//         publishDir "${params.outdir}/variants/intersect", mode: params.publish_dir_mode
-
-//         input:
-//         tuple val(sample), val(single_end), path('varscan2/*'), path('ivar/*'), path('bcftools/*') from ch_varscan2_highfreq_intersect
-
-//         output:
-//         path "$sample"
-
-//         script:
-//         """
-//         bcftools isec  \\
-//             --nfiles +2 \\
-//             --output-type z \\
-//             -p $sample \\
-//             */*.vcf.gz
-//         """
-//     }
-// }
 
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
@@ -2352,22 +1961,6 @@ workflow ILLUMINA {
 
 //     script:
 //     """
-//     echo $workflow.manifest.version > v_pipeline.txt
-//     echo $workflow.nextflow.version > v_nextflow.txt
-//     parallel-fastq-dump --version > v_parallel_fastq_dump.txt
-//     fastqc --version > v_fastqc.txt
-//     fastp --version 2> v_fastp.txt
-//     bowtie2 --version > v_bowtie2.txt
-//     samtools --version > v_samtools.txt
-//     bedtools --version > v_bedtools.txt
-//     mosdepth --version > v_mosdepth.txt
-//     picard CollectMultipleMetrics --version &> v_picard.txt || true
-//     ivar -v > v_ivar.txt
-//     echo \$(varscan 2>&1) > v_varscan.txt
-//     bcftools -v > v_bcftools.txt
-//     snpEff -version > v_snpeff.txt
-//     echo \$(SnpSift 2>&1) > v_snpsift.txt
-//     quast.py --version > v_quast.txt
 //     cutadapt --version > v_cutadapt.txt
 //     kraken2 --version > v_kraken2.txt
 //     spades.py --version > v_spades.txt
