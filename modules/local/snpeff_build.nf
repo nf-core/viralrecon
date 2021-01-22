@@ -1,34 +1,50 @@
+// Import generic module functions
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
+params.options = [:]
+def options    = initOptions(params.options)
 
-// /*
-//  * PREPROCESSING: Build SnpEff database for viral genome
-//  */
-// process MAKE_SNPEFF_DB {
-//     tag "${index_base}.fa"
-//     label 'process_low'
-//     if (params.save_reference) {
-//         publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
-//     }
+process SNPEFF_BUILD {
+    tag "$fasta"
+    label 'process_low'
+    publishDir "${params.outdir}",
+        mode: params.publish_dir_mode,
+        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:'') }
 
-//     when:
-//     (!params.skip_variants || !params.skip_assembly) && params.gff && !params.skip_snpeff
+    conda (params.enable_conda ? 'bioconda::snpeff=5.0' : null)
+    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+        container 'https://depot.galaxyproject.org/singularity/snpeff:5.0--0'
+    } else {
+        container 'quay.io/biocontainers/snpeff:5.0--0'
+    }
 
-//     input:
-//     path ("SnpEffDB/genomes/${index_base}.fa") from ch_fasta
-//     path ("SnpEffDB/${index_base}/genes.gff") from ch_gff
+    input:
+    path fasta
+    path gff
 
-//     output:
-//     tuple path("SnpEffDB"), path("*.config") into ch_snpeff_db_varscan2,
-//                                                   ch_snpeff_db_ivar,
-//                                                   ch_snpeff_db_bcftools,
-//                                                   ch_snpeff_db_spades,
-//                                                   ch_snpeff_db_metaspades,
-//                                                   ch_snpeff_db_unicycler,
-//                                                   ch_snpeff_db_minia
+    output:
+    path 'SnpEffDB'     , emit: db
+    path '*.config'     , emit: config
+    path '*.version.txt', emit: version
 
-//     script:
-//     """
-//     echo "${index_base}.genome : ${index_base}" > snpeff.config
-//     snpEff build -config snpeff.config -dataDir ./SnpEffDB -gff3 -v ${index_base}
-//     """
-// }
+    script:
+    def software = getSoftwareName(task.process)
+    def basename = fasta.baseName
+    """
+    mkdir -p SnpEffDB/genomes/
+    cd SnpEffDB/genomes/
+    ln -s ../../$fasta ${basename}.fa
+
+    cd ../../
+    mkdir -p SnpEffDB/${basename}/
+    cd SnpEffDB/${basename}/
+    ln -s ../../$gff genes.gff
+
+    cd ../../
+    echo "${basename}.genome : ${basename}" > snpeff.config
+
+    snpEff build -config snpeff.config -dataDir ./SnpEffDB -gff3 -v ${basename}
+
+    echo \$(snpEff -version 2>&1) | sed 's/^.*SnpEff //; s/ .*\$//' > ${software}.version.txt
+    """
+}
