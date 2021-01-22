@@ -5,6 +5,7 @@
 params.genome_options        = [:]
 params.index_options         = [:]
 params.bowtie2_index_options = [:]
+params.snpeff_build_options  = [:]
 
 include {
     GUNZIP as GUNZIP_FASTA
@@ -14,6 +15,7 @@ include {
 include { UNTAR as UNTAR_BOWTIE2_INDEX } from '../../modules/local/untar'         addParams( options: params.bowtie2_index_options )
 include { UNTAR as UNTAR_KRAKEN2_DB    } from '../../modules/local/untar'         addParams( options: params.index_options         )
 include { BOWTIE2_BUILD                } from '../../modules/local/bowtie2_build' addParams( options: params.bowtie2_index_options )
+include { SNPEFF_BUILD                 } from '../../modules/local/snpeff_build'  addParams( options: params.snpeff_build_options  )
 
 workflow PREPARE_GENOME {
     take:
@@ -69,7 +71,7 @@ workflow PREPARE_GENOME {
             ch_bowtie2_version = BOWTIE2_BUILD.out.version
         }
     }
-    
+
     /*
      * Prepare reference files required for de novo assembly
      */
@@ -98,6 +100,17 @@ workflow PREPARE_GENOME {
             }
         }
     }
+
+    /*
+     * Make snpEff database
+     */
+    ch_snpeff_db     = Channel.empty()
+    ch_snpeff_config = Channel.empty()
+    if ((!params.skip_variants || !params.skip_assembly) && params.gff && !params.skip_snpeff) {
+        SNPEFF_BUILD ( ch_fasta, ch_gff )
+        ch_snpeff_db     = SNPEFF_BUILD.out.db
+        ch_snpeff_config = SNPEFF_BUILD.out.config
+    }
     
     emit:
     fasta           = ch_fasta            // path: genome.fasta
@@ -106,5 +119,7 @@ workflow PREPARE_GENOME {
     amplicon_fasta  = ch_amplicon_fasta   // path: amplicon.fasta
     bowtie2_index   = ch_bowtie2_index    // path: bowtie2/index/
     kraken2_db      = ch_kraken2_db       // path: kraken2_db/
+    snpeff_db       = ch_snpeff_db        // path: snpeff_db
+    snpeff_config   = ch_snpeff_config    // path: snpeff.config
     bowtie2_version = ch_bowtie2_version  // path: *.version.txt
 }
