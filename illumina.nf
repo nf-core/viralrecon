@@ -108,6 +108,9 @@ ivar_consensus_options.args += " -t $params.max_allele_freq"
 def ivar_variants_to_vcf_highfreq_options   = modules['ivar_variants_to_vcf_highfreq']
 ivar_variants_to_vcf_highfreq_options.args += " --allele_freq_thresh $params.max_allele_freq"
 
+def kraken2_run_options = modules['kraken2_run']
+if (params.save_kraken2_fastq) { kraken2_run_options.publish_files.put('fastq.gz','') }
+
 def multiqc_options         = modules['multiqc']
 multiqc_options.args       += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 // if (params.skip_alignment)  { multiqc_options['publish_dir'] = '' }
@@ -123,6 +126,7 @@ include { IVAR_VARIANTS              } from './modules/local/ivar_variants'     
 include { IVAR_CONSENSUS             } from './modules/local/ivar_consensus'             addParams( options: ivar_consensus_options              )
 include { BCFTOOLS_MPILEUP           } from './modules/local/bcftools_mpileup'           addParams( options: modules['bcftools_mpileup']         ) 
 include { BCFTOOLS_ISEC              } from './modules/local/bcftools_isec'              addParams( options: modules['bcftools_isec']            ) 
+include { KRAKEN2_RUN                } from './modules/local/kraken2_run'                addParams( options: kraken2_run_options                 ) 
 include { GET_SOFTWARE_VERSIONS      } from './modules/local/get_software_versions'      addParams( options: [publish_files : ['csv':'']]        )
 include { MULTIQC                    } from './modules/local/multiqc'                    addParams( options: multiqc_options                     )
 
@@ -591,7 +595,23 @@ workflow ILLUMINA {
                 .join(BCFTOOLS_MPILEUP.out.tbi, by: [0])
         )
     }
-    
+
+    /*
+     * MODULE: Run Kraken2
+     */
+    ch_kraken2_fastq          = Channel.empty()
+    ch_kraken2_report_multiqc = Channel.empty()
+    ch_kraken2_version        = Channel.empty()
+    if (!params.skip_assembly && !params.skip_kraken2) {
+        KRAKEN2_RUN ( 
+            FASTQC_FASTP.out.reads,
+            PREPARE_GENOME.out.kraken2_db
+        )
+        ch_kraken2_fastq          = KRAKEN2_RUN.out.unclassified
+        ch_kraken2_report_multiqc = KRAKEN2_RUN.out.txt
+        ch_kraken2_version        = KRAKEN2_RUN.out.version
+    }
+
     /*
      * MODULE: Pipeline reporting
      */
