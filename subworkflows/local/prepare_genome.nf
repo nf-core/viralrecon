@@ -111,7 +111,7 @@ workflow PREPARE_GENOME {
                     ch_kraken2_db = file(params.kraken2_db)
                 }
             } else {
-                ch_kraken2_db = KRAKEN2_BUILD ( ).db
+                ch_kraken2_db = KRAKEN2_BUILD ( params.kraken2_db_name ).db
             }
         }
     }
@@ -128,13 +128,13 @@ workflow PREPARE_GENOME {
     }
     
     emit:
-    fasta           = ch_fasta            // path: genome.fasta
-    gff             = ch_gff              // path: genome.gff
-    amplicon_bed    = ch_amplicon_bed     // path: amplicon.bed
-    amplicon_fasta  = ch_amplicon_fasta   // path: amplicon.fasta
-    bowtie2_index   = ch_bowtie2_index    // path: bowtie2/index/
-    snpeff_db       = ch_snpeff_db        // path: snpeff_db
-    snpeff_config   = ch_snpeff_config    // path: snpeff.config
-    blast_db        = ch_blast_db         // path: blast_db/
-    kraken2_db      = ch_kraken2_db       // path: kraken2_db/
+    fasta          = ch_fasta            // path: genome.fasta
+    gff            = ch_gff              // path: genome.gff
+    amplicon_bed   = ch_amplicon_bed     // path: amplicon.bed
+    amplicon_fasta = ch_amplicon_fasta   // path: amplicon.fasta
+    bowtie2_index  = ch_bowtie2_index    // path: bowtie2/index/
+    snpeff_db      = ch_snpeff_db        // path: snpeff_db
+    snpeff_config  = ch_snpeff_config    // path: snpeff.config
+    blast_db       = ch_blast_db         // path: blast_db/
+    kraken2_db     = ch_kraken2_db       // path: kraken2_db/
 }
