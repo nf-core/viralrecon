@@ -62,6 +62,9 @@ if (params.amplicon_fasta) { ch_amplicon_fasta = file(params.amplicon_fasta) }
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
+// if (!params.skip_kraken2 && !params.kraken2_db) {
+//     if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
+
 ////////////////////////////////////////////////////
 /* --          CONFIG FILES                    -- */
 ////////////////////////////////////////////////////
