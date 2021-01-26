@@ -162,7 +162,7 @@ def ivar_trim_sort_bam_options = modules['ivar_trim_sort_bam']
 
 include { FASTQC_FASTP          } from './subworkflows/local/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
 include { INPUT_CHECK           } from './subworkflows/local/input_check'         addParams( options: [:] )
-include { PREPARE_GENOME        } from './subworkflows/local/prepare_genome'      addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options )
+include { PREPARE_GENOME        } from './subworkflows/local/prepare_genome'      addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options, makeblastdb_options: modules['blast_makeblastdb'], kraken2_build_options: modules['kraken2_build'])
 include { ALIGN_BOWTIE2         } from './subworkflows/local/align_bowtie2'       addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options )
 include { FILTER_BAM_SAMTOOLS   } from './subworkflows/local/filter_bam_samtools' addParams( samtools_view_options: modules['filter_bam'], samtools_index_options: filter_bam_sort_bam_options )
 include { AMPLICON_TRIM_IVAR    } from './subworkflows/local/amplicon_trim_ivar'  addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
@@ -642,69 +642,6 @@ workflow ILLUMINA {
 // /* --                                                                     -- */
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
-
-// /*
-//  * PREPROCESSING: Build Blast database for viral genome
-//  */
-// process MAKE_BLAST_DB {
-//     tag "$fasta"
-//     label 'process_medium'
-//     if (params.save_reference) {
-//         publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
-//     }
-
-//     when:
-//     !params.skip_assembly && !params.skip_blast
-
-//     input:
-//     path fasta from ch_fasta
-
-//     output:
-//     path "BlastDB" into ch_blast_db
-
-//     script:
-//     """
-//     makeblastdb \\
-//         -in $fasta \\
-//         -parse_seqids \\
-//         -dbtype nucl
-//     mkdir BlastDB && mv ${fasta}* BlastDB
-//     """
-// }
-
-// /*
-//  * PREPROCESSING: Build Kraken2 database for host genome
-//  */
-// if (!isOffline()) {
-//     if (!params.skip_kraken2 && !params.kraken2_db) {
-//         if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
-
-//         process KRAKEN2_BUILD {
-//             tag "$db"
-//             label 'process_high'
-//             if (params.save_reference) {
-//                 publishDir "${params.outdir}/genome", mode: params.publish_dir_mode
-//             }
-
-//             when:
-//             !params.skip_assembly
-
-//             output:
-//             path "$db" into ch_kraken2_db
-
-//             script:
-//             db = "kraken2_${params.kraken2_db_name}"
-//             ftp = params.kraken2_use_ftp ? "--use-ftp" : ""
-//             """
-//             kraken2-build --db $db --threads $task.cpus $ftp --download-taxonomy
-//             kraken2-build --db $db --threads $task.cpus $ftp --download-library $params.kraken2_db_name
-//             kraken2-build --db $db --threads $task.cpus $ftp --build
-//             """
-//         }
-//     }
-// } else {
-//     exit 1, "NXF_OFFLINE=true or -offline has been set so cannot download files required to build Kraken2 database!"
-// }
 
 // /*
 //  * STEP 6.1: Amplicon trimming with Cutadapt
