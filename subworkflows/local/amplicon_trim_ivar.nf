@@ -27,7 +27,7 @@ workflow AMPLICON_TRIM_IVAR {
     
     emit:
     orig_bam         = IVAR_TRIM.out.bam              // channel: [ val(meta), bam   ]
-    log_out          = IVAR_TRIM.out.log_out          // channel: [ val(meta), log   ]
+    log_out          = IVAR_TRIM.out.log              // channel: [ val(meta), log   ]
     ivar_version     = IVAR_TRIM.out.version          //    path: *.version.txt
 
     bam              = BAM_SORT_SAMTOOLS.out.bam      // channel: [ val(meta), [ bam ] ]
