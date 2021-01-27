@@ -134,9 +134,15 @@ include { UNICYCLER                  } from './modules/local/unicycler'         
 // include { BANDAGE as SPADES_BANDAGE    } from './modules/local/bandage'                  addParams( options: modules['spades_bandage']           )
 include { BANDAGE as UNICYCLER_BANDAGE } from './modules/local/bandage'                  addParams( options: modules['unicycler_bandage']        ) 
 // include { BANDAGE as MINIA_BANDAGE     } from './modules/local/bandage'                  addParams( options: modules['minia_bandage']            ) 
-// include { BLAST_BLASTN as SPADES_BLASTN    } from './modules/local/blast_blastn'                addParams( options: modules['spades_blastn']             )
-include { BLAST_BLASTN as UNICYCLER_BLASTN } from './modules/local/blast_blastn'                addParams( options: modules['unicycler_blastn']          ) 
-// include { BLAST_BLASTN as MINIA_BLASTN     } from './modules/local/blast_blastn'                addParams( options: modules['minia_blastn']              ) 
+// include { BLAST_BLASTN as SPADES_BLASTN    } from './modules/local/blast_blastn'         addParams( options: modules['spades_blastn']            )
+include { BLAST_BLASTN as UNICYCLER_BLASTN } from './modules/local/blast_blastn'         addParams( options: modules['unicycler_blastn']         ) 
+// include { BLAST_BLASTN as MINIA_BLASTN     } from './modules/local/blast_blastn'         addParams( options: modules['minia_blastn']             )
+// include { ABACAS as SPADES_ABACAS          } from './modules/local/abacas'               addParams( options: modules['spades_abacas']            )
+include { ABACAS as UNICYCLER_ABACAS       } from './modules/local/abacas'               addParams( options: modules['unicycler_abacas']         )
+// include { ABACAS as MINIA_ABACAS           } from './modules/local/abacas'               addParams( options: modules['minia_abacas']             )
+// include { PLASMIDID as SPADES_PLASMIDID    } from './modules/local/plasmidid'            addParams( options: modules['spades_plasmidid']         )
+include { PLASMIDID as UNICYCLER_PLASMIDID } from './modules/local/plasmidid'            addParams( options: modules['unicycler_plasmidid']      )
+// include { PLASMIDID as MINIA_PLASMIDID     } from './modules/local/plasmidid'            addParams( options: modules['minia_plasmidid']          )
 
 include { GET_SOFTWARE_VERSIONS      } from './modules/local/get_software_versions'      addParams( options: [publish_files : ['csv':'']]        )
 include { MULTIQC                    } from './modules/local/multiqc'                    addParams( options: multiqc_options                     )
@@ -674,6 +680,29 @@ workflow ILLUMINA {
         // awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
         // cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
         // """
+
+        // if (!params.skip_abacas) {
+        //     UNICYCLER_ABACAS (
+        //         UNICYCLER.out.scaffolds,
+        //         PREPARE_GENOME.out.fasta
+        //     )
+        // }
+
+        if (!params.skip_plasmidid) {
+            UNICYCLER_PLASMIDID (
+                UNICYCLER.out.scaffolds,
+                PREPARE_GENOME.out.fasta
+            )
+            //input: tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
+        }
+
+        if (!params.skip_variants_quast) {
+            QUAST_UNICYCLER (
+                MAKE_CONSENSUS_BCFTOOLS.out.fasta.collect{ it[1] },
+                PREPARE_GENOME.out.fasta,
+                PREPARE_GENOME.out.gff
+            )
+        }
     }
 
     /*
@@ -725,65 +754,6 @@ workflow ILLUMINA {
 // ////////////////////////////////////////////////////
 // /* --               UNICYCLER                  -- */
 // ////////////////////////////////////////////////////
-
-// /*
-//  * STEP 6.3.2: Run ABACAS on Unicycler de novo assembly
-//  */
-// process UNICYCLER_ABACAS {
-//     tag "$sample"
-//     label 'process_medium'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/unicycler/abacas", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
-//                       else filename
-//                 }
-
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_abacas
-
-//     input:
-//     tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_abacas
-//     path fasta from ch_fasta
-
-//     output:
-//     path "*.abacas*"
-
-//     script:
-//     """
-//     abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
-//     mv nucmer.delta ${sample}.abacas.nucmer.delta
-//     mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
-//     mv nucmer.tiling ${sample}.abacas.nucmer.tiling
-//     mv unused_contigs.out ${sample}.abacas.unused.contigs.out
-//     """
-// }
-
-// /*
-//  * STEP 6.3.3: Run PlasmidID on Unicycler de novo assembly
-//  */
-// process UNICYCLER_PLASMIDID {
-//     tag "$sample"
-//     label 'process_medium'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/unicycler/plasmidid", mode: params.publish_dir_mode
-
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_plasmidid
-
-//     input:
-//     tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
-//     path fasta from ch_fasta
-
-//     output:
-//     path "$sample"
-
-//     script:
-//     """
-//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-//     mv NO_GROUP/$sample ./$sample
-//     """
-// }
 
 // /*
 //  * STEP 6.3.4: Run Quast on Unicycler de novo assembly
@@ -1794,15 +1764,9 @@ workflow ILLUMINA {
 
 //     script:
 //     """
-//     cutadapt --version > v_cutadapt.txt
-//     kraken2 --version > v_kraken2.txt
 //     spades.py --version > v_spades.txt
-//     unicycler --version > v_unicycler.txt
 //     minia --version > v_minia.txt
-//     blastn -version > v_blast.txt
-//     abacas.pl -v &> v_abacas.txt || true
 //     plasmidID -v > v_plasmidid.txt  || true
-//     Bandage --version > v_bandage.txt
 //     minimap2 --version > v_minimap2.txt
 //     vg version > v_vg.txt
 //     echo \$(R --version 2>&1) > v_R.txt
