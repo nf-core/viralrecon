@@ -662,8 +662,6 @@ workflow ILLUMINA {
             )
         }
 
-        PREPARE_GENOME.out.blast_db.view()
-        println(params.blast_db)
         if (!params.skip_blast) {
             UNICYCLER_BLASTN (
                 UNICYCLER.out.scaffolds,
@@ -727,7 +725,6 @@ workflow ILLUMINA {
 // ////////////////////////////////////////////////////
 // /* --               UNICYCLER                  -- */
 // ////////////////////////////////////////////////////
-
 
 // /*
 //  * STEP 6.3.2: Run ABACAS on Unicycler de novo assembly
