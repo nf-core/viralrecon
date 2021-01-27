@@ -178,6 +178,7 @@ include { FILTER_BAM_SAMTOOLS   } from './subworkflows/local/filter_bam_samtools
 include { AMPLICON_TRIM_IVAR    } from './subworkflows/local/amplicon_trim_ivar'  addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
 include { VCF_TABIX_STATS       } from './subworkflows/local/vcf_tabix_stats'     addParams( tabix_options: modules['varscan_bcftools_filter_tabix'], stats_options: modules['varscan_bcftools_filter_stats'] )
 include { ASSEMBLY_UNICYCLER    } from './subworkflows/local/assembly_unicycler'  addParams( unicycler_options: modules['unicycler'], bandage_options: modules['unicycler_bandage'], blastn_options: modules['unicycler_blastn'], abacas_options: modules['unicycler_abacas'], plasmidid_options: modules['unicycler_plasmidid'], quast_options: modules['unicycler_quast'], snpeff_options: modules['unicycler_snpeff'], snpeff_bgzip_options: modules['unicycler_snpeff_bgzip'], snpeff_tabix_options: modules['unicycler_snpeff_tabix'], snpeff_stats_options: modules['unicycler_snpeff_tabix'], snpsift_options: modules['unicycler_snpsift'] )
+include { ASSEMBLY_MINIA        } from './subworkflows/local/assembly_minia'      addParams( minia_options: modules['minia'], blastn_options: modules['minia_blastn'], abacas_options: modules['minia_abacas'], plasmidid_options: modules['minia_plasmidid'], quast_options: modules['minia_quast'], snpeff_options: modules['minia_snpeff'], snpeff_bgzip_options: modules['minia_snpeff_bgzip'], snpeff_tabix_options: modules['minia_snpeff_tabix'], snpeff_stats_options: modules['minia_snpeff_tabix'], snpsift_options: modules['minia_snpsift'] )
 
 include { MAKE_CONSENSUS as MAKE_CONSENSUS_VARSCAN                     } from './subworkflows/local/make_consensus'        addParams( genomecov_options: modules['varscan_consensus_genomecov'], merge_options: modules['varscan_consensus_merge'], mask_options: modules['varscan_consensus_mask'], maskfasta_options: modules['varscan_consensus_maskfasta'], bcftools_options: modules['varscan_consensus_bcftools'], plot_bases_options: modules['varscan_consensus_plot'] )
 include { MAKE_CONSENSUS as MAKE_CONSENSUS_BCFTOOLS                    } from './subworkflows/local/make_consensus'        addParams( genomecov_options: modules['bcftools_consensus_genomecov'], merge_options: modules['bcftools_consensus_merge'], mask_options: modules['bcftools_consensus_mask'], maskfasta_options: modules['bcftools_consensus_maskfasta'], bcftools_options: modules['bcftools_consensus_bcftools'], plot_bases_options: modules['bcftools_consensus_plot'] )
@@ -642,7 +643,7 @@ workflow ILLUMINA {
     }
 
     /*
-     * SUBWORKFLOW: Run Unicycler
+     * SUBWORKFLOW: Run Unicycler assembly and downstream analysis
      */
     ch_unicycler_version = Channel.empty()
     if (!params.skip_assembly && 'unicycler' in assemblers) {
@@ -654,6 +655,23 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config
         )
+        ch_unicycler_version = ASSEMBLY_UNICYCLER.out.unicycler_version
+    }
+
+    /*
+     * SUBWORKFLOW: Run minia assembly and downstream analysis
+     */
+    ch_minia_version = Channel.empty()
+    if (!params.skip_assembly && 'minia' in assemblers) {
+        ASSEMBLY_MINIA (
+            ch_trim_fastq,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gff,
+            PREPARE_GENOME.out.blast_db,
+            PREPARE_GENOME.out.snpeff_db,
+            PREPARE_GENOME.out.snpeff_config
+        )
+        ch_minia_version = ASSEMBLY_MINIA.out.minia_version
     }
 
     /*
@@ -910,45 +928,6 @@ workflow ILLUMINA {
 //     """
 // }
 
-// ////////////////////////////////////////////////////
-// /* --                MINIA                     -- */
-// ////////////////////////////////////////////////////
-
-// /*
-//  * STEP 6.3: De novo assembly with minia
-//  */
-// process MINIA {
-//     tag "$sample"
-//     label 'process_high'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/minia/${params.minia_kmer}", mode: params.publish_dir_mode
-
-//     when:
-//     !params.skip_assembly && 'minia' in assemblers
-
-//     input:
-//     tuple val(sample), val(single_end), path(reads) from ch_kraken2_minia
-
-//     output:
-//     tuple val(sample), val(single_end), path("*scaffolds.fa") into ch_minia_vg,
-//                                                                    ch_minia_blast,
-//                                                                    ch_minia_abacas,
-//                                                                    ch_minia_plasmidid,
-//                                                                    ch_minia_quast
-
-//     script:
-//     """
-//     echo "${reads.join("\n")}" > input_files.txt
-//     minia \\
-//         -kmer-size $params.minia_kmer \\
-//         -abundance-min 20 \\
-//         -nb-cores $task.cpus \\
-//         -in input_files.txt \\
-//         -out ${sample}.k${params.minia_kmer}.a20
-//     mv ${sample}.k${params.minia_kmer}.a20.contigs.fa ${sample}.k${params.minia_kmer}.scaffolds.fa
-//     """
-// }
-
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
 // /* --                                                                     -- */
@@ -956,33 +935,6 @@ workflow ILLUMINA {
 // /* --                                                                     -- */
 // ///////////////////////////////////////////////////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////////////
-
-// /*
-//  * Parse software version numbers
-//  */
-// process get_software_versions {
-//     publishDir "${params.outdir}/pipeline_info", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".csv")) filename
-//                       else null
-//                 }
-
-//     output:
-//     path "software_versions_mqc.yaml" into ch_software_versions_yaml
-//     path "software_versions.csv"
-
-//     script:
-//     """
-//     spades.py --version > v_spades.txt
-//     minia --version > v_minia.txt
-//     plasmidID -v > v_plasmidid.txt  || true
-//     minimap2 --version > v_minimap2.txt
-//     vg version > v_vg.txt
-//     echo \$(R --version 2>&1) > v_R.txt
-//     multiqc --version > v_multiqc.txt
-//     scrape_software_versions.py &> software_versions_mqc.yaml
-//     """
-// }
 
 // /*
 //  * STEP 7: MultiQC
