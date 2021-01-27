@@ -21,7 +21,7 @@ process KRAKEN2_BUILD {
     val library
 
     output:
-    path 'kraken2'      , emit: db
+    path 'kraken2_db'   , emit: db
     path '*.version.txt', emit: version
 
     script:
