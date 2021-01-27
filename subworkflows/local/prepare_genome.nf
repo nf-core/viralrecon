@@ -99,7 +99,7 @@ workflow PREPARE_GENOME {
                     ch_blast_db = file(params.blast_db)
                 }
             } else {
-                ch_blastdb = BLAST_MAKEBLASTDB ( ch_fasta ).db
+                ch_blast_db = BLAST_MAKEBLASTDB ( ch_fasta ).db
             }
         }
 
