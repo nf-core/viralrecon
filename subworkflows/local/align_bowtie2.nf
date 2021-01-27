@@ -26,7 +26,7 @@ workflow ALIGN_BOWTIE2 {
 
     emit:
     orig_bam         = BOWTIE2_ALIGN.out.bam          // channel: [ val(meta), bam   ]
-    log_out          = BOWTIE2_ALIGN.out.log_out      // channel: [ val(meta), log   ]
+    log_out          = BOWTIE2_ALIGN.out.log          // channel: [ val(meta), log   ]
     fastq            = BOWTIE2_ALIGN.out.fastq        // channel: [ val(meta), fastq ]
     bowtie2_version  = BOWTIE2_ALIGN.out.version      //    path: *.version.txt
 
