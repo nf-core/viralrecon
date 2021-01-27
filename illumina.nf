@@ -131,9 +131,12 @@ include { KRAKEN2_RUN                } from './modules/local/kraken2_run'       
 // include { SPADES                     } from './modules/local/spades'                     addParams( options: modules['spades']                   ) 
 include { UNICYCLER                  } from './modules/local/unicycler'                  addParams( options: modules['unicycler']                ) 
 // include { MINIA                      } from './modules/local/minia'                      addParams( options: modules['minia']                    ) 
-// include { BANDAGE as SPADES_BANDAGE    } from './modules/local/bandage'                  addParams( options: modules['spades']                   )
+// include { BANDAGE as SPADES_BANDAGE    } from './modules/local/bandage'                  addParams( options: modules['spades_bandage']           )
 include { BANDAGE as UNICYCLER_BANDAGE } from './modules/local/bandage'                  addParams( options: modules['unicycler_bandage']        ) 
-// include { BANDAGE as MINIA_BANDAGE     } from './modules/local/bandage'                  addParams( options: modules['minia']                    ) 
+// include { BANDAGE as MINIA_BANDAGE     } from './modules/local/bandage'                  addParams( options: modules['minia_bandage']            ) 
+// include { BLAST_BLASTN as SPADES_BLASTN    } from './modules/local/blast_blastn'                addParams( options: modules['spades_blastn']             )
+include { BLAST_BLASTN as UNICYCLER_BLASTN } from './modules/local/blast_blastn'                addParams( options: modules['unicycler_blastn']          ) 
+// include { BLAST_BLASTN as MINIA_BLASTN     } from './modules/local/blast_blastn'                addParams( options: modules['minia_blastn']              ) 
 
 include { GET_SOFTWARE_VERSIONS      } from './modules/local/get_software_versions'      addParams( options: [publish_files : ['csv':'']]        )
 include { MULTIQC                    } from './modules/local/multiqc'                    addParams( options: multiqc_options                     )
@@ -658,6 +661,21 @@ workflow ILLUMINA {
                 UNICYCLER.out.graph
             )
         }
+
+        PREPARE_GENOME.out.blast_db.view()
+        println(params.blast_db)
+        if (!params.skip_blast) {
+            UNICYCLER_BLASTN (
+                UNICYCLER.out.scaffolds,
+                PREPARE_GENOME.out.blast_db
+            )
+        }
+        // input: path header from ch_blast_outfmt6_header
+        // script:
+        // """
+        // awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
+        // cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
+        // """
     }
 
     /*
@@ -710,40 +728,6 @@ workflow ILLUMINA {
 // /* --               UNICYCLER                  -- */
 // ////////////////////////////////////////////////////
 
-
-// /*
-//  * STEP 6.3.1: Run Blast on MetaSPAdes de novo assembly
-//  */
-// process UNICYCLER_BLAST {
-//     tag "$sample"
-//     label 'process_medium'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/unicycler/blast", mode: params.publish_dir_mode
-
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_blast
-
-//     input:
-//     tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_blast
-//     path db from ch_blast_db
-//     path header from ch_blast_outfmt6_header
-
-//     output:
-//     path "*.blast*"
-
-//     script:
-//     """
-//     blastn \\
-//         -num_threads $task.cpus \\
-//         -db $db/$fasta_base \\
-//         -query $scaffold \\
-//         -outfmt \'6 stitle std slen qlen qcovs\' \\
-//         -out ${sample}.blast.txt
-
-//     awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
-//     cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
-//     """
-// }
 
 // /*
 //  * STEP 6.3.2: Run ABACAS on Unicycler de novo assembly
