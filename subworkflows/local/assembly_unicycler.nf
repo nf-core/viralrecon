@@ -15,7 +15,8 @@ params.snpeff_stats_options = [:]
 params.snpsift_options      = [:]
 
 include { UNICYCLER   } from '../../modules/local/unicycler' addParams( options: params.unicycler_options ) 
-include { ASSEMBLY_QC } from './assembly_qc'                 addParams( bandage_options: params.bandage_options, blastn_options: params.blastn_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options, snpeff_options: params.snpeff_options, snpeff_bgzip_options: params.snpeff_bgzip_options, snpeff_tabix_options: params.snpeff_tabix_options, snpeff_stats_options: params.snpeff_stats_options, snpsift_options: params.snpsift_options )
+include { BANDAGE     } from '../../modules/local/bandage'   addParams( options: params.bandage_options   ) 
+include { ASSEMBLY_QC } from './assembly_qc'                 addParams( blastn_options: params.blastn_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options, snpeff_options: params.snpeff_options, snpeff_bgzip_options: params.snpeff_bgzip_options, snpeff_tabix_options: params.snpeff_tabix_options, snpeff_stats_options: params.snpeff_stats_options, snpsift_options: params.snpsift_options )
 
 workflow ASSEMBLY_UNICYCLER {
     take:
@@ -36,11 +37,23 @@ workflow ASSEMBLY_UNICYCLER {
     //input: tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
 
     /*
+     * Generate assembly visualisation with Bandage
+     */
+    ch_bandage_png     = Channel.empty()
+    ch_bandage_svg     = Channel.empty()
+    ch_bandage_version = Channel.empty()
+    if (!params.skip_bandage) {
+        BANDAGE ( UNICYCLER.out.graph )
+        ch_bandage_version = BANDAGE.out.version
+        ch_bandage_png     = BANDAGE.out.png
+        ch_bandage_svg     = BANDAGE.out.svg
+    }
+
+    /*
      * Downstream assembly steps
      */
     ASSEMBLY_QC ( 
         UNICYCLER.out.scaffolds,
-        UNICYCLER.out.graph,
         fasta,
         gff,
         blast_db,
@@ -54,17 +67,17 @@ workflow ASSEMBLY_UNICYCLER {
     log_out           = UNICYCLER.out.log                // channel: [ val(meta), [ log ] ]
     unicycler_version = UNICYCLER.out.version            //    path: *.version.txt
 
+    bandage_png       = ch_bandage_png                    // channel: [ val(meta), [ png ] ]
+    bandage_svg       = ch_bandage_svg                    // channel: [ val(meta), [ svg ] ]
+    bandage_version   = ch_bandage_version                //    path: *.version.txt
+
     blast_txt         = ASSEMBLY_QC.out.blast_txt         // channel: [ val(meta), [ txt ] ]
     blast_version     = ASSEMBLY_QC.out.blast_version     //    path: *.version.txt
 
     quast_results     = ASSEMBLY_QC.out.quast_results     // channel: [ val(meta), [ results ] ]
     quast_tsv         = ASSEMBLY_QC.out.quast_tsv         // channel: [ val(meta), [ tsv ] ]
     quast_version     = ASSEMBLY_QC.out.quast_version     //    path: *.version.txt
-
-    bandage_png       = ASSEMBLY_QC.out.bandage_png       // channel: [ val(meta), [ png ] ]
-    bandage_svg       = ASSEMBLY_QC.out.bandage_svg       // channel: [ val(meta), [ svg ] ]
-    bandage_version   = ASSEMBLY_QC.out.bandage_version   //    path: *.version.txt
-
+    
     abacas_results    = ASSEMBLY_QC.out.abacas_results    // channel: [ val(meta), [ results ] ]
     abacas_version    = ASSEMBLY_QC.out.abacas_version    //    path: *.version.txt
 
