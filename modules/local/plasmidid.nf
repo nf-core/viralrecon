@@ -28,14 +28,14 @@ process PLASMIDID {
 
     script:
     def software = getSoftwareName(task.process)
-    prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
+    prefix       = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
     plasmidID \\
         -d $fasta \\
         -s $prefix \\
         -c $scaffold \\
         $options.args \\
-        -o . \\
+        -o .
     
     mv NO_GROUP/$prefix ./$prefix
 
