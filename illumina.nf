@@ -126,6 +126,7 @@ include { IVAR_VARIANTS              } from './modules/local/ivar_variants'     
 include { IVAR_CONSENSUS             } from './modules/local/ivar_consensus'             addParams( options: ivar_consensus_options              )
 include { BCFTOOLS_MPILEUP           } from './modules/local/bcftools_mpileup'           addParams( options: modules['bcftools_mpileup']         ) 
 include { BCFTOOLS_ISEC              } from './modules/local/bcftools_isec'              addParams( options: modules['bcftools_isec']            ) 
+include { CUTADAPT                   } from './modules/local/cutadapt'                   addParams( options: modules['cutadapt']                 )
 include { KRAKEN2_RUN                } from './modules/local/kraken2_run'                addParams( options: kraken2_run_options                 ) 
 include { GET_SOFTWARE_VERSIONS      } from './modules/local/get_software_versions'      addParams( options: [publish_files : ['csv':'']]        )
 include { MULTIQC                    } from './modules/local/multiqc'                    addParams( options: multiqc_options                     )
@@ -193,6 +194,7 @@ include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_BCFTOOLS                    } from '.
  * MODULE: Installed directly from nf-core/modules
  */
 include { PICARD_COLLECTMULTIPLEMETRICS } from './modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['picard_collectmultiplemetrics'] )
+include { FASTQC                        } from './modules/nf-core/software/fastqc/main'                        addParams( options: modules['cutadapt_fastqc']               )
 
 /*
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
@@ -262,6 +264,7 @@ workflow ILLUMINA {
         params.skip_fastqc || params.skip_qc,
         params.skip_trimming
     )
+    ch_trim_fastq        = FASTQC_FASTP.out.reads
     ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
     ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
     
@@ -276,7 +279,7 @@ workflow ILLUMINA {
     ch_bowtie2_multiqc   = Channel.empty()
     if (!params.skip_variants) {
         ALIGN_BOWTIE2 (
-            FASTQC_FASTP.out.reads,
+            ch_trim_fastq,
             PREPARE_GENOME.out.bowtie2_index
         )
         ch_sorted_bam        = ALIGN_BOWTIE2.out.bam
@@ -597,19 +600,41 @@ workflow ILLUMINA {
     }
 
     /*
+     * MODULE: Amplicon trimming with Cutadapt
+     */
+    ch_cutadapt_multiqc        = Channel.empty()
+    ch_cutadapt_fastqc_multiqc = Channel.empty()
+    ch_cutadapt_version        = Channel.empty()
+    if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_amplicon_trimming) {
+        CUTADAPT (
+            ch_trim_fastq,
+            PREPARE_GENOME.out.amplicon_fasta
+        )
+        ch_trim_fastq       = CUTADAPT.out.reads
+        ch_cutadapt_multiqc = CUTADAPT.out.log
+        ch_cutadapt_version = CUTADAPT.out.version
+
+        if (!params.skip_fastqc) {
+            FASTQC ( 
+                CUTADAPT.out.reads 
+            )
+            ch_cutadapt_fastqc_multiqc = FASTQC.out.zip
+        }
+    }
+
+    /*
      * MODULE: Run Kraken2
      */
-    ch_kraken2_fastq          = Channel.empty()
-    ch_kraken2_report_multiqc = Channel.empty()
-    ch_kraken2_version        = Channel.empty()
+    ch_kraken2_multiqc = Channel.empty()
+    ch_kraken2_version = Channel.empty()
     if (!params.skip_assembly && !params.skip_kraken2) {
         KRAKEN2_RUN ( 
-            FASTQC_FASTP.out.reads,
+            ch_trim_fastq,
             PREPARE_GENOME.out.kraken2_db
         )
-        ch_kraken2_fastq          = KRAKEN2_RUN.out.unclassified
-        ch_kraken2_report_multiqc = KRAKEN2_RUN.out.txt
-        ch_kraken2_version        = KRAKEN2_RUN.out.version
+        ch_trim_fastq      = KRAKEN2_RUN.out.unclassified
+        ch_kraken2_multiqc = KRAKEN2_RUN.out.txt
+        ch_kraken2_version = KRAKEN2_RUN.out.version
     }
 
     /*
@@ -657,117 +682,6 @@ workflow ILLUMINA {
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
 ////////////////////////////////////////////////////
-
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                    DENOVO ASSEMBLY PROCESSES                        -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-
-// /*
-//  * STEP 6.1: Amplicon trimming with Cutadapt
-//  */
-// if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_amplicon_trimming) {
-//     process CUTADAPT {
-//         tag "$sample"
-//         label 'process_medium'
-//         publishDir "${params.outdir}/assembly/cutadapt", mode: params.publish_dir_mode,
-//             saveAs: { filename ->
-//                           if (filename.endsWith(".html")) "fastqc/$filename"
-//                           else if (filename.endsWith(".zip")) "fastqc/zips/$filename"
-//                           else if (filename.endsWith(".log")) "log/$filename"
-//                           else params.save_trimmed ? filename : null
-//                     }
-
-//         input:
-//         tuple val(sample), val(single_end), path(reads) from ch_fastp_cutadapt
-//         path amplicons from ch_amplicon_fasta
-
-//         output:
-//         tuple val(sample), val(single_end), path("*.ptrim.fastq.gz") into ch_cutadapt_kraken2
-//         path "*.{zip,html}" into ch_cutadapt_fastqc_mqc
-//         path "*.log" into ch_cutadapt_mqc
-
-//         script:
-//         adapters = single_end ? "-a file:primers.fasta" : "-a file:primers.fasta -A file:primers.fasta"
-//         out_reads = single_end ? "-o ${sample}.ptrim.fastq.gz" : "-o ${sample}_1.ptrim.fastq.gz -p ${sample}_2.ptrim.fastq.gz"
-//         """
-//         sed -r '/^[ACTGactg]+\$/ s/\$/X/g' $amplicons > primers.fasta
-
-//         cutadapt \\
-//             --cores $task.cpus \\
-//             --overlap 5 \\
-//             --minimum-length 30 \\
-//             --error-rate 0.1 \\
-//             $adapters \\
-//             $out_reads \\
-//             $reads \\
-//             > ${sample}.cutadapt.log
-
-//         fastqc --quiet --threads $task.cpus *.ptrim.fastq.gz
-//         """
-//     }
-//     ch_fastp_kraken2 = ch_cutadapt_kraken2
-
-// } else {
-//     ch_cutadapt_mqc = Channel.empty()
-//     ch_cutadapt_fastqc_mqc = Channel.empty()
-// }
-
-// /*
-//  * STEP 6.2: Filter reads with Kraken2
-//  */
-// if (!params.skip_kraken2 && !params.skip_assembly) {
-//     process KRAKEN2 {
-//         tag "$sample"
-//         label 'process_high'
-//         publishDir "${params.outdir}/assembly/kraken2", mode: params.publish_dir_mode,
-//             saveAs: { filename ->
-//                           if (filename.endsWith(".txt")) filename
-//                           else params.save_kraken2_fastq ? filename : null
-//                     }
-
-//         input:
-//         tuple val(sample), val(single_end), path(reads) from ch_fastp_kraken2
-//         path db from ch_kraken2_db
-
-//         output:
-//         tuple val(sample), val(single_end), path("*.viral*") into ch_kraken2_spades,
-//                                                                   ch_kraken2_metaspades,
-//                                                                   ch_kraken2_unicycler,
-//                                                                   ch_kraken2_minia
-//         path "*.report.txt" into ch_kraken2_report_mqc
-//         path "*.host*"
-
-
-//         script:
-//         pe = single_end ? "" : "--paired"
-//         classified = single_end ? "${sample}.host.fastq" : "${sample}.host#.fastq"
-//         unclassified = single_end ? "${sample}.viral.fastq" : "${sample}.viral#.fastq"
-//         """
-//         kraken2 \\
-//             --db $db \\
-//             --threads $task.cpus \\
-//             --unclassified-out $unclassified \\
-//             --classified-out $classified \\
-//             --report ${sample}.kraken2.report.txt \\
-//             --report-zero-counts \\
-//             $pe \\
-//             --gzip-compressed \\
-//             $reads
-//         pigz -p $task.cpus *.fastq
-//         """
-//     }
-// } else {
-//     ch_fastp_kraken2
-//         .into { ch_kraken2_spades
-//                 ch_kraken2_metaspades
-//                 ch_kraken2_unicycler
-//                 ch_kraken2_minia }
-//     ch_kraken2_report_mqc = Channel.empty()
-// }
 
 // ////////////////////////////////////////////////////
 // /* --                SPADES                    -- */
