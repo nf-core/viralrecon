@@ -19,7 +19,7 @@ process BANDAGE {
     }
 
     input:
-    tuple val(meta), path(assembly_graph)
+    tuple val(meta), path(graph)
     
     output:
     tuple val(meta), path('*.png'), emit: png
@@ -30,8 +30,8 @@ process BANDAGE {
     def software = getSoftwareName(task.process)
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
-    Bandage image $assembly_graph ${prefix}.png $options.args
-    Bandage image $assembly_graph ${prefix}.svg $options.args
+    Bandage image $graph ${prefix}.png $options.args
+    Bandage image $graph ${prefix}.svg $options.args
     
     echo \$(Bandage --version 2>&1) | sed 's/^.*Version: //; s/ .*\$//' > ${software}.version.txt
     """

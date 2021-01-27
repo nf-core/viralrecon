@@ -655,7 +655,7 @@ workflow ILLUMINA {
 
         if (!params.skip_bandage) {
             UNICYCLER_BANDAGE (
-                UNICYCLER.out.assembly_graph
+                UNICYCLER.out.graph
             )
         }
     }

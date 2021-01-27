@@ -23,7 +23,7 @@ process UNICYCLER {
     
     output:
     tuple val(meta), path('*.scaffolds.fa'), emit: scaffolds
-    tuple val(meta), path('*.assembly.gfa'), emit: assembly_graph
+    tuple val(meta), path('*.assembly.gfa'), emit: graph
     tuple val(meta), path('*.log')         , emit: log
     path  '*.version.txt'                  , emit: version
     
