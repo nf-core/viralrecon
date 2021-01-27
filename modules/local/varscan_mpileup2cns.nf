@@ -24,7 +24,7 @@ process VARSCAN_MPILEUP2CNS {
 
     output:
     tuple val(meta), path("*.vcf"), emit: vcf
-    tuple val(meta), path("*.log"), emit: log_out
+    tuple val(meta), path("*.log"), emit: log
     path  "*.version.txt"         , emit: version
 
     script:
