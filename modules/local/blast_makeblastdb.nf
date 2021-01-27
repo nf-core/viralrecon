@@ -22,7 +22,7 @@ process BLAST_MAKEBLASTDB {
     path fasta
 
     output:
-    path 'blastdb'      , emit: db
+    path 'blast_db'     , emit: db
     path '*.version.txt', emit: version
 
     script:
@@ -32,8 +32,8 @@ process BLAST_MAKEBLASTDB {
         -in $fasta \\
         $options.args
 
-    mkdir blastdb
-    mv ${fasta}* blastdb
+    mkdir blast_db
+    mv ${fasta}* blast_db
 
     echo \$(blastn -version 2>&1) | sed 's/^.*blastn: //; s/ .*\$//' > ${software}.version.txt
     """
