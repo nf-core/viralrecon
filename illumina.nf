@@ -128,6 +128,13 @@ include { BCFTOOLS_MPILEUP           } from './modules/local/bcftools_mpileup'  
 include { BCFTOOLS_ISEC              } from './modules/local/bcftools_isec'              addParams( options: modules['bcftools_isec']            ) 
 include { CUTADAPT                   } from './modules/local/cutadapt'                   addParams( options: modules['cutadapt']                 )
 include { KRAKEN2_RUN                } from './modules/local/kraken2_run'                addParams( options: kraken2_run_options                 ) 
+// include { SPADES                     } from './modules/local/spades'                     addParams( options: modules['spades']                   ) 
+include { UNICYCLER                  } from './modules/local/unicycler'                  addParams( options: modules['unicycler']                ) 
+// include { MINIA                      } from './modules/local/minia'                      addParams( options: modules['minia']                    ) 
+// include { BANDAGE as SPADES_BANDAGE    } from './modules/local/bandage'                  addParams( options: modules['spades']                   )
+include { BANDAGE as UNICYCLER_BANDAGE } from './modules/local/bandage'                  addParams( options: modules['unicycler_bandage']        ) 
+// include { BANDAGE as MINIA_BANDAGE     } from './modules/local/bandage'                  addParams( options: modules['minia']                    ) 
+
 include { GET_SOFTWARE_VERSIONS      } from './modules/local/get_software_versions'      addParams( options: [publish_files : ['csv':'']]        )
 include { MULTIQC                    } from './modules/local/multiqc'                    addParams( options: multiqc_options                     )
 
@@ -472,7 +479,7 @@ workflow ILLUMINA {
             }
         }
 
-        if (params.gff && !params.skip_snpeff) {
+        if (params.gff && !params.skip_variants_snpeff) {
             SNPEFF_SNPSIFT_VARSCAN_LOWFREQ (
                 VCF_BGZIP_TABIX_STATS_VARSCAN.out.vcf,
                 PREPARE_GENOME.out.snpeff_db,
@@ -532,7 +539,7 @@ workflow ILLUMINA {
             }
         }
 
-        if (params.gff && !params.skip_snpeff) {
+        if (params.gff && !params.skip_variants_snpeff) {
             SNPEFF_SNPSIFT_IVAR_LOWFREQ (
                 VCF_BGZIP_TABIX_STATS_IVAR_LOWFREQ.out.vcf,
                 PREPARE_GENOME.out.snpeff_db,
@@ -575,7 +582,7 @@ workflow ILLUMINA {
             }
         }
 
-        if (params.gff && !params.skip_snpeff) {
+        if (params.gff && !params.skip_variants_snpeff) {
             SNPEFF_SNPSIFT_BCFTOOLS (
                 BCFTOOLS_MPILEUP.out.vcf,
                 PREPARE_GENOME.out.snpeff_db,
@@ -638,6 +645,22 @@ workflow ILLUMINA {
     }
 
     /*
+     * MODULE: Run Unicycler
+     */
+    ch_unicycler_version = Channel.empty()
+    if (!params.skip_assembly && 'unicycler' in assemblers) {
+        UNICYCLER (
+            ch_trim_fastq
+        )
+
+        if (!params.skip_bandage) {
+            UNICYCLER_BANDAGE (
+                UNICYCLER.out.assembly_graph
+            )
+        }
+    }
+
+    /*
      * MODULE: Pipeline reporting
      */
     GET_SOFTWARE_VERSIONS ( 
@@ -682,6 +705,245 @@ workflow ILLUMINA {
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
 ////////////////////////////////////////////////////
+
+// ////////////////////////////////////////////////////
+// /* --               UNICYCLER                  -- */
+// ////////////////////////////////////////////////////
+
+
+// /*
+//  * STEP 6.3.1: Run Blast on MetaSPAdes de novo assembly
+//  */
+// process UNICYCLER_BLAST {
+//     tag "$sample"
+//     label 'process_medium'
+//     label 'error_ignore'
+//     publishDir "${params.outdir}/assembly/unicycler/blast", mode: params.publish_dir_mode
+
+//     when:
+//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_blast
+
+//     input:
+//     tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_blast
+//     path db from ch_blast_db
+//     path header from ch_blast_outfmt6_header
+
+//     output:
+//     path "*.blast*"
+
+//     script:
+//     """
+//     blastn \\
+//         -num_threads $task.cpus \\
+//         -db $db/$fasta_base \\
+//         -query $scaffold \\
+//         -outfmt \'6 stitle std slen qlen qcovs\' \\
+//         -out ${sample}.blast.txt
+
+//     awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
+//     cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
+//     """
+// }
+
+// /*
+//  * STEP 6.3.2: Run ABACAS on Unicycler de novo assembly
+//  */
+// process UNICYCLER_ABACAS {
+//     tag "$sample"
+//     label 'process_medium'
+//     label 'error_ignore'
+//     publishDir "${params.outdir}/assembly/unicycler/abacas", mode: params.publish_dir_mode,
+//         saveAs: { filename ->
+//                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
+//                       else filename
+//                 }
+
+//     when:
+//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_abacas
+
+//     input:
+//     tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_abacas
+//     path fasta from ch_fasta
+
+//     output:
+//     path "*.abacas*"
+
+//     script:
+//     """
+//     abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
+//     mv nucmer.delta ${sample}.abacas.nucmer.delta
+//     mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
+//     mv nucmer.tiling ${sample}.abacas.nucmer.tiling
+//     mv unused_contigs.out ${sample}.abacas.unused.contigs.out
+//     """
+// }
+
+// /*
+//  * STEP 6.3.3: Run PlasmidID on Unicycler de novo assembly
+//  */
+// process UNICYCLER_PLASMIDID {
+//     tag "$sample"
+//     label 'process_medium'
+//     label 'error_ignore'
+//     publishDir "${params.outdir}/assembly/unicycler/plasmidid", mode: params.publish_dir_mode
+
+//     when:
+//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_plasmidid
+
+//     input:
+//     tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
+//     path fasta from ch_fasta
+
+//     output:
+//     path "$sample"
+
+//     script:
+//     """
+//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
+//     mv NO_GROUP/$sample ./$sample
+//     """
+// }
+
+// /*
+//  * STEP 6.3.4: Run Quast on Unicycler de novo assembly
+//  */
+// process UNICYCLER_QUAST {
+//     label 'process_medium'
+//     label 'error_ignore'
+//     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode,
+//         saveAs: { filename ->
+//                       if (!filename.endsWith(".tsv")) filename
+//                 }
+
+//     when:
+//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_assembly_quast
+
+//     input:
+//     path scaffolds from ch_unicycler_quast.collect{ it[2] }
+//     path fasta from ch_fasta
+//     path gff from ch_gff
+
+//     output:
+//     path "quast"
+//     path "report.tsv" into ch_quast_unicycler_mqc
+
+//     script:
+//     features = params.gff ? "--features $gff" : ""
+//     """
+//     quast.py \\
+//         --output-dir quast \\
+//         -r $fasta \\
+//         $features \\
+//         --threads $task.cpus \\
+//         ${scaffolds.join(' ')}
+//     ln -s quast/report.tsv
+//     """
+// }
+
+// /*
+//  * STEP 6.3.5: Overlap scaffolds with Minimap2, induce and polish assembly, and call variants with seqwish and vg
+//  */
+// process UNICYCLER_VG {
+//     tag "$sample"
+//     label 'process_medium'
+//     label 'error_ignore'
+//     publishDir "${params.outdir}/assembly/unicycler/variants", mode: params.publish_dir_mode,
+//         saveAs: { filename ->
+//                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
+//                       else if (filename.endsWith(".png")) "bandage/$filename"
+//                       else if (filename.endsWith(".svg")) "bandage/$filename"
+//                       else filename
+//                 }
+
+//     when:
+//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_vg
+
+//     input:
+//     tuple val(sample), val(single_end), path(scaffolds) from ch_unicycler_vg
+//     path fasta from ch_fasta
+
+//     output:
+//     tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_unicycler_vg_vcf
+//     path "*.bcftools_stats.txt" into ch_unicycler_vg_bcftools_mqc
+//     path "*.{gfa,png,svg}"
+
+//     script:
+//     """
+//     minimap2 -c -t $task.cpus -x asm20 $fasta $scaffolds > ${sample}.paf
+
+//     cat $scaffolds $fasta > ${sample}.withRef.fasta
+//     seqwish --paf-alns ${sample}.paf --seqs ${sample}.withRef.fasta --gfa ${sample}.gfa --threads $task.cpus
+
+//     vg view -Fv ${sample}.gfa --threads $task.cpus > ${sample}.vg
+//     vg convert -x ${sample}.vg > ${sample}.xg
+
+//     samtools faidx $fasta
+//     vg snarls ${sample}.xg > ${sample}.snarls
+//     for chrom in `cat ${fasta}.fai | cut -f1`
+//     do
+//         vg deconstruct -p \$chrom ${sample}.xg -r ${sample}.snarls --threads $task.cpus \\
+//             | bcftools sort -O v -T ./ \\
+//             | bgzip -c > ${sample}.\$chrom.vcf.gz
+//     done
+//     bcftools concat --output-type z --output ${sample}.vcf.gz *.vcf.gz
+//     tabix -p vcf -f ${sample}.vcf.gz
+//     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
+
+//     if [ -s ${sample}.gfa ]
+//     then
+//         Bandage image ${sample}.gfa ${sample}.png --height 1000
+//         Bandage image ${sample}.gfa ${sample}.svg --height 1000
+//     fi
+//     """
+// }
+
+// /*
+//  * STEP 6.3.6: Variant annotation with SnpEff and SnpSift
+//  */
+// process UNICYCLER_SNPEFF {
+//     tag "$sample"
+//     label 'process_medium'
+//     label 'error_ignore'
+//     publishDir "${params.outdir}/assembly/unicycler/variants/snpeff", mode: params.publish_dir_mode
+
+//     when:
+//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_vg && params.gff && !params.skip_snpeff
+
+//     input:
+//     tuple val(sample), val(single_end), path(vcf) from ch_unicycler_vg_vcf
+//     tuple file(db), file(config) from ch_snpeff_db_unicycler
+
+//     output:
+//     path "*.snpEff.csv" into ch_unicycler_snpeff_mqc
+//     path "*.vcf.gz*"
+//     path "*.{txt,html}"
+
+//     script:
+//     """
+//     snpEff ${index_base} \\
+//         -config $config \\
+//         -dataDir $db \\
+//         ${vcf[0]} \\
+//         -csvStats ${sample}.snpEff.csv \\
+//         | bgzip -c > ${sample}.snpEff.vcf.gz
+//     tabix -p vcf -f ${sample}.snpEff.vcf.gz
+//     mv snpEff_summary.html ${sample}.snpEff.summary.html
+
+//     SnpSift extractFields -s "," \\
+//         -e "." \\
+//         ${sample}.snpEff.vcf.gz \\
+//         CHROM POS REF ALT \\
+//         "ANN[*].GENE" "ANN[*].GENEID" \\
+//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
+//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
+//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
+//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
+//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
+//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
+//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
+//         > ${sample}.snpSift.table.txt
+//     	"""
+// }
 
 // ////////////////////////////////////////////////////
 // /* --                SPADES                    -- */
@@ -1224,290 +1486,6 @@ workflow ILLUMINA {
 
 //     output:
 //     path "*.snpEff.csv" into ch_metaspades_snpeff_mqc
-//     path "*.vcf.gz*"
-//     path "*.{txt,html}"
-
-//     script:
-//     """
-//     snpEff ${index_base} \\
-//         -config $config \\
-//         -dataDir $db \\
-//         ${vcf[0]} \\
-//         -csvStats ${sample}.snpEff.csv \\
-//         | bgzip -c > ${sample}.snpEff.vcf.gz
-//     tabix -p vcf -f ${sample}.snpEff.vcf.gz
-//     mv snpEff_summary.html ${sample}.snpEff.summary.html
-
-//     SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${sample}.snpEff.vcf.gz \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${sample}.snpSift.table.txt
-//     	"""
-// }
-
-// ////////////////////////////////////////////////////
-// /* --               UNICYCLER                  -- */
-// ////////////////////////////////////////////////////
-
-// /*
-//  * STEP 6.3: De novo assembly with Unicycler
-//  */
-// process UNICYCLER {
-//     tag "$sample"
-//     label 'process_high'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode,
-//     saveAs: { filename ->
-//                   if (filename.endsWith(".png")) "bandage/$filename"
-//                   else if (filename.endsWith(".svg")) "bandage/$filename"
-//                   else filename
-//             }
-
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers
-
-//     input:
-//     tuple val(sample), val(single_end), path(reads) from ch_kraken2_unicycler
-
-//     output:
-//     tuple val(sample), val(single_end), path("*scaffolds.fa") into ch_unicycler_blast,
-//                                                                    ch_unicycler_abacas,
-//                                                                    ch_unicycler_plasmidid,
-//                                                                    ch_unicycler_quast,
-//                                                                    ch_unicycler_vg
-//     path "*assembly.{gfa,png,svg}"
-
-//     script:
-//     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
-//     """
-//     unicycler \\
-//         --threads $task.cpus \\
-//         $input_reads \\
-//         --out ./
-//     mv assembly.fasta ${sample}.scaffolds.fa
-//     mv assembly.gfa ${sample}.assembly.gfa
-
-//     if [ -s ${sample}.assembly.gfa ]
-//     then
-//         Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
-//         Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
-//     fi
-//     """
-// }
-
-// /*
-//  * STEP 6.3.1: Run Blast on MetaSPAdes de novo assembly
-//  */
-// process UNICYCLER_BLAST {
-//     tag "$sample"
-//     label 'process_medium'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/unicycler/blast", mode: params.publish_dir_mode
-
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_blast
-
-//     input:
-//     tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_blast
-//     path db from ch_blast_db
-//     path header from ch_blast_outfmt6_header
-
-//     output:
-//     path "*.blast*"
-
-//     script:
-//     """
-//     blastn \\
-//         -num_threads $task.cpus \\
-//         -db $db/$fasta_base \\
-//         -query $scaffold \\
-//         -outfmt \'6 stitle std slen qlen qcovs\' \\
-//         -out ${sample}.blast.txt
-
-//     awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' ${sample}.blast.txt | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > ${sample}.blast.filt.txt
-//     cat $header ${sample}.blast.filt.txt > ${sample}.blast.filt.header.txt
-//     """
-// }
-
-// /*
-//  * STEP 6.3.2: Run ABACAS on Unicycler de novo assembly
-//  */
-// process UNICYCLER_ABACAS {
-//     tag "$sample"
-//     label 'process_medium'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/unicycler/abacas", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.indexOf("nucmer") > 0) "nucmer/$filename"
-//                       else filename
-//                 }
-
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_abacas
-
-//     input:
-//     tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_abacas
-//     path fasta from ch_fasta
-
-//     output:
-//     path "*.abacas*"
-
-//     script:
-//     """
-//     abacas.pl -r $fasta -q $scaffold -m -p nucmer -o ${sample}.abacas
-//     mv nucmer.delta ${sample}.abacas.nucmer.delta
-//     mv nucmer.filtered.delta ${sample}.abacas.nucmer.filtered.delta
-//     mv nucmer.tiling ${sample}.abacas.nucmer.tiling
-//     mv unused_contigs.out ${sample}.abacas.unused.contigs.out
-//     """
-// }
-
-// /*
-//  * STEP 6.3.3: Run PlasmidID on Unicycler de novo assembly
-//  */
-// process UNICYCLER_PLASMIDID {
-//     tag "$sample"
-//     label 'process_medium'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/unicycler/plasmidid", mode: params.publish_dir_mode
-
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_plasmidid
-
-//     input:
-//     tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
-//     path fasta from ch_fasta
-
-//     output:
-//     path "$sample"
-
-//     script:
-//     """
-//     plasmidID -d $fasta -s $sample -c $scaffold --only-reconstruct -C 47 -S 47 -i 60 --no-trim -o .
-//     mv NO_GROUP/$sample ./$sample
-//     """
-// }
-
-// /*
-//  * STEP 6.3.4: Run Quast on Unicycler de novo assembly
-//  */
-// process UNICYCLER_QUAST {
-//     label 'process_medium'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/unicycler", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (!filename.endsWith(".tsv")) filename
-//                 }
-
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_assembly_quast
-
-//     input:
-//     path scaffolds from ch_unicycler_quast.collect{ it[2] }
-//     path fasta from ch_fasta
-//     path gff from ch_gff
-
-//     output:
-//     path "quast"
-//     path "report.tsv" into ch_quast_unicycler_mqc
-
-//     script:
-//     features = params.gff ? "--features $gff" : ""
-//     """
-//     quast.py \\
-//         --output-dir quast \\
-//         -r $fasta \\
-//         $features \\
-//         --threads $task.cpus \\
-//         ${scaffolds.join(' ')}
-//     ln -s quast/report.tsv
-//     """
-// }
-
-// /*
-//  * STEP 6.3.5: Overlap scaffolds with Minimap2, induce and polish assembly, and call variants with seqwish and vg
-//  */
-// process UNICYCLER_VG {
-//     tag "$sample"
-//     label 'process_medium'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/unicycler/variants", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
-//                       else if (filename.endsWith(".png")) "bandage/$filename"
-//                       else if (filename.endsWith(".svg")) "bandage/$filename"
-//                       else filename
-//                 }
-
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_vg
-
-//     input:
-//     tuple val(sample), val(single_end), path(scaffolds) from ch_unicycler_vg
-//     path fasta from ch_fasta
-
-//     output:
-//     tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_unicycler_vg_vcf
-//     path "*.bcftools_stats.txt" into ch_unicycler_vg_bcftools_mqc
-//     path "*.{gfa,png,svg}"
-
-//     script:
-//     """
-//     minimap2 -c -t $task.cpus -x asm20 $fasta $scaffolds > ${sample}.paf
-
-//     cat $scaffolds $fasta > ${sample}.withRef.fasta
-//     seqwish --paf-alns ${sample}.paf --seqs ${sample}.withRef.fasta --gfa ${sample}.gfa --threads $task.cpus
-
-//     vg view -Fv ${sample}.gfa --threads $task.cpus > ${sample}.vg
-//     vg convert -x ${sample}.vg > ${sample}.xg
-
-//     samtools faidx $fasta
-//     vg snarls ${sample}.xg > ${sample}.snarls
-//     for chrom in `cat ${fasta}.fai | cut -f1`
-//     do
-//         vg deconstruct -p \$chrom ${sample}.xg -r ${sample}.snarls --threads $task.cpus \\
-//             | bcftools sort -O v -T ./ \\
-//             | bgzip -c > ${sample}.\$chrom.vcf.gz
-//     done
-//     bcftools concat --output-type z --output ${sample}.vcf.gz *.vcf.gz
-//     tabix -p vcf -f ${sample}.vcf.gz
-//     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
-
-//     if [ -s ${sample}.gfa ]
-//     then
-//         Bandage image ${sample}.gfa ${sample}.png --height 1000
-//         Bandage image ${sample}.gfa ${sample}.svg --height 1000
-//     fi
-//     """
-// }
-
-// /*
-//  * STEP 6.3.6: Variant annotation with SnpEff and SnpSift
-//  */
-// process UNICYCLER_SNPEFF {
-//     tag "$sample"
-//     label 'process_medium'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/unicycler/variants/snpeff", mode: params.publish_dir_mode
-
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_vg && params.gff && !params.skip_snpeff
-
-//     input:
-//     tuple val(sample), val(single_end), path(vcf) from ch_unicycler_vg_vcf
-//     tuple file(db), file(config) from ch_snpeff_db_unicycler
-
-//     output:
-//     path "*.snpEff.csv" into ch_unicycler_snpeff_mqc
 //     path "*.vcf.gz*"
 //     path "*.{txt,html}"
 
