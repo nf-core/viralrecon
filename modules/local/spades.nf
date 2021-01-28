@@ -17,6 +17,8 @@ process SPADES {
     tuple val(meta), path(reads)
     path  hmm
 
+    cache false
+
     output:
     tuple val(meta), path('*.scaffolds.fa'), emit: scaffolds
     tuple val(meta), path('*.assembly.gfa'), emit: graph
