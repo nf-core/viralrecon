@@ -19,6 +19,9 @@ def checkPathParamList = [
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
+// Stage dummy file to be used as an optional input where required
+ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
+
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet file not specified!' }
 if (params.fasta) { ch_fasta = file(params.fasta) } else { exit 1, 'Genome fasta file not specified!' }
@@ -48,19 +51,22 @@ if (params.protocol == 'amplicon' && !params.skip_variants && !params.amplicon_b
 if (params.amplicon_bed) { ch_amplicon_bed = file(params.amplicon_bed) }
 
 // Assembly parameter validation
-def assemblerList = [ 'spades', 'metaspades', 'unicycler', 'minia', 'none' ]
+def assemblerList = [ 'spades', 'unicycler', 'minia', 'none' ]
 def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
 }
 
+def spadesModeList = ['metaviral', 'rnaviral', 'metaspades']
+if (!spadesModeList.contains(params.spades_mode)) {
+    exit 1, "Invalid spades mode option: ${params.spades_mode}. Valid options: ${spadesModeList.join(', ')}"
+}
+if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file }
+
 if (params.protocol == 'amplicon' && !params.skip_assembly && !params.amplicon_fasta) {
     exit 1, "To perform de novo assembly in 'amplicon' mode please provide a valid amplicon fasta file!"
 }
 if (params.amplicon_fasta) { ch_amplicon_fasta = file(params.amplicon_fasta) }
-
-// Stage dummy file to be used as an optional input where required
-ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
 // if (!params.skip_kraken2 && !params.kraken2_db) {
 //     if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
@@ -168,6 +174,15 @@ ivar_trim_options.args += params.ivar_trim_noprimer ? "" : " -e"
 
 def ivar_trim_sort_bam_options = modules['ivar_trim_sort_bam']
 
+def spades_mode = ""
+if (params.spades_mode == 'metaspades') {
+    spades_mode = "--meta"
+} else {
+    spades_mode = "--${params.spades_mode}"
+}
+def spades_options   = modules['spades']
+spades_options.args += params.spades_mode ? "" : spades_mode
+
 include { FASTQC_FASTP          } from '../subworkflows/local/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
 include { INPUT_CHECK           } from '../subworkflows/local/input_check'         addParams( options: [:] )
 include { PREPARE_GENOME        } from '../subworkflows/local/prepare_genome'      addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options, makeblastdb_options: modules['blast_makeblastdb'], kraken2_build_options: modules['kraken2_build'])
@@ -204,7 +219,7 @@ include { FASTQC                        } from '../modules/nf-core/software/fast
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
  */
 def markduplicates_options   = modules['picard_markduplicates']
-markduplicates_options.args += params.filter_dups ? " REMOVE_DUPLICATES=true" : ""
+markduplicates_options.args += params.filter_duplicates ? " REMOVE_DUPLICATES=true" : ""
 include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['picard_markduplicates_sort_bam'] )
 
 ////////////////////////////////////////////////////
@@ -648,6 +663,7 @@ workflow ILLUMINA {
     if (!params.skip_assembly && 'spades' in assemblers) {
         ASSEMBLY_SPADES (
             ch_trim_fastq,
+            ch_spades_hmm,
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.gff,
             PREPARE_GENOME.out.blast_db,
