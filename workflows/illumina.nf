@@ -181,7 +181,7 @@ if (params.spades_mode == 'metaspades') {
     spades_mode = "--${params.spades_mode}"
 }
 def spades_options   = modules['spades']
-spades_options.args += params.spades_mode ? "" : spades_mode
+spades_options.args += params.spades_mode ? spades_mode : ""
 
 include { FASTQC_FASTP          } from '../subworkflows/local/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
 include { INPUT_CHECK           } from '../subworkflows/local/input_check'         addParams( options: [:] )
