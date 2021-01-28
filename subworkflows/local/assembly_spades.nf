@@ -21,6 +21,7 @@ include { ASSEMBLY_QC } from './assembly_qc'               addParams( blastn_opt
 workflow ASSEMBLY_SPADES {
     take:
     reads         // channel: [ val(meta), [ reads ] ]
+    hmm           // channel: /path/to/spades.hmm
     fasta         // channel: /path/to/genome.fasta
     gff           // channel: /path/to/genome.gff
     blast_db      // channel: /path/to/blast_db/
@@ -31,7 +32,7 @@ workflow ASSEMBLY_SPADES {
     /*
      * Assemble reads with SPAdes
      */
-    SPADES ( reads )
+    SPADES ( reads, hmm )
 
     // FILTER CHANNELS HERE WHERE FASTA HAS NO CONTIGS
     //input: tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
