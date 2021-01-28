@@ -19,10 +19,13 @@ process SPADES {
     val   coronaspades
 
     output:
-    tuple val(meta), path('*.scaffolds.fa'), emit: scaffolds
-    tuple val(meta), path('*.assembly.gfa'), emit: graph
-    tuple val(meta), path('*.log')         , emit: log
-    path  '*.version.txt'                  , emit: version
+    tuple val(meta), path('*.scaffolds.fa')    , emit: scaffolds
+    tuple val(meta), path('*.contigs.fa')      , emit: contigs
+    tuple val(meta), path('*.assembly.gfa')    , emit: gfa
+    tuple val(meta), path('*.assembly.fastg')  , emit: fastg
+    tuple val(meta), path('*.log')             , emit: log
+    tuple val(meta), path('*.gene_clusters.fa'), optional:true, emit: gene_clusters
+    path  '*.version.txt'                      , emit: version
     
     script:
     def software    = getSoftwareName(task.process)
@@ -40,6 +43,12 @@ process SPADES {
 
     mv scaffolds.fasta ${prefix}.scaffolds.fa
     mv assembly_graph_with_scaffolds.gfa ${prefix}.assembly.gfa
+    mv contigs.fasta ${prefix}.contigs.fa
+    mv assembly_graph.fastg ${prefix}.assembly.fastg
+    
+    if [ -f gene_clusters.fasta ]; then
+        mv gene_clusters.fasta ${prefix}.gene_clusters.fa
+    fi
     
     echo \$(spades.py --version 2>&1) | sed 's/^.*SPAdes genome assembler v//; s/ .*\$//' > ${software}.version.txt
     """
