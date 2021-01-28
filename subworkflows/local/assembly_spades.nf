@@ -55,7 +55,7 @@ workflow ASSEMBLY_SPADES {
     ch_bandage_svg     = Channel.empty()
     ch_bandage_version = Channel.empty()
     if (!params.skip_bandage) {
-        BANDAGE ( SPADES.out.graph )
+        BANDAGE ( SPADES.out.gfa )
         ch_bandage_version = BANDAGE.out.version
         ch_bandage_png     = BANDAGE.out.png
         ch_bandage_svg     = BANDAGE.out.svg
@@ -75,7 +75,10 @@ workflow ASSEMBLY_SPADES {
 
     emit:
     scaffolds         = SPADES.out.scaffolds              // channel: [ val(meta), [ scaffolds ] ]
-    graph             = SPADES.out.graph                  // channel: [ val(meta), [ graph ] ]
+    contigs           = SPADES.out.contigs                // channel: [ val(meta), [ contigs ] ]
+    gene_clusters     = SPADES.out.gene_clusters          // channel: [ val(meta), [ gene_clusters ] ]
+    gfa               = SPADES.out.gfa                    // channel: [ val(meta), [ graph ] ]
+    fastg             = SPADES.out.fastg                  // channel: [ val(meta), [ fastg ] ]
     log_out           = SPADES.out.log                    // channel: [ val(meta), [ log ] ]
     spades_version    = SPADES.out.version                //    path: *.version.txt
 
