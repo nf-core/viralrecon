@@ -16,8 +16,7 @@ process SPADES {
     input:
     tuple val(meta), path(reads)
     path  hmm
-
-    cache false
+    val   coronaspades
 
     output:
     tuple val(meta), path('*.scaffolds.fa'), emit: scaffolds
@@ -30,8 +29,9 @@ process SPADES {
     def prefix      = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     def input_reads = meta.single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
     def custom_hmms = params.spades_hmm ? "--custom-hmms $hmm" : ""
+    def command     = coronaspades ? "coronaspades.py" : "spades.py"
     """
-    spades.py \\
+    $command \\
         $options.args \\
         --threads $task.cpus \\
         $custom_hmms \\
