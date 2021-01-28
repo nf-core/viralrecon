@@ -13,9 +13,9 @@ process PLASMIDID {
         
     conda (params.enable_conda ? 'bioconda::plasmidid=1.6.3' : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container 'https://depot.galaxyproject.org/singularity/plasmidid:1.6.3--0'
+        container 'https://depot.galaxyproject.org/singularity/plasmidid:1.6.3--1'
     } else {
-        container 'quay.io/biocontainers/plasmidid:1.6.3--0'
+        container 'quay.io/biocontainers/plasmidid:1.6.3--1'
     }
 
     input:
