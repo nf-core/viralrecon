@@ -57,7 +57,7 @@ if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
 }
 
-def spadesModeList = ['metaviral', 'rnaviral', 'metaspades']
+def spadesModeList = ['metaviral', 'rnaviral', 'meta']
 if (!spadesModeList.contains(params.spades_mode)) {
     exit 1, "Invalid spades mode option: ${params.spades_mode}. Valid options: ${spadesModeList.join(', ')}"
 }
@@ -174,14 +174,8 @@ ivar_trim_options.args += params.ivar_trim_noprimer ? "" : " -e"
 
 def ivar_trim_sort_bam_options = modules['ivar_trim_sort_bam']
 
-def spades_mode = ""
-if (params.spades_mode == 'metaspades') {
-    spades_mode = "--meta"
-} else {
-    spades_mode = "--${params.spades_mode}"
-}
 def spades_options   = modules['spades']
-spades_options.args += params.spades_mode ? spades_mode : ""
+spades_options.args += params.spades_mode ? "--${params.spades_mode}" : ""
 
 include { FASTQC_FASTP          } from '../subworkflows/local/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
 include { INPUT_CHECK           } from '../subworkflows/local/input_check'         addParams( options: [:] )
