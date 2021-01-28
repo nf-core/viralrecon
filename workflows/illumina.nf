@@ -175,6 +175,7 @@ include { ALIGN_BOWTIE2         } from '../subworkflows/local/align_bowtie2'    
 include { FILTER_BAM_SAMTOOLS   } from '../subworkflows/local/filter_bam_samtools' addParams( samtools_view_options: modules['filter_bam'], samtools_index_options: filter_bam_sort_bam_options )
 include { AMPLICON_TRIM_IVAR    } from '../subworkflows/local/amplicon_trim_ivar'  addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
 include { VCF_TABIX_STATS       } from '../subworkflows/local/vcf_tabix_stats'     addParams( tabix_options: modules['varscan_bcftools_filter_tabix'], stats_options: modules['varscan_bcftools_filter_stats'] )
+include { ASSEMBLY_SPADES       } from '../subworkflows/local/assembly_spades'     addParams( spades_options: modules['spades'], bandage_options: modules['spades_bandage'], blastn_options: modules['spades_blastn'], abacas_options: modules['spades_abacas'], plasmidid_options: modules['spades_plasmidid'], quast_options: modules['spades_quast'], snpeff_options: modules['spades_snpeff'], snpeff_bgzip_options: modules['spades_snpeff_bgzip'], snpeff_tabix_options: modules['spades_snpeff_tabix'], snpeff_stats_options: modules['spades_snpeff_tabix'], snpsift_options: modules['spades_snpsift'] )
 include { ASSEMBLY_UNICYCLER    } from '../subworkflows/local/assembly_unicycler'  addParams( unicycler_options: modules['unicycler'], bandage_options: modules['unicycler_bandage'], blastn_options: modules['unicycler_blastn'], abacas_options: modules['unicycler_abacas'], plasmidid_options: modules['unicycler_plasmidid'], quast_options: modules['unicycler_quast'], snpeff_options: modules['unicycler_snpeff'], snpeff_bgzip_options: modules['unicycler_snpeff_bgzip'], snpeff_tabix_options: modules['unicycler_snpeff_tabix'], snpeff_stats_options: modules['unicycler_snpeff_tabix'], snpsift_options: modules['unicycler_snpsift'] )
 include { ASSEMBLY_MINIA        } from '../subworkflows/local/assembly_minia'      addParams( minia_options: modules['minia'], blastn_options: modules['minia_blastn'], abacas_options: modules['minia_abacas'], plasmidid_options: modules['minia_plasmidid'], quast_options: modules['minia_quast'], snpeff_options: modules['minia_snpeff'], snpeff_bgzip_options: modules['minia_snpeff_bgzip'], snpeff_tabix_options: modules['minia_snpeff_tabix'], snpeff_stats_options: modules['minia_snpeff_tabix'], snpsift_options: modules['minia_snpsift'] )
 
@@ -641,6 +642,22 @@ workflow ILLUMINA {
     }
 
     /*
+     * SUBWORKFLOW: Run SPAdes assembly and downstream analysis
+     */
+    ch_spades_version = Channel.empty()
+    if (!params.skip_assembly && 'spades' in assemblers) {
+        ASSEMBLY_SPADES (
+            ch_trim_fastq,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gff,
+            PREPARE_GENOME.out.blast_db,
+            PREPARE_GENOME.out.snpeff_db,
+            PREPARE_GENOME.out.snpeff_config
+        )
+        ch_spades_version = ASSEMBLY_SPADES.out.spades_version
+    }
+
+    /*
      * SUBWORKFLOW: Run Unicycler assembly and downstream analysis
      */
     ch_unicycler_version = Channel.empty()
@@ -821,57 +838,6 @@ workflow ILLUMINA {
 //         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
 //         > ${sample}.snpSift.table.txt
 //     	"""
-// }
-
-// ////////////////////////////////////////////////////
-// /* --                SPADES                    -- */
-// ////////////////////////////////////////////////////
-
-// /*
-//  * STEP 6.3: De novo assembly with SPAdes
-//  */
-// process SPADES {
-//     tag "$sample"
-//     label 'process_high'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/spades", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".png")) "bandage/$filename"
-//                       else if (filename.endsWith(".svg")) "bandage/$filename"
-//                       else filename
-//                 }
-
-//     when:
-//     !params.skip_assembly && 'spades' in assemblers
-
-//     input:
-//     tuple val(sample), val(single_end), path(reads) from ch_kraken2_spades
-
-//     output:
-//     tuple val(sample), val(single_end), path("*scaffolds.fa") into ch_spades_blast,
-//                                                                    ch_spades_abacas,
-//                                                                    ch_spades_plasmidid,
-//                                                                    ch_spades_quast,
-//                                                                    ch_spades_vg
-//     path "*assembly.{gfa,png,svg}"
-
-
-//     script:
-//     input_reads = single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
-//     """
-//     spades.py \\
-//         --threads $task.cpus \\
-//         $input_reads \\
-//         -o ./
-//     mv scaffolds.fasta ${sample}.scaffolds.fa
-//     mv assembly_graph_with_scaffolds.gfa ${sample}.assembly.gfa
-
-//     if [ -s ${sample}.assembly.gfa ]
-//     then
-//         Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
-//         Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
-//     fi
-//     """
 // }
 
 // ////////////////////////////////////////////////////
