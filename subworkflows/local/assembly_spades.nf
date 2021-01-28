@@ -14,8 +14,8 @@ params.snpeff_tabix_options = [:]
 params.snpeff_stats_options = [:]
 params.snpsift_options      = [:]
 
-include { SPADES      } from '../../modules/local/spades'  addParams( options: params.spades_options ) 
-include { BANDAGE     } from '../../modules/local/bandage' addParams( options: params.bandage_options   ) 
+include { SPADES      } from '../../modules/local/spades'  addParams( options: params.spades_options  ) 
+include { BANDAGE     } from '../../modules/local/bandage' addParams( options: params.bandage_options ) 
 include { ASSEMBLY_QC } from './assembly_qc'               addParams( blastn_options: params.blastn_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options, snpeff_options: params.snpeff_options, snpeff_bgzip_options: params.snpeff_bgzip_options, snpeff_tabix_options: params.snpeff_tabix_options, snpeff_stats_options: params.snpeff_stats_options, snpsift_options: params.snpsift_options )
 
 workflow ASSEMBLY_SPADES {
@@ -30,9 +30,19 @@ workflow ASSEMBLY_SPADES {
     
     main:
     /*
+     * Filter for paired-end samples if running metaSPAdes / metaviralSPAdes / metaplasmidSPAdes
+     */
+    ch_reads = reads
+    if (params.spades_options.args.contains('--meta')) {
+        reads
+            .filter { meta, fastq -> !meta.single_end }
+            .set { ch_reads }
+    }
+    
+    /*
      * Assemble reads with SPAdes
      */
-    SPADES ( reads, hmm )
+    SPADES ( ch_reads, hmm )
 
     // FILTER CHANNELS HERE WHERE FASTA HAS NO CONTIGS
     //input: tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
