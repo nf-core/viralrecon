@@ -61,14 +61,14 @@ workflow {
      * SUBWORKFLOW: Get SRA run information for public database ids, download and md5sum check FastQ files, auto-create samplesheet
      */
     if (params.public_data_ids) {
-        include { SRA_DOWNLOAD } from './sra_download' addParams( summary_params: summary_params )
+        include { SRA_DOWNLOAD } from './workflows/sra_download' addParams( summary_params: summary_params )
         SRA_DOWNLOAD ()
     
     /*
      * SUBWORKFLOW: Variant analysis for Illumina data
      */
     } else if (params.platform == 'illumina') {
-        include { ILLUMINA } from './illumina' addParams( summary_params: summary_params )
+        include { ILLUMINA } from './workflows/illumina' addParams( summary_params: summary_params )
         ILLUMINA ()
     }
 }
