@@ -57,7 +57,7 @@ if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
 }
 
-def spadesModeList = ['metaviral', 'rnaviral', 'meta']
+def spadesModeList = [ 'rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio' ]
 if (!spadesModeList.contains(params.spades_mode)) {
     exit 1, "Invalid spades mode option: ${params.spades_mode}. Valid options: ${spadesModeList.join(', ')}"
 }
@@ -175,7 +175,7 @@ ivar_trim_options.args += params.ivar_trim_noprimer ? "" : " -e"
 def ivar_trim_sort_bam_options = modules['ivar_trim_sort_bam']
 
 def spades_options   = modules['spades']
-spades_options.args += params.spades_mode ? "--${params.spades_mode}" : ""
+spades_options.args += (params.spades_mode && params.spades_mode != 'corona') ? "--${params.spades_mode}" : ""
 
 include { FASTQC_FASTP          } from '../subworkflows/local/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
 include { INPUT_CHECK           } from '../subworkflows/local/input_check'         addParams( options: [:] )
@@ -658,6 +658,7 @@ workflow ILLUMINA {
         ASSEMBLY_SPADES (
             ch_trim_fastq,
             ch_spades_hmm,
+            params.spades_mode == 'corona',
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.gff,
             PREPARE_GENOME.out.blast_db,
@@ -848,58 +849,6 @@ workflow ILLUMINA {
 //         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
 //         > ${sample}.snpSift.table.txt
 //     	"""
-// }
-
-// ////////////////////////////////////////////////////
-// /* --               METASPADES                 -- */
-// ////////////////////////////////////////////////////
-
-// /*
-//  * STEP 6.3: De novo assembly with MetaSPAdes
-//  */
-// process METASPADES {
-//     tag "$sample"
-//     label 'process_high'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/metaspades", mode: params.publish_dir_mode,
-//     saveAs: { filename ->
-//                   if (filename.endsWith(".png")) "bandage/$filename"
-//                   else if (filename.endsWith(".svg")) "bandage/$filename"
-//                   else filename
-//             }
-
-//     when:
-//     !params.skip_assembly && 'metaspades' in assemblers && !single_end
-
-//     input:
-//     tuple val(sample), val(single_end), path(reads) from ch_kraken2_metaspades
-
-//     output:
-//     tuple val(sample), val(single_end), path("*scaffolds.fa") into ch_metaspades_blast,
-//                                                                    ch_metaspades_abacas,
-//                                                                    ch_metaspades_plasmidid,
-//                                                                    ch_metaspades_quast,
-//                                                                    ch_metaspades_vg
-//     path "*assembly.{gfa,png,svg}"
-
-
-//     script:
-//     """
-//     spades.py \\
-//         --meta \\
-//         --threads $task.cpus \\
-//         -1 ${reads[0]} \\
-//         -2 ${reads[1]} \\
-//         -o ./
-//     mv scaffolds.fasta ${sample}.scaffolds.fa
-//     mv assembly_graph_with_scaffolds.gfa ${sample}.assembly.gfa
-
-//     if [ -s ${sample}.assembly.gfa ]
-//     then
-//         Bandage image ${sample}.assembly.gfa ${sample}.assembly.png --height 1000
-//         Bandage image ${sample}.assembly.gfa ${sample}.assembly.svg --height 1000
-//     fi
-//     """
 // }
 
 // ///////////////////////////////////////////////////////////////////////////////
