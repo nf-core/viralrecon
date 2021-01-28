@@ -43,7 +43,7 @@ workflow ASSEMBLY_UNICYCLER {
     ch_bandage_svg     = Channel.empty()
     ch_bandage_version = Channel.empty()
     if (!params.skip_bandage) {
-        BANDAGE ( UNICYCLER.out.graph )
+        BANDAGE ( UNICYCLER.out.gfa )
         ch_bandage_version = BANDAGE.out.version
         ch_bandage_png     = BANDAGE.out.png
         ch_bandage_svg     = BANDAGE.out.svg
@@ -63,7 +63,7 @@ workflow ASSEMBLY_UNICYCLER {
 
     emit:
     scaffolds         = UNICYCLER.out.scaffolds          // channel: [ val(meta), [ scaffolds ] ]
-    graph             = UNICYCLER.out.graph              // channel: [ val(meta), [ graph ] ]
+    gfa               = UNICYCLER.out.gfa                // channel: [ val(meta), [ gfa ] ]
     log_out           = UNICYCLER.out.log                // channel: [ val(meta), [ log ] ]
     unicycler_version = UNICYCLER.out.version            //    path: *.version.txt
 
