@@ -18,8 +18,6 @@ process SPADES {
     path  hmm
     val   coronaspades
 
-    cache false 
-
     output:
     tuple val(meta), path('*.scaffolds.fa')    , optional:true, emit: scaffolds
     tuple val(meta), path('*.contigs.fa')      , optional:true, emit: contigs
