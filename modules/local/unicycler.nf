@@ -28,14 +28,14 @@ process UNICYCLER {
     path  '*.version.txt'                  , emit: version
     
     script:
-    def software = getSoftwareName(task.process)
-    def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
-    def in_reads = meta.single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
+    def software    = getSoftwareName(task.process)
+    def prefix      = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
+    def input_reads = meta.single_end ? "-s $reads" : "-1 ${reads[0]} -2 ${reads[1]}"
     """
     unicycler \\
         --threads $task.cpus \\
         $options.args \\
-        $in_reads \\
+        $input_reads \\
         --out ./
         
     mv assembly.fasta ${prefix}.scaffolds.fa
