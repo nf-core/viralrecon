@@ -22,6 +22,7 @@ workflow ASSEMBLY_SPADES {
     take:
     reads         // channel: [ val(meta), [ reads ] ]
     hmm           // channel: /path/to/spades.hmm
+    coronaspades  // boolean: run coronaspades.py
     fasta         // channel: /path/to/genome.fasta
     gff           // channel: /path/to/genome.gff
     blast_db      // channel: /path/to/blast_db/
@@ -42,7 +43,7 @@ workflow ASSEMBLY_SPADES {
     /*
      * Assemble reads with SPAdes
      */
-    SPADES ( ch_reads, hmm )
+    SPADES ( ch_reads, hmm, coronaspades )
 
     // FILTER CHANNELS HERE WHERE FASTA HAS NO CONTIGS
     //input: tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
