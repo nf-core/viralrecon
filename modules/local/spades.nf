@@ -19,11 +19,11 @@ process SPADES {
     val   coronaspades
 
     output:
-    tuple val(meta), path('*.scaffolds.fa')    , emit: scaffolds
-    tuple val(meta), path('*.contigs.fa')      , emit: contigs
     tuple val(meta), path('*.assembly.gfa')    , emit: gfa
-    tuple val(meta), path('*.assembly.fastg')  , emit: fastg
     tuple val(meta), path('*.log')             , emit: log
+    tuple val(meta), path('*.scaffolds.fa')    , optional:true, emit: scaffolds
+    tuple val(meta), path('*.contigs.fa')      , optional:true, emit: contigs
+    tuple val(meta), path('*.transcripts.fa')  , optional:true, emit: transcripts
     tuple val(meta), path('*.gene_clusters.fa'), optional:true, emit: gene_clusters
     path  '*.version.txt'                      , emit: version
     
@@ -41,10 +41,21 @@ process SPADES {
         $input_reads \\
         -o ./
 
-    mv scaffolds.fasta ${prefix}.scaffolds.fa
-    mv assembly_graph_with_scaffolds.gfa ${prefix}.assembly.gfa
-    mv contigs.fasta ${prefix}.contigs.fa
-    mv assembly_graph.fastg ${prefix}.assembly.fastg
+    if [ -f scaffolds.fasta ]; then
+        mv scaffolds.fasta ${prefix}.scaffolds.fa
+    fi 
+
+    if [ -f contigs.fasta ]; then
+        mv contigs.fasta ${prefix}.contigs.fa
+    fi
+
+    if [ -f transcripts.fasta ]; then
+        mv transcripts.fasta ${prefix}.transcripts.fa
+    fi
+
+    if [ -f assembly_graph_with_scaffolds.gfa ]; then
+        mv assembly_graph_with_scaffolds.gfa ${prefix}.assembly.gfa
+    fi 
     
     if [ -f gene_clusters.fasta ]; then
         mv gene_clusters.fasta ${prefix}.gene_clusters.fa
@@ -53,4 +64,3 @@ process SPADES {
     echo \$(spades.py --version 2>&1) | sed 's/^.*SPAdes genome assembler v//; s/ .*\$//' > ${software}.version.txt
     """
 }
-
