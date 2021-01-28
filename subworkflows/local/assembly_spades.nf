@@ -34,7 +34,7 @@ workflow ASSEMBLY_SPADES {
      * Filter for paired-end samples if running metaSPAdes / metaviralSPAdes / metaplasmidSPAdes
      */
     ch_reads = reads
-    if (params.spades_options.args.contains('--meta')) {
+    if (params.spades_options.args.contains('--meta') || params.spades_options.args.contains('--bio')) {
         reads
             .filter { meta, fastq -> !meta.single_end }
             .set { ch_reads }
@@ -76,9 +76,9 @@ workflow ASSEMBLY_SPADES {
     emit:
     scaffolds         = SPADES.out.scaffolds              // channel: [ val(meta), [ scaffolds ] ]
     contigs           = SPADES.out.contigs                // channel: [ val(meta), [ contigs ] ]
+    transcripts       = SPADES.out.transcripts            // channel: [ val(meta), [ transcripts ] ]
     gene_clusters     = SPADES.out.gene_clusters          // channel: [ val(meta), [ gene_clusters ] ]
-    gfa               = SPADES.out.gfa                    // channel: [ val(meta), [ graph ] ]
-    fastg             = SPADES.out.fastg                  // channel: [ val(meta), [ fastg ] ]
+    gfa               = SPADES.out.gfa                    // channel: [ val(meta), [ gfa ] ]
     log_out           = SPADES.out.log                    // channel: [ val(meta), [ log ] ]
     spades_version    = SPADES.out.version                //    path: *.version.txt
 
