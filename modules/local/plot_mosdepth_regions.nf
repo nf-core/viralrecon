@@ -5,7 +5,6 @@ params.options = [:]
 def options    = initOptions(params.options)
 
 process PLOT_MOSDEPTH_REGIONS {
-    tag "$bed"
     label 'process_medium'
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -19,19 +18,19 @@ process PLOT_MOSDEPTH_REGIONS {
     }
     
     input:
-    path bed
+    path beds
     
     output:
     path '*.pdf', emit: pdf
     path '*.tsv', emit: tsv
     
     script:
-    def prefix = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
+    def prefix = options.suffix ?: "mosdepth"
     """
     plot_mosdepth_regions.r \\
-        --input_files ${bed.join(',')} \\
-        --input_suffix ${suffix}.regions.bed.gz \\
+        --input_files ${beds.join(',')} \\
         --output_dir ./ \\
-        --output_suffix ${suffix}.regions
+        --output_suffix $prefix \\
+        $options.args
     """
 }
