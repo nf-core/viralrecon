@@ -22,8 +22,8 @@ process PLOT_MOSDEPTH_REGIONS {
     path bed
     
     output:
-    path  '*.pdf', emit: pdf
-    path  '*.tsv', emit: tsv
+    path '*.pdf', emit: pdf
+    path '*.tsv', emit: tsv
     
     script:
     def prefix = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
