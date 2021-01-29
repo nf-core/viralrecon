@@ -143,9 +143,9 @@ include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../mod
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_amplicon'] )
 include { IVAR_VARIANTS_TO_VCF as IVAR_VARIANTS_TO_VCF_LOWFREQ    } from '../modules/local/ivar_variants_to_vcf'  addParams( options: modules['ivar_variants_to_vcf_lowfreq']   )
 include { IVAR_VARIANTS_TO_VCF as IVAR_VARIANTS_TO_VCF_HIGHFREQ   } from '../modules/local/ivar_variants_to_vcf'  addParams( options: ivar_variants_to_vcf_highfreq_options     )
-include { QUAST as QUAST_VARSCAN                                  } from '../modules/local/quast'                 addParams( options: modules['varscan_quast']            )
-include { QUAST as QUAST_IVAR                                     } from '../modules/local/quast'                 addParams( options: modules['ivar_quast']               )
-include { QUAST as QUAST_BCFTOOLS                                 } from '../modules/local/quast'                 addParams( options: modules['bcftools_quast']           )
+include { QUAST as QUAST_VARSCAN                                  } from '../modules/local/quast'                 addParams( options: modules['varscan_quast']                  )
+include { QUAST as QUAST_IVAR                                     } from '../modules/local/quast'                 addParams( options: modules['ivar_quast']                     )
+include { QUAST as QUAST_BCFTOOLS                                 } from '../modules/local/quast'                 addParams( options: modules['bcftools_quast']                 )
 
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
