@@ -13,8 +13,9 @@ params.snpeff_tabix_options = [:]
 params.snpeff_stats_options = [:]
 params.snpsift_options      = [:]
 
-include { MINIA   } from '../../modules/local/minia' addParams( options: params.minia_options ) 
-include { ASSEMBLY_QC } from './assembly_qc'         addParams( blastn_options: params.blastn_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options, snpeff_options: params.snpeff_options, snpeff_bgzip_options: params.snpeff_bgzip_options, snpeff_tabix_options: params.snpeff_tabix_options, snpeff_stats_options: params.snpeff_stats_options, snpsift_options: params.snpsift_options )
+include { MINIA       } from '../../modules/local/minia' addParams( options: params.minia_options ) 
+include { ASSEMBLY_QC } from './assembly_qc'             addParams( blastn_options: params.blastn_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
+// include { ASSEMBLY_VG } from './assembly_vg'             addParams( snpeff_options: params.snpeff_options, snpeff_bgzip_options: params.snpeff_bgzip_options, snpeff_tabix_options: params.snpeff_tabix_options, snpeff_stats_options: params.snpeff_stats_options, snpsift_options: params.snpsift_options )
 
 workflow ASSEMBLY_MINIA {
     take:
@@ -31,19 +32,23 @@ workflow ASSEMBLY_MINIA {
      */
     MINIA ( reads )
 
-    // FILTER CHANNELS HERE WHERE FASTA HAS NO CONTIGS
-    //input: tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
+    /*
+     * Filter for empty contig files
+     */
+    MINIA
+        .out
+        .contigs
+        .filter { meta, contig -> contig.size() > 0 }
+        .set { ch_contigs }
 
     /*
      * Downstream assembly steps
      */
     ASSEMBLY_QC ( 
-        MINIA.out.contigs,
+        ch_contigs,
         fasta,
         gff,
-        blast_db,
-        snpeff_db,
-        snpeff_config
+        blast_db
     )
 
     emit:
