@@ -16,7 +16,8 @@ params.snpsift_options      = [:]
 
 include { UNICYCLER   } from '../../modules/local/unicycler' addParams( options: params.unicycler_options ) 
 include { BANDAGE     } from '../../modules/local/bandage'   addParams( options: params.bandage_options   ) 
-include { ASSEMBLY_QC } from './assembly_qc'                 addParams( blastn_options: params.blastn_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options, snpeff_options: params.snpeff_options, snpeff_bgzip_options: params.snpeff_bgzip_options, snpeff_tabix_options: params.snpeff_tabix_options, snpeff_stats_options: params.snpeff_stats_options, snpsift_options: params.snpsift_options )
+include { ASSEMBLY_QC } from './assembly_qc'                 addParams( blastn_options: params.blastn_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
+// include { ASSEMBLY_VG } from './assembly_vg'                 addParams( snpeff_options: params.snpeff_options, snpeff_bgzip_options: params.snpeff_bgzip_options, snpeff_tabix_options: params.snpeff_tabix_options, snpeff_stats_options: params.snpeff_stats_options, snpsift_options: params.snpsift_options )
 
 workflow ASSEMBLY_UNICYCLER {
     take:
@@ -33,9 +34,15 @@ workflow ASSEMBLY_UNICYCLER {
      */
     UNICYCLER ( reads )
 
-    // FILTER CHANNELS HERE WHERE FASTA HAS NO CONTIGS
-    //input: tuple val(sample), val(single_end), path(scaffold) from ch_unicycler_plasmidid.filter { it.size() > 0 }
-
+    /*
+     * Filter for empty scaffold files
+     */
+    UNICYCLER
+        .out
+        .scaffolds
+        .filter { meta, scaffold -> scaffold.size() > 0 }
+        .set { ch_scaffolds }
+    
     /*
      * Generate assembly visualisation with Bandage
      */
@@ -53,12 +60,10 @@ workflow ASSEMBLY_UNICYCLER {
      * Downstream assembly steps
      */
     ASSEMBLY_QC ( 
-        UNICYCLER.out.scaffolds,
+        ch_scaffolds,
         fasta,
         gff,
-        blast_db,
-        snpeff_db,
-        snpeff_config
+        blast_db
     )
 
     emit:
