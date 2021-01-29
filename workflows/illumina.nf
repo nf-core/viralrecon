@@ -98,15 +98,6 @@ if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
 def samtools_mpileup_options    = modules['samtools_mpileup']
 if (params.save_mpileup) { samtools_mpileup_options.publish_files.put('mpileup','') }
 
-def ivar_variants_options = modules['ivar_variants']
-ivar_variants_options.args += " -t $params.min_allele_freq"
-
-def ivar_consensus_options = modules['ivar_consensus']
-ivar_consensus_options.args += " -t $params.max_allele_freq"
-
-def ivar_variants_to_vcf_highfreq_options   = modules['ivar_variants_to_vcf_highfreq']
-ivar_variants_to_vcf_highfreq_options.args += " --allele_freq_thresh $params.max_allele_freq"
-
 def kraken2_run_options = modules['kraken2_run']
 if (params.save_kraken2_fastq) { kraken2_run_options.publish_files.put('fastq.gz','') }
 
@@ -119,9 +110,6 @@ include { MULTIQC_CUSTOM_FAIL_MAPPED } from '../modules/local/multiqc_custom_fai
 include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'   addParams( options: modules['picard_collectwgsmetrics'] )
 include { COLLAPSE_AMPLICONS         } from '../modules/local/collapse_amplicons'         addParams( options: modules['collapse_amplicons']       )
 include { SAMTOOLS_MPILEUP           } from '../modules/local/samtools_mpileup'           addParams( options: samtools_mpileup_options            )
-include { IVAR_VARIANTS              } from '../modules/local/ivar_variants'              addParams( options: ivar_variants_options               )
-include { IVAR_CONSENSUS             } from '../modules/local/ivar_consensus'             addParams( options: ivar_consensus_options              )
-include { BCFTOOLS_MPILEUP           } from '../modules/local/bcftools_mpileup'           addParams( options: modules['bcftools_mpileup']         ) 
 include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'              addParams( options: modules['bcftools_isec']            ) 
 include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: modules['cutadapt']                 )
 include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'                addParams( options: kraken2_run_options                 ) 
@@ -132,10 +120,6 @@ include { MOSDEPTH as MOSDEPTH_GENOME                             } from '../mod
 include { MOSDEPTH as MOSDEPTH_AMPLICON                           } from '../modules/local/mosdepth'              addParams( options: modules['mosdepth_amplicon']              )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_amplicon'] )
-include { IVAR_VARIANTS_TO_VCF as IVAR_VARIANTS_TO_VCF_LOWFREQ    } from '../modules/local/ivar_variants_to_vcf'  addParams( options: modules['ivar_variants_to_vcf_lowfreq']   )
-include { IVAR_VARIANTS_TO_VCF as IVAR_VARIANTS_TO_VCF_HIGHFREQ   } from '../modules/local/ivar_variants_to_vcf'  addParams( options: ivar_variants_to_vcf_highfreq_options     )
-include { QUAST as QUAST_IVAR                                     } from '../modules/local/quast'                 addParams( options: modules['ivar_quast']                     )
-include { QUAST as QUAST_BCFTOOLS                                 } from '../modules/local/quast'                 addParams( options: modules['bcftools_quast']                 )
 
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -164,33 +148,37 @@ ivar_trim_options.args += params.ivar_trim_noprimer ? "" : " -e"
 
 def ivar_trim_sort_bam_options = modules['ivar_trim_sort_bam']
 
-def varscan_mpileup2cns_options = modules['varscan_mpileup2cns']
+def varscan_mpileup2cns_options   = modules['varscan_mpileup2cns']
 varscan_mpileup2cns_options.args += " --min-var-freq $params.min_allele_freq"
 varscan_mpileup2cns_options.args += (params.protocol != 'amplicon' && params.varscan2_strand_filter) ? " --strand-filter 1" : " --strand-filter 0"
 
 def varscan_bcftools_options   = modules['varscan_bcftools_filter']
 varscan_bcftools_options.args += " -i 'FORMAT/AD / (FORMAT/AD + FORMAT/RD) >= $params.max_allele_freq'"
 
+def ivar_variants_options   = modules['ivar_variants']
+ivar_variants_options.args += " -t $params.min_allele_freq"
+
+def ivar_consensus_options   = modules['ivar_consensus']
+ivar_consensus_options.args += " -t $params.max_allele_freq"
+
+def ivar_variants_to_vcf_highfreq_options   = modules['ivar_variants_to_vcf_highfreq']
+ivar_variants_to_vcf_highfreq_options.args += " --allele_freq_thresh $params.max_allele_freq"
+
 def spades_options   = modules['spades']
 spades_options.args += (params.spades_mode && params.spades_mode != 'corona') ? "--${params.spades_mode}" : ""
 
-include { FASTQC_FASTP        } from '../subworkflows/local/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
 include { INPUT_CHECK         } from '../subworkflows/local/input_check'         addParams( options: [:] )
 include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome'      addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_index_options: bowtie2_build_options, makeblastdb_options: modules['blast_makeblastdb'], kraken2_build_options: modules['kraken2_build'])
+include { FASTQC_FASTP        } from '../subworkflows/local/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
 include { ALIGN_BOWTIE2       } from '../subworkflows/local/align_bowtie2'       addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options )
 include { FILTER_BAM_SAMTOOLS } from '../subworkflows/local/filter_bam_samtools' addParams( samtools_view_options: modules['filter_bam'], samtools_index_options: filter_bam_sort_bam_options )
 include { AMPLICON_TRIM_IVAR  } from '../subworkflows/local/amplicon_trim_ivar'  addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
 include { VARIANTS_VARSCAN    } from '../subworkflows/local/variants_varscan'    addParams( varscan_mpileup2cns_options : varscan_mpileup2cns_options, quast_options : modules['varscan_quast'], bcftools_filter_options : modules['varscan_bcftools_filter'], consensus_genomecov_options : modules['varscan_consensus_genomecov'], consensus_merge_options : modules['varscan_consensus_merge'], consensus_mask_options : modules['varscan_consensus_mask'], consensus_maskfasta_options : modules['varscan_consensus_maskfasta'], consensus_bcftools_options : modules['varscan_consensus_bcftools'], consensus_plot_options : modules['varscan_consensus_plot'], bgzip_options : modules['varscan_bgzip'], tabix_options : modules['varscan_tabix'], stats_options : modules['varscan_stats'], bcftools_filter_tabix_options : modules['varscan_bcftools_filter_tabix'], bcftools_filter_stats_options : modules['varscan_bcftools_filter_stats'], snpeff_lowfreq_options : modules['varscan_snpeff_lowfreq'], snpsift_lowfreq_options : modules['varscan_snpsift_lowfreq'], snpeff_lowfreq_bgzip_options : modules['varscan_snpeff_lowfreq_bgzip'], snpeff_lowfreq_tabix_options : modules['varscan_snpeff_lowfreq_tabix'], snpeff_lowfreq_stats_options : modules['varscan_snpeff_lowfreq_stats'], snpeff_highfreq_options : modules['varscan_snpeff_highfreq'], snpsift_highfreq_options : modules['varscan_snpsift_highfreq'], snpeff_highfreq_bgzip_options : modules['varscan_snpeff_highfreq_bgzip'], snpeff_highfreq_tabix_options : modules['varscan_snpeff_highfreq_tabix'], snpeff_highfreq_stats_options : modules['varscan_snpeff_highfreq_stats'] )
+// include { VARIANTS_IVAR       } from '../subworkflows/local/variants_ivar'       addParams(  )
+include { VARIANTS_BCFTOOLS   } from '../subworkflows/local/variants_bcftools'   addParams( bcftools_mpileup_options : modules['bcftools_mpileup'], quast_options : modules['bcftools_quast'], consensus_genomecov_options : modules['bcftools_consensus_genomecov'], consensus_merge_options : modules['bcftools_consensus_merge'], consensus_mask_options : modules['bcftools_consensus_mask'], consensus_maskfasta_options : modules['bcftools_consensus_maskfasta'], consensus_bcftools_options : modules['bcftools_consensus_bcftools'], consensus_plot_options : modules['bcftools_consensus_plot'], snpeff_options : modules['bcftools_snpeff'], snpsift_options : modules['bcftools_snpsift'], snpeff_bgzip_options : modules['bcftools_snpeff_bgzip'], snpeff_tabix_options : modules['bcftools_snpeff_tabix'], snpeff_stats_options : modules['bcftools_snpeff_stats'] )
 include { ASSEMBLY_SPADES     } from '../subworkflows/local/assembly_spades'     addParams( spades_options: modules['spades'], bandage_options: modules['spades_bandage'], blastn_options: modules['spades_blastn'], abacas_options: modules['spades_abacas'], plasmidid_options: modules['spades_plasmidid'], quast_options: modules['spades_quast'], snpeff_options: modules['spades_snpeff'], snpeff_bgzip_options: modules['spades_snpeff_bgzip'], snpeff_tabix_options: modules['spades_snpeff_tabix'], snpeff_stats_options: modules['spades_snpeff_tabix'], snpsift_options: modules['spades_snpsift'] )
 include { ASSEMBLY_UNICYCLER  } from '../subworkflows/local/assembly_unicycler'  addParams( unicycler_options: modules['unicycler'], bandage_options: modules['unicycler_bandage'], blastn_options: modules['unicycler_blastn'], abacas_options: modules['unicycler_abacas'], plasmidid_options: modules['unicycler_plasmidid'], quast_options: modules['unicycler_quast'], snpeff_options: modules['unicycler_snpeff'], snpeff_bgzip_options: modules['unicycler_snpeff_bgzip'], snpeff_tabix_options: modules['unicycler_snpeff_tabix'], snpeff_stats_options: modules['unicycler_snpeff_tabix'], snpsift_options: modules['unicycler_snpsift'] )
 include { ASSEMBLY_MINIA      } from '../subworkflows/local/assembly_minia'      addParams( minia_options: modules['minia'], blastn_options: modules['minia_blastn'], abacas_options: modules['minia_abacas'], plasmidid_options: modules['minia_plasmidid'], quast_options: modules['minia_quast'], snpeff_options: modules['minia_snpeff'], snpeff_bgzip_options: modules['minia_snpeff_bgzip'], snpeff_tabix_options: modules['minia_snpeff_tabix'], snpeff_stats_options: modules['minia_snpeff_tabix'], snpsift_options: modules['minia_snpsift'] )
-
-include { MAKE_CONSENSUS as MAKE_CONSENSUS_BCFTOOLS                    } from '../subworkflows/local/make_consensus'        addParams( genomecov_options: modules['bcftools_consensus_genomecov'], merge_options: modules['bcftools_consensus_merge'], mask_options: modules['bcftools_consensus_mask'], maskfasta_options: modules['bcftools_consensus_maskfasta'], bcftools_options: modules['bcftools_consensus_bcftools'], plot_bases_options: modules['bcftools_consensus_plot'] )
-include { VCF_BGZIP_TABIX_STATS as VCF_BGZIP_TABIX_STATS_IVAR_LOWFREQ  } from '../subworkflows/local/vcf_bgzip_tabix_stats' addParams( bgzip_options: modules['ivar_bgzip_lowfreq'], tabix_options: modules['ivar_tabix_lowfreq'], stats_options: modules['ivar_stats_lowfreq'] )
-include { VCF_BGZIP_TABIX_STATS as VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ } from '../subworkflows/local/vcf_bgzip_tabix_stats' addParams( bgzip_options: modules['ivar_bgzip_highfreq'], tabix_options: modules['ivar_tabix_highfreq'], stats_options: modules['ivar_stats_highfreq'] )
-include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_IVAR_LOWFREQ                } from '../subworkflows/local/snpeff_snpsift'        addParams( snpeff_options: modules['ivar_snpeff_lowfreq'], snpsift_options: modules['ivar_snpsift_lowfreq'], bgzip_options: modules['ivar_snpeff_lowfreq_bgzip'], tabix_options: modules['ivar_snpeff_lowfreq_tabix'], stats_options: modules['ivar_snpeff_lowfreq_stats'] )
-include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_IVAR_HIGHFREQ               } from '../subworkflows/local/snpeff_snpsift'        addParams( snpeff_options: modules['ivar_snpeff_highfreq'], snpsift_options: modules['ivar_snpsift_highfreq'], bgzip_options: modules['ivar_snpeff_highfreq_bgzip'], tabix_options: modules['ivar_snpeff_highfreq_tabix'], stats_options: modules['ivar_snpeff_highfreq_stats'] )
-include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_BCFTOOLS                    } from '../subworkflows/local/snpeff_snpsift'        addParams( snpeff_options: modules['bcftools_snpeff'], snpsift_options: modules['bcftools_snpsift'], bgzip_options: modules['bcftools_snpeff_bgzip'], tabix_options: modules['bcftools_snpeff_tabix'], stats_options: modules['bcftools_snpeff_stats'] )
 
 ////////////////////////////////////////////////////
 /* --    IMPORT NF-CORE MODULES/SUBWORKFLOWS   -- */
@@ -199,8 +187,8 @@ include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_BCFTOOLS                    } from '.
 /*
  * MODULE: Installed directly from nf-core/modules
  */
-include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['picard_collectmultiplemetrics'] )
 include { FASTQC                        } from '../modules/nf-core/software/fastqc/main'                        addParams( options: modules['cutadapt_fastqc']               )
+include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['picard_collectmultiplemetrics'] )
 
 /*
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
@@ -443,7 +431,6 @@ workflow ILLUMINA {
      * SUBWORKFLOW: Call variants with VarScan2
      */
     if (!params.skip_variants && 'varscan2' in callers) {
-
         VARIANTS_VARSCAN (
             SAMTOOLS_MPILEUP.out.mpileup,
             ch_sorted_bam,
@@ -459,95 +446,72 @@ workflow ILLUMINA {
      */
     if (!params.skip_variants && 'ivar' in callers) {
 
-        IVAR_VARIANTS (
-            SAMTOOLS_MPILEUP.out.mpileup,
-            PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff
-        )
+        // IVAR_VARIANTS (
+        //     SAMTOOLS_MPILEUP.out.mpileup,
+        //     PREPARE_GENOME.out.fasta,
+        //     PREPARE_GENOME.out.gff
+        // )
 
-        IVAR_VARIANTS_TO_VCF_LOWFREQ (
-            IVAR_VARIANTS.out.tsv,
-            ch_ivar_variants_header_mqc
-        )
+        // IVAR_VARIANTS_TO_VCF_LOWFREQ (
+        //     IVAR_VARIANTS.out.tsv,
+        //     ch_ivar_variants_header_mqc
+        // )
 
-        VCF_BGZIP_TABIX_STATS_IVAR_LOWFREQ (
-            IVAR_VARIANTS_TO_VCF_LOWFREQ.out.vcf
-        )
+        // VCF_BGZIP_TABIX_STATS_IVAR_LOWFREQ (
+        //     IVAR_VARIANTS_TO_VCF_LOWFREQ.out.vcf
+        // )
 
-        IVAR_VARIANTS_TO_VCF_HIGHFREQ (
-            IVAR_VARIANTS.out.tsv,
-            ch_ivar_variants_header_mqc
-        )
+        // IVAR_VARIANTS_TO_VCF_HIGHFREQ (
+        //     IVAR_VARIANTS.out.tsv,
+        //     ch_ivar_variants_header_mqc
+        // )
 
-        VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ (
-            IVAR_VARIANTS_TO_VCF_HIGHFREQ.out.vcf
-        )
+        // VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ (
+        //     IVAR_VARIANTS_TO_VCF_HIGHFREQ.out.vcf
+        // )
 
-        if (!params.skip_consensus) {
-            IVAR_CONSENSUS (
-                SAMTOOLS_MPILEUP.out.mpileup
-            )
+        // if (!params.skip_consensus) {
+        //     IVAR_CONSENSUS (
+        //         SAMTOOLS_MPILEUP.out.mpileup
+        //     )
 
-            if (!params.skip_variants_quast) {
-                QUAST_IVAR (
-                    IVAR_CONSENSUS.out.fasta.collect{ it[1] },
-                    PREPARE_GENOME.out.fasta,
-                    PREPARE_GENOME.out.gff
-                )
-            }
-        }
+        //     if (!params.skip_variants_quast) {
+        //         QUAST_IVAR (
+        //             IVAR_CONSENSUS.out.fasta.collect{ it[1] },
+        //             PREPARE_GENOME.out.fasta,
+        //             PREPARE_GENOME.out.gff
+        //         )
+        //     }
+        // }
 
-        if (params.gff && !params.skip_variants_snpeff) {
-            SNPEFF_SNPSIFT_IVAR_LOWFREQ (
-                VCF_BGZIP_TABIX_STATS_IVAR_LOWFREQ.out.vcf,
-                PREPARE_GENOME.out.snpeff_db,
-                PREPARE_GENOME.out.snpeff_config,
-                PREPARE_GENOME.out.fasta,
-            )
+        // if (params.gff && !params.skip_variants_snpeff) {
+        //     SNPEFF_SNPSIFT_IVAR_LOWFREQ (
+        //         VCF_BGZIP_TABIX_STATS_IVAR_LOWFREQ.out.vcf,
+        //         PREPARE_GENOME.out.snpeff_db,
+        //         PREPARE_GENOME.out.snpeff_config,
+        //         PREPARE_GENOME.out.fasta,
+        //     )
 
-            SNPEFF_SNPSIFT_IVAR_HIGHFREQ (
-                VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ.out.vcf,
-                PREPARE_GENOME.out.snpeff_db,
-                PREPARE_GENOME.out.snpeff_config,
-                PREPARE_GENOME.out.fasta
-            )
-        }
+        //     SNPEFF_SNPSIFT_IVAR_HIGHFREQ (
+        //         VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ.out.vcf,
+        //         PREPARE_GENOME.out.snpeff_db,
+        //         PREPARE_GENOME.out.snpeff_config,
+        //         PREPARE_GENOME.out.fasta
+        //     )
+        // }
     }
 
     /*
      * SUBWORKFLOW: Call variants with BCFTools
      */
     if (!params.skip_variants && 'bcftools' in callers) {
-        BCFTOOLS_MPILEUP (
+        VARIANTS_BCFTOOLS (
             ch_sorted_bam,
-            PREPARE_GENOME.out.fasta
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gff,
+            PREPARE_GENOME.out.snpeff_db,
+            PREPARE_GENOME.out.snpeff_config
         )
-
-        if (!params.skip_consensus) {
-            MAKE_CONSENSUS_BCFTOOLS (
-                ch_sorted_bam
-                    .join(BCFTOOLS_MPILEUP.out.vcf, by: [0])
-                    .join(BCFTOOLS_MPILEUP.out.tbi, by: [0]),
-                PREPARE_GENOME.out.fasta
-            )
-
-            if (!params.skip_variants_quast) {
-                QUAST_BCFTOOLS (
-                    MAKE_CONSENSUS_BCFTOOLS.out.fasta.collect{ it[1] },
-                    PREPARE_GENOME.out.fasta,
-                    PREPARE_GENOME.out.gff
-                )
-            }
-        }
-
-        if (params.gff && !params.skip_variants_snpeff) {
-            SNPEFF_SNPSIFT_BCFTOOLS (
-                BCFTOOLS_MPILEUP.out.vcf,
-                PREPARE_GENOME.out.snpeff_db,
-                PREPARE_GENOME.out.snpeff_config,
-                PREPARE_GENOME.out.fasta,
-            )
-        }
     }
 
     // /*
