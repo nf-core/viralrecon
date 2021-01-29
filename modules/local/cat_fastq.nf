@@ -4,9 +4,6 @@ include { initOptions; saveFiles } from './functions'
 params.options = [:]
 def options    = initOptions(params.options)
 
-/*
- * Concatenate FastQ files
- */
 process CAT_FASTQ {
     tag "$meta.id"
     publishDir "${params.outdir}",

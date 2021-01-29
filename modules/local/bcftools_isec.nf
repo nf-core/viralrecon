@@ -26,7 +26,7 @@ process BCFTOOLS_ISEC {
 
     script:
     def software = getSoftwareName(task.process)
-    prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
+    prefix       = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
     bcftools isec  \\
         $options.args \\

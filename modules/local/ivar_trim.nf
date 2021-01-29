@@ -32,7 +32,7 @@ process IVAR_TRIM {
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
     ivar trim \\
-        -i $bam\\
+        -i $bam \\
         -b $bed \\
         $options.args \\
         -p $prefix \\
