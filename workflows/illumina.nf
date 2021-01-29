@@ -414,10 +414,10 @@ workflow ILLUMINA {
         )
         ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
         
-        // PLOT_MOSDEPTH_REGIONS_GENOME (
-        //     MOSDEPTH_GENOME.out.regions_bed.collect()
-        // )
-
+        PLOT_MOSDEPTH_REGIONS_GENOME (
+            MOSDEPTH_GENOME.out.regions_bed.collect { it[1] }
+        )
+        
         if (params.protocol == 'amplicon') {
 
             COLLAPSE_AMPLICONS (
@@ -430,9 +430,9 @@ workflow ILLUMINA {
                 0
             )
 
-            // PLOT_MOSDEPTH_REGIONS_AMPLICON ( 
-            //     MOSDEPTH_AMPLICON.out.regions_bed.collect()
-            // )
+            PLOT_MOSDEPTH_REGIONS_AMPLICON ( 
+                MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
+            )
         }
     }
 
