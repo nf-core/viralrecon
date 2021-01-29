@@ -11,18 +11,13 @@ process PLOT_BASE_DENSITY {
         mode: params.publish_dir_mode,
                 saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:meta.id) }
 
-    conda (params.enable_conda ? "conda-forge::python=3.8.3" : null)
+    conda (params.enable_conda ? "conda-forge::r-base=4.0.3 conda-forge::r-reshape2=1.4.4 conda-forge::r-optparse=1.6.6 conda-forge::r-ggplot2=3.3.3 conda-forge::r-scales=1.1.1 conda-forge::r-viridis=0.5.1 conda-forge::r-tidyverse=1.3.0 bioconda::bioconductor-biostrings=2.58.0 bioconda::bioconductor-complexheatmap=2.6.2" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/python:3.8.3"
+        container "https://depot.galaxyproject.org/singularity/"
     } else {
-        container "quay.io/biocontainers/python:3.8.3"
+        container "quay.io/biocontainers/"
     }
-    // library(optparse)
-    // library(ggplot2)
-    // library(scales)
-    // library(reshape2)
-    // library(Biostrings)
-
+    
     input:
     tuple val(meta), path(fasta)
     
