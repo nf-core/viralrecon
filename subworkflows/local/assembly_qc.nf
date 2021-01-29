@@ -2,30 +2,22 @@
  * Downstream analysis for assembly scaffolds
  */
 
-params.blastn_options       = [:]
-params.abacas_options       = [:]
-params.plasmidid_options    = [:]
-params.quast_options        = [:]
-params.snpeff_options       = [:]
-params.snpeff_bgzip_options = [:]
-params.snpeff_tabix_options = [:]
-params.snpeff_stats_options = [:]
-params.snpsift_options      = [:]
+params.blastn_options    = [:]
+params.abacas_options    = [:]
+params.plasmidid_options = [:]
+params.quast_options     = [:]
 
-include { BLAST_BLASTN   } from '../../modules/local/blast_blastn' addParams( options: params.blastn_options    ) 
-include { ABACAS         } from '../../modules/local/abacas'       addParams( options: params.abacas_options    )
-include { PLASMIDID      } from '../../modules/local/plasmidid'    addParams( options: params.plasmidid_options )
-include { QUAST          } from '../../modules/local/quast'        addParams( options: params.quast_options     )
-include { SNPEFF_SNPSIFT } from './snpeff_snpsift'                 addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options: params.snpeff_stats_options )
+include { BLAST_BLASTN } from '../../modules/local/blast_blastn' addParams( options: params.blastn_options    ) 
+include { ABACAS       } from '../../modules/local/abacas'       addParams( options: params.abacas_options    )
+include { PLASMIDID    } from '../../modules/local/plasmidid'    addParams( options: params.plasmidid_options )
+include { QUAST        } from '../../modules/local/quast'        addParams( options: params.quast_options     )
 
 workflow ASSEMBLY_QC {
     take:
-    scaffolds     // channel: [ val(meta), [ scaffolds ] ]
-    fasta         // channel: /path/to/genome.fasta
-    gff           // channel: /path/to/genome.gff
-    blast_db      // channel: /path/to/blast_db/
-    snpeff_db     // channel: /path/to/snpeff_db/
-    snpeff_config // channel: /path/to/snpeff_db/
+    scaffolds // channel: [ val(meta), [ scaffolds ] ]
+    fasta     // channel: /path/to/genome.fasta
+    gff       // channel: /path/to/genome.gff
+    blast_db  // channel: /path/to/blast_db/
     
     main:
     /*
@@ -72,10 +64,6 @@ workflow ASSEMBLY_QC {
     //     PLASMIDID ( scaffolds, fasta )
     //     ch_plasmidid_results = PLASMIDID.out.results
     //     ch_plasmidid_version = PLASMIDID.out.version
-    // }
-
-    // if (!params.skip_variants_snpeff) {
-    //     SNPEFF_SNPSIFT ( vcf, snpeff_db, snpeff_config, fasta )
     // }
 
     emit:
