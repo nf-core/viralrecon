@@ -39,7 +39,7 @@ if (!protocolList.contains(params.protocol)) {
 }
 
 // Variant calling parameter validation
-def callerList = [ 'varscan2', 'ivar', 'bcftools', 'none']
+def callerList = [ 'varscan2', 'ivar', 'bcftools' ]
 def callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((callerList + callers).unique().size() != callerList.size()) {
     exit 1, "Invalid variant calller option: ${params.callers}. Valid options: ${callerList.join(', ')}"
@@ -51,10 +51,14 @@ if (params.protocol == 'amplicon' && !params.skip_variants && !params.amplicon_b
 if (params.amplicon_bed) { ch_amplicon_bed = file(params.amplicon_bed) }
 
 // Assembly parameter validation
-def assemblerList = [ 'spades', 'unicycler', 'minia', 'none' ]
+def assemblerList = [ 'spades', 'unicycler', 'minia' ]
 def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
+}
+
+if (params.enable_conda && assemblers.contains('spades')) {
+    assemblers = Checks.ignore_spades(params, log)
 }
 
 def spadesModeList = [ 'rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio' ]
@@ -256,7 +260,7 @@ workflow ILLUMINA {
     FASTQC_FASTP (
         ch_cat_fastq,
         params.skip_fastqc || params.skip_qc,
-        params.skip_trimming
+        params.skip_fastp
     )
     ch_trim_fastq        = FASTQC_FASTP.out.reads
     ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
@@ -488,7 +492,7 @@ workflow ILLUMINA {
     ch_cutadapt_multiqc        = Channel.empty()
     ch_cutadapt_fastqc_multiqc = Channel.empty()
     ch_cutadapt_version        = Channel.empty()
-    if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_amplicon_trimming) {
+    if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
         CUTADAPT (
             ch_trim_fastq,
             PREPARE_GENOME.out.amplicon_fasta
