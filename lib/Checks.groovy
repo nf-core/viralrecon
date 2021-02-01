@@ -75,6 +75,18 @@ class Checks {
                "  https://github.com/${workflow.manifest.name}/blob/master/CITATIONS.md"
     }
 
+    // Print a warning after SRA download has completed
+    static void sra_download(log) {
+        log.warn "=============================================================================\n" +
+                 "  THIS IS AN EXPERIMENTAL FEATURE!\n\n" + 
+                 "  Please double-check the samplesheet that has been auto-created using the\n" +
+                 "  public database ids provided via the '--public_data_ids' parameter.\n\n" +
+                 "  All of the sample metadata obtained from the ENA has been appended\n" +
+                 "  as additional columns to help you manually curate the samplesheet before\n" +
+                 "  you run the main branch of the pipeline.\n" +
+                 "==================================================================================="
+    }
+
     // Exit pipeline if incorrect --genome key provided
     static void genome_exists(params, log) {
         if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
