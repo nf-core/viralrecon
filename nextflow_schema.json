@@ -19,7 +19,6 @@
                     "fa_icon": "fas fa-file-csv",
                     "help_text": "You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/viralrecon/docs/usage#introduction).",
                     "description": "Path to comma-separated file containing information about the samples you would like to analyse.",
-                    "default": "./samplesheet.csv"
                 },
                 "protocol": {
                     "type": "string",
@@ -343,7 +342,7 @@
             "properties": {
                 "assemblers": {
                     "type": "string",
-                    "default": "spades,metaspades,unicycler,minia",
+                    "default": "spades,unicycler,minia",
                     "description": "Specify which assembly algorithms you would like to use. Available options are spades, metaspades, unicycler and minia.",
                     "fa_icon": "fas fa-random"
                 },
