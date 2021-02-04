@@ -179,24 +179,6 @@ module_order:
         path_filters:
             - './spades/snpeff/*.csv'
     - quast:
-        name: 'ASSEMBLY: QUAST (MetaSPAdes)'
-        anchor: 'quast_metaspades'
-        info: 'This section of the report shows QUAST results from MetaSPAdes de novo assembly.'
-        path_filters:
-            - './metaspades/quast/*.tsv'
-    - bcftools:
-        name: 'ASSEMBLY: BCFTools (MetaSPAdes)'
-        anchor: 'bcftools_metaspades'
-        info: 'This section of the report shows BCFTools stats results for variants called in the MetaSPAdes assembly relative to the reference.'
-        path_filters:
-            - './metaspades/bcftools/*.txt'
-    - snpeff:
-        name: 'ASSEMBLY: SnpEff (MetaSPAdes)'
-        anchor: 'snpeff_metaspades'
-        info: 'This section of the report shows SnpEff results for variants called in the MetaSPAdes assembly relative to the reference.'
-        path_filters:
-            - './metaspades/snpeff/*.csv'
-    - quast:
         name: 'ASSEMBLY: QUAST (Unicycler)'
         anchor: 'quast_unicycler'
         info: 'This section of the report shows QUAST results from Unicycler de novo assembly.'
