@@ -16,10 +16,10 @@ params.snpeff_bgzip_options        = [:]
 params.snpeff_tabix_options        = [:]
 params.snpeff_stats_options        = [:]
 
-include { BCFTOOLS_MPILEUP } from '../../modules/local/bcftools_mpileup' addParams( options: params.bcftools_mpileup_options ) 
-include { MAKE_CONSENSUS   } from './make_consensus'                     addParams( genomecov_options: params.consensus_genomecov_options, merge_options: params.consensus_merge_options, mask_options: params.consensus_mask_options, maskfasta_options: params.consensus_maskfasta_options, bcftools_options: params.consensus_bcftools_options, plot_bases_options: params.consensus_plot_options )
-include { SNPEFF_SNPSIFT   } from './snpeff_snpsift'                     addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
-include { QUAST            } from '../../modules/nf-core/quast/main'     addParams( options: params.quast_options )
+include { BCFTOOLS_MPILEUP } from '../../modules/local/bcftools_mpileup'      addParams( options: params.bcftools_mpileup_options ) 
+include { QUAST            } from '../../modules/nf-core/software/quast/main' addParams( options: params.quast_options            )
+include { MAKE_CONSENSUS   } from './make_consensus'                          addParams( genomecov_options: params.consensus_genomecov_options, merge_options: params.consensus_merge_options, mask_options: params.consensus_mask_options, maskfasta_options: params.consensus_maskfasta_options, bcftools_options: params.consensus_bcftools_options, plot_bases_options: params.consensus_plot_options )
+include { SNPEFF_SNPSIFT   } from './snpeff_snpsift'                          addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
 
 workflow VARIANTS_BCFTOOLS {
     take:
@@ -42,7 +42,7 @@ workflow VARIANTS_BCFTOOLS {
         MAKE_CONSENSUS ( bam.join(BCFTOOLS_MPILEUP.out.vcf, by: [0]).join(BCFTOOLS_MPILEUP.out.tbi, by: [0]), fasta )
 
         if (!params.skip_variants_quast) {
-            QUAST ( MAKE_CONSENSUS.out.fasta.collect{ it[1] }, fasta, gff, true, if params.gff )
+            QUAST ( MAKE_CONSENSUS.out.fasta.collect{ it[1] }, fasta, gff, true, params.gff )
         }
     }
 

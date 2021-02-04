@@ -13,14 +13,14 @@ include {
     GUNZIP as GUNZIP_FASTA
     GUNZIP as GUNZIP_GFF               
     GUNZIP as GUNZIP_AMPLICON_BED
-    GUNZIP as GUNZIP_AMPLICON_FASTA    } from '../../modules/local/gunzip'               addParams( options: params.genome_options        )
-include { UNTAR as UNTAR_BOWTIE2_INDEX } from '../../modules/local/untar'                addParams( options: params.bowtie2_build_options )
-include { UNTAR as UNTAR_KRAKEN2_DB    } from '../../modules/local/untar'                addParams( options: params.index_options         )
-include { UNTAR as UNTAR_BLAST_DB      } from '../../modules/local/untar'                addParams( options: params.index_options         )
-include { BOWTIE2_BUILD                } from '../../modules/nf-core/bowtie2/build/main' addParams( options: params.bowtie2_build_options )
-include { SNPEFF_BUILD                 } from '../../modules/local/snpeff_build'         addParams( options: params.snpeff_build_options  )
-include { BLAST_MAKEBLASTDB            } from '../../modules/local/blast_makeblastdb'    addParams( options: params.makeblastdb_options   )
-include { KRAKEN2_BUILD                } from '../../modules/local/kraken2_build'        addParams( options: params.kraken2_build_options )
+    GUNZIP as GUNZIP_AMPLICON_FASTA    } from '../../modules/local/gunzip'                        addParams( options: params.genome_options        )
+include { UNTAR as UNTAR_BOWTIE2_INDEX } from '../../modules/local/untar'                         addParams( options: params.bowtie2_build_options )
+include { UNTAR as UNTAR_KRAKEN2_DB    } from '../../modules/local/untar'                         addParams( options: params.index_options         )
+include { UNTAR as UNTAR_BLAST_DB      } from '../../modules/local/untar'                         addParams( options: params.index_options         )
+include { SNPEFF_BUILD                 } from '../../modules/local/snpeff_build'                  addParams( options: params.snpeff_build_options  )
+include { BLAST_MAKEBLASTDB            } from '../../modules/local/blast_makeblastdb'             addParams( options: params.makeblastdb_options   )
+include { KRAKEN2_BUILD                } from '../../modules/local/kraken2_build'                 addParams( options: params.kraken2_build_options )
+include { BOWTIE2_BUILD                } from '../../modules/nf-core/software/bowtie2/build/main' addParams( options: params.bowtie2_build_options )
 
 workflow PREPARE_GENOME {
     take:
