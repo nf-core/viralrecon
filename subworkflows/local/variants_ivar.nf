@@ -26,13 +26,13 @@ params.snpeff_highfreq_stats_options         = [:]
 
 include { IVAR_VARIANTS                                           } from '../../modules/local/ivar_variants'        addParams( options: params.ivar_variants_options                 )
 include { IVAR_CONSENSUS                                          } from '../../modules/local/ivar_consensus'       addParams( options: params.ivar_consensus_options                )
-include { QUAST                                                   } from '../../modules/local/quast'                addParams( options: params.quast_options                         )
 include { IVAR_VARIANTS_TO_VCF as IVAR_VARIANTS_TO_VCF_LOWFREQ    } from '../../modules/local/ivar_variants_to_vcf' addParams( options: params.ivar_variants_to_vcf_lowfreq_options  )
 include { IVAR_VARIANTS_TO_VCF as IVAR_VARIANTS_TO_VCF_HIGHFREQ   } from '../../modules/local/ivar_variants_to_vcf' addParams( options: params.ivar_variants_to_vcf_highfreq_options )
-include { VCF_BGZIP_TABIX_STATS as VCF_BGZIP_TABIX_STATS_LOWFREQ  } from './vcf_bgzip_tabix_stats' addParams( bgzip_options: params.ivar_bgzip_lowfreq_options, tabix_options: params.ivar_tabix_lowfreq_options, stats_options: params.ivar_stats_lowfreq_options    )
-include { VCF_BGZIP_TABIX_STATS as VCF_BGZIP_TABIX_STATS_HIGHFREQ } from './vcf_bgzip_tabix_stats' addParams( bgzip_options: params.ivar_bgzip_highfreq_options, tabix_options: params.ivar_tabix_highfreq_options, stats_options: params.ivar_stats_highfreq_options )
-include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_LOWFREQ                } from './snpeff_snpsift'        addParams( snpeff_options: params.snpeff_lowfreq_options, snpsift_options: params.snpsift_lowfreq_options, bgzip_options: params.snpeff_lowfreq_bgzip_options, tabix_options: params.snpeff_lowfreq_tabix_options, stats_options: params.snpeff_lowfreq_stats_options      )
-include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_HIGHFREQ               } from './snpeff_snpsift'        addParams( snpeff_options: params.snpeff_highfreq_options, snpsift_options: params.snpsift_highfreq_options, bgzip_options: params.snpeff_highfreq_bgzip_options, tabix_options: params.snpeff_highfreq_tabix_options, stats_options: params.snpeff_highfreq_stats_options )
+include { VCF_BGZIP_TABIX_STATS as VCF_BGZIP_TABIX_STATS_LOWFREQ  } from './vcf_bgzip_tabix_stats'                  addParams( bgzip_options: params.ivar_bgzip_lowfreq_options, tabix_options: params.ivar_tabix_lowfreq_options, stats_options: params.ivar_stats_lowfreq_options    )
+include { VCF_BGZIP_TABIX_STATS as VCF_BGZIP_TABIX_STATS_HIGHFREQ } from './vcf_bgzip_tabix_stats'                  addParams( bgzip_options: params.ivar_bgzip_highfreq_options, tabix_options: params.ivar_tabix_highfreq_options, stats_options: params.ivar_stats_highfreq_options )
+include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_LOWFREQ                } from './snpeff_snpsift'                         addParams( snpeff_options: params.snpeff_lowfreq_options, snpsift_options: params.snpsift_lowfreq_options, bgzip_options: params.snpeff_lowfreq_bgzip_options, tabix_options: params.snpeff_lowfreq_tabix_options, stats_options: params.snpeff_lowfreq_stats_options      )
+include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_HIGHFREQ               } from './snpeff_snpsift'                         addParams( snpeff_options: params.snpeff_highfreq_options, snpsift_options: params.snpsift_highfreq_options, bgzip_options: params.snpeff_highfreq_bgzip_options, tabix_options: params.snpeff_highfreq_tabix_options, stats_options: params.snpeff_highfreq_stats_options )
+include { QUAST                                                   } from '../../modules/nf-core/quast/main'         addParams( options: params.quast_options )
 
 workflow VARIANTS_IVAR {
     take:
@@ -70,7 +70,7 @@ workflow VARIANTS_IVAR {
         IVAR_CONSENSUS ( mpileup )
 
         if (!params.skip_variants_quast) {
-            QUAST ( IVAR_CONSENSUS.out.fasta.collect{ it[1] }, fasta, gff )
+            QUAST ( IVAR_CONSENSUS.out.fasta.collect{ it[1] }, fasta, gff, true, if params.gff )
         }
     }
 

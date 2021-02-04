@@ -10,7 +10,7 @@ params.quast_options     = [:]
 include { BLAST_BLASTN } from '../../modules/local/blast_blastn' addParams( options: params.blastn_options    ) 
 include { ABACAS       } from '../../modules/local/abacas'       addParams( options: params.abacas_options    )
 include { PLASMIDID    } from '../../modules/local/plasmidid'    addParams( options: params.plasmidid_options )
-include { QUAST        } from '../../modules/local/quast'        addParams( options: params.quast_options     )
+include { QUAST        } from '../../modules/nf-core/quast/main' addParams( options: params.quast_options     )
 
 workflow ASSEMBLY_QC {
     take:
@@ -38,7 +38,7 @@ workflow ASSEMBLY_QC {
     ch_quast_tsv     = Channel.empty()
     ch_quast_version = Channel.empty()
     if (!params.skip_assembly_quast) {
-        QUAST ( scaffolds.collect{ it[1] }, fasta, gff )
+        QUAST ( scaffolds.collect{ it[1] }, fasta, gff, true, if params.gff )
         ch_quast_results = QUAST.out.results
         ch_quast_tsv     = QUAST.out.tsv
         ch_quast_version = QUAST.out.version

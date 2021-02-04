@@ -27,14 +27,14 @@ params.snpeff_highfreq_bgzip_options = [:]
 params.snpeff_highfreq_tabix_options = [:]
 params.snpeff_highfreq_stats_options = [:]
 
-include { VARSCAN_MPILEUP2CNS   } from '../../modules/local/varscan_mpileup2cns' addParams( options: params.varscan_mpileup2cns_options )
-include { QUAST                 } from '../../modules/local/quast'               addParams( options: params.quast_options               )
-include { BCFTOOLS_FILTER       } from '../../modules/local/bcftools_filter'     addParams( options: params.bcftools_filter_options     )
-include { MAKE_CONSENSUS        } from './make_consensus'                        addParams( genomecov_options: params.consensus_genomecov_options, merge_options: params.consensus_merge_options, mask_options: params.consensus_mask_options, maskfasta_options: params.consensus_maskfasta_options, bcftools_options: params.consensus_bcftools_options, plot_bases_options: params.consensus_plot_options )
-include { VCF_BGZIP_TABIX_STATS } from './vcf_bgzip_tabix_stats'                 addParams( bgzip_options: params.bgzip_options, tabix_options: params.tabix_options, stats_options: params.stats_options )
-include { VCF_TABIX_STATS       } from './vcf_tabix_stats'                       addParams( tabix_options: params.bcftools_filter_tabix_options, stats_options: params.bcftools_filter_stats_options      )
-include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_LOWFREQ  } from './snpeff_snpsift'    addParams( snpeff_options: params.snpeff_lowfreq_options, snpsift_options: params.snpsift_lowfreq_options, bgzip_options: params.snpeff_lowfreq_bgzip_options, tabix_options: params.snpeff_lowfreq_tabix_options, stats_options: params.snpeff_lowfreq_stats_options      )
-include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_HIGHFREQ } from './snpeff_snpsift'    addParams( snpeff_options: params.snpeff_highfreq_options, snpsift_options: params.snpsift_highfreq_options, bgzip_options: params.snpeff_highfreq_bgzip_options, tabix_options: params.snpeff_highfreq_tabix_options, stats_options: params.snpeff_highfreq_stats_options )
+include { VARSCAN_MPILEUP2CNS                       } from '../../modules/local/varscan_mpileup2cns' addParams( options: params.varscan_mpileup2cns_options )
+include { BCFTOOLS_FILTER                           } from '../../modules/local/bcftools_filter'     addParams( options: params.bcftools_filter_options     )
+include { MAKE_CONSENSUS                            } from './make_consensus'                        addParams( genomecov_options: params.consensus_genomecov_options, merge_options: params.consensus_merge_options, mask_options: params.consensus_mask_options, maskfasta_options: params.consensus_maskfasta_options, bcftools_options: params.consensus_bcftools_options, plot_bases_options: params.consensus_plot_options )
+include { VCF_BGZIP_TABIX_STATS                     } from './vcf_bgzip_tabix_stats'                 addParams( bgzip_options: params.bgzip_options, tabix_options: params.tabix_options, stats_options: params.stats_options )
+include { VCF_TABIX_STATS                           } from './vcf_tabix_stats'                       addParams( tabix_options: params.bcftools_filter_tabix_options, stats_options: params.bcftools_filter_stats_options      )
+include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_LOWFREQ  } from './snpeff_snpsift'                        addParams( snpeff_options: params.snpeff_lowfreq_options, snpsift_options: params.snpsift_lowfreq_options, bgzip_options: params.snpeff_lowfreq_bgzip_options, tabix_options: params.snpeff_lowfreq_tabix_options, stats_options: params.snpeff_lowfreq_stats_options      )
+include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_HIGHFREQ } from './snpeff_snpsift'                        addParams( snpeff_options: params.snpeff_highfreq_options, snpsift_options: params.snpsift_highfreq_options, bgzip_options: params.snpeff_highfreq_bgzip_options, tabix_options: params.snpeff_highfreq_tabix_options, stats_options: params.snpeff_highfreq_stats_options )
+include { QUAST                                     } from '../../modules/nf-core/quast/main'        addParams( options: params.quast_options )
 
 workflow VARIANTS_VARSCAN {
     take:
@@ -73,7 +73,7 @@ workflow VARIANTS_VARSCAN {
         MAKE_CONSENSUS ( bam.join(BCFTOOLS_FILTER.out.vcf, by: [0]).join(VCF_TABIX_STATS.out.tbi, by: [0]), fasta )
 
         if (!params.skip_variants_quast) {
-            QUAST ( MAKE_CONSENSUS.out.fasta.collect{ it[1] }, fasta, gff )
+            QUAST ( MAKE_CONSENSUS.out.fasta.collect{ it[1] }, fasta, gff, true, if params.gff )
         }
     }
 
