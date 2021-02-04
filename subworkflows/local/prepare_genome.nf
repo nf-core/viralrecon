@@ -2,25 +2,28 @@
  * Uncompress and prepare reference genome files
 */
 
-params.genome_options        = [:]
-params.index_options         = [:]
-params.bowtie2_build_options = [:]
-params.snpeff_build_options  = [:]
-params.makeblastdb_options   = [:]
-params.kraken2_build_options = [:]
+params.genome_options            = [:]
+params.index_options             = [:]
+params.db_options                = [:]
+params.bedtools_getfasta_options = [:]
+params.bowtie2_build_options     = [:]
+params.snpeff_build_options      = [:]
+params.makeblastdb_options       = [:]
+params.kraken2_build_options     = [:]
 
 include {
     GUNZIP as GUNZIP_FASTA
     GUNZIP as GUNZIP_GFF               
-    GUNZIP as GUNZIP_AMPLICON_BED
-    GUNZIP as GUNZIP_AMPLICON_FASTA    } from '../../modules/local/gunzip'                        addParams( options: params.genome_options        )
-include { UNTAR as UNTAR_BOWTIE2_INDEX } from '../../modules/local/untar'                         addParams( options: params.bowtie2_build_options )
-include { UNTAR as UNTAR_KRAKEN2_DB    } from '../../modules/local/untar'                         addParams( options: params.index_options         )
-include { UNTAR as UNTAR_BLAST_DB      } from '../../modules/local/untar'                         addParams( options: params.index_options         )
-include { SNPEFF_BUILD                 } from '../../modules/local/snpeff_build'                  addParams( options: params.snpeff_build_options  )
-include { BLAST_MAKEBLASTDB            } from '../../modules/local/blast_makeblastdb'             addParams( options: params.makeblastdb_options   )
-include { KRAKEN2_BUILD                } from '../../modules/local/kraken2_build'                 addParams( options: params.kraken2_build_options )
-include { BOWTIE2_BUILD                } from '../../modules/nf-core/software/bowtie2/build/main' addParams( options: params.bowtie2_build_options )
+    GUNZIP as GUNZIP_PRIMER_BED
+    GUNZIP as GUNZIP_PRIMER_FASTA      } from '../../modules/local/gunzip'                        addParams( options: params.genome_options            )
+include { UNTAR as UNTAR_BOWTIE2_INDEX } from '../../modules/local/untar'                         addParams( options: params.index_options             )
+include { UNTAR as UNTAR_KRAKEN2_DB    } from '../../modules/local/untar'                         addParams( options: params.db_options                )
+include { UNTAR as UNTAR_BLAST_DB      } from '../../modules/local/untar'                         addParams( options: params.db_options                )
+include { BEDTOOLS_GETFASTA            } from '../../modules/local/bedtools_getfasta'             addParams( options: params.bedtools_getfasta_options )
+include { BOWTIE2_BUILD                } from '../../modules/nf-core/software/bowtie2/build/main' addParams( options: params.bowtie2_build_options     )
+include { SNPEFF_BUILD                 } from '../../modules/local/snpeff_build'                  addParams( options: params.snpeff_build_options      )
+include { BLAST_MAKEBLASTDB            } from '../../modules/local/blast_makeblastdb'             addParams( options: params.makeblastdb_options       )
+include { KRAKEN2_BUILD                } from '../../modules/local/kraken2_build'                 addParams( options: params.kraken2_build_options     )
 
 workflow PREPARE_GENOME {
     take:
@@ -52,15 +55,15 @@ workflow PREPARE_GENOME {
     /*
      * Prepare reference files required for variant calling
      */
-    ch_amplicon_bed    = Channel.empty()
-    ch_bowtie2_index   = Channel.empty()
+    ch_primer_bed    = Channel.empty()
+    ch_bowtie2_index = Channel.empty()
     if (!params.skip_variants) {
 
-        if (params.amplicon_bed) {
-            if (params.amplicon_bed.endsWith('.gz')) {
-                ch_amplicon_bed = GUNZIP_AMPLICON_BED ( params.amplicon_bed ).gunzip
+        if (params.primer_bed) {
+            if (params.primer_bed.endsWith('.gz')) {
+                ch_primer_bed = GUNZIP_PRIMER_BED ( params.primer_bed ).gunzip
             } else {
-                ch_amplicon_bed = file(params.amplicon_bed)
+                ch_primer_bed = file(params.primer_bed)
             }
         }
 
@@ -78,17 +81,19 @@ workflow PREPARE_GENOME {
     /*
      * Prepare reference files required for de novo assembly
      */
-    ch_amplicon_fasta = Channel.empty()
+    ch_primer_fasta   = Channel.empty()
     ch_blast_db       = Channel.empty()
     ch_kraken2_db     = Channel.empty()
     if (!params.skip_assembly) {
 
-        if (params.amplicon_fasta) {
-            if (params.amplicon_fasta.endsWith('.gz')) {
-                ch_amplicon_fasta = GUNZIP_AMPLICON_FASTA ( params.amplicon_fasta ).gunzip
+        if (params.primer_fasta) {
+            if (params.primer_fasta.endsWith('.gz')) {
+                ch_primer_fasta = GUNZIP_PRIMER_FASTA ( params.primer_fasta ).gunzip
             } else {
-                ch_amplicon_fasta = file(params.amplicon_fasta)
+                ch_primer_fasta = file(params.primer_fasta)
             }
+        } else {
+            ch_primer_fasta = BEDTOOLS_GETFASTA ( ch_primer_bed, ch_fasta ).fasta
         }
 
         if (!params.skip_blast) {
@@ -128,13 +133,13 @@ workflow PREPARE_GENOME {
     }
     
     emit:
-    fasta          = ch_fasta            // path: genome.fasta
-    gff            = ch_gff              // path: genome.gff
-    amplicon_bed   = ch_amplicon_bed     // path: amplicon.bed
-    amplicon_fasta = ch_amplicon_fasta   // path: amplicon.fasta
-    bowtie2_index  = ch_bowtie2_index    // path: bowtie2/index/
-    snpeff_db      = ch_snpeff_db        // path: snpeff_db
-    snpeff_config  = ch_snpeff_config    // path: snpeff.config
-    blast_db       = ch_blast_db         // path: blast_db/
-    kraken2_db     = ch_kraken2_db       // path: kraken2_db/
+    fasta          = ch_fasta         // path: genome.fasta
+    gff            = ch_gff           // path: genome.gff
+    primer_bed     = ch_primer_bed    // path: primer.bed
+    primer_fasta   = ch_primer_fasta  // path: primer.fasta
+    bowtie2_index  = ch_bowtie2_index // path: bowtie2/index/
+    snpeff_db      = ch_snpeff_db     // path: snpeff_db
+    snpeff_config  = ch_snpeff_config // path: snpeff.config
+    blast_db       = ch_blast_db      // path: blast_db/
+    kraken2_db     = ch_kraken2_db    // path: kraken2_db/
 }
