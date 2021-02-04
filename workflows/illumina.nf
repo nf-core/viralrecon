@@ -613,10 +613,10 @@ workflow ILLUMINA {
 /* --              COMPLETION EMAIL            -- */
 ////////////////////////////////////////////////////
 
-// workflow.onComplete {
-//     Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
-//     Completion.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
-// }
+workflow.onComplete {
+    Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
+    Completion.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
+}
 
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
