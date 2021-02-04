@@ -12,15 +12,13 @@ include { FASTP                 } from '../../modules/nf-core/software/fastp/mai
 
 workflow FASTQC_FASTP {
     take:
-    reads         // channel: [ val(meta), [ reads ] ]
-    skip_fastqc   // boolean: true/false
-    skip_trimming // boolean: true/false
-
+    reads // channel: [ val(meta), [ reads ] ]
+    
     main:
     fastqc_raw_html = Channel.empty()
     fastqc_raw_zip  = Channel.empty()
     fastqc_version  = Channel.empty()
-    if (!skip_fastqc) {
+    if (!params.skip_fastqc && !params.skip_qc) {
         FASTQC_RAW ( reads ).html.set { fastqc_raw_html }
         fastqc_raw_zip = FASTQC_RAW.out.zip
         fastqc_version = FASTQC_RAW.out.version
@@ -34,15 +32,15 @@ workflow FASTQC_FASTP {
     fastp_version    = Channel.empty()
     fastqc_trim_html = Channel.empty()
     fastqc_trim_zip  = Channel.empty()
-    if (!skip_trimming) {
-        FASTP ( reads ).reads.set { trim_reads }
+    if (!params.skip_fastp) {
+        FASTP ( reads, params.save_trimmed_fail ).reads.set { trim_reads }
         trim_json       = FASTP.out.json
         trim_html       = FASTP.out.html
         trim_log        = FASTP.out.log
         trim_reads_fail = FASTP.out.reads_fail
         fastp_version   = FASTP.out.version
 
-        if (!skip_fastqc) {
+        if (!params.skip_fastqc && !params.skip_qc) {
             FASTQC_TRIM ( trim_reads ).html.set { fastqc_trim_html }
             fastqc_trim_zip = FASTQC_TRIM.out.zip
         }
