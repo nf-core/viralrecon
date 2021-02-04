@@ -23,7 +23,7 @@ process SNPEFF_BUILD {
     path gff
 
     output:
-    path 'SnpEffDB'     , emit: db
+    path 'snpeff_db'    , emit: db
     path '*.config'     , emit: config
     path '*.version.txt', emit: version
 
@@ -31,19 +31,19 @@ process SNPEFF_BUILD {
     def software = getSoftwareName(task.process)
     def basename = fasta.baseName
     """
-    mkdir -p SnpEffDB/genomes/
-    cd SnpEffDB/genomes/
+    mkdir -p snpeff_db/genomes/
+    cd snpeff_db/genomes/
     ln -s ../../$fasta ${basename}.fa
 
     cd ../../
-    mkdir -p SnpEffDB/${basename}/
-    cd SnpEffDB/${basename}/
+    mkdir -p snpeff_db/${basename}/
+    cd snpeff_db/${basename}/
     ln -s ../../$gff genes.gff
 
     cd ../../
     echo "${basename}.genome : ${basename}" > snpeff.config
 
-    snpEff build -config snpeff.config -dataDir ./SnpEffDB -gff3 -v ${basename}
+    snpEff build -config snpeff.config -dataDir ./snpeff_db -gff3 -v ${basename}
 
     echo \$(snpEff -version 2>&1) | sed 's/^.*SnpEff //; s/ .*\$//' > ${software}.version.txt
     """
