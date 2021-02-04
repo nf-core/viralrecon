@@ -176,7 +176,7 @@ include { SAMTOOLS_MPILEUP              } from '../modules/nf-core/software/samt
 /*
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
  */
-def fastp_options    = modules['fastp']
+def fastp_options = modules['fastp']
 if (params.save_trimmed)      { fastp_options.publish_files.put('trim.fastq.gz','') }
 if (params.save_trimmed_fail) { fastp_options.publish_files.put('fail.fastq.gz','') }
 
@@ -254,17 +254,18 @@ workflow ILLUMINA {
     .mix(ch_fastq.single)
     .set { ch_cat_fastq }
     
-    // /*
-    //  * SUBWORKFLOW: Read QC, extract UMI and trim adapters
-    //  */
-    // FASTQC_FASTP (
-    //     ch_cat_fastq,
-    //     params.skip_fastqc || params.skip_qc,
-    //     params.skip_fastp
-    // )
-    // ch_trim_fastq        = FASTQC_FASTP.out.reads
-    // ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
-    // ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
+    /*
+     * SUBWORKFLOW: Read QC and trim adapters
+     */
+    FASTQC_FASTP (
+        ch_cat_fastq
+    )
+    ch_trim_fastq          = FASTQC_FASTP.out.reads
+    ch_fastqc_raw_multiqc  = FASTQC_FASTP.out.fastqc_raw_zip
+    ch_fastqc_trim_multiqc = FASTQC_FASTP.out.fastqc_trim_zip
+    ch_fastp_multiqc       = FASTQC_FASTP.out.trim_json
+    ch_software_versions   = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
+    ch_software_versions   = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
     
     // /*
     //  * SUBWORKFLOW: Alignment with Bowtie2
