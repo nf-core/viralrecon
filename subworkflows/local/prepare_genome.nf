@@ -5,8 +5,9 @@
 params.genome_options            = [:]
 params.index_options             = [:]
 params.db_options                = [:]
-params.bedtools_getfasta_options = [:]
 params.bowtie2_build_options     = [:]
+params.bedtools_getfasta_options = [:]
+params.collapse_primers_options  = [:]
 params.snpeff_build_options      = [:]
 params.makeblastdb_options       = [:]
 params.kraken2_build_options     = [:]
@@ -19,8 +20,9 @@ include {
 include { UNTAR as UNTAR_BOWTIE2_INDEX } from '../../modules/local/untar'                         addParams( options: params.index_options             )
 include { UNTAR as UNTAR_KRAKEN2_DB    } from '../../modules/local/untar'                         addParams( options: params.db_options                )
 include { UNTAR as UNTAR_BLAST_DB      } from '../../modules/local/untar'                         addParams( options: params.db_options                )
-include { BEDTOOLS_GETFASTA            } from '../../modules/local/bedtools_getfasta'             addParams( options: params.bedtools_getfasta_options )
 include { BOWTIE2_BUILD                } from '../../modules/nf-core/software/bowtie2/build/main' addParams( options: params.bowtie2_build_options     )
+include { COLLAPSE_PRIMERS             } from '../../modules/local/collapse_primers'              addParams( options: params.collapse_primers_options  )
+include { BEDTOOLS_GETFASTA            } from '../../modules/local/bedtools_getfasta'             addParams( options: params.bedtools_getfasta_options )
 include { SNPEFF_BUILD                 } from '../../modules/local/snpeff_build'                  addParams( options: params.snpeff_build_options      )
 include { BLAST_MAKEBLASTDB            } from '../../modules/local/blast_makeblastdb'             addParams( options: params.makeblastdb_options       )
 include { KRAKEN2_BUILD                } from '../../modules/local/kraken2_build'                 addParams( options: params.kraken2_build_options     )
@@ -55,17 +57,10 @@ workflow PREPARE_GENOME {
     /*
      * Prepare reference files required for variant calling
      */
-    ch_primer_bed    = Channel.empty()
-    ch_bowtie2_index = Channel.empty()
+    ch_bowtie2_index        = Channel.empty()
+    ch_primer_bed           = Channel.empty()
+    ch_primer_collapsed_bed = Channel.empty()
     if (!params.skip_variants) {
-
-        if (params.primer_bed) {
-            if (params.primer_bed.endsWith('.gz')) {
-                ch_primer_bed = GUNZIP_PRIMER_BED ( params.primer_bed ).gunzip
-            } else {
-                ch_primer_bed = file(params.primer_bed)
-            }
-        }
 
         if (params.bowtie2_index) {
             if (params.bowtie2_index.endsWith('.tar.gz')) {
@@ -75,6 +70,20 @@ workflow PREPARE_GENOME {
             }
         } else {
             ch_bowtie2_index   = BOWTIE2_BUILD ( ch_fasta ).index
+        }
+
+        if (params.protocol == 'amplicon') {
+            if (params.primer_bed) {
+                if (params.primer_bed.endsWith('.gz')) {
+                    ch_primer_bed = GUNZIP_PRIMER_BED ( params.primer_bed ).gunzip
+                } else {
+                    ch_primer_bed = file(params.primer_bed)
+                }
+            }
+
+            if (!params.skip_mosdepth) {
+                ch_primer_collapsed_bed = COLLAPSE_PRIMERS ( ch_primer_bed, params.primer_left_suffix, params.primer_right_suffix )
+            }
         }
     }
 
@@ -133,13 +142,14 @@ workflow PREPARE_GENOME {
     }
     
     emit:
-    fasta          = ch_fasta         // path: genome.fasta
-    gff            = ch_gff           // path: genome.gff
-    primer_bed     = ch_primer_bed    // path: primer.bed
-    primer_fasta   = ch_primer_fasta  // path: primer.fasta
-    bowtie2_index  = ch_bowtie2_index // path: bowtie2/index/
-    snpeff_db      = ch_snpeff_db     // path: snpeff_db
-    snpeff_config  = ch_snpeff_config // path: snpeff.config
-    blast_db       = ch_blast_db      // path: blast_db/
-    kraken2_db     = ch_kraken2_db    // path: kraken2_db/
+    fasta                = ch_fasta                 // path: genome.fasta
+    gff                  = ch_gff                   // path: genome.gff
+    primer_bed           = ch_primer_bed            // path: primer.bed
+    primer_collapsed_bed = ch_primer_collapsed_bed  // path: primer.collapsed.bed
+    primer_fasta         = ch_primer_fasta          // path: primer.fasta
+    bowtie2_index        = ch_bowtie2_index         // path: bowtie2/index/
+    snpeff_db            = ch_snpeff_db             // path: snpeff_db
+    snpeff_config        = ch_snpeff_config         // path: snpeff.config
+    blast_db             = ch_blast_db              // path: blast_db/
+    kraken2_db           = ch_kraken2_db            // path: kraken2_db/
 }
