@@ -14,7 +14,7 @@ Checks.genome_exists(params, log)
 // Check input path parameters to see if they exist
 def checkPathParamList = [
     params.input, params.fasta, params.gff, 
-    params.bowtie2_index, params.amplicon_fasta, params.amplicon_bed,
+    params.bowtie2_index, params.primer_bed, params.primer_fasta,
     params.multiqc_config
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
@@ -23,15 +23,8 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
 // Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet file not specified!' }
-if (params.fasta) { ch_fasta = file(params.fasta) } else { exit 1, 'Genome fasta file not specified!' }
-if (params.gff)   { ch_gff   = file(params.gff)   }
-
-// Check optional parameters
-def platformList = ['illumina']
-if (!platformList.contains(params.platform)) {
-    exit 1, "Invalid platform option: ${params.platform}. Valid options: ${platformList.join(', ')}"
-}
+if (params.input)  { ch_input = file(params.input) } else { exit 1, 'Input samplesheet file not specified!' }
+if (!params.fasta) { exit 1, 'Genome fasta file not specified!' }
 
 def protocolList = ['metagenomic', 'amplicon']
 if (!protocolList.contains(params.protocol)) {
@@ -45,10 +38,9 @@ if ((callerList + callers).unique().size() != callerList.size()) {
     exit 1, "Invalid variant calller option: ${params.callers}. Valid options: ${callerList.join(', ')}"
 }
 
-if (params.protocol == 'amplicon' && !params.skip_variants && !params.amplicon_bed) {
-    exit 1, "To perform variant calling in 'amplicon' mode please provide a valid amplicon BED file!"
+if (params.protocol == 'amplicon' && !params.skip_variants && !params.primer_bed) {
+    exit 1, "To perform variant calling in 'amplicon' mode please provide a valid primer BED file!"
 }
-if (params.amplicon_bed) { ch_amplicon_bed = file(params.amplicon_bed) }
 
 // Assembly parameter validation
 def assemblerList = [ 'spades', 'unicycler', 'minia' ]
@@ -66,11 +58,6 @@ if (!spadesModeList.contains(params.spades_mode)) {
     exit 1, "Invalid spades mode option: ${params.spades_mode}. Valid options: ${spadesModeList.join(', ')}"
 }
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file }
-
-if (params.protocol == 'amplicon' && !params.skip_assembly && !params.amplicon_fasta) {
-    exit 1, "To perform de novo assembly in 'amplicon' mode please provide a valid amplicon fasta file!"
-}
-if (params.amplicon_fasta) { ch_amplicon_fasta = file(params.amplicon_fasta) }
 
 // if (!params.skip_kraken2 && !params.kraken2_db) {
 //     if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
@@ -92,9 +79,6 @@ ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_hea
 
 // Don't overwrite global params.modules, create a copy instead and use that within the main script.
 def modules = params.modules.clone()
-
-def publish_genome_options = params.save_reference ? [publish_dir: 'genome']       : [publish_files: false]
-def publish_index_options  = params.save_reference ? [publish_dir: 'genome/index'] : [publish_files: false]
 
 def cat_fastq_options          = modules['cat_fastq']
 if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
@@ -124,8 +108,21 @@ include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../mod
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
  */
-def bowtie2_build_options    = modules['bowtie2_build']
-if (!params.save_reference) { bowtie2_build_options['publish_files'] = false }
+def publish_genome_options    = params.save_reference ? [publish_dir: 'genome']       : [publish_files: false]
+def publish_index_options     = params.save_reference ? [publish_dir: 'genome/index'] : [publish_files: false]
+def publish_db_options        = params.save_reference ? [publish_dir: 'genome/db']    : [publish_files: false]
+def bedtools_getfasta_options = modules['bedtools_getfasta']
+def bowtie2_build_options     = modules['bowtie2_build']
+def snpeff_build_options      = modules['snpeff_build']
+def makeblastdb_options       = modules['blast_makeblastdb']
+def kraken2_build_options     = modules['kraken2_build']
+if (!params.save_reference) { 
+    bedtools_getfasta_options['publish_files'] = false
+    bowtie2_build_options['publish_files']     = false
+    snpeff_build_options['publish_files']      = false
+    makeblastdb_options['publish_files']       = false
+    kraken2_build_options['publish_files']     = false
+}
 
 def ivar_trim_options   = modules['ivar_trim']
 ivar_trim_options.args += params.ivar_trim_noprimer ? "" : " -e"
@@ -152,7 +149,7 @@ def spades_options   = modules['spades']
 spades_options.args += (params.spades_mode && params.spades_mode != 'corona') ? "--${params.spades_mode}" : ""
 
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'        addParams( options: [:] )
-include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome'     addParams( genome_options: publish_genome_options, index_options: publish_index_options, bowtie2_build_options: bowtie2_build_options, makeblastdb_options: modules['blast_makeblastdb'], kraken2_build_options: modules['kraken2_build'])
+include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome'     addParams( genome_options: publish_genome_options, index_options: publish_index_options, db_options: publish_db_options, bedtools_getfasta_options: bedtools_getfasta_options, bowtie2_build_options: bowtie2_build_options, snpeff_build_options: snpeff_build_options, makeblastdb_options: makeblastdb_options, kraken2_build_options: kraken2_build_options )
 include { PRIMER_TRIM_IVAR   } from '../subworkflows/local/primer_trim_ivar'   addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
 include { VARIANTS_VARSCAN   } from '../subworkflows/local/variants_varscan'   addParams( varscan_mpileup2cns_options: varscan_mpileup2cns_options, quast_options: modules['varscan_quast'], bcftools_filter_options: modules['varscan_bcftools_filter'], consensus_genomecov_options: modules['varscan_consensus_genomecov'], consensus_merge_options: modules['varscan_consensus_merge'], consensus_mask_options: modules['varscan_consensus_mask'], consensus_maskfasta_options: modules['varscan_consensus_maskfasta'], consensus_bcftools_options: modules['varscan_consensus_bcftools'], consensus_plot_options: modules['varscan_consensus_plot'], bgzip_options: modules['varscan_bgzip'], tabix_options: modules['varscan_tabix'], stats_options: modules['varscan_stats'], bcftools_filter_tabix_options: modules['varscan_bcftools_filter_tabix'], bcftools_filter_stats_options: modules['varscan_bcftools_filter_stats'], snpeff_lowfreq_options: modules['varscan_snpeff_lowfreq'], snpsift_lowfreq_options: modules['varscan_snpsift_lowfreq'], snpeff_lowfreq_bgzip_options: modules['varscan_snpeff_lowfreq_bgzip'], snpeff_lowfreq_tabix_options: modules['varscan_snpeff_lowfreq_tabix'], snpeff_lowfreq_stats_options: modules['varscan_snpeff_lowfreq_stats'], snpeff_highfreq_options: modules['varscan_snpeff_highfreq'], snpsift_highfreq_options: modules['varscan_snpsift_highfreq'], snpeff_highfreq_bgzip_options: modules['varscan_snpeff_highfreq_bgzip'], snpeff_highfreq_tabix_options: modules['varscan_snpeff_highfreq_tabix'], snpeff_highfreq_stats_options: modules['varscan_snpeff_highfreq_stats'] )
 include { VARIANTS_IVAR      } from '../subworkflows/local/variants_ivar'      addParams( ivar_variants_options: ivar_variants_options, ivar_consensus_options: ivar_consensus_options, quast_options: modules['ivar_quast'], ivar_variants_to_vcf_lowfreq_options: modules['ivar_variants_to_vcf_lowfreq'], ivar_variants_to_vcf_highfreq_options: ivar_variants_to_vcf_highfreq_options, ivar_bgzip_lowfreq_options: modules['ivar_bgzip_lowfreq'], ivar_tabix_lowfreq_options: modules['ivar_tabix_lowfreq'], ivar_stats_lowfreq_options: modules['ivar_stats_lowfreq'], ivar_bgzip_highfreq_options: modules['ivar_bgzip_highfreq'], ivar_tabix_highfreq_options: modules['ivar_tabix_highfreq'], ivar_stats_highfreq_options: modules['ivar_stats_highfreq'], snpeff_lowfreq_options: modules['ivar_snpeff_lowfreq'], snpsift_lowfreq_options: modules['ivar_snpsift_lowfreq'], snpeff_lowfreq_bgzip_options: modules['ivar_snpeff_lowfreq_bgzip'], snpeff_lowfreq_tabix_options: modules['ivar_snpeff_lowfreq_tabix'], snpeff_lowfreq_stats_options: modules['ivar_snpeff_lowfreq_stats'], snpeff_highfreq_options: modules['ivar_snpeff_highfreq'], snpsift_highfreq_options: modules['ivar_snpsift_highfreq'], snpeff_highfreq_bgzip_options: modules['ivar_snpeff_highfreq_bgzip'], snpeff_highfreq_tabix_options: modules['ivar_snpeff_highfreq_tabix'], snpeff_highfreq_stats_options: modules['ivar_snpeff_highfreq_stats'] )
@@ -226,397 +223,397 @@ workflow ILLUMINA {
     // Check genome fasta only contains a single contig
     Checks.is_multifasta(PREPARE_GENOME.out.fasta, log)
     
-    /*
-     * SUBWORKFLOW: Read in samplesheet, validate and stage input files
-     */
-    INPUT_CHECK ( 
-        ch_input
-    )
-    .map {
-        meta, fastq ->
-            meta.id = meta.id.split('_')[0..-2].join('_')
-            [ meta, fastq ] 
-    }
-    .groupTuple(by: [0])
-    .branch {
-        meta, fastq ->
-            single  : fastq.size() == 1
-                return [ meta, fastq.flatten() ]
-            multiple: fastq.size() > 1
-                return [ meta, fastq.flatten() ]
-    }
-    .set { ch_fastq }
+    // /*
+    //  * SUBWORKFLOW: Read in samplesheet, validate and stage input files
+    //  */
+    // INPUT_CHECK ( 
+    //     ch_input
+    // )
+    // .map {
+    //     meta, fastq ->
+    //         meta.id = meta.id.split('_')[0..-2].join('_')
+    //         [ meta, fastq ] 
+    // }
+    // .groupTuple(by: [0])
+    // .branch {
+    //     meta, fastq ->
+    //         single  : fastq.size() == 1
+    //             return [ meta, fastq.flatten() ]
+    //         multiple: fastq.size() > 1
+    //             return [ meta, fastq.flatten() ]
+    // }
+    // .set { ch_fastq }
     
-    /*
-     * MODULE: Concatenate FastQ files from same sample if required
-     */
-    CAT_FASTQ ( 
-        ch_fastq.multiple
-    )
-    .mix(ch_fastq.single)
-    .set { ch_cat_fastq }
+    // /*
+    //  * MODULE: Concatenate FastQ files from same sample if required
+    //  */
+    // CAT_FASTQ ( 
+    //     ch_fastq.multiple
+    // )
+    // .mix(ch_fastq.single)
+    // .set { ch_cat_fastq }
     
-    /*
-     * SUBWORKFLOW: Read QC, extract UMI and trim adapters
-     */
-    FASTQC_FASTP (
-        ch_cat_fastq,
-        params.skip_fastqc || params.skip_qc,
-        params.skip_fastp
-    )
-    ch_trim_fastq        = FASTQC_FASTP.out.reads
-    ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
-    ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
+    // /*
+    //  * SUBWORKFLOW: Read QC, extract UMI and trim adapters
+    //  */
+    // FASTQC_FASTP (
+    //     ch_cat_fastq,
+    //     params.skip_fastqc || params.skip_qc,
+    //     params.skip_fastp
+    // )
+    // ch_trim_fastq        = FASTQC_FASTP.out.reads
+    // ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
+    // ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
     
-    /*
-     * SUBWORKFLOW: Alignment with Bowtie2
-     */
-    ch_sorted_bam        = Channel.empty()
-    ch_sorted_bai        = Channel.empty()
-    ch_samtools_stats    = Channel.empty()
-    ch_samtools_flagstat = Channel.empty()
-    ch_samtools_idxstats = Channel.empty()
-    ch_bowtie2_multiqc   = Channel.empty()
-    if (!params.skip_variants) {
-        ALIGN_BOWTIE2 (
-            ch_trim_fastq,
-            PREPARE_GENOME.out.bowtie2_index
-        )
-        ch_sorted_bam        = ALIGN_BOWTIE2.out.bam
-        ch_sorted_bai        = ALIGN_BOWTIE2.out.bai
-        ch_samtools_stats    = ALIGN_BOWTIE2.out.stats
-        ch_samtools_flagstat = ALIGN_BOWTIE2.out.flagstat
-        ch_samtools_idxstats = ALIGN_BOWTIE2.out.idxstats
-        ch_bowtie2_multiqc   = ALIGN_BOWTIE2.out.log_out
-        ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.bowtie2_version.first().ifEmpty(null))
-        ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
-    }
-
-    /*
-     * Filter channels to get samples that passed Bowtie2 minimum mapped reads threshold
-     */
-    ch_fail_mapping_multiqc = Channel.empty()
-    if (!params.skip_variants) {
-        ch_samtools_flagstat
-            .map { meta, flagstat -> [ meta ] + Checks.get_flagstat_mapped_reads(workflow, params, log, flagstat) }
-            .set { ch_mapped_reads }
-
-        ch_sorted_bam
-            .join(ch_mapped_reads, by: [0])
-            .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
-            .set { ch_sorted_bam }
-
-        ch_sorted_bai
-            .join(ch_mapped_reads, by: [0])
-            .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
-            .set { ch_sorted_bai }
-
-        ch_mapped_reads
-            .branch { meta, mapped, pass ->
-                pass: pass
-                    pass_mapped_reads[meta.id] = mapped
-                    return [ "$meta.id\t$mapped" ]
-                fail: !pass
-                    fail_mapped_reads[meta.id] = mapped
-                    return [ "$meta.id\t$mapped" ]
-            }
-            .set { ch_pass_fail_mapped }
-
-        MULTIQC_CUSTOM_FAIL_MAPPED ( 
-            ch_pass_fail_mapped.fail.collect()
-        )
-        .set { ch_fail_mapping_multiqc }
-    }
-    
-    /*
-     * SUBWORKFLOW: Filter unmapped reads from BAM and trim reads with iVar
-     */
-    ch_ivar_trim_multiqc = Channel.empty()
-    if (!params.skip_variants && params.protocol == 'amplicon') {
-        FILTER_BAM_SAMTOOLS (
-            ch_sorted_bam
-        )
-        ch_sorted_bam = FILTER_BAM_SAMTOOLS.out.bam
-        ch_sorted_bai = FILTER_BAM_SAMTOOLS.out.bai
-
-        PRIMER_TRIM_IVAR (
-            ch_sorted_bam.join(ch_sorted_bai, by: [0]),
-            ch_amplicon_bed
-        )
-        ch_sorted_bam             = PRIMER_TRIM_IVAR.out.bam
-        ch_sorted_bai             = PRIMER_TRIM_IVAR.out.bai
-        // ch_samtools_stats         = PRIMER_TRIM_IVAR.out.stats
-        // ch_samtools_flagstat      = PRIMER_TRIM_IVAR.out.flagstat
-        // ch_samtools_idxstats      = PRIMER_TRIM_IVAR.out.idxstats
-        ch_ivar_trim_multiqc      = PRIMER_TRIM_IVAR.out.log_out
-        ch_software_versions      = ch_software_versions.mix(PRIMER_TRIM_IVAR.out.ivar_version.first().ifEmpty(null))
-    }
-
-    /*
-     * SUBWORKFLOW: Mark duplicate reads
-     */
-    ch_markduplicates_multiqc = Channel.empty()
-    if (!params.skip_variants && !params.skip_markduplicates) {
-        MARK_DUPLICATES_PICARD (
-            ch_sorted_bam
-        )
-        ch_sorted_bam             = MARK_DUPLICATES_PICARD.out.bam
-        ch_sorted_bai             = MARK_DUPLICATES_PICARD.out.bai
-        // ch_samtools_stats         = MARK_DUPLICATES_PICARD.out.stats
-        // ch_samtools_flagstat      = MARK_DUPLICATES_PICARD.out.flagstat
-        // ch_samtools_idxstats      = MARK_DUPLICATES_PICARD.out.idxstats
-        ch_markduplicates_multiqc = MARK_DUPLICATES_PICARD.out.metrics
-        ch_software_versions      = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
-    }
-
-    /*
-     * MODULE: Picard metrics
-     */
-    ch_picard_collectmultiplemetrics_multiqc = Channel.empty()
-    ch_picard_collectwgsmetrics_multiqc      = Channel.empty()
-    if (!params.skip_variants && !params.skip_picard_metrics) {
-        PICARD_COLLECTMULTIPLEMETRICS (
-            ch_sorted_bam,
-            PREPARE_GENOME.out.fasta
-        )
-        ch_picard_collectmultiplemetrics_multiqc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
-
-        PICARD_COLLECTWGSMETRICS (
-            ch_sorted_bam,
-            PREPARE_GENOME.out.fasta
-        )
-        ch_picard_collectwgsmetrics_multiqc = PICARD_COLLECTWGSMETRICS.out.metrics
-    }
-
-    /*
-     * MODULE: Coverage QC plots
-     */
-    ch_mosdepth_multiqc = Channel.empty()
-    if (!params.skip_variants && !params.skip_mosdepth) {
-
-        MOSDEPTH_GENOME (
-            ch_sorted_bam.join(ch_sorted_bai, by: [0]),
-            ch_dummy_file,
-            200
-        )
-        ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
-        
-        PLOT_MOSDEPTH_REGIONS_GENOME (
-            MOSDEPTH_GENOME.out.regions_bed.collect { it[1] }
-        )
-        
-        if (params.protocol == 'amplicon') {
-
-            COLLAPSE_AMPLICONS (
-                ch_amplicon_bed
-            )
-
-            MOSDEPTH_AMPLICON (
-                ch_sorted_bam.join(ch_sorted_bai, by: [0]),
-                COLLAPSE_AMPLICONS.out.bed,
-                0
-            )
-
-            PLOT_MOSDEPTH_REGIONS_AMPLICON ( 
-                MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
-            )
-        }
-    }
-
-    /*
-     * MODULE: Make mpileup to re-use across callers
-     */
-    if (!params.skip_variants) {
-        SAMTOOLS_MPILEUP (
-            ch_sorted_bam,
-            PREPARE_GENOME.out.fasta
-        )
-    }
-
-    /*
-     * SUBWORKFLOW: Call variants with VarScan2
-     */
-    if (!params.skip_variants && 'varscan2' in callers) {
-        VARIANTS_VARSCAN (
-            SAMTOOLS_MPILEUP.out.mpileup,
-            ch_sorted_bam,
-            PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.snpeff_db,
-            PREPARE_GENOME.out.snpeff_config
-        )
-    }
-
-    /*
-     * SUBWORKFLOW: Call variants with IVar
-     */
-    if (!params.skip_variants && 'ivar' in callers) {
-        VARIANTS_IVAR (
-            SAMTOOLS_MPILEUP.out.mpileup,
-            PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.snpeff_db,
-            PREPARE_GENOME.out.snpeff_config,
-            ch_ivar_variants_header_mqc
-        )
-    }
-
-    /*
-     * SUBWORKFLOW: Call variants with BCFTools
-     */
-    if (!params.skip_variants && 'bcftools' in callers) {
-        VARIANTS_BCFTOOLS (
-            ch_sorted_bam,
-            PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.snpeff_db,
-            PREPARE_GENOME.out.snpeff_config
-        )
-    }
+    // /*
+    //  * SUBWORKFLOW: Alignment with Bowtie2
+    //  */
+    // ch_sorted_bam        = Channel.empty()
+    // ch_sorted_bai        = Channel.empty()
+    // ch_samtools_stats    = Channel.empty()
+    // ch_samtools_flagstat = Channel.empty()
+    // ch_samtools_idxstats = Channel.empty()
+    // ch_bowtie2_multiqc   = Channel.empty()
+    // if (!params.skip_variants) {
+    //     ALIGN_BOWTIE2 (
+    //         ch_trim_fastq,
+    //         PREPARE_GENOME.out.bowtie2_index
+    //     )
+    //     ch_sorted_bam        = ALIGN_BOWTIE2.out.bam
+    //     ch_sorted_bai        = ALIGN_BOWTIE2.out.bai
+    //     ch_samtools_stats    = ALIGN_BOWTIE2.out.stats
+    //     ch_samtools_flagstat = ALIGN_BOWTIE2.out.flagstat
+    //     ch_samtools_idxstats = ALIGN_BOWTIE2.out.idxstats
+    //     ch_bowtie2_multiqc   = ALIGN_BOWTIE2.out.log_out
+    //     ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.bowtie2_version.first().ifEmpty(null))
+    //     ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
+    // }
 
     // /*
-    //  * MODULE: Intersect variants across callers
+    //  * Filter channels to get samples that passed Bowtie2 minimum mapped reads threshold
     //  */
-    // if (!params.skip_variants && callers.size() > 2) {
-    //     BCFTOOLS_ISEC (
-    //         VARIANTS_VARSCAN.out.vcf
-    //             .join(VCF_TABIX_STATS.out.tbi, by: [0])
-    //             .join(VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ.out.vcf, by: [0])
-    //             .join(VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ.out.tbi, by: [0])
-    //             .join(BCFTOOLS_MPILEUP.out.vcf, by: [0])
-    //             .join(BCFTOOLS_MPILEUP.out.tbi, by: [0])
+    // ch_fail_mapping_multiqc = Channel.empty()
+    // if (!params.skip_variants) {
+    //     ch_samtools_flagstat
+    //         .map { meta, flagstat -> [ meta ] + Checks.get_flagstat_mapped_reads(workflow, params, log, flagstat) }
+    //         .set { ch_mapped_reads }
+
+    //     ch_sorted_bam
+    //         .join(ch_mapped_reads, by: [0])
+    //         .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
+    //         .set { ch_sorted_bam }
+
+    //     ch_sorted_bai
+    //         .join(ch_mapped_reads, by: [0])
+    //         .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
+    //         .set { ch_sorted_bai }
+
+    //     ch_mapped_reads
+    //         .branch { meta, mapped, pass ->
+    //             pass: pass
+    //                 pass_mapped_reads[meta.id] = mapped
+    //                 return [ "$meta.id\t$mapped" ]
+    //             fail: !pass
+    //                 fail_mapped_reads[meta.id] = mapped
+    //                 return [ "$meta.id\t$mapped" ]
+    //         }
+    //         .set { ch_pass_fail_mapped }
+
+    //     MULTIQC_CUSTOM_FAIL_MAPPED ( 
+    //         ch_pass_fail_mapped.fail.collect()
+    //     )
+    //     .set { ch_fail_mapping_multiqc }
+    // }
+    
+    // /*
+    //  * SUBWORKFLOW: Filter unmapped reads from BAM and trim reads with iVar
+    //  */
+    // ch_ivar_trim_multiqc = Channel.empty()
+    // if (!params.skip_variants && params.protocol == 'amplicon') {
+    //     FILTER_BAM_SAMTOOLS (
+    //         ch_sorted_bam
+    //     )
+    //     ch_sorted_bam = FILTER_BAM_SAMTOOLS.out.bam
+    //     ch_sorted_bai = FILTER_BAM_SAMTOOLS.out.bai
+
+    //     PRIMER_TRIM_IVAR (
+    //         ch_sorted_bam.join(ch_sorted_bai, by: [0]),
+    //         ch_primer_bed
+    //     )
+    //     ch_sorted_bam             = PRIMER_TRIM_IVAR.out.bam
+    //     ch_sorted_bai             = PRIMER_TRIM_IVAR.out.bai
+    //     // ch_samtools_stats         = PRIMER_TRIM_IVAR.out.stats
+    //     // ch_samtools_flagstat      = PRIMER_TRIM_IVAR.out.flagstat
+    //     // ch_samtools_idxstats      = PRIMER_TRIM_IVAR.out.idxstats
+    //     ch_ivar_trim_multiqc      = PRIMER_TRIM_IVAR.out.log_out
+    //     ch_software_versions      = ch_software_versions.mix(PRIMER_TRIM_IVAR.out.ivar_version.first().ifEmpty(null))
+    // }
+
+    // /*
+    //  * SUBWORKFLOW: Mark duplicate reads
+    //  */
+    // ch_markduplicates_multiqc = Channel.empty()
+    // if (!params.skip_variants && !params.skip_markduplicates) {
+    //     MARK_DUPLICATES_PICARD (
+    //         ch_sorted_bam
+    //     )
+    //     ch_sorted_bam             = MARK_DUPLICATES_PICARD.out.bam
+    //     ch_sorted_bai             = MARK_DUPLICATES_PICARD.out.bai
+    //     // ch_samtools_stats         = MARK_DUPLICATES_PICARD.out.stats
+    //     // ch_samtools_flagstat      = MARK_DUPLICATES_PICARD.out.flagstat
+    //     // ch_samtools_idxstats      = MARK_DUPLICATES_PICARD.out.idxstats
+    //     ch_markduplicates_multiqc = MARK_DUPLICATES_PICARD.out.metrics
+    //     ch_software_versions      = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
+    // }
+
+    // /*
+    //  * MODULE: Picard metrics
+    //  */
+    // ch_picard_collectmultiplemetrics_multiqc = Channel.empty()
+    // ch_picard_collectwgsmetrics_multiqc      = Channel.empty()
+    // if (!params.skip_variants && !params.skip_picard_metrics) {
+    //     PICARD_COLLECTMULTIPLEMETRICS (
+    //         ch_sorted_bam,
+    //         PREPARE_GENOME.out.fasta
+    //     )
+    //     ch_picard_collectmultiplemetrics_multiqc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
+
+    //     PICARD_COLLECTWGSMETRICS (
+    //         ch_sorted_bam,
+    //         PREPARE_GENOME.out.fasta
+    //     )
+    //     ch_picard_collectwgsmetrics_multiqc = PICARD_COLLECTWGSMETRICS.out.metrics
+    // }
+
+    // /*
+    //  * MODULE: Coverage QC plots
+    //  */
+    // ch_mosdepth_multiqc = Channel.empty()
+    // if (!params.skip_variants && !params.skip_mosdepth) {
+
+    //     MOSDEPTH_GENOME (
+    //         ch_sorted_bam.join(ch_sorted_bai, by: [0]),
+    //         ch_dummy_file,
+    //         200
+    //     )
+    //     ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
+        
+    //     PLOT_MOSDEPTH_REGIONS_GENOME (
+    //         MOSDEPTH_GENOME.out.regions_bed.collect { it[1] }
+    //     )
+        
+    //     if (params.protocol == 'amplicon') {
+
+    //         COLLAPSE_AMPLICONS (
+    //             ch_primer_bed
+    //         )
+
+    //         MOSDEPTH_AMPLICON (
+    //             ch_sorted_bam.join(ch_sorted_bai, by: [0]),
+    //             COLLAPSE_AMPLICONS.out.bed,
+    //             0
+    //         )
+
+    //         PLOT_MOSDEPTH_REGIONS_AMPLICON ( 
+    //             MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
+    //         )
+    //     }
+    // }
+
+    // /*
+    //  * MODULE: Make mpileup to re-use across callers
+    //  */
+    // if (!params.skip_variants) {
+    //     SAMTOOLS_MPILEUP (
+    //         ch_sorted_bam,
+    //         PREPARE_GENOME.out.fasta
     //     )
     // }
 
-    /*
-     * MODULE: Amplicon trimming with Cutadapt
-     */
-    ch_cutadapt_multiqc        = Channel.empty()
-    ch_cutadapt_fastqc_multiqc = Channel.empty()
-    ch_cutadapt_version        = Channel.empty()
-    if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
-        CUTADAPT (
-            ch_trim_fastq,
-            PREPARE_GENOME.out.amplicon_fasta
-        )
-        ch_trim_fastq       = CUTADAPT.out.reads
-        ch_cutadapt_multiqc = CUTADAPT.out.log
-        ch_cutadapt_version = CUTADAPT.out.version
-
-        if (!params.skip_fastqc) {
-            FASTQC ( 
-                CUTADAPT.out.reads 
-            )
-            ch_cutadapt_fastqc_multiqc = FASTQC.out.zip
-        }
-    }
-
-    /*
-     * MODULE: Run Kraken2
-     */
-    ch_kraken2_multiqc = Channel.empty()
-    ch_kraken2_version = Channel.empty()
-    if (!params.skip_assembly && !params.skip_kraken2) {
-        KRAKEN2_RUN ( 
-            ch_trim_fastq,
-            PREPARE_GENOME.out.kraken2_db
-        )
-        ch_trim_fastq      = KRAKEN2_RUN.out.unclassified
-        ch_kraken2_multiqc = KRAKEN2_RUN.out.txt
-        ch_kraken2_version = KRAKEN2_RUN.out.version
-    }
-
-    /*
-     * SUBWORKFLOW: Run SPAdes assembly and downstream analysis
-     */
-    ch_spades_version = Channel.empty()
-    if (!params.skip_assembly && 'spades' in assemblers) {
-        ASSEMBLY_SPADES (
-            ch_trim_fastq,
-            ch_spades_hmm,
-            params.spades_mode == 'corona',
-            PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.blast_db,
-            PREPARE_GENOME.out.snpeff_db,
-            PREPARE_GENOME.out.snpeff_config
-        )
-        ch_spades_version = ASSEMBLY_SPADES.out.spades_version
-    }
-
-    /*
-     * SUBWORKFLOW: Run Unicycler assembly and downstream analysis
-     */
-    ch_unicycler_version = Channel.empty()
-    if (!params.skip_assembly && 'unicycler' in assemblers) {
-        ASSEMBLY_UNICYCLER (
-            ch_trim_fastq,
-            PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.blast_db,
-            PREPARE_GENOME.out.snpeff_db,
-            PREPARE_GENOME.out.snpeff_config
-        )
-        ch_unicycler_version = ASSEMBLY_UNICYCLER.out.unicycler_version
-    }
-
-    /*
-     * SUBWORKFLOW: Run minia assembly and downstream analysis
-     */
-    ch_minia_version = Channel.empty()
-    if (!params.skip_assembly && 'minia' in assemblers) {
-        ASSEMBLY_MINIA (
-            ch_trim_fastq,
-            PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.blast_db,
-            PREPARE_GENOME.out.snpeff_db,
-            PREPARE_GENOME.out.snpeff_config
-        )
-        ch_minia_version = ASSEMBLY_MINIA.out.minia_version
-    }
-
-    /*
-     * MODULE: Pipeline reporting
-     */
-    GET_SOFTWARE_VERSIONS ( 
-        ch_software_versions.map { it }.collect()
-    )
-
-    /*
-     * MultiQC
-     */
-    if (!params.skip_multiqc) {
-        workflow_summary    = Schema.params_summary_multiqc(workflow, params.summary_params)
-        ch_workflow_summary = Channel.value(workflow_summary)
-
-    //     MULTIQC (
-    //         ch_multiqc_config,
-    //         ch_multiqc_custom_config.collect().ifEmpty([]),
-    //         GET_SOFTWARE_VERSIONS.out.yaml.collect(),
-    //         ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
-    //         ch_fail_mapping_multiqc.ifEmpty([]),
-    //         FASTQC_FASTP.out.fastqc_zip.collect{it[1]}.ifEmpty([]),
-    //         FASTQC_FASTP.out.trim_zip.collect{it[1]}.ifEmpty([]),
-    //         FASTQC_FASTP.out.trim_log.collect{it[1]}.ifEmpty([]),
-    //         ch_bowtie2_multiqc.collect{it[1]}.ifEmpty([]),
-    //         ch_samtools_stats.collect{it[1]}.ifEmpty([]),
-    //         ch_samtools_flagstat.collect{it[1]}.ifEmpty([]),
-    //         ch_samtools_idxstats.collect{it[1]}.ifEmpty([]),
-    //         ch_markduplicates_multiqc.collect{it[1]}.ifEmpty([]),
+    // /*
+    //  * SUBWORKFLOW: Call variants with VarScan2
+    //  */
+    // if (!params.skip_variants && 'varscan2' in callers) {
+    //     VARIANTS_VARSCAN (
+    //         SAMTOOLS_MPILEUP.out.mpileup,
+    //         ch_sorted_bam,
+    //         PREPARE_GENOME.out.fasta,
+    //         PREPARE_GENOME.out.gff,
+    //         PREPARE_GENOME.out.snpeff_db,
+    //         PREPARE_GENOME.out.snpeff_config
     //     )
-    //     multiqc_report = MULTIQC.out.report.toList()
-    }
+    // }
+
+    // /*
+    //  * SUBWORKFLOW: Call variants with IVar
+    //  */
+    // if (!params.skip_variants && 'ivar' in callers) {
+    //     VARIANTS_IVAR (
+    //         SAMTOOLS_MPILEUP.out.mpileup,
+    //         PREPARE_GENOME.out.fasta,
+    //         PREPARE_GENOME.out.gff,
+    //         PREPARE_GENOME.out.snpeff_db,
+    //         PREPARE_GENOME.out.snpeff_config,
+    //         ch_ivar_variants_header_mqc
+    //     )
+    // }
+
+    // /*
+    //  * SUBWORKFLOW: Call variants with BCFTools
+    //  */
+    // if (!params.skip_variants && 'bcftools' in callers) {
+    //     VARIANTS_BCFTOOLS (
+    //         ch_sorted_bam,
+    //         PREPARE_GENOME.out.fasta,
+    //         PREPARE_GENOME.out.gff,
+    //         PREPARE_GENOME.out.snpeff_db,
+    //         PREPARE_GENOME.out.snpeff_config
+    //     )
+    // }
+
+    // // /*
+    // //  * MODULE: Intersect variants across callers
+    // //  */
+    // // if (!params.skip_variants && callers.size() > 2) {
+    // //     BCFTOOLS_ISEC (
+    // //         VARIANTS_VARSCAN.out.vcf
+    // //             .join(VCF_TABIX_STATS.out.tbi, by: [0])
+    // //             .join(VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ.out.vcf, by: [0])
+    // //             .join(VCF_BGZIP_TABIX_STATS_IVAR_HIGHFREQ.out.tbi, by: [0])
+    // //             .join(BCFTOOLS_MPILEUP.out.vcf, by: [0])
+    // //             .join(BCFTOOLS_MPILEUP.out.tbi, by: [0])
+    // //     )
+    // // }
+
+    // /*
+    //  * MODULE: Primer trimming with Cutadapt
+    //  */
+    // ch_cutadapt_multiqc        = Channel.empty()
+    // ch_cutadapt_fastqc_multiqc = Channel.empty()
+    // ch_cutadapt_version        = Channel.empty()
+    // if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
+    //     CUTADAPT (
+    //         ch_trim_fastq,
+    //         PREPARE_GENOME.out.primer_fasta
+    //     )
+    //     ch_trim_fastq       = CUTADAPT.out.reads
+    //     ch_cutadapt_multiqc = CUTADAPT.out.log
+    //     ch_cutadapt_version = CUTADAPT.out.version
+
+    //     if (!params.skip_fastqc) {
+    //         FASTQC ( 
+    //             CUTADAPT.out.reads 
+    //         )
+    //         ch_cutadapt_fastqc_multiqc = FASTQC.out.zip
+    //     }
+    // }
+
+    // /*
+    //  * MODULE: Run Kraken2
+    //  */
+    // ch_kraken2_multiqc = Channel.empty()
+    // ch_kraken2_version = Channel.empty()
+    // if (!params.skip_assembly && !params.skip_kraken2) {
+    //     KRAKEN2_RUN ( 
+    //         ch_trim_fastq,
+    //         PREPARE_GENOME.out.kraken2_db
+    //     )
+    //     ch_trim_fastq      = KRAKEN2_RUN.out.unclassified
+    //     ch_kraken2_multiqc = KRAKEN2_RUN.out.txt
+    //     ch_kraken2_version = KRAKEN2_RUN.out.version
+    // }
+
+    // /*
+    //  * SUBWORKFLOW: Run SPAdes assembly and downstream analysis
+    //  */
+    // ch_spades_version = Channel.empty()
+    // if (!params.skip_assembly && 'spades' in assemblers) {
+    //     ASSEMBLY_SPADES (
+    //         ch_trim_fastq,
+    //         ch_spades_hmm,
+    //         params.spades_mode == 'corona',
+    //         PREPARE_GENOME.out.fasta,
+    //         PREPARE_GENOME.out.gff,
+    //         PREPARE_GENOME.out.blast_db,
+    //         PREPARE_GENOME.out.snpeff_db,
+    //         PREPARE_GENOME.out.snpeff_config
+    //     )
+    //     ch_spades_version = ASSEMBLY_SPADES.out.spades_version
+    // }
+
+    // /*
+    //  * SUBWORKFLOW: Run Unicycler assembly and downstream analysis
+    //  */
+    // ch_unicycler_version = Channel.empty()
+    // if (!params.skip_assembly && 'unicycler' in assemblers) {
+    //     ASSEMBLY_UNICYCLER (
+    //         ch_trim_fastq,
+    //         PREPARE_GENOME.out.fasta,
+    //         PREPARE_GENOME.out.gff,
+    //         PREPARE_GENOME.out.blast_db,
+    //         PREPARE_GENOME.out.snpeff_db,
+    //         PREPARE_GENOME.out.snpeff_config
+    //     )
+    //     ch_unicycler_version = ASSEMBLY_UNICYCLER.out.unicycler_version
+    // }
+
+    // /*
+    //  * SUBWORKFLOW: Run minia assembly and downstream analysis
+    //  */
+    // ch_minia_version = Channel.empty()
+    // if (!params.skip_assembly && 'minia' in assemblers) {
+    //     ASSEMBLY_MINIA (
+    //         ch_trim_fastq,
+    //         PREPARE_GENOME.out.fasta,
+    //         PREPARE_GENOME.out.gff,
+    //         PREPARE_GENOME.out.blast_db,
+    //         PREPARE_GENOME.out.snpeff_db,
+    //         PREPARE_GENOME.out.snpeff_config
+    //     )
+    //     ch_minia_version = ASSEMBLY_MINIA.out.minia_version
+    // }
+
+    // /*
+    //  * MODULE: Pipeline reporting
+    //  */
+    // GET_SOFTWARE_VERSIONS ( 
+    //     ch_software_versions.map { it }.collect()
+    // )
+
+    // /*
+    //  * MultiQC
+    //  */
+    // if (!params.skip_multiqc) {
+    //     workflow_summary    = Schema.params_summary_multiqc(workflow, params.summary_params)
+    //     ch_workflow_summary = Channel.value(workflow_summary)
+
+    // //     MULTIQC (
+    // //         ch_multiqc_config,
+    // //         ch_multiqc_custom_config.collect().ifEmpty([]),
+    // //         GET_SOFTWARE_VERSIONS.out.yaml.collect(),
+    // //         ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+    // //         ch_fail_mapping_multiqc.ifEmpty([]),
+    // //         FASTQC_FASTP.out.fastqc_zip.collect{it[1]}.ifEmpty([]),
+    // //         FASTQC_FASTP.out.trim_zip.collect{it[1]}.ifEmpty([]),
+    // //         FASTQC_FASTP.out.trim_log.collect{it[1]}.ifEmpty([]),
+    // //         ch_bowtie2_multiqc.collect{it[1]}.ifEmpty([]),
+    // //         ch_samtools_stats.collect{it[1]}.ifEmpty([]),
+    // //         ch_samtools_flagstat.collect{it[1]}.ifEmpty([]),
+    // //         ch_samtools_idxstats.collect{it[1]}.ifEmpty([]),
+    // //         ch_markduplicates_multiqc.collect{it[1]}.ifEmpty([]),
+    // //     )
+    // //     multiqc_report = MULTIQC.out.report.toList()
+    // }
 }
 
 ////////////////////////////////////////////////////
 /* --              COMPLETION EMAIL            -- */
 ////////////////////////////////////////////////////
 
-workflow.onComplete {
-    Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
-    Completion.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
-}
+// workflow.onComplete {
+//     Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
+//     Completion.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
+// }
 
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
