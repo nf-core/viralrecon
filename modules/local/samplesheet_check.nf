@@ -3,9 +3,6 @@ include { saveFiles } from './functions'
 
 params.options = [:]
 
-/*
- * Reformat design file and check validity
- */
 process SAMPLESHEET_CHECK {
     tag "$samplesheet"
     publishDir "${params.outdir}",
