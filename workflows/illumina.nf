@@ -32,7 +32,7 @@ if (!protocolList.contains(params.protocol)) {
 }
 
 // Variant calling parameter validation
-def callerList = [ 'varscan2', 'ivar', 'bcftools' ]
+def callerList = ['varscan2', 'ivar', 'bcftools']
 def callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((callerList + callers).unique().size() != callerList.size()) {
     exit 1, "Invalid variant calller option: ${params.callers}. Valid options: ${callerList.join(', ')}"
@@ -43,7 +43,7 @@ if (params.protocol == 'amplicon' && !params.skip_variants && !params.primer_bed
 }
 
 // Assembly parameter validation
-def assemblerList = [ 'spades', 'unicycler', 'minia' ]
+def assemblerList = ['spades', 'unicycler', 'minia']
 def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
@@ -53,7 +53,7 @@ if (params.enable_conda && assemblers.contains('spades')) {
     assemblers = Checks.ignore_spades(params, log)
 }
 
-def spadesModeList = [ 'rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio' ]
+def spadesModeList = ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
 if (!spadesModeList.contains(params.spades_mode)) {
     exit 1, "Invalid spades mode option: ${params.spades_mode}. Valid options: ${spadesModeList.join(', ')}"
 }
