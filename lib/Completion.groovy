@@ -124,21 +124,21 @@ class Completion {
             def samp_aln = ''
             def total_aln_count = pass_mapped_reads.size() + fail_mapped_reads.size()
             for (samp in pass_mapped_reads) {
-                samp_aln += "    ${samp.value}%: ${samp.key}\n"
+                samp_aln += "    ${samp.value}: ${samp.key}\n"
                 idx += 1
                 if (idx > 5) {
                     samp_aln += "    ..see pipeline reports for full list\n"
                     break;
                 }
             }
-            log.info "-${colors.purple}[$workflow.manifest.name]${colors.green} ${pass_mapped_reads.size()}/$total_aln_count samples passed STAR ${params.min_mapped_reads}% mapped threshold:\n${samp_aln}${colors.reset}-"
+            log.info "-${colors.purple}[$workflow.manifest.name]${colors.green} ${pass_mapped_reads.size()}/$total_aln_count samples passed Bowtie2 ${params.min_mapped_reads} mapped read threshold:\n${samp_aln}${colors.reset}-"
         }
         if (fail_mapped_reads.size() > 0) {
             def samp_aln = ''
             for (samp in fail_mapped_reads) {
-                samp_aln += "    ${samp.value}%: ${samp.key}\n"
+                samp_aln += "    ${samp.value}: ${samp.key}\n"
             }
-            log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} ${fail_mapped_reads.size()} samples skipped since they failed STAR ${params.min_mapped_reads}% mapped threshold:\n${samp_aln}${colors.reset}-"
+            log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} ${fail_mapped_reads.size()} samples skipped since they failed Bowtie2 ${params.min_mapped_reads} mapped read threshold:\n${samp_aln}${colors.reset}-"
         }
 
         if (workflow.success) {
