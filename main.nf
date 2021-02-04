@@ -52,6 +52,12 @@ Checks.aws_batch(workflow, params)
 // Check the hostnames against configured profiles
 Checks.hostname(workflow, params, log)
 
+// Check sequencing platform
+def platformList = ['illumina', 'nanopore']
+if (!params.public_data_ids && !platformList.contains(params.platform)) {
+    exit 1, "Invalid platform option: ${params.platform}. Valid options: ${platformList.join(', ')}"
+}
+
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */
 ////////////////////////////////////////////////////
