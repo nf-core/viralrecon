@@ -2,7 +2,6 @@
 include { saveFiles } from './functions'
 
 params.options = [:]
-def options    = initOptions(params.options)
 
 process COLLAPSE_PRIMERS {
     tag "$bed"
@@ -27,12 +26,11 @@ process COLLAPSE_PRIMERS {
     path  '*.bed', emit: bed
     
     script:
-    def prefix = options.suffix ?: "sequences"
     """
     collapse_primer_bed.py \\
         --left_primer_suffix $left_suffix \\
         --right_primer_suffix $right_suffix \\
         $bed \\
-        ${prefix}.bed
+        ${bed.baseName}.collapsed.bed
     """
 }
