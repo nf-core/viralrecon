@@ -244,7 +244,7 @@
                 "assemblers": {
                     "type": "string",
                     "default": "spades,unicycler,minia",
-                    "description": "Specify which assembly algorithms you would like to use. Available options are spades, metaspades, unicycler and minia.",
+                    "description": "Specify which assembly algorithms you would like to use. Available options are spades, unicycler and minia.",
                     "fa_icon": "fas fa-random"
                 },
                 "skip_blast": {
