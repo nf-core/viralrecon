@@ -5,6 +5,7 @@ params.options = [:]
 def options    = initOptions(params.options)
 
 process BEDTOOLS_GETFASTA {
+    tag "$bed"
     label 'process_medium'
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -27,7 +28,7 @@ process BEDTOOLS_GETFASTA {
 
     script:
     def software = getSoftwareName(task.process)
-    def prefix   = options.suffix ?: "sequences"
+    def prefix   = options.suffix ? "${bed.baseName}${options.suffix}" : "${bed.baseName}"
     """
     bedtools \\
         getfasta \\
