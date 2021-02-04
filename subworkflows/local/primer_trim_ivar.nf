@@ -9,14 +9,14 @@ include { IVAR_TRIM         } from '../../modules/local/ivar_trim'              
 include { SAMTOOLS_INDEX    } from '../../modules/nf-core/software/samtools/index/main' addParams( options: params.samtools_options  )
 include { BAM_SORT_SAMTOOLS } from '../nf-core/bam_sort_samtools'                       addParams( options: params.samtools_options  )
 
-workflow AMPLICON_TRIM_IVAR {
+workflow PRIMER_TRIM_IVAR {
     take:
     bam // channel: [ val(meta), [ bam ], [bai] ]
     bed // path   : bed
 
     main:
     /*
-     * iVar trim amplicons
+     * iVar trim primes
      */
     IVAR_TRIM ( bam, bed )
 

@@ -176,7 +176,7 @@ include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome'     
 include { FASTQC_FASTP        } from '../subworkflows/local/fastqc_fastp'        addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
 include { ALIGN_BOWTIE2       } from '../subworkflows/local/align_bowtie2'       addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options )
 include { FILTER_BAM_SAMTOOLS } from '../subworkflows/local/filter_bam_samtools' addParams( samtools_view_options: modules['filter_bam'], samtools_index_options: filter_bam_sort_bam_options )
-include { AMPLICON_TRIM_IVAR  } from '../subworkflows/local/amplicon_trim_ivar'  addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
+include { PRIMER_TRIM_IVAR    } from '../subworkflows/local/primer_trim_ivar'    addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
 include { VARIANTS_VARSCAN    } from '../subworkflows/local/variants_varscan'    addParams( varscan_mpileup2cns_options: varscan_mpileup2cns_options, quast_options: modules['varscan_quast'], bcftools_filter_options: modules['varscan_bcftools_filter'], consensus_genomecov_options: modules['varscan_consensus_genomecov'], consensus_merge_options: modules['varscan_consensus_merge'], consensus_mask_options: modules['varscan_consensus_mask'], consensus_maskfasta_options: modules['varscan_consensus_maskfasta'], consensus_bcftools_options: modules['varscan_consensus_bcftools'], consensus_plot_options: modules['varscan_consensus_plot'], bgzip_options: modules['varscan_bgzip'], tabix_options: modules['varscan_tabix'], stats_options: modules['varscan_stats'], bcftools_filter_tabix_options: modules['varscan_bcftools_filter_tabix'], bcftools_filter_stats_options: modules['varscan_bcftools_filter_stats'], snpeff_lowfreq_options: modules['varscan_snpeff_lowfreq'], snpsift_lowfreq_options: modules['varscan_snpsift_lowfreq'], snpeff_lowfreq_bgzip_options: modules['varscan_snpeff_lowfreq_bgzip'], snpeff_lowfreq_tabix_options: modules['varscan_snpeff_lowfreq_tabix'], snpeff_lowfreq_stats_options: modules['varscan_snpeff_lowfreq_stats'], snpeff_highfreq_options: modules['varscan_snpeff_highfreq'], snpsift_highfreq_options: modules['varscan_snpsift_highfreq'], snpeff_highfreq_bgzip_options: modules['varscan_snpeff_highfreq_bgzip'], snpeff_highfreq_tabix_options: modules['varscan_snpeff_highfreq_tabix'], snpeff_highfreq_stats_options: modules['varscan_snpeff_highfreq_stats'] )
 include { VARIANTS_IVAR       } from '../subworkflows/local/variants_ivar'       addParams( ivar_variants_options: ivar_variants_options, ivar_consensus_options: ivar_consensus_options, quast_options: modules['ivar_quast'], ivar_variants_to_vcf_lowfreq_options: modules['ivar_variants_to_vcf_lowfreq'], ivar_variants_to_vcf_highfreq_options: ivar_variants_to_vcf_highfreq_options, ivar_bgzip_lowfreq_options: modules['ivar_bgzip_lowfreq'], ivar_tabix_lowfreq_options: modules['ivar_tabix_lowfreq'], ivar_stats_lowfreq_options: modules['ivar_stats_lowfreq'], ivar_bgzip_highfreq_options: modules['ivar_bgzip_highfreq'], ivar_tabix_highfreq_options: modules['ivar_tabix_highfreq'], ivar_stats_highfreq_options: modules['ivar_stats_highfreq'], snpeff_lowfreq_options: modules['ivar_snpeff_lowfreq'], snpsift_lowfreq_options: modules['ivar_snpsift_lowfreq'], snpeff_lowfreq_bgzip_options: modules['ivar_snpeff_lowfreq_bgzip'], snpeff_lowfreq_tabix_options: modules['ivar_snpeff_lowfreq_tabix'], snpeff_lowfreq_stats_options: modules['ivar_snpeff_lowfreq_stats'], snpeff_highfreq_options: modules['ivar_snpeff_highfreq'], snpsift_highfreq_options: modules['ivar_snpsift_highfreq'], snpeff_highfreq_bgzip_options: modules['ivar_snpeff_highfreq_bgzip'], snpeff_highfreq_tabix_options: modules['ivar_snpeff_highfreq_tabix'], snpeff_highfreq_stats_options: modules['ivar_snpeff_highfreq_stats'] )
 include { VARIANTS_BCFTOOLS   } from '../subworkflows/local/variants_bcftools'   addParams( bcftools_mpileup_options: modules['bcftools_mpileup'], quast_options: modules['bcftools_quast'], consensus_genomecov_options: modules['bcftools_consensus_genomecov'], consensus_merge_options: modules['bcftools_consensus_merge'], consensus_mask_options: modules['bcftools_consensus_mask'], consensus_maskfasta_options: modules['bcftools_consensus_maskfasta'], consensus_bcftools_options: modules['bcftools_consensus_bcftools'], consensus_plot_options: modules['bcftools_consensus_plot'], snpeff_options: modules['bcftools_snpeff'], snpsift_options: modules['bcftools_snpsift'], snpeff_bgzip_options: modules['bcftools_snpeff_bgzip'], snpeff_tabix_options: modules['bcftools_snpeff_tabix'], snpeff_stats_options: modules['bcftools_snpeff_stats'] )
@@ -337,17 +337,17 @@ workflow ILLUMINA {
         ch_sorted_bam = FILTER_BAM_SAMTOOLS.out.bam
         ch_sorted_bai = FILTER_BAM_SAMTOOLS.out.bai
 
-        AMPLICON_TRIM_IVAR (
+        PRIMER_TRIM_IVAR (
             ch_sorted_bam.join(ch_sorted_bai, by: [0]),
             ch_amplicon_bed
         )
-        ch_sorted_bam             = AMPLICON_TRIM_IVAR.out.bam
-        ch_sorted_bai             = AMPLICON_TRIM_IVAR.out.bai
-        // ch_samtools_stats         = AMPLICON_TRIM_IVAR.out.stats
-        // ch_samtools_flagstat      = AMPLICON_TRIM_IVAR.out.flagstat
-        // ch_samtools_idxstats      = AMPLICON_TRIM_IVAR.out.idxstats
-        ch_ivar_trim_multiqc      = AMPLICON_TRIM_IVAR.out.log_out
-        ch_software_versions      = ch_software_versions.mix(AMPLICON_TRIM_IVAR.out.ivar_version.first().ifEmpty(null))
+        ch_sorted_bam             = PRIMER_TRIM_IVAR.out.bam
+        ch_sorted_bai             = PRIMER_TRIM_IVAR.out.bai
+        // ch_samtools_stats         = PRIMER_TRIM_IVAR.out.stats
+        // ch_samtools_flagstat      = PRIMER_TRIM_IVAR.out.flagstat
+        // ch_samtools_idxstats      = PRIMER_TRIM_IVAR.out.idxstats
+        ch_ivar_trim_multiqc      = PRIMER_TRIM_IVAR.out.log_out
+        ch_software_versions      = ch_software_versions.mix(PRIMER_TRIM_IVAR.out.ivar_version.first().ifEmpty(null))
     }
 
     /*
