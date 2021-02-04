@@ -91,7 +91,7 @@ Numerous QC and reporting steps are included in the pipeline in order to collate
             --input samplesheet.csv \
             --genome 'MN908947.3' \
             --protocol amplicon \
-            --amplicon_bed ./nCoV-2019.artic.V3.bed \
+            --primer_bed ./nCoV-2019.artic.V3.bed \
             --skip_assembly \
             -profile <docker/singularity/podman/conda/institute>
         ```
