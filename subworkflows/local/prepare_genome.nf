@@ -90,21 +90,11 @@ workflow PREPARE_GENOME {
     /*
      * Prepare reference files required for de novo assembly
      */
-    ch_primer_fasta   = Channel.empty()
-    ch_blast_db       = Channel.empty()
-    ch_kraken2_db     = Channel.empty()
+    ch_primer_fasta = Channel.empty()
+    ch_blast_db     = Channel.empty()
+    ch_kraken2_db   = Channel.empty()
     if (!params.skip_assembly) {
-
-        if (params.primer_fasta) {
-            if (params.primer_fasta.endsWith('.gz')) {
-                ch_primer_fasta = GUNZIP_PRIMER_FASTA ( params.primer_fasta ).gunzip
-            } else {
-                ch_primer_fasta = file(params.primer_fasta)
-            }
-        } else {
-            ch_primer_fasta = BEDTOOLS_GETFASTA ( ch_primer_bed, ch_fasta ).fasta
-        }
-
+        
         if (!params.skip_blast) {
             if (params.blast_db) {
                 if (params.blast_db.endsWith('.tar.gz')) {
@@ -126,6 +116,18 @@ workflow PREPARE_GENOME {
                 }
             } else {
                 ch_kraken2_db = KRAKEN2_BUILD ( params.kraken2_db_name ).db
+            }
+        }
+
+        if (params.protocol == 'amplicon' && !params.skip_cutadapt) {
+            if (params.primer_fasta) {
+                if (params.primer_fasta.endsWith('.gz')) {
+                    ch_primer_fasta = GUNZIP_PRIMER_FASTA ( params.primer_fasta ).gunzip
+                } else {
+                    ch_primer_fasta = file(params.primer_fasta)
+                }
+            } else {
+                ch_primer_fasta = BEDTOOLS_GETFASTA ( ch_primer_bed, ch_fasta ).fasta
             }
         }
     }
