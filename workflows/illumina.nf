@@ -93,7 +93,7 @@ multiqc_options.args       += params.multiqc_title ? " --title \"$params.multiqc
 include { CAT_FASTQ                  } from '../modules/local/cat_fastq'                  addParams( options: cat_fastq_options                   ) 
 include { MULTIQC_CUSTOM_FAIL_MAPPED } from '../modules/local/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]              )
 include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'   addParams( options: modules['picard_collectwgsmetrics'] )
-include { COLLAPSE_AMPLICONS         } from '../modules/local/collapse_amplicons'         addParams( options: modules['collapse_amplicons']       )
+include { COLLAPSE_PRIMERS           } from '../modules/local/collapse_primers'           addParams( options: collapse_primers_options            )
 include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'              addParams( options: modules['bcftools_isec']            ) 
 include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: modules['cutadapt']                 )
 include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'                addParams( options: kraken2_run_options                 ) 
@@ -116,12 +116,14 @@ def bowtie2_build_options     = modules['bowtie2_build']
 def snpeff_build_options      = modules['snpeff_build']
 def makeblastdb_options       = modules['blast_makeblastdb']
 def kraken2_build_options     = modules['kraken2_build']
+def collapse_primers_options  = modules['collapse_primers']
 if (!params.save_reference) { 
     bedtools_getfasta_options['publish_files'] = false
     bowtie2_build_options['publish_files']     = false
     snpeff_build_options['publish_files']      = false
     makeblastdb_options['publish_files']       = false
     kraken2_build_options['publish_files']     = false
+    collapse_primers_options['publish_files']  = false
 }
 
 def ivar_trim_options   = modules['ivar_trim']
@@ -404,13 +406,15 @@ workflow ILLUMINA {
         
     //     if (params.protocol == 'amplicon') {
 
-    //         COLLAPSE_AMPLICONS (
-    //             ch_primer_bed
-    //         )
+            COLLAPSE_PRIMERS (
+                ch_primer_bed,
+                params.primer_left_suffix,
+                params.primer_right_suffix
+            )
 
     //         MOSDEPTH_AMPLICON (
     //             ch_sorted_bam.join(ch_sorted_bai, by: [0]),
-    //             COLLAPSE_AMPLICONS.out.bed,
+    //             COLLAPSE_PRIMERS.out.bed,
     //             0
     //         )
 
