@@ -49,15 +49,15 @@ if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
     exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
 }
 
-if (params.enable_conda && assemblers.contains('spades')) {
-    assemblers = Checks.ignore_spades(params, log)
-}
-
 def spadesModeList = ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
 if (!spadesModeList.contains(params.spades_mode)) {
     exit 1, "Invalid spades mode option: ${params.spades_mode}. Valid options: ${spadesModeList.join(', ')}"
 }
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file }
+
+if (params.enable_conda && assemblers.contains('spades')) {
+    assemblers = Checks.ignore_spades(params, log)
+}
 
 // if (!params.skip_kraken2 && !params.kraken2_db) {
 //     if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
@@ -224,35 +224,35 @@ workflow ILLUMINA {
     // Check genome fasta only contains a single contig
     Checks.is_multifasta(PREPARE_GENOME.out.fasta, log)
     
-    // /*
-    //  * SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //  */
-    // INPUT_CHECK ( 
-    //     ch_input
-    // )
-    // .map {
-    //     meta, fastq ->
-    //         meta.id = meta.id.split('_')[0..-2].join('_')
-    //         [ meta, fastq ] 
-    // }
-    // .groupTuple(by: [0])
-    // .branch {
-    //     meta, fastq ->
-    //         single  : fastq.size() == 1
-    //             return [ meta, fastq.flatten() ]
-    //         multiple: fastq.size() > 1
-    //             return [ meta, fastq.flatten() ]
-    // }
-    // .set { ch_fastq }
+    /*
+     * SUBWORKFLOW: Read in samplesheet, validate and stage input files
+     */
+    INPUT_CHECK ( 
+        ch_input
+    )
+    .map {
+        meta, fastq ->
+            meta.id = meta.id.split('_')[0..-2].join('_')
+            [ meta, fastq ] 
+    }
+    .groupTuple(by: [0])
+    .branch {
+        meta, fastq ->
+            single  : fastq.size() == 1
+                return [ meta, fastq.flatten() ]
+            multiple: fastq.size() > 1
+                return [ meta, fastq.flatten() ]
+    }
+    .set { ch_fastq }
     
-    // /*
-    //  * MODULE: Concatenate FastQ files from same sample if required
-    //  */
-    // CAT_FASTQ ( 
-    //     ch_fastq.multiple
-    // )
-    // .mix(ch_fastq.single)
-    // .set { ch_cat_fastq }
+    /*
+     * MODULE: Concatenate FastQ files from same sample if required
+     */
+    CAT_FASTQ ( 
+        ch_fastq.multiple
+    )
+    .mix(ch_fastq.single)
+    .set { ch_cat_fastq }
     
     // /*
     //  * SUBWORKFLOW: Read QC, extract UMI and trim adapters
