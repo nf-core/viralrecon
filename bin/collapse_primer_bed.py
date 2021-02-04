@@ -7,8 +7,8 @@ import argparse
 
 
 def parse_args(args=None):
-    Description = 'Collapse LEFT/RIGHT primers in amplicon BED to single intervals.'
-    Epilog = """Example usage: python collapse_amplicon_bed.py <FILE_IN> <FILE_OUT>"""
+    Description = 'Collapse LEFT/RIGHT primers in primer BED to single intervals.'
+    Epilog = """Example usage: python collapse_primer_bed.py <FILE_IN> <FILE_OUT>"""
 
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
     parser.add_argument('FILE_IN', help="Input BED file.")
@@ -34,38 +34,38 @@ def uniqify(seq):
     return [x for x in seq if not (x in seen or seen_add(x))]
 
 
-def collapse_amplicon_bed(FileIn,FileOut,LeftPrimerSuffix,RightPrimerSuffix):
-    StartPosList = []
-    IntervalDict = {}
-    fin = open(FileIn,'r')
+def collapse_primer_bed(file_in, file_out, left_primer_suffix, right_primer_suffix):
+    start_pos_list = []
+    interval_dict = {}
+    fin = open(file_in,'r')
     while True:
         line = fin.readline()
         if line:
             chrom,start,end,name,score,strand = line.strip().split('\t')
-            amplicon = re.sub(r'(?:{}|{}).*'.format(LeftPrimerSuffix,RightPrimerSuffix),'',name)
-            if amplicon not in IntervalDict:
-                IntervalDict[amplicon] = []
-            IntervalDict[amplicon].append((chrom,int(start),int(end),score))
-            StartPosList.append((int(start),amplicon))
+            primer = re.sub(r'(?:{}|{}).*'.format(left_primer_suffix,right_primer_suffix),'',name)
+            if primer not in interval_dict:
+                interval_dict[primer] = []
+            interval_dict[primer].append((chrom,int(start),int(end),score))
+            start_pos_list.append((int(start),primer))
         else:
             fin.close()
             break
 
-    fout = open(FileOut,'w')
-    for amplicon in uniqify([x[1] for x in sorted(StartPosList)]):
-        posList = [item for elem in IntervalDict[amplicon] for item in elem[1:3]]
-        chrom = IntervalDict[amplicon][0][0]
-        start = min(posList)
-        end = max(posList)
+    fout = open(file_out,'w')
+    for primer in uniqify([x[1] for x in sorted(start_pos_list)]):
+        pos_list = [item for elem in interval_dict[primer] for item in elem[1:3]]
+        chrom = interval_dict[primer][0][0]
+        start = min(pos_list)
+        end = max(pos_list)
         strand = '+'
-        score = IntervalDict[amplicon][0][3]
-        fout.write(f'{chrom}\t{start}\t{end}\t{amplicon}\t{score}\t{strand}\n')
+        score = interval_dict[primer][0][3]
+        fout.write(f'{chrom}\t{start}\t{end}\t{primer}\t{score}\t{strand}\n')
     fout.close()
 
 
 def main(args=None):
     args = parse_args(args)
-    collapse_amplicon_bed(args.FILE_IN,args.FILE_OUT,args.LEFT_PRIMER_SUFFIX,args.RIGHT_PRIMER_SUFFIX)
+    collapse_primer_bed(args.FILE_IN, args.FILE_OUT, args.LEFT_PRIMER_SUFFIX, args.RIGHT_PRIMER_SUFFIX)
 
 
 if __name__ == '__main__':
