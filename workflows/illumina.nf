@@ -93,7 +93,6 @@ multiqc_options.args       += params.multiqc_title ? " --title \"$params.multiqc
 include { CAT_FASTQ                  } from '../modules/local/cat_fastq'                  addParams( options: cat_fastq_options                   ) 
 include { MULTIQC_CUSTOM_FAIL_MAPPED } from '../modules/local/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]              )
 include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'   addParams( options: modules['picard_collectwgsmetrics'] )
-include { COLLAPSE_PRIMERS           } from '../modules/local/collapse_primers'           addParams( options: collapse_primers_options            )
 include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'              addParams( options: modules['bcftools_isec']            ) 
 include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: modules['cutadapt']                 )
 include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'                addParams( options: kraken2_run_options                 ) 
@@ -151,7 +150,7 @@ def spades_options   = modules['spades']
 spades_options.args += (params.spades_mode && params.spades_mode != 'corona') ? "--${params.spades_mode}" : ""
 
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'        addParams( options: [:] )
-include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome'     addParams( genome_options: publish_genome_options, index_options: publish_index_options, db_options: publish_db_options, bedtools_getfasta_options: bedtools_getfasta_options, bowtie2_build_options: bowtie2_build_options, snpeff_build_options: snpeff_build_options, makeblastdb_options: makeblastdb_options, kraken2_build_options: kraken2_build_options )
+include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome'     addParams( genome_options: publish_genome_options, index_options: publish_index_options, db_options: publish_db_options, bowtie2_build_options: bowtie2_build_options, bedtools_getfasta_options: bedtools_getfasta_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options, makeblastdb_options: makeblastdb_options, kraken2_build_options: kraken2_build_options )
 include { PRIMER_TRIM_IVAR   } from '../subworkflows/local/primer_trim_ivar'   addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
 include { VARIANTS_VARSCAN   } from '../subworkflows/local/variants_varscan'   addParams( varscan_mpileup2cns_options: varscan_mpileup2cns_options, quast_options: modules['varscan_quast'], bcftools_filter_options: modules['varscan_bcftools_filter'], consensus_genomecov_options: modules['varscan_consensus_genomecov'], consensus_merge_options: modules['varscan_consensus_merge'], consensus_mask_options: modules['varscan_consensus_mask'], consensus_maskfasta_options: modules['varscan_consensus_maskfasta'], consensus_bcftools_options: modules['varscan_consensus_bcftools'], consensus_plot_options: modules['varscan_consensus_plot'], bgzip_options: modules['varscan_bgzip'], tabix_options: modules['varscan_tabix'], stats_options: modules['varscan_stats'], bcftools_filter_tabix_options: modules['varscan_bcftools_filter_tabix'], bcftools_filter_stats_options: modules['varscan_bcftools_filter_stats'], snpeff_lowfreq_options: modules['varscan_snpeff_lowfreq'], snpsift_lowfreq_options: modules['varscan_snpsift_lowfreq'], snpeff_lowfreq_bgzip_options: modules['varscan_snpeff_lowfreq_bgzip'], snpeff_lowfreq_tabix_options: modules['varscan_snpeff_lowfreq_tabix'], snpeff_lowfreq_stats_options: modules['varscan_snpeff_lowfreq_stats'], snpeff_highfreq_options: modules['varscan_snpeff_highfreq'], snpsift_highfreq_options: modules['varscan_snpsift_highfreq'], snpeff_highfreq_bgzip_options: modules['varscan_snpeff_highfreq_bgzip'], snpeff_highfreq_tabix_options: modules['varscan_snpeff_highfreq_tabix'], snpeff_highfreq_stats_options: modules['varscan_snpeff_highfreq_stats'] )
 include { VARIANTS_IVAR      } from '../subworkflows/local/variants_ivar'      addParams( ivar_variants_options: ivar_variants_options, ivar_consensus_options: ivar_consensus_options, quast_options: modules['ivar_quast'], ivar_variants_to_vcf_lowfreq_options: modules['ivar_variants_to_vcf_lowfreq'], ivar_variants_to_vcf_highfreq_options: ivar_variants_to_vcf_highfreq_options, ivar_bgzip_lowfreq_options: modules['ivar_bgzip_lowfreq'], ivar_tabix_lowfreq_options: modules['ivar_tabix_lowfreq'], ivar_stats_lowfreq_options: modules['ivar_stats_lowfreq'], ivar_bgzip_highfreq_options: modules['ivar_bgzip_highfreq'], ivar_tabix_highfreq_options: modules['ivar_tabix_highfreq'], ivar_stats_highfreq_options: modules['ivar_stats_highfreq'], snpeff_lowfreq_options: modules['ivar_snpeff_lowfreq'], snpsift_lowfreq_options: modules['ivar_snpsift_lowfreq'], snpeff_lowfreq_bgzip_options: modules['ivar_snpeff_lowfreq_bgzip'], snpeff_lowfreq_tabix_options: modules['ivar_snpeff_lowfreq_tabix'], snpeff_lowfreq_stats_options: modules['ivar_snpeff_lowfreq_stats'], snpeff_highfreq_options: modules['ivar_snpeff_highfreq'], snpsift_highfreq_options: modules['ivar_snpsift_highfreq'], snpeff_highfreq_bgzip_options: modules['ivar_snpeff_highfreq_bgzip'], snpeff_highfreq_tabix_options: modules['ivar_snpeff_highfreq_tabix'], snpeff_highfreq_stats_options: modules['ivar_snpeff_highfreq_stats'] )
@@ -405,16 +404,9 @@ workflow ILLUMINA {
     //     )
         
     //     if (params.protocol == 'amplicon') {
-
-            COLLAPSE_PRIMERS (
-                ch_primer_bed,
-                params.primer_left_suffix,
-                params.primer_right_suffix
-            )
-
     //         MOSDEPTH_AMPLICON (
     //             ch_sorted_bam.join(ch_sorted_bai, by: [0]),
-    //             COLLAPSE_PRIMERS.out.bed,
+    //             PREPARE_GENOME.out.primer_collapsed_bed,
     //             0
     //         )
 
