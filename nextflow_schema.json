@@ -26,29 +26,29 @@
                     "description": "Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplicon'.",
                     "fa_icon": "fas fa-vials"
                 },
-                "amplicon_bed": {
+                "primer_bed": {
                     "type": "string",
-                    "description": "If the '--protocol amplicon' parameter is provided then iVar is used to trim amplicon primer sequences after read alignment and before variant calling.",
+                    "description": "If the '--protocol amplicon' parameter is provided then iVar is used to trim primer sequences after read alignment and before variant calling.",
                     "help_text": "iVar uses the primer positions relative to the viral genome supplied in this file to soft clip primer sequences from a coordinate sorted BAM file. The file must be in BED format as highlighted below:\n\n```\nMN908947.3 30 54 nCoV-2019_1_LEFT 60 -\nMN908947.3 385 410 nCoV-2019_1_RIGHT 60 +\nMN908947.3 320 342 nCoV-2019_2_LEFT 60 -\nMN908947.3 704 726 nCoV-2019_2_RIGHT 60 +\n```",
                     "fa_icon": "fas fa-assistive-listening-systems"
                 },
-                "amplicon_fasta": {
+                "primer_fasta": {
                     "type": "string",
-                    "description": "If the '--protocol amplicon' parameter is provided then Cutadapt is used to trim amplicon primer sequences from FastQ files before de novo assembly.",
+                    "description": "If the '--protocol amplicon' parameter is provided then Cutadapt is used to trim primer sequences from FastQ files before de novo assembly.",
                     "help_text": "This file must contain amplicon primer sequences in Fasta format and is mandatory when --protocol amplicon is specified. An example is shown below:\n\n```\n>nCoV-2019_1_LEFT\nACCAACCAACTTTCGATCTCTTGT\n>nCoV-2019_1_RIGHT\nCATCTTTAAGATGTTGACGTGCCTC\n>nCoV-2019_2_LEFT\nCTGTTTTACAGGTTCGCGACGT\n>nCoV-2019_2_RIGHT\nTAAGGATCAGTGCCAAGCTCGT\n```",
                     "fa_icon": "fas fa-assistive-listening-systems"
                 },
-                "amplicon_left_suffix": {
+                "primer_left_suffix": {
                     "type": "string",
                     "default": "_LEFT",
                     "fa_icon": "fas fa-assistive-listening-systems",
-                    "description": "Suffix used in name field of '--amplicon_bed' to indicate left primer position."
+                    "description": "Suffix used in name field of '--primer_bed' to indicate left primer position."
                 },
-                "amplicon_right_suffix": {
+                "primer_right_suffix": {
                     "type": "string",
                     "default": "_RIGHT",
                     "fa_icon": "fas fa-assistive-listening-systems",
-                    "description": "Suffix used in name field of '--amplicon_bed' to indicate right primer position."
+                    "description": "Suffix used in name field of '--primer_bed' to indicate right primer position."
                 },
                 "outdir": {
                     "type": "string",
