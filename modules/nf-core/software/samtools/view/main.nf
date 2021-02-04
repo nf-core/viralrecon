@@ -1,9 +1,10 @@
 // Import generic module functions
-include { saveFiles; getSoftwareName } from './functions'
+include { initOptions; saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
+def options    = initOptions(params.options)
 
-process SAMTOOLS_IDXSTATS {
+process SAMTOOLS_VIEW {
     tag "$meta.id"
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
@@ -17,16 +18,17 @@ process SAMTOOLS_IDXSTATS {
     }
 
     input:
-    tuple val(meta), path(bam), path(bai)
+    tuple val(meta), path(bam)
 
     output:
-    tuple val(meta), path("*.idxstats"), emit: idxstats
-    path  "*.version.txt"              , emit: version
+    tuple val(meta), path("*.bam"), emit: bam
+    path  "*.version.txt"         , emit: version
 
     script:
     def software = getSoftwareName(task.process)
+    def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
-    samtools idxstats $bam > ${bam}.idxstats
+    samtools view $options.args $bam > ${prefix}.bam
     echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//' > ${software}.version.txt
     """
 }
