@@ -595,12 +595,11 @@ workflow ILLUMINA {
         ch_minia_quast_multiqc    = ASSEMBLY_MINIA.out.quast_tsv
         // ch_minia_bcftools_multiqc = ASSEMBLY_MINIA.out.quast_tsv
         // ch_minia_snpeff_multiqc   = ASSEMBLY_MINIA.out.quast_tsv
-        // ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.minia_version.first().ifEmpty(null))
-        // ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.bandage_version.first().ifEmpty(null))
-        // ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.blast_version.first().ifEmpty(null))
-        // ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.quast_version.ifEmpty(null))
-        // ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.abacas_version.first().ifEmpty(null))
-        // ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.plasmidid_version.first().ifEmpty(null))
+        ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.minia_version.first().ifEmpty(null))
+        ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.blast_version.first().ifEmpty(null))
+        ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.quast_version.ifEmpty(null))
+        ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.abacas_version.first().ifEmpty(null))
+        ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.plasmidid_version.first().ifEmpty(null))
     }
 
     /*
@@ -620,7 +619,7 @@ workflow ILLUMINA {
     )
 
     // /*
-    //  * MultiQC
+    //  * MODULE: MultiQC
     //  */
     // if (!params.skip_multiqc) {
     //     workflow_summary    = Schema.params_summary_multiqc(workflow, params.summary_params)
@@ -649,10 +648,10 @@ workflow ILLUMINA {
 /* --              COMPLETION EMAIL            -- */
 ////////////////////////////////////////////////////
 
-// workflow.onComplete {
-//     Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
-//     Completion.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
-// }
+workflow.onComplete {
+    Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
+    Completion.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
+}
 
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
