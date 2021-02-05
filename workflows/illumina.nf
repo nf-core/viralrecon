@@ -83,6 +83,9 @@ def modules = params.modules.clone()
 def cat_fastq_options          = modules['cat_fastq']
 if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
 
+def cutadapt_options = modules['cutadapt']
+if (params.save_trimmed) { cutadapt_options.publish_files.put('fastq.gz','') }
+
 def kraken2_run_options = modules['kraken2_run']
 if (params.save_kraken2_fastq) { kraken2_run_options.publish_files.put('fastq.gz','') }
 
@@ -94,7 +97,7 @@ include { CAT_FASTQ                  } from '../modules/local/cat_fastq'        
 include { MULTIQC_CUSTOM_FAIL_MAPPED } from '../modules/local/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]              )
 include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'   addParams( options: modules['picard_collectwgsmetrics'] )
 include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'              addParams( options: modules['bcftools_isec']            ) 
-include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: modules['cutadapt']                 )
+include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: cutadapt_options                    )
 include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'                addParams( options: kraken2_run_options                 ) 
 include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'      addParams( options: [publish_files: ['csv':'']]         )
 include { MULTIQC                    } from '../modules/local/multiqc'                    addParams( options: multiqc_options                     )
@@ -484,48 +487,45 @@ workflow ILLUMINA {
     // //     )
     // // }
 
-    // /*
-    //  * MODULE: Primer trimming with Cutadapt
-    //  */
-    // ch_cutadapt_multiqc        = Channel.empty()
-    // ch_cutadapt_fastqc_multiqc = Channel.empty()
-    // ch_cutadapt_version        = Channel.empty()
-    // if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
-    //     CUTADAPT (
-    //         ch_trim_fastq,
-    //         PREPARE_GENOME.out.primer_fasta
-    //     )
-    //     ch_trim_fastq       = CUTADAPT.out.reads
-    //     ch_cutadapt_multiqc = CUTADAPT.out.log
-    //     ch_cutadapt_version = CUTADAPT.out.version
+    /*
+     * MODULE: Primer trimming with Cutadapt
+     */
+    ch_cutadapt_multiqc        = Channel.empty()
+    ch_cutadapt_fastqc_multiqc = Channel.empty()
+    if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
+        CUTADAPT (
+            ch_trim_fastq,
+            PREPARE_GENOME.out.primer_fasta
+        )
+        ch_trim_fastq       = CUTADAPT.out.reads
+        ch_cutadapt_multiqc = CUTADAPT.out.log
+        ch_software_versions = ch_software_versions.mix(CUTADAPT.out.version.first().ifEmpty(null))
 
-    //     if (!params.skip_fastqc) {
-    //         FASTQC ( 
-    //             CUTADAPT.out.reads 
-    //         )
-    //         ch_cutadapt_fastqc_multiqc = FASTQC.out.zip
-    //     }
-    // }
+        if (!params.skip_fastqc) {
+            FASTQC ( 
+                CUTADAPT.out.reads 
+            )
+            ch_cutadapt_fastqc_multiqc = FASTQC.out.zip
+        }
+    }
 
-    // /*
-    //  * MODULE: Run Kraken2
-    //  */
-    // ch_kraken2_multiqc = Channel.empty()
-    // ch_kraken2_version = Channel.empty()
-    // if (!params.skip_assembly && !params.skip_kraken2) {
-    //     KRAKEN2_RUN ( 
-    //         ch_trim_fastq,
-    //         PREPARE_GENOME.out.kraken2_db
-    //     )
-    //     ch_trim_fastq      = KRAKEN2_RUN.out.unclassified
-    //     ch_kraken2_multiqc = KRAKEN2_RUN.out.txt
-    //     ch_kraken2_version = KRAKEN2_RUN.out.version
-    // }
+    /*
+     * MODULE: Run Kraken2 for removal of host reads
+     */
+    ch_kraken2_multiqc = Channel.empty()
+    if (!params.skip_assembly && !params.skip_kraken2) {
+        KRAKEN2_RUN ( 
+            ch_trim_fastq,
+            PREPARE_GENOME.out.kraken2_db
+        )
+        ch_trim_fastq      = KRAKEN2_RUN.out.unclassified
+        ch_kraken2_multiqc = KRAKEN2_RUN.out.txt
+        ch_software_versions = ch_software_versions.mix(KRAKEN2_RUN.out.version.first().ifEmpty(null))
+    }
 
     // /*
     //  * SUBWORKFLOW: Run SPAdes assembly and downstream analysis
     //  */
-    // ch_spades_version = Channel.empty()
     // if (!params.skip_assembly && 'spades' in assemblers) {
     //     ASSEMBLY_SPADES (
     //         ch_trim_fastq,
@@ -543,7 +543,6 @@ workflow ILLUMINA {
     // /*
     //  * SUBWORKFLOW: Run Unicycler assembly and downstream analysis
     //  */
-    // ch_unicycler_version = Channel.empty()
     // if (!params.skip_assembly && 'unicycler' in assemblers) {
     //     ASSEMBLY_UNICYCLER (
     //         ch_trim_fastq,
@@ -559,7 +558,6 @@ workflow ILLUMINA {
     // /*
     //  * SUBWORKFLOW: Run minia assembly and downstream analysis
     //  */
-    // ch_minia_version = Channel.empty()
     // if (!params.skip_assembly && 'minia' in assemblers) {
     //     ASSEMBLY_MINIA (
     //         ch_trim_fastq,
@@ -617,188 +615,3 @@ workflow ILLUMINA {
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
 ////////////////////////////////////////////////////
-
-// /*
-//  * STEP 6.3.5: Overlap scaffolds with Minimap2, induce and polish assembly, and call variants with seqwish and vg
-//  */
-// process UNICYCLER_VG {
-//     tag "$sample"
-//     label 'process_medium'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/unicycler/variants", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith(".txt")) "bcftools_stats/$filename"
-//                       else if (filename.endsWith(".png")) "bandage/$filename"
-//                       else if (filename.endsWith(".svg")) "bandage/$filename"
-//                       else filename
-//                 }
-
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_vg
-
-//     input:
-//     tuple val(sample), val(single_end), path(scaffolds) from ch_unicycler_vg
-//     path fasta from ch_fasta
-
-//     output:
-//     tuple val(sample), val(single_end), path("${sample}.vcf.gz*") into ch_unicycler_vg_vcf
-//     path "*.bcftools_stats.txt" into ch_unicycler_vg_bcftools_mqc
-//     path "*.{gfa,png,svg}"
-
-//     script:
-//     """
-//     minimap2 -c -t $task.cpus -x asm20 $fasta $scaffolds > ${sample}.paf
-
-//     cat $scaffolds $fasta > ${sample}.withRef.fasta
-//     seqwish --paf-alns ${sample}.paf --seqs ${sample}.withRef.fasta --gfa ${sample}.gfa --threads $task.cpus
-
-//     vg view -Fv ${sample}.gfa --threads $task.cpus > ${sample}.vg
-//     vg convert -x ${sample}.vg > ${sample}.xg
-
-//     samtools faidx $fasta
-//     vg snarls ${sample}.xg > ${sample}.snarls
-//     for chrom in `cat ${fasta}.fai | cut -f1`
-//     do
-//         vg deconstruct -p \$chrom ${sample}.xg -r ${sample}.snarls --threads $task.cpus \\
-//             | bcftools sort -O v -T ./ \\
-//             | bgzip -c > ${sample}.\$chrom.vcf.gz
-//     done
-//     bcftools concat --output-type z --output ${sample}.vcf.gz *.vcf.gz
-//     tabix -p vcf -f ${sample}.vcf.gz
-//     bcftools stats ${sample}.vcf.gz > ${sample}.bcftools_stats.txt
-
-//     if [ -s ${sample}.gfa ]
-//     then
-//         Bandage image ${sample}.gfa ${sample}.png --height 1000
-//         Bandage image ${sample}.gfa ${sample}.svg --height 1000
-//     fi
-//     """
-// }
-
-// /*
-//  * STEP 6.3.6: Variant annotation with SnpEff and SnpSift
-//  */
-// process UNICYCLER_SNPEFF {
-//     tag "$sample"
-//     label 'process_medium'
-//     label 'error_ignore'
-//     publishDir "${params.outdir}/assembly/unicycler/variants/snpeff", mode: params.publish_dir_mode
-
-//     when:
-//     !params.skip_assembly && 'unicycler' in assemblers && !params.skip_vg && params.gff && !params.skip_snpeff
-
-//     input:
-//     tuple val(sample), val(single_end), path(vcf) from ch_unicycler_vg_vcf
-//     tuple file(db), file(config) from ch_snpeff_db_unicycler
-
-//     output:
-//     path "*.snpEff.csv" into ch_unicycler_snpeff_mqc
-//     path "*.vcf.gz*"
-//     path "*.{txt,html}"
-
-//     script:
-//     """
-//     snpEff ${index_base} \\
-//         -config $config \\
-//         -dataDir $db \\
-//         ${vcf[0]} \\
-//         -csvStats ${sample}.snpEff.csv \\
-//         | bgzip -c > ${sample}.snpEff.vcf.gz
-//     tabix -p vcf -f ${sample}.snpEff.vcf.gz
-//     mv snpEff_summary.html ${sample}.snpEff.summary.html
-
-//     SnpSift extractFields -s "," \\
-//         -e "." \\
-//         ${sample}.snpEff.vcf.gz \\
-//         CHROM POS REF ALT \\
-//         "ANN[*].GENE" "ANN[*].GENEID" \\
-//         "ANN[*].IMPACT" "ANN[*].EFFECT" \\
-//         "ANN[*].FEATURE" "ANN[*].FEATUREID" \\
-//         "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" \\
-//         "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" \\
-//         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
-//         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
-//         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-//         > ${sample}.snpSift.table.txt
-//     	"""
-// }
-
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-// /* --                                                                     -- */
-// /* --                          MULTIQC                                    -- */
-// /* --                                                                     -- */
-// ///////////////////////////////////////////////////////////////////////////////
-// ///////////////////////////////////////////////////////////////////////////////
-
-// /*
-//  * STEP 7: MultiQC
-//  */
-// process MULTIQC {
-//     label 'process_medium'
-//     publishDir "${params.outdir}", mode: params.publish_dir_mode,
-//         saveAs: { filename ->
-//                       if (filename.endsWith("assembly_metrics_mqc.tsv")) "assembly/$filename"
-//                       else if (filename.endsWith("variants_metrics_mqc.tsv")) "variants/$filename"
-//                       else "multiqc/$filename"
-//                 }
-
-//     when:
-//     !params.skip_multiqc
-
-//     input:
-//     path (multiqc_config) from ch_multiqc_config
-//     path (mqc_custom_config) from ch_multiqc_custom_config.collect().ifEmpty([])
-//     path ('fastqc/*') from ch_fastqc_raw_reports_mqc.collect().ifEmpty([])
-//     path ('fastp/log/*') from ch_fastp_mqc.collect().ifEmpty([])
-//     path ('fastp/fastqc/*') from ch_fastp_fastqc_mqc.collect().ifEmpty([])
-//     path ('bowtie2/log/*') from ch_bowtie2_mqc.collect().ifEmpty([])
-//     path ('bowtie2/flagstat/*') from ch_sort_bam_flagstat_mqc.collect().ifEmpty([])
-//     path ('ivar/trim/flagstat/*') from ch_ivar_trim_flagstat_mqc.collect().ifEmpty([])
-//     path ('ivar/trim/log/*') from ch_ivar_trim_log_mqc.collect().ifEmpty([])
-//     path ('picard/markdup/*') from ch_markdup_bam_flagstat_mqc.collect().ifEmpty([])
-//     path ('picard/metrics/*') from ch_markdup_bam_metrics_mqc.collect().ifEmpty([])
-//     path ('picard/metrics/*') from ch_picard_metrics_mqc.collect().ifEmpty([])
-//     path ('mosdepth/genome/*') from ch_mosdepth_genome_mqc.collect().ifEmpty([])
-//     path ('varscan2/counts/lowfreq/*') from ch_varscan2_log_mqc.collect().ifEmpty([])
-//     path ('varscan2/bcftools/highfreq/*') from ch_varscan2_bcftools_highfreq_mqc.collect().ifEmpty([])
-//     path ('varscan2/snpeff/highfreq/*') from ch_varscan2_snpeff_highfreq_mqc.collect().ifEmpty([])
-//     path ('varscan2/quast/highfreq/*') from ch_varscan2_quast_mqc.collect().ifEmpty([])
-//     path ('ivar/variants/counts/lowfreq/*') from ch_ivar_count_mqc.collect().ifEmpty([])
-//     path ('ivar/variants/bcftools/highfreq/*') from ch_ivar_bcftools_highfreq_mqc.collect().ifEmpty([])
-//     path ('ivar/variants/snpeff/highfreq/*') from ch_ivar_snpeff_highfreq_mqc.collect().ifEmpty([])
-//     path ('ivar/consensus/quast/highfreq/*') from ch_ivar_quast_mqc.collect().ifEmpty([])
-//     path ('bcftools/variants/bcftools/*') from ch_bcftools_variants_mqc.collect().ifEmpty([])
-//     path ('bcftools/variants/snpeff/*') from ch_bcftools_snpeff_mqc.collect().ifEmpty([])
-//     path ('bcftools/consensus/quast/*') from ch_bcftools_quast_mqc.collect().ifEmpty([])
-//     path ('cutadapt/log/*') from ch_cutadapt_mqc.collect().ifEmpty([])
-//     path ('cutadapt/fastqc/*') from ch_cutadapt_fastqc_mqc.collect().ifEmpty([])
-//     path ('kraken2/*') from ch_kraken2_report_mqc.collect().ifEmpty([])
-//     path ('spades/bcftools/*') from ch_spades_vg_bcftools_mqc.collect().ifEmpty([])
-//     path ('spades/snpeff/*') from ch_spades_snpeff_mqc.collect().ifEmpty([])
-//     path ('spades/quast/*') from ch_quast_spades_mqc.collect().ifEmpty([])
-//     path ('unicycler/bcftools/*') from ch_unicycler_vg_bcftools_mqc.collect().ifEmpty([])
-//     path ('unicycler/snpeff/*') from ch_unicycler_snpeff_mqc.collect().ifEmpty([])
-//     path ('unicycler/quast/*') from ch_quast_unicycler_mqc.collect().ifEmpty([])
-//     path ('minia/bcftools/*') from ch_minia_vg_bcftools_mqc.collect().ifEmpty([])
-//     path ('minia/snpeff/*') from ch_minia_snpeff_mqc.collect().ifEmpty([])
-//     path ('minia/quast/*') from ch_quast_minia_mqc.collect().ifEmpty([])
-//     path ('software_versions/*') from ch_software_versions_yaml.collect()
-//     path workflow_summary from ch_workflow_summary.collectFile(name: "workflow_summary_mqc.yaml")
-
-//     output:
-//     path "*multiqc_report.html" into ch_multiqc_report
-//     path "*_data"
-//     path "*.tsv"
-
-//     script:
-//     rtitle = custom_runName ? "--title \"$custom_runName\"" : ''
-//     rfilename = custom_runName ? "--filename " + custom_runName.replaceAll('\\W','_').replaceAll('_+','_') + "_multiqc_report" : ''
-//     custom_config_file = params.multiqc_config ? "--config $mqc_custom_config" : ''
-//     """
-//     multiqc . -f $rtitle $rfilename $custom_config_file
-//     multiqc_to_custom_tsv.py
-//     multiqc . -f $rtitle $rfilename $custom_config_file
-//     """
-// }
-
