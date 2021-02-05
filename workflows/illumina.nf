@@ -371,25 +371,25 @@ workflow ILLUMINA {
         ch_markduplicates_multiqc  = MARK_DUPLICATES_PICARD.out.metrics
     }
 
-    //ch_software_versions       = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
-    // /*
-    //  * MODULE: Picard metrics
-    //  */
-    // ch_picard_collectmultiplemetrics_multiqc = Channel.empty()
-    // ch_picard_collectwgsmetrics_multiqc      = Channel.empty()
-    // if (!params.skip_variants && !params.skip_picard_metrics) {
-    //     PICARD_COLLECTMULTIPLEMETRICS (
-    //         ch_bam,
-    //         PREPARE_GENOME.out.fasta
-    //     )
-    //     ch_picard_collectmultiplemetrics_multiqc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
+    /*
+     * MODULE: Picard metrics
+     */
+    ch_picard_collectwgsmetrics_multiqc      = Channel.empty()
+    ch_picard_collectmultiplemetrics_multiqc = Channel.empty()
+    if (!params.skip_variants && !params.skip_picard_metrics) {
+        PICARD_COLLECTWGSMETRICS (
+            ch_bam,
+            PREPARE_GENOME.out.fasta
+        )
+        ch_picard_collectwgsmetrics_multiqc = PICARD_COLLECTWGSMETRICS.out.metrics
+        ch_software_versions = ch_software_versions.mix(PICARD_COLLECTWGSMETRICS.out.version.first().ifEmpty(null))
 
-    //     PICARD_COLLECTWGSMETRICS (
-    //         ch_bam,
-    //         PREPARE_GENOME.out.fasta
-    //     )
-    //     ch_picard_collectwgsmetrics_multiqc = PICARD_COLLECTWGSMETRICS.out.metrics
-    // }
+        PICARD_COLLECTMULTIPLEMETRICS (
+            ch_bam,
+            PREPARE_GENOME.out.fasta
+        )
+        ch_picard_collectmultiplemetrics_multiqc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
+    }
 
     // /*
     //  * MODULE: Coverage QC plots
