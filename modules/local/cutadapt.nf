@@ -23,15 +23,15 @@ process CUTADAPT {
     path  adapters
     
     output:
-    tuple val(meta), path('*.trim.fastq.gz'), emit: reads
-    tuple val(meta), path('*.log')          , emit: log
-    path '*.version.txt'                    , emit: version
+    tuple val(meta), path('*.fastq.gz'), emit: reads
+    tuple val(meta), path('*.log')     , emit: log
+    path '*.version.txt'               , emit: version
     
     script:
     def software = getSoftwareName(task.process)
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     def paired   = meta.single_end ? "-a file:adapters.sub.fa"   : "-a file:adapters.sub.fa -A file:adapters.sub.fa"
-    def trimmed  = meta.single_end ? "-o ${prefix}.trim.fastq.gz" : "-o ${prefix}_1.trim.fastq.gz -p ${prefix}_2.trim.fastq.gz"
+    def trimmed  = meta.single_end ? "-o ${prefix}.fastq.gz" : "-o ${prefix}_1.fastq.gz -p ${prefix}_2.fastq.gz"
     """
     sed -r '/^[ACTGactg]+\$/ s/\$/X/g' $adapters > adapters.sub.fa
 
