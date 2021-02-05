@@ -287,41 +287,41 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
     }
 
-    // /*
-    //  * Filter channels to get samples that passed Bowtie2 minimum mapped reads threshold
-    //  */
-    // ch_fail_mapping_multiqc = Channel.empty()
-    // if (!params.skip_variants) {
-    //     ch_samtools_flagstat
-    //         .map { meta, flagstat -> [ meta ] + Checks.get_flagstat_mapped_reads(workflow, params, log, flagstat) }
-    //         .set { ch_mapped_reads }
+    /*
+     * Filter channels to get samples that passed Bowtie2 minimum mapped reads threshold
+     */
+    ch_fail_mapping_multiqc = Channel.empty()
+    if (!params.skip_variants) {
+        ch_samtools_flagstat
+            .map { meta, flagstat -> [ meta ] + Checks.get_flagstat_mapped_reads(workflow, params, log, flagstat) }
+            .set { ch_mapped_reads }
 
-    //     ch_bam
-    //         .join(ch_mapped_reads, by: [0])
-    //         .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
-    //         .set { ch_bam }
+        ch_bam
+            .join(ch_mapped_reads, by: [0])
+            .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
+            .set { ch_bam }
 
-    //     ch_bai
-    //         .join(ch_mapped_reads, by: [0])
-    //         .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
-    //         .set { ch_bai }
+        ch_bai
+            .join(ch_mapped_reads, by: [0])
+            .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
+            .set { ch_bai }
 
-    //     ch_mapped_reads
-    //         .branch { meta, mapped, pass ->
-    //             pass: pass
-    //                 pass_mapped_reads[meta.id] = mapped
-    //                 return [ "$meta.id\t$mapped" ]
-    //             fail: !pass
-    //                 fail_mapped_reads[meta.id] = mapped
-    //                 return [ "$meta.id\t$mapped" ]
-    //         }
-    //         .set { ch_pass_fail_mapped }
+        ch_mapped_reads
+            .branch { meta, mapped, pass ->
+                pass: pass
+                    pass_mapped_reads[meta.id] = mapped
+                    return [ "$meta.id\t$mapped" ]
+                fail: !pass
+                    fail_mapped_reads[meta.id] = mapped
+                    return [ "$meta.id\t$mapped" ]
+            }
+            .set { ch_pass_fail_mapped }
 
-    //     MULTIQC_CUSTOM_FAIL_MAPPED ( 
-    //         ch_pass_fail_mapped.fail.collect()
-    //     )
-    //     .set { ch_fail_mapping_multiqc }
-    // }
+        MULTIQC_CUSTOM_FAIL_MAPPED ( 
+            ch_pass_fail_mapped.fail.collect()
+        )
+        .set { ch_fail_mapping_multiqc }
+    }
     
     // /*
     //  * SUBWORKFLOW: Trim primer sequences from reads with iVar
