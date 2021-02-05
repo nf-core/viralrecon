@@ -14,10 +14,10 @@ params.quast_options        = [:]
 // params.snpeff_stats_options = [:]
 // params.snpsift_options      = [:]
 
-include { UNICYCLER   } from '../../modules/local/unicycler' addParams( options: params.unicycler_options ) 
-include { BANDAGE     } from '../../modules/local/bandage'   addParams( options: params.bandage_options   ) 
-include { ASSEMBLY_QC } from './assembly_qc'                 addParams( blastn_options: params.blastn_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
-// include { ASSEMBLY_VG } from './assembly_vg'                 addParams( snpeff_options: params.snpeff_options, snpeff_bgzip_options: params.snpeff_bgzip_options, snpeff_tabix_options: params.snpeff_tabix_options, snpeff_stats_options: params.snpeff_stats_options, snpsift_options: params.snpsift_options )
+include { UNICYCLER     } from '../../modules/local/unicycler'                     addParams( options: params.unicycler_options ) 
+include { BANDAGE_IMAGE } from '../../modules/nf-core/software/bandage/image/main' addParams( options: params.bandage_options   ) 
+include { ASSEMBLY_QC   } from './assembly_qc' addParams( blastn_options: params.blastn_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
+// include { ASSEMBLY_VG   } from './assembly_vg' addParams( snpeff_options: params.snpeff_options, snpeff_bgzip_options: params.snpeff_bgzip_options, snpeff_tabix_options: params.snpeff_tabix_options, snpeff_stats_options: params.snpeff_stats_options, snpsift_options: params.snpsift_options )
 
 workflow ASSEMBLY_UNICYCLER {
     take:
@@ -50,10 +50,10 @@ workflow ASSEMBLY_UNICYCLER {
     ch_bandage_svg     = Channel.empty()
     ch_bandage_version = Channel.empty()
     if (!params.skip_bandage) {
-        BANDAGE ( UNICYCLER.out.gfa )
-        ch_bandage_version = BANDAGE.out.version
-        ch_bandage_png     = BANDAGE.out.png
-        ch_bandage_svg     = BANDAGE.out.svg
+        BANDAGE_IMAGE ( UNICYCLER.out.gfa )
+        ch_bandage_version = BANDAGE_IMAGE.out.version
+        ch_bandage_png     = BANDAGE_IMAGE.out.png
+        ch_bandage_svg     = BANDAGE_IMAGE.out.svg
     }
 
     /*
