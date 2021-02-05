@@ -127,8 +127,16 @@ if (!params.save_reference) {
 
 def ivar_trim_options   = modules['ivar_trim']
 ivar_trim_options.args += params.ivar_trim_noprimer ? "" : " -e"
+if (params.save_align_intermeds) { ivar_trim_options.publish_files.put('bam','') }
 
 def ivar_trim_sort_bam_options = modules['ivar_trim_sort_bam']
+if (params.save_align_intermeds || params.skip_markduplicates) {
+    ivar_trim_sort_bam_options.publish_files.put('bam','')
+    ivar_trim_sort_bam_options.publish_files.put('bai','')
+}
+
+if (params.save_align_intermeds) { bowtie2_align_options.publish_files.put('bam','') }
+if (params.save_unaligned)       { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
 
 def varscan_mpileup2cns_options   = modules['varscan_mpileup2cns']
 varscan_mpileup2cns_options.args += " --min-var-freq $params.min_allele_freq"
@@ -185,7 +193,7 @@ if (params.save_align_intermeds) { bowtie2_align_options.publish_files.put('bam'
 if (params.save_unaligned)       { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
 
 def bowtie2_sort_bam_options = modules['bowtie2_sort_bam']
-if (params.save_align_intermeds || params.skip_markduplicates) {
+if ((params.protocol != 'amplicon' && params.skip_markduplicates) || params.save_align_intermeds) {
     bowtie2_sort_bam_options.publish_files.put('bam','')
     bowtie2_sort_bam_options.publish_files.put('bai','')
 }
@@ -268,9 +276,9 @@ workflow ILLUMINA {
      */
     ch_bam               = Channel.empty()
     ch_bai               = Channel.empty()
-    ch_samtools_stats    = Channel.empty()
-    ch_samtools_flagstat = Channel.empty()
-    ch_samtools_idxstats = Channel.empty()
+    ch_bowtie2_stats     = Channel.empty()
+    ch_bowtie2_flagstat  = Channel.empty()
+    ch_bowtie2_idxstats  = Channel.empty()
     ch_bowtie2_multiqc   = Channel.empty()
     if (!params.skip_variants) {
         ALIGN_BOWTIE2 (
@@ -279,9 +287,9 @@ workflow ILLUMINA {
         )
         ch_bam               = ALIGN_BOWTIE2.out.bam
         ch_bai               = ALIGN_BOWTIE2.out.bai
-        ch_samtools_stats    = ALIGN_BOWTIE2.out.stats
-        ch_samtools_flagstat = ALIGN_BOWTIE2.out.flagstat
-        ch_samtools_idxstats = ALIGN_BOWTIE2.out.idxstats
+        ch_bowtie2_stats     = ALIGN_BOWTIE2.out.stats
+        ch_bowtie2_flagstat  = ALIGN_BOWTIE2.out.flagstat
+        ch_bowtie2_idxstats  = ALIGN_BOWTIE2.out.idxstats
         ch_bowtie2_multiqc   = ALIGN_BOWTIE2.out.log_out
         ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.bowtie2_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
@@ -292,7 +300,7 @@ workflow ILLUMINA {
      */
     ch_fail_mapping_multiqc = Channel.empty()
     if (!params.skip_variants) {
-        ch_samtools_flagstat
+        ch_bowtie2_flagstat
             .map { meta, flagstat -> [ meta ] + Checks.get_flagstat_mapped_reads(workflow, params, log, flagstat) }
             .set { ch_mapped_reads }
 
@@ -323,42 +331,47 @@ workflow ILLUMINA {
         .set { ch_fail_mapping_multiqc }
     }
     
-    // /*
-    //  * SUBWORKFLOW: Trim primer sequences from reads with iVar
-    //  */
-    // ch_ivar_trim_multiqc = Channel.empty()
-    // if (!params.skip_variants && params.protocol == 'amplicon') {
+    /*
+     * SUBWORKFLOW: Trim primer sequences from reads with iVar
+     */
+    ch_ivar_trim_stats    = Channel.empty()
+    ch_ivar_trim_flagstat = Channel.empty()
+    ch_ivar_trim_idxstats = Channel.empty()
+    ch_ivar_trim_multiqc  = Channel.empty()
+    if (!params.skip_variants && params.protocol == 'amplicon') {
+        PRIMER_TRIM_IVAR (
+            ch_bam.join(ch_bai, by: [0]),
+            PREPARE_GENOME.out.primer_bed
+        )
+        ch_bam                = PRIMER_TRIM_IVAR.out.bam
+        ch_bai                = PRIMER_TRIM_IVAR.out.bai
+        ch_ivar_trim_stats    = PRIMER_TRIM_IVAR.out.stats
+        ch_ivar_trim_flagstat = PRIMER_TRIM_IVAR.out.flagstat
+        ch_ivar_trim_idxstats = PRIMER_TRIM_IVAR.out.idxstats
+        ch_ivar_trim_multiqc  = PRIMER_TRIM_IVAR.out.log_out
+        ch_software_versions  = ch_software_versions.mix(PRIMER_TRIM_IVAR.out.ivar_version.first().ifEmpty(null))
+    }
 
-    //     PRIMER_TRIM_IVAR (
-    //         ch_bam.join(ch_bai, by: [0]),
-    //         ch_primer_bed
-    //     )
-    //     ch_bam             = PRIMER_TRIM_IVAR.out.bam
-    //     ch_bai             = PRIMER_TRIM_IVAR.out.bai
-    //     // ch_samtools_stats         = PRIMER_TRIM_IVAR.out.stats
-    //     // ch_samtools_flagstat      = PRIMER_TRIM_IVAR.out.flagstat
-    //     // ch_samtools_idxstats      = PRIMER_TRIM_IVAR.out.idxstats
-    //     ch_ivar_trim_multiqc      = PRIMER_TRIM_IVAR.out.log_out
-    //     ch_software_versions      = ch_software_versions.mix(PRIMER_TRIM_IVAR.out.ivar_version.first().ifEmpty(null))
-    // }
+    /*
+     * SUBWORKFLOW: Mark duplicate reads
+     */
+    ch_markduplicates_stats    = Channel.empty()
+    ch_markduplicates_flagstat = Channel.empty()
+    ch_markduplicates_idxstats = Channel.empty()
+    ch_markduplicates_multiqc  = Channel.empty()
+    if (!params.skip_variants && !params.skip_markduplicates) {
+        MARK_DUPLICATES_PICARD (
+            ch_bam
+        )
+        ch_bam                     = MARK_DUPLICATES_PICARD.out.bam
+        ch_bai                     = MARK_DUPLICATES_PICARD.out.bai
+        ch_markduplicates_stats    = MARK_DUPLICATES_PICARD.out.stats
+        ch_markduplicates_flagstat = MARK_DUPLICATES_PICARD.out.flagstat
+        ch_markduplicates_idxstats = MARK_DUPLICATES_PICARD.out.idxstats
+        ch_markduplicates_multiqc  = MARK_DUPLICATES_PICARD.out.metrics
+    }
 
-    // /*
-    //  * SUBWORKFLOW: Mark duplicate reads
-    //  */
-    // ch_markduplicates_multiqc = Channel.empty()
-    // if (!params.skip_variants && !params.skip_markduplicates) {
-    //     MARK_DUPLICATES_PICARD (
-    //         ch_bam
-    //     )
-    //     ch_bam             = MARK_DUPLICATES_PICARD.out.bam
-    //     ch_bai             = MARK_DUPLICATES_PICARD.out.bai
-    //     // ch_samtools_stats         = MARK_DUPLICATES_PICARD.out.stats
-    //     // ch_samtools_flagstat      = MARK_DUPLICATES_PICARD.out.flagstat
-    //     // ch_samtools_idxstats      = MARK_DUPLICATES_PICARD.out.idxstats
-    //     ch_markduplicates_multiqc = MARK_DUPLICATES_PICARD.out.metrics
-    //     ch_software_versions      = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
-    // }
-
+    //ch_software_versions       = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
     // /*
     //  * MODULE: Picard metrics
     //  */
