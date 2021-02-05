@@ -8,11 +8,11 @@ params.blastn_options       = [:]
 params.abacas_options       = [:]
 params.plasmidid_options    = [:]
 params.quast_options        = [:]
-params.snpeff_options       = [:]
-params.snpeff_bgzip_options = [:]
-params.snpeff_tabix_options = [:]
-params.snpeff_stats_options = [:]
-params.snpsift_options      = [:]
+// params.snpeff_options       = [:]
+// params.snpeff_bgzip_options = [:]
+// params.snpeff_tabix_options = [:]
+// params.snpeff_stats_options = [:]
+// params.snpsift_options      = [:]
 
 include { SPADES      } from '../../modules/local/spades'  addParams( options: params.spades_options  ) 
 include { BANDAGE     } from '../../modules/local/bandage' addParams( options: params.bandage_options ) 
@@ -103,5 +103,4 @@ workflow ASSEMBLY_SPADES {
 
     plasmidid_results = ASSEMBLY_QC.out.plasmidid_results // channel: [ val(meta), [ results ] ]
     plasmidid_version = ASSEMBLY_QC.out.plasmidid_version //    path: *.version.txt
-
 }
