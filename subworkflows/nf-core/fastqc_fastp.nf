@@ -33,7 +33,7 @@ workflow FASTQC_FASTP {
     fastqc_trim_html = Channel.empty()
     fastqc_trim_zip  = Channel.empty()
     if (!params.skip_fastp) {
-        FASTP ( reads, params.save_trimmed_fail ).reads.set { trim_reads }
+        FASTP ( reads ).reads.set { trim_reads }
         trim_json       = FASTP.out.json
         trim_html       = FASTP.out.html
         trim_log        = FASTP.out.log
