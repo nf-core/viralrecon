@@ -8,11 +8,11 @@ params.blastn_options       = [:]
 params.abacas_options       = [:]
 params.plasmidid_options    = [:]
 params.quast_options        = [:]
-params.snpeff_options       = [:]
-params.snpeff_bgzip_options = [:]
-params.snpeff_tabix_options = [:]
-params.snpeff_stats_options = [:]
-params.snpsift_options      = [:]
+// params.snpeff_options       = [:]
+// params.snpeff_bgzip_options = [:]
+// params.snpeff_tabix_options = [:]
+// params.snpeff_stats_options = [:]
+// params.snpsift_options      = [:]
 
 include { UNICYCLER   } from '../../modules/local/unicycler' addParams( options: params.unicycler_options ) 
 include { BANDAGE     } from '../../modules/local/bandage'   addParams( options: params.bandage_options   ) 
