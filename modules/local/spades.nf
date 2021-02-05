@@ -41,6 +41,8 @@ process SPADES {
         $input_reads \\
         -o ./
 
+    mv spades.log ${prefix}.spades.log
+    
     if [ -f scaffolds.fasta ]; then
         mv scaffolds.fasta ${prefix}.scaffolds.fa
     fi 
