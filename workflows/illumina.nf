@@ -80,7 +80,7 @@ ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_hea
 // Don't overwrite global params.modules, create a copy instead and use that within the main script.
 def modules = params.modules.clone()
 
-def cat_fastq_options          = modules['cat_fastq']
+def cat_fastq_options = modules['cat_fastq']
 if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
 
 def cutadapt_options = modules['cutadapt']
@@ -89,9 +89,8 @@ if (params.save_trimmed) { cutadapt_options.publish_files.put('fastq.gz','') }
 def kraken2_run_options = modules['kraken2_run']
 if (params.save_kraken2_fastq) { kraken2_run_options.publish_files.put('fastq.gz','') }
 
-def multiqc_options         = modules['multiqc']
-multiqc_options.args       += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
-// if (params.skip_alignment)  { multiqc_options['publish_dir'] = '' }
+def multiqc_options   = modules['multiqc']
+multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 
 include { CAT_FASTQ                  } from '../modules/local/cat_fastq'                  addParams( options: cat_fastq_options                   ) 
 include { MULTIQC_CUSTOM_FAIL_MAPPED } from '../modules/local/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]              )
@@ -497,8 +496,8 @@ workflow ILLUMINA {
             ch_trim_fastq,
             PREPARE_GENOME.out.primer_fasta
         )
-        ch_trim_fastq       = CUTADAPT.out.reads
-        ch_cutadapt_multiqc = CUTADAPT.out.log
+        ch_trim_fastq        = CUTADAPT.out.reads
+        ch_cutadapt_multiqc  = CUTADAPT.out.log
         ch_software_versions = ch_software_versions.mix(CUTADAPT.out.version.first().ifEmpty(null))
 
         if (!params.skip_fastqc) {
@@ -518,8 +517,8 @@ workflow ILLUMINA {
             ch_trim_fastq,
             PREPARE_GENOME.out.kraken2_db
         )
-        ch_trim_fastq      = KRAKEN2_RUN.out.unclassified
-        ch_kraken2_multiqc = KRAKEN2_RUN.out.txt
+        ch_trim_fastq        = KRAKEN2_RUN.out.unclassified
+        ch_kraken2_multiqc   = KRAKEN2_RUN.out.txt
         ch_software_versions = ch_software_versions.mix(KRAKEN2_RUN.out.version.first().ifEmpty(null))
     }
 
