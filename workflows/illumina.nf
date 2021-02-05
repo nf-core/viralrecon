@@ -391,35 +391,36 @@ workflow ILLUMINA {
         ch_picard_collectmultiplemetrics_multiqc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
     }
 
-    // /*
-    //  * MODULE: Coverage QC plots
-    //  */
-    // ch_mosdepth_multiqc = Channel.empty()
-    // if (!params.skip_variants && !params.skip_mosdepth) {
+    /*
+     * MODULE: Genome-wide and amplicon-specific coverage QC plots
+     */
+    ch_mosdepth_multiqc = Channel.empty()
+    if (!params.skip_variants && !params.skip_mosdepth) {
 
-    //     MOSDEPTH_GENOME (
-    //         ch_bam.join(ch_bai, by: [0]),
-    //         ch_dummy_file,
-    //         200
-    //     )
-    //     ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
-        
-    //     PLOT_MOSDEPTH_REGIONS_GENOME (
-    //         MOSDEPTH_GENOME.out.regions_bed.collect { it[1] }
-    //     )
-        
-    //     if (params.protocol == 'amplicon') {
-    //         MOSDEPTH_AMPLICON (
-    //             ch_bam.join(ch_bai, by: [0]),
-    //             PREPARE_GENOME.out.primer_collapsed_bed,
-    //             0
-    //         )
+        MOSDEPTH_GENOME (
+            ch_bam.join(ch_bai, by: [0]),
+            ch_dummy_file,
+            200
+        )
+        ch_mosdepth_multiqc  = MOSDEPTH_GENOME.out.global_txt
+        ch_software_versions = ch_software_versions.mix(MOSDEPTH_GENOME.out.version.first().ifEmpty(null))
 
-    //         PLOT_MOSDEPTH_REGIONS_AMPLICON ( 
-    //             MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
-    //         )
-    //     }
-    // }
+        PLOT_MOSDEPTH_REGIONS_GENOME (
+            MOSDEPTH_GENOME.out.regions_bed.collect { it[1] }
+        )
+        
+        if (params.protocol == 'amplicon') {
+            MOSDEPTH_AMPLICON (
+                ch_bam.join(ch_bai, by: [0]),
+                PREPARE_GENOME.out.primer_collapsed_bed,
+                0
+            )
+
+            PLOT_MOSDEPTH_REGIONS_AMPLICON ( 
+                MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
+            )
+        }
+    }
 
     // /*
     //  * MODULE: Make mpileup to re-use across callers
