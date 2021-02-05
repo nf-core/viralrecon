@@ -7,11 +7,11 @@ params.blastn_options       = [:]
 params.abacas_options       = [:]
 params.plasmidid_options    = [:]
 params.quast_options        = [:]
-params.snpeff_options       = [:]
-params.snpeff_bgzip_options = [:]
-params.snpeff_tabix_options = [:]
-params.snpeff_stats_options = [:]
-params.snpsift_options      = [:]
+// params.snpeff_options       = [:]
+// params.snpeff_bgzip_options = [:]
+// params.snpeff_tabix_options = [:]
+// params.snpeff_stats_options = [:]
+// params.snpsift_options      = [:]
 
 include { MINIA       } from '../../modules/local/minia' addParams( options: params.minia_options ) 
 include { ASSEMBLY_QC } from './assembly_qc'             addParams( blastn_options: params.blastn_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
