@@ -174,12 +174,9 @@ include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'     a
 /*
  * MODULE: Installed directly from nf-core/modules
  */
-def samtools_mpileup_options    = modules['samtools_mpileup']
-if (params.save_mpileup) { samtools_mpileup_options.publish_files.put('mpileup','') }
-
 include { FASTQC                        } from '../modules/nf-core/software/fastqc/main'                        addParams( options: modules['cutadapt_fastqc']               )
 include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['picard_collectmultiplemetrics'] )
-include { SAMTOOLS_MPILEUP              } from '../modules/nf-core/software/samtools/mpileup/main'              addParams( options: samtools_mpileup_options                 )
+include { SAMTOOLS_MPILEUP              } from '../modules/nf-core/software/samtools/mpileup/main'              addParams( options: modules['samtools_mpileup']              )
 
 /*
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
@@ -422,15 +419,15 @@ workflow ILLUMINA {
         }
     }
 
-    // /*
-    //  * MODULE: Make mpileup to re-use across callers
-    //  */
-    // if (!params.skip_variants) {
-    //     SAMTOOLS_MPILEUP (
-    //         ch_bam,
-    //         PREPARE_GENOME.out.fasta
-    //     )
-    // }
+    /*
+     * MODULE: Make mpileup to re-use across callers
+     */
+    if (!params.skip_variants) {
+        SAMTOOLS_MPILEUP (
+            ch_bam,
+            PREPARE_GENOME.out.fasta
+        )
+    }
 
     // /*
     //  * SUBWORKFLOW: Call variants with VarScan2
