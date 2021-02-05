@@ -368,6 +368,7 @@ workflow ILLUMINA {
         ch_markduplicates_flagstat = MARK_DUPLICATES_PICARD.out.flagstat
         ch_markduplicates_idxstats = MARK_DUPLICATES_PICARD.out.idxstats
         ch_markduplicates_multiqc  = MARK_DUPLICATES_PICARD.out.metrics
+        ch_software_versions = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
     }
 
     /*
@@ -550,42 +551,73 @@ workflow ILLUMINA {
         ch_software_versions       = ch_software_versions.mix(ASSEMBLY_SPADES.out.plasmidid_version.first().ifEmpty(null))
     }
 
-    // /*
-    //  * SUBWORKFLOW: Run Unicycler assembly and downstream analysis
-    //  */
-    // if (!params.skip_assembly && 'unicycler' in assemblers) {
-    //     ASSEMBLY_UNICYCLER (
-    //         ch_trim_fastq,
-    //         PREPARE_GENOME.out.fasta,
-    //         PREPARE_GENOME.out.gff,
-    //         PREPARE_GENOME.out.blast_db,
-    //         PREPARE_GENOME.out.snpeff_db,
-    //         PREPARE_GENOME.out.snpeff_config
-    //     )
-    //     ch_unicycler_version = ASSEMBLY_UNICYCLER.out.unicycler_version
-    // }
+    /*
+     * SUBWORKFLOW: Run Unicycler assembly and downstream analysis
+     */
+    ch_unicycler_quast_multiqc    = Channel.empty()
+    // ch_unicycler_bcftools_multiqc = Channel.empty()
+    // ch_unicycler_snpeff_multiqc   = Channel.empty()
+    if (!params.skip_assembly && 'unicycler' in assemblers) {
+        ASSEMBLY_UNICYCLER (
+            ch_trim_fastq,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gff,
+            PREPARE_GENOME.out.blast_db,
+            PREPARE_GENOME.out.snpeff_db,
+            PREPARE_GENOME.out.snpeff_config
+        )
+        ch_unicycler_quast_multiqc    = ASSEMBLY_UNICYCLER.out.quast_tsv
+        // ch_unicycler_bcftools_multiqc = ASSEMBLY_UNICYCLER.out.quast_tsv
+        // ch_unicycler_snpeff_multiqc   = ASSEMBLY_UNICYCLER.out.quast_tsv
+        ch_software_versions          = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.unicycler_version.first().ifEmpty(null))
+        ch_software_versions          = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.bandage_version.first().ifEmpty(null))
+        ch_software_versions          = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.blast_version.first().ifEmpty(null))
+        ch_software_versions          = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.quast_version.ifEmpty(null))
+        ch_software_versions          = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.abacas_version.first().ifEmpty(null))
+        ch_software_versions          = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.plasmidid_version.first().ifEmpty(null))
+    }
 
-    // /*
-    //  * SUBWORKFLOW: Run minia assembly and downstream analysis
-    //  */
-    // if (!params.skip_assembly && 'minia' in assemblers) {
-    //     ASSEMBLY_MINIA (
-    //         ch_trim_fastq,
-    //         PREPARE_GENOME.out.fasta,
-    //         PREPARE_GENOME.out.gff,
-    //         PREPARE_GENOME.out.blast_db,
-    //         PREPARE_GENOME.out.snpeff_db,
-    //         PREPARE_GENOME.out.snpeff_config
-    //     )
-    //     ch_minia_version = ASSEMBLY_MINIA.out.minia_version
-    // }
+    /*
+     * SUBWORKFLOW: Run minia assembly and downstream analysis
+     */
+    ch_minia_quast_multiqc    = Channel.empty()
+    // ch_minia_bcftools_multiqc = Channel.empty()
+    // ch_minia_snpeff_multiqc   = Channel.empty()
+    if (!params.skip_assembly && 'minia' in assemblers) {
+        ASSEMBLY_MINIA (
+            ch_trim_fastq,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gff,
+            PREPARE_GENOME.out.blast_db,
+            PREPARE_GENOME.out.snpeff_db,
+            PREPARE_GENOME.out.snpeff_config
+        )
+        ch_minia_quast_multiqc    = ASSEMBLY_MINIA.out.quast_tsv
+        // ch_minia_bcftools_multiqc = ASSEMBLY_MINIA.out.quast_tsv
+        // ch_minia_snpeff_multiqc   = ASSEMBLY_MINIA.out.quast_tsv
+        // ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.minia_version.first().ifEmpty(null))
+        // ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.bandage_version.first().ifEmpty(null))
+        // ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.blast_version.first().ifEmpty(null))
+        // ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.quast_version.ifEmpty(null))
+        // ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.abacas_version.first().ifEmpty(null))
+        // ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.plasmidid_version.first().ifEmpty(null))
+    }
 
-    // /*
-    //  * MODULE: Pipeline reporting
-    //  */
-    // GET_SOFTWARE_VERSIONS ( 
-    //     ch_software_versions.map { it }.collect()
-    // )
+    /*
+     * MODULE: Pipeline reporting
+     */
+    // Get unique list of files containing version information
+    ch_software_versions
+        .map { it -> if (it) [ it.baseName, it ] }
+        .groupTuple()
+        .map { it[1][0] }
+        .flatten()
+        .collect()
+        .set { ch_software_versions }
+
+    GET_SOFTWARE_VERSIONS ( 
+        ch_software_versions
+    )
 
     // /*
     //  * MultiQC
