@@ -26,7 +26,7 @@ workflow PRIMER_TRIM_IVAR {
     BAM_SORT_SAMTOOLS ( IVAR_TRIM.out.bam )
     
     emit:
-    orig_bam         = IVAR_TRIM.out.bam              // channel: [ val(meta), bam   ]
+    bam_orig         = IVAR_TRIM.out.bam              // channel: [ val(meta), bam   ]
     log_out          = IVAR_TRIM.out.log              // channel: [ val(meta), log   ]
     ivar_version     = IVAR_TRIM.out.version          //    path: *.version.txt
 
