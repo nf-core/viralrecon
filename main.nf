@@ -77,7 +77,6 @@ workflow {
         include { ILLUMINA } from './workflows/illumina' addParams( summary_params: summary_params )
         ILLUMINA ()
     }
-}
 
 ////////////////////////////////////////////////////
 /* --                  THE END                 -- */
