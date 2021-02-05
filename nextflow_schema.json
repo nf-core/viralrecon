@@ -172,11 +172,6 @@
                     "description": "This option unsets the '-e' parameter in 'ivar trim' to discard reads without primers.",
                     "fa_icon": "fas fa-cut"
                 },
-                "filter_unmapped": {
-                    "type": "boolean",
-                    "description": "Remove unmapped reads from alignments.",
-                    "fa_icon": "fas fa-trash-alt"
-                },
                 "min_allele_freq": {
                     "type": "number",
                     "default": 0.25,
