@@ -180,10 +180,9 @@ def fastp_options = modules['fastp']
 if (params.save_trimmed)      { fastp_options.publish_files.put('trim.fastq.gz','') }
 if (params.save_trimmed_fail) { fastp_options.publish_files.put('fail.fastq.gz','') }
 
-def bowtie2_align_options         = modules['bowtie2_align']
+def bowtie2_align_options = modules['bowtie2_align']
 if (params.save_align_intermeds) { bowtie2_align_options.publish_files.put('bam','') }
 if (params.save_unaligned)       { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
-bowtie2_align_options.args2      += params.filter_unmapped ? "-F4" : ""
 
 def bowtie2_sort_bam_options = modules['bowtie2_sort_bam']
 if (params.save_align_intermeds || params.skip_markduplicates) {
@@ -191,14 +190,11 @@ if (params.save_align_intermeds || params.skip_markduplicates) {
     bowtie2_sort_bam_options.publish_files.put('bai','')
 }
 
-def filter_bam_sort_bam_options = modules['filter_bam_sort_bam']
-
 def markduplicates_options   = modules['picard_markduplicates']
 markduplicates_options.args += params.filter_duplicates ? " REMOVE_DUPLICATES=true" : ""
 
 include { FASTQC_FASTP           } from '../subworkflows/nf-core/fastqc_fastp'           addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
 include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'          addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options                                     )
-include { FILTER_BAM_SAMTOOLS    } from '../subworkflows/nf-core/filter_bam_samtools'    addParams( samtools_view_options: modules['filter_bam'], samtools_index_options: filter_bam_sort_bam_options                    )
 include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['picard_markduplicates_sort_bam']          )
 
 ////////////////////////////////////////////////////
@@ -267,29 +263,29 @@ workflow ILLUMINA {
     ch_software_versions   = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
     ch_software_versions   = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
     
-    // /*
-    //  * SUBWORKFLOW: Alignment with Bowtie2
-    //  */
-    // ch_sorted_bam        = Channel.empty()
-    // ch_sorted_bai        = Channel.empty()
-    // ch_samtools_stats    = Channel.empty()
-    // ch_samtools_flagstat = Channel.empty()
-    // ch_samtools_idxstats = Channel.empty()
-    // ch_bowtie2_multiqc   = Channel.empty()
-    // if (!params.skip_variants) {
-    //     ALIGN_BOWTIE2 (
-    //         ch_trim_fastq,
-    //         PREPARE_GENOME.out.bowtie2_index
-    //     )
-    //     ch_sorted_bam        = ALIGN_BOWTIE2.out.bam
-    //     ch_sorted_bai        = ALIGN_BOWTIE2.out.bai
-    //     ch_samtools_stats    = ALIGN_BOWTIE2.out.stats
-    //     ch_samtools_flagstat = ALIGN_BOWTIE2.out.flagstat
-    //     ch_samtools_idxstats = ALIGN_BOWTIE2.out.idxstats
-    //     ch_bowtie2_multiqc   = ALIGN_BOWTIE2.out.log_out
-    //     ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.bowtie2_version.first().ifEmpty(null))
-    //     ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
-    // }
+    /*
+     * SUBWORKFLOW: Alignment with Bowtie2
+     */
+    ch_bam               = Channel.empty()
+    ch_bai               = Channel.empty()
+    ch_samtools_stats    = Channel.empty()
+    ch_samtools_flagstat = Channel.empty()
+    ch_samtools_idxstats = Channel.empty()
+    ch_bowtie2_multiqc   = Channel.empty()
+    if (!params.skip_variants) {
+        ALIGN_BOWTIE2 (
+            ch_trim_fastq,
+            PREPARE_GENOME.out.bowtie2_index
+        )
+        ch_bam               = ALIGN_BOWTIE2.out.bam
+        ch_bai               = ALIGN_BOWTIE2.out.bai
+        ch_samtools_stats    = ALIGN_BOWTIE2.out.stats
+        ch_samtools_flagstat = ALIGN_BOWTIE2.out.flagstat
+        ch_samtools_idxstats = ALIGN_BOWTIE2.out.idxstats
+        ch_bowtie2_multiqc   = ALIGN_BOWTIE2.out.log_out
+        ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.bowtie2_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
+    }
 
     // /*
     //  * Filter channels to get samples that passed Bowtie2 minimum mapped reads threshold
@@ -300,15 +296,15 @@ workflow ILLUMINA {
     //         .map { meta, flagstat -> [ meta ] + Checks.get_flagstat_mapped_reads(workflow, params, log, flagstat) }
     //         .set { ch_mapped_reads }
 
-    //     ch_sorted_bam
+    //     ch_bam
     //         .join(ch_mapped_reads, by: [0])
     //         .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
-    //         .set { ch_sorted_bam }
+    //         .set { ch_bam }
 
-    //     ch_sorted_bai
+    //     ch_bai
     //         .join(ch_mapped_reads, by: [0])
     //         .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
-    //         .set { ch_sorted_bai }
+    //         .set { ch_bai }
 
     //     ch_mapped_reads
     //         .branch { meta, mapped, pass ->
@@ -328,22 +324,17 @@ workflow ILLUMINA {
     // }
     
     // /*
-    //  * SUBWORKFLOW: Filter unmapped reads from BAM and trim reads with iVar
+    //  * SUBWORKFLOW: Trim primer sequences from reads with iVar
     //  */
     // ch_ivar_trim_multiqc = Channel.empty()
     // if (!params.skip_variants && params.protocol == 'amplicon') {
-    //     FILTER_BAM_SAMTOOLS (
-    //         ch_sorted_bam
-    //     )
-    //     ch_sorted_bam = FILTER_BAM_SAMTOOLS.out.bam
-    //     ch_sorted_bai = FILTER_BAM_SAMTOOLS.out.bai
 
     //     PRIMER_TRIM_IVAR (
-    //         ch_sorted_bam.join(ch_sorted_bai, by: [0]),
+    //         ch_bam.join(ch_bai, by: [0]),
     //         ch_primer_bed
     //     )
-    //     ch_sorted_bam             = PRIMER_TRIM_IVAR.out.bam
-    //     ch_sorted_bai             = PRIMER_TRIM_IVAR.out.bai
+    //     ch_bam             = PRIMER_TRIM_IVAR.out.bam
+    //     ch_bai             = PRIMER_TRIM_IVAR.out.bai
     //     // ch_samtools_stats         = PRIMER_TRIM_IVAR.out.stats
     //     // ch_samtools_flagstat      = PRIMER_TRIM_IVAR.out.flagstat
     //     // ch_samtools_idxstats      = PRIMER_TRIM_IVAR.out.idxstats
@@ -357,10 +348,10 @@ workflow ILLUMINA {
     // ch_markduplicates_multiqc = Channel.empty()
     // if (!params.skip_variants && !params.skip_markduplicates) {
     //     MARK_DUPLICATES_PICARD (
-    //         ch_sorted_bam
+    //         ch_bam
     //     )
-    //     ch_sorted_bam             = MARK_DUPLICATES_PICARD.out.bam
-    //     ch_sorted_bai             = MARK_DUPLICATES_PICARD.out.bai
+    //     ch_bam             = MARK_DUPLICATES_PICARD.out.bam
+    //     ch_bai             = MARK_DUPLICATES_PICARD.out.bai
     //     // ch_samtools_stats         = MARK_DUPLICATES_PICARD.out.stats
     //     // ch_samtools_flagstat      = MARK_DUPLICATES_PICARD.out.flagstat
     //     // ch_samtools_idxstats      = MARK_DUPLICATES_PICARD.out.idxstats
@@ -375,13 +366,13 @@ workflow ILLUMINA {
     // ch_picard_collectwgsmetrics_multiqc      = Channel.empty()
     // if (!params.skip_variants && !params.skip_picard_metrics) {
     //     PICARD_COLLECTMULTIPLEMETRICS (
-    //         ch_sorted_bam,
+    //         ch_bam,
     //         PREPARE_GENOME.out.fasta
     //     )
     //     ch_picard_collectmultiplemetrics_multiqc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
 
     //     PICARD_COLLECTWGSMETRICS (
-    //         ch_sorted_bam,
+    //         ch_bam,
     //         PREPARE_GENOME.out.fasta
     //     )
     //     ch_picard_collectwgsmetrics_multiqc = PICARD_COLLECTWGSMETRICS.out.metrics
@@ -394,7 +385,7 @@ workflow ILLUMINA {
     // if (!params.skip_variants && !params.skip_mosdepth) {
 
     //     MOSDEPTH_GENOME (
-    //         ch_sorted_bam.join(ch_sorted_bai, by: [0]),
+    //         ch_bam.join(ch_bai, by: [0]),
     //         ch_dummy_file,
     //         200
     //     )
@@ -406,7 +397,7 @@ workflow ILLUMINA {
         
     //     if (params.protocol == 'amplicon') {
     //         MOSDEPTH_AMPLICON (
-    //             ch_sorted_bam.join(ch_sorted_bai, by: [0]),
+    //             ch_bam.join(ch_bai, by: [0]),
     //             PREPARE_GENOME.out.primer_collapsed_bed,
     //             0
     //         )
@@ -422,7 +413,7 @@ workflow ILLUMINA {
     //  */
     // if (!params.skip_variants) {
     //     SAMTOOLS_MPILEUP (
-    //         ch_sorted_bam,
+    //         ch_bam,
     //         PREPARE_GENOME.out.fasta
     //     )
     // }
@@ -433,7 +424,7 @@ workflow ILLUMINA {
     // if (!params.skip_variants && 'varscan2' in callers) {
     //     VARIANTS_VARSCAN (
     //         SAMTOOLS_MPILEUP.out.mpileup,
-    //         ch_sorted_bam,
+    //         ch_bam,
     //         PREPARE_GENOME.out.fasta,
     //         PREPARE_GENOME.out.gff,
     //         PREPARE_GENOME.out.snpeff_db,
@@ -460,7 +451,7 @@ workflow ILLUMINA {
     //  */
     // if (!params.skip_variants && 'bcftools' in callers) {
     //     VARIANTS_BCFTOOLS (
-    //         ch_sorted_bam,
+    //         ch_bam,
     //         PREPARE_GENOME.out.fasta,
     //         PREPARE_GENOME.out.gff,
     //         PREPARE_GENOME.out.snpeff_db,
