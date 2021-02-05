@@ -40,6 +40,7 @@ process UNICYCLER {
         
     mv assembly.fasta ${prefix}.scaffolds.fa
     mv assembly.gfa ${prefix}.assembly.gfa
+    mv unicycler.log ${prefix}.unicycler.log
     
     echo \$(unicycler --version 2>&1) | sed 's/^.*Unicycler v//; s/ .*\$//' > ${software}.version.txt
     """
