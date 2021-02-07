@@ -202,11 +202,6 @@
                     "description": "Save the intermediate BAM files from the alignment step.",
                     "help_text": "By default, intermediate BAM files will not be saved. The final BAM files created after the appropriate filtering step are always saved to limit storage usage. Set this parameter to also save other intermediate BAM files."
                 },
-                "save_mpileup": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-save",
-                    "description": "Save Pileup files in the results directory. These tend to be quite large so are not saved by default."
-                },
                 "skip_markduplicates": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
