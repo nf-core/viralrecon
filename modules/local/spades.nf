@@ -11,8 +11,13 @@ process SPADES {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:meta.id) }
 
-    container "staphb/spades:3.15.0"
-    
+    conda (params.enable_conda ? 'bioconda::spades=3.15.0=h633aebb_0' : null)
+    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+        container 'https://depot.galaxyproject.org/singularity/spades:3.15.0--h633aebb_0'
+    } else {
+        container 'quay.io/biocontainers/spades:3.15.0--h633aebb_0'
+    }
+
     input:
     tuple val(meta), path(reads)
     path  hmm
