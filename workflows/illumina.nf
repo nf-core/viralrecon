@@ -463,6 +463,11 @@ workflow ILLUMINA {
     /*
      * SUBWORKFLOW: Call variants with BCFTools
      */
+    ch_bcftools_vcf            = Channel.empty()
+    ch_bcftools_tbi            = Channel.empty()
+    ch_bcftools_stats_multiqc  = Channel.empty()
+    ch_bcftools_snpeff_multiqc = Channel.empty()
+    ch_bcftools_quast_multiqc  = Channel.empty()
     if (!params.skip_variants && 'bcftools' in callers) {
         VARIANTS_BCFTOOLS (
             ch_bam,
@@ -471,6 +476,16 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config
         )
+        ch_bcftools_vcf            = VARIANTS_BCFTOOLS.out.vcf
+        ch_bcftools_tbi            = VARIANTS_BCFTOOLS.out.tbi
+        ch_bcftools_stats_multiqc  = VARIANTS_BCFTOOLS.out.stats
+        ch_bcftools_snpeff_multiqc = VARIANTS_BCFTOOLS.out.snpeff_csv
+        ch_bcftools_quast_multiqc  = VARIANTS_BCFTOOLS.out.quast_results
+        ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.bedtools_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.quast_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.snpeff_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.snpsift_version.first().ifEmpty(null))
     }
 
     // // /*
