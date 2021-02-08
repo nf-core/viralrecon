@@ -53,8 +53,28 @@ workflow VARIANTS_BCFTOOLS {
         SNPEFF_SNPSIFT ( BCFTOOLS_MPILEUP.out.vcf, snpeff_db, snpeff_config, fasta )
     }
 
-    // emit:
-    // scaffolds         = SPADES.out.scaffolds              // channel: [ val(meta), [ scaffolds ] ]
-    // spades_version    = SPADES.out.version                //    path: *.version.txt
+    emit:
+    vcf              = BCFTOOLS_MPILEUP.out.vcf            // channel: [ val(meta), [ vcf ] ]
+    tbi              = BCFTOOLS_MPILEUP.out.tbi            // channel: [ val(meta), [ tbi ] ]
+    stats            = BCFTOOLS_MPILEUP.out.txt            // channel: [ val(meta), [ txt ] ]
+    bcftools_version = BCFTOOLS_MPILEUP.out.version        //    path: *.version.txt
+    
+    consensus        = MAKE_CONSENSUS.out.fasta            // channel: [ val(meta), [ fasta ] ]
+    bases_tsv        = MAKE_CONSENSUS.out.tsv              // channel: [ val(meta), [ tsv ] ]
+    bases_pdf        = MAKE_CONSENSUS.out.pdf              // channel: [ val(meta), [ pdf ] ]
+    bedtools_version = MAKE_CONSENSUS.out.bedtools_version //    path: *.version.txt 
+    
+    quast_results    = QUAST.out.results                   // channel: [ val(meta), [ results ] ]
+    quast_tsv        = QUAST.out.tsv                       // channel: [ val(meta), [ tsv ] ]
+    quast_version    = QUAST.out.version                   //    path: *.version.txt
 
+    snpeff_vcf       = SNPEFF_SNPSIFT.out.vcf              // channel: [ val(meta), [ vcf.gz ] ]
+    snpeff_tbi       = SNPEFF_SNPSIFT.out.tbi              // channel: [ val(meta), [ tbi ] ]
+    snpeff_stats     = SNPEFF_SNPSIFT.out.stats            // channel: [ val(meta), [ txt ] ]
+    snpeff_csv       = SNPEFF_SNPSIFT.out.csv              // channel: [ val(meta), [ csv ] ]
+    snpeff_txt       = SNPEFF_SNPSIFT.out.txt              // channel: [ val(meta), [ txt ] ]
+    snpeff_html      = SNPEFF_SNPSIFT.out.html             // channel: [ val(meta), [ html ] ]
+    snpsift_txt      = SNPEFF_SNPSIFT.out.snpsift_txt      // channel: [ val(meta), [ txt ] ]
+    snpeff_version   = SNPEFF_SNPSIFT.out.snpeff_version   //    path: *.version.txt
+    snpsift_version  = SNPEFF_SNPSIFT.out.snpsift_version  //    path: *.version.txt
 }
