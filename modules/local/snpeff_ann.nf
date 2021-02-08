@@ -40,9 +40,9 @@ process SNPEFF_ANN {
         -dataDir $db \\
         $options.args \\
         $vcf \\
-        -csvStats ${prefix}.snpEff.csv \\
-        > ${prefix}.snpEff.vcf
-    mv snpEff_summary.html ${prefix}.snpEff.summary.html
+        -csvStats ${prefix}.snpeff.csv \\
+        > ${prefix}.snpeff.vcf
+    mv snpEff_summary.html ${prefix}.snpeff.summary.html
     
     echo \$(snpEff -version 2>&1) | sed 's/^.*SnpEff //; s/ .*\$//' > ${software}.version.txt
     """
