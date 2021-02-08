@@ -460,18 +460,18 @@ workflow ILLUMINA {
     //     )
     // }
 
-    // /*
-    //  * SUBWORKFLOW: Call variants with BCFTools
-    //  */
-    // if (!params.skip_variants && 'bcftools' in callers) {
-    //     VARIANTS_BCFTOOLS (
-    //         ch_bam,
-    //         PREPARE_GENOME.out.fasta,
-    //         PREPARE_GENOME.out.gff,
-    //         PREPARE_GENOME.out.snpeff_db,
-    //         PREPARE_GENOME.out.snpeff_config
-    //     )
-    // }
+    /*
+     * SUBWORKFLOW: Call variants with BCFTools
+     */
+    if (!params.skip_variants && 'bcftools' in callers) {
+        VARIANTS_BCFTOOLS (
+            ch_bam,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gff,
+            PREPARE_GENOME.out.snpeff_db,
+            PREPARE_GENOME.out.snpeff_config
+        )
+    }
 
     // // /*
     // //  * MODULE: Intersect variants across callers
