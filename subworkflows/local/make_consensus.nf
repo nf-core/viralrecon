@@ -32,12 +32,12 @@ workflow MAKE_CONSENSUS {
 
     BCFTOOLS_CONSENSUS ( bam_vcf.map { meta, bam, vcf, tbi -> [ meta, vcf, tbi ] }.join( BEDTOOLS_MASKFASTA.out.fasta, by: [0] ) )
 
-    //PLOT_BASE_DENSITY ( BCFTOOLS_CONSENSUS.out.fasta )
+    PLOT_BASE_DENSITY ( BCFTOOLS_CONSENSUS.out.fasta )
 
     emit:
     fasta            = BCFTOOLS_CONSENSUS.out.fasta   // channel: [ val(meta), [ fasta ] ]
-    // tsv              = PLOT_BASE_DENSITY.out.tsv      // channel: [ val(meta), [ tsv ] ]
-    // pdf              = PLOT_BASE_DENSITY.out.pdf      // channel: [ val(meta), [ pdf ] ]
+    tsv              = PLOT_BASE_DENSITY.out.tsv      // channel: [ val(meta), [ tsv ] ]
+    pdf              = PLOT_BASE_DENSITY.out.pdf      // channel: [ val(meta), [ pdf ] ]
     bedtools_version = BEDTOOLS_MERGE.out.version     //    path: *.version.txt 
     bcftools_version = BCFTOOLS_CONSENSUS.out.version //    path: *.version.txt
 
