@@ -44,7 +44,7 @@ process SNPSIFT_EXTRACTFIELDS {
         "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" \\
         "ANN[*].AA_LEN" "ANN[*].DISTANCE" "EFF[*].EFFECT" \\
         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
-        > ${prefix}.SnpSift.txt
+        > ${prefix}.snpsift.txt
 
     echo \$(SnpSift -h 2>&1) | sed 's/^.*SnpSift version //; s/ .*\$//' > ${software}.version.txt
     """
