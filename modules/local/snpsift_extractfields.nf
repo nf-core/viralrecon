@@ -22,8 +22,8 @@ process SNPSIFT_EXTRACTFIELDS {
     tuple val(meta), path(vcf)
     
     output:
-    tuple val(meta), path("*.txt"), emit: txt
-    path '*.version.txt'          , emit: version
+    tuple val(meta), path("*.snpsift.txt"), emit: txt
+    path '*.version.txt'                  , emit: version
 
     script:
     def software = getSoftwareName(task.process)
