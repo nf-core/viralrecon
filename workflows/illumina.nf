@@ -257,33 +257,30 @@ workflow ILLUMINA {
     FASTQC_FASTP (
         ch_cat_fastq
     )
-    ch_trim_fastq          = FASTQC_FASTP.out.reads
-    ch_fastqc_raw_multiqc  = FASTQC_FASTP.out.fastqc_raw_zip
-    ch_fastqc_trim_multiqc = FASTQC_FASTP.out.fastqc_trim_zip
-    ch_fastp_multiqc       = FASTQC_FASTP.out.trim_json
-    ch_software_versions   = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
-    ch_software_versions   = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
+    ch_trim_fastq        = FASTQC_FASTP.out.reads
+    ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
+    ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
     
     /*
      * SUBWORKFLOW: Alignment with Bowtie2
      */
-    ch_bam               = Channel.empty()
-    ch_bai               = Channel.empty()
-    ch_bowtie2_stats     = Channel.empty()
-    ch_bowtie2_flagstat  = Channel.empty()
-    ch_bowtie2_idxstats  = Channel.empty()
-    ch_bowtie2_multiqc   = Channel.empty()
+    ch_bam                      = Channel.empty()
+    ch_bai                      = Channel.empty()
+    ch_bowtie2_multiqc          = Channel.empty()
+    ch_bowtie2_stats_multiqc    = Channel.empty()
+    ch_bowtie2_flagstat_multiqc = Channel.empty()
+    ch_bowtie2_idxstats_multiqc = Channel.empty()
     if (!params.skip_variants) {
         ALIGN_BOWTIE2 (
             ch_trim_fastq,
             PREPARE_GENOME.out.bowtie2_index
         )
-        ch_bam               = ALIGN_BOWTIE2.out.bam
-        ch_bai               = ALIGN_BOWTIE2.out.bai
-        ch_bowtie2_stats     = ALIGN_BOWTIE2.out.stats
-        ch_bowtie2_flagstat  = ALIGN_BOWTIE2.out.flagstat
-        ch_bowtie2_idxstats  = ALIGN_BOWTIE2.out.idxstats
-        ch_bowtie2_multiqc   = ALIGN_BOWTIE2.out.log_out
+        ch_bam                      = ALIGN_BOWTIE2.out.bam
+        ch_bai                      = ALIGN_BOWTIE2.out.bai
+        ch_bowtie2_multiqc          = ALIGN_BOWTIE2.out.log_out
+        ch_bowtie2_stats_multiqc    = ALIGN_BOWTIE2.out.stats
+        ch_bowtie2_flagstat_multiqc = ALIGN_BOWTIE2.out.flagstat
+        ch_bowtie2_idxstats_multiqc = ALIGN_BOWTIE2.out.idxstats
         ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.bowtie2_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
     }
@@ -293,7 +290,7 @@ workflow ILLUMINA {
      */
     ch_fail_mapping_multiqc = Channel.empty()
     if (!params.skip_variants) {
-        ch_bowtie2_flagstat
+        ch_bowtie2_flagstat_multiqc
             .map { meta, flagstat -> [ meta ] + Checks.get_flagstat_mapped_reads(workflow, params, log, flagstat) }
             .set { ch_mapped_reads }
 
@@ -327,41 +324,41 @@ workflow ILLUMINA {
     /*
      * SUBWORKFLOW: Trim primer sequences from reads with iVar
      */
-    ch_ivar_trim_stats    = Channel.empty()
-    ch_ivar_trim_flagstat = Channel.empty()
-    ch_ivar_trim_idxstats = Channel.empty()
-    ch_ivar_trim_multiqc  = Channel.empty()
+    ch_ivar_trim_multiqc          = Channel.empty()
+    ch_ivar_trim_stats_multiqc    = Channel.empty()
+    ch_ivar_trim_flagstat_multiqc = Channel.empty()
+    ch_ivar_trim_idxstats_multiqc = Channel.empty()
     if (!params.skip_variants && params.protocol == 'amplicon') {
         PRIMER_TRIM_IVAR (
             ch_bam.join(ch_bai, by: [0]),
             PREPARE_GENOME.out.primer_bed
         )
-        ch_bam                = PRIMER_TRIM_IVAR.out.bam
-        ch_bai                = PRIMER_TRIM_IVAR.out.bai
-        ch_ivar_trim_stats    = PRIMER_TRIM_IVAR.out.stats
-        ch_ivar_trim_flagstat = PRIMER_TRIM_IVAR.out.flagstat
-        ch_ivar_trim_idxstats = PRIMER_TRIM_IVAR.out.idxstats
-        ch_ivar_trim_multiqc  = PRIMER_TRIM_IVAR.out.log_out
+        ch_bam                        = PRIMER_TRIM_IVAR.out.bam
+        ch_bai                        = PRIMER_TRIM_IVAR.out.bai
+        ch_ivar_trim_multiqc          = PRIMER_TRIM_IVAR.out.log_out
+        ch_ivar_trim_stats_multiqc    = PRIMER_TRIM_IVAR.out.stats
+        ch_ivar_trim_flagstat_multiqc = PRIMER_TRIM_IVAR.out.flagstat
+        ch_ivar_trim_idxstats_multiqc = PRIMER_TRIM_IVAR.out.idxstats
         ch_software_versions  = ch_software_versions.mix(PRIMER_TRIM_IVAR.out.ivar_version.first().ifEmpty(null))
     }
 
     /*
      * SUBWORKFLOW: Mark duplicate reads
      */
-    ch_markduplicates_stats    = Channel.empty()
-    ch_markduplicates_flagstat = Channel.empty()
-    ch_markduplicates_idxstats = Channel.empty()
-    ch_markduplicates_multiqc  = Channel.empty()
+    ch_markduplicates_multiqc          = Channel.empty()
+    ch_markduplicates_stats_multiqc    = Channel.empty()
+    ch_markduplicates_flagstat_multiqc = Channel.empty()
+    ch_markduplicates_idxstats_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_markduplicates) {
         MARK_DUPLICATES_PICARD (
             ch_bam
         )
-        ch_bam                     = MARK_DUPLICATES_PICARD.out.bam
-        ch_bai                     = MARK_DUPLICATES_PICARD.out.bai
-        ch_markduplicates_stats    = MARK_DUPLICATES_PICARD.out.stats
-        ch_markduplicates_flagstat = MARK_DUPLICATES_PICARD.out.flagstat
-        ch_markduplicates_idxstats = MARK_DUPLICATES_PICARD.out.idxstats
-        ch_markduplicates_multiqc  = MARK_DUPLICATES_PICARD.out.metrics
+        ch_bam                             = MARK_DUPLICATES_PICARD.out.bam
+        ch_bai                             = MARK_DUPLICATES_PICARD.out.bai
+        ch_markduplicates_multiqc          = MARK_DUPLICATES_PICARD.out.metrics
+        ch_markduplicates_stats_multiqc    = MARK_DUPLICATES_PICARD.out.stats
+        ch_markduplicates_flagstat_multiqc = MARK_DUPLICATES_PICARD.out.flagstat
+        ch_markduplicates_idxstats_multiqc = MARK_DUPLICATES_PICARD.out.idxstats
         ch_software_versions = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
     }
 
@@ -662,30 +659,63 @@ workflow ILLUMINA {
         ch_software_versions
     )
 
-    // /*
-    //  * MODULE: MultiQC
-    //  */
-    // if (!params.skip_multiqc) {
-    //     workflow_summary    = Schema.params_summary_multiqc(workflow, params.summary_params)
-    //     ch_workflow_summary = Channel.value(workflow_summary)
+    /*
+     * MODULE: MultiQC
+     */
+    if (!params.skip_multiqc) {
+        workflow_summary    = Schema.params_summary_multiqc(workflow, params.summary_params)
+        ch_workflow_summary = Channel.value(workflow_summary)
 
-    // //     MULTIQC (
-    // //         ch_multiqc_config,
-    // //         ch_multiqc_custom_config.collect().ifEmpty([]),
-    // //         GET_SOFTWARE_VERSIONS.out.yaml.collect(),
-    // //         ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
-    // //         ch_fail_mapping_multiqc.ifEmpty([]),
-    // //         FASTQC_FASTP.out.fastqc_zip.collect{it[1]}.ifEmpty([]),
-    // //         FASTQC_FASTP.out.trim_zip.collect{it[1]}.ifEmpty([]),
-    // //         FASTQC_FASTP.out.trim_log.collect{it[1]}.ifEmpty([]),
-    // //         ch_bowtie2_multiqc.collect{it[1]}.ifEmpty([]),
-    // //         ch_samtools_stats.collect{it[1]}.ifEmpty([]),
-    // //         ch_samtools_flagstat.collect{it[1]}.ifEmpty([]),
-    // //         ch_samtools_idxstats.collect{it[1]}.ifEmpty([]),
-    // //         ch_markduplicates_multiqc.collect{it[1]}.ifEmpty([]),
-    // //     )
-    // //     multiqc_report = MULTIQC.out.report.toList()
-    // }
+        MULTIQC (
+            ch_multiqc_config,
+            ch_multiqc_custom_config.collect().ifEmpty([]),
+            GET_SOFTWARE_VERSIONS.out.yaml.collect(),
+            ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+            ch_fail_mapping_multiqc.ifEmpty([]),
+            FASTQC_FASTP.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
+            FASTQC_FASTP.out.fastqc_trim_zip.collect{it[1]}.ifEmpty([]),
+            FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
+            ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_bowtie2_stats_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_bowtie2_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_bowtie2_idxstats_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_bowtie2_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_ivar_trim_stats_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_ivar_trim_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_ivar_trim_idxstats_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_ivar_trim_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_markduplicates_stats_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_markduplicates_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_markduplicates_idxstats_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_markduplicates_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_picard_collectwgsmetrics_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_picard_collectmultiplemetrics_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_mosdepth_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_ivar_counts_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_ivar_stats_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_ivar_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_ivar_quast_multiqc.collect().ifEmpty([]),
+            ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_bcftools_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_bcftools_quast_multiqc.collect().ifEmpty([]),
+            ch_varscan_log_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_varscan_stats_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_varscan_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_varscan_quast_multiqc.collect().ifEmpty([]),
+            ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_cutadapt_fastqc_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_spades_quast_multiqc.collect().ifEmpty([]),
+            // ch_spades_bcftools_multiqc.collect{it[1]}.ifEmpty([]),
+            // ch_spades_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_unicycler_quast_multiqc.collect().ifEmpty([]),
+            // ch_unicycler_bcftools_multiqc.collect{it[1]}.ifEmpty([]),
+            // ch_unicycler_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_minia_quast_multiqc.collect().ifEmpty([])
+            //ch_minia_bcftools_multiqc.collect{it[1]}.ifEmpty([]),
+            // ch_minia_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
+        )
+        multiqc_report = MULTIQC.out.report.toList()
+    }
 }
 
 ////////////////////////////////////////////////////
