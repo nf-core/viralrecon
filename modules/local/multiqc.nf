@@ -75,7 +75,7 @@ process MULTIQC {
     def custom_config = params.multiqc_config ? "--config $multiqc_custom_config" : ''
     """
     multiqc -f $options.args $custom_config .
+    multiqc_to_custom_tsv.py
+    multiqc -f $options.args $custom_config .
     """
 }
-// multiqc_to_custom_tsv.py
-// multiqc -f $options.args $custom_config .
