@@ -174,15 +174,9 @@
                 },
                 "min_allele_freq": {
                     "type": "number",
-                    "default": 0.25,
+                    "default": 0.75,
                     "description": "Minimum allele frequency threshold for calling variants.",
                     "fa_icon": "fas fa-hand-paper"
-                },
-                "max_allele_freq": {
-                    "type": "number",
-                    "default": 0.75,
-                    "description": "Maximum allele frequency threshold for filtering variant calls.",
-                    "fa_icon": "fab fa-acquisitions-incorporated"
                 },
                 "varscan2_strand_filter": {
                     "type": "boolean",
