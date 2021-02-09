@@ -21,7 +21,7 @@ include { IVAR_CONSENSUS        } from '../../modules/local/ivar_consensus'     
 include { IVAR_VARIANTS_TO_VCF  } from '../../modules/local/ivar_variants_to_vcf'  addParams( options: params.ivar_variants_to_vcf_options )
 include { PLOT_BASE_DENSITY     } from '../../modules/local/plot_base_density'     addParams( options: params.consensus_plot_options       )
 include { QUAST                 } from '../../modules/nf-core/software/quast/main' addParams( options: params.quast_options                )
-include { VCF_BGZIP_TABIX_STATS } from './vcf_bgzip_tabix_stats'                   addParams( bgzip_options: params.bcftools_bgzip_options, tabix_options: params.bcftools_tabix_options, stats_options: params.bcftools_stats_options )
+include { VCF_BGZIP_TABIX_STATS } from '../nf-core/vcf_bgzip_tabix_stats'          addParams( bgzip_options: params.bcftools_bgzip_options, tabix_options: params.bcftools_tabix_options, stats_options: params.bcftools_stats_options )
 include { SNPEFF_SNPSIFT        } from './snpeff_snpsift'                          addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
 
 workflow VARIANTS_IVAR {
