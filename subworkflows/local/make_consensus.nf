@@ -9,12 +9,12 @@ params.maskfasta_options  = [:]
 params.bcftools_options   = [:]
 params.plot_bases_options = [:]
 
-include { BEDTOOLS_GENOMECOV } from '../../modules/local/bedtools_genomecov' addParams( options: params.genomecov_options  )
-include { BEDTOOLS_MERGE     } from '../../modules/local/bedtools_merge'     addParams( options: params.merge_options      )
-include { MAKE_BED_MASK      } from '../../modules/local/make_bed_mask'      addParams( options: params.mask_options       )
-include { BEDTOOLS_MASKFASTA } from '../../modules/local/bedtools_maskfasta' addParams( options: params.maskfasta_options  )
-include { BCFTOOLS_CONSENSUS } from '../../modules/local/bcftools_consensus' addParams( options: params.bcftools_options   )
-include { PLOT_BASE_DENSITY  } from '../../modules/local/plot_base_density'  addParams( options: params.plot_bases_options )
+include { BEDTOOLS_GENOMECOV } from '../../modules/nf-core/software/bedtools/genomecov/main' addParams( options: params.genomecov_options  )
+include { BEDTOOLS_MERGE     } from '../../modules/nf-core/software/bedtools/merge/main'     addParams( options: params.merge_options      )
+include { BEDTOOLS_MASKFASTA } from '../../modules/nf-core/software/bedtools/maskfasta/main' addParams( options: params.maskfasta_options  )
+include { BCFTOOLS_CONSENSUS } from '../../modules/nf-core/software/bcftools/consensus/main' addParams( options: params.bcftools_options   )
+include { MAKE_BED_MASK      } from '../../modules/local/make_bed_mask'                      addParams( options: params.mask_options       )
+include { PLOT_BASE_DENSITY  } from '../../modules/local/plot_base_density'                  addParams( options: params.plot_bases_options )
 
 workflow MAKE_CONSENSUS {
     take:
