@@ -23,35 +23,48 @@ process MULTIQC {
     path software_versions
     path workflow_summary
     path fail_mapping_summary
-    path fail_strand_check
     path ('fastqc/*')
-    path ('trimgalore/fastqc/*')
-    path ('trimgalore/*')
-    path ('sortmerna/*')
-    path ('star/*')
-    path ('hisat2/*')
-    path ('rsem/*')
-    path ('salmon/*')
-    path ('samtools/stats/*')
-    path ('samtools/flagstat/*')
-    path ('samtools/idxstats/*')
-    path ('picard/markduplicates/*')
-    path ('featurecounts/*')
-    path ('deseq2/aligner/*')
-    path ('deseq2/aligner/*')
-    path ('deseq2/pseudoaligner/*')
-    path ('deseq2/pseudoaligner/*')
-    path ('preseq/*')
-    path ('qualimap/*')
-    path ('dupradar/*')
-    path ('rseqc/bam_stat/*')
-    path ('rseqc/infer_experiment/*')
-    path ('rseqc/inner_distance/*')
-    path ('rseqc/junction_annotation/*')
-    path ('rseqc/junction_saturation/*')
-    path ('rseqc/read_distribution/*')
-    path ('rseqc/read_duplication/*')
-    
+    path ('fastp/*')
+    path ('fastp/*')
+    path ('kraken2/*')
+    path ('bowtie2/*')
+    path ('bowtie2/*')
+    path ('bowtie2/*')
+    path ('bowtie2/*')
+    path ('ivar_trim/*')
+    path ('ivar_trim/*')
+    path ('ivar_trim/*')
+    path ('ivar_trim/*')
+    path ('picard_markduplicates/*')
+    path ('picard_markduplicates/*')
+    path ('picard_markduplicates/*')
+    path ('picard_markduplicates/*')
+    path ('picard_metrics/*')
+    path ('picard_metrics/*')
+    path ('mosdepth/*')
+    path ('variants_ivar/*')
+    path ('variants_ivar/*')
+    path ('variants_ivar/*')
+    path ('variants_ivar/*')
+    path ('variants_bcftools/*')
+    path ('variants_bcftools/*')
+    path ('variants_bcftools/*')
+    path ('variants_varscan/*')
+    path ('variants_varscan/*')
+    path ('variants_varscan/*')
+    path ('variants_varscan/*')
+    path ('cutadapt/*')
+    path ('cutadapt/*')
+    path ('assembly_spades/*')
+    // path ('assembly_spades/*')
+    // path ('assembly_spades/*')
+    path ('assembly_unicycler/*')
+    // path ('assembly_unicycler/*')
+    // path ('assembly_unicycler/*')
+    path ('assembly_minia/*')
+    // path ('assembly_minia/*')
+    // path ('assembly_minia/*')
+        
     output:
     path "*multiqc_report.html", emit: report
     path "*_data"              , emit: data
@@ -64,3 +77,5 @@ process MULTIQC {
     multiqc -f $options.args $custom_config .
     """
 }
+// multiqc_to_custom_tsv.py
+// multiqc -f $options.args $custom_config .
