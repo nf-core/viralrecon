@@ -446,7 +446,7 @@ workflow ILLUMINA {
         ch_ivar_counts_multiqc = VARIANTS_IVAR.out.multiqc_tsv
         ch_ivar_stats_multiqc  = VARIANTS_IVAR.out.stats
         ch_ivar_snpeff_multiqc = VARIANTS_IVAR.out.snpeff_csv
-        ch_ivar_quast_multiqc  = VARIANTS_IVAR.out.quast_results
+        ch_ivar_quast_multiqc  = VARIANTS_IVAR.out.quast_tsv
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.ivar_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.bcftools_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.quast_version.ifEmpty(null))
@@ -474,7 +474,7 @@ workflow ILLUMINA {
         ch_bcftools_tbi            = VARIANTS_BCFTOOLS.out.tbi
         ch_bcftools_stats_multiqc  = VARIANTS_BCFTOOLS.out.stats
         ch_bcftools_snpeff_multiqc = VARIANTS_BCFTOOLS.out.snpeff_csv
-        ch_bcftools_quast_multiqc  = VARIANTS_BCFTOOLS.out.quast_results
+        ch_bcftools_quast_multiqc  = VARIANTS_BCFTOOLS.out.quast_tsv
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.bedtools_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.quast_version.ifEmpty(null))
@@ -505,7 +505,7 @@ workflow ILLUMINA {
         ch_varscan_log_multiqc    = VARIANTS_VARSCAN.out.log_out
         ch_varscan_stats_multiqc  = VARIANTS_VARSCAN.out.stats
         ch_varscan_snpeff_multiqc = VARIANTS_VARSCAN.out.snpeff_csv
-        ch_varscan_quast_multiqc  = VARIANTS_VARSCAN.out.quast_results
+        ch_varscan_quast_multiqc  = VARIANTS_VARSCAN.out.quast_tsv
         ch_software_versions = ch_software_versions.mix(VARIANTS_VARSCAN.out.varscan_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_VARSCAN.out.bcftools_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_VARSCAN.out.bedtools_version.first().ifEmpty(null))
