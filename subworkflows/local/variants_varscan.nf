@@ -2,39 +2,28 @@
  * Variant calling and downstream processing for Varscan
  */
 
-params.varscan_mpileup2cns_options   = [:]
-params.quast_options                 = [:]
-params.bcftools_filter_options       = [:]
-params.consensus_genomecov_options   = [:]
-params.consensus_merge_options       = [:]
-params.consensus_mask_options        = [:]
-params.consensus_maskfasta_options   = [:]
-params.consensus_bcftools_options    = [:]
-params.consensus_plot_options        = [:]
-params.bgzip_options                 = [:]
-params.tabix_options                 = [:]
-params.stats_options                 = [:]
-params.bcftools_filter_tabix_options = [:]
-params.bcftools_filter_stats_options = [:]
-params.snpeff_lowfreq_options        = [:]
-params.snpsift_lowfreq_options       = [:]
-params.snpeff_lowfreq_bgzip_options  = [:]
-params.snpeff_lowfreq_tabix_options  = [:]
-params.snpeff_lowfreq_stats_options  = [:]
-params.snpeff_highfreq_options       = [:]
-params.snpsift_highfreq_options      = [:]
-params.snpeff_highfreq_bgzip_options = [:]
-params.snpeff_highfreq_tabix_options = [:]
-params.snpeff_highfreq_stats_options = [:]
+params.varscan_mpileup2cns_options = [:]
+params.bcftools_bgzip_options      = [:]
+params.bcftools_tabix_options      = [:]
+params.bcftools_stats_options      = [:]
+params.consensus_genomecov_options = [:]
+params.consensus_merge_options     = [:]
+params.consensus_mask_options      = [:]
+params.consensus_maskfasta_options = [:]
+params.consensus_bcftools_options  = [:]
+params.consensus_plot_options      = [:]
+params.quast_options               = [:]
+params.snpeff_options              = [:]
+params.snpsift_options             = [:]
+params.snpeff_bgzip_options        = [:]
+params.snpeff_tabix_options        = [:]
+params.snpeff_stats_options        = [:]
 
-include { VARSCAN_MPILEUP2CNS                       } from '../../modules/local/varscan_mpileup2cns'   addParams( options: params.varscan_mpileup2cns_options )
-include { BCFTOOLS_FILTER                           } from '../../modules/local/bcftools_filter'       addParams( options: params.bcftools_filter_options     )
-include { QUAST                                     } from '../../modules/nf-core/software/quast/main' addParams( options: params.quast_options               )
-include { MAKE_CONSENSUS                            } from './make_consensus'                          addParams( genomecov_options: params.consensus_genomecov_options, merge_options: params.consensus_merge_options, mask_options: params.consensus_mask_options, maskfasta_options: params.consensus_maskfasta_options, bcftools_options: params.consensus_bcftools_options, plot_bases_options: params.consensus_plot_options )
-include { VCF_BGZIP_TABIX_STATS                     } from './vcf_bgzip_tabix_stats'                   addParams( bgzip_options: params.bgzip_options, tabix_options: params.tabix_options, stats_options: params.stats_options )
-include { VCF_TABIX_STATS                           } from './vcf_tabix_stats'                         addParams( tabix_options: params.bcftools_filter_tabix_options, stats_options: params.bcftools_filter_stats_options      )
-include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_LOWFREQ  } from './snpeff_snpsift'                          addParams( snpeff_options: params.snpeff_lowfreq_options, snpsift_options: params.snpsift_lowfreq_options, bgzip_options: params.snpeff_lowfreq_bgzip_options, tabix_options: params.snpeff_lowfreq_tabix_options, stats_options: params.snpeff_lowfreq_stats_options      )
-include { SNPEFF_SNPSIFT as SNPEFF_SNPSIFT_HIGHFREQ } from './snpeff_snpsift'                          addParams( snpeff_options: params.snpeff_highfreq_options, snpsift_options: params.snpsift_highfreq_options, bgzip_options: params.snpeff_highfreq_bgzip_options, tabix_options: params.snpeff_highfreq_tabix_options, stats_options: params.snpeff_highfreq_stats_options )
+include { VARSCAN_MPILEUP2CNS   } from '../../modules/local/varscan_mpileup2cns'   addParams( options: params.varscan_mpileup2cns_options )
+include { QUAST                 } from '../../modules/nf-core/software/quast/main' addParams( options: params.quast_options               )
+include { VCF_BGZIP_TABIX_STATS } from './vcf_bgzip_tabix_stats'                   addParams( bgzip_options: params.bcftools_bgzip_options, tabix_options: params.bcftools_tabix_options, stats_options: params.bcftools_stats_options )
+include { MAKE_CONSENSUS        } from './make_consensus'                          addParams( genomecov_options: params.consensus_genomecov_options, merge_options: params.consensus_merge_options, mask_options: params.consensus_mask_options, maskfasta_options: params.consensus_maskfasta_options, bcftools_options: params.consensus_bcftools_options, plot_bases_options: params.consensus_plot_options )
+include { SNPEFF_SNPSIFT        } from './snpeff_snpsift'                          addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
 
 workflow VARIANTS_VARSCAN {
     take:
@@ -57,20 +46,10 @@ workflow VARIANTS_VARSCAN {
     VCF_BGZIP_TABIX_STATS ( VARSCAN_MPILEUP2CNS.out.vcf )
 
     /*
-     * Filter VCF for high frequency variants
-     */
-    BCFTOOLS_FILTER ( VCF_BGZIP_TABIX_STATS.out.vcf )
-
-    /*
-     * Index VCF for high frequency variants
-     */
-    VCF_TABIX_STATS ( BCFTOOLS_FILTER.out.vcf )
-
-    /*
      * Create genome consensus using variants in VCF
      */
     if (!params.skip_consensus) {
-        MAKE_CONSENSUS ( bam.join(BCFTOOLS_FILTER.out.vcf, by: [0]).join(VCF_TABIX_STATS.out.tbi, by: [0]), fasta )
+        MAKE_CONSENSUS ( bam.join(VCF_BGZIP_TABIX_STATS.out.vcf, by: [0]).join(VCF_BGZIP_TABIX_STATS.out.tbi, by: [0]), fasta )
 
         if (!params.skip_variants_quast) {
             QUAST ( MAKE_CONSENSUS.out.fasta.collect{ it[1] }, fasta, gff, true, params.gff )
@@ -78,16 +57,38 @@ workflow VARIANTS_VARSCAN {
     }
 
     /*
-     * Annotate low/high frequency variants
+     * Annotate variants
      */
     if (params.gff && !params.skip_variants_snpeff) {
-        SNPEFF_SNPSIFT_LOWFREQ ( VCF_BGZIP_TABIX_STATS.out.vcf, snpeff_db, snpeff_config, fasta )
-
-        SNPEFF_SNPSIFT_HIGHFREQ ( BCFTOOLS_FILTER.out.vcf, snpeff_db, snpeff_config, fasta )
+        SNPEFF_SNPSIFT ( VCF_BGZIP_TABIX_STATS.out.vcf, snpeff_db, snpeff_config, fasta )
     }
 
-    // emit:
-    // scaffolds         = SPADES.out.scaffolds              // channel: [ val(meta), [ scaffolds ] ]
-    // spades_version    = SPADES.out.version                //    path: *.version.txt
+    emit:
+    vcf_orig         = VARSCAN_MPILEUP2CNS.out.vcf        // channel: [ val(meta), [ vcf ] ]
+    log_out          = VARSCAN_MPILEUP2CNS.out.log        // channel: [ val(meta), [ log ] ]
+    varscan_version  = VARSCAN_MPILEUP2CNS.out.version    //    path: *.version.txt
 
+    vcf              = VCF_BGZIP_TABIX_STATS.out.vcf      // channel: [ val(meta), [ vcf ] ]
+    tbi              = VCF_BGZIP_TABIX_STATS.out.tbi      // channel: [ val(meta), [ tbi ] ]
+    stats            = VCF_BGZIP_TABIX_STATS.out.stats    // channel: [ val(meta), [ txt ] ]
+    bcftools_version = VCF_BGZIP_TABIX_STATS.out.version  //    path: *.version.txt
+
+    consensus        = MAKE_CONSENSUS.out.fasta            // channel: [ val(meta), [ fasta ] ]
+    bases_tsv        = MAKE_CONSENSUS.out.tsv              // channel: [ val(meta), [ tsv ] ]
+    bases_pdf        = MAKE_CONSENSUS.out.pdf              // channel: [ val(meta), [ pdf ] ]
+    bedtools_version = MAKE_CONSENSUS.out.bedtools_version //    path: *.version.txt 
+    
+    quast_results    = QUAST.out.results                   // channel: [ val(meta), [ results ] ]
+    quast_tsv        = QUAST.out.tsv                       // channel: [ val(meta), [ tsv ] ]
+    quast_version    = QUAST.out.version                   //    path: *.version.txt
+
+    snpeff_vcf       = SNPEFF_SNPSIFT.out.vcf              // channel: [ val(meta), [ vcf.gz ] ]
+    snpeff_tbi       = SNPEFF_SNPSIFT.out.tbi              // channel: [ val(meta), [ tbi ] ]
+    snpeff_stats     = SNPEFF_SNPSIFT.out.stats            // channel: [ val(meta), [ txt ] ]
+    snpeff_csv       = SNPEFF_SNPSIFT.out.csv              // channel: [ val(meta), [ csv ] ]
+    snpeff_txt       = SNPEFF_SNPSIFT.out.txt              // channel: [ val(meta), [ txt ] ]
+    snpeff_html      = SNPEFF_SNPSIFT.out.html             // channel: [ val(meta), [ html ] ]
+    snpsift_txt      = SNPEFF_SNPSIFT.out.snpsift_txt      // channel: [ val(meta), [ txt ] ]
+    snpeff_version   = SNPEFF_SNPSIFT.out.snpeff_version   //    path: *.version.txt
+    snpsift_version  = SNPEFF_SNPSIFT.out.snpsift_version  //    path: *.version.txt
 }
