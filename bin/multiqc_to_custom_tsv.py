@@ -122,18 +122,18 @@ def main(args=None):
         ('multiqc_picard_wgsmetrics.yaml',                         [('Coverage mean', ['MEAN_COVERAGE']),
                                                                     ('Coverage std dev', ['SD_COVERAGE']),
                                                                     ('% Coverage > 10x', ['PCT_10X'])]),
-        ('multiqc_bcftools_stats_bcftools_varscan2.yaml',          [('# High conf SNPs (VarScan 2)', ['number_of_SNPs']),
-                                                                    ('# High conf INDELs (VarScan 2)', ['number_of_indels'])]),
-        ('multiqc_bcftools_stats_bcftools_ivar.yaml',              [('# High conf SNPs (iVar)', ['number_of_SNPs']),
-                                                                    ('# High conf INDELs (iVar)', ['number_of_indels'])]),
-        ('multiqc_bcftools_stats_bcftools_bcftools.yaml',          [('# High conf SNPs (BCFTools)', ['number_of_SNPs']),
-                                                                    ('# High conf INDELs (BCFTools)', ['number_of_indels'])]),
-        ('multiqc_snpeff_snpeff_varscan2.yaml',                    [('# Missense variants (VarScan 2)', ['MISSENSE'])]),
+        ('multiqc_bcftools_stats_bcftools_ivar.yaml',              [('# SNPs (iVar)', ['number_of_SNPs']),
+                                                                    ('# INDELs (iVar)', ['number_of_indels'])]),
+        ('multiqc_bcftools_stats_bcftools_bcftools.yaml',          [('# SNPs (BCFTools)', ['number_of_SNPs']),
+                                                                    ('# INDELs (BCFTools)', ['number_of_indels'])]),
+        ('multiqc_bcftools_stats_bcftools_varscan2.yaml',          [('# SNPs (VarScan 2)', ['number_of_SNPs']),
+                                                                    ('# INDELs (VarScan 2)', ['number_of_indels'])]),
         ('multiqc_snpeff_snpeff_ivar.yaml',                        [('# Missense variants (iVar)', ['MISSENSE'])]),
         ('multiqc_snpeff_snpeff_bcftools.yaml',                    [('# Missense variants (BCFTools)', ['MISSENSE'])]),
-        ('multiqc_quast_quast_varscan2.yaml',                      [('# Ns per 100kb consensus (VarScan 2)', ["# N's per 100 kbp"])]),
+        ('multiqc_snpeff_snpeff_varscan2.yaml',                    [('# Missense variants (VarScan 2)', ['MISSENSE'])]),
         ('multiqc_quast_quast_ivar.yaml',                          [('# Ns per 100kb consensus (iVar)', ["# N's per 100 kbp"])]),
         ('multiqc_quast_quast_bcftools.yaml',                      [('# Ns per 100kb consensus (BCFTools)', ["# N's per 100 kbp"])]),
+        ('multiqc_quast_quast_varscan2.yaml',                      [('# Ns per 100kb consensus (VarScan 2)', ["# N's per 100 kbp"])])
     ]
 
     AssemblyFileFieldList = [
@@ -151,16 +151,16 @@ def main(args=None):
         ('multiqc_quast_quast_minia.yaml',                         [('# Contigs (minia)', ['# contigs (>= 0 bp)']),
                                                                     ('Largest contig (minia)', ['Largest contig']),
                                                                     ('% Genome fraction (minia)', ['Genome fraction (%)']),
-                                                                    ('N50 (minia)', ['N50'])]),
-        ('multiqc_bcftools_stats_bcftools_spades.yaml',            [('# SNPs (SPAdes)', ['number_of_SNPs']),
-                                                                    ('# INDELs (SPAdes)', ['number_of_indels'])]),
-        ('multiqc_bcftools_stats_bcftools_unicycler.yaml',         [('# SNPs (Unicycler)', ['number_of_SNPs']),
-                                                                    ('# INDELs (Unicycler)', ['number_of_indels'])]),
-        ('multiqc_bcftools_stats_bcftools_minia.yaml',             [('# SNPs (minia)', ['number_of_SNPs']),
-                                                                    ('# INDELs (minia)', ['number_of_indels'])]),
-        ('multiqc_snpeff_snpeff_spades.yaml',                      [('# Missense variants (SPAdes)', ['MISSENSE'])]),
-        ('multiqc_snpeff_snpeff_unicycler.yaml',                   [('# Missense variants (Unicycler)', ['MISSENSE'])]),
-        ('multiqc_snpeff_snpeff_minia.yaml',                       [('# Missense variants (minia)', ['MISSENSE'])])
+                                                                    ('N50 (minia)', ['N50'])])
+        # ('multiqc_bcftools_stats_bcftools_spades.yaml',            [('# SNPs (SPAdes)', ['number_of_SNPs']),
+        #                                                             ('# INDELs (SPAdes)', ['number_of_indels'])]),
+        # ('multiqc_bcftools_stats_bcftools_unicycler.yaml',         [('# SNPs (Unicycler)', ['number_of_SNPs']),
+        #                                                             ('# INDELs (Unicycler)', ['number_of_indels'])]),
+        # ('multiqc_bcftools_stats_bcftools_minia.yaml',             [('# SNPs (minia)', ['number_of_SNPs']),
+        #                                                             ('# INDELs (minia)', ['number_of_indels'])]),
+        # ('multiqc_snpeff_snpeff_spades.yaml',                      [('# Missense variants (SPAdes)', ['MISSENSE'])]),
+        # ('multiqc_snpeff_snpeff_unicycler.yaml',                   [('# Missense variants (Unicycler)', ['MISSENSE'])]),
+        # ('multiqc_snpeff_snpeff_minia.yaml',                       [('# Missense variants (minia)', ['MISSENSE'])])
     ]
 
     ## Dictionary of samples being single-end/paired-end
