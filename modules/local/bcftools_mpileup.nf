@@ -22,10 +22,10 @@ process BCFTOOLS_MPILEUP {
     path  fasta
 
     output:
-    tuple val(meta), path("*.gz") , emit: vcf
-    tuple val(meta), path("*.tbi"), emit: tbi
-    tuple val(meta), path("*.txt"), emit: txt
-    path  "*.version.txt"         , emit: version
+    tuple val(meta), path("*.gz")      , emit: vcf
+    tuple val(meta), path("*.tbi")     , emit: tbi
+    tuple val(meta), path("*stats.txt"), emit: txt
+    path  "*.version.txt"              , emit: version
 
     script:
     def software = getSoftwareName(task.process)
