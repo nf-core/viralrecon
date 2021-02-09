@@ -233,19 +233,18 @@ custom_plot_config:
         cpswitch_c_active: False
         smooth_points: 1000
 
-# extra_fn_clean_exts:
-#     - '.trim'
-#     - '.bowtie2'
-#     - '.mkD'
-#     - '.ptrim'
-#     - '.highfreq'
-#     - '.lowfreq'
-#     - '.consensus'
-#     - '.snpEff'
-#     - '.scaffolds'
-#     - '.kraken2'
-#     - type: regex
-#       pattern: '.(AF|k)[0-9]+.*'
+extra_fn_clean_exts:
+    - '.bowtie2'
+    - '.ivar_trim'
+    - '.mpileup'
+    - '.snpeff'
+    - '.consensus'
+    - '.trim'
+    - '.markduplicates'
+    - '.primer_trim'
+    - '.scaffolds'
+    - '.contigs'
+    - '.kraken2'
 
 # # Customise the module search patterns to speed up execution time
 # #  - Skip module sub-tools that we are not interested in
