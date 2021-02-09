@@ -328,7 +328,7 @@ workflow ILLUMINA {
     ch_ivar_trim_stats_multiqc    = Channel.empty()
     ch_ivar_trim_flagstat_multiqc = Channel.empty()
     ch_ivar_trim_idxstats_multiqc = Channel.empty()
-    if (!params.skip_variants && params.protocol == 'amplicon') {
+    if (!params.skip_variants && !params.skip_ivar_trim && params.protocol == 'amplicon') {
         PRIMER_TRIM_IVAR (
             ch_bam.join(ch_bai, by: [0]),
             PREPARE_GENOME.out.primer_bed
