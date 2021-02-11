@@ -157,8 +157,8 @@
             "properties": {
                 "callers": {
                     "type": "string",
-                    "default": "varscan2,ivar,bcftools",
-                    "description": "Specify which variant calling algorithms you would like to use. Available options are varscan2, ivar and bcftools.",
+                    "default": "ivar",
+                    "description": "Specify which variant calling algorithms you would like to use. Available options are ivar and bcftools.",
                     "fa_icon": "fas fa-phone-volume"
                 },
                 "min_mapped_reads": {
@@ -177,13 +177,6 @@
                     "default": 0.75,
                     "description": "Minimum allele frequency threshold for calling variants.",
                     "fa_icon": "fas fa-hand-paper"
-                },
-                "varscan2_strand_filter": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Ignore Varscan2 variants with >90% support on one strand.",
-                    "help_text": "The strand filter will be switched off for amplicon data by default because this sort of bias may be expected.",
-                    "fa_icon": "fas fa-exchange-alt"
                 },
                 "skip_variants": {
                     "type": "boolean",
@@ -227,7 +220,7 @@
             "properties": {
                 "assemblers": {
                     "type": "string",
-                    "default": "spades,unicycler,minia",
+                    "default": "spades",
                     "description": "Specify which assembly algorithms you would like to use. Available options are spades, unicycler and minia.",
                     "fa_icon": "fas fa-random"
                 },
