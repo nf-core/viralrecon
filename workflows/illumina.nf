@@ -32,7 +32,7 @@ if (!protocolList.contains(params.protocol)) {
 }
 
 // Variant calling parameter validation
-def callerList = ['varscan2', 'ivar', 'bcftools']
+def callerList = ['ivar', 'bcftools']
 def callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
 if ((callerList + callers).unique().size() != callerList.size()) {
     exit 1, "Invalid variant calller option: ${params.callers}. Valid options: ${callerList.join(', ')}"
@@ -140,10 +140,6 @@ if (params.save_align_intermeds || params.skip_markduplicates) {
 if (params.save_align_intermeds) { bowtie2_align_options.publish_files.put('bam','') }
 if (params.save_unaligned)       { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
 
-def varscan_mpileup2cns_options   = modules['varscan_mpileup2cns']
-varscan_mpileup2cns_options.args += " --min-var-freq $params.min_allele_freq"
-varscan_mpileup2cns_options.args += (params.protocol != 'amplicon' && params.varscan2_strand_filter) ? " --strand-filter 1" : " --strand-filter 0"
-
 def ivar_variants_options   = modules['ivar_variants']
 ivar_variants_options.args += " -t $params.min_allele_freq"
 
@@ -156,7 +152,6 @@ spades_options.args += (params.spades_mode && params.spades_mode != 'corona') ? 
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'        addParams( options: [:] )
 include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome'     addParams( genome_options: publish_genome_options, index_options: publish_index_options, db_options: publish_db_options, bowtie2_build_options: bowtie2_build_options, bedtools_getfasta_options: bedtools_getfasta_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options, makeblastdb_options: makeblastdb_options, kraken2_build_options: kraken2_build_options )
 include { PRIMER_TRIM_IVAR   } from '../subworkflows/local/primer_trim_ivar'   addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
-include { VARIANTS_VARSCAN   } from '../subworkflows/local/variants_varscan'   addParams( varscan_mpileup2cns_options: varscan_mpileup2cns_options, bcftools_bgzip_options: modules['varscan_bcftools_bgzip'], bcftools_tabix_options: modules['varscan_bcftools_tabix'], bcftools_stats_options: modules['varscan_bcftools_stats'], consensus_genomecov_options: modules['varscan_consensus_genomecov'], consensus_merge_options: modules['varscan_consensus_merge'], consensus_mask_options: modules['varscan_consensus_mask'], consensus_maskfasta_options: modules['varscan_consensus_maskfasta'], consensus_bcftools_options: modules['varscan_consensus_bcftools'], consensus_plot_options: modules['varscan_consensus_plot'], quast_options: modules['varscan_quast'], snpeff_options: modules['varscan_snpeff'], snpsift_options: modules['varscan_snpsift'], snpeff_bgzip_options: modules['varscan_snpeff_bgzip'], snpeff_tabix_options: modules['varscan_snpeff_tabix'], snpeff_stats_options: modules['varscan_snpeff_stats'] )
 include { VARIANTS_IVAR      } from '../subworkflows/local/variants_ivar'      addParams( ivar_variants_options: ivar_variants_options, ivar_variants_to_vcf_options: modules['ivar_variants_to_vcf'], bcftools_bgzip_options: modules['ivar_bcftools_bgzip'], bcftools_tabix_options: modules['ivar_bcftools_tabix'], bcftools_stats_options: modules['ivar_bcftools_stats'], ivar_consensus_options: ivar_consensus_options, consensus_plot_options: modules['ivar_consensus_plot'], quast_options: modules['ivar_quast'], snpeff_options: modules['ivar_snpeff'], snpsift_options: modules['ivar_snpsift'], snpeff_bgzip_options: modules['ivar_snpeff_bgzip'], snpeff_tabix_options: modules['ivar_snpeff_tabix'], snpeff_stats_options: modules['ivar_snpeff_stats'] )
 include { VARIANTS_BCFTOOLS  } from '../subworkflows/local/variants_bcftools'  addParams( bcftools_mpileup_options: modules['bcftools_mpileup'], quast_options: modules['bcftools_quast'], consensus_genomecov_options: modules['bcftools_consensus_genomecov'], consensus_merge_options: modules['bcftools_consensus_merge'], consensus_mask_options: modules['bcftools_consensus_mask'], consensus_maskfasta_options: modules['bcftools_consensus_maskfasta'], consensus_bcftools_options: modules['bcftools_consensus_bcftools'], consensus_plot_options: modules['bcftools_consensus_plot'], snpeff_options: modules['bcftools_snpeff'], snpsift_options: modules['bcftools_snpsift'], snpeff_bgzip_options: modules['bcftools_snpeff_bgzip'], snpeff_tabix_options: modules['bcftools_snpeff_tabix'], snpeff_stats_options: modules['bcftools_snpeff_stats'] )
 include { ASSEMBLY_SPADES    } from '../subworkflows/local/assembly_spades'    addParams( spades_options: spades_options, bandage_options: modules['spades_bandage'], blastn_options: modules['spades_blastn'], abacas_options: modules['spades_abacas'], plasmidid_options: modules['spades_plasmidid'], quast_options: modules['spades_quast'], snpeff_options: modules['spades_snpeff'], snpeff_bgzip_options: modules['spades_snpeff_bgzip'], snpeff_tabix_options: modules['spades_snpeff_tabix'], snpeff_stats_options: modules['spades_snpeff_tabix'], snpsift_options: modules['spades_snpsift'] )
@@ -483,48 +478,14 @@ workflow ILLUMINA {
     }
 
     /*
-     * SUBWORKFLOW: Call variants with VarScan2
-     */
-    ch_varscan_vcf            = Channel.empty()
-    ch_varscan_tbi            = Channel.empty()
-    ch_varscan_log_multiqc    = Channel.empty()
-    ch_varscan_stats_multiqc  = Channel.empty()
-    ch_varscan_snpeff_multiqc = Channel.empty()
-    ch_varscan_quast_multiqc  = Channel.empty()
-    if (!params.skip_variants && 'varscan2' in callers) {
-        VARIANTS_VARSCAN (
-            SAMTOOLS_MPILEUP.out.mpileup,
-            ch_bam,
-            PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.snpeff_db,
-            PREPARE_GENOME.out.snpeff_config
-        )
-        ch_varscan_vcf            = VARIANTS_VARSCAN.out.vcf
-        ch_varscan_tbi            = VARIANTS_VARSCAN.out.tbi
-        ch_varscan_log_multiqc    = VARIANTS_VARSCAN.out.log_out
-        ch_varscan_stats_multiqc  = VARIANTS_VARSCAN.out.stats
-        ch_varscan_snpeff_multiqc = VARIANTS_VARSCAN.out.snpeff_csv
-        ch_varscan_quast_multiqc  = VARIANTS_VARSCAN.out.quast_tsv
-        ch_software_versions = ch_software_versions.mix(VARIANTS_VARSCAN.out.varscan_version.first().ifEmpty(null))
-        ch_software_versions = ch_software_versions.mix(VARIANTS_VARSCAN.out.bcftools_version.first().ifEmpty(null))
-        ch_software_versions = ch_software_versions.mix(VARIANTS_VARSCAN.out.bedtools_version.first().ifEmpty(null))
-        ch_software_versions = ch_software_versions.mix(VARIANTS_VARSCAN.out.quast_version.ifEmpty(null))
-        ch_software_versions = ch_software_versions.mix(VARIANTS_VARSCAN.out.snpeff_version.first().ifEmpty(null))
-        ch_software_versions = ch_software_versions.mix(VARIANTS_VARSCAN.out.snpsift_version.first().ifEmpty(null))
-    }
-
-    /*
      * MODULE: Intersect variants across callers
      */
-    if (!params.skip_variants && callers.size() > 2) {
+    if (!params.skip_variants && callers.size() > 1) {
         BCFTOOLS_ISEC (
             ch_ivar_vcf
                 .join(ch_ivar_tbi, by: [0])
                 .join(ch_bcftools_vcf, by: [0])
                 .join(ch_bcftools_tbi, by: [0])
-                .join(ch_varscan_vcf, by: [0])
-                .join(ch_varscan_tbi, by: [0])
         )
     }
 
@@ -698,10 +659,6 @@ workflow ILLUMINA {
             ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_quast_multiqc.collect().ifEmpty([]),
-            ch_varscan_log_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_varscan_stats_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_varscan_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_varscan_quast_multiqc.collect().ifEmpty([]),
             ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
             ch_cutadapt_fastqc_multiqc.collect{it[1]}.ifEmpty([]),
             ch_spades_quast_multiqc.collect().ifEmpty([]),
