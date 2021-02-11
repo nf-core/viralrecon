@@ -1,15 +1,17 @@
-name: pangolin
-description: Phylogenetic Assignment of Named Global Outbreak LINeages
+name: blast_blastn
+description: Queries a BLAST DNA database
 keywords:
-    - covid
-    - pangolin
-    - lineage
+    - fasta
+    - blast
+    - blastn
+    - DNA sequence
 tools:
-    - star:
+    - blast:
         description: |
-            Phylogenetic Assignment of Named Global Outbreak LINeages
-        homepage: https://github.com/cov-lineages/pangolin#pangolearn-description
-        manual: https://github.com/cov-lineages/pangolin#pangolearn-description
+            BLAST finds regions of similarity between biological sequences.
+        homepage: https://blast.ncbi.nlm.nih.gov/Blast.cgi
+        documentation: https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=Blastdocs
+        doi: 10.1016/S0022-2836(05)80360-2
 params:
     - outdir:
         type: string
@@ -36,19 +38,24 @@ input:
         type: map
         description: |
             Groovy Map containing sample information
+            e.g. [ id:'test', single_end:false ]
     - fasta:
         type: file
-        description: |
-            The genome assembly to be evaluated
+        description: Input fasta file containing queries sequences
+        pattern: "*.{fa,fasta}"
+    - db:
+        type: directory
+        description: Directory containing blast database
+        pattern: "*"
 output:
-    - report:
+    - txt:
         type: file
-        description: Pangolin lineage report
-        pattern: "*.{csv}"
+        description: File containing blastn hits
+        pattern: "*.{blastn.txt}"
     - version:
         type: file
         description: File containing software version
         pattern: "*.{version.txt}"
 authors:
-    - "@kevinmenden"
+    - "@joseespinosa"
     - "@drpatelh"

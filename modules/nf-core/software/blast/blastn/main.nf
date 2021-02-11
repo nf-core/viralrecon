@@ -4,38 +4,39 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 def options    = initOptions(params.options)
 
-process BEDTOOLS_MASKFASTA {
+process BLAST_BLASTN {
     tag "$meta.id"
     label 'process_medium'
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:meta.id) }
 
-    conda (params.enable_conda ? "bioconda::bedtools=2.30.0=hc088bd4_0" : null)
+    conda (params.enable_conda ? 'bioconda::blast=2.10.1=pl526he19e7b1_3' : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/bedtools:2.30.0--hc088bd4_0"
+        container 'https://depot.galaxyproject.org/singularity/blast:2.10.1--pl526he19e7b1_3'
     } else {
-        container "quay.io/biocontainers/bedtools:2.30.0--hc088bd4_0"
+        container 'quay.io/biocontainers/blast:2.10.1--pl526he19e7b1_3'
     }
 
     input:
-    tuple val(meta), path(bed)
-    path  fasta
+    tuple val(meta), path(fasta)
+    path  db
 
     output:
-    tuple val(meta), path("*.fa"), emit: fasta
-    path "*.version.txt"         , emit: version
+    tuple val(meta), path('*.blastn.txt'), emit: txt
+    path '*.version.txt'                 , emit: version
 
     script:
     def software = getSoftwareName(task.process)
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
-    bedtools \\
-        maskfasta \\
+    DB=`find -L ./ -name "*.ndb" | sed 's/.ndb//'`
+    blastn \\
+        -num_threads $task.cpus \\
+        -db \$DB \\
+        -query $fasta \\
         $options.args \\
-        -fi $fasta \\
-        -bed $bed \\
-        -fo ${prefix}.fa
-    bedtools --version | sed -e "s/bedtools v//g" > ${software}.version.txt
+        -out ${prefix}.blastn.txt
+    echo \$(blastn -version 2>&1) | sed 's/^.*blastn: //; s/ .*\$//' > ${software}.version.txt
     """
 }
