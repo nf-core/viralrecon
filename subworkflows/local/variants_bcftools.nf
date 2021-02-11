@@ -15,7 +15,7 @@ params.snpsift_options             = [:]
 params.snpeff_bgzip_options        = [:]
 params.snpeff_tabix_options        = [:]
 params.snpeff_stats_options        = [:]
-params.pangolin_options             = [:]
+params.pangolin_options            = [:]
 
 include { BCFTOOLS_MPILEUP } from '../../modules/local/bcftools_mpileup'         addParams( options: params.bcftools_mpileup_options ) 
 include { QUAST            } from '../../modules/nf-core/software/quast/main'    addParams( options: params.quast_options            )
@@ -38,56 +38,89 @@ workflow VARIANTS_BCFTOOLS {
     BCFTOOLS_MPILEUP ( bam, fasta )
 
     /*
-     * Create genome consensus using variants in VCF
+     * Create genome consensus using variants in VCF, run QUAST and pangolin
      */
+    ch_consensus        = Channel.empty()
+    ch_bases_tsv        = Channel.empty()
+    ch_bases_pdf        = Channel.empty()
+    ch_bedtools_version = Channel.empty()
+    ch_quast_results    = Channel.empty()
+    ch_quast_tsv        = Channel.empty()
+    ch_quast_version    = Channel.empty()
+    ch_pangolin_report  = Channel.empty()
+    ch_pangolin_version = Channel.empty()
     if (!params.skip_consensus) {
         MAKE_CONSENSUS ( bam.join(BCFTOOLS_MPILEUP.out.vcf, by: [0]).join(BCFTOOLS_MPILEUP.out.tbi, by: [0]), fasta )
-
+        ch_consensus        = MAKE_CONSENSUS.out.fasta
+        ch_bases_tsv        = MAKE_CONSENSUS.out.tsv
+        ch_bases_pdf        = MAKE_CONSENSUS.out.pdf
+        ch_bedtools_version = MAKE_CONSENSUS.out.bedtools_version
+    
         if (!params.skip_variants_quast) {
-            QUAST ( MAKE_CONSENSUS.out.fasta.collect{ it[1] }, fasta, gff, true, params.gff )
+            QUAST ( ch_consensus.collect{ it[1] }, fasta, gff, true, params.gff )
+            ch_quast_results = QUAST.out.results
+            ch_quast_tsv     = QUAST.out.tsv
+            ch_quast_version = QUAST.out.version
+        }
+
+        if (!params.skip_variants_pangolin) {
+            PANGOLIN ( ch_consensus )
+            ch_pangolin_report  = PANGOLIN.out.report
+            ch_pangolin_version = PANGOLIN.out.version
         }
     }
 
     /*
      * Annotate variants
      */
+    ch_snpeff_vcf      = Channel.empty()
+    ch_snpeff_tbi      = Channel.empty()
+    ch_snpeff_stats    = Channel.empty()
+    ch_snpeff_csv      = Channel.empty()
+    ch_snpeff_txt      = Channel.empty()
+    ch_snpeff_html     = Channel.empty()
+    ch_snpsift_txt     = Channel.empty()
+    ch_snpeff_version  = Channel.empty()
+    ch_snpsift_version = Channel.empty()
     if (params.gff && !params.skip_variants_snpeff) {
         SNPEFF_SNPSIFT ( BCFTOOLS_MPILEUP.out.vcf, snpeff_db, snpeff_config, fasta )
-    }
-
-    /*
-     * Panoglin lineage analysis
-     */
-    if (!skip_pangolin) {
-        PANGOLIN ( MAKE_CONSENSUS.out.fasta )
+        ch_snpeff_vcf      = SNPEFF_SNPSIFT.out.vcf
+        ch_snpeff_tbi      = SNPEFF_SNPSIFT.out.tbi
+        ch_snpeff_stats    = SNPEFF_SNPSIFT.out.stats
+        ch_snpeff_csv      = SNPEFF_SNPSIFT.out.csv
+        ch_snpeff_txt      = SNPEFF_SNPSIFT.out.txt
+        ch_snpeff_html     = SNPEFF_SNPSIFT.out.html
+        ch_snpsift_txt     = SNPEFF_SNPSIFT.out.snpsift_txt
+        ch_snpeff_version  = SNPEFF_SNPSIFT.out.snpeff_version
+        ch_snpsift_version = SNPEFF_SNPSIFT.out.snpsift_version
     }
 
     emit:
-    vcf              = BCFTOOLS_MPILEUP.out.vcf            // channel: [ val(meta), [ vcf ] ]
-    tbi              = BCFTOOLS_MPILEUP.out.tbi            // channel: [ val(meta), [ tbi ] ]
-    stats            = BCFTOOLS_MPILEUP.out.txt            // channel: [ val(meta), [ txt ] ]
-    bcftools_version = BCFTOOLS_MPILEUP.out.version        //    path: *.version.txt
+    vcf              = BCFTOOLS_MPILEUP.out.vcf     // channel: [ val(meta), [ vcf ] ]
+    tbi              = BCFTOOLS_MPILEUP.out.tbi     // channel: [ val(meta), [ tbi ] ]
+    stats            = BCFTOOLS_MPILEUP.out.txt     // channel: [ val(meta), [ txt ] ]
+    bcftools_version = BCFTOOLS_MPILEUP.out.version //    path: *.version.txt
     
-    consensus        = MAKE_CONSENSUS.out.fasta            // channel: [ val(meta), [ fasta ] ]
-    bases_tsv        = MAKE_CONSENSUS.out.tsv              // channel: [ val(meta), [ tsv ] ]
-    bases_pdf        = MAKE_CONSENSUS.out.pdf              // channel: [ val(meta), [ pdf ] ]
-    bedtools_version = MAKE_CONSENSUS.out.bedtools_version //    path: *.version.txt 
+    consensus        = ch_consensus                 // channel: [ val(meta), [ fasta ] ]
+    bases_tsv        = ch_bases_tsv                 // channel: [ val(meta), [ tsv ] ]
+    bases_pdf        = ch_bases_pdf                 // channel: [ val(meta), [ pdf ] ]
+    bedtools_version = ch_bedtools_version          //    path: *.version.txt 
     
-    quast_results    = QUAST.out.results                   // channel: [ val(meta), [ results ] ]
-    quast_tsv        = QUAST.out.tsv                       // channel: [ val(meta), [ tsv ] ]
-    quast_version    = QUAST.out.version                   //    path: *.version.txt
+    quast_results    = ch_quast_results             // channel: [ val(meta), [ results ] ]
+    quast_tsv        = ch_quast_tsv                 // channel: [ val(meta), [ tsv ] ]
+    quast_version    = ch_quast_version             //    path: *.version.txt
 
-    snpeff_vcf       = SNPEFF_SNPSIFT.out.vcf              // channel: [ val(meta), [ vcf.gz ] ]
-    snpeff_tbi       = SNPEFF_SNPSIFT.out.tbi              // channel: [ val(meta), [ tbi ] ]
-    snpeff_stats     = SNPEFF_SNPSIFT.out.stats            // channel: [ val(meta), [ txt ] ]
-    snpeff_csv       = SNPEFF_SNPSIFT.out.csv              // channel: [ val(meta), [ csv ] ]
-    snpeff_txt       = SNPEFF_SNPSIFT.out.txt              // channel: [ val(meta), [ txt ] ]
-    snpeff_html      = SNPEFF_SNPSIFT.out.html             // channel: [ val(meta), [ html ] ]
-    snpsift_txt      = SNPEFF_SNPSIFT.out.snpsift_txt      // channel: [ val(meta), [ txt ] ]
-    snpeff_version   = SNPEFF_SNPSIFT.out.snpeff_version   //    path: *.version.txt
-    snpsift_version  = SNPEFF_SNPSIFT.out.snpsift_version  //    path: *.version.txt
+    snpeff_vcf       = ch_snpeff_vcf                // channel: [ val(meta), [ vcf.gz ] ]
+    snpeff_tbi       = ch_snpeff_tbi                // channel: [ val(meta), [ tbi ] ]
+    snpeff_stats     = ch_snpeff_stats              // channel: [ val(meta), [ txt ] ]
+    snpeff_csv       = ch_snpeff_csv                // channel: [ val(meta), [ csv ] ]
+    snpeff_txt       = ch_snpeff_txt                // channel: [ val(meta), [ txt ] ]
+    snpeff_html      = ch_snpeff_html               // channel: [ val(meta), [ html ] ]
+    snpsift_txt      = ch_snpsift_txt               // channel: [ val(meta), [ txt ] ]
+    snpeff_version   = ch_snpeff_version            //    path: *.version.txt
+    snpsift_version  = ch_snpsift_version           //    path: *.version.txt
 
-    pangolin_report  = PANGOLIN.out.report                // channel: [ val(meta), [ csv ] ]
-    pangolin_version = PANGOLIN.out.version               //    path: *.version.txt
+    pangolin_report  = ch_pangolin_report           // channel: [ val(meta), [ csv ] ]
+    pangolin_version = ch_pangolin_version          //    path: *.version.txt
 
 }
