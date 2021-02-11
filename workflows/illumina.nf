@@ -123,23 +123,17 @@ if (params.skip_markduplicates) {
     ivar_trim_sort_bam_options.publish_files.put('bai','')
 }
 
-def ivar_variants_options   = modules['ivar_variants']
-ivar_variants_options.args += " -t $params.min_allele_freq"
-
-def ivar_consensus_options   = modules['ivar_consensus']
-ivar_consensus_options.args += " -t $params.min_allele_freq"
-
 def spades_options   = modules['spades']
 spades_options.args += (params.spades_mode && params.spades_mode != 'corona') ? " --${params.spades_mode}" : ""
 
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'        addParams( options: [:] )
 include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome'     addParams( genome_options: publish_genome_options, index_options: publish_index_options, db_options: publish_db_options, bowtie2_build_options: bowtie2_build_options, bedtools_getfasta_options: bedtools_getfasta_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options, makeblastdb_options: makeblastdb_options, kraken2_build_options: kraken2_build_options )
 include { PRIMER_TRIM_IVAR   } from '../subworkflows/local/primer_trim_ivar'   addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
-include { VARIANTS_IVAR      } from '../subworkflows/local/variants_ivar'      addParams( ivar_variants_options: ivar_variants_options, ivar_variants_to_vcf_options: modules['ivar_variants_to_vcf'], bcftools_bgzip_options: modules['ivar_bcftools_bgzip'], bcftools_tabix_options: modules['ivar_bcftools_tabix'], bcftools_stats_options: modules['ivar_bcftools_stats'], ivar_consensus_options: ivar_consensus_options, consensus_plot_options: modules['ivar_consensus_plot'], quast_options: modules['ivar_quast'], snpeff_options: modules['ivar_snpeff'], snpsift_options: modules['ivar_snpsift'], snpeff_bgzip_options: modules['ivar_snpeff_bgzip'], snpeff_tabix_options: modules['ivar_snpeff_tabix'], snpeff_stats_options: modules['ivar_snpeff_stats'] )
-include { VARIANTS_BCFTOOLS  } from '../subworkflows/local/variants_bcftools'  addParams( bcftools_mpileup_options: modules['bcftools_mpileup'], quast_options: modules['bcftools_quast'], consensus_genomecov_options: modules['bcftools_consensus_genomecov'], consensus_merge_options: modules['bcftools_consensus_merge'], consensus_mask_options: modules['bcftools_consensus_mask'], consensus_maskfasta_options: modules['bcftools_consensus_maskfasta'], consensus_bcftools_options: modules['bcftools_consensus_bcftools'], consensus_plot_options: modules['bcftools_consensus_plot'], snpeff_options: modules['bcftools_snpeff'], snpsift_options: modules['bcftools_snpsift'], snpeff_bgzip_options: modules['bcftools_snpeff_bgzip'], snpeff_tabix_options: modules['bcftools_snpeff_tabix'], snpeff_stats_options: modules['bcftools_snpeff_stats'] )
-include { ASSEMBLY_SPADES    } from '../subworkflows/local/assembly_spades'    addParams( spades_options: spades_options, bandage_options: modules['spades_bandage'], blastn_options: modules['spades_blastn'], abacas_options: modules['spades_abacas'], plasmidid_options: modules['spades_plasmidid'], quast_options: modules['spades_quast'], snpeff_options: modules['spades_snpeff'], snpeff_bgzip_options: modules['spades_snpeff_bgzip'], snpeff_tabix_options: modules['spades_snpeff_tabix'], snpeff_stats_options: modules['spades_snpeff_tabix'], snpsift_options: modules['spades_snpsift'] )
-include { ASSEMBLY_UNICYCLER } from '../subworkflows/local/assembly_unicycler' addParams( unicycler_options: modules['unicycler'], bandage_options: modules['unicycler_bandage'], blastn_options: modules['unicycler_blastn'], abacas_options: modules['unicycler_abacas'], plasmidid_options: modules['unicycler_plasmidid'], quast_options: modules['unicycler_quast'], snpeff_options: modules['unicycler_snpeff'], snpeff_bgzip_options: modules['unicycler_snpeff_bgzip'], snpeff_tabix_options: modules['unicycler_snpeff_tabix'], snpeff_stats_options: modules['unicycler_snpeff_tabix'], snpsift_options: modules['unicycler_snpsift'] )
-include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'     addParams( minia_options: modules['minia'], blastn_options: modules['minia_blastn'], abacas_options: modules['minia_abacas'], plasmidid_options: modules['minia_plasmidid'], quast_options: modules['minia_quast'], snpeff_options: modules['minia_snpeff'], snpeff_bgzip_options: modules['minia_snpeff_bgzip'], snpeff_tabix_options: modules['minia_snpeff_tabix'], snpeff_stats_options: modules['minia_snpeff_tabix'], snpsift_options: modules['minia_snpsift'] )
+include { VARIANTS_IVAR      } from '../subworkflows/local/variants_ivar'      addParams( ivar_variants_options: modules['ivar_variants'], ivar_variants_to_vcf_options: modules['ivar_variants_to_vcf'], bcftools_bgzip_options: modules['ivar_bcftools_bgzip'], bcftools_tabix_options: modules['ivar_bcftools_tabix'], bcftools_stats_options: modules['ivar_bcftools_stats'], ivar_consensus_options: modules['ivar_consensus'], consensus_plot_options: modules['ivar_consensus_plot'], quast_options: modules['ivar_quast'], snpeff_options: modules['ivar_snpeff'], snpsift_options: modules['ivar_snpsift'], snpeff_bgzip_options: modules['ivar_snpeff_bgzip'], snpeff_tabix_options: modules['ivar_snpeff_tabix'], snpeff_stats_options: modules['ivar_snpeff_stats'], pangolin_options: modules['ivar_pangolin'] )
+include { VARIANTS_BCFTOOLS  } from '../subworkflows/local/variants_bcftools'  addParams( bcftools_mpileup_options: modules['bcftools_mpileup'], quast_options: modules['bcftools_quast'], consensus_genomecov_options: modules['bcftools_consensus_genomecov'], consensus_merge_options: modules['bcftools_consensus_merge'], consensus_mask_options: modules['bcftools_consensus_mask'], consensus_maskfasta_options: modules['bcftools_consensus_maskfasta'], consensus_bcftools_options: modules['bcftools_consensus_bcftools'], consensus_plot_options: modules['bcftools_consensus_plot'], snpeff_options: modules['bcftools_snpeff'], snpsift_options: modules['bcftools_snpsift'], snpeff_bgzip_options: modules['bcftools_snpeff_bgzip'], snpeff_tabix_options: modules['bcftools_snpeff_tabix'], snpeff_stats_options: modules['bcftools_snpeff_stats'], pangolin_options: modules['bcftools_pangolin'] )
+include { ASSEMBLY_SPADES    } from '../subworkflows/local/assembly_spades'    addParams( spades_options: spades_options, bandage_options: modules['spades_bandage'], blastn_options: modules['spades_blastn'], abacas_options: modules['spades_abacas'], plasmidid_options: modules['spades_plasmidid'], quast_options: modules['spades_quast'], snpeff_options: modules['spades_snpeff'], snpeff_bgzip_options: modules['spades_snpeff_bgzip'], snpeff_tabix_options: modules['spades_snpeff_tabix'], snpeff_stats_options: modules['spades_snpeff_tabix'], snpsift_options: modules['spades_snpsift'], pangolin_options: modules['spades_pangolin'] )
+include { ASSEMBLY_UNICYCLER } from '../subworkflows/local/assembly_unicycler' addParams( unicycler_options: modules['unicycler'], bandage_options: modules['unicycler_bandage'], blastn_options: modules['unicycler_blastn'], abacas_options: modules['unicycler_abacas'], plasmidid_options: modules['unicycler_plasmidid'], quast_options: modules['unicycler_quast'], snpeff_options: modules['unicycler_snpeff'], snpeff_bgzip_options: modules['unicycler_snpeff_bgzip'], snpeff_tabix_options: modules['unicycler_snpeff_tabix'], snpeff_stats_options: modules['unicycler_snpeff_tabix'], snpsift_options: modules['unicycler_snpsift'], pangolin_options: modules['unicycler_pangolin'] )
+include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'     addParams( minia_options: modules['minia'], blastn_options: modules['minia_blastn'], abacas_options: modules['minia_abacas'], plasmidid_options: modules['minia_plasmidid'], quast_options: modules['minia_quast'], snpeff_options: modules['minia_snpeff'], snpeff_bgzip_options: modules['minia_snpeff_bgzip'], snpeff_tabix_options: modules['minia_snpeff_tabix'], snpeff_stats_options: modules['minia_snpeff_tabix'], snpsift_options: modules['minia_snpsift'], pangolin_options: modules['minia_pangolin'] )
 
 ////////////////////////////////////////////////////
 /* --    IMPORT NF-CORE MODULES/SUBWORKFLOWS   -- */
@@ -428,6 +422,7 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.quast_version.ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.snpeff_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.snpsift_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.pangolin_version.first().ifEmpty(null))
     }
 
     /*
@@ -456,6 +451,7 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.quast_version.ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.snpeff_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.snpsift_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.pangolin_version.first().ifEmpty(null))
     }
 
     /*
@@ -526,12 +522,13 @@ workflow ILLUMINA {
         ch_spades_quast_multiqc    = ASSEMBLY_SPADES.out.quast_tsv
         // ch_spades_bcftools_multiqc = ASSEMBLY_SPADES.out.quast_tsv
         // ch_spades_snpeff_multiqc   = ASSEMBLY_SPADES.out.quast_tsv
-        ch_software_versions       = ch_software_versions.mix(ASSEMBLY_SPADES.out.spades_version.first().ifEmpty(null))
-        ch_software_versions       = ch_software_versions.mix(ASSEMBLY_SPADES.out.bandage_version.first().ifEmpty(null))
-        ch_software_versions       = ch_software_versions.mix(ASSEMBLY_SPADES.out.blast_version.first().ifEmpty(null))
-        ch_software_versions       = ch_software_versions.mix(ASSEMBLY_SPADES.out.quast_version.ifEmpty(null))
-        ch_software_versions       = ch_software_versions.mix(ASSEMBLY_SPADES.out.abacas_version.first().ifEmpty(null))
-        ch_software_versions       = ch_software_versions.mix(ASSEMBLY_SPADES.out.plasmidid_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_SPADES.out.spades_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_SPADES.out.bandage_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_SPADES.out.blast_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_SPADES.out.quast_version.ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_SPADES.out.abacas_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_SPADES.out.plasmidid_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_SPADES.out.pangolin_version.first().ifEmpty(null))
     }
 
     /*
@@ -552,12 +549,13 @@ workflow ILLUMINA {
         ch_unicycler_quast_multiqc    = ASSEMBLY_UNICYCLER.out.quast_tsv
         // ch_unicycler_bcftools_multiqc = ASSEMBLY_UNICYCLER.out.quast_tsv
         // ch_unicycler_snpeff_multiqc   = ASSEMBLY_UNICYCLER.out.quast_tsv
-        ch_software_versions          = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.unicycler_version.first().ifEmpty(null))
-        ch_software_versions          = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.bandage_version.first().ifEmpty(null))
-        ch_software_versions          = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.blast_version.first().ifEmpty(null))
-        ch_software_versions          = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.quast_version.ifEmpty(null))
-        ch_software_versions          = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.abacas_version.first().ifEmpty(null))
-        ch_software_versions          = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.plasmidid_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.unicycler_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.bandage_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.blast_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.quast_version.ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.abacas_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.plasmidid_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.pangolin_version.first().ifEmpty(null))
     }
 
     /*
@@ -578,11 +576,12 @@ workflow ILLUMINA {
         ch_minia_quast_multiqc    = ASSEMBLY_MINIA.out.quast_tsv
         // ch_minia_bcftools_multiqc = ASSEMBLY_MINIA.out.quast_tsv
         // ch_minia_snpeff_multiqc   = ASSEMBLY_MINIA.out.quast_tsv
-        ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.minia_version.first().ifEmpty(null))
-        ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.blast_version.first().ifEmpty(null))
-        ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.quast_version.ifEmpty(null))
-        ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.abacas_version.first().ifEmpty(null))
-        ch_software_versions      = ch_software_versions.mix(ASSEMBLY_MINIA.out.plasmidid_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_MINIA.out.minia_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_MINIA.out.blast_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_MINIA.out.quast_version.ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_MINIA.out.abacas_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_MINIA.out.plasmidid_version.first().ifEmpty(null))
+        ch_software_versions = ch_software_versions.mix(ASSEMBLY_MINIA.out.pangolin_version.first().ifEmpty(null))
     }
 
     /*
