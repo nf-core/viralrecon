@@ -196,6 +196,8 @@ module_order:
 report_section_order:
     summary_assembly_metrics:
       before: summary_variants_metrics
+    ivar_variants:
+        before: mosdepth
     software_versions:
         order: -1001
     nf-core-viralrecon-summary:
@@ -270,3 +272,15 @@ sp:
         skip: true
     picard/variant_calling_metrics:
         skip: true
+
+# See https://github.com/ewels/MultiQC_TestData/blob/master/data/custom_content/with_config/table_headerconfig/multiqc_config.yaml
+custom_data:
+    fail_mapped_samples:
+        section_name: 'WARNING: Fail Alignment Check'
+        description: "List of samples that failed the Bowtie2 minimum mapped reads threshold specified via the '--min_mapped_reads' parameter, and hence were ignored for the downstream processing steps."
+        plot_type: 'table'
+        pconfig:
+            id: 'fail_mapped_samples_table'
+            table_title: 'Samples failed mapped read threshold'
+            namespace: 'Samples failed mapping read threshold'
+            format: '{:,.0f}'
