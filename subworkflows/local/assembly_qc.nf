@@ -6,11 +6,13 @@ params.blastn_options    = [:]
 params.abacas_options    = [:]
 params.plasmidid_options = [:]
 params.quast_options     = [:]
+params.pangolin_options  = [:]
 
 include { ABACAS       } from '../../modules/local/abacas'                       addParams( options: params.abacas_options    )
 include { PLASMIDID    } from '../../modules/local/plasmidid'                    addParams( options: params.plasmidid_options )
 include { BLAST_BLASTN } from '../../modules/nf-core/software/blast/blastn/main' addParams( options: params.blastn_options    ) 
 include { QUAST        } from '../../modules/nf-core/software/quast/main'        addParams( options: params.quast_options     )
+include { PANGOLIN     } from '../../modules/nf-core/software/pangolin/main'     addParams( options: params.pangolin_options  )
 
 workflow ASSEMBLY_QC {
     take:
@@ -62,9 +64,20 @@ workflow ASSEMBLY_QC {
     ch_plasmidid_version = Channel.empty()
     // if (!params.skip_plasmidid) {
     //     PLASMIDID ( scaffolds, fasta )
-    //     ch_plasmidid_results = PLASMIDID.out.results
-    //     ch_plasmidid_version = PLASMIDID.out.version
+    //    ch_plasmidid_results = PLASMIDID.out.results
+    //    ch_plasmidid_version = PLASMIDID.out.version
     // }
+
+    /*
+     * Panoglin lineage analysis
+     */
+    ch_pangolin_report  = Channel.empty()
+    ch_pangolin_version = Channel.empty()
+    if (!params.skip_assembly_pangolin) {
+        PANGOLIN ( scaffolds )
+        ch_pangolin_report  = PANGOLIN.out.report
+        ch_pangolin_version = PANGOLIN.out.version
+    }
 
     emit:
     blast_txt         = ch_blast_txt         // channel: [ val(meta), [ txt ] ]
@@ -79,5 +92,8 @@ workflow ASSEMBLY_QC {
 
     plasmidid_results = ch_plasmidid_results // channel: [ val(meta), [ results ] ]
     plasmidid_version = ch_plasmidid_version //    path: *.version.txt
+
+    pangolin_report   = ch_pangolin_report   // channel: [ val(meta), [ csv ] ]
+    pangolin_version  = ch_pangolin_version  //    path: *.version.txt
 }
 
