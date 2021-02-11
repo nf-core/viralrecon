@@ -123,7 +123,7 @@ A file called `summary_variants_metrics_mqc.tsv` containing a selection of read 
   <summary>Output files</summary>
 
 * `variants/bam/`
-  * `<SAMPLE>.bam`: Original BAM file created by Bowtie 2. Only present if `--save_align_intermeds` parameter is supplied.
+  * `<SAMPLE>.bam`: Original BAM file created by Bowtie 2. 
 * `variants/bam/log/`
   * `<SAMPLE>.bowtie2.log`: Bowtie 2 mapping log file.
 
@@ -144,8 +144,6 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 * `variants/bam/samtools_stats/`
   * SAMtools `<SAMPLE>.sorted.bam.flagstat`, `<SAMPLE>.sorted.bam.idxstats` and `<SAMPLE>.sorted.bam.stats` files generated from the alignment files.
 
-> **NB:** BAM files and their associated indices will only be saved in the results directory if the `--save_align_intermeds` parameter is supplied.
-
 </details>
 
 ![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
@@ -164,8 +162,6 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
   * SAMtools `<SAMPLE>.trim.flagstat`, `<SAMPLE>.trim.idxstats` and `<SAMPLE>.trim.stats` files generated from the primer trimmed alignment files.
 * `variants/bam/log/`
   * `<SAMPLE>.trim.ivar.log`: iVar trim log file obtained from stdout.
-
-> **NB:** Post-trimmed BAM files and their associated indices will only be saved in the results directory if the `--save_align_intermeds` parameter is supplied.
 
 </details>
 

@@ -120,16 +120,12 @@ if (!params.save_reference) {
 
 def ivar_trim_options   = modules['ivar_trim']
 ivar_trim_options.args += params.ivar_trim_noprimer ? "" : " -e"
-if (params.save_align_intermeds) { ivar_trim_options.publish_files.put('bam','') }
 
 def ivar_trim_sort_bam_options = modules['ivar_trim_sort_bam']
-if (params.save_align_intermeds || params.skip_markduplicates) {
+if (params.skip_markduplicates) {
     ivar_trim_sort_bam_options.publish_files.put('bam','')
     ivar_trim_sort_bam_options.publish_files.put('bai','')
 }
-
-if (params.save_align_intermeds) { bowtie2_align_options.publish_files.put('bam','') }
-if (params.save_unaligned)       { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
 
 def ivar_variants_options   = modules['ivar_variants']
 ivar_variants_options.args += " -t $params.min_allele_freq"
@@ -167,11 +163,10 @@ def fastp_options = modules['fastp']
 if (params.save_trimmed_fail) { fastp_options.publish_files.put('fail.fastq.gz','') }
 
 def bowtie2_align_options = modules['bowtie2_align']
-if (params.save_align_intermeds) { bowtie2_align_options.publish_files.put('bam','') }
-if (params.save_unaligned)       { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
+if (params.save_unaligned) { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
 
 def bowtie2_sort_bam_options = modules['bowtie2_sort_bam']
-if ((params.protocol != 'amplicon' && params.skip_markduplicates) || params.save_align_intermeds) {
+if (params.protocol != 'amplicon' && params.skip_markduplicates) {
     bowtie2_sort_bam_options.publish_files.put('bam','')
     bowtie2_sort_bam_options.publish_files.put('bai','')
 }
