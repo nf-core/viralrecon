@@ -24,11 +24,13 @@ On release, automated continuous integration tests run the pipeline on a full-si
 
 ## Pipeline summary
 
+The pipeline has numerous options to allow you to run only specific aspects of the workflow if you so wish. For example, you can skip the host read filtering step with Kraken 2 with `--skip_kraken2` or you can skip all of the assembly steps with the `--skip_assembly` parameter. See the [usage docs](https://nf-co.re/rnaseq/usage) for all of the available options when running the pipeline.
+
 1. Download samples via SRA, ENA or GEO ids ([`ENA FTP`](https://ena-docs.readthedocs.io/en/latest/retrieval/file-download.html); *if required*)
-2. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html); *if required*)
+2. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html))
 3. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 4. Adapter trimming ([`fastp`](https://github.com/OpenGene/fastp))
-5. Removal of host reads ([`Kraken 2`](http://ccb.jhu.edu/software/kraken2/))
+5. Removal of host reads ([`Kraken 2`](http://ccb.jhu.edu/software/kraken2/); *optional*)
 6. Variant calling
     1. Read alignment ([`Bowtie 2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml))
     2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
@@ -52,8 +54,6 @@ On release, automated continuous integration tests run the pipeline on a full-si
         * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
         * Lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin))
 7. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
-
-> **NB:** The pipeline has a number of options to allow you to run only specific aspects of the workflow if you so wish. For example, you can skip all of the assembly steps with the `--skip_assembly` parameter. See the [usage docs](docs/usage.md) for all of the available options when running the pipeline.
 
 ## Pipeline reporting
 
