@@ -107,8 +107,6 @@ If multiple libraries/runs have been provided for the same sample in the input s
 * `preprocess/fastp/fastqc/zips/`
   * `*.trim_fastqc.zip`: Zip archive containing the FastQC report.
 
-> **NB:** Post-trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
-
 </details>
 
 ![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
@@ -394,8 +392,6 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
   * `*.ptrim_fastqc.html`: FastQC report of the trimmed reads.
 * `assembly/cutadapt/fastqc/zips/`
   * `*.ptrim_fastqc.zip`: Zip archive containing the FastQC report.
-
-> **NB:** Trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
 
 </details>
 

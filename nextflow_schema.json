@@ -109,7 +109,7 @@
             "description": "Options to adjust read trimming criteria.",
             "default": "",
             "properties": {
-                "save_trimmed": {
+                "save_trimmed_fail": {
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
                     "description": "Save the trimmed FastQ files in the results directory.",
@@ -481,9 +481,6 @@
             "type": "string"
         },
         "skip_sra_fastq_download": {
-            "type": "string"
-        },
-        "save_trimmed_fail": {
             "type": "string"
         },
         "skip_fastp": {
