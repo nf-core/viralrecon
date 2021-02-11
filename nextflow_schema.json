@@ -20,35 +20,15 @@
                     "help_text": "You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/viralrecon/docs/usage#introduction).",
                     "description": "Path to comma-separated file containing information about the samples you would like to analyse."
                 },
+                "platform": {
+                    "type": "string",
+                    "default": "illumina"
+                },
                 "protocol": {
                     "type": "string",
                     "default": "metagenomic",
                     "description": "Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplicon'.",
                     "fa_icon": "fas fa-vials"
-                },
-                "primer_bed": {
-                    "type": "string",
-                    "description": "If the '--protocol amplicon' parameter is provided then iVar is used to trim primer sequences after read alignment and before variant calling.",
-                    "help_text": "iVar uses the primer positions relative to the viral genome supplied in this file to soft clip primer sequences from a coordinate sorted BAM file. The file must be in BED format as highlighted below:\n\n```\nMN908947.3 30 54 nCoV-2019_1_LEFT 60 -\nMN908947.3 385 410 nCoV-2019_1_RIGHT 60 +\nMN908947.3 320 342 nCoV-2019_2_LEFT 60 -\nMN908947.3 704 726 nCoV-2019_2_RIGHT 60 +\n```",
-                    "fa_icon": "fas fa-assistive-listening-systems"
-                },
-                "primer_fasta": {
-                    "type": "string",
-                    "description": "If the '--protocol amplicon' parameter is provided then Cutadapt is used to trim primer sequences from FastQ files before de novo assembly.",
-                    "help_text": "This file must contain amplicon primer sequences in Fasta format and is mandatory when --protocol amplicon is specified. An example is shown below:\n\n```\n>nCoV-2019_1_LEFT\nACCAACCAACTTTCGATCTCTTGT\n>nCoV-2019_1_RIGHT\nCATCTTTAAGATGTTGACGTGCCTC\n>nCoV-2019_2_LEFT\nCTGTTTTACAGGTTCGCGACGT\n>nCoV-2019_2_RIGHT\nTAAGGATCAGTGCCAAGCTCGT\n```",
-                    "fa_icon": "fas fa-assistive-listening-systems"
-                },
-                "primer_left_suffix": {
-                    "type": "string",
-                    "default": "_LEFT",
-                    "fa_icon": "fas fa-assistive-listening-systems",
-                    "description": "Suffix used in name field of '--primer_bed' to indicate left primer position."
-                },
-                "primer_right_suffix": {
-                    "type": "string",
-                    "default": "_RIGHT",
-                    "fa_icon": "fas fa-assistive-listening-systems",
-                    "description": "Suffix used in name field of '--primer_bed' to indicate right primer position."
                 },
                 "outdir": {
                     "type": "string",
@@ -88,6 +68,36 @@
                     "description": "Full path to GFF annotation file.",
                     "fa_icon": "fas fa-file-invoice"
                 },
+                "bowtie2_index": {
+                    "type": "string"
+                },
+                "blast_db": {
+                    "type": "string"
+                },
+                "primer_bed": {
+                    "type": "string",
+                    "description": "If the '--protocol amplicon' parameter is provided then iVar is used to trim primer sequences after read alignment and before variant calling.",
+                    "help_text": "iVar uses the primer positions relative to the viral genome supplied in this file to soft clip primer sequences from a coordinate sorted BAM file. The file must be in BED format as highlighted below:\n\n```\nMN908947.3 30 54 nCoV-2019_1_LEFT 60 -\nMN908947.3 385 410 nCoV-2019_1_RIGHT 60 +\nMN908947.3 320 342 nCoV-2019_2_LEFT 60 -\nMN908947.3 704 726 nCoV-2019_2_RIGHT 60 +\n```",
+                    "fa_icon": "fas fa-assistive-listening-systems"
+                },
+                "primer_fasta": {
+                    "type": "string",
+                    "description": "If the '--protocol amplicon' parameter is provided then Cutadapt is used to trim primer sequences from FastQ files before de novo assembly.",
+                    "help_text": "This file must contain amplicon primer sequences in Fasta format and is mandatory when --protocol amplicon is specified. An example is shown below:\n\n```\n>nCoV-2019_1_LEFT\nACCAACCAACTTTCGATCTCTTGT\n>nCoV-2019_1_RIGHT\nCATCTTTAAGATGTTGACGTGCCTC\n>nCoV-2019_2_LEFT\nCTGTTTTACAGGTTCGCGACGT\n>nCoV-2019_2_RIGHT\nTAAGGATCAGTGCCAAGCTCGT\n```",
+                    "fa_icon": "fas fa-assistive-listening-systems"
+                },
+                "primer_left_suffix": {
+                    "type": "string",
+                    "default": "_LEFT",
+                    "fa_icon": "fas fa-assistive-listening-systems",
+                    "description": "Suffix used in name field of '--primer_bed' to indicate left primer position."
+                },
+                "primer_right_suffix": {
+                    "type": "string",
+                    "default": "_RIGHT",
+                    "fa_icon": "fas fa-assistive-listening-systems",
+                    "description": "Suffix used in name field of '--primer_bed' to indicate right primer position."
+                },
                 "save_reference": {
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
@@ -101,7 +111,14 @@
             "description": "Options for downloading publicy available data from the SRA.",
             "default": "",
             "fa_icon": "fas fa-cloud-download-alt",
-            "properties": {}
+            "properties": {
+                "public_data_ids": {
+                    "type": "string"
+                },
+                "skip_sra_fastq_download": {
+                    "type": "string"
+                }
+            }
         },
         "read_trimming_options": {
             "title": "Read trimming options",
@@ -123,6 +140,7 @@
             "type": "object",
             "description": "Options for host read filtering with Kraken2.",
             "default": "",
+            "fa_icon": "fab fa-gitkraken",
             "properties": {
                 "kraken2_db": {
                     "type": "string",
@@ -130,19 +148,18 @@
                     "fa_icon": "fab fa-gitkraken",
                     "description": "Full path to Kraken2 database built from host genome."
                 },
+                "skip_kraken2": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip Kraken2 process for removing host classified reads."
+                },
                 "kraken2_db_name": {
                     "type": "string",
                     "default": "human",
                     "fa_icon": "fab fa-gitkraken",
                     "description": "Name for host genome as recognised by Kraken2 when using the 'kraken2 build' command."
-                },
-                "skip_kraken2": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip Kraken2 process for removing host classified reads."
                 }
-            },
-            "fa_icon": "fab fa-gitkraken"
+            }
         },
         "variant_calling_options": {
             "title": "Variant calling options",
@@ -192,6 +209,27 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip generation of QUAST aggregated report for consensus sequences."
+                },
+                "skip_fastp": {
+                    "type": "string"
+                },
+                "filter_duplicates": {
+                    "type": "string"
+                },
+                "save_unaligned": {
+                    "type": "string"
+                },
+                "skip_variants_snpeff": {
+                    "type": "string"
+                },
+                "skip_consensus": {
+                    "type": "string"
+                },
+                "skip_ivar_trim": {
+                    "type": "string"
+                },
+                "skip_variants_pangolin": {
+                    "type": "string"
                 }
             },
             "fa_icon": "fas fa-dna"
@@ -237,6 +275,25 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Specify this parameter to skip all of the de novo assembly steps in the pipeline."
+                },
+                "skip_cutadapt": {
+                    "type": "string"
+                },
+                "spades_mode": {
+                    "type": "string",
+                    "default": "rnaviral"
+                },
+                "spades_hmm": {
+                    "type": "string"
+                },
+                "skip_bandage": {
+                    "type": "string"
+                },
+                "skip_assembly_snpeff": {
+                    "type": "string"
+                },
+                "skip_assembly_pangolin": {
+                    "type": "string"
                 }
             },
             "fa_icon": "fas fa-random"
@@ -256,6 +313,9 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip MultiQC."
+                },
+                "skip_qc": {
+                    "type": "string"
                 }
             },
             "fa_icon": "fas fa-fast-forward"
@@ -325,11 +385,23 @@
                     "fa_icon": "fas fa-cog",
                     "hidden": true
                 },
+                "multiqc_title": {
+                    "type": "string",
+                    "hidden": true
+                },
                 "tracedir": {
                     "type": "string",
                     "description": "Directory to keep pipeline Nextflow logs and reports.",
                     "default": "${params.outdir}/pipeline_info",
                     "fa_icon": "fas fa-cogs",
+                    "hidden": true
+                },
+                "enable_conda": {
+                    "type": "string",
+                    "hidden": true
+                },
+                "singularity_pull_docker_container": {
+                    "type": "string",
                     "hidden": true
                 }
             }
@@ -425,15 +497,6 @@
             "$ref": "#/definitions/reference_genome_options"
         },
         {
-            "$ref": "#/definitions/generic_options"
-        },
-        {
-            "$ref": "#/definitions/max_job_request_options"
-        },
-        {
-            "$ref": "#/definitions/institutional_config_options"
-        },
-        {
             "$ref": "#/definitions/sra_download"
         },
         {
@@ -450,67 +513,15 @@
         },
         {
             "$ref": "#/definitions/process_skipping_options"
+        },
+        {
+            "$ref": "#/definitions/generic_options"
+        },
+        {
+            "$ref": "#/definitions/max_job_request_options"
+        },
+        {
+            "$ref": "#/definitions/institutional_config_options"
         }
-    ],
-    "properties": {
-        "public_data_ids": {
-            "type": "string"
-        },
-        "platform": {
-            "type": "string",
-            "default": "illumina"
-        },
-        "skip_sra_fastq_download": {
-            "type": "string"
-        },
-        "skip_fastp": {
-            "type": "string"
-        },
-        "skip_cutadapt": {
-            "type": "string"
-        },
-        "filter_duplicates": {
-            "type": "string"
-        },
-        "save_unaligned": {
-            "type": "string"
-        },
-        "skip_variants_snpeff": {
-            "type": "string"
-        },
-        "skip_consensus": {
-            "type": "string"
-        },
-        "spades_mode": {
-            "type": "string",
-            "default": "rnaviral"
-        },
-        "spades_hmm": {
-            "type": "string"
-        },
-        "blast_db": {
-            "type": "string"
-        },
-        "skip_bandage": {
-            "type": "string"
-        },
-        "skip_assembly_snpeff": {
-            "type": "string"
-        },
-        "skip_qc": {
-            "type": "string"
-        },
-        "multiqc_title": {
-            "type": "string"
-        },
-        "enable_conda": {
-            "type": "string"
-        },
-        "singularity_pull_docker_container": {
-            "type": "string"
-        },
-        "bowtie2_index": {
-            "type": "string"
-        }
-    }
+    ]
 }
