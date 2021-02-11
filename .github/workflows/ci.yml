@@ -46,7 +46,7 @@ jobs:
       NXF_ANSI_LOG: false
     strategy:
       matrix:
-        parameters: [--skip_fastp, --skip_markduplicates, --skip_variants, --skip_cutadapt, --skip_kraken2, --skip_assembly, '--callers ivar --assemblers spades']
+        parameters: [--skip_fastp, --skip_markduplicates, --skip_variants, --skip_cutadapt, --skip_kraken2, --skip_assembly, '--spades_mode corona', '--spades_mode metaviral']
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
