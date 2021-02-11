@@ -10,10 +10,10 @@ include { BAM_STATS_SAMTOOLS } from './bam_stats_samtools'                      
 
 workflow BAM_SORT_SAMTOOLS {
     take:
-    ch_bam // channel: [ val(meta), [ bam ] ]
+    bam // channel: [ val(meta), [ bam ] ]
     
     main:
-    SAMTOOLS_SORT      ( ch_bam )
+    SAMTOOLS_SORT      ( bam )
     SAMTOOLS_INDEX     ( SAMTOOLS_SORT.out.bam )
     BAM_STATS_SAMTOOLS ( SAMTOOLS_SORT.out.bam.join(SAMTOOLS_INDEX.out.bai, by: [0]) )
 
