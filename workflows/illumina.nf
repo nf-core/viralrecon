@@ -86,9 +86,6 @@ if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
 def cutadapt_options = modules['cutadapt']
 if (params.save_trimmed) { cutadapt_options.publish_files.put('fastq.gz','') }
 
-def kraken2_run_options = modules['kraken2_run']
-if (params.save_kraken2_fastq) { kraken2_run_options.publish_files.put('fastq.gz','') }
-
 def multiqc_options   = modules['multiqc']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 
@@ -97,7 +94,7 @@ include { MULTIQC_CUSTOM_FAIL_MAPPED } from '../modules/local/multiqc_custom_fai
 include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'   addParams( options: modules['picard_collectwgsmetrics'] )
 include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'              addParams( options: modules['bcftools_isec']            ) 
 include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: cutadapt_options                    )
-include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'                addParams( options: kraken2_run_options                 ) 
+include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'                addParams( options: modules['kraken2_run']              ) 
 include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'      addParams( options: [publish_files: ['csv':'']]         )
 include { MULTIQC                    } from '../modules/local/multiqc'                    addParams( options: multiqc_options                     )
 

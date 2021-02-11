@@ -411,8 +411,6 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.viral*.fastq.gz`: Reads that were unclassified to the host database.
   * `*.kraken2.report.txt`: Kraken 2 taxonomic report. See [here](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual#sample-report-output-format) for a detailed description of the format.
 
-> **NB:** Output FastQ files will only be saved in the results directory if the `--save_kraken2_fastq` parameter is supplied.
-
 </details>
 
 ![MultiQC - Kraken 2 classification plot](images/mqc_kraken2_plot.png)

@@ -136,11 +136,6 @@
                     "fa_icon": "fab fa-gitkraken",
                     "description": "Name for host genome as recognised by Kraken2 when using the 'kraken2 build' command."
                 },
-                "save_kraken2_fastq": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-save",
-                    "description": "Save the host and viral FastQ files in the results directory."
-                },
                 "skip_kraken2": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
