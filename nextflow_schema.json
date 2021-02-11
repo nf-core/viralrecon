@@ -167,12 +167,6 @@
                     "description": "This option unsets the '-e' parameter in 'ivar trim' to discard reads without primers.",
                     "fa_icon": "fas fa-cut"
                 },
-                "min_allele_freq": {
-                    "type": "number",
-                    "default": 0.75,
-                    "description": "Minimum allele frequency threshold for calling variants.",
-                    "fa_icon": "fas fa-hand-paper"
-                },
                 "skip_variants": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
