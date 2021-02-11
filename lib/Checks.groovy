@@ -87,20 +87,6 @@ class Checks {
                  "==================================================================================="
     }
 
-    // Generate a warning if using SPAdes with Conda
-    static ArrayList ignore_spades(params, log) {
-        def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
-        if (!params.enable_conda && assemblers.contains('spades')) {
-            assemblers = assemblers - [ 'spades' ]
-            log.warn "=============================================================================\n" +
-                      "  Invalid --assemblers option: ${params.assemblers}.\n" +
-                      "  'spades' is not currently supported when using Conda and will be ignored.\n" +
-                      "  Please amend the '--assemblers' parameter to remove this warning.\n" +
-                      "==================================================================================="
-        }
-        return assemblers
-    }
-
     // Exit pipeline if incorrect --genome key provided
     static void genome_exists(params, log) {
         if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {

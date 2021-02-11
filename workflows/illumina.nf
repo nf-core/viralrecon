@@ -55,10 +55,6 @@ if (!spadesModeList.contains(params.spades_mode)) {
 }
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file }
 
-if (params.enable_conda && assemblers.contains('spades')) {
-    assemblers = Checks.ignore_spades(params, log)
-}
-
 // if (!params.skip_kraken2 && !params.kraken2_db) {
 //     if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
 
