@@ -22,7 +22,9 @@
                 },
                 "platform": {
                     "type": "string",
-                    "default": "illumina"
+                    "default": "illumina",
+                    "fa_icon": "fas fa-hdd",
+                    "description": "NGS platform used to sequence the samples"
                 },
                 "protocol": {
                     "type": "string",
@@ -42,6 +44,25 @@
                     "fa_icon": "fas fa-envelope",
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+                }
+            }
+        },
+        "sra_download": {
+            "title": "SRA download",
+            "type": "object",
+            "description": "Options for downloading publicy available data from the SRA.",
+            "default": "",
+            "fa_icon": "fas fa-cloud-download-alt",
+            "properties": {
+                "public_data_ids": {
+                    "type": "string",
+                    "description": "File containing SRA/ENA/GEO identifiers one per line in order to download their associated FastQ files.",
+                    "fa_icon": "fas fa-database"
+                },
+                "skip_sra_fastq_download": {
+                    "type": "boolean",
+                    "description": "Only download metadata for public data database ids and don't download the FastQ files.",
+                    "fa_icon": "fas fa-fast-forward"
                 }
             }
         },
@@ -69,10 +90,14 @@
                     "fa_icon": "fas fa-file-invoice"
                 },
                 "bowtie2_index": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to directory or tar.gz archive for pre-built Bowtie2 index.",
+                    "fa_icon": "fas fa-bezier-curve"
                 },
                 "blast_db": {
-                    "type": "string"
+                    "type": "string",
+                    "fa_icon": "fas fa-database",
+                    "description": "Path to directory or tar.gz archive for pre-built BLAST database."
                 },
                 "primer_bed": {
                     "type": "string",
@@ -83,7 +108,7 @@
                 "primer_fasta": {
                     "type": "string",
                     "description": "If the '--protocol amplicon' parameter is provided then Cutadapt is used to trim primer sequences from FastQ files before de novo assembly.",
-                    "help_text": "This file must contain amplicon primer sequences in Fasta format and is mandatory when --protocol amplicon is specified. An example is shown below:\n\n```\n>nCoV-2019_1_LEFT\nACCAACCAACTTTCGATCTCTTGT\n>nCoV-2019_1_RIGHT\nCATCTTTAAGATGTTGACGTGCCTC\n>nCoV-2019_2_LEFT\nCTGTTTTACAGGTTCGCGACGT\n>nCoV-2019_2_RIGHT\nTAAGGATCAGTGCCAAGCTCGT\n```",
+                    "help_text": "This file must contain amplicon primer sequences in Fasta format. An example is shown below:\n\n```\n>nCoV-2019_1_LEFT\nACCAACCAACTTTCGATCTCTTGT\n>nCoV-2019_1_RIGHT\nCATCTTTAAGATGTTGACGTGCCTC\n>nCoV-2019_2_LEFT\nCTGTTTTACAGGTTCGCGACGT\n>nCoV-2019_2_RIGHT\nTAAGGATCAGTGCCAAGCTCGT\n```",
                     "fa_icon": "fas fa-assistive-listening-systems"
                 },
                 "primer_left_suffix": {
@@ -105,21 +130,6 @@
                 }
             }
         },
-        "sra_download": {
-            "title": "SRA download",
-            "type": "object",
-            "description": "Options for downloading publicy available data from the SRA.",
-            "default": "",
-            "fa_icon": "fas fa-cloud-download-alt",
-            "properties": {
-                "public_data_ids": {
-                    "type": "string"
-                },
-                "skip_sra_fastq_download": {
-                    "type": "string"
-                }
-            }
-        },
         "read_trimming_options": {
             "title": "Read trimming options",
             "type": "object",
@@ -131,6 +141,11 @@
                     "fa_icon": "fas fa-save",
                     "description": "Save the trimmed FastQ files in the results directory.",
                     "help_text": "By default, trimmed FastQ files will not be saved to the results directory. Specify this flag (or set to true in your config file) to copy these files to the results directory when complete."
+                },
+                "skip_fastp": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip the initial read trimming step peformed by fastp."
                 }
             },
             "fa_icon": "fas fa-cut"
@@ -148,16 +163,16 @@
                     "fa_icon": "fab fa-gitkraken",
                     "description": "Full path to Kraken2 database built from host genome."
                 },
-                "skip_kraken2": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip Kraken2 process for removing host classified reads."
-                },
                 "kraken2_db_name": {
                     "type": "string",
                     "default": "human",
                     "fa_icon": "fab fa-gitkraken",
                     "description": "Name for host genome as recognised by Kraken2 when using the 'kraken2 build' command."
+                },
+                "skip_kraken2": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip Kraken2 process for removing host classified reads."
                 }
             }
         },
@@ -184,10 +199,20 @@
                     "description": "This option unsets the '-e' parameter in 'ivar trim' to discard reads without primers.",
                     "fa_icon": "fas fa-cut"
                 },
-                "skip_variants": {
+                "filter_duplicates": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-clone",
+                    "description": "Filtered duplicates reads detected by Picard MarkDuplicates from alignments."
+                },
+                "save_unaligned": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Save unaligned reads in FastQ format from Bowtie 2 to the results directory."
+                },
+                "skip_ivar_trim": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
-                    "description": "Specify this parameter to skip all of the variant calling and mapping steps in the pipeline."
+                    "description": "Skip iVar primer trimming step. Not recommended for --protocol amplicon."
                 },
                 "skip_markduplicates": {
                     "type": "boolean",
@@ -205,31 +230,30 @@
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip genome-wide and amplicon coverage plot generation from mosdepth output."
                 },
+                "skip_consensus": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip genome consensus creation step and any downstream QC."
+                },
+                "skip_variants_snpeff": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip SnpEff and SnpSift annotation of variants."
+                },
                 "skip_variants_quast": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip generation of QUAST aggregated report for consensus sequences."
                 },
-                "skip_fastp": {
-                    "type": "string"
-                },
-                "filter_duplicates": {
-                    "type": "string"
-                },
-                "save_unaligned": {
-                    "type": "string"
-                },
-                "skip_variants_snpeff": {
-                    "type": "string"
-                },
-                "skip_consensus": {
-                    "type": "string"
-                },
-                "skip_ivar_trim": {
-                    "type": "string"
-                },
                 "skip_variants_pangolin": {
-                    "type": "string"
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip Pangolin lineage analysis for genome consensus sequence."
+                },
+                "skip_variants": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Specify this parameter to skip all of the variant calling and mapping steps in the pipeline."
                 }
             },
             "fa_icon": "fas fa-dna"
@@ -245,6 +269,27 @@
                     "default": "spades",
                     "description": "Specify which assembly algorithms you would like to use. Available options are spades, unicycler and minia.",
                     "fa_icon": "fas fa-random"
+                },
+                "spades_mode": {
+                    "type": "string",
+                    "default": "rnaviral",
+                    "fa_icon": "fab fa-digg",
+                    "description": "Specify the SPAdes mode you would like to run. Supported options are 'rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio'."
+                },
+                "spades_hmm": {
+                    "type": "string",
+                    "fa_icon": "fab fa-digg",
+                    "description": "Path to profile HMMs specific for gene/organism to enhance SPAdes assembly."
+                },
+                "skip_cutadapt": {
+                    "type": "boolean",
+                    "description": "Skip the amplicon trimming step with Cutadapt when using --protocol amplicon.",
+                    "fa_icon": "fas fa-fast-forward"
+                },
+                "skip_bandage": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip Bandage image creation for assembly visualisation."
                 },
                 "skip_blast": {
                     "type": "boolean",
@@ -266,34 +311,25 @@
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip variant graph creation and variant calling relative to reference genome."
                 },
+                "skip_assembly_snpeff": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip SnpEff and SnpSift annotation of variants called from the assembly variant graph."
+                },
                 "skip_assembly_quast": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip generation of QUAST aggregated report for assemblies."
                 },
+                "skip_assembly_pangolin": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip Pangolin lineage analysis for genome assembly."
+                },
                 "skip_assembly": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Specify this parameter to skip all of the de novo assembly steps in the pipeline."
-                },
-                "skip_cutadapt": {
-                    "type": "string"
-                },
-                "spades_mode": {
-                    "type": "string",
-                    "default": "rnaviral"
-                },
-                "spades_hmm": {
-                    "type": "string"
-                },
-                "skip_bandage": {
-                    "type": "string"
-                },
-                "skip_assembly_snpeff": {
-                    "type": "string"
-                },
-                "skip_assembly_pangolin": {
-                    "type": "string"
                 }
             },
             "fa_icon": "fas fa-random"
@@ -315,7 +351,9 @@
                     "description": "Skip MultiQC."
                 },
                 "skip_qc": {
-                    "type": "string"
+                    "type": "boolean",
+                    "description": "Skip all QC steps except for MultiQC.",
+                    "fa_icon": "fas fa-fast-forward"
                 }
             },
             "fa_icon": "fas fa-fast-forward"
@@ -387,7 +425,9 @@
                 },
                 "multiqc_title": {
                     "type": "string",
-                    "hidden": true
+                    "hidden": true,
+                    "fa_icon": "fas fa-signature",
+                    "description": "Custom title for the MultiQC report."
                 },
                 "tracedir": {
                     "type": "string",
@@ -397,12 +437,17 @@
                     "hidden": true
                 },
                 "enable_conda": {
-                    "type": "string",
-                    "hidden": true
+                    "type": "boolean",
+                    "hidden": true,
+                    "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
+                    "fa_icon": "fas fa-bacon"
                 },
                 "singularity_pull_docker_container": {
-                    "type": "string",
-                    "hidden": true
+                    "type": "boolean",
+                    "hidden": true,
+                    "description": "Instead of directly downloading Singularity images for use with Singularity, force the workflow to pull and convert Docker containers instead.",
+                    "fa_icon": "fas fa-toolbox",
+                    "help_text": "This may be useful for example if you are unable to directly pull Singularity containers to run the pipeline due to http/https proxy issues."
                 }
             }
         },
@@ -494,10 +539,10 @@
             "$ref": "#/definitions/input_output_options"
         },
         {
-            "$ref": "#/definitions/reference_genome_options"
+            "$ref": "#/definitions/sra_download"
         },
         {
-            "$ref": "#/definitions/sra_download"
+            "$ref": "#/definitions/reference_genome_options"
         },
         {
             "$ref": "#/definitions/read_trimming_options"
