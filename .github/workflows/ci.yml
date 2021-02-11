@@ -71,7 +71,7 @@ jobs:
       NXF_ANSI_LOG: false
     strategy:
       matrix:
-        parameters: [--skip_sra_fastq_download --save_merged_fastq, '']
+        parameters: [--skip_sra_fastq_download, '']
 
     steps:
       - name: Check out pipeline code

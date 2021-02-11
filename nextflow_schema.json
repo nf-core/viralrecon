@@ -472,9 +472,6 @@
             "type": "string",
             "default": "illumina"
         },
-        "save_merged_fastq": {
-            "type": "string"
-        },
         "skip_sra_fastq_download": {
             "type": "string"
         },

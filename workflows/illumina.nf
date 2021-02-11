@@ -80,20 +80,14 @@ ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_hea
 // Don't overwrite global params.modules, create a copy instead and use that within the main script.
 def modules = params.modules.clone()
 
-def cat_fastq_options = modules['cat_fastq']
-if (!params.save_merged_fastq) { cat_fastq_options['publish_files'] = false }
-
-def cutadapt_options = modules['cutadapt']
-if (params.save_trimmed) { cutadapt_options.publish_files.put('fastq.gz','') }
-
 def multiqc_options   = modules['multiqc']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 
-include { CAT_FASTQ                  } from '../modules/local/cat_fastq'                  addParams( options: cat_fastq_options                   ) 
+include { CAT_FASTQ                  } from '../modules/local/cat_fastq'                  addParams( options: modules['cat_fastq']                ) 
 include { MULTIQC_CUSTOM_FAIL_MAPPED } from '../modules/local/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]              )
 include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'   addParams( options: modules['picard_collectwgsmetrics'] )
 include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'              addParams( options: modules['bcftools_isec']            ) 
-include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: cutadapt_options                    )
+include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: modules['cutadapt']                 )
 include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'                addParams( options: modules['kraken2_run']              ) 
 include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'      addParams( options: [publish_files: ['csv':'']]         )
 include { MULTIQC                    } from '../modules/local/multiqc'                    addParams( options: multiqc_options                     )
@@ -170,7 +164,6 @@ include { SAMTOOLS_MPILEUP              } from '../modules/nf-core/software/samt
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
  */
 def fastp_options = modules['fastp']
-if (params.save_trimmed)      { fastp_options.publish_files.put('trim.fastq.gz','') }
 if (params.save_trimmed_fail) { fastp_options.publish_files.put('fail.fastq.gz','') }
 
 def bowtie2_align_options = modules['bowtie2_align']
