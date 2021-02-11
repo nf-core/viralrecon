@@ -123,7 +123,7 @@ A file called `summary_variants_metrics_mqc.tsv` containing a selection of read 
   <summary>Output files</summary>
 
 * `variants/bam/`
-  * `<SAMPLE>.bam`: Original BAM file created by Bowtie 2. 
+  * `<SAMPLE>.bam`: Original BAM file created by Bowtie 2.
 * `variants/bam/log/`
   * `<SAMPLE>.bowtie2.log`: Bowtie 2 mapping log file.
 
