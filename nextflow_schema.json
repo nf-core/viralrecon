@@ -191,6 +191,7 @@
                 },
                 "skip_markduplicates": {
                     "type": "boolean",
+                    "default": true,
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip picard MarkDuplicates step."
                 },
