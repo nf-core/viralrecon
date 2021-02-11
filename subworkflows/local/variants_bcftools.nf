@@ -15,11 +15,13 @@ params.snpsift_options             = [:]
 params.snpeff_bgzip_options        = [:]
 params.snpeff_tabix_options        = [:]
 params.snpeff_stats_options        = [:]
+params.pangolin_options             = [:]
 
-include { BCFTOOLS_MPILEUP } from '../../modules/local/bcftools_mpileup'      addParams( options: params.bcftools_mpileup_options ) 
-include { QUAST            } from '../../modules/nf-core/software/quast/main' addParams( options: params.quast_options            )
-include { MAKE_CONSENSUS   } from './make_consensus'                          addParams( genomecov_options: params.consensus_genomecov_options, merge_options: params.consensus_merge_options, mask_options: params.consensus_mask_options, maskfasta_options: params.consensus_maskfasta_options, bcftools_options: params.consensus_bcftools_options, plot_bases_options: params.consensus_plot_options )
-include { SNPEFF_SNPSIFT   } from './snpeff_snpsift'                          addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
+include { BCFTOOLS_MPILEUP } from '../../modules/local/bcftools_mpileup'         addParams( options: params.bcftools_mpileup_options ) 
+include { QUAST            } from '../../modules/nf-core/software/quast/main'    addParams( options: params.quast_options            )
+include { PANGOLIN         } from '../../modules/nf-core/software/pangolin/main' addParams( options: params.pangolin_options         )
+include { MAKE_CONSENSUS   } from './make_consensus'                             addParams( genomecov_options: params.consensus_genomecov_options, merge_options: params.consensus_merge_options, mask_options: params.consensus_mask_options, maskfasta_options: params.consensus_maskfasta_options, bcftools_options: params.consensus_bcftools_options, plot_bases_options: params.consensus_plot_options )
+include { SNPEFF_SNPSIFT   } from './snpeff_snpsift'                             addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
 
 workflow VARIANTS_BCFTOOLS {
     take:
@@ -53,6 +55,13 @@ workflow VARIANTS_BCFTOOLS {
         SNPEFF_SNPSIFT ( BCFTOOLS_MPILEUP.out.vcf, snpeff_db, snpeff_config, fasta )
     }
 
+    /*
+     * Panoglin lineage analysis
+     */
+    if (!skip_pangolin) {
+        PANGOLIN ( MAKE_CONSENSUS.out.fasta )
+    }
+
     emit:
     vcf              = BCFTOOLS_MPILEUP.out.vcf            // channel: [ val(meta), [ vcf ] ]
     tbi              = BCFTOOLS_MPILEUP.out.tbi            // channel: [ val(meta), [ tbi ] ]
@@ -77,4 +86,8 @@ workflow VARIANTS_BCFTOOLS {
     snpsift_txt      = SNPEFF_SNPSIFT.out.snpsift_txt      // channel: [ val(meta), [ txt ] ]
     snpeff_version   = SNPEFF_SNPSIFT.out.snpeff_version   //    path: *.version.txt
     snpsift_version  = SNPEFF_SNPSIFT.out.snpsift_version  //    path: *.version.txt
+
+    pangolin_report  = PANGOLIN.out.report                // channel: [ val(meta), [ csv ] ]
+    pangolin_version = PANGOLIN.out.version               //    path: *.version.txt
+
 }

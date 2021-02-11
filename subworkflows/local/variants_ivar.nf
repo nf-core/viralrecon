@@ -15,14 +15,16 @@ params.snpsift_options              = [:]
 params.snpeff_bgzip_options         = [:]
 params.snpeff_tabix_options         = [:]
 params.snpeff_stats_options         = [:]
+params.pangolin_options             = [:]
 
-include { IVAR_VARIANTS         } from '../../modules/local/ivar_variants'         addParams( options: params.ivar_variants_options        )
-include { IVAR_CONSENSUS        } from '../../modules/local/ivar_consensus'        addParams( options: params.ivar_consensus_options       )
-include { IVAR_VARIANTS_TO_VCF  } from '../../modules/local/ivar_variants_to_vcf'  addParams( options: params.ivar_variants_to_vcf_options )
-include { PLOT_BASE_DENSITY     } from '../../modules/local/plot_base_density'     addParams( options: params.consensus_plot_options       )
-include { QUAST                 } from '../../modules/nf-core/software/quast/main' addParams( options: params.quast_options                )
-include { VCF_BGZIP_TABIX_STATS } from '../nf-core/vcf_bgzip_tabix_stats'          addParams( bgzip_options: params.bcftools_bgzip_options, tabix_options: params.bcftools_tabix_options, stats_options: params.bcftools_stats_options )
-include { SNPEFF_SNPSIFT        } from './snpeff_snpsift'                          addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
+include { IVAR_VARIANTS         } from '../../modules/local/ivar_variants'            addParams( options: params.ivar_variants_options        )
+include { IVAR_CONSENSUS        } from '../../modules/local/ivar_consensus'           addParams( options: params.ivar_consensus_options       )
+include { IVAR_VARIANTS_TO_VCF  } from '../../modules/local/ivar_variants_to_vcf'     addParams( options: params.ivar_variants_to_vcf_options )
+include { PLOT_BASE_DENSITY     } from '../../modules/local/plot_base_density'        addParams( options: params.consensus_plot_options       )
+include { QUAST                 } from '../../modules/nf-core/software/quast/main'    addParams( options: params.quast_options                )
+include { PANGOLIN              } from '../../modules/nf-core/software/pangolin/main' addParams( options: params.pangolin_options             )
+include { VCF_BGZIP_TABIX_STATS } from '../nf-core/vcf_bgzip_tabix_stats'             addParams( bgzip_options: params.bcftools_bgzip_options, tabix_options: params.bcftools_tabix_options, stats_options: params.bcftools_stats_options )
+include { SNPEFF_SNPSIFT        } from './snpeff_snpsift'                             addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
 
 workflow VARIANTS_IVAR {
     take:
@@ -66,6 +68,13 @@ workflow VARIANTS_IVAR {
         SNPEFF_SNPSIFT ( VCF_BGZIP_TABIX_STATS.out.vcf, snpeff_db, snpeff_config, fasta )
     }
 
+    /*
+     * Panoglin lineage analysis
+     */
+    if (!skip_pangolin) {
+        PANGOLIN ( IVAR_CONSENSUS.out.fasta )
+    }
+
     emit:
     tsv              = IVAR_VARIANTS.out.tsv              // channel: [ val(meta), [ tsv ] ]
     ivar_version     = IVAR_VARIANTS.out.version          //    path: *.version.txt
@@ -98,5 +107,8 @@ workflow VARIANTS_IVAR {
     snpsift_txt      = SNPEFF_SNPSIFT.out.snpsift_txt     // channel: [ val(meta), [ txt ] ]
     snpeff_version   = SNPEFF_SNPSIFT.out.snpeff_version  //    path: *.version.txt
     snpsift_version  = SNPEFF_SNPSIFT.out.snpsift_version //    path: *.version.txt
+
+    pangolin_report  = PANGOLIN.out.report                // channel: [ val(meta), [ csv ] ]
+    pangolin_version = PANGOLIN.out.version               //    path: *.version.txt
 }
 
