@@ -31,11 +31,9 @@ process SRA_TO_SAMPLESHEET {
 
     // Add required fields for the pipeline to the beginning of the map
     pipeline_map = [
-        group       : "${meta.id.split('_')[0..-2].join('_')}",
-        replicate   : 1,
+        sample      : "${meta.id.split('_')[0..-2].join('_')}",
         fastq_1     : "${params.outdir}/${params.results_dir}/${fastq[0]}",
-        fastq_2     : meta.single_end ? '' : "${params.outdir}/${params.results_dir}/${fastq[1]}",
-        strandedness: 'unstranded'
+        fastq_2     : meta.single_end ? '' : "${params.outdir}/${params.results_dir}/${fastq[1]}"
     ]
     pipeline_map << meta_map
 
