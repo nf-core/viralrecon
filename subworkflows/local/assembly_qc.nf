@@ -7,10 +7,10 @@ params.abacas_options    = [:]
 params.plasmidid_options = [:]
 params.quast_options     = [:]
 
-include { BLAST_BLASTN } from '../../modules/local/blast_blastn'          addParams( options: params.blastn_options    ) 
-include { ABACAS       } from '../../modules/local/abacas'                addParams( options: params.abacas_options    )
-include { PLASMIDID    } from '../../modules/local/plasmidid'             addParams( options: params.plasmidid_options )
-include { QUAST        } from '../../modules/nf-core/software/quast/main' addParams( options: params.quast_options     )
+include { ABACAS       } from '../../modules/local/abacas'                       addParams( options: params.abacas_options    )
+include { PLASMIDID    } from '../../modules/local/plasmidid'                    addParams( options: params.plasmidid_options )
+include { BLAST_BLASTN } from '../../modules/nf-core/software/blast/blastn/main' addParams( options: params.blastn_options    ) 
+include { QUAST        } from '../../modules/nf-core/software/quast/main'        addParams( options: params.quast_options     )
 
 workflow ASSEMBLY_QC {
     take:

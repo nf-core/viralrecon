@@ -22,7 +22,7 @@ include { UNTAR as UNTAR_KRAKEN2_DB    } from '../../modules/nf-core/software/un
 include { UNTAR as UNTAR_BLAST_DB      } from '../../modules/nf-core/software/untar/main'             addParams( options: params.db_options                )
 include { BOWTIE2_BUILD                } from '../../modules/nf-core/software/bowtie2/build/main'     addParams( options: params.bowtie2_build_options     )
 include { BLAST_MAKEBLASTDB            } from '../../modules/nf-core/software/blast/makeblastdb/main' addParams( options: params.makeblastdb_options       )
-include { BEDTOOLS_GETFASTA            } from '../../modules/local/bedtools_getfasta'                 addParams( options: params.bedtools_getfasta_options )
+include { BEDTOOLS_GETFASTA            } from '../../modules/nf-core/software/bedtools/getfasta/main' addParams( options: params.bedtools_getfasta_options )
 include { COLLAPSE_PRIMERS             } from '../../modules/local/collapse_primers'                  addParams( options: params.collapse_primers_options  )
 include { KRAKEN2_BUILD                } from '../../modules/local/kraken2_build'                     addParams( options: params.kraken2_build_options     )
 include { SNPEFF_BUILD                 } from '../../modules/local/snpeff_build'                      addParams( options: params.snpeff_build_options      )
