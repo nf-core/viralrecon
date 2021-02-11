@@ -29,7 +29,7 @@ include { SNPEFF_BUILD                 } from '../../modules/local/snpeff_build'
 
 workflow PREPARE_GENOME {
     take:
-    ch_dummy_file
+    dummy_file
 
     main:
     /*
@@ -51,7 +51,7 @@ workflow PREPARE_GENOME {
             ch_gff = file(params.gff)
         }
     } else {
-        ch_gff = ch_dummy_file
+        ch_gff = dummy_file
     }
 
     /*
@@ -90,9 +90,9 @@ workflow PREPARE_GENOME {
     /*
      * Prepare reference files required for de novo assembly
      */
-    ch_primer_fasta = Channel.empty()
     ch_blast_db     = Channel.empty()
     ch_kraken2_db   = Channel.empty()
+    ch_primer_fasta = Channel.empty()
     if (!params.skip_assembly) {
         
         if (!params.skip_blast) {
