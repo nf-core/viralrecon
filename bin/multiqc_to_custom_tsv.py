@@ -126,14 +126,10 @@ def main(args=None):
                                                                     ('# INDELs (iVar)', ['number_of_indels'])]),
         ('multiqc_bcftools_stats_bcftools_bcftools.yaml',          [('# SNPs (BCFTools)', ['number_of_SNPs']),
                                                                     ('# INDELs (BCFTools)', ['number_of_indels'])]),
-        ('multiqc_bcftools_stats_bcftools_varscan2.yaml',          [('# SNPs (VarScan 2)', ['number_of_SNPs']),
-                                                                    ('# INDELs (VarScan 2)', ['number_of_indels'])]),
         ('multiqc_snpeff_snpeff_ivar.yaml',                        [('# Missense variants (iVar)', ['MISSENSE'])]),
         ('multiqc_snpeff_snpeff_bcftools.yaml',                    [('# Missense variants (BCFTools)', ['MISSENSE'])]),
-        ('multiqc_snpeff_snpeff_varscan2.yaml',                    [('# Missense variants (VarScan 2)', ['MISSENSE'])]),
         ('multiqc_quast_quast_ivar.yaml',                          [('# Ns per 100kb consensus (iVar)', ["# N's per 100 kbp"])]),
-        ('multiqc_quast_quast_bcftools.yaml',                      [('# Ns per 100kb consensus (BCFTools)', ["# N's per 100 kbp"])]),
-        ('multiqc_quast_quast_varscan2.yaml',                      [('# Ns per 100kb consensus (VarScan 2)', ["# N's per 100 kbp"])])
+        ('multiqc_quast_quast_bcftools.yaml',                      [('# Ns per 100kb consensus (BCFTools)', ["# N's per 100 kbp"])])
     ]
 
     AssemblyFileFieldList = [
