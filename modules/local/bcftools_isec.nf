@@ -18,7 +18,7 @@ process BCFTOOLS_ISEC {
     }
 
     input:
-    tuple val(meta), path('ivar/*'), path('ivar/*'), path('bcftools/*'), path('bcftools/*'), path('varscan/*'), path('varscan/*')
+    tuple val(meta), path('ivar/*'), path('ivar/*'), path('bcftools/*'), path('bcftools/*')
 
     output:
     tuple val(meta), path("${prefix}"), emit: results
