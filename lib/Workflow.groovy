@@ -1,5 +1,5 @@
 /*
- * This file holds several functions used to perform standard checks for the nf-core/viralrecon pipeline.
+ * This file holds several functions specific to the pipeline.
  */
 
 class Workflow {
