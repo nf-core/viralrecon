@@ -26,9 +26,9 @@ if (params.help) {
 /* --        GENOME PARAMETER VALUES           -- */
 ////////////////////////////////////////////////////
 
-params.fasta         = Checks.get_genome_attribute(params, 'fasta')
-params.gff           = Checks.get_genome_attribute(params, 'gff')
-params.bowtie2_index = Checks.get_genome_attribute(params, 'bowtie2')
+params.fasta         = Workflow.get_genome_attribute(params, 'fasta')
+params.gff           = Workflow.get_genome_attribute(params, 'gff')
+params.bowtie2_index = Workflow.get_genome_attribute(params, 'bowtie2')
 
 ////////////////////////////////////////////////////
 /* --         PRINT PARAMETER SUMMARY          -- */

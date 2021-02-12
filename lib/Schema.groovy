@@ -100,7 +100,7 @@ class Schema {
             output += "\n"
         }
         output += Headers.dashed_line(params.monochrome_logs)
-        output += "\n\n" + Checks.citation(workflow)
+        output += "\n\n" + Workflow.citation(workflow)
         output += "\n\n" + Headers.dashed_line(params.monochrome_logs)
         return output
     }
@@ -197,7 +197,7 @@ class Schema {
             }
         }
         output += Headers.dashed_line(params.monochrome_logs)
-        output += "\n\n" + Checks.citation(workflow)
+        output += "\n\n" + Workflow.citation(workflow)
         output += "\n\n" + Headers.dashed_line(params.monochrome_logs)
         return output
     }

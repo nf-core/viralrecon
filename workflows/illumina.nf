@@ -8,55 +8,32 @@ params.summary_params = [:]
 /* --          VALIDATE INPUTS                 -- */
 ////////////////////////////////////////////////////
 
-// Check genome key exists if provided
-Checks.genome_exists(params, log)
+def valid_params = [
+    protocols   : ['metagenomic', 'amplicon'],
+    callers     : ['ivar', 'bcftools'],
+    assemblers  : ['spades', 'unicycler', 'minia'],
+    spades_modes: ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
+]
+
+// Validate input parameters
+Workflow.validate_params(params, log, valid_params)
 
 // Check input path parameters to see if they exist
 def checkPathParamList = [
-    params.input, params.fasta, params.gff, 
-    params.bowtie2_index, params.primer_bed, params.primer_fasta,
-    params.multiqc_config
+    params.input, params.fasta, params.gff, params.bowtie2_index,
+    params.kraken2_db, params.primer_bed, params.primer_fasta,
+    params.blast_db, params.spades_hmm, params.multiqc_config
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
-// Check mandatory parameters
-if (params.input)  { ch_input = file(params.input) } else { exit 1, 'Input samplesheet file not specified!' }
-if (!params.fasta) { exit 1, 'Genome fasta file not specified!' }
+if (params.input)      { ch_input = file(params.input)           } else { exit 1, 'Input samplesheet file not specified!' }
+if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   }
 
-def protocolList = ['metagenomic', 'amplicon']
-if (!protocolList.contains(params.protocol)) {
-    exit 1, "Invalid protocol option: ${params.protocol}. Valid options: ${protocolList.join(', ')}"
-}
-
-// Variant calling parameter validation
-def callerList = ['ivar', 'bcftools']
-def callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
-if ((callerList + callers).unique().size() != callerList.size()) {
-    exit 1, "Invalid variant calller option: ${params.callers}. Valid options: ${callerList.join(', ')}"
-}
-
-if (params.protocol == 'amplicon' && !params.skip_variants && !params.primer_bed) {
-    exit 1, "To perform variant calling in 'amplicon' mode please provide a valid primer BED file!"
-}
-
-// Assembly parameter validation
-def assemblerList = ['spades', 'unicycler', 'minia']
+def callers    = params.callers    ? params.callers.split(',').collect{ it.trim().toLowerCase() }    : []
 def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
-if ((assemblerList + assemblers).unique().size() != assemblerList.size()) {
-    exit 1, "Invalid assembler option: ${params.assemblers}. Valid options: ${assemblerList.join(', ')}"
-}
-
-def spadesModeList = ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
-if (!spadesModeList.contains(params.spades_mode)) {
-    exit 1, "Invalid spades mode option: ${params.spades_mode}. Valid options: ${spadesModeList.join(', ')}"
-}
-if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file }
-
-// if (!params.skip_kraken2 && !params.kraken2_db) {
-//     if (!params.kraken2_db_name) { exit 1, "Please specify a valid name to build Kraken2 database for host e.g. 'human'!" }
 
 ////////////////////////////////////////////////////
 /* --          CONFIG FILES                    -- */
@@ -189,7 +166,7 @@ workflow ILLUMINA {
     )
 
     // Check genome fasta only contains a single contig
-    Checks.is_multifasta(PREPARE_GENOME.out.fasta, log)
+    Workflow.is_multifasta(PREPARE_GENOME.out.fasta, log)
     
     /*
      * SUBWORKFLOW: Read in samplesheet, validate and stage input files
@@ -283,7 +260,7 @@ workflow ILLUMINA {
     ch_fail_mapping_multiqc = Channel.empty()
     if (!params.skip_variants) {
         ch_bowtie2_flagstat_multiqc
-            .map { meta, flagstat -> [ meta ] + Checks.get_flagstat_mapped_reads(workflow, params, log, flagstat) }
+            .map { meta, flagstat -> [ meta ] + Workflow.get_flagstat_mapped_reads(workflow, params, log, flagstat) }
             .set { ch_mapped_reads }
 
         ch_bam

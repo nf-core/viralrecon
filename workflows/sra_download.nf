@@ -103,7 +103,7 @@ workflow SRA_DOWNLOAD {
 workflow.onComplete {
     Completion.email(workflow, params, params.summary_params, projectDir, log)
     Completion.summary(workflow, params, log)
-    Checks.sra_download(log)
+    Viralrecon.sra_download(log)
 }
 
 ////////////////////////////////////////////////////
