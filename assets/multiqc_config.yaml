@@ -9,6 +9,7 @@ run_modules:
     - custom_content
     - fastqc
     - fastp
+    - kraken
     - bowtie2
     - samtools
     - picard
@@ -18,7 +19,6 @@ run_modules:
     - snpeff
     - quast
     - cutadapt
-    - kraken
 
 exclude_modules:
     - 'general_stats'
@@ -60,6 +60,9 @@ module_order:
         info: 'This section of the report shows FastQC results for reads after adapter and quality trimming.'
         path_filters:
             - './fastp/*.zip'
+    - kraken:
+        name: 'PREPROCESS: Kraken 2'
+        info: 'This section of the report shows Kraken 2 classification results for reads after adapter trimming with fastp.'
     - bowtie2:
         name: 'VARIANTS: Bowtie 2'
         info: 'This section of the report shows Bowtie 2 mapping results for reads after adapter trimming and quality trimming.'
@@ -135,9 +138,6 @@ module_order:
         info: 'This section of the report shows FastQC results for reads after primer sequence trimming with Cutadapt.'
         path_filters:
             - './cutadapt/*.zip'
-    - kraken:
-        name: 'ASSEMBLY: Kraken 2'
-        info: 'This section of the report shows Kraken 2 classification results for reads after primer sequence trimming with Cutadapt.'
     - quast:
         name: 'ASSEMBLY: QUAST (SPAdes)'
         anchor: 'quast_spades'
@@ -212,6 +212,7 @@ custom_plot_config:
         smooth_points: 1000
 
 extra_fn_clean_exts:
+    - '.kraken2'
     - '.bowtie2'
     - '.ivar_trim'
     - '.mpileup'
@@ -222,7 +223,6 @@ extra_fn_clean_exts:
     - '.primer_trim'
     - '.scaffolds'
     - '.contigs'
-    - '.kraken2'
 
 # # Customise the module search patterns to speed up execution time
 # #  - Skip module sub-tools that we are not interested in
