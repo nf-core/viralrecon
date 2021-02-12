@@ -57,6 +57,22 @@ workflow PREPARE_GENOME {
     /*
      * Prepare reference files required for variant calling
      */
+    ch_kraken2_db = Channel.empty()
+    if (!params.skip_kraken2) {
+        if (params.kraken2_db) {
+            if (params.kraken2_db.endsWith('.tar.gz')) {
+                ch_kraken2_db = UNTAR_KRAKEN2_DB ( params.kraken2_db ).untar
+            } else {
+                ch_kraken2_db = file(params.kraken2_db)
+            }
+        } else {
+            ch_kraken2_db = KRAKEN2_BUILD ( params.kraken2_db_name ).db
+        }
+    }
+
+    /*
+     * Prepare reference files required for variant calling
+     */
     ch_bowtie2_index        = Channel.empty()
     ch_primer_bed           = Channel.empty()
     ch_primer_collapsed_bed = Channel.empty()
@@ -91,7 +107,6 @@ workflow PREPARE_GENOME {
      * Prepare reference files required for de novo assembly
      */
     ch_blast_db     = Channel.empty()
-    ch_kraken2_db   = Channel.empty()
     ch_primer_fasta = Channel.empty()
     if (!params.skip_assembly) {
         
@@ -104,18 +119,6 @@ workflow PREPARE_GENOME {
                 }
             } else {
                 ch_blast_db = BLAST_MAKEBLASTDB ( ch_fasta ).db
-            }
-        }
-
-        if (!params.skip_kraken2) {
-            if (params.kraken2_db) {
-                if (params.kraken2_db.endsWith('.tar.gz')) {
-                    ch_kraken2_db = UNTAR_KRAKEN2_DB ( params.kraken2_db ).untar
-                } else {
-                    ch_kraken2_db = file(params.kraken2_db)
-                }
-            } else {
-                ch_kraken2_db = KRAKEN2_BUILD ( params.kraken2_db_name ).db
             }
         }
 
