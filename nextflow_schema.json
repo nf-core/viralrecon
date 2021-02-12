@@ -157,6 +157,17 @@
             "default": "",
             "fa_icon": "fab fa-gitkraken",
             "properties": {
+                "kraken2_variants_host_filter": {
+                    "type": "boolean",
+                    "fa_icon": "fab fa-gitkraken",
+                    "description": "Remove host reads identified by Kraken2 before running variant calling steps in the pipeline."
+                },
+                "kraken2_assembly_host_filter": {
+                    "type": "boolean",
+                    "default": true,
+                    "fa_icon": "fab fa-gitkraken",
+                    "description": "Remove host reads identified by Kraken2 before running aseembly steps in the pipeline."
+                },
                 "kraken2_db": {
                     "type": "string",
                     "default": "s3://nf-core-awsmegatests/viralrecon/input_data/kraken2_human.tar.gz",
