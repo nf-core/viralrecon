@@ -227,10 +227,32 @@ workflow ILLUMINA {
     FASTQC_FASTP (
         ch_cat_fastq
     )
-    ch_trim_fastq        = FASTQC_FASTP.out.reads
+    ch_variants_fastq    = FASTQC_FASTP.out.reads
     ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
     ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
     
+    /*
+     * MODULE: Run Kraken2 for removal of host reads
+     */
+    ch_assembly_fastq  = ch_variants_fastq
+    ch_kraken2_multiqc = Channel.empty()
+    if (!params.skip_kraken2) {
+        KRAKEN2_RUN ( 
+            ch_variants_fastq,
+            PREPARE_GENOME.out.kraken2_db
+        )
+        ch_kraken2_multiqc   = KRAKEN2_RUN.out.txt
+        ch_software_versions = ch_software_versions.mix(KRAKEN2_RUN.out.version.first().ifEmpty(null))
+
+        if (params.kraken2_variants_host_filter)
+            ch_variants_fastq = KRAKEN2_RUN.out.unclassified
+        }
+
+        if (params.kraken2_assembly_host_filter)
+            ch_assembly_fastq = KRAKEN2_RUN.out.unclassified
+        }        
+    }
+
     /*
      * SUBWORKFLOW: Alignment with Bowtie2
      */
@@ -242,7 +264,7 @@ workflow ILLUMINA {
     ch_bowtie2_idxstats_multiqc = Channel.empty()
     if (!params.skip_variants) {
         ALIGN_BOWTIE2 (
-            ch_trim_fastq,
+            ch_variants_fastq,
             PREPARE_GENOME.out.bowtie2_index
         )
         ch_bam                      = ALIGN_BOWTIE2.out.bam
@@ -473,10 +495,10 @@ workflow ILLUMINA {
     ch_cutadapt_fastqc_multiqc = Channel.empty()
     if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
         CUTADAPT (
-            ch_trim_fastq,
+            ch_assembly_fastq,
             PREPARE_GENOME.out.primer_fasta
         )
-        ch_trim_fastq        = CUTADAPT.out.reads
+        ch_assembly_fastq    = CUTADAPT.out.reads
         ch_cutadapt_multiqc  = CUTADAPT.out.log
         ch_software_versions = ch_software_versions.mix(CUTADAPT.out.version.first().ifEmpty(null))
 
@@ -489,20 +511,6 @@ workflow ILLUMINA {
     }
 
     /*
-     * MODULE: Run Kraken2 for removal of host reads
-     */
-    ch_kraken2_multiqc = Channel.empty()
-    if (!params.skip_assembly && !params.skip_kraken2) {
-        KRAKEN2_RUN ( 
-            ch_trim_fastq,
-            PREPARE_GENOME.out.kraken2_db
-        )
-        ch_trim_fastq        = KRAKEN2_RUN.out.unclassified
-        ch_kraken2_multiqc   = KRAKEN2_RUN.out.txt
-        ch_software_versions = ch_software_versions.mix(KRAKEN2_RUN.out.version.first().ifEmpty(null))
-    }
-
-    /*
      * SUBWORKFLOW: Run SPAdes assembly and downstream analysis
      */
     ch_spades_quast_multiqc    = Channel.empty()
@@ -510,7 +518,7 @@ workflow ILLUMINA {
     // ch_spades_snpeff_multiqc   = Channel.empty()
     if (!params.skip_assembly && 'spades' in assemblers) {
         ASSEMBLY_SPADES (
-            ch_trim_fastq,
+            ch_assembly_fastq,
             ch_spades_hmm,
             params.spades_mode == 'corona',
             PREPARE_GENOME.out.fasta,
@@ -539,7 +547,7 @@ workflow ILLUMINA {
     // ch_unicycler_snpeff_multiqc   = Channel.empty()
     if (!params.skip_assembly && 'unicycler' in assemblers) {
         ASSEMBLY_UNICYCLER (
-            ch_trim_fastq,
+            ch_assembly_fastq,
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.gff,
             PREPARE_GENOME.out.blast_db,
@@ -566,7 +574,7 @@ workflow ILLUMINA {
     // ch_minia_snpeff_multiqc   = Channel.empty()
     if (!params.skip_assembly && 'minia' in assemblers) {
         ASSEMBLY_MINIA (
-            ch_trim_fastq,
+            ch_assembly_fastq,
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.gff,
             PREPARE_GENOME.out.blast_db,
