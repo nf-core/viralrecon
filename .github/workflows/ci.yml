@@ -20,27 +20,10 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: ['20.04.0', '']
+        nxf_ver: [20.11.0-edge]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
-
-      - name: Check if Dockerfile or Conda environment changed
-        uses: technote-space/get-diff-action@v4
-        with:
-          FILES: |
-            Dockerfile
-            environment.yml
-
-      - name: Build new docker image
-        if: env.MATCHED_FILES
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
-
-      - name: Pull docker image
-        if: ${{ !env.MATCHED_FILES }}
-        run: |
-          docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
       - name: Install Nextflow
         env:
@@ -53,36 +36,20 @@ jobs:
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test,docker
 
+
   parameters:
     name: Test workflow parameters
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
     runs-on: ubuntu-latest
     env:
-      NXF_VER: '20.04.0'
+      NXF_VER: '20.11.0-edge'
       NXF_ANSI_LOG: false
     strategy:
       matrix:
-        parameters: [--skip_adapter_trimming, --skip_markduplicates, --skip_variants, --skip_amplicon_trimming, --skip_kraken2, --skip_assembly, '--callers ivar --assemblers spades']
+        parameters: [--skip_fastp, --skip_markduplicates, --skip_variants, --skip_cutadapt, --skip_kraken2, --skip_assembly, '--spades_mode corona', '--spades_mode metaviral']
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
-
-      - name: Check if Dockerfile or Conda environment changed
-        uses: technote-space/get-diff-action@v4
-        with:
-          FILES: |
-            Dockerfile
-            environment.yml
-
-      - name: Build new docker image
-        if: env.MATCHED_FILES
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
-
-      - name: Pull docker image
-        if: ${{ !env.MATCHED_FILES }}
-        run: |
-          docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
       - name: Install Nextflow
         env:
@@ -100,31 +67,15 @@ jobs:
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
     runs-on: ubuntu-latest
     env:
-      NXF_VER: '20.04.0'
+      NXF_VER: '20.11.0-edge'
       NXF_ANSI_LOG: false
     strategy:
       matrix:
-        parameters: [--skip_sra, '']
+        parameters: [--skip_sra_fastq_download, '']
+
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
-
-      - name: Check if Dockerfile or Conda environment changed
-        uses: technote-space/get-diff-action@v4
-        with:
-          FILES: |
-            Dockerfile
-            environment.yml
-
-      - name: Build new docker image
-        if: env.MATCHED_FILES
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
-
-      - name: Pull docker image
-        if: ${{ !env.MATCHED_FILES }}
-        run: |
-          docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
       - name: Install Nextflow
         env:
@@ -133,7 +84,7 @@ jobs:
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
 
-      - name: Run pipeline with minimal data via SRA ids and various options
+      - name: Run pipeline to download SRA ids and various options
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_sra,docker ${{ matrix.parameters }}
 
@@ -142,7 +93,7 @@ jobs:
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
     runs-on: ubuntu-latest
     env:
-      NXF_VER: '20.04.0'
+      NXF_VER: '20.11.0-edge'
       NXF_ANSI_LOG: false
     strategy:
       matrix:
@@ -150,23 +101,6 @@ jobs:
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
-
-      - name: Check if Dockerfile or Conda environment changed
-        uses: technote-space/get-diff-action@v4
-        with:
-          FILES: |
-            Dockerfile
-            environment.yml
-
-      - name: Build new docker image
-        if: env.MATCHED_FILES
-        run: docker build --no-cache . -t nfcore/viralrecon:dev
-
-      - name: Pull docker image
-        if: ${{ !env.MATCHED_FILES }}
-        run: |
-          docker pull nfcore/viralrecon:dev
-          docker tag nfcore/viralrecon:dev nfcore/viralrecon:dev
 
       - name: Install Nextflow
         env:

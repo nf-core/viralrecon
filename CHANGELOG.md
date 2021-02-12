@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unpublished Version / DEV]
+## [[2.0dev](https://github.com/nf-core/rnaseq/releases/tag/2.0)] - 2021-XX-XX
 
 ### `Fixed`
 
@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### `Dependencies`
 
-## [1.1.0] - 2020-06-23
+## [[1.1.0](https://github.com/nf-core/rnaseq/releases/tag/1.1.0)] - 2020-06-23
 
 ### `Added`
 
@@ -61,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Update minia `3.2.3` -> `3.2.4`
 * Update plasmidid `1.5.2` -> `1.6.3`
 
-## [1.0.0] - 2020-06-01
+## [[1.0.0](https://github.com/nf-core/rnaseq/releases/tag/1.0.0)] - 2020-06-01
 
 Initial release of nf-core/viralrecon, created with the [nf-core](http://nf-co.re/) template.
 

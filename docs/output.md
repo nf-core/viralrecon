@@ -26,14 +26,14 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [picard MarkDuplicates](#picard-markduplicates) - Duplicate read marking and removal
   * [picard CollectMultipleMetrics](#picard-collectmultiplemetrics) - Whole genome coverage and alignment metrics
   * [mosdepth](#mosdepth) - Whole-genome and amplicon coverage metrics
-  * [VarScan 2, BCFTools, BEDTools](#varscan-2-bcftools-bedtools) *||* [iVar variants and iVar consensus](#ivar-variants-and-ivar-consensus) *||* [BCFTools and BEDTools](#bcftools-and-bedtools) - Variant calling and consensus sequence generation
+  * [iVar variants and iVar consensus](#ivar-variants-and-ivar-consensus) *||* [BCFTools and BEDTools](#bcftools-and-bedtools) - Variant calling and consensus sequence generation
     * [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
     * [QUAST](#quast) - Consensus assessment report
   * [BCFTools isec](#bcftools-isec) - Intersect variants across all callers
 * [De novo assembly](#de-novo-assembly)
   * [Cutadapt](#cutadapt) - Primer trimming for amplicon data
   * [Kraken 2](#kraken-2) - Removal of host reads
-  * [SPAdes](#spades) *||* [metaSPAdes](#metaspades) *||* [Unicycler](#unicycler) *||* [minia](#minia) - Viral genome assembly
+  * [SPAdes](#spades) *||* [Unicycler](#unicycler) *||* [minia](#minia) - Viral genome assembly
     * [BLAST](#blast) - Blast to reference assembly
     * [ABACAS](#abacas) - Order contigs according to reference genome
     * [PlasmidID](#plasmidid) - Assembly report and visualisation
@@ -107,8 +107,6 @@ If multiple libraries/runs have been provided for the same sample in the input s
 * `preprocess/fastp/fastqc/zips/`
   * `*.trim_fastqc.zip`: Zip archive containing the FastQC report.
 
-> **NB:** Post-trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
-
 </details>
 
 ![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
@@ -125,7 +123,7 @@ A file called `summary_variants_metrics_mqc.tsv` containing a selection of read 
   <summary>Output files</summary>
 
 * `variants/bam/`
-  * `<SAMPLE>.bam`: Original BAM file created by Bowtie 2. Only present if `--save_align_intermeds` parameter is supplied.
+  * `<SAMPLE>.bam`: Original BAM file created by Bowtie 2.
 * `variants/bam/log/`
   * `<SAMPLE>.bowtie2.log`: Bowtie 2 mapping log file.
 
@@ -146,15 +144,13 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 * `variants/bam/samtools_stats/`
   * SAMtools `<SAMPLE>.sorted.bam.flagstat`, `<SAMPLE>.sorted.bam.idxstats` and `<SAMPLE>.sorted.bam.stats` files generated from the alignment files.
 
-> **NB:** BAM files and their associated indices will only be saved in the results directory if the `--save_align_intermeds` parameter is supplied.
-
 </details>
 
 ![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
 
 ### iVar trim
 
-If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pasteur.fr/docs/ivar/1.0/manualpage.html) is used to trim amplicon primer sequences from the aligned reads. iVar uses the primer positions supplied in `--amplicon_bed` to soft clip primer sequences from a coordinate sorted BAM file.
+If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pasteur.fr/docs/ivar/1.0/manualpage.html) is used to trim amplicon primer sequences from the aligned reads. iVar uses the primer positions supplied in `--primer_bed` to soft clip primer sequences from a coordinate sorted BAM file.
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -166,8 +162,6 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
   * SAMtools `<SAMPLE>.trim.flagstat`, `<SAMPLE>.trim.idxstats` and `<SAMPLE>.trim.stats` files generated from the primer trimmed alignment files.
 * `variants/bam/log/`
   * `<SAMPLE>.trim.ivar.log`: iVar trim log file obtained from stdout.
-
-> **NB:** Post-trimmed BAM files and their associated indices will only be saved in the results directory if the `--save_align_intermeds` parameter is supplied.
 
 </details>
 
@@ -258,46 +252,6 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
   <img src="images/r_amplicon_barplot.png" alt="R - Sample per-amplicon coverage plot">
 </p>
 
-### VarScan 2, BCFTools, BEDTools
-
-[VarScan 2](http://dkoboldt.github.io/varscan/) is a platform-independent software tool to detect variants in NGS data. In this pipeline, VarScan 2 is used in conjunction with SAMtools in order to call both high and low frequency variants.
-
-[BCFtools](http://samtools.github.io/bcftools/bcftools.html) is a set of utilities that manipulate variant calls in [VCF](https://vcftools.github.io/specs.html) and its binary counterpart BCF format. BCFTools is used in the variant calling and *de novo* assembly steps of this pipeline to obtain basic statistics from the VCF output. It is also used in the VarScan 2 variant calling branch of the pipeline to generate a consensus sequence by integrating high frequency variant calls into the reference genome.
-
-[BEDTools](https://bedtools.readthedocs.io/en/latest/) is a swiss-army knife of tools for a wide-range of genomics analysis tasks. In this pipeline we use `bedtools genomecov` to compute the per-base mapped read coverage in bedGraph format, and `bedtools maskfasta` to mask sequences in a Fasta file based on intervals defined in a feature file. This may be useful for creating your own masked genome file based on custom annotations or for masking all but your target regions when aligning sequence data from a targeted capture experiment.
-
-<details markdown="1">
-  <summary>Output files</summary>
-
-* `variants/varscan2/`
-  * `<SAMPLE>.vcf.gz`: Low frequency variants VCF file.
-  * `<SAMPLE>.vcf.gz.tbi`: Low frequency variants VCF index file.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.vcf.gz`: High frequency variants VCF file.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.vcf.gz.tbi`: High frequency variants VCF index file.
-* `variants/varscan2/consensus/`
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.consensus.fa`: Consensus Fasta file generated by integrating the high frequency variants called by VarScan into the reference genome.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.consensus.masked.fa`: Masked consensus Fasta file.
-* `variants/varscan2/consensus/base_qc/`
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.ACTG_density.pdf`: Plot showing density of ACGT bases within the consensus sequence.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.base_counts.pdf`: Plot showing frequency and percentages of all bases in consensus sequence.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.base_counts.tsv`: File containing frequency and percentages of all bases in consensus sequence.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.N_density.pdf`: Plot showing density of N bases within the consensus sequence.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.N_run.tsv`: File containing start positions and width of N bases in consensus sequence.
-* `variants/varscan2/bcftools_stats/`
-  * `<SAMPLE>.bcftools_stats.txt`: Statistics and counts obtained from low frequency variants VCF file.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.bcftools_stats.txt`: Statistics and counts obtained from high frequency variants VCF file.
-* `variants/varscan2/log/`
-  * `<SAMPLE>.varscan2.log`: Log file generated from stderr by VarScan 2.
-* `variants/bam/mpileup/`
-  * `<SAMPLE>.<SUFFIX>.mpileup`: mpileup files summarize all the data from aligned reads at a given genomic position. Each row of the mpileup file gives similar information to a single vertical column of reads as visualised in IGV.
-
-> **NB:** The value of `<MAX_ALLELE_FREQ>` in the output file names above is determined by the `--max_allele_freq` parameter (Default: 0.8).  
-> **NB:** Output mpileup files will only be saved in the  directory if the `--save_mpileup` parameter is supplied. The naming convention for these files will depend on the preceeding steps that were run in the pipeline as described in the paragraph explaining the value of `<SUFFIX>` in the section above.
-
-</details>
-
-![MultiQC - VarScan 2 variants called plot](images/mqc_varscan2_plot.png)
-
 ### iVar variants and iVar consensus
 
 [iVar](https://github.com/andersen-lab/ivar/blob/master/docs/MANUAL.md) is a computational package that contains functions broadly useful for viral amplicon-based sequencing. We use iVar in this pipeline to [trim primer sequences](#ivar-trim) for amplicon input data as well as to call variants and for consensus sequence generation.
@@ -309,23 +263,23 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
   * `<SAMPLE>.tsv`: Low frequency variants in TSV format.
   * `<SAMPLE>.vcf.gz`: Low frequency variants VCF file.
   * `<SAMPLE>.vcf.gz.tbi`: Low frequency variants VCF index file.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.vcf.gz`: High frequency variants VCF file.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.vcf.gz.tbi`: High frequency variants VCF index file.
+  * `<SAMPLE>.vcf.gz`: High frequency variants VCF file.
+  * `<SAMPLE>.vcf.gz.tbi`: High frequency variants VCF index file.
 * `variants/ivar/consensus/`
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.consensus.fa`: Consensus Fasta file generated by iVar at the frequency threshold set by the `--max_allele_freq` parameter.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.consensus.qual.txt`: File with the average quality of each base in the consensus sequence.
+  * `<SAMPLE>.consensus.fa`: Consensus Fasta file generated by iVar.
+  * `<SAMPLE>.consensus.qual.txt`: File with the average quality of each base in the consensus sequence.
 * `variants/ivar/consensus/base_qc/`
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.ACTG_density.pdf`: Plot showing density of ACGT bases within the consensus sequence.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.base_counts.pdf`: Plot showing frequency and percentages of all bases in consensus sequence.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.base_counts.tsv`: File containing frequency and percentages of all bases in consensus sequence.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.N_density.pdf`: Plot showing density of N bases within the consensus sequence.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.N_run.tsv`: File containing start positions and width of N bases in consensus sequence.
+  * `<SAMPLE>.ACTG_density.pdf`: Plot showing density of ACGT bases within the consensus sequence.
+  * `<SAMPLE>.base_counts.pdf`: Plot showing frequency and percentages of all bases in consensus sequence.
+  * `<SAMPLE>.base_counts.tsv`: File containing frequency and percentages of all bases in consensus sequence.
+  * `<SAMPLE>.N_density.pdf`: Plot showing density of N bases within the consensus sequence.
+  * `<SAMPLE>.N_run.tsv`: File containing start positions and width of N bases in consensus sequence.
 * `variants/ivar/log/`
   * `<SAMPLE>.variant.counts.log`: Variant counts for low frequency variants.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.variant.counts.log`: Variant counts for high frequency variants.
+  * `<SAMPLE>.variant.counts.log`: Variant counts for high frequency variants.
 * `variants/ivar/bcftools_stats/`
   * `<SAMPLE>.bcftools_stats.txt`: Statistics and counts obtained from low frequency variants VCF file.
-  * `<SAMPLE>.AF<MAX_ALLELE_FREQ>.bcftools_stats.txt`: Statistics and counts obtained from high frequency variants VCF file.
+  * `<SAMPLE>.bcftools_stats.txt`: Statistics and counts obtained from high frequency variants VCF file.
 
 </details>
 
@@ -333,7 +287,11 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 ### BCFTools and BEDTools
 
-[BCFtools](http://samtools.github.io/bcftools/bcftools.html) can be used to call variants directly from BAM alignment files. The functionality to call variants with BCFTools in this pipeline was inspired by work carried out by [Conor Walker](https://github.com/conorwalker/covid19/blob/3cb26ec399417bedb7e60487415c78a405f517d6/scripts/call_variants.sh). In contrast to VarScan 2 and iVar, the original variant calls obtained by BCFTools are not filtered further by a higher allele frequency. It seems that the default calls obtained by BCFTools appear to be comparable with the high frequency variants generated by VarScan 2 and iVar.
+[BCFtools](http://samtools.github.io/bcftools/bcftools.html) can be used to call variants directly from BAM alignment files. The functionality to call variants with BCFTools in this pipeline was inspired by work carried out by [Conor Walker](https://github.com/conorwalker/covid19/blob/3cb26ec399417bedb7e60487415c78a405f517d6/scripts/call_variants.sh). In contrast to iVar, the original variant calls obtained by BCFTools are not filtered further by a higher allele frequency. It seems that the default calls obtained by BCFTools appear to be comparable with the high frequency variants generated by iVar.
+
+[BCFtools](http://samtools.github.io/bcftools/bcftools.html) is a set of utilities that manipulate variant calls in [VCF](https://vcftools.github.io/specs.html) and its binary counterpart BCF format. BCFTools is used in the variant calling and *de novo* assembly steps of this pipeline to obtain basic statistics from the VCF output. It can also used be used to generate a consensus sequence by integrating variant calls into the reference genome.
+
+[BEDTools](https://bedtools.readthedocs.io/en/latest/) is a swiss-army knife of tools for a wide-range of genomics analysis tasks. In this pipeline we use `bedtools genomecov` to compute the per-base mapped read coverage in bedGraph format, and `bedtools maskfasta` to mask sequences in a Fasta file based on intervals defined in a feature file. This may be useful for creating your own masked genome file based on custom annotations or for masking all but your target regions when aligning sequence data from a targeted capture experiment.
 
 <details markdown="1">
   <summary>Output files</summary>
@@ -374,7 +332,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
   * `*.snpEff.vcf.gz.tbi`: Index for VCF file with variant annotations.
   * `*.snpSift.table.txt`: SnpSift summary table.
 
-> **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'varscan2,ivar,bcftools'). If applicable, you will have two sets of files where the file name prefix will be `<SAMPLE>` for low-frequency variants and `<SAMPLE>.AF<MAX_ALLELE_FREQ>` for high frequency variants.
+> **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar').
 
 </details>
 
@@ -387,10 +345,10 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 <details markdown="1">
   <summary>Output files</summary>
 
-* `variants/<CALLER>/quast/AF<MAX_ALLELE_FREQ>/`
+* `variants/<CALLER>/quast/`
   * `report.html`: Results report in HTML format. Also available in various other file formats i.e. `report.pdf`, `report.tex`, `report.tsv` and `report.txt`.
 
-> **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'varscan2,ivar,bcftools') and the value of `<MAX_ALLELE_FREQ>` is determined by the `--max_allele_freq` parameter (Default: 0.8).
+> **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar').
 
 </details>
 
@@ -407,7 +365,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
   * `README.txt`: File containing command used and file name mappings.
   * `sites.txt`: List of variants common to at least 2/3 callers in textual format. The last column indicates presence (1) or absence (0) amongst the 3 different callers.
 
-> **NB:** This process will only be executed when all 3 variant callers are specified to run, as is by default i.e. `--callers varscan2,ivar,bcftools`.
+> **NB:** This process will only be executed when all 3 variant callers are specified to run, as is by default i.e. `--callers ivar`.
 
 </details>
 
@@ -431,8 +389,6 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 * `assembly/cutadapt/fastqc/zips/`
   * `*.ptrim_fastqc.zip`: Zip archive containing the FastQC report.
 
-> **NB:** Trimmed FastQ files will only be saved in the results directory if the `--save_trimmed` parameter is supplied.
-
 </details>
 
 ![MultiQC - Cutadapt filtered reads plot](images/mqc_cutadapt_plot.png)
@@ -450,8 +406,6 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.host*.fastq.gz`: Reads that were classified to the host database.
   * `*.viral*.fastq.gz`: Reads that were unclassified to the host database.
   * `*.kraken2.report.txt`: Kraken 2 taxonomic report. See [here](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual#sample-report-output-format) for a detailed description of the format.
-
-> **NB:** Output FastQ files will only be saved in the results directory if the `--save_kraken2_fastq` parameter is supplied.
 
 </details>
 
@@ -472,22 +426,6 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 * `assembly/spades/bandage/`
   * `*.png`: Bandage visualisation for SPAdes assembly graph in PNG format.
   * `*.svg`: Bandage visualisation for SPAdes assembly graph in SVG format.
-
-</details>
-
-### metaSPAdes
-
-[metaSPAdes](http://cab.spbu.ru/software/meta-spades/) is a de Bruijn graph-based assembler that is distributed with SPAdes and executed via the `--meta` option. It can be used for the simultaneous reconstruction of multiple genomes as observed in metagenomics data.
-
-<details markdown="1">
-  <summary>Output files</summary>
-
-* `assembly/metaspades/`
-  * `*.scaffolds.fa`: metaSPAdes scaffold assembly.
-  * `*.assembly.gfa`: metaSPAdes assembly graph in GFA format.
-* `assembly/metaspades/bandage/`
-  * `*.png`: Bandage visualisation for metaSPAdes assembly graph in PNG format.
-  * `*.svg`: Bandage visualisation for metaSPAdes assembly graph in SVG format.
 
 </details>
 
@@ -532,7 +470,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.blast.txt`: BLAST results against the target virus.
   * `*.blast.filt.header.txt`: Filtered BLAST results.
 
-> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
+> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,unicycler,minia').
 
 </details>
 
@@ -554,7 +492,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.unused_contigs.out`: Information on contigs that have a mapping information but could not be used in the ordering.
 * `assembly/<ASSEMBLER>/abacas/nucmer/`: Folder containing the files generated by the NUCmer algorithm used by ABACAS.
 
-> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
+> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,unicycler,minia').
 
 </details>
 
@@ -572,7 +510,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `fasta_files`: Folder with fasta files that correspond to the selection of contigs/scaffolds required to reconstruct the reference genome generated in the `images/` folder.
   * `log/`: Log files.
 
-> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
+> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,unicycler,minia').
 
 </details>
 
@@ -586,7 +524,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 * `assembly/<ASSEMBLER>/quast/`
   * `report.html`: Results report in HTML format. Also available in various other file formats i.e. `report.pdf`, `report.tex`, `report.tsv` and `report.txt`.
 
-> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
+> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,unicycler,minia').
 
 </details>
 
@@ -615,7 +553,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.png`: Bandage visualisation for induced genome variation graph in PNG format.
   * `*.svg`: Bandage visualisation for induced genome variation graph in SVG format.
 
-> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
+> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,unicycler,minia').
 
 </details>
 
@@ -636,7 +574,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.snpEff.vcf.gz.tbi`: Index for VCF file with variant annotations.
   * `*.snpSift.table.txt`: SnpSift summary table.
 
-> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,metaspades,unicycler,minia').
+> **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,unicycler,minia').
 
 </details>
 
@@ -646,7 +584,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [MultiQC](http://multiqc.info) is a visualization tool that generates a single HTML report summarizing all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in the report data directory.
 
-Results generated by MultiQC collate pipeline QC from FastQC, fastp, Cutadapt, Bowtie 2, Kraken 2, VarScan 2, iVar, samtools flagstat, samtools idxstats, samtools stats, picard CollectMultipleMetrics and CollectWgsMetrics, BCFTools, SnpEff and QUAST.
+Results generated by MultiQC collate pipeline QC from FastQC, fastp, Cutadapt, Bowtie 2, Kraken 2, iVar, samtools flagstat, samtools idxstats, samtools stats, picard CollectMultipleMetrics and CollectWgsMetrics, BCFTools, SnpEff and QUAST.
 
 The default [`multiqc config file`](https://github.com/nf-core/viralrecon/blob/master/assets/multiqc_config.yaml) has been written in a way in which to structure these QC metrics to make them more interpretable in the final report.
 
