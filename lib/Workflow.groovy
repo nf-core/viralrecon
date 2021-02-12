@@ -138,7 +138,8 @@ class Workflow {
         return [ mapped_reads, pass ]
     }
 
-    static void has_primer_suffixes(primer_bed_file, primer_left_suffix, primer_right_suffix, log) {
+    // Function to check whether primer BED file has the correct suffixes as provided to the pipeline
+    static void check_primer_suffixes(primer_bed_file, primer_left_suffix, primer_right_suffix, log) {
         def total = 0
         def left  = 0
         def right = 0
