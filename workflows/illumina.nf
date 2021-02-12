@@ -167,6 +167,8 @@ workflow ILLUMINA {
 
     // Check genome fasta only contains a single contig
     Workflow.is_multifasta(PREPARE_GENOME.out.fasta, log)
+
+    // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
     Workflow.check_primer_suffixes(PREPARE_GENOME.out.primer_bed, params.primer_left_suffix, params.primer_right_suffix, log)
     
     /*
