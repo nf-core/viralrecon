@@ -169,7 +169,9 @@ workflow ILLUMINA {
     Workflow.is_multifasta(PREPARE_GENOME.out.fasta, log)
 
     // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
-    Workflow.check_primer_suffixes(PREPARE_GENOME.out.primer_bed, params.primer_left_suffix, params.primer_right_suffix, log)
+    if (params.protocol == 'amplicon' && !params.skip_variants) {
+        Workflow.check_primer_suffixes(PREPARE_GENOME.out.primer_bed, params.primer_left_suffix, params.primer_right_suffix, log)
+    }
     
     /*
      * SUBWORKFLOW: Read in samplesheet, validate and stage input files

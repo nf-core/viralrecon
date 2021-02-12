@@ -143,15 +143,14 @@ class Workflow {
         def total = 0
         def left  = 0
         def right = 0
-        primer_bed_file.eachLine { 
-            line ->
-                total += 1
-                def name = line.split('\t')[3]
-                if (name.endsWith(primer_left_suffix)) {
-                    left += 1
-                } else if (name.endsWith(primer_right_suffix)) (
-                    right += 1
-                )
+        primer_bed_file.eachLine { line ->
+            total += 1
+            def name = line.split('\t')[3]
+            if (name.endsWith(primer_left_suffix)) {
+                left += 1
+            } else if (name.endsWith(primer_right_suffix)) (
+                right += 1
+            )
         }
         if (total != (left + right)) {
             log.warn "=============================================================================\n" +
