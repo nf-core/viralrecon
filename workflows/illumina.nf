@@ -244,11 +244,11 @@ workflow ILLUMINA {
         ch_kraken2_multiqc   = KRAKEN2_RUN.out.txt
         ch_software_versions = ch_software_versions.mix(KRAKEN2_RUN.out.version.first().ifEmpty(null))
 
-        if (params.kraken2_variants_host_filter)
+        if (params.kraken2_variants_host_filter) {
             ch_variants_fastq = KRAKEN2_RUN.out.unclassified
         }
 
-        if (params.kraken2_assembly_host_filter)
+        if (params.kraken2_assembly_host_filter) {
             ch_assembly_fastq = KRAKEN2_RUN.out.unclassified
         }        
     }
