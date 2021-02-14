@@ -28,6 +28,7 @@ if (params.help) {
 
 params.fasta         = Workflow.get_genome_attribute(params, 'fasta')
 params.gff           = Workflow.get_genome_attribute(params, 'gff')
+params.bwa_index     = Workflow.get_genome_attribute(params, 'bwa')
 params.bowtie2_index = Workflow.get_genome_attribute(params, 'bowtie2')
 
 ////////////////////////////////////////////////////
@@ -64,18 +65,25 @@ if (!params.public_data_ids && !platformList.contains(params.platform)) {
 
 workflow {
     /*
-     * SUBWORKFLOW: Get SRA run information for public database ids, download and md5sum check FastQ files, auto-create samplesheet
+     * WORKFLOW: Get SRA run information for public database ids, download and md5sum check FastQ files, auto-create samplesheet
      */
     if (params.public_data_ids) {
         include { SRA_DOWNLOAD } from './workflows/sra_download' addParams( summary_params: summary_params )
         SRA_DOWNLOAD ()
     
     /*
-     * SUBWORKFLOW: Variant analysis for Illumina data
+     * WORKFLOW: Variant and de novo assembly analysis for Illumina data
      */
     } else if (params.platform == 'illumina') {
         include { ILLUMINA } from './workflows/illumina' addParams( summary_params: summary_params )
         ILLUMINA ()
+
+    /*
+     * WORKFLOW: Variant analysis for Nanopore data
+     */ 
+    } else if (params.platform == 'nanopore') {
+        include { NANOPORE } from './workflows/nanopore' addParams( summary_params: summary_params )
+        NANOPORE ()
     }
 }
 
