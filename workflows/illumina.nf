@@ -16,7 +16,7 @@ def valid_params = [
 ]
 
 // Validate input parameters
-Workflow.validate_params(params, log, valid_params)
+Workflow.validate_illumina_params(params, log, valid_params)
 
 // Check input path parameters to see if they exist
 def checkPathParamList = [
@@ -177,7 +177,8 @@ workflow ILLUMINA {
      * SUBWORKFLOW: Read in samplesheet, validate and stage input files
      */
     INPUT_CHECK ( 
-        ch_input
+        ch_input,
+        params.platform
     )
     .map {
         meta, fastq ->
