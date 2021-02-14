@@ -25,16 +25,12 @@ process MULTIQC {
     path fail_no_barcodes_summary
     path fail_barcode_count_summary
     path fail_guppyplex_count_summary
-    // path ('kraken2/*')
-    // path ('bowtie2/*')
-    // path ('bowtie2/*')
-    // path ('bowtie2/*')
-    // path ('picard_metrics/*')
-    // path ('mosdepth/*')
-    // path ('variants_ivar/*')
-    // path ('variants_ivar/*')
-    // path ('variants_ivar/*')
-    // path ('variants_ivar/*')
+    path ('samtools_stats/*')
+    path ('samtools_stats/*')
+    path ('samtools_stats/*')
+    path ('bcftools_stats/*')
+    path ('quast/*')
+    path ('snpeff/*')
 
     output:
     path "*multiqc_report.html", emit: report
