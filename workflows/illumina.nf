@@ -39,7 +39,7 @@ def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.tr
 /* --          CONFIG FILES                    -- */
 ////////////////////////////////////////////////////
 
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true)
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
 
 // Header files
@@ -53,7 +53,7 @@ ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_hea
 // Don't overwrite global params.modules, create a copy instead and use that within the main script.
 def modules = params.modules.clone()
 
-def multiqc_options   = modules['multiqc']
+def multiqc_options   = modules['multiqc_illumina']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 
 include { CAT_FASTQ                  } from '../modules/local/cat_fastq'                  addParams( options: modules['cat_fastq']                ) 
@@ -63,7 +63,7 @@ include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'    
 include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: modules['cutadapt']                 )
 include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'                addParams( options: modules['kraken2_run']              ) 
 include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'      addParams( options: [publish_files: ['csv':'']]         )
-include { MULTIQC                    } from '../modules/local/multiqc'                    addParams( options: multiqc_options                     )
+include { MULTIQC                    } from '../modules/local/multiqc_illumina'           addParams( options: multiqc_options                     )
 
 include { MOSDEPTH as MOSDEPTH_GENOME                             } from '../modules/local/mosdepth'              addParams( options: modules['mosdepth_genome']                )
 include { MOSDEPTH as MOSDEPTH_AMPLICON                           } from '../modules/local/mosdepth'              addParams( options: modules['mosdepth_amplicon']              )
