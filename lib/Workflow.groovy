@@ -15,49 +15,49 @@ class Workflow {
                "  https://github.com/${workflow.manifest.name}/blob/master/CITATIONS.md"
     }
 
-    static void validate_params(params, log, valid_params) {
+    static void validate_illumina_params(params, log, valid_params) {
         genome_exists(params, log)
 
         // Generic parameter validation
         if (!params.fasta) { 
-            log.error "Genome fasta file not specified!"
-            System.exit(0)
+            log.error "Genome fasta file not specified with e.g. '--fasta genome.fa'"
+            System.exit(1)
         }
 
         if (!params.skip_kraken2 && !params.kraken2_db) {
             if (!params.kraken2_db_name) { 
-                log.error "Please specify a valid name to build Kraken2 database for host e.g. 'human'!"
-                System.exit(0)
+                log.error "Please specify a valid name to build Kraken2 database for host e.g. '--kraken2_db_name human'"
+                System.exit(1)
             }
         }
         
         if (!valid_params['protocols'].contains(params.protocol)) {
-            log.error "Invalid protocol option: ${params.protocol}. Valid options: ${valid_params['protocols'].join(', ')}"
-            System.exit(0)
+            log.error "Invalid option: ${params.protocol}. Valid options for '--protocol': ${valid_params['protocols'].join(', ')}"
+            System.exit(1)
         }
 
         // Variant calling parameter validation
         def callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
         if ((valid_params['callers'] + callers).unique().size() != valid_params['callers'].size()) {
-            log.error "Invalid variant calller option: ${params.callers}. Valid options: ${valid_params['callers'].join(', ')}"
-            System.exit(0)
+            log.error "Invalid option: ${params.callers}. Valid options for '--callers': ${valid_params['callers'].join(', ')}"
+            System.exit(1)
         }
 
         if (params.protocol == 'amplicon' && !params.skip_variants && !params.primer_bed) {
-            log.error "To perform variant calling in 'amplicon' mode please provide a valid primer BED file!"
-            System.exit(0)
+            log.error "To perform variant calling in amplicon mode please provide a valid primer BED file e.g. '--primer_bed primers.bed'"
+            System.exit(1)
         }
 
         // Assembly parameter validation
         def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
         if ((valid_params['assemblers'] + assemblers).unique().size() != valid_params['assemblers'].size()) {
-            log.error "Invalid assembler option: ${params.assemblers}. Valid options: ${valid_params['assemblers'].join(', ')}"
-            System.exit(0)
+            log.error "Invalid option: ${params.assemblers}. Valid options for '--assemblers': ${valid_params['assemblers'].join(', ')}"
+            System.exit(1)
         }
 
         if (!valid_params['spades_modes'].contains(params.spades_mode)) {
-            log.error "Invalid spades mode option: ${params.spades_mode}. Valid options: ${valid_params['spades_modes'].join(', ')}"
-            System.exit(0)
+            log.error "Invalid option: ${params.spades_mode}. Valid options for '--spades_modes': ${valid_params['spades_modes'].join(', ')}"
+            System.exit(1)
         }
     }
 
@@ -81,7 +81,7 @@ class Workflow {
                       "  Currently, the available genome keys are:\n" +
                       "  ${params.genomes.keySet().join(", ")}\n" +
                       "==================================================================================="
-            System.exit(0)
+            System.exit(1)
         }
     }
 
