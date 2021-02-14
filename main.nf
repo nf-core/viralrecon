@@ -28,7 +28,6 @@ if (params.help) {
 
 params.fasta         = Workflow.get_genome_attribute(params, 'fasta')
 params.gff           = Workflow.get_genome_attribute(params, 'gff')
-params.bwa_index     = Workflow.get_genome_attribute(params, 'bwa')
 params.bowtie2_index = Workflow.get_genome_attribute(params, 'bowtie2')
 
 ////////////////////////////////////////////////////
