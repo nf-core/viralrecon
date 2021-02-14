@@ -22,8 +22,8 @@ process ARTIC_GUPPYPLEX {
     tuple val(meta), path(fastq_dir)
     
     output:
-    path "*.fastq.gz"    , emit: fastq
-    path  "*.version.txt", emit: version
+    tuple val(meta), path("*.fastq.gz"), emit: fastq
+    path  "*.version.txt"              , emit: version
 
     script:
     def software = getSoftwareName(task.process)
