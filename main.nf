@@ -26,9 +26,31 @@ if (params.help) {
 /* --        GENOME PARAMETER VALUES           -- */
 ////////////////////////////////////////////////////
 
-params.fasta         = Workflow.get_genome_attribute(params, 'fasta')
-params.gff           = Workflow.get_genome_attribute(params, 'gff')
-params.bowtie2_index = Workflow.get_genome_attribute(params, 'bowtie2')
+def primer_set = ''
+def primer_set_version = 0
+if (!params.public_data_ids && params.platform == 'illumina') {
+    if (params.protocol == 'amplicon') {
+        primer_set = params.primer_set
+        primer_set_version = params.primer_set_version
+    }
+} else if (!params.public_data_ids && params.platform == 'nanopore') {
+    if (params.primer_set != 'artic') {
+        log.error "Invalid option: --primer_set '${params.primer_set}'. Only --primer_set 'artic' is supported when running the pipeline on Nanopore input data.\n"
+        System.exit(1)
+    }
+    if (!params.primer_set_version) {
+        log.error "Invalid option: --primer_set_version '${params.primer_set_version}'.\nPlease specify a valid option when using --primer_set '${params.primer_set}'.\n"
+        System.exit(1)
+    }
+    primer_set = params.primer_set
+    primer_set_version = params.primer_set_version
+}
+
+params.fasta         = Workflow.get_genome_attribute(params, 'fasta'     , log, primer_set, primer_set_version)
+params.gff           = Workflow.get_genome_attribute(params, 'gff'       , log, primer_set, primer_set_version)
+params.primer_bed    = Workflow.get_genome_attribute(params, 'primer_bed', log, primer_set, primer_set_version)
+params.artic_scheme  = Workflow.get_genome_attribute(params, 'scheme'    , log, primer_set, primer_set_version)
+params.bowtie2_index = Workflow.get_genome_attribute(params, 'bowtie2'   , log, primer_set, primer_set_version)
 
 ////////////////////////////////////////////////////
 /* --         PRINT PARAMETER SUMMARY          -- */
