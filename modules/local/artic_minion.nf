@@ -22,9 +22,12 @@ process ARTIC_MINION {
     tuple val(meta), path(fastq)
     path  fast5_dir
     path  sequencing_summary
-    path  scheme_dir
     val   scheme
     val   scheme_version
+    path  ("primer-schemes/${scheme}/V${scheme_version}/${scheme}.reference.fasta")
+    path  ("primer-schemes/${scheme}/V${scheme_version}/${scheme}.scheme.bed")
+    
+    cache false
 
     output:
     tuple val(meta), path("${prefix}.*")                          , emit: results
@@ -36,8 +39,8 @@ process ARTIC_MINION {
 
     script:
     def software = getSoftwareName(task.process)
-    prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
-    def version  = scheme_version.toLowerCase().replaceAll('v','')
+    prefix       = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
+    def version  = scheme_version.toString().toLowerCase().replaceAll('v','')
     def fast5    = params.fast5_dir          ? "--fast5-directory $fast5_dir"             : ""
     def summary  = params.sequencing_summary ? "--sequencing-summary $sequencing_summary" : ""
     if (options.args.contains('--medaka ')) {
@@ -50,7 +53,7 @@ process ARTIC_MINION {
         $options.args \\
         --threads $task.cpus \\
         --read-file $fastq \\
-        --scheme-directory $scheme_dir \\
+        --scheme-directory ./primer-schemes \\
         --scheme-version $version \\
         $fast5 \\
         $summary \\
