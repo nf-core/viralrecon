@@ -26,7 +26,6 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
 if (params.input)              { ch_input              = file(params.input)              }
-if (params.gff)                { ch_gff                = file(params.gff)                } else { ch_gff                = ch_dummy_file }
 if (params.fast5_dir)          { ch_fast5_dir          = file(params.fast5_dir)          } else { ch_fast5_dir          = ch_dummy_file }
 if (params.sequencing_summary) { ch_sequencing_summary = file(params.sequencing_summary) } else { ch_sequencing_summary = ch_dummy_file }
 
@@ -63,17 +62,15 @@ include { MULTIQC                             } from '../modules/local/multiqc_n
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
  */
 def publish_genome_options   = params.save_reference ? [publish_dir: 'genome'] : [publish_files: false]
-def clone_scheme_options     = modules['artic_clone_scheme']
 def collapse_primers_options = modules['artic_collapse_primers']
 def snpeff_build_options     = modules['artic_snpeff_build']
 if (!params.save_reference) {
-    clone_scheme_options['publish_files']  = false
     collapse_primers_options['publish_files']  = false
     snpeff_build_options['publish_files']      = false
 }
 
 include { INPUT_CHECK    } from '../subworkflows/local/input_check'             addParams( options: [:] )
-include { PREPARE_GENOME } from '../subworkflows/local/prepare_genome_nanopore' addParams( genome_options: publish_genome_options, clone_scheme_options: clone_scheme_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options )
+include { PREPARE_GENOME } from '../subworkflows/local/prepare_genome_nanopore' addParams( genome_options: publish_genome_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options )
 include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'          addParams( snpeff_options: modules['artic_snpeff'], snpsift_options: modules['artic_snpsift'], bgzip_options: modules['artic_snpeff_bgzip'], tabix_options: modules['artic_snpeff_tabix'], stats_options: modules['artic_snpeff_stats'] )
 
 ////////////////////////////////////////////////////
@@ -228,11 +225,12 @@ workflow NANOPORE {
         ARTIC_GUPPYPLEX.out.fastq.filter { it[-1].countFastq() > params.min_guppyplex_reads },
         ch_fast5_dir,
         ch_sequencing_summary,
-        PREPARE_GENOME.out.scheme_dir,
         params.artic_scheme,
-        params.artic_scheme_version
+        params.primer_set_version,
+        PREPARE_GENOME.out.fasta,
+        PREPARE_GENOME.out.primer_bed
     )
-
+    
     /*
      * SUBWORKFLOW: Filter unmapped reads from BAM and trim reads with iVar
      */
