@@ -579,5 +579,43 @@
         {
             "$ref": "#/definitions/institutional_config_options"
         }
-    ]
+    ],
+    "properties": {
+        "primer_set": {
+            "type": "string",
+            "default": "artic"
+        },
+        "primer_set_version": {
+            "type": "integer",
+            "default": 3
+        },
+        "fastq_dir": {
+            "type": "string"
+        },
+        "fast5_dir": {
+            "type": "string"
+        },
+        "sequencing_summary": {
+            "type": "string"
+        },
+        "min_barcode_reads": {
+            "type": "integer",
+            "default": 100
+        },
+        "min_guppyplex_reads": {
+            "type": "integer",
+            "default": 10
+        },
+        "artic_minion_caller": {
+            "type": "string",
+            "default": "nanopolish"
+        },
+        "artic_minion_aligner": {
+            "type": "string",
+            "default": "minimap2"
+        },
+        "artic_scheme": {
+            "type": "string"
+        }
+    }
 }
