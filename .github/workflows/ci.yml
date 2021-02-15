@@ -97,7 +97,7 @@ jobs:
       NXF_ANSI_LOG: false
     strategy:
       matrix:
-        parameters: [--gff false, '']
+        parameters: [--gff false, "--genome 'NC_045512.2'"]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
