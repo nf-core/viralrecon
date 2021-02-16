@@ -25,6 +25,7 @@ process MULTIQC {
     path fail_no_barcodes_summary
     path fail_barcode_count_summary
     path fail_guppyplex_count_summary
+    path ('artic_minion/*')
     path ('samtools_stats/*')
     path ('samtools_stats/*')
     path ('samtools_stats/*')
