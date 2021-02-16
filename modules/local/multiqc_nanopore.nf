@@ -29,6 +29,7 @@ process MULTIQC {
     path ('samtools_stats/*')
     path ('samtools_stats/*')
     path ('bcftools_stats/*')
+    path ('mosdepth/*')
     path ('quast/*')
     path ('snpeff/*')
 
