@@ -18,24 +18,31 @@ process ARTIC_MINION {
         container "quay.io/biocontainers/artic:1.2.1--py_0"
     }
 
+    cache false 
+
     input:
     tuple val(meta), path(fastq)
     path  fast5_dir
     path  sequencing_summary
-    val   scheme
-    val   scheme_version
     path  ("primer-schemes/${scheme}/V${scheme_version}/${scheme}.reference.fasta")
     path  ("primer-schemes/${scheme}/V${scheme_version}/${scheme}.scheme.bed")
+    val   scheme
+    val   scheme_version
+    val   medaka_model
     
-    cache false
-
     output:
-    tuple val(meta), path("${prefix}.*")                          , emit: results
-    tuple val(meta), path("${prefix}.primertrimmed.rg.sorted.bam"), emit: bam_primer_trim
-    tuple val(meta), path("${prefix}.sorted.bam")                 , emit: bam
-    tuple val(meta), path("${prefix}.consensus.fasta")            , emit: fasta
-    tuple val(meta), path("${prefix}.pass.vcf.gz")                , emit: vcf
-    path  "*.version.txt"                                         , emit: version
+    tuple val(meta), path("${prefix}.*")                              , emit: results
+    tuple val(meta), path("${prefix}.sorted.bam")                     , emit: bam
+    tuple val(meta), path("${prefix}.sorted.bam.bai")                 , emit: bai
+    tuple val(meta), path("${prefix}.trimmed.rg.sorted.bam")          , emit: bam_trimmed
+    tuple val(meta), path("${prefix}.trimmed.rg.sorted.bam.bai")      , emit: bai_trimmed
+    tuple val(meta), path("${prefix}.primertrimmed.rg.sorted.bam")    , emit: bam_primertrimmed
+    tuple val(meta), path("${prefix}.primertrimmed.rg.sorted.bam.bai"), emit: bai_primertrimmed
+    tuple val(meta), path("${prefix}.consensus.fasta")                , emit: fasta
+    tuple val(meta), path("${prefix}.pass.vcf.gz")                    , emit: vcf
+    tuple val(meta), path("${prefix}.pass.vcf.gz.tbi")                , emit: tbi
+    tuple val(meta), path("*.json"), optional:true                    , emit: json
+    path  "*.version.txt"                                             , emit: version
 
     script:
     def software = getSoftwareName(task.process)
@@ -43,9 +50,11 @@ process ARTIC_MINION {
     def version  = scheme_version.toString().toLowerCase().replaceAll('v','')
     def fast5    = params.fast5_dir          ? "--fast5-directory $fast5_dir"             : ""
     def summary  = params.sequencing_summary ? "--sequencing-summary $sequencing_summary" : ""
-    if (options.args.contains('--medaka ')) {
-        fast5    = ""
-        summary  = ""
+    def model    = ""
+    if (options.args.tokenize().contains('--medaka')) {
+        fast5     = ""
+        summary   = ""
+        model     = "--medaka-model $medaka_model"
     }
     """
     artic \\
@@ -55,6 +64,7 @@ process ARTIC_MINION {
         --read-file $fastq \\
         --scheme-directory ./primer-schemes \\
         --scheme-version $version \\
+        $model \\
         $fast5 \\
         $summary \\
         $scheme \\
