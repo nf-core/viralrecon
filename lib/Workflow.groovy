@@ -130,6 +130,13 @@ class Workflow {
                 System.exit(1)
             }
         }
+
+        if (params.artic_minion_caller == 'medaka') {
+            if (!params.artic_minion_medaka_model) {
+                log.error "Please specify the '--artic_minion_medaka_model' parameter too if using the '--artic_minion_caller medaka' workflow.\nSee https://github.com/nanoporetech/medaka"
+                System.exit(1)
+            }
+        }
     }
 
     // Print a warning after SRA download has completed
