@@ -125,8 +125,7 @@
                     "type": "string"
                 },
                 "primer_set_version": {
-                    "type": "integer",
-                    "default": "0"
+                    "type": "integer"
                 },
                 "save_reference": {
                     "type": "boolean",
