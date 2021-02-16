@@ -41,7 +41,6 @@ params.fasta         = Workflow.get_genome_attribute(params, 'fasta'     , log, 
 params.gff           = Workflow.get_genome_attribute(params, 'gff'       , log, primer_set, primer_set_version)
 params.bowtie2_index = Workflow.get_genome_attribute(params, 'bowtie2'   , log, primer_set, primer_set_version)
 params.primer_bed    = Workflow.get_genome_attribute(params, 'primer_bed', log, primer_set, primer_set_version)
-println(params.primer_bed)
 
 ////////////////////////////////////////////////////
 /* --         PRINT PARAMETER SUMMARY          -- */
