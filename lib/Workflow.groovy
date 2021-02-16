@@ -235,9 +235,9 @@ class Workflow {
         primer_bed_file.eachLine { line ->
             total += 1
             def name = line.split('\t')[3]
-            if (name.endsWith(primer_left_suffix)) {
+            if (name.contains(primer_left_suffix)) {
                 left += 1
-            } else if (name.endsWith(primer_right_suffix)) (
+            } else if (name.contains(primer_right_suffix)) (
                 right += 1
             )
         }
