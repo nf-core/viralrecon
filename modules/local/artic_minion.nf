@@ -18,8 +18,6 @@ process ARTIC_MINION {
         container "quay.io/biocontainers/artic:1.2.1--py_0"
     }
 
-    cache false 
-
     input:
     tuple val(meta), path(fastq)
     path  fast5_dir
