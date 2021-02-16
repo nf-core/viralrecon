@@ -15,48 +15,73 @@ class Workflow {
                "  https://github.com/${workflow.manifest.name}/blob/master/CITATIONS.md"
     }
 
+    static void validate_main_params(workflow, params, log) {
+        // Check that conda channels are set-up correctly
+        if (params.enable_conda) {
+            Checks.check_conda_channels(log)
+        }
+
+        // Check AWS batch settings
+        Checks.aws_batch(workflow, params)
+
+        // Check the hostnames against configured profiles
+        Checks.hostname(workflow, params, log)
+
+        // Check sequencing platform
+        def platformList = ['illumina', 'nanopore']
+        if (!params.public_data_ids) {
+            if (!params.platform) {
+                log.error "Platform not specified with e.g. '--platform illumina'. Valid options: ${platformList.join(', ')}."
+                System.exit(1)
+            } else if (!platformList.contains(params.platform)) {
+                log.error "Invalid platform option: '${params.platform}'. Valid options: ${platformList.join(', ')}."
+                System.exit(1)
+            }
+        }
+    }
+
     static void validate_illumina_params(params, log, valid_params) {
         genome_exists(params, log)
 
         // Generic parameter validation
+        if (!valid_params['protocols'].contains(params.protocol)) {
+            log.error "Invalid option: '${params.protocol}'. Valid options for '--protocol': ${valid_params['protocols'].join(', ')}."
+            System.exit(1)
+        }
+
         if (!params.fasta) { 
-            log.error "Genome fasta file not specified with e.g. '--fasta genome.fa'"
+            log.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
             System.exit(1)
         }
 
         if (!params.skip_kraken2 && !params.kraken2_db) {
             if (!params.kraken2_db_name) { 
-                log.error "Please specify a valid name to build Kraken2 database for host e.g. '--kraken2_db_name human'"
+                log.error "Please specify a valid name to build Kraken2 database for host e.g. '--kraken2_db_name human'."
                 System.exit(1)
             }
         }
         
-        if (!valid_params['protocols'].contains(params.protocol)) {
-            log.error "Invalid option: ${params.protocol}. Valid options for '--protocol': ${valid_params['protocols'].join(', ')}"
-            System.exit(1)
-        }
-
         // Variant calling parameter validation
         def callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
         if ((valid_params['callers'] + callers).unique().size() != valid_params['callers'].size()) {
-            log.error "Invalid option: ${params.callers}. Valid options for '--callers': ${valid_params['callers'].join(', ')}"
+            log.error "Invalid option: ${params.callers}. Valid options for '--callers': ${valid_params['callers'].join(', ')}."
             System.exit(1)
         }
 
         if (params.protocol == 'amplicon' && !params.skip_variants && !params.primer_bed) {
-            log.error "To perform variant calling in amplicon mode please provide a valid primer BED file e.g. '--primer_bed primers.bed'"
+            log.error "To perform variant calling in amplicon mode please provide a valid primer BED file e.g. '--primer_bed primers.bed'."
             System.exit(1)
         }
 
         // Assembly parameter validation
         def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
         if ((valid_params['assemblers'] + assemblers).unique().size() != valid_params['assemblers'].size()) {
-            log.error "Invalid option: ${params.assemblers}. Valid options for '--assemblers': ${valid_params['assemblers'].join(', ')}"
+            log.error "Invalid option: ${params.assemblers}. Valid options for '--assemblers': ${valid_params['assemblers'].join(', ')}."
             System.exit(1)
         }
 
         if (!valid_params['spades_modes'].contains(params.spades_mode)) {
-            log.error "Invalid option: ${params.spades_mode}. Valid options for '--spades_modes': ${valid_params['spades_modes'].join(', ')}"
+            log.error "Invalid option: ${params.spades_mode}. Valid options for '--spades_modes': ${valid_params['spades_modes'].join(', ')}."
             System.exit(1)
         }
     }
@@ -81,12 +106,12 @@ class Workflow {
         }
 
         if (!valid_params['artic_minion_caller'].contains(params.artic_minion_caller)) {
-            log.error "Invalid option: ${params.artic_minion_caller}. Valid options for '--artic_minion_caller': ${valid_params['artic_minion_caller'].join(', ')}"
+            log.error "Invalid option: ${params.artic_minion_caller}. Valid options for '--artic_minion_caller': ${valid_params['artic_minion_caller'].join(', ')}."
             System.exit(1)
         }
 
         if (!valid_params['artic_minion_aligner'].contains(params.artic_minion_aligner)) {
-            log.error "Invalid option: ${params.artic_minion_aligner}. Valid options for '--artic_minion_aligner': ${valid_params['artic_minion_aligner'].join(', ')}"
+            log.error "Invalid option: ${params.artic_minion_aligner}. Valid options for '--artic_minion_aligner': ${valid_params['artic_minion_aligner'].join(', ')}."
             System.exit(1)
         }
 
