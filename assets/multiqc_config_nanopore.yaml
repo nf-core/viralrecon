@@ -69,8 +69,8 @@ custom_data:
             format: '{:,.0f}'
     fail_barcode_count_samples:
         section_name: 'WARNING: Fail barcode read count'
-        description: "List of samples that failed the minimum number of reads required per barcode specified via the '--min_barcode_reads' parameter, and hence were ignored for the downstream processing steps."
-        plot_type: 'table'
+        description: "Samples that failed the minimum number of reads required per barcode specified via the '--min_barcode_reads' parameter, and hence were ignored for the downstream processing steps."
+        plot_type: 'bargraph'
         pconfig:
             id: 'fail_barcode_count_samples_table'
             table_title: 'Samples failed barcode read count threshold'
@@ -78,8 +78,8 @@ custom_data:
             format: '{:,.0f}'
     fail_guppyplex_count_samples:
         section_name: 'WARNING: Fail guppyplex read count'
-        description: "List of samples that failed the minimum number of reads required per sample specified via the '--min_guppyplex_reads' parameter, and hence were ignored for the downstream processing steps."
-        plot_type: 'table'
+        description: "Samples that failed the minimum number of reads required per sample specified via the '--min_guppyplex_reads' parameter, and hence were ignored for the downstream processing steps."
+        plot_type: 'bargraph'
         pconfig:
             id: 'fail_guppyplex_count_samples_table'
             table_title: 'Samples failed artic guppyplex read count threshold'
