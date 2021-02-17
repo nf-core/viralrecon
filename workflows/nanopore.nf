@@ -47,13 +47,14 @@ artic_minion_options.args += params.artic_minion_aligner == 'bwa'    ? " --bwa" 
 def multiqc_options   = modules['artic_multiqc']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 
-include { ARTIC_GUPPYPLEX                     } from '../modules/local/artic_guppyplex'                     addParams( options: modules['artic_guppyplex']         )
-include { ARTIC_MINION                        } from '../modules/local/artic_minion'                        addParams( options: artic_minion_options               )
-include { MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_fail_no_barcodes'     addParams( options: [publish_files: false]             )
-include { MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_fail_barcode_count'   addParams( options: [publish_files: false]             )
-include { MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_fail_guppyplex_count' addParams( options: [publish_files: false]             )
-include { GET_SOFTWARE_VERSIONS               } from '../modules/local/get_software_versions'               addParams( options: [publish_files: ['csv':'']]        )
-include { MULTIQC                             } from '../modules/local/multiqc_nanopore'                    addParams( options: multiqc_options                    )
+include { PYCOQC                              } from '../modules/local/pycoqc'                              addParams( options: modules['artic_pycoqc']     )
+include { ARTIC_GUPPYPLEX                     } from '../modules/local/artic_guppyplex'                     addParams( options: modules['artic_guppyplex']  )
+include { ARTIC_MINION                        } from '../modules/local/artic_minion'                        addParams( options: artic_minion_options        )
+include { MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_fail_no_barcodes'     addParams( options: [publish_files: false]      )
+include { MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_fail_barcode_count'   addParams( options: [publish_files: false]      )
+include { MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_fail_guppyplex_count' addParams( options: [publish_files: false]      )
+include { GET_SOFTWARE_VERSIONS               } from '../modules/local/get_software_versions'               addParams( options: [publish_files: ['csv':'']] )
+include { MULTIQC                             } from '../modules/local/multiqc_nanopore'                    addParams( options: multiqc_options             )
 
 include { MOSDEPTH as MOSDEPTH_GENOME         } from '../modules/local/mosdepth'                                  addParams( options: modules['artic_mosdepth_genome']                )
 include { MOSDEPTH as MOSDEPTH_AMPLICON       } from '../modules/local/mosdepth'                                  addParams( options: modules['artic_mosdepth_amplicon']              )
@@ -101,6 +102,15 @@ def pass_barcode_reads = [:]
 def fail_barcode_reads = [:]
 
 workflow NANOPORE {
+
+    /*
+     * MODULE: PycoQC on sequencing summary file
+     */
+    if (params.sequencing_summary && !params.skip_pycoqc) {
+        PYCOQC (
+            ch_sequencing_summary
+        )
+    }
 
     /*
      * SUBWORKFLOW: Uncompress and prepare reference genome files
@@ -349,6 +359,7 @@ workflow NANOPORE {
             ch_multiqc_custom_config.collect().ifEmpty([]),
             GET_SOFTWARE_VERSIONS.out.yaml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+            PYCOQC.out.json.collect().ifEmpty([]),
             MULTIQC_CUSTOM_FAIL_NO_BARCODES.out.ifEmpty([]),
             MULTIQC_CUSTOM_FAIL_BARCODE_COUNT.out.ifEmpty([]),
             MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT.out.ifEmpty([]),
