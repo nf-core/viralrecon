@@ -48,6 +48,7 @@ def multiqc_options   = modules['artic_multiqc']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 
 include { PYCOQC                              } from '../modules/local/pycoqc'                              addParams( options: modules['artic_pycoqc']     )
+include { NANOPLOT                            } from '../modules/local/nanoplot'                            addParams( options: modules['artic_nanoplot']   )
 include { ARTIC_GUPPYPLEX                     } from '../modules/local/artic_guppyplex'                     addParams( options: modules['artic_guppyplex']  )
 include { ARTIC_MINION                        } from '../modules/local/artic_minion'                        addParams( options: artic_minion_options        )
 include { MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_fail_no_barcodes'     addParams( options: [publish_files: false]      )
@@ -103,6 +104,8 @@ def fail_barcode_reads = [:]
 
 workflow NANOPORE {
 
+    ch_software_versions = Channel.empty()
+
     /*
      * MODULE: PycoQC on sequencing summary file
      */
@@ -111,6 +114,7 @@ workflow NANOPORE {
             ch_sequencing_summary
         )
     }
+    ch_software_versions = ch_software_versions.mix(PYCOQC.out.version.ifEmpty(null))
 
     /*
      * SUBWORKFLOW: Uncompress and prepare reference genome files
@@ -208,7 +212,6 @@ workflow NANOPORE {
     ARTIC_GUPPYPLEX (
         ch_fastq_dirs
     )
-    ch_software_versions = Channel.empty()
     ch_software_versions = ch_software_versions.mix(ARTIC_GUPPYPLEX.out.version.first().ifEmpty(null))
 
     /*
@@ -229,7 +232,17 @@ workflow NANOPORE {
     MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT ( 
         ch_pass_fail_guppyplex_count.fail.collect()
     )
-    
+
+    /*
+     * MODULE: Nanoplot QC for FastQ files
+     */
+    if (!params.skip_nanoplot) {
+        NANOPLOT (
+            ARTIC_GUPPYPLEX.out.fastq
+        )
+        ch_software_versions = ch_software_versions.mix(NANOPLOT.out.version.first().ifEmpty(null))
+    }
+
     /*
      * MODULE: Run Artic minion
      */
