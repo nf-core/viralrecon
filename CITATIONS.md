@@ -13,6 +13,8 @@
 * [ABACAS](https://www.ncbi.nlm.nih.gov/pubmed/19497936/)
   > Assefa S, Keane TM, Otto TD, Newbold C, Berriman M. ABACAS: algorithm-based automatic contiguation of assembled sequences. Bioinformatics. 2009 Aug 1;25(15):1968-9. doi: 10.1093/bioinformatics/btp347. Epub 2009 Jun 3. PubMed PMID: 19497936; PubMed Central PMCID: PMC2712343.
 
+* [ARTIC network](https://github.com/artic-network)
+
 * [Bandage](https://www.ncbi.nlm.nih.gov/pubmed/26099265)
   > Wick R.R., Schultz M.B., Zobel J. & Holt K.E. Bandage: interactive visualisation of de novo genome assemblies. Bioinformatics, 31(20), 3350-3352. doi: 10.1093/bioinformatics/btv383. PubMed PMID: 26099265; PubMed Central PCMID: PMC4595904.
 
@@ -54,12 +56,18 @@
 * [MultiQC](https://www.ncbi.nlm.nih.gov/pubmed/27312411/)
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
 
+* [NanoPlot](https://pubmed.ncbi.nlm.nih.gov/29547981/)
+  > De Coster W, D'Hert S, Schultz DT, Cruts M, Van Broeckhoven C. NanoPack: visualizing and processing long-read sequencing data. Bioinformatics. 2018 Aug 1;34(15):2666-2669. doi: 10.1093/bioinformatics/bty149. PubMed PMID: 29547981; PubMed Central PMCID: PMC6061794.
+
 * [pangolin](https://github.com/cov-lineages/pangolin)
   > Áine O'Toole, Emily Scher, Anthony Underwood, Ben Jackson, Verity Hill, JT McCrone, Chris Ruis, Khali Abu-Dahab, Ben Taylor, Corin Yeats, Louis du Plessis, David Aanensen, Eddie Holmes, Oliver Pybus, Andrew Rambaut. pangolin: lineage assignment in an emerging pandemic as an epidemiological tool. Publication in preparation.
 
 * [parallel-fastq-dump](https://github.com/rvalieris/parallel-fastq-dump)
 
 * [picard-tools](http://broadinstitute.github.io/picard)
+
+* [pycoQC](https://doi.org/10.21105/joss.01236)
+  > Leger A, Leonardi T, (2019). pycoQC, interactive quality control for Oxford Nanopore Sequencing. Journal of Open Source Software, 4(34), 1236.
 
 * [QUAST](https://www.ncbi.nlm.nih.gov/pubmed/23422339/)
   > Gurevich A, Saveliev V, Vyahhi N, Tesler G. QUAST: quality assessment tool for genome assemblies. Bioinformatics. 2013 Apr 15;29(8):1072-5. doi: 10.1093/bioinformatics/btt086. Epub 2013 Feb 19. PubMed PMID: 23422339; PubMed Central PMCID: PMC3624806.
