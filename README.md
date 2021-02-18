@@ -90,24 +90,42 @@ The pipeline has numerous options to allow you to run only specific aspects of t
 
 4. Start running your own analysis!
 
-    * Typical command for shotgun analysis:
+    * Typical command for Illumina shotgun analysis:
 
         ```bash
         nextflow run nf-core/viralrecon \
             --input samplesheet.csv \
+            --platform illumina \
+            --protocol metagenomic \
             --genome 'MN908947.3' \
             -profile <docker/singularity/podman/conda/institute>
         ```
 
-    * Typical command for amplicon analysis:
+    * Typical command for Illumina amplicon analysis:
 
         ```bash
         nextflow run nf-core/viralrecon \
             --input samplesheet.csv \
-            --genome 'MN908947.3' \
+            --platform illumina \
             --protocol amplicon \
-            --primer_bed ./nCoV-2019.artic.V3.bed \
+            --genome 'MN908947.3' \
+            --primer_set artic \
+            --primer_set_version 3 \
             --skip_assembly \
+            -profile <docker/singularity/podman/conda/institute>
+        ```
+
+    * Typical command for Nanopore amplicon analysis:
+
+        ```bash
+        nextflow run nf-core/viralrecon \
+            --input samplesheet.csv \
+            --platform nanopore \
+            --genome 'MN908947.3' \
+            --primer_set_version 3 \
+            --fastq_dir ./fastq_pass/ \
+            --fast5_dir ./fast5_pass/ \
+            --sequencing_summary sequencing_summary.txt \
             -profile <docker/singularity/podman/conda/institute>
         ```
 
@@ -119,9 +137,10 @@ The pipeline has numerous options to allow you to run only specific aspects of t
             -profile <docker/singularity/podman/conda/institute>
         ```
 
-    > **NB:** The commands to obtain public data and to run the main arm of the pipeline are completely independent. This is intentional because it allows you to download all of the raw data in an initial pipeline run (`results/public_data/`) and then to curate the auto-created samplesheet based on the available sample metadata before you run the pipeline again properly.
+    * The commands to obtain public data and to run the main arm of the pipeline are completely independent. This is intentional because it allows you to download all of the raw data in an initial pipeline run (`results/public_data/`) and then to curate the auto-created samplesheet based on the available sample metadata before you run the pipeline again properly.
+    * You can find the default keys used to specify `--genome` in the [Genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config). Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard keys. If you are able to get permissions from the vendor/supplier to share the primer information then we would be more than happy for to support it within the pipeline.
 
-See [usage docs](https://nf-co.re/viralrecon/usage) for all of the available options when running the pipeline.
+See [usage](https://nf-co.re/viralrecon/usage) and [parameter](https://nf-co.re/viralrecon/parameters) docs for all of the available options when running the pipeline.
 
 ## Documentation
 
