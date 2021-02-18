@@ -46,7 +46,7 @@ jobs:
       NXF_ANSI_LOG: false
     strategy:
       matrix:
-        parameters: [--skip_fastp, --skip_markduplicates, --skip_variants, --skip_cutadapt, --skip_kraken2, --skip_assembly, '--spades_mode corona', '--spades_mode metaviral']
+        parameters: [--skip_fastp, --skip_variants, --skip_cutadapt, --skip_kraken2, --skip_assembly, '--spades_mode corona', '--spades_mode metaviral']
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -134,6 +134,6 @@ jobs:
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
 
-      - name: Run pipeline with minimal SISPA data and various options
+      - name: Run pipeline with minimal Nanopore data and various options
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker ${{ matrix.parameters }}
