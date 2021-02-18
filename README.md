@@ -65,7 +65,7 @@ The pipeline has numerous options to allow you to run only specific aspects of t
 4. Align reads, call variants and generate consensus sequence ([`artic minion`](https://artic.readthedocs.io/en/latest/commands/))
 5. Remove unmapped reads and obtain alignment metrics ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
 6. Genome-wide and amplicon coverage QC plots ([`mosdepth`](https://github.com/brentp/mosdepth/))
-7. Variant analysis:
+7. Downstream variant analysis:
     * Count metrics ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html))
     * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
     * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
