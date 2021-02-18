@@ -74,7 +74,7 @@ The pipeline has numerous options to allow you to run only specific aspects of t
 
 ## Quick Start
 
-1. Install [`nextflow`](https://nf-co.re/usage/installation). Note, at the time of release, this version of the pipeline requires an `edge` release of Nextflow. See [usage docs](https://nf-co.re/viralrecon/usage#nextflow-edge-releases) for more information.
+1. Install [`nextflow`](https://nf-co.re/usage/installation). At the time of release, this version of the pipeline requires an `edge` release of Nextflow (see [usage docs](https://nf-co.re/viralrecon/usage#nextflow-edge-releases) for more information).
 
 2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`Podman`](https://podman.io/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
 
