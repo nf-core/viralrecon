@@ -176,7 +176,7 @@ NXF_OPTS='-Xms1g -Xmx4g'
 
 Stable releases will be becoming more infrequent as Nextflow shifts its development model to becoming more dynamic via the usage of plugins. This will allow functionality to be added as an extension to the core codebase with a release cycle that could potentially be independent to that of Nextflow itself. As a result of the reduction in stable releases, some pipelines may be required to use Nextflow `edge` releases in order to be able to exploit cutting "edge" features e.g. version 3.0 of the nf-core/rnaseq pipeline requires Nextflow `>=20.11.0-edge` in order to be able to directly download Singularity containers over `http` (see [nf-core/rnaseq#496](https://github.com/nf-core/rnaseq/issues/496)).
 
-There are a number of ways you can install Nextflow edge releases:
+There are a number of ways you can install Nextflow `edge` releases, the main difference with stable releases being that you have to `export` the version you would like to install before issuing the appropriate installation commands as highlighted below.
 
 * If you have Nextflow installed already you can update it using the commands below:
 
@@ -185,7 +185,7 @@ export NXF_VER="20.11.0-edge"
 nextflow self-update
 ```
 
-* If you would like to download and install a Nextflow edge release from scratch:
+* If you would like to download and install a Nextflow `edge` release from scratch with minimal fuss:
 
 ```bash
 export NXF_VER="20.12.0-edge"
@@ -195,4 +195,4 @@ sudo mv nextflow /usr/local/bin/
 
 > Note if you don't have `sudo` privileges required for the last command above then you can move the `nextflow` binary to somewhere else and export that directory to `$PATH` instead. One way of doing that on Linux would be to add `export PATH=$PATH:/path/to/nextflow/binary/` to your `~/.bashrc` file so that it is available every time you login to your system.
 
-* Manually download and install Nextflow from the available [assets](https://github.com/nextflow-io/nextflow/releases) on Github.
+* Manually download and install Nextflow from the available [assets](https://github.com/nextflow-io/nextflow/releases) on Github. See [Nextflow installation docs](https://www.nextflow.io/docs/latest/getstarted.html#installation).
