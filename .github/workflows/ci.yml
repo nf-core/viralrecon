@@ -112,3 +112,28 @@ jobs:
       - name: Run pipeline with minimal SISPA data and various options
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }}
+
+  test_nanopore:
+    name: Test Nanopore workflow
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
+    runs-on: ubuntu-latest
+    env:
+      NXF_VER: '20.11.0-edge'
+      NXF_ANSI_LOG: false
+    strategy:
+      matrix:
+        parameters: [--gff false, --min_barcode_reads 10000, --min_guppyplex_reads 10000, "--artic_minion_caller medaka --artic_minion_medaka_model r941_min_fast_g303", --artic_minion_aligner bwa]
+    steps:
+      - name: Check out pipeline code
+        uses: actions/checkout@v2
+
+      - name: Install Nextflow
+        env:
+          CAPSULE_LOG: none
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+
+      - name: Run pipeline with minimal SISPA data and various options
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker ${{ matrix.parameters }}
