@@ -98,31 +98,37 @@
                     "type": "string",
                     "description": "If the '--protocol amplicon' parameter is provided then iVar is used to trim primer sequences after read alignment and before variant calling.",
                     "help_text": "iVar uses the primer positions relative to the viral genome supplied in this file to soft clip primer sequences from a coordinate sorted BAM file. The file must be in BED format as highlighted below:\n\n```\nMN908947.3 30 54 nCoV-2019_1_LEFT 60 -\nMN908947.3 385 410 nCoV-2019_1_RIGHT 60 +\nMN908947.3 320 342 nCoV-2019_2_LEFT 60 -\nMN908947.3 704 726 nCoV-2019_2_RIGHT 60 +\n```",
-                    "fa_icon": "fas fa-assistive-listening-systems"
+                    "fa_icon": "fas fa-stream"
                 },
                 "primer_fasta": {
                     "type": "string",
                     "description": "If the '--protocol amplicon' parameter is provided then Cutadapt is used to trim primer sequences from FastQ files before de novo assembly.",
                     "help_text": "This file must contain amplicon primer sequences in Fasta format. An example is shown below:\n\n```\n>nCoV-2019_1_LEFT\nACCAACCAACTTTCGATCTCTTGT\n>nCoV-2019_1_RIGHT\nCATCTTTAAGATGTTGACGTGCCTC\n>nCoV-2019_2_LEFT\nCTGTTTTACAGGTTCGCGACGT\n>nCoV-2019_2_RIGHT\nTAAGGATCAGTGCCAAGCTCGT\n```",
-                    "fa_icon": "fas fa-assistive-listening-systems"
+                    "fa_icon": "fas fa-stream"
                 },
                 "primer_left_suffix": {
                     "type": "string",
                     "default": "_LEFT",
-                    "fa_icon": "fas fa-assistive-listening-systems",
+                    "fa_icon": "fas fa-arrow-left",
                     "description": "Suffix used in name field of '--primer_bed' to indicate left primer position."
                 },
                 "primer_right_suffix": {
                     "type": "string",
                     "default": "_RIGHT",
-                    "fa_icon": "fas fa-assistive-listening-systems",
+                    "fa_icon": "fas fa-arrow-right",
                     "description": "Suffix used in name field of '--primer_bed' to indicate right primer position."
                 },
                 "primer_set": {
-                    "type": "string"
+                    "type": "string",
+                    "fa_icon": "fas fa-sliders-h",
+                    "description": "The primer set to be used for the data analysis.",
+                    "help_text": "Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard keys. See https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config"
                 },
                 "primer_set_version": {
-                    "type": "integer"
+                    "type": "integer",
+                    "fa_icon": "fas fa-code-branch",
+                    "description": "Version of the primer set e.g. '--primer_set artic --primer_set_version 3'.",
+                    "help_text": "Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard keys. See https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config"
                 },
                 "save_reference": {
                     "type": "boolean",
@@ -139,32 +145,68 @@
             "fa_icon": "fas fa-truck-loading",
             "properties": {
                 "fastq_dir": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to a folder containing fastq files from the Nanopore run.",
+                    "help_text": "e.g. '--fastq_dir ./20191023_1522_MC-110615_0_FAO93606_12bf9b4f/fastq_pass/'.",
+                    "fa_icon": "fas fa-folder-open"
                 },
                 "fast5_dir": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to a folder containing fast5 files from the Nanopore run.",
+                    "help_text": "e.g. '--fast5_dir ./20191023_1522_MC-110615_0_FAO93606_12bf9b4f/fast5_pass/'. Not required when running the pipeline with the '--artic_minion_caller medaka' workflow.",
+                    "fa_icon": "fas fa-folder-open"
                 },
                 "sequencing_summary": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Sequencing summary file generated after Nanopore run completion.",
+                    "help_text": " e.g. '--sequencing_summary ./20191023_1522_MC-110615_0_FAO93606_12bf9b4f/sequencing_summary.txt'. Not required when running the pipeline with the '--artic_minion_caller medaka' workflow.",
+                    "fa_icon": "fas fa-file"
                 },
                 "min_barcode_reads": {
                     "type": "integer",
-                    "default": 100
+                    "default": 100,
+                    "description": "Minimum number of raw reads required per sample/barcode in order to be considered for the downstream processing steps.",
+                    "fa_icon": "fas fa-hand-paper"
                 },
                 "min_guppyplex_reads": {
                     "type": "integer",
-                    "default": 10
+                    "default": 10,
+                    "description": "Minimum number of reads required after the artic guppyplex process per sample/barcode in order to be considered for the downstream processing steps.",
+                    "fa_icon": "fas fa-hand-paper"
                 },
                 "artic_minion_caller": {
                     "type": "string",
-                    "default": "nanopolish"
+                    "default": "nanopolish",
+                    "description": "Variant caller used when running artic minion. Available options are 'medaka' and 'nanopolish' (default).",
+                    "fa_icon": "fas fa-phone-volume"
                 },
                 "artic_minion_aligner": {
                     "type": "string",
-                    "default": "minimap2"
+                    "default": "minimap2",
+                    "description": "Aligner used when running artic minion. Available options are 'bwa' and 'minimap2' (default).",
+                    "fa_icon": "fas fa-map-signs"
                 },
                 "artic_scheme": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Primer scheme recognised by the artic minion command.",
+                    "help_text": "e.g. '--artic_scheme ncov-2019'. See https://artic.readthedocs.io/en/latest/primer-schemes/ and https://github.com/artic-network/primer-schemes/blob/master/schemes_manifest.json.",
+                    "fa_icon": "fas fa-stream"
+                },
+                "artic_minion_medaka_model": {
+                    "type": "string",
+                    "description": "Parameter passed to artic minion and required when using the '--artic_minion_caller medaka' workflow.",
+                    "help_text": "See https://github.com/nanoporetech/medaka",
+                    "fa_icon": "fas fa-train"
+                },
+                "skip_pycoqc": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip pycoQC."
+                },
+                "skip_nanoplot": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip NanoPlot."
                 }
             }
         },
@@ -234,7 +276,7 @@
                 "callers": {
                     "type": "string",
                     "default": "ivar",
-                    "description": "Specify which variant calling algorithms you would like to use. Available options are ivar and bcftools.",
+                    "description": "Specify which variant calling algorithms you would like to use. Available options are 'ivar' and 'bcftools'.",
                     "fa_icon": "fas fa-phone-volume"
                 },
                 "min_mapped_reads": {
@@ -316,7 +358,7 @@
                 "assemblers": {
                     "type": "string",
                     "default": "spades",
-                    "description": "Specify which assembly algorithms you would like to use. Available options are spades, unicycler and minia.",
+                    "description": "Specify which assembly algorithms you would like to use. Available options are 'spades', 'unicycler' and 'minia'.",
                     "fa_icon": "fas fa-random"
                 },
                 "spades_mode": {
