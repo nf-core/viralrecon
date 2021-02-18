@@ -6,17 +6,17 @@
 
 ## Introduction
 
+### Illumina samplesheet format
+
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
 
 ```bash
 --input '[path to samplesheet file]'
 ```
 
-### Format
-
 The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once (e.g. to increase sequencing depth). The pipeline will concatenate the raw reads before performing any downstream analysis.
 
-A final design file may look something like the one below. `SAMPLE_1` was sequenced twice in Illumina PE format, `SAMPLE_2` was sequenced once in Illumina SE format.
+A final samplesheet file may look something like the one below. `SAMPLE_1` was sequenced twice in Illumina PE format, `SAMPLE_2` was sequenced once in Illumina SE format.
 
 ```bash
 sample,fastq_1,fastq_2
@@ -30,6 +30,29 @@ SAMPLE_2,AEG588A2_S4_L003_R1_001.fastq.gz,
 | `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample.               |
 | `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".  |
 | `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".  |
+
+### Nanopore samplesheet format
+
+You have the option to provide a samplesheet to the pipeline that maps sample ids to barcode ids. This allows you to associate barocode ids to clinical/public database identifiers that can be used to QC or pre-process the data with more appropriate sample names.
+
+```bash
+--input '[path to samplesheet file]'
+```
+
+It has to be a comma-separated file with 2 columns. A final samplesheet file may look something like the one below:
+
+```bash
+sample,barcode
+21X983255,1
+70H209408,2
+49Y807476,3
+70N209581,4
+```
+
+| Column    | Description                                                                                                                 |
+|-----------|-----------------------------------------------------------------------------------------------------------------------------|
+| `sample`  | Custom sample name, one per barcode.                                                                                        |
+| `barcode` | Barcode identifier attributed to that sample during multiplexing. Must be an integer.                                       |
 
 ## Direct download of public repository data
 
