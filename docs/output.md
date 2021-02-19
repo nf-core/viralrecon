@@ -253,8 +253,7 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 
 #### Nanopore: Pangolin
 
-
-    <!-- * Lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin)) -->
+<!-- * Lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin)) -->
 
 ### Nanopore: Workflow reporting and genomes
 
