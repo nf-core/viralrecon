@@ -211,7 +211,7 @@ nextflow self-update
 * If you would like to download and install a Nextflow `edge` release from scratch with minimal fuss:
 
 ```bash
-export NXF_VER="20.12.0-edge"
+export NXF_VER="20.11.0-edge"
 wget -qO- get.nextflow.io | bash
 sudo mv nextflow /usr/local/bin/
 ```
