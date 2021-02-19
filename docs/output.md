@@ -107,23 +107,19 @@ Align reads, call variants and generate consensus sequence with [`artic minion`]
 <details markdown="1">
 <summary>Output files</summary>
 
-* `variants/bam/`
-  * `<SAMPLE>.sorted.bam`: Coordinate sorted BAM file containing read alignment information.
-  * `<SAMPLE>.sorted.bam.bai`: Index file for coordinate sorted BAM file.
-* `variants/bam/samtools_stats/`
-  * SAMtools `<SAMPLE>.sorted.bam.flagstat`, `<SAMPLE>.sorted.bam.idxstats` and `<SAMPLE>.sorted.bam.stats` files generated from the alignment files.
--rw-rw----+ 1 patelh domain_users 1511064 Feb 19 16:31 SAMPLE_01.mapped.bam
--rw-rw----+ 1 patelh domain_users     152 Feb 19 16:31 SAMPLE_01.mapped.bam.bai
+* `nanopore/<CALLER>/`
+  * `<SAMPLE>.mapped.sorted.bam`: Coordinate sorted BAM file containing read alignment information.
+  * `<SAMPLE>.mapped.sorted.bam.bai`: Index file for coordinate sorted BAM file.
+* `nanopore/<CALLER>/samtools_stats/`  
+  * SAMtools `<SAMPLE>.mapped.sorted.bam.flagstat`, `<SAMPLE>.mapped.sorted.bam.idxstats` and `<SAMPLE>.mapped.sorted.bam.stats` files generated from the alignment files.
 
 > **NB:** The value of `<CALLER>` in the output directory name above is determined by the `artic_minion_caller` parameter (Default: 'nanopolish').
 
 </details>
 
-Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/) to sort them by coordinate, for indexing, as well as to generate read mapping statistics.
+BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/) to remove unmapped reads as well as to generate read mapping statistics.
 
 ![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
-
-<!-- 5. Remove unmapped reads and obtain alignment metrics ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/)) -->
 
 #### Nanopore: mosdepth
 
