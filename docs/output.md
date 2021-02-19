@@ -1,4 +1,4 @@
-# ![nf-core/viralrecon](images/nf-core-viralrecon_logo.png)
+# nf-core/viralrecon: Output
 
 ## :warning: Please read this documentation on the nf-core website: [https://nf-co.re/viralrecon/output](https://nf-co.re/viralrecon/output)
 
