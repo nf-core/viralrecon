@@ -24,9 +24,9 @@ process ARTIC_MINION {
     path  sequencing_summary
     path  ("primer-schemes/${scheme}/V${scheme_version}/${scheme}.reference.fasta")
     path  ("primer-schemes/${scheme}/V${scheme_version}/${scheme}.scheme.bed")
+    path  medaka_model
     val   scheme
     val   scheme_version
-    val   medaka_model
     
     output:
     tuple val(meta), path("${prefix}.*")                              , emit: results
@@ -50,9 +50,9 @@ process ARTIC_MINION {
     def summary  = params.sequencing_summary ? "--sequencing-summary $sequencing_summary" : ""
     def model    = ""
     if (options.args.tokenize().contains('--medaka')) {
-        fast5     = ""
-        summary   = ""
-        model     = "--medaka-model $medaka_model"
+        fast5   = ""
+        summary = ""
+        model = file(params.artic_minion_medaka_model).exists() ? "--medaka-model ./$medaka_model" : "--medaka-model $params.artic_minion_medaka_model"
     }
     """
     artic \\
