@@ -16,15 +16,17 @@
 
 ## Introduction
 
-**nfcore/viralrecon** is a bioinformatics analysis pipeline used to perform assembly and intra-host/low-frequency variant calling for viral samples. The pipeline supports short-read Illumina sequencing data from both shotgun (e.g. sequencing directly from clinical samples) and enrichment-based library preparation methods (e.g. amplicon-based: [ARTIC SARS-CoV-2 enrichment protocol](https://artic.network/ncov-2019); or probe-capture-based).
-
-The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with Docker containers making installation trivial and results highly reproducible.
+**nfcore/viralrecon** is a bioinformatics analysis pipeline used to perform assembly and intra-host/low-frequency variant calling for viral samples. The pipeline supports both Illumina and Nanopore sequencing data. For Illumina short-reads the pipeline is able to analyse metagenomics data typically obtained from shotgun sequencing (e.g. directly from clinical samples) and enrichment-based library preparation methods (e.g. amplicon-based: [ARTIC SARS-CoV-2 enrichment protocol](https://artic.network/ncov-2019); or probe-capture-based). For Nanopore data the pipeline only supports amplicon-based analysis obtained from primer sets created and maintained by the [ARTIC Network](https://artic.network/).
 
 On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources. The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/viralrecon/results).
 
+The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It comes with Docker containers making installation trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process making it easier to maintain, update and overwrite container definitions if required. Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community!
+
 ## Pipeline summary
 
-The pipeline has numerous options to allow you to run only specific aspects of the workflow if you so wish. For example, you can skip the host read filtering step with Kraken 2 with `--skip_kraken2` or you can skip all of the assembly steps with the `--skip_assembly` parameter. See the [usage docs](https://nf-co.re/rnaseq/usage) for all of the available options when running the pipeline.
+The pipeline has numerous options to allow you to run only specific aspects of the workflow if you so wish. For example, for Illumina data you can skip the host read filtering step with Kraken 2 with `--skip_kraken2` or you can skip all of the assembly steps with the `--skip_assembly` parameter. See the [usage](https://nf-co.re/viralrecon/usage) and [parameter](https://nf-co.re/viralrecon/parameters) docs for all of the available options when running the pipeline.
+
+### Illumina
 
 1. Download samples via SRA, ENA or GEO ids ([`ENA FTP`](https://ena-docs.readthedocs.io/en/latest/retrieval/file-download.html); *if required*)
 2. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html))
@@ -55,13 +57,24 @@ The pipeline has numerous options to allow you to run only specific aspects of t
         * Lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin))
 8. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
 
-## Pipeline reporting
+### Nanopore
 
-Numerous QC and reporting steps are included in the pipeline in order to collate a full summary of the analysis within a single [MultiQC](https://multiqc.info/) report. You can see [an example MultiQC report here](https://raw.githack.com/nf-core/viralrecon/master/docs/html/multiqc_report.html), generated using the parameters defined in [this configuration file](https://github.com/nf-core/viralrecon/blob/master/conf/test_full.config). The pipeline was run with [these samples](https://zenodo.org/record/3735111), prepared from the [ncov-2019 ARTIC Network V1 amplicon set](https://artic.network/ncov-2019) and sequenced on the Illumina MiSeq platform in 301bp paired-end format.
+1. Sequencing QC ([`pycoQC`](https://github.com/a-slide/pycoQC))
+2. Aggregate pre-demultiplexed reads from MinKNOW/Guppy ([`artic guppyplex`](https://artic.readthedocs.io/en/latest/commands/))
+3. Read QC ([`NanoPlot`](https://github.com/wdecoster/NanoPlot))
+4. Align reads, call variants and generate consensus sequence ([`artic minion`](https://artic.readthedocs.io/en/latest/commands/))
+5. Remove unmapped reads and obtain alignment metrics ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
+6. Genome-wide and amplicon coverage QC plots ([`mosdepth`](https://github.com/brentp/mosdepth/))
+7. Downstream variant analysis:
+    * Count metrics ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html))
+    * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
+    * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
+    * Lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin))
+8. Present QC, visualisation and custom reporting for sequencing, raw reads, alignment and variant calling results ([`MultiQC`](http://multiqc.info/))
 
 ## Quick Start
 
-1. Install [`nextflow`](https://nf-co.re/usage/installation)
+1. Install [`nextflow`](https://nf-co.re/usage/installation). At the time of release, this version of the pipeline requires an `edge` release of Nextflow (see [usage docs](https://nf-co.re/viralrecon/usage#nextflow-edge-releases) for more information).
 
 2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) or [`Podman`](https://podman.io/) for full pipeline reproducibility _(please only use [`Conda`](https://conda.io/miniconda.html) as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_
 
@@ -77,24 +90,42 @@ Numerous QC and reporting steps are included in the pipeline in order to collate
 
 4. Start running your own analysis!
 
-    * Typical command for shotgun analysis:
+    * Typical command for Illumina shotgun analysis:
 
         ```bash
         nextflow run nf-core/viralrecon \
             --input samplesheet.csv \
+            --platform illumina \
+            --protocol metagenomic \
             --genome 'MN908947.3' \
             -profile <docker/singularity/podman/conda/institute>
         ```
 
-    * Typical command for amplicon analysis:
+    * Typical command for Illumina amplicon analysis:
 
         ```bash
         nextflow run nf-core/viralrecon \
             --input samplesheet.csv \
-            --genome 'MN908947.3' \
+            --platform illumina \
             --protocol amplicon \
-            --primer_bed ./nCoV-2019.artic.V3.bed \
+            --genome 'MN908947.3' \
+            --primer_set artic \
+            --primer_set_version 3 \
             --skip_assembly \
+            -profile <docker/singularity/podman/conda/institute>
+        ```
+
+    * Typical command for Nanopore amplicon analysis:
+
+        ```bash
+        nextflow run nf-core/viralrecon \
+            --input samplesheet.csv \
+            --platform nanopore \
+            --genome 'MN908947.3' \
+            --primer_set_version 3 \
+            --fastq_dir fastq_pass/ \
+            --fast5_dir fast5_pass/ \
+            --sequencing_summary sequencing_summary.txt \
             -profile <docker/singularity/podman/conda/institute>
         ```
 
@@ -106,9 +137,10 @@ Numerous QC and reporting steps are included in the pipeline in order to collate
             -profile <docker/singularity/podman/conda/institute>
         ```
 
-    > **NB:** The commands to obtain public data and to run the main arm of the pipeline are completely independent. This is intentional because it allows you to download all of the raw data in an initial pipeline run (`results/public_data/`) and then to curate the auto-created samplesheet based on the available sample metadata before you run the pipeline again properly.
+    * The commands to obtain public data and to run the main arm of the pipeline are completely independent. This is intentional because it allows you to download all of the raw data in an initial pipeline run (`results/public_data/`) and then to curate the auto-created samplesheet based on the available sample metadata before you run the pipeline again properly.
+    * You can find the default keys used to specify `--genome` in the [genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config). Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard keys. If you are able to get permissions from the vendor/supplier to share the primer information then we would be more than happy to support it within the pipeline.
 
-See [usage docs](https://nf-co.re/viralrecon/usage) for all of the available options when running the pipeline.
+See [usage](https://nf-co.re/viralrecon/usage) and [parameter](https://nf-co.re/viralrecon/parameters) docs for all of the available options when running the pipeline.
 
 ## Documentation
 
@@ -117,6 +149,8 @@ The nf-core/viralrecon pipeline comes with documentation about the pipeline: [us
 ## Credits
 
 These scripts were originally written by [Sarai Varona](https://github.com/svarona), [Miguel Juliá](https://github.com/MiguelJulia) and [Sara Monzon](https://github.com/saramonzon) from [BU-ISCIII](https://github.com/BU-ISCIII) and co-ordinated by Isabel Cuesta for the [Institute of Health Carlos III](https://eng.isciii.es/eng.isciii.es/Paginas/Inicio.html), Spain. Through collaboration with the nf-core community the pipeline has now been updated substantially to include additional processing steps, to standardise inputs/outputs and to improve pipeline reporting; implemented primarily by [Harshil Patel](https://github.com/drpatelh) from [The Bioinformatics & Biostatistics Group](https://www.crick.ac.uk/research/science-technology-platforms/bioinformatics-and-biostatistics/) at [The Francis Crick Institute](https://www.crick.ac.uk/), London.
+
+The key steps in the Nanopore implementation of the pipeline are carried out using the [ARTIC Network's field bioinformatics pipeline](https://github.com/artic-network/fieldbioinformatics) and were inspired by the amazing work carried out by contributors to the [connor-lab/ncov2019-artic-nf pipeline](https://github.com/connor-lab/ncov2019-artic-nf) originally written by [Matt Bull](https://github.com/m-bull) for use by the [COG-UK](https://github.com/COG-UK) project. Thank you for all of your incredible efforts during this pandemic!
 
 Many thanks to others who have helped out and contributed along the way too, including (but not limited to)\*:
 

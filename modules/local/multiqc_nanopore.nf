@@ -18,49 +18,23 @@ process MULTIQC {
     }
 
     input:
-    path multiqc_config
+    path 'multiqc_config.yaml'
     path multiqc_custom_config
     path software_versions
     path workflow_summary
-    path fail_mapping_summary
-    path ('fastqc/*')
-    path ('fastp/*')
-    path ('fastp/*')
-    path ('kraken2/*')
-    path ('bowtie2/*')
-    path ('bowtie2/*')
-    path ('bowtie2/*')
-    path ('bowtie2/*')
-    path ('ivar_trim/*')
-    path ('ivar_trim/*')
-    path ('ivar_trim/*')
-    path ('ivar_trim/*')
-    path ('picard_markduplicates/*')
-    path ('picard_markduplicates/*')
-    path ('picard_markduplicates/*')
-    path ('picard_markduplicates/*')
-    path ('picard_metrics/*')
-    path ('picard_metrics/*')
+    path ('pycoqc/*')
+    path fail_no_barcodes_summary
+    path fail_barcode_count_summary
+    path fail_guppyplex_count_summary
+    path ('artic_minion/*')
+    path ('samtools_stats/*')
+    path ('samtools_stats/*')
+    path ('samtools_stats/*')
+    path ('bcftools_stats/*')
     path ('mosdepth/*')
-    path ('variants_ivar/*')
-    path ('variants_ivar/*')
-    path ('variants_ivar/*')
-    path ('variants_ivar/*')
-    path ('variants_bcftools/*')
-    path ('variants_bcftools/*')
-    path ('variants_bcftools/*')
-    path ('cutadapt/*')
-    path ('cutadapt/*')
-    path ('assembly_spades/*')
-    // path ('assembly_spades/*')
-    // path ('assembly_spades/*')
-    path ('assembly_unicycler/*')
-    // path ('assembly_unicycler/*')
-    // path ('assembly_unicycler/*')
-    path ('assembly_minia/*')
-    // path ('assembly_minia/*')
-    // path ('assembly_minia/*')
-        
+    path ('quast/*')
+    path ('snpeff/*')
+
     output:
     path "*multiqc_report.html", emit: report
     path "*_data"              , emit: data
@@ -71,7 +45,7 @@ process MULTIQC {
     def custom_config = params.multiqc_config ? "--config $multiqc_custom_config" : ''
     """
     multiqc -f $options.args $custom_config .
-    multiqc_to_custom_tsv.py
-    multiqc -f $options.args $custom_config .
     """
 }
+// multiqc_to_custom_tsv.py
+// multiqc -f $options.args $custom_config .
