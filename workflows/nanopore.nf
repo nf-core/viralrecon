@@ -25,13 +25,21 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
-// Config files
+// MultiQC config files
 ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
 
 if (params.input)              { ch_input              = file(params.input)              }
 if (params.fast5_dir)          { ch_fast5_dir          = file(params.fast5_dir)          } else { ch_fast5_dir          = ch_dummy_file     }
 if (params.sequencing_summary) { ch_sequencing_summary = file(params.sequencing_summary) } else { ch_sequencing_summary = ch_multiqc_config }
+
+// Need to stage medaka model properly depending on whether it is a string or a file
+ch_medaka_model = Channel.empty()
+if (params.artic_minion_caller == 'medaka') {
+    if (file(params.artic_minion_medaka_model).exists()) {
+        ch_medaka_model = Channel.fromPath(params.artic_minion_medaka_model)
+    }
+}
 
 ////////////////////////////////////////////////////
 /* --    IMPORT LOCAL MODULES/SUBWORKFLOWS     -- */
@@ -69,8 +77,8 @@ def publish_genome_options   = params.save_reference ? [publish_dir: 'genome'] :
 def collapse_primers_options = modules['artic_collapse_primers']
 def snpeff_build_options     = modules['artic_snpeff_build']
 if (!params.save_reference) {
-    collapse_primers_options['publish_files']  = false
-    snpeff_build_options['publish_files']      = false
+    collapse_primers_options['publish_files'] = false
+    snpeff_build_options['publish_files']     = false
 }
 
 include { INPUT_CHECK    } from '../subworkflows/local/input_check'             addParams( options: [:] )
@@ -252,9 +260,9 @@ workflow NANOPORE {
         ch_sequencing_summary,
         PREPARE_GENOME.out.fasta,
         PREPARE_GENOME.out.primer_bed,
+        ch_medaka_model.ifEmpty([]),
         params.artic_scheme,
         params.primer_set_version,
-        params.artic_minion_medaka_model
     )
     
     /*
