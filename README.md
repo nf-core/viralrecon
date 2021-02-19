@@ -123,8 +123,8 @@ The pipeline has numerous options to allow you to run only specific aspects of t
             --platform nanopore \
             --genome 'MN908947.3' \
             --primer_set_version 3 \
-            --fastq_dir ./fastq_pass/ \
-            --fast5_dir ./fast5_pass/ \
+            --fastq_dir fastq_pass/ \
+            --fast5_dir fast5_pass/ \
             --sequencing_summary sequencing_summary.txt \
             -profile <docker/singularity/podman/conda/institute>
         ```
