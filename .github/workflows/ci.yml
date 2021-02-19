@@ -122,7 +122,7 @@ jobs:
       NXF_ANSI_LOG: false
     strategy:
       matrix:
-        parameters: [--gff false, --min_barcode_reads 10000, --min_guppyplex_reads 10000, "--artic_minion_caller medaka --artic_minion_medaka_model r941_min_fast_g303", --artic_minion_aligner bwa]
+        parameters: [--gff false, --input false, --min_barcode_reads 10000, --min_guppyplex_reads 10000, "--artic_minion_caller medaka"]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
