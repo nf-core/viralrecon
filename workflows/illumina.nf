@@ -53,19 +53,19 @@ ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_hea
 // Don't overwrite global params.modules, create a copy instead and use that within the main script.
 def modules = params.modules.clone()
 
-def multiqc_options   = modules['multiqc_illumina']
+def multiqc_options   = modules['illumina_multiqc']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 
-include { MULTIQC_CUSTOM_FAIL_MAPPED } from '../modules/local/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]              )
-include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'   addParams( options: modules['picard_collectwgsmetrics'] )
-include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'              addParams( options: modules['bcftools_isec']            ) 
-include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: modules['cutadapt']                 )
-include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'                addParams( options: modules['kraken2_run']              ) 
-include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'      addParams( options: [publish_files: ['csv':'']]         )
-include { MULTIQC                    } from '../modules/local/multiqc_illumina'           addParams( options: multiqc_options                     )
+include { MULTIQC_CUSTOM_FAIL_MAPPED } from '../modules/local/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]                       )
+include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'   addParams( options: modules['illumina_picard_collectwgsmetrics'] )
+include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'              addParams( options: modules['illumina_bcftools_isec']            ) 
+include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: modules['illumina_cutadapt']                 )
+include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'                addParams( options: modules['illumina_kraken2_run']              ) 
+include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'      addParams( options: [publish_files: ['csv':'']]                  )
+include { MULTIQC                    } from '../modules/local/multiqc_illumina'           addParams( options: multiqc_options                              )
 
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_genome']   )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['plot_mosdepth_regions_amplicon'] )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
 
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -73,12 +73,12 @@ include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../mod
 def publish_genome_options    = params.save_reference ? [publish_dir: 'genome']       : [publish_files: false]
 def publish_index_options     = params.save_reference ? [publish_dir: 'genome/index'] : [publish_files: false]
 def publish_db_options        = params.save_reference ? [publish_dir: 'genome/db']    : [publish_files: false]
-def bedtools_getfasta_options = modules['bedtools_getfasta']
-def bowtie2_build_options     = modules['bowtie2_build']
-def snpeff_build_options      = modules['snpeff_build']
-def makeblastdb_options       = modules['blast_makeblastdb']
-def kraken2_build_options     = modules['kraken2_build']
-def collapse_primers_options  = modules['collapse_primers_illumina']
+def bedtools_getfasta_options = modules['illumina_bedtools_getfasta']
+def bowtie2_build_options     = modules['illumina_bowtie2_build']
+def snpeff_build_options      = modules['illumina_snpeff_build']
+def makeblastdb_options       = modules['illumina_blast_makeblastdb']
+def kraken2_build_options     = modules['illumina_kraken2_build']
+def collapse_primers_options  = modules['illumina_collapse_primers_illumina']
 if (!params.save_reference) { 
     bedtools_getfasta_options['publish_files'] = false
     bowtie2_build_options['publish_files']     = false
@@ -88,26 +88,26 @@ if (!params.save_reference) {
     collapse_primers_options['publish_files']  = false
 }
 
-def ivar_trim_options   = modules['ivar_trim']
+def ivar_trim_options   = modules['illumina_ivar_trim']
 ivar_trim_options.args += params.ivar_trim_noprimer ? "" : " -e"
 
-def ivar_trim_sort_bam_options = modules['ivar_trim_sort_bam']
+def ivar_trim_sort_bam_options = modules['illumina_ivar_trim_sort_bam']
 if (params.skip_markduplicates) {
     ivar_trim_sort_bam_options.publish_files.put('bam','')
     ivar_trim_sort_bam_options.publish_files.put('bai','')
 }
 
-def spades_options   = modules['spades']
+def spades_options   = modules['illumina_spades']
 spades_options.args += (params.spades_mode && params.spades_mode != 'corona') ? " --${params.spades_mode}" : ""
 
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'             addParams( options: [:] )
 include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome_illumina' addParams( genome_options: publish_genome_options, index_options: publish_index_options, db_options: publish_db_options, bowtie2_build_options: bowtie2_build_options, bedtools_getfasta_options: bedtools_getfasta_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options, makeblastdb_options: makeblastdb_options, kraken2_build_options: kraken2_build_options )
 include { PRIMER_TRIM_IVAR   } from '../subworkflows/local/primer_trim_ivar'        addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
-include { VARIANTS_IVAR      } from '../subworkflows/local/variants_ivar'           addParams( ivar_variants_options: modules['ivar_variants'], ivar_variants_to_vcf_options: modules['ivar_variants_to_vcf'], tabix_bgzip_options: modules['ivar_tabix_bgzip'], tabix_tabix_options: modules['ivar_tabix_tabix'], bcftools_stats_options: modules['ivar_bcftools_stats'], ivar_consensus_options: modules['ivar_consensus'], consensus_plot_options: modules['ivar_consensus_plot'], quast_options: modules['ivar_quast'], snpeff_options: modules['ivar_snpeff'], snpsift_options: modules['ivar_snpsift'], snpeff_bgzip_options: modules['ivar_snpeff_bgzip'], snpeff_tabix_options: modules['ivar_snpeff_tabix'], snpeff_stats_options: modules['ivar_snpeff_stats'], pangolin_options: modules['ivar_pangolin'] )
-include { VARIANTS_BCFTOOLS  } from '../subworkflows/local/variants_bcftools'       addParams( bcftools_mpileup_options: modules['bcftools_mpileup'], quast_options: modules['bcftools_quast'], consensus_genomecov_options: modules['bcftools_consensus_genomecov'], consensus_merge_options: modules['bcftools_consensus_merge'], consensus_mask_options: modules['bcftools_consensus_mask'], consensus_maskfasta_options: modules['bcftools_consensus_maskfasta'], consensus_bcftools_options: modules['bcftools_consensus_bcftools'], consensus_plot_options: modules['bcftools_consensus_plot'], snpeff_options: modules['bcftools_snpeff'], snpsift_options: modules['bcftools_snpsift'], snpeff_bgzip_options: modules['bcftools_snpeff_bgzip'], snpeff_tabix_options: modules['bcftools_snpeff_tabix'], snpeff_stats_options: modules['bcftools_snpeff_stats'], pangolin_options: modules['bcftools_pangolin'] )
-include { ASSEMBLY_SPADES    } from '../subworkflows/local/assembly_spades'         addParams( spades_options: spades_options, bandage_options: modules['spades_bandage'], blastn_options: modules['spades_blastn'], abacas_options: modules['spades_abacas'], plasmidid_options: modules['spades_plasmidid'], quast_options: modules['spades_quast'], snpeff_options: modules['spades_snpeff'], snpeff_bgzip_options: modules['spades_snpeff_bgzip'], snpeff_tabix_options: modules['spades_snpeff_tabix'], snpeff_stats_options: modules['spades_snpeff_tabix'], snpsift_options: modules['spades_snpsift'], pangolin_options: modules['spades_pangolin'] )
-include { ASSEMBLY_UNICYCLER } from '../subworkflows/local/assembly_unicycler'      addParams( unicycler_options: modules['unicycler'], bandage_options: modules['unicycler_bandage'], blastn_options: modules['unicycler_blastn'], abacas_options: modules['unicycler_abacas'], plasmidid_options: modules['unicycler_plasmidid'], quast_options: modules['unicycler_quast'], snpeff_options: modules['unicycler_snpeff'], snpeff_bgzip_options: modules['unicycler_snpeff_bgzip'], snpeff_tabix_options: modules['unicycler_snpeff_tabix'], snpeff_stats_options: modules['unicycler_snpeff_tabix'], snpsift_options: modules['unicycler_snpsift'], pangolin_options: modules['unicycler_pangolin'] )
-include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'          addParams( minia_options: modules['minia'], blastn_options: modules['minia_blastn'], abacas_options: modules['minia_abacas'], plasmidid_options: modules['minia_plasmidid'], quast_options: modules['minia_quast'], snpeff_options: modules['minia_snpeff'], snpeff_bgzip_options: modules['minia_snpeff_bgzip'], snpeff_tabix_options: modules['minia_snpeff_tabix'], snpeff_stats_options: modules['minia_snpeff_tabix'], snpsift_options: modules['minia_snpsift'], pangolin_options: modules['minia_pangolin'] )
+include { VARIANTS_IVAR      } from '../subworkflows/local/variants_ivar'           addParams( ivar_variants_options: modules['illumina_ivar_variants'], ivar_variants_to_vcf_options: modules['illumina_ivar_variants_to_vcf'], tabix_bgzip_options: modules['illumina_ivar_tabix_bgzip'], tabix_tabix_options: modules['illumina_ivar_tabix_tabix'], bcftools_stats_options: modules['illumina_ivar_bcftools_stats'], ivar_consensus_options: modules['illumina_ivar_consensus'], consensus_plot_options: modules['illumina_ivar_consensus_plot'], quast_options: modules['illumina_ivar_quast'], snpeff_options: modules['illumina_ivar_snpeff'], snpsift_options: modules['illumina_ivar_snpsift'], snpeff_bgzip_options: modules['illumina_ivar_snpeff_bgzip'], snpeff_tabix_options: modules['illumina_ivar_snpeff_tabix'], snpeff_stats_options: modules['illumina_ivar_snpeff_stats'], pangolin_options: modules['illumina_ivar_pangolin'] )
+include { VARIANTS_BCFTOOLS  } from '../subworkflows/local/variants_bcftools'       addParams( bcftools_mpileup_options: modules['illumina_bcftools_mpileup'], quast_options: modules['illumina_bcftools_quast'], consensus_genomecov_options: modules['illumina_bcftools_consensus_genomecov'], consensus_merge_options: modules['illumina_bcftools_consensus_merge'], consensus_mask_options: modules['illumina_bcftools_consensus_mask'], consensus_maskfasta_options: modules['illumina_bcftools_consensus_maskfasta'], consensus_bcftools_options: modules['illumina_bcftools_consensus_bcftools'], consensus_plot_options: modules['illumina_bcftools_consensus_plot'], snpeff_options: modules['illumina_bcftools_snpeff'], snpsift_options: modules['illumina_bcftools_snpsift'], snpeff_bgzip_options: modules['illumina_bcftools_snpeff_bgzip'], snpeff_tabix_options: modules['illumina_bcftools_snpeff_tabix'], snpeff_stats_options: modules['illumina_bcftools_snpeff_stats'], pangolin_options: modules['illumina_bcftools_pangolin'] )
+include { ASSEMBLY_SPADES    } from '../subworkflows/local/assembly_spades'         addParams( spades_options: spades_options, bandage_options: modules['illumina_spades_bandage'], blastn_options: modules['illumina_spades_blastn'], abacas_options: modules['illumina_spades_abacas'], plasmidid_options: modules['illumina_spades_plasmidid'], quast_options: modules['illumina_spades_quast'], snpeff_options: modules['illumina_spades_snpeff'], snpeff_bgzip_options: modules['illumina_spades_snpeff_bgzip'], snpeff_tabix_options: modules['illumina_spades_snpeff_tabix'], snpeff_stats_options: modules['illumina_spades_snpeff_tabix'], snpsift_options: modules['illumina_spades_snpsift'], pangolin_options: modules['illumina_spades_pangolin'] )
+include { ASSEMBLY_UNICYCLER } from '../subworkflows/local/assembly_unicycler'      addParams( unicycler_options: modules['illumina_unicycler'], bandage_options: modules['illumina_unicycler_bandage'], blastn_options: modules['illumina_unicycler_blastn'], abacas_options: modules['illumina_unicycler_abacas'], plasmidid_options: modules['illumina_unicycler_plasmidid'], quast_options: modules['illumina_unicycler_quast'], snpeff_options: modules['illumina_unicycler_snpeff'], snpeff_bgzip_options: modules['illumina_unicycler_snpeff_bgzip'], snpeff_tabix_options: modules['illumina_unicycler_snpeff_tabix'], snpeff_stats_options: modules['illumina_unicycler_snpeff_tabix'], snpsift_options: modules['illumina_unicycler_snpsift'], pangolin_options: modules['illumina_unicycler_pangolin'] )
+include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'          addParams( minia_options: modules['illumina_minia'], blastn_options: modules['illumina_minia_blastn'], abacas_options: modules['illumina_minia_abacas'], plasmidid_options: modules['illumina_minia_plasmidid'], quast_options: modules['illumina_minia_quast'], snpeff_options: modules['illumina_minia_snpeff'], snpeff_bgzip_options: modules['illumina_minia_snpeff_bgzip'], snpeff_tabix_options: modules['illumina_minia_snpeff_tabix'], snpeff_stats_options: modules['illumina_minia_snpeff_tabix'], snpsift_options: modules['illumina_minia_snpsift'], pangolin_options: modules['illumina_minia_pangolin'] )
 
 ////////////////////////////////////////////////////
 /* --    IMPORT NF-CORE MODULES/SUBWORKFLOWS   -- */
@@ -116,33 +116,33 @@ include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'      
 /*
  * MODULE: Installed directly from nf-core/modules
  */
-include { CAT_FASTQ                     } from '../modules/nf-core/software/cat/fastq/main'                     addParams( options: modules['cat_fastq']                     ) 
-include { FASTQC                        } from '../modules/nf-core/software/fastqc/main'                        addParams( options: modules['cutadapt_fastqc']               )
-include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['picard_collectmultiplemetrics'] )
-include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['mosdepth_genome']               )
-include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['mosdepth_amplicon']             )
+include { CAT_FASTQ                     } from '../modules/nf-core/software/cat/fastq/main'                     addParams( options: modules['illumina_cat_fastq']                     ) 
+include { FASTQC                        } from '../modules/nf-core/software/fastqc/main'                        addParams( options: modules['illumina_cutadapt_fastqc']               )
+include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['illumina_picard_collectmultiplemetrics'] )
+include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_genome']               )
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_amplicon']             )
 
 /*
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
  */
-def fastp_options = modules['fastp']
+def fastp_options = modules['illumina_fastp']
 if (params.save_trimmed_fail) { fastp_options.publish_files.put('fail.fastq.gz','') }
 
-def bowtie2_align_options = modules['bowtie2_align']
+def bowtie2_align_options = modules['illumina_bowtie2_align']
 if (params.save_unaligned) { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
 
-def bowtie2_sort_bam_options = modules['bowtie2_sort_bam']
+def bowtie2_sort_bam_options = modules['illumina_bowtie2_sort_bam']
 if (params.protocol != 'amplicon' && params.skip_markduplicates) {
     bowtie2_sort_bam_options.publish_files.put('bam','')
     bowtie2_sort_bam_options.publish_files.put('bai','')
 }
 
-def markduplicates_options   = modules['picard_markduplicates']
+def markduplicates_options   = modules['illumina_picard_markduplicates']
 markduplicates_options.args += params.filter_duplicates ? " REMOVE_DUPLICATES=true" : ""
 
-include { FASTQC_FASTP           } from '../subworkflows/nf-core/fastqc_fastp'           addParams( fastqc_raw_options: modules['fastqc_raw'], fastqc_trim_options: modules['fastqc_trim'], fastp_options: fastp_options )
-include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'          addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options                                     )
-include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['picard_markduplicates_sort_bam']          )
+include { FASTQC_FASTP           } from '../subworkflows/nf-core/fastqc_fastp'           addParams( fastqc_raw_options: modules['illumina_fastqc_raw'], fastqc_trim_options: modules['illumina_fastqc_trim'], fastp_options: fastp_options )
+include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'          addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options                                                       )
+include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['illumina_picard_markduplicates_sort_bam']                   )
 
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */
