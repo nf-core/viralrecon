@@ -65,8 +65,6 @@ include { MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_c
 include { GET_SOFTWARE_VERSIONS               } from '../modules/local/get_software_versions'               addParams( options: [publish_files: ['csv':'']] )
 include { MULTIQC                             } from '../modules/local/multiqc_nanopore'                    addParams( options: multiqc_options             )
 
-include { MOSDEPTH as MOSDEPTH_GENOME         } from '../modules/local/mosdepth'                                  addParams( options: modules['artic_mosdepth_genome']                )
-include { MOSDEPTH as MOSDEPTH_AMPLICON       } from '../modules/local/mosdepth'                                  addParams( options: modules['artic_mosdepth_amplicon']              )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['artic_plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['artic_plot_mosdepth_regions_amplicon'] )
 
@@ -95,6 +93,8 @@ include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'          
 include { BCFTOOLS_STATS } from '../modules/nf-core/software/bcftools/stats/main' addParams( options: modules['artic_bcftools_stats'] )
 include { QUAST          } from '../modules/nf-core/software/quast/main'          addParams( options: modules['artic_quast']          )
 include { PANGOLIN       } from '../modules/nf-core/software/pangolin/main'       addParams( options: modules['artic_pangolin']       )
+include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main' addParams( options: modules['artic_mosdepth_genome']   )
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main' addParams( options: modules['artic_mosdepth_amplicon'] )
 
 /*
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
