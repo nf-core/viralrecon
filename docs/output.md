@@ -59,7 +59,7 @@ The directories listed below will be created in the results directory after the 
 
 Aggregate pre-demultiplexed reads from MinKNOW/Guppy with [`artic guppyplex`](https://artic.readthedocs.io/en/latest/commands/).
 
-## Nanopore: NanoPlot
+#### Nanopore: NanoPlot
 
 <details markdown="1">
 <summary>Output files</summary>
