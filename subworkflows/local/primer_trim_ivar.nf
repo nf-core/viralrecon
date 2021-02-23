@@ -5,7 +5,7 @@
 params.ivar_trim_options = [:]
 params.samtools_options  = [:]
 
-include { IVAR_TRIM         } from '../../modules/local/ivar_trim'                      addParams( options: params.ivar_trim_options )
+include { IVAR_TRIM         } from '../../modules/nf-core/software/ivar/trim/main'      addParams( options: params.ivar_trim_options )
 include { SAMTOOLS_INDEX    } from '../../modules/nf-core/software/samtools/index/main' addParams( options: params.samtools_options  )
 include { BAM_SORT_SAMTOOLS } from '../nf-core/bam_sort_samtools'                       addParams( options: params.samtools_options  )
 
@@ -16,7 +16,7 @@ workflow PRIMER_TRIM_IVAR {
 
     main:
     /*
-     * iVar trim primes
+     * iVar trim primers
      */
     IVAR_TRIM ( bam, bed )
 
