@@ -300,6 +300,11 @@
                     "fa_icon": "fas fa-save",
                     "description": "Save unaligned reads in FastQ format from Bowtie 2 to the results directory."
                 },
+                "save_mpileup": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Save mpileup files generated when calling variants with iVar variants or iVar consensus."
+                },
                 "skip_ivar_trim": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
