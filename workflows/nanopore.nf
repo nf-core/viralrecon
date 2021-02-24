@@ -48,16 +48,16 @@ if (params.artic_minion_caller == 'medaka') {
 // Don't overwrite global params.modules, create a copy instead and use that within the main script.
 def modules = params.modules.clone()
 
-def artic_minion_options   = modules['artic_minion']
+def artic_minion_options   = modules['nanopore_artic_minion']
 artic_minion_options.args += params.artic_minion_caller  == 'medaka' ? " --medaka" : ""
 artic_minion_options.args += params.artic_minion_aligner == 'bwa'    ? " --bwa"    : " --minimap2"
 
-def multiqc_options   = modules['artic_multiqc']
+def multiqc_options   = modules['nanopore_multiqc']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 
-include { PYCOQC                              } from '../modules/local/pycoqc'                              addParams( options: modules['artic_pycoqc']     )
-include { NANOPLOT                            } from '../modules/local/nanoplot'                            addParams( options: modules['artic_nanoplot']   )
-include { ARTIC_GUPPYPLEX                     } from '../modules/local/artic_guppyplex'                     addParams( options: modules['artic_guppyplex']  )
+include { PYCOQC                              } from '../modules/local/pycoqc'                              addParams( options: modules['nanopore_pycoqc']     )
+include { NANOPLOT                            } from '../modules/local/nanoplot'                            addParams( options: modules['nanopore_nanoplot']   )
+include { ARTIC_GUPPYPLEX                     } from '../modules/local/artic_guppyplex'                     addParams( options: modules['nanopore_artic_guppyplex']  )
 include { ARTIC_MINION                        } from '../modules/local/artic_minion'                        addParams( options: artic_minion_options        )
 include { MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_fail_no_barcodes'     addParams( options: [publish_files: false]      )
 include { MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_fail_barcode_count'   addParams( options: [publish_files: false]      )
@@ -65,17 +65,15 @@ include { MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_c
 include { GET_SOFTWARE_VERSIONS               } from '../modules/local/get_software_versions'               addParams( options: [publish_files: ['csv':'']] )
 include { MULTIQC                             } from '../modules/local/multiqc_nanopore'                    addParams( options: multiqc_options             )
 
-include { MOSDEPTH as MOSDEPTH_GENOME         } from '../modules/local/mosdepth'                                  addParams( options: modules['artic_mosdepth_genome']                )
-include { MOSDEPTH as MOSDEPTH_AMPLICON       } from '../modules/local/mosdepth'                                  addParams( options: modules['artic_mosdepth_amplicon']              )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['artic_plot_mosdepth_regions_genome']   )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['artic_plot_mosdepth_regions_amplicon'] )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
 
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
  */
 def publish_genome_options   = params.save_reference ? [publish_dir: 'genome'] : [publish_files: false]
-def collapse_primers_options = modules['artic_collapse_primers']
-def snpeff_build_options     = modules['artic_snpeff_build']
+def collapse_primers_options = modules['nanopore_collapse_primers']
+def snpeff_build_options     = modules['nanopore_snpeff_build']
 if (!params.save_reference) {
     collapse_primers_options['publish_files'] = false
     snpeff_build_options['publish_files']     = false
@@ -83,7 +81,7 @@ if (!params.save_reference) {
 
 include { INPUT_CHECK    } from '../subworkflows/local/input_check'             addParams( options: [:] )
 include { PREPARE_GENOME } from '../subworkflows/local/prepare_genome_nanopore' addParams( genome_options: publish_genome_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options )
-include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'          addParams( snpeff_options: modules['artic_snpeff'], snpsift_options: modules['artic_snpsift'], bgzip_options: modules['artic_snpeff_bgzip'], tabix_options: modules['artic_snpeff_tabix'], stats_options: modules['artic_snpeff_stats'] )
+include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'          addParams( snpeff_options: modules['nanopore_snpeff'], snpsift_options: modules['nanopore_snpsift'], bgzip_options: modules['nanopore_snpeff_bgzip'], tabix_options: modules['nanopore_snpeff_tabix'], stats_options: modules['nanopore_snpeff_stats'] )
 
 ////////////////////////////////////////////////////
 /* --    IMPORT NF-CORE MODULES/SUBWORKFLOWS   -- */
@@ -92,14 +90,16 @@ include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'          
 /*
  * MODULE: Installed directly from nf-core/modules
  */
-include { BCFTOOLS_STATS } from '../modules/nf-core/software/bcftools/stats/main' addParams( options: modules['artic_bcftools_stats'] )
-include { QUAST          } from '../modules/nf-core/software/quast/main'          addParams( options: modules['artic_quast']          )
-include { PANGOLIN       } from '../modules/nf-core/software/pangolin/main'       addParams( options: modules['artic_pangolin']       )
+include { BCFTOOLS_STATS } from '../modules/nf-core/software/bcftools/stats/main' addParams( options: modules['nanopore_bcftools_stats'] )
+include { QUAST          } from '../modules/nf-core/software/quast/main'          addParams( options: modules['nanopore_quast']          )
+include { PANGOLIN       } from '../modules/nf-core/software/pangolin/main'       addParams( options: modules['nanopore_pangolin']       )
+include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main' addParams( options: modules['nanopore_mosdepth_genome']   )
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main' addParams( options: modules['nanopore_mosdepth_amplicon'] )
 
 /*
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
  */
-include { FILTER_BAM_SAMTOOLS } from '../subworkflows/nf-core/filter_bam_samtools' addParams( samtools_view_options: modules['artic_filter_bam'], samtools_index_options: modules['artic_filter_bam_stats'] )
+include { FILTER_BAM_SAMTOOLS } from '../subworkflows/nf-core/filter_bam_samtools' addParams( samtools_view_options: modules['nanopore_filter_bam'], samtools_index_options: modules['nanopore_filter_bam_stats'] )
 
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */

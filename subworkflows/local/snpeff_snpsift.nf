@@ -27,15 +27,17 @@ workflow SNPEFF_SNPSIFT {
     SNPSIFT_EXTRACTFIELDS ( VCF_BGZIP_TABIX_STATS.out.vcf )
     
     emit:
-    vcf             = VCF_BGZIP_TABIX_STATS.out.vcf     // channel: [ val(meta), [ vcf.gz ] ]
-    tbi             = VCF_BGZIP_TABIX_STATS.out.tbi     // channel: [ val(meta), [ tbi ] ]
-    stats           = VCF_BGZIP_TABIX_STATS.out.stats   // channel: [ val(meta), [ txt ] ]
+    csv              = SNPEFF_ANN.out.csv                         // channel: [ val(meta), [ csv ] ]
+    txt              = SNPEFF_ANN.out.txt                         // channel: [ val(meta), [ txt ] ]
+    html             = SNPEFF_ANN.out.html                        // channel: [ val(meta), [ html ] ]
+    snpeff_version   = SNPEFF_ANN.out.version                     //    path: *.version.txt
 
-    csv             = SNPEFF_ANN.out.csv                // channel: [ val(meta), [ csv ] ]
-    txt             = SNPEFF_ANN.out.txt                // channel: [ val(meta), [ txt ] ]
-    html            = SNPEFF_ANN.out.html               // channel: [ val(meta), [ html ] ]
-    snpeff_version  = SNPEFF_ANN.out.version            //    path: *.version.txt
-    
-    snpsift_txt     = SNPSIFT_EXTRACTFIELDS.out.txt
-    snpsift_version = SNPSIFT_EXTRACTFIELDS.out.version //    path: *.version.txt
+    vcf              = VCF_BGZIP_TABIX_STATS.out.vcf              // channel: [ val(meta), [ vcf.gz ] ]
+    tbi              = VCF_BGZIP_TABIX_STATS.out.tbi              // channel: [ val(meta), [ tbi ] ]
+    stats            = VCF_BGZIP_TABIX_STATS.out.stats            // channel: [ val(meta), [ txt ] ]
+    tabix_version    = VCF_BGZIP_TABIX_STATS.out.tabix_version    //    path: *.version.txt
+    bcftools_version = VCF_BGZIP_TABIX_STATS.out.bcftools_version //    path: *.version.txt
+
+    snpsift_txt      = SNPSIFT_EXTRACTFIELDS.out.txt              // channel: [ val(meta), [ txt ] ]
+    snpsift_version  = SNPSIFT_EXTRACTFIELDS.out.version          //    path: *.version.txt
 }

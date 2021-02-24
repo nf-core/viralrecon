@@ -11,7 +11,7 @@ process KRAKEN2_RUN {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:meta.id) }
 
-    conda (params.enable_conda ? 'bioconda::kraken2:2.1.1' : null)
+    conda (params.enable_conda ? 'bioconda::kraken2=2.1.1' : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container 'https://depot.galaxyproject.org/singularity/kraken2:2.1.1--pl526hc9558a2_0'
     } else {
