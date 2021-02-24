@@ -140,7 +140,7 @@ workflow PREPARE_GENOME {
      */
     ch_snpeff_db     = Channel.empty()
     ch_snpeff_config = Channel.empty()
-    if ((!params.skip_variants || !params.skip_assembly) && params.gff && (!params.skip_variants_snpeff || !params.skip_assembly_snpeff)) {
+    if (!params.skip_variants && params.gff && !params.skip_snpeff) {
         SNPEFF_BUILD ( ch_fasta, ch_gff )
         ch_snpeff_db     = SNPEFF_BUILD.out.db
         ch_snpeff_config = SNPEFF_BUILD.out.config
