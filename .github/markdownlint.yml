@@ -10,3 +10,5 @@ no-inline-html:
         - kbd
         - details
         - summary
+single-title:
+    level: 2
