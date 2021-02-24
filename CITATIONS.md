@@ -47,9 +47,6 @@
 * [minia](https://www.ncbi.nlm.nih.gov/pubmed/24040893/)
   > Chikhi R, Rizk G. Space-efficient and exact de Bruijn graph representation based on a Bloom filter. Algorithms Mol Biol. 2013 Sep 16;8(1):22. doi: 10.1186/1748-7188-8-22. PubMed PMID: 24040893; PubMed Central PMCID: PMC3848682.
 
-* [Minimap2](https://www.ncbi.nlm.nih.gov/pubmed/29750242/)
-  > Li H. Minimap2: pairwise alignment for nucleotide sequences. Bioinformatics. 2018 Sep 15;34(18):3094-3100. doi: 10.1093/bioinformatics/bty191. PubMed PMID: 29750242; PubMed Central PMCID: PMC6137996.
-
 * [mosdepth](https://www.ncbi.nlm.nih.gov/pubmed/29096012)
   > Pedersen BS, Quinlan AR. Mosdepth: Quick Coverage Calculation for Genomes and Exomes. Bioinformatics. 2018 Mar 1;34(5):867-868. doi: 10.1093/bioinformatics/btx699. PMID: 29096012 PMCID: PMC6030888.
 
@@ -61,8 +58,6 @@
 
 * [pangolin](https://github.com/cov-lineages/pangolin)
   > Áine O'Toole, Emily Scher, Anthony Underwood, Ben Jackson, Verity Hill, JT McCrone, Chris Ruis, Khali Abu-Dahab, Ben Taylor, Corin Yeats, Louis du Plessis, David Aanensen, Eddie Holmes, Oliver Pybus, Andrew Rambaut. pangolin: lineage assignment in an emerging pandemic as an epidemiological tool. Publication in preparation.
-
-* [parallel-fastq-dump](https://github.com/rvalieris/parallel-fastq-dump)
 
 * [picard-tools](http://broadinstitute.github.io/picard)
 
@@ -78,8 +73,6 @@
 * [SAMtools](https://www.ncbi.nlm.nih.gov/pubmed/19505943/)
   > Li H, Handsaker B, Wysoker A, Fennell T, Ruan J, Homer N, Marth G, Abecasis G, Durbin R; 1000 Genome Project Data Processing Subgroup. The Sequence Alignment/Map format and SAMtools. Bioinformatics. 2009 Aug 15;25(16):2078-9. doi: 10.1093/bioinformatics/btp352. Epub 2009 Jun 8. PubMed PMID: 19505943; PubMed Central PMCID: PMC2723002.
 
-* [seqwish](https://github.com/ekg/seqwish)
-
 * [SnpEff](https://www.ncbi.nlm.nih.gov/pubmed/22728672/)
   > Cingolani P, Platts A, Wang le L, Coon M, Nguyen T, Wang L, Land SJ, Lu X, Ruden DM. A program for annotating and predicting the effects of single nucleotide polymorphisms, SnpEff: SNPs in the genome of Drosophila melanogaster strain w1118; iso-2; iso-3. Fly (Austin). 2012 Apr-Jun;6(2):80-92. doi: 10.4161/fly.19695. PubMed PMID: 22728672; PubMed Central PMCID: PMC3679285.
 
@@ -89,19 +82,8 @@
 * [SPAdes](https://www.ncbi.nlm.nih.gov/pubmed/24093227/)
   > Nurk S, Bankevich A, Antipov D, Gurevich AA, Korobeynikov A, Lapidus A, Prjibelski AD, Pyshkin A, Sirotkin A, Sirotkin Y, Stepanauskas R, Clingenpeel SR, Woyke T, McLean JS, Lasken R, Tesler G, Alekseyev MA, Pevzner PA. Assembling single-cell genomes and mini-metagenomes from chimeric MDA products. J Comput Biol. 2013 Oct;20(10):714-37. doi: 10.1089/cmb.2013.0084. PubMed PMID: 24093227; PubMed Central PMCID: PMC3791033.
 
-* [SRA Toolkit](http://ncbi.github.io/sra-tools/)
-
-* [Trimmomatic](https://www.ncbi.nlm.nih.gov/pubmed/24695404/)
-  > Bolger AM, Lohse M, Usadel B. Trimmomatic: a flexible trimmer for Illumina sequence data. Bioinformatics. 2014 Aug 1;30(15):2114-20. doi: 10.1093/bioinformatics/btu170. Epub 2014 Apr 1. PubMed PMID: 24695404; PubMed Central PMCID: PMC4103590.
-
-* [UCSC tools](https://www.ncbi.nlm.nih.gov/pubmed/20639541/)
-  > Kent WJ, Zweig AS, Barber G, Hinrichs AS, Karolchik D. BigWig and BigBed: enabling browsing of large distributed datasets. Bioinformatics. 2010 Sep 1;26(17):2204-7. doi: 10.1093/bioinformatics/btq351. Epub 2010 Jul 17. PubMed PMID: 20639541; PubMed Central PMCID: PMC2922891.
-
 * [Unicycler](https://www.ncbi.nlm.nih.gov/pubmed/28594827/)
   > Wick RR, Judd LM, Gorrie CL, Holt KE. Unicycler: Resolving bacterial genome assemblies from short and long sequencing reads. PLoS Comput Biol. 2017 Jun 8;13(6):e1005595. doi: 10.1371/journal.pcbi.1005595. eCollection 2017 Jun. PubMed PMID: 28594827; PubMed Central PMCID: PMC5481147.
-
-* [vg](https://www.ncbi.nlm.nih.gov/pubmed/30125266/)
-  > Garrison E, Sirén J, Novak AM, Hickey G, Eizenga JM, Dawson ET, Jones W, Garg S, Markello C, Lin MF, Paten B, Durbin R. Variation graph toolkit improves read mapping by representing genetic variation in the reference. Nat Biotechnol. 2018 Oct;36(9):875-879. doi: 10.1038/nbt.4227. Epub 2018 Aug 20. PubMed PMID: 30125266; PubMed Central PMCID: PMC6126949.
 
 ## Software packaging/containerisation tools
 
