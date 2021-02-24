@@ -52,14 +52,8 @@ process MULTIQC {
     path ('cutadapt/*')
     path ('cutadapt/*')
     path ('assembly_spades/*')
-    // path ('assembly_spades/*')
-    // path ('assembly_spades/*')
     path ('assembly_unicycler/*')
-    // path ('assembly_unicycler/*')
-    // path ('assembly_unicycler/*')
     path ('assembly_minia/*')
-    // path ('assembly_minia/*')
-    // path ('assembly_minia/*')
         
     output:
     path "*multiqc_report.html", emit: report
