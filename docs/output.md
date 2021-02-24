@@ -258,6 +258,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [iVar variants and iVar consensus](#ivar-variants-and-ivar-consensus) *||* [BCFTools and BEDTools](#bcftools-and-bedtools) - Variant calling and consensus sequence generation
     * [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
     * [QUAST](#quast) - Consensus assessment report
+    * [Pangolin](#pangolin) - Lineage analysis
   * [BCFTools isec](#bcftools-isec) - Intersect variants across all callers
 * [De novo assembly](#illumina-de-novo-assembly)
   * [Cutadapt](#cutadapt) - Primer trimming for amplicon data
@@ -568,6 +569,20 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 </details>
 
 [QUAST](http://bioinf.spbau.ru/quast) is used to generate a single report with which to evaluate the quality of the consensus sequence across all of the samples provided to the pipeline. The HTML results can be opened within any browser (we recommend using Google Chrome). Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
+
+### Pangolin
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `illumina/variants/<CALLER>/pangolin/`
+  * `*.pangolin.csv`: Lineage analysis results from Pangolin.
+
+> **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar').
+
+</details>
+
+Lineage analysis with [`Pangolin`](https://github.com/cov-lineages/pangolin)
 
 ### BCFTools isec
 
