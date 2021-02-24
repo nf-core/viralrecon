@@ -63,7 +63,7 @@ workflow VARIANTS_BCFTOOLS {
             ch_quast_version = QUAST.out.version
         }
 
-        if (!params.skip_variants_pangolin) {
+        if (!params.skip_pangolin) {
             PANGOLIN ( ch_consensus )
             ch_pangolin_report  = PANGOLIN.out.report
             ch_pangolin_version = PANGOLIN.out.version
@@ -82,7 +82,7 @@ workflow VARIANTS_BCFTOOLS {
     ch_snpsift_txt     = Channel.empty()
     ch_snpeff_version  = Channel.empty()
     ch_snpsift_version = Channel.empty()
-    if (params.gff && !params.skip_variants_snpeff) {
+    if (params.gff && !params.skip_snpeff) {
         SNPEFF_SNPSIFT ( BCFTOOLS_MPILEUP.out.vcf, snpeff_db, snpeff_config, fasta )
         ch_snpeff_vcf      = SNPEFF_SNPSIFT.out.vcf
         ch_snpeff_tbi      = SNPEFF_SNPSIFT.out.tbi
