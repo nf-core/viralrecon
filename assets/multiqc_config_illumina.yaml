@@ -123,54 +123,18 @@ module_order:
         info: 'This section of the report shows QUAST results from SPAdes de novo assembly.'
         path_filters:
             - './assembly_spades/*.tsv'
-    - bcftools:
-        name: 'ASSEMBLY: BCFTools (SPAdes)'
-        anchor: 'bcftools_spades'
-        info: 'This section of the report shows BCFTools stats results for variants called in the SPAdes assembly relative to the reference.'
-        path_filters:
-            - './assembly_spades/*.txt'
-    - snpeff:
-        name: 'ASSEMBLY: SnpEff (SPAdes)'
-        anchor: 'snpeff_spades'
-        info: 'This section of the report shows SnpEff results for variants called in the SPAdes assembly relative to the reference.'
-        path_filters:
-            - './assembly_spades/*.csv'
     - quast:
         name: 'ASSEMBLY: QUAST (Unicycler)'
         anchor: 'quast_unicycler'
         info: 'This section of the report shows QUAST results from Unicycler de novo assembly.'
         path_filters:
             - './assembly_unicycler/*.tsv'
-    - bcftools:
-        name: 'ASSEMBLY: BCFTools (Unicycler)'
-        anchor: 'bcftools_unicycler'
-        info: 'This section of the report shows BCFTools stats results for variants called in the Unicycler assembly relative to the reference.'
-        path_filters:
-            - './assembly_unicycler/*.txt'
-    - snpeff:
-        name: 'ASSEMBLY: SnpEff (Unicycler)'
-        anchor: 'snpeff_unicycler'
-        info: 'This section of the report shows SnpEff results for variants called in the Unicycler assembly relative to the reference.'
-        path_filters:
-            - './assembly_unicycler/*.csv'
     - quast:
         name: 'ASSEMBLY: QUAST (minia)'
         anchor: 'quast_minia'
         info: 'This section of the report shows QUAST results from minia de novo assembly.'
         path_filters:
             - './assembly_minia/*.tsv'
-    - bcftools:
-        name: 'ASSEMBLY: BCFTools (minia)'
-        anchor: 'bcftools_minia'
-        info: 'This section of the report shows BCFTools stats results for variants called in the minia assembly relative to the reference.'
-        path_filters:
-            - './assembly_minia/*.txt'
-    - snpeff:
-        name: 'ASSEMBLY: SnpEff (minia)'
-        anchor: 'snpeff_minia'
-        info: 'This section of the report shows SnpEff results for variants called in the minia assembly relative to the reference.'
-        path_filters:
-            - './assembly_minia/*.csv'
 
 report_section_order:
     summary_assembly_metrics:
