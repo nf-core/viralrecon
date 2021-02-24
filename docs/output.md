@@ -247,6 +247,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [cat](#cat) - Merge re-sequenced FastQ files
   * [FastQC](#fastqc) - Raw read QC
   * [fastp](#fastp) - Adapter and quality trimming
+  * [Kraken 2](#kraken-2) - Removal of host reads
 * [Variant calling](#illumina-variant-calling)
   * [Bowtie 2](#bowtie-2) - Read alignment relative to reference genome
   * [SAMtools](#samtools) - Sort, index and generate metrics for alignments
@@ -260,7 +261,6 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [BCFTools isec](#bcftools-isec) - Intersect variants across all callers
 * [De novo assembly](#illumina-de-novo-assembly)
   * [Cutadapt](#cutadapt) - Primer trimming for amplicon data
-  * [Kraken 2](#kraken-2) - Removal of host reads
   * [SPAdes](#spades) *||* [Unicycler](#unicycler) *||* [minia](#minia) - Viral genome assembly
     * [BLAST](#blast) - Blast to reference assembly
     * [ABACAS](#abacas) - Order contigs according to reference genome
@@ -336,6 +336,22 @@ If multiple libraries/runs have been provided for the same sample in the input s
 [fastp](https://github.com/OpenGene/fastp) is a tool designed to provide fast, all-in-one preprocessing for FastQ files. It has been developed in C++ with multithreading support to achieve higher performance. fastp is used in this pipeline for standard adapter trimming and quality filtering.
 
 ![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
+
+### Kraken 2
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `illumina/kraken2/`
+  * `*.kraken2.report.txt`: Kraken 2 taxonomic report. See [here](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual#sample-report-output-format) for a detailed description of the format.
+
+</details>
+
+[Kraken 2](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual) is a sequence classifier that assigns taxonomic labels to DNA sequences. Kraken 2 examines the k-mers within a query sequence and uses the information within those k-mers to query a database. That database maps k-mers to the lowest common ancestor (LCA) of all genomes known to contain a given k-mer.
+
+We use a Kraken 2 database in this workflow to filter out reads specific to the host genome before performing the *de novo* assembly steps in the pipeline. This filtering is not performed in the variant calling arm of the pipeline by default but Kraken 2 is still run to obtain an estimate of host reads, however, the filtering can be amended via the `--kraken2_variants_host_filter` parameter.
+
+![MultiQC - Kraken 2 classification plot](images/mqc_kraken2_plot.png)
 
 ## Illumina: Variant calling
 
@@ -593,35 +609,20 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 
 ![MultiQC - Cutadapt filtered reads plot](images/mqc_cutadapt_plot.png)
 
-### Kraken 2
-
-<details markdown="1">
-<summary>Output files</summary>
-
-* `assembly/kraken2/`
-  * `*.host*.fastq.gz`: Reads that were classified to the host database.
-  * `*.viral*.fastq.gz`: Reads that were unclassified to the host database.
-  * `*.kraken2.report.txt`: Kraken 2 taxonomic report. See [here](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual#sample-report-output-format) for a detailed description of the format.
-
-</details>
-
-[Kraken 2](https://ccb.jhu.edu/software/kraken2/index.shtml?t=manual) is a sequence classifier that assigns taxonomic labels to DNA sequences. Kraken 2 examines the k-mers within a query sequence and uses the information within those k-mers to query a database. That database maps k-mers to the lowest common ancestor (LCA) of all genomes known to contain a given k-mer.
-
-We used a Kraken 2 database in this workflow to filter out reads specific to the host genome. The remainder of the reads are then passed to numerous *de novo* assembly algorithms in order to reconstruct the viral genome.
-
-![MultiQC - Kraken 2 classification plot](images/mqc_kraken2_plot.png)
-
 ### SPAdes
 
 <details markdown="1">
 <summary>Output files</summary>
 
-* `assembly/spades/`
+* `illumina/assembly/spades/<SPADES_MODE>/`
   * `*.scaffolds.fa`: SPAdes scaffold assembly.
+  * `*.contigs.fa`: SPAdes assembly contigs.
   * `*.assembly.gfa`: SPAdes assembly graph in [GFA](https://github.com/GFA-spec/GFA-spec/blob/master/GFA1.md) format.
-* `assembly/spades/bandage/`
+* `illumina/assembly/spades/<SPADES_MODE>/bandage/`
   * `*.png`: Bandage visualisation for SPAdes assembly graph in PNG format.
   * `*.svg`: Bandage visualisation for SPAdes assembly graph in SVG format.
+
+> **NB:** The value of `<SPADES_MODE>` in the output directory name above is determined by the `--spades_mode` parameter (Default: 'rnaviral').
 
 </details>
 
@@ -634,10 +635,10 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 <details markdown="1">
 <summary>Output files</summary>
 
-* `assembly/unicycler/`
+* `illumina/assembly/unicycler/`
   * `*.scaffolds.fa`: Unicycler scaffold assembly.
   * `*.assembly.gfa`: Unicycler assembly graph in GFA format.
-* `assembly/unicycler/bandage/`
+* `illumina/assembly/unicycler/bandage/`
   * `*.png`: Bandage visualisation for Unicycler assembly graph in PNG format.
   * `*.svg`: Bandage visualisation for Unicycler assembly graph in SVG format.
 
@@ -650,10 +651,10 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 <details markdown="1">
 <summary>Output files</summary>
 
-* `assembly/minia/<MINIA_KMER>/`
-  * `*.scaffolds.fa`: Minia scaffold assembly.
-
-> **NB:** The value of `<MINIA_KMER>` in the output directory name above is determined by the `--minia_kmer` parameter (Default: 31).
+* `illumina/assembly/minia/`
+  * `*.contigs.fa`: Minia scaffold assembly.
+  * `*.unitigs.fa`: Minia unitigs fasta file.
+  * `*.h5`: Minia h5 output file.
 
 </details>
 
@@ -664,7 +665,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 <details markdown="1">
 <summary>Output files</summary>
 
-* `assembly/<ASSEMBLER>/blast/`
+* `illumina/assembly/<ASSEMBLER>/blast/`
   * `*.blast.txt`: BLAST results against the target virus.
   * `*.blast.filt.header.txt`: Filtered BLAST results.
 
@@ -679,7 +680,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 <details markdown="1">
 <summary>Output files</summary>
 
-* `assembly/<ASSEMBLER>/abacas/`
+* `illumina/assembly/<ASSEMBLER>/abacas/`
   * `*.abacas.bin`: Bin file that contains contigs that are not used in ordering.
   * `*.abacas.crunch`: Comparison file.
   * `*.abacas.fasta`: Ordered and orientated sequence file.
@@ -688,7 +689,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
   * `*.abacas.MULTIFASTA.fa`: A list of ordered and orientated contigs in a multi-fasta format.
   * `*.abacas.tab`: Feature file
   * `*.unused_contigs.out`: Information on contigs that have a mapping information but could not be used in the ordering.
-* `assembly/<ASSEMBLER>/abacas/nucmer/`: Folder containing the files generated by the NUCmer algorithm used by ABACAS.
+* `illumina/assembly/<ASSEMBLER>/abacas/nucmer/`: Folder containing the files generated by the NUCmer algorithm used by ABACAS.
 
 > **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,unicycler,minia').
 
@@ -701,7 +702,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 <details markdown="1">
 <summary>Output files</summary>
 
-* `assembly/<ASSEMBLER>/plasmidid/<SAMPLE>/`
+* `illumina/assembly/<ASSEMBLER>/plasmidid/<SAMPLE>/`
   * `images/<SAMPLE>_<REF_NAME>.png`: PNG file with the visualization of the alignment between the viral assembly and the reference viral genome.
   * `data/`: Files used for drawing the circos images.
   * `database/`: Annotation files used for drawing the circos images.
@@ -719,7 +720,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 <details markdown="1">
 <summary>Output files</summary>
 
-* `assembly/<ASSEMBLER>/quast/`
+* `illumina/assembly/<ASSEMBLER>/quast/`
   * `report.html`: Results report in HTML format. Also available in various other file formats i.e. `report.pdf`, `report.tex`, `report.tsv` and `report.txt`.
 
 > **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades,unicycler,minia').
@@ -735,13 +736,13 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 <details markdown="1">
 <summary>Output files</summary>
 
-* `assembly/<ASSEMBLER>/variants/`
+* `illumina/assembly/<ASSEMBLER>/variants/`
   * `*.gfa`: Induced genome variation graph.
   * `*.vcf.gz`: VCF file with variant annotations.
   * `*.vcf.gz.tbi`: Index for VCF file with variant annotations.
-* `assembly/<ASSEMBLER>/variants/bcftools_stats/`
+* `illumina/assembly/<ASSEMBLER>/variants/bcftools_stats/`
   * `*.bcftools_stats.txt`: Statistics and counts for variants in VCF files.
-* `assembly/<ASSEMBLER>/bandage/`
+* `illumina/assembly/<ASSEMBLER>/bandage/`
   * `*.png`: Bandage visualisation for induced genome variation graph in PNG format.
   * `*.svg`: Bandage visualisation for induced genome variation graph in SVG format.
 
@@ -762,7 +763,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 <details markdown="1">
 <summary>Output files</summary>
 
-* `assembly/<ASSEMBLER>/variants/snpeff/`
+* `illumina/assembly/<ASSEMBLER>/variants/snpeff/`
   * `*.snpEff.csv`: Variant annotation csv file.
   * `*.snpEff.genes.txt`: Gene table for annotated variants.
   * `*.snpEff.summary.html`: Summary html file for variants.
@@ -785,7 +786,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 <details markdown="1">
 <summary>Output files</summary>
 
-* `multiqc/`  
+* `illumina/multiqc/`  
   * `multiqc_report.html`: a standalone HTML file that can be viewed in your web browser.
   * `multiqc_data/`: directory containing parsed statistics from the different tools used in the pipeline.
   * `multiqc_plots/`: directory containing static images from the report in various formats.
@@ -808,10 +809,10 @@ Please click [here](https://raw.githack.com/nf-core/viralrecon/master/docs/html/
 <summary>Output files</summary>
 
 * `genome/`  
-  * `BlastDB/`: BLAST database for viral genome.
-  * `Bowtie2Index/`: Bowtie 2 index for viral genome.
-  * `kraken2_<KRAKEN2_DB_NAME>/`: Kraken 2 database for host genome.
-  * `SnpEffDB/`: SnpEff database for viral genome.
+  * `blast_db/`: BLAST database for viral genome.
+  * `bowtie2/`: Bowtie 2 index for viral genome.
+  * `kraken2_db/`: Kraken 2 database for host genome.
+  * `snpeff_db/`: SnpEff database for viral genome.
   * `snpeff.config`: SnpEff config file for viral genome.
   * Unzipped genome fasta file for viral genome
   * Unzipped genome annotation GFF file for viral genome
