@@ -402,25 +402,10 @@
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip assembly report generation by PlasmidID."
                 },
-                "skip_vg": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip variant graph creation and variant calling relative to reference genome."
-                },
-                "skip_assembly_snpeff": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip SnpEff and SnpSift annotation of variants called from the assembly variant graph."
-                },
                 "skip_assembly_quast": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip generation of QUAST aggregated report for assemblies."
-                },
-                "skip_assembly_pangolin": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip Pangolin lineage analysis for genome assembly."
                 },
                 "skip_assembly": {
                     "type": "boolean",
