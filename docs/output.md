@@ -12,26 +12,26 @@ The directories listed below will be created in the results directory after the 
 
 # Nanopore: Pipeline overview
 
-* [Nanopore: Preprocessing](#nanopore-preprocessing)
-  * [pycoQC](#pycoqc) - Sequencing QC
-  * [artic guppyplex](#artic-guppyplex) - Aggregate pre-demultiplexed reads from MinKNOW/Guppy
-  * [NanoPlot](#nanoplot) - Read QC
-* [Nanopore: Variant calling](#nanopore-variant-calling)
-  * [artic minion](#artic-minion) - Align reads, call variants and generate consensus sequence
-* [Nanopore: Downstream analysis](#nanopore-downstream-analysis)
-  * [SAMtools](#samtools) - Remove unmapped reads and obtain alignment metrics
-  * [mosdepth](#mosdepth) - Genome-wide and amplicon coverage QC plots
-  * [BCFTools](#bcftools) - Variant count metrics
-  * [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
-  * [QUAST](#quast) - Consensus assessment report
-  * [Pangolin](#pangolin) - Lineage analysis
-* [Nanopore Workflow reporting and genomes](#nanopore-workflow-reporting-and-genomes)
-  * [MultiQC](#multiqc) - Present QC, visualisation and custom reporting for sequencing, raw reads, alignment and variant calling results
-  * [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
+* [Preprocessing](#nanopore-preprocessing)
+  * [pycoQC](#nanopore-pycoqc) - Sequencing QC
+  * [artic guppyplex](#nanopore-artic-guppyplex) - Aggregate pre-demultiplexed reads from MinKNOW/Guppy
+  * [NanoPlot](#nanopore-nanoplot) - Read QC
+* [Variant calling](#nanopore-variant-calling)
+  * [artic minion](#nanopore-artic-minion) - Align reads, call variants and generate consensus sequence
+* [Downstream analysis](#nanopore-downstream-analysis)
+  * [SAMtools](#nanopore-samtools) - Remove unmapped reads and obtain alignment metrics
+  * [mosdepth](#nanopore-mosdepth) - Genome-wide and amplicon coverage QC plots
+  * [BCFTools](#nanopore-bcftools) - Variant count metrics
+  * [SnpEff and SnpSift](#nanopore-snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
+  * [QUAST](#nanopore-quast) - Consensus assessment report
+  * [Pangolin](#nanopore-pangolin) - Lineage analysis
+* [Workflow reporting and genomes](#nanopore-workflow-reporting-and-genomes)
+  * [MultiQC](#nanopore-multiqc) - Present QC, visualisation and custom reporting for sequencing, raw reads, alignment and variant calling results
+  * [Pipeline information](#nanopore-pipeline-information) - Report metrics generated during the workflow execution
 
 ## Nanopore: Preprocessing
 
-### pycoQC
+### Nanopore: pycoQC
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -45,7 +45,7 @@ The directories listed below will be created in the results directory after the 
 
 ![PycoQC - Number of reads per barcode](images/pycoqc_readsperbarcode.png)
 
-### artic guppyplex
+### Nanopore: artic guppyplex
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -59,7 +59,7 @@ The directories listed below will be created in the results directory after the 
 
 Aggregate pre-demultiplexed reads from MinKNOW/Guppy with [`artic guppyplex`](https://artic.readthedocs.io/en/latest/commands/).
 
-### NanoPlot
+### Nanopore: NanoPlot
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -75,7 +75,7 @@ Aggregate pre-demultiplexed reads from MinKNOW/Guppy with [`artic guppyplex`](ht
 
 ## Nanopore: Variant calling
 
-### artic minion
+### Nanopore: artic minion
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -103,7 +103,7 @@ Align reads, call variants and generate consensus sequence with [`artic minion`]
 
 ## Nanopore: Downstream analysis
 
-### SAMtools
+### Nanopore: SAMtools
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -122,7 +122,7 @@ BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/
 
 ![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
 
-### mosdepth
+### Nanopore: mosdepth
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -150,7 +150,7 @@ BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/
   <img src="images/r_amplicon_barplot.png" alt="R - Sample per-amplicon coverage plot">
 </p>
 
-### BCFTools
+### Nanopore: BCFTools
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -166,7 +166,7 @@ BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/
 
 ![MultiQC - BCFTools variant counts](images/mqc_bcftools_stats_plot.png)
 
-### SnpEff and SnpSift
+### Nanopore: SnpEff and SnpSift
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -191,7 +191,7 @@ BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/
 
 ![MultiQC - SnpEff annotation counts](images/mqc_snpeff_plot.png)
 
-### QUAST
+### Nanopore: QUAST
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -205,7 +205,7 @@ BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/
 
 [QUAST](http://bioinf.spbau.ru/quast) is used to generate a single report with which to evaluate the quality of the consensus sequence across all of the samples provided to the pipeline. The HTML results can be opened within any browser (we recommend using Google Chrome). Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
 
-### Pangolin
+### Nanopore: Pangolin
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -221,7 +221,7 @@ Lineage analysis with [`Pangolin`](https://github.com/cov-lineages/pangolin)
 
 ## Nanopore: Workflow reporting and genomes
 
-### MultiQC
+### Nanopore: MultiQC
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -242,7 +242,7 @@ The pipeline has special steps which also allow the software versions to be repo
 
 An example MultiQC report generated from a full-sized dataset can be viewed on the [nf-core website](https://nf-co.re/viralrecon/results).
 
-### Pipeline information
+### Nanopore: Pipeline information
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -263,11 +263,11 @@ Please click [here](https://raw.githack.com/nf-core/viralrecon/master/docs/html/
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
-* [Illumina: Preprocessing](#illumina-preprocessing)
+* [Preprocessing](#illumina-preprocessing)
   * [cat](#cat) - Merge re-sequenced FastQ files
   * [FastQC](#fastqc) - Raw read QC
   * [fastp](#fastp) - Adapter and quality trimming
-* [Illumina: Variant calling](#illumina-variant-calling)
+* [Variant calling](#illumina-variant-calling)
   * [Bowtie 2](#bowtie-2) - Read alignment relative to reference genome
   * [SAMtools](#samtools) - Sort, index and generate metrics for alignments
   * [iVar trim](#ivar-trim) - Primer sequence removal for amplicon data
@@ -278,7 +278,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
     * [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
     * [QUAST](#quast) - Consensus assessment report
   * [BCFTools isec](#bcftools-isec) - Intersect variants across all callers
-* [Illumina: De novo assembly](#illumina-de-novo-assembly)
+* [De novo assembly](#illumina-de-novo-assembly)
   * [Cutadapt](#cutadapt) - Primer trimming for amplicon data
   * [Kraken 2](#kraken-2) - Removal of host reads
   * [SPAdes](#spades) *||* [Unicycler](#unicycler) *||* [minia](#minia) - Viral genome assembly
@@ -288,7 +288,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
     * [Assembly QUAST](#assembly-quast) - Assembly quality assessment
     * [Minimap2, seqwish, vg](#minimap2-seqwish-vg) - Call variants from induced genome variation graph
     * [Assembly SnpEff and SnpSift](#assembly-snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
-* [Illumina: Workflow reporting and genomes](#illumina-workflow-reporting-and-genomes)
+* [Workflow reporting and genomes](#illumina-workflow-reporting-and-genomes)
   * [MultiQC](#multiqc) - Present QC for raw reads, alignment, assembly and variant calling
   * [Reference genome files](#reference-genome-files) - Save reference genome indices/files
   * [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
