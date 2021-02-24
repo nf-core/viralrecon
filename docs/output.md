@@ -137,7 +137,7 @@ BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/
 
 </details>
 
-[mosdepth](mosdepth) is a fast BAM/CRAM depth calculation for WGS, exome, or targeted sequencing. mosdepth is used in this pipeline to obtain genome-wide coverage values in 200bp windows and for `--protocol amplicon` to obtain amplicon/region-specific coverage metrics. The results are then either rendered in MultiQC (genome-wide coverage) or are plotted using custom `R` scripts.
+[mosdepth](mosdepth) is a fast BAM/CRAM depth calculation for WGS, exome, or targeted sequencing. mosdepth is used in this pipeline to obtain genome-wide coverage values in 200bp windows and to obtain amplicon/region-specific coverage metrics. The results are then either rendered in MultiQC (genome-wide coverage) or are plotted using custom `R` scripts.
 
 ![R - Sample genome-wide coverage plot](images/r_genome_coverage.png)
 
@@ -339,7 +339,7 @@ If multiple libraries/runs have been provided for the same sample in the input s
 
 ## Illumina: Variant calling
 
-A file called `summary_variants_metrics_mqc.tsv` containing a selection of read and variant calling metrics will be saved in the `variants/` results directory. The same metrics have also been added to the top of the MultiQC report.
+A file called `summary_variants_metrics_mqc.tsv` containing a selection of read and variant calling metrics will be saved in the `illumina/variants/` results directory. The same metrics will also be added to the top of the MultiQC report.
 
 ### Bowtie 2
 
@@ -436,35 +436,17 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 <details markdown="1">
 <summary>Output files</summary>
 
-* `variants/bam/mosdepth/genome/`
-  * `<SAMPLE>.<SUFFIX>.genome.mosdepth.global.dist.txt`: A distribution of proportion of bases covered at or above a given threshold for each chromosome and genome-wide.
-  * `<SAMPLE>.<SUFFIX>.genome.mosdepth.region.dist.txt`: A distribution of proportion of bases covered at or above a given threshold for each chromosome and genome-wide.
-  * `<SAMPLE>.<SUFFIX>.genome.mosdepth.summary.txt`: Summary metrics including mean, min and max coverage values.
-  * `<SAMPLE>.<SUFFIX>.genome.per-base.bed.gz`: Per-base depth output genome-wide.
-  * `<SAMPLE>.<SUFFIX>.genome.per-base.bed.gz.csi`: CSI index that can be used for tabix queries from above file.
-  * `<SAMPLE>.<SUFFIX>.genome.regions.bed.gz`: Mean regional depth for 200bp windows genome-wide.
-  * `<SAMPLE>.<SUFFIX>.genome.regions.bed.gz.csi`: CSI index that can be used for tabix queries from above file.
-* `variants/bam/mosdepth/genome/plots/`
-  * `all_samples.<SUFFIX>.genome.regions.coverage.tsv`: File aggregating genome-wide coverage values across all samples used for plotting.
-  * `<SAMPLE>.<SUFFIX>.genome.regions.coverage.pdf`: Whole-genome coverage plot.
-  * `<SAMPLE>.<SUFFIX>.genome.regions.coverage.tsv`: File containing coverage values for the above plot.
-* `variants/bam/mosdepth/amplicon/`
-  * `<SAMPLE>.<SUFFIX>.amplicon.mosdepth.global.dist.txt`: A distribution of proportion of bases covered at or above a given threshold for each chromosome and genome-wide.
-  * `<SAMPLE>.<SUFFIX>.amplicon.mosdepth.region.dist.txt`: A distribution of proportion of bases covered at or above a given threshold for each chromosome and genome-wide.
-  * `<SAMPLE>.<SUFFIX>.amplicon.mosdepth.summary.txt`: Summary metrics including mean, min and max coverage values.
-  * `<SAMPLE>.<SUFFIX>.amplicon.per-base.bed.gz`: Per-base depth output genome-wide.
-  * `<SAMPLE>.<SUFFIX>.amplicon.per-base.bed.gz.csi`: CSI index that can be used for tabix queries from above file.
-  * `<SAMPLE>.<SUFFIX>.amplicon.regions.bed.gz`: Mean regional depth for individual amplicons genome-wide.
-  * `<SAMPLE>.<SUFFIX>.amplicon.regions.bed.gz.csi`: CSI index that can be used for tabix queries from above file.
-  * `<SAMPLE>.<SUFFIX>.amplicon.thresholds.bed.gz`: Threshold output to indicate how many bases in each region are covered at given thresholds.
-  * `<SAMPLE>.<SUFFIX>.amplicon.thresholds.bed.gz.csi`: CSI index that can be used for tabix queries from above file.
-* `variants/bam/mosdepth/amplicon/plots/`
-  * `all_samples.<SUFFIX>.amplicon.regions.coverage.tsv`: File aggregating per-amplicon coverage values across all samples used for plotting.
-  * `all_samples.<SUFFIX>.amplicon.regions.heatmap.pdf`: Heatmap showing per-amplicon coverage across all samples.
-  * `<SAMPLE>.<SUFFIX>.amplicon.regions.coverage.pdf`: Bar plot showing per-amplicon coverage for an individual sample.
-  * `<SAMPLE>.<SUFFIX>.amplicon.regions.coverage.tsv`: File containing per-amplicon coverage values for the above plot.
-
-> NB: The value of `<SUFFIX>` in the output file names above will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
+* `illumina/variants/bowtie2/mosdepth/genome/`
+  * `all_samples.mosdepth.coverage.tsv`: File aggregating genome-wide coverage values across all samples used for plotting.
+  * `*.mosdepth.coverage.pdf`: Whole-genome coverage plot.
+  * `*.mosdepth.coverage.tsv`: File containing coverage values for the above plot.
+  * `*.mosdepth.summary.txt`: Summary metrics including mean, min and max coverage values.
+* `illumina/variants/bowtie2/mosdepth/amplicon/`
+  * `all_samples.mosdepth.coverage.tsv`: File aggregating per-amplicon coverage values across all samples used for plotting.
+  * `all_samples.mosdepth.heatmap.pdf`: Heatmap showing per-amplicon coverage across all samples.
+  * `*.mosdepth.coverage.pdf`: Bar plot showing per-amplicon coverage for an individual sample.
+  * `*.mosdepth.coverage.tsv`: File containing per-amplicon coverage values for the above plot.
+  * `*.mosdepth.summary.txt`: Summary metrics including mean, min and max coverage values.
 
 </details>
 
@@ -481,27 +463,23 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 <details markdown="1">
 <summary>Output files</summary>
 
-* `variants/ivar/`
-  * `<SAMPLE>.tsv`: Low frequency variants in TSV format.
-  * `<SAMPLE>.vcf.gz`: Low frequency variants VCF file.
-  * `<SAMPLE>.vcf.gz.tbi`: Low frequency variants VCF index file.
-  * `<SAMPLE>.vcf.gz`: High frequency variants VCF file.
-  * `<SAMPLE>.vcf.gz.tbi`: High frequency variants VCF index file.
-* `variants/ivar/consensus/`
-  * `<SAMPLE>.consensus.fa`: Consensus Fasta file generated by iVar.
-  * `<SAMPLE>.consensus.qual.txt`: File with the average quality of each base in the consensus sequence.
-* `variants/ivar/consensus/base_qc/`
-  * `<SAMPLE>.ACTG_density.pdf`: Plot showing density of ACGT bases within the consensus sequence.
-  * `<SAMPLE>.base_counts.pdf`: Plot showing frequency and percentages of all bases in consensus sequence.
-  * `<SAMPLE>.base_counts.tsv`: File containing frequency and percentages of all bases in consensus sequence.
-  * `<SAMPLE>.N_density.pdf`: Plot showing density of N bases within the consensus sequence.
-  * `<SAMPLE>.N_run.tsv`: File containing start positions and width of N bases in consensus sequence.
-* `variants/ivar/log/`
-  * `<SAMPLE>.variant.counts.log`: Variant counts for low frequency variants.
-  * `<SAMPLE>.variant.counts.log`: Variant counts for high frequency variants.
-* `variants/ivar/bcftools_stats/`
-  * `<SAMPLE>.bcftools_stats.txt`: Statistics and counts obtained from low frequency variants VCF file.
-  * `<SAMPLE>.bcftools_stats.txt`: Statistics and counts obtained from high frequency variants VCF file.
+* `illumina/variants/ivar/`
+  * `*.tsv`: Original iVar variants in TSV format.
+  * `*.vcf.gz`: iVar variants in VCF format.
+  * `*.vcf.gz.tbi`: iVar variants in VCF index file.
+* `illumina/variants/ivar/consensus/`
+  * `*.consensus.fa`: Consensus Fasta file generated by iVar.
+  * `*.consensus.qual.txt`: File with the average quality of each base in the consensus sequence.
+* `illumina/variants/ivar/consensus/base_qc/`
+  * `*.ACTG_density.pdf`: Plot showing density of ACGT bases within the consensus sequence.
+  * `*.base_counts.pdf`: Plot showing frequency and percentages of all bases in consensus sequence.
+  * `*.base_counts.tsv`: File containing frequency and percentages of all bases in consensus sequence.
+  * `*.N_density.pdf`: Plot showing density of N bases within the consensus sequence.
+  * `*.N_run.tsv`: File containing start positions and width of N bases in consensus sequence.
+* `illumina/variants/ivar/log/`
+  * `*.variant_counts.log`: Counts for type of variants called by iVar.
+* `illumina/variants/ivar/bcftools_stats/`
+  * `*.bcftools_stats.txt`: Statistics and counts obtained from iVar variants VCF file.
 
 </details>
 
@@ -514,24 +492,23 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 <details markdown="1">
 <summary>Output files</summary>
 
-* `variants/bcftools/`
-  * `<SAMPLE>.vcf.gz`: Variants VCF file.
-  * `<SAMPLE>.vcf.gz.tbi`: Variants VCF index file.
-* `variants/bcftools/consensus/`
-  * `<SAMPLE>.consensus.fa`: Consensus Fasta file generated by integrating the variants called by BCFTools into the reference genome.
-  * `<SAMPLE>.consensus.masked.fa`: Masked consensus Fasta file.
-* `variants/bcftools/consensus/base_qc/`
-  * `<SAMPLE>.ACTG_density.pdf`: Plot showing density of ACGT bases within the consensus sequence.
-  * `<SAMPLE>.base_counts.pdf`: Plot showing frequency and percentages of all bases in consensus sequence.
-  * `<SAMPLE>.base_counts.tsv`: File containing frequency and percentages of all bases in consensus sequence.
-  * `<SAMPLE>.N_density.pdf`: Plot showing density of N bases within the consensus sequence.
-  * `<SAMPLE>.N_run.tsv`: File containing start positions and width of N bases in consensus sequence.
-* `variants/bcftools/bcftools_stats/`
-  * `<SAMPLE>.bcftools_stats.txt`: Statistics and counts obtained from VCF file.
+* `illumina/variants/bcftools/`
+  * `*.vcf.gz`: Variants VCF file.
+  * `*.vcf.gz.tbi`: Variants VCF index file.
+* `illumina/variants/bcftools/consensus/`
+  * `*.consensus.fa`: Consensus Fasta file generated by integrating the variants called by BCFTools into the reference genome.
+* `illumina/variants/bcftools/consensus/base_qc/`
+  * `*.ACTG_density.pdf`: Plot showing density of ACGT bases within the consensus sequence.
+  * `*.base_counts.pdf`: Plot showing frequency and percentages of all bases in consensus sequence.
+  * `*.base_counts.tsv`: File containing frequency and percentages of all bases in consensus sequence.
+  * `*.N_density.pdf`: Plot showing density of N bases within the consensus sequence.
+  * `*.N_run.tsv`: File containing start positions and width of N bases in consensus sequence.
+* `illumina/variants/bcftools/bcftools_stats/`
+  * `*.bcftools_stats.txt`: Statistics and counts obtained from VCF file.
 
 </details>
 
-[BCFtools](http://samtools.github.io/bcftools/bcftools.html) can be used to call variants directly from BAM alignment files. The functionality to call variants with BCFTools in this pipeline was inspired by work carried out by [Conor Walker](https://github.com/conorwalker/covid19/blob/3cb26ec399417bedb7e60487415c78a405f517d6/scripts/call_variants.sh). In contrast to iVar, the original variant calls obtained by BCFTools are not filtered further by a higher allele frequency. It seems that the default calls obtained by BCFTools appear to be comparable with the high frequency variants generated by iVar.
+[BCFtools](http://samtools.github.io/bcftools/bcftools.html) can be used to call variants directly from BAM alignment files. The functionality to call variants with BCFTools in this pipeline was inspired by work carried out by [Conor Walker](https://github.com/conorwalker/covid19/blob/3cb26ec399417bedb7e60487415c78a405f517d6/scripts/call_variants.sh).
 
 [BCFtools](http://samtools.github.io/bcftools/bcftools.html) is a set of utilities that manipulate variant calls in [VCF](https://vcftools.github.io/specs.html) and its binary counterpart BCF format. BCFTools is used in the variant calling and *de novo* assembly steps of this pipeline to obtain basic statistics from the VCF output. It can also used be used to generate a consensus sequence by integrating variant calls into the reference genome.
 
@@ -544,13 +521,15 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 <details markdown="1">
 <summary>Output files</summary>
 
-* `variants/<CALLER>/snpeff/`
-  * `*.snpEff.csv`: Variant annotation csv file.
-  * `*.snpEff.genes.txt`: Gene table for annotated variants.
-  * `*.snpEff.summary.html`: Summary html file for variants.
-  * `*.snpEff.vcf.gz`: VCF file with variant annotations.
-  * `*.snpEff.vcf.gz.tbi`: Index for VCF file with variant annotations.
-  * `*.snpSift.table.txt`: SnpSift summary table.
+* `illumina/variants/<CALLER>/snpeff/`
+  * `*.snpeff.csv`: Variant annotation csv file.
+  * `*.snpeff.genes.txt`: Gene table for annotated variants.
+  * `*.snpeff.summary.html`: Summary html file for variants.
+  * `*.snpeff.vcf.gz`: VCF file with variant annotations.
+  * `*.snpeff.vcf.gz.tbi`: Index for VCF file with variant annotations.
+  * `*.snpsift.txt`: SnpSift summary table.
+* `illumina/variants/<CALLER>/snpeff/bcftools_stats/`
+  * `*.bcftools_stats.txt`: Statistics and counts obtained from VCF file.
 
 > **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar').
 
@@ -567,7 +546,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 <details markdown="1">
 <summary>Output files</summary>
 
-* `variants/<CALLER>/quast/`
+* `illumina/variants/<CALLER>/quast/`
   * `report.html`: Results report in HTML format. Also available in various other file formats i.e. `report.pdf`, `report.tex`, `report.tsv` and `report.txt`.
 
 > **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar').
@@ -581,35 +560,32 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 <details markdown="1">
 <summary>Output files</summary>
 
-* `variants/intersect/<SAMPLE>/`
-  * `*.vcf.gz`: VCF file containing variants common to at least 2/3 callers. There will be one file for each caller - see `README.txt` for details.
+* `illumina/variants/intersect/<SAMPLE>/`
+  * `*.vcf.gz`: VCF file containing variants common to both variant callers. There will be one file for each caller - see `README.txt` for details.
   * `*.vcf.gz.tbi`: Index for VCF file.
   * `README.txt`: File containing command used and file name mappings.
-  * `sites.txt`: List of variants common to at least 2/3 callers in textual format. The last column indicates presence (1) or absence (0) amongst the 3 different callers.
+  * `sites.txt`: List of variants common to both variant callers in textual format. The last column indicates presence (1) or absence (0) amongst the 2 different callers.
 
-> **NB:** This process will only be executed when all 3 variant callers are specified to run, as is by default i.e. `--callers ivar`.
+> **NB:** This process will only be executed when both variant callers are specified to be run i.e. `--callers ivar,bcftools`.
 
 </details>
 
-[BCFTools isec](http://samtools.github.io/bcftools/bcftools.html#isec) can be used to intersect the variant calls generated by the 3 different callers used in the pipeline. This permits a quick assessment of how consistently a particular variant is being called using different algorithms and to prioritise the investigation of the variants.
+[BCFTools isec](http://samtools.github.io/bcftools/bcftools.html#isec) can be used to intersect the variant calls generated by the 2 different callers used in the pipeline. This permits a quick assessment of how consistently a particular variant is being called using different algorithms and to prioritise the investigation of the variants.
 
 ## Illumina: De novo assembly
 
-A file called `summary_assembly_metrics_mqc.tsv` containing a selection of read and *de novo* assembly related metrics will be saved in the `assembly/` results directory. The same metrics have also been added to the top of the MultiQC report.
+A file called `summary_assembly_metrics_mqc.tsv` containing a selection of read and *de novo* assembly related metrics will be saved in the `assembly/` results directory. The same metrics will also be added to the top of the MultiQC report.
 
 ### Cutadapt
 
 <details markdown="1">
 <summary>Output files</summary>
 
-* `assembly/cutadapt/`
-  * `*.ptrim.fastq.gz`: FastQ files after primer sequence trimming.
-* `assembly/cutadapt/log/`
+* `illumina/assembly/cutadapt/log/`
   * `*.cutadapt.log`: Cutadapt log file generated from stdout.
-* `assembly/cutadapt/fastqc/`
-  * `*.ptrim_fastqc.html`: FastQC report of the trimmed reads.
-* `assembly/cutadapt/fastqc/zips/`
-  * `*.ptrim_fastqc.zip`: Zip archive containing the FastQC report.
+* `illumina/assembly/cutadapt/fastqc/`
+  * `*_fastqc.html`: FastQC report of the trimmed reads.
+  * `*_fastqc.zip`: Zip archive containing the FastQC report.
 
 </details>
 
