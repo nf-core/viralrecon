@@ -331,7 +331,7 @@
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip genome consensus creation step and any downstream QC."
                 },
-                "skip_variants_snpeff": {
+                "skip_snpeff": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip SnpEff and SnpSift annotation of variants."
@@ -341,7 +341,7 @@
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip generation of QUAST aggregated report for consensus sequences."
                 },
-                "skip_variants_pangolin": {
+                "skip_pangolin": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip Pangolin lineage analysis for genome consensus sequence."
