@@ -266,8 +266,6 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
     * [ABACAS](#abacas) - Order contigs according to reference genome
     * [PlasmidID](#plasmidid) - Assembly report and visualisation
     * [Assembly QUAST](#assembly-quast) - Assembly quality assessment
-    * [Minimap2, seqwish, vg](#minimap2-seqwish-vg) - Call variants from induced genome variation graph
-    * [Assembly SnpEff and SnpSift](#assembly-snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
 * [Workflow reporting and genomes](#illumina-workflow-reporting-and-genomes)
   * [MultiQC](#multiqc) - Present QC for raw reads, alignment, assembly and variant calling
   * [Reference genome files](#reference-genome-files) - Save reference genome indices/files
@@ -741,7 +739,6 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 * `illumina/multiqc/`  
   * `multiqc_report.html`: a standalone HTML file that can be viewed in your web browser.
   * `multiqc_data/`: directory containing parsed statistics from the different tools used in the pipeline.
-  * `multiqc_plots/`: directory containing static images from the report in various formats.
 
 </details>
 
