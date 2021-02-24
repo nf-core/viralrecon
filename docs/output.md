@@ -274,40 +274,42 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 ## Illumina: Preprocessing
 
-### parallel-fastq-dump
+### cat
+
+If multiple libraries/runs have been provided for the same sample in the input samplesheet (e.g. to increase sequencing depth) then these will be merged at the very beginning of the pipeline in order to have consistent sample naming throughout the pipeline. Please refer to the [usage docs](https://github.com/nf-core/viralrecon/blob/dev/docs/usage.md#format) to see how to specify these samples in the input samplesheet.
+
+### cat
 
 <details markdown="1">
 <summary>Output files</summary>
 
-* `preprocess/sra/`
-  * `sra_run_info.tsv`: Run information file for all samples to be downloaded from the ENA/SRA.
-  * `*.fastq.gz`: Paired-end/single-end reads downloaded and extracted from the ENA/SRA.
-* `preprocess/sra/md5/`
-  * `*.md5`: Files containing `md5` sum for FastQ files downloaded from ENA/SRA.
-* `preprocess/sra/log/`
-  * `*.fastq_dump.log`: Log file generated from stdout whilst running `parallel-fastq-dump`.
+* `illumina/fastq/`
+  * `*.merged.fastq.gz`: These files are not saved by default but can be via a custom config file such as the one below.
 
-> **NB:** Downloaded FastQ files will only be saved in the results directory if the `--save_sra_fastq` parameter is supplied.  
+```nextflow
+params {
+    modules {
+        'illumina_cat_fastq' {
+            publish_files = null
+        }
+    }
+}
+```
 
 </details>
 
-Please see the [usage docs](https://github.com/nf-core/viralrecon/blob/master/docs/usage.md#supported-public-repository-ids) for a list of supported public repository identifiers and how to provide them to the pipeline. The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well as their associated md5sums. If a download link exists, the files will be downloaded by FTP otherwise they will be downloaded using [parallel-fastq-dump](https://github.com/rvalieris/parallel-fastq-dump).
-
-### cat
-
-If multiple libraries/runs have been provided for the same sample in the input samplesheet (e.g. to increase sequencing depth) then these will be merged at the very beginning of the pipeline in order to have consistent sample naming throughout the pipeline. Please refer to the [usage docs](https://github.com/nf-core/viralrecon/blob/dev/docs/usage.md#format) to see how to specify these samples in the input samplesheet.
+If multiple libraries/runs have been provided for the same sample in the input samplesheet (e.g. to increase sequencing depth) then these will be merged at the very beginning of the pipeline in order to have consistent sample naming throughout the pipeline. Please refer to the [usage documentation](https://nf-co.re/viralrecon/usage#illumina-samplesheet-format) to see how to specify these samples in the input samplesheet.
 
 ### FastQC
 
 <details markdown="1">
 <summary>Output files</summary>
 
-* `preprocess/fastqc/`
+* `illumina/fastqc/raw/`
   * `*_fastqc.html`: FastQC report containing quality metrics.
-* `preprocess/fastqc/zips/`
   * `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
 
-> **NB:** The FastQC plots in this directory are generated relative to the raw, input reads. They may contain adapter sequence and regions of low quality. To see how your reads look after trimming please refer to the FastQC reports in the `preprocess/fastp/fastqc/` directory.
+> **NB:** The FastQC plots in this directory are generated relative to the raw, input reads. They may contain adapter sequence and regions of low quality. To see how your reads look after trimming please refer to the FastQC reports in the `illumina/fastqc/trim/` directory.
 
 </details>
 
@@ -320,17 +322,14 @@ If multiple libraries/runs have been provided for the same sample in the input s
 <details markdown="1">
 <summary>Output files</summary>
 
-* `preprocess/fastp/`
+* `illumina/fastp/`
   * `*.fastp.html`: Trimming report in html format.
   * `*.fastp.json`: Trimming report in json format.
-  * `*.trim.fastq.gz`: Paired-end/single-end trimmed reads.
-  * `*.trim.fail.gz`: Unpaired trimmed reads (only for paired-end data).  
-* `preprocess/fastp/log/`
+* `illumina/fastp/log/`
   * `*.fastp.log`: Trimming log file.
-* `preprocess/fastp/fastqc/`:
-  * `*.trim_fastqc.html`: FastQC report of the trimmed reads.
-* `preprocess/fastp/fastqc/zips/`
-  * `*.trim_fastqc.zip`: Zip archive containing the FastQC report.
+* `illumina/fastqc/trim/`
+  * `*_fastqc.html`: FastQC report of the trimmed reads.
+  * `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
 
 </details>
 
@@ -347,10 +346,8 @@ A file called `summary_variants_metrics_mqc.tsv` containing a selection of read 
 <details markdown="1">
 <summary>Output files</summary>
 
-* `variants/bam/`
-  * `<SAMPLE>.bam`: Original BAM file created by Bowtie 2.
-* `variants/bam/log/`
-  * `<SAMPLE>.bowtie2.log`: Bowtie 2 mapping log file.
+* `illumina/variants/bowtie2/log/`
+  * `*.bowtie2.log`: Bowtie 2 mapping log file.
 
 </details>
 
@@ -363,11 +360,13 @@ A file called `summary_variants_metrics_mqc.tsv` containing a selection of read 
 <details markdown="1">
 <summary>Output files</summary>
 
-* `variants/bam/`
+* `illumina/variants/bowtie2/`
   * `<SAMPLE>.sorted.bam`: Coordinate sorted BAM file containing read alignment information.
   * `<SAMPLE>.sorted.bam.bai`: Index file for coordinate sorted BAM file.
-* `variants/bam/samtools_stats/`
+* `illumina/variants/bowtie2/samtools_stats/`
   * SAMtools `<SAMPLE>.sorted.bam.flagstat`, `<SAMPLE>.sorted.bam.idxstats` and `<SAMPLE>.sorted.bam.stats` files generated from the alignment files.
+
+> **NB:** The BAM files above will only be present in the results directory if `--skip_markduplicates true` and `--protocol metagenomic`.
 
 </details>
 
@@ -380,13 +379,13 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 <details markdown="1">
 <summary>Output files</summary>
 
-* `variants/bam/`
-  * `<SAMPLE>.trim.sorted.bam`: Coordinate sorted BAM file after primer trimming.
-  * `<SAMPLE>.trim.sorted.bam.bai`: Index file for coordinate sorted BAM file after primer trimming.
-* `variants/bam/samtools_stats/`
-  * SAMtools `<SAMPLE>.trim.flagstat`, `<SAMPLE>.trim.idxstats` and `<SAMPLE>.trim.stats` files generated from the primer trimmed alignment files.
-* `variants/bam/log/`
-  * `<SAMPLE>.trim.ivar.log`: iVar trim log file obtained from stdout.
+* `illumina/variants/bowtie2/`
+  * `*.ivar_trim.sorted.bam`: Coordinate sorted BAM file after primer trimming.
+  * `*.ivar_trim.sorted.bam.bai`: Index file for coordinate sorted BAM file after primer trimming.
+* `illumina/variants/bowtie2/samtools_stats/`
+  * SAMtools `*.ivar_trim.sorted.bam.flagstat`, `*.ivar_trim.sorted.bam.idxstats` and `*.ivar_trim.sorted.bam.stats` files generated from the primer trimmed alignment files.
+* `illumina/variants/bowtie2/log/`
+  * `*.ivar_trim.ivar.log`: iVar trim log file obtained from stdout.
 
 </details>
 
@@ -399,19 +398,17 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 <details markdown="1">
 <summary>Output files</summary>
 
-* `variants/bam/`
-  * `<SAMPLE>.<SUFFIX>.sorted.bam`: Coordinate sorted BAM file after duplicate marking.
-  * `<SAMPLE>.<SUFFIX>.sorted.bam.bai`: Index file for coordinate sorted BAM file after duplicate marking.
-* `variants/bam/samtools_stats/`
-  * SAMtools `<SAMPLE>.<SUFFIX>.flagstat`, `<SAMPLE>.<SUFFIX>.idxstats` and `<SAMPLE>.<SUFFIX>.stats` files generated from the duplicate marked alignment files.
-* `variants/bam/picard_metrics/`
-  * `<SAMPLE>.<SUFFIX>.MarkDuplicates.metrics.txt`: Metrics file from MarkDuplicates.
-
-> **NB:** The value of `<SUFFIX>` in the output file names above will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
+* `illumina/variants/bowtie2/`
+  * `*.markduplicates.sorted.bam`: Coordinate sorted BAM file after duplicate marking.
+  * `*.markduplicates.sorted.bam.bai`: Index file for coordinate sorted BAM file after duplicate marking.
+* `illumina/variants/bowtie2/samtools_stats/`
+  * SAMtools `*.markduplicates.sorted.bam.flagstat`, `*.markduplicates.sorted.bam.idxstats` and `*.markduplicates.sorted.bam.stats` files generated from the duplicate marked alignment files.
+* `illumina/variants/bowtie2/picard_metrics/`
+  * `*.markduplicates.sorted.MarkDuplicates.metrics.txt`: Metrics file from MarkDuplicates.
 
 </details>
 
-Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced from your sample were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation. By default, the pipeline uses picard MarkDuplicates to *mark* the duplicate reads identified amongst the alignments to allow you to guage the overall level of duplication in your samples. However, you can also choose to remove any reads identified as duplicates via the `--filter_dups` parameter.
+Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-explorer/kits-and-arrays/umi.html) it is not possible to establish whether the fragments you have sequenced from your sample were derived via true biological duplication (i.e. sequencing independent template fragments) or as a result of PCR biases introduced during the library preparation. [picard MarkDuplicates](https://gatk.broadinstitute.org/hc/en-us/articles/360037052812-MarkDuplicates-Picard-) isn't run by default because you anticipate high levels of duplication with viral data due to the size of the genome, however, you can activate it by adding `--skip_markduplicates false` to the command you use to run the pipeline. This will only *mark* the duplicate reads identified amongst the alignments to allow you to guage the overall level of duplication in your samples. You can also choose to remove any reads identified as duplicates via the `--filter_duplicates` parameter.
 
 ![MultiQC - Picard MarkDuplicates metrics plot](images/mqc_picard_duplicates_plot.png)
 
@@ -420,11 +417,11 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 <details markdown="1">
 <summary>Output files</summary>
 
-* `variants/bam/picard_metrics/`  
-  * `<SAMPLE>.<SUFFIX>.CollectMultipleMetrics.*`: Alignment QC files from picard CollectMultipleMetrics in `*_metrics` textual format and plotted in `*.pdf` format.
-  * `<SAMPLE>.<SUFFIX>.CollectWgsMetrics.coverage_metrics`: Coverage metrics file from CollectWgsMetrics.
-
-> **NB:** The value of `<SUFFIX>` in the output file names above will depend on the preceeding steps that were run in the pipeline. If `--protocol amplicon` is specified then this process will be run on the iVar trimmed alignments and the value of `<SUFFIX>` will be `trim.mkD`. However, if `--protocol metagenomic` is specified then the process will be run on the alignments obtained directly from Bowtie 2 and the value of `<SUFFIX>` will be `mkD`; where `mkD` is an abbreviation for MarkDuplicates.
+* `illumina/variants/bowtie2/picard_metrics/`  
+  * `*.CollectMultipleMetrics.*`: Alignment QC files from picard CollectMultipleMetrics in `*_metrics` textual format.
+  * `*.CollectWgsMetrics.coverage_metrics`: Coverage metrics file from CollectWgsMetrics.
+* `illumina/variants/bowtie2/picard_metrics/pdf/`  
+  * `*.pdf` plots for metrics obtained from CollectMultipleMetrics.
 
 </details>
 
