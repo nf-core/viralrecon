@@ -1,10 +1,11 @@
+
 # Introduction
 
 This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
 
 The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
-## Nanopore: Pipeline overview
+# Nanopore: Pipeline overview
 
 * [Preprocessing](#nanopore-preprocessing)
   * [pycoQC](#nanopore-pycoqc) - Sequencing QC
@@ -23,9 +24,9 @@ The directories listed below will be created in the results directory after the 
   * [MultiQC](#nanopore-multiqc) - Present QC, visualisation and custom reporting for sequencing, raw reads, alignment and variant calling results
   * [Pipeline information](#nanopore-pipeline-information) - Report metrics generated during the workflow execution
 
-### Nanopore: Preprocessing
+## Nanopore: Preprocessing
 
-#### Nanopore: pycoQC
+### Nanopore: pycoQC
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -39,7 +40,7 @@ The directories listed below will be created in the results directory after the 
 
 ![PycoQC - Number of reads per barcode](images/pycoqc_readsperbarcode.png)
 
-#### Nanopore: artic guppyplex
+### Nanopore: artic guppyplex
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -53,7 +54,7 @@ The directories listed below will be created in the results directory after the 
 
 Aggregate pre-demultiplexed reads from MinKNOW/Guppy with [`artic guppyplex`](https://artic.readthedocs.io/en/latest/commands/).
 
-#### Nanopore: NanoPlot
+### Nanopore: NanoPlot
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -67,9 +68,9 @@ Aggregate pre-demultiplexed reads from MinKNOW/Guppy with [`artic guppyplex`](ht
 
 ![Nanoplot - Read quality vs read length](images/nanoplot_readlengthquality.png)
 
-### Nanopore: Variant calling
+## Nanopore: Variant calling
 
-#### Nanopore: artic minion
+### Nanopore: artic minion
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -95,9 +96,9 @@ Aggregate pre-demultiplexed reads from MinKNOW/Guppy with [`artic guppyplex`](ht
 
 Align reads, call variants and generate consensus sequence with [`artic minion`](https://artic.readthedocs.io/en/latest/commands/).
 
-### Nanopore: Downstream analysis
+## Nanopore: Downstream analysis
 
-#### Nanopore: SAMtools
+### Nanopore: SAMtools
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -116,7 +117,7 @@ BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/
 
 ![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
 
-#### Nanopore: mosdepth
+### Nanopore: mosdepth
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -144,7 +145,7 @@ BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/
   <img src="images/r_amplicon_barplot.png" alt="R - Sample per-amplicon coverage plot">
 </p>
 
-#### Nanopore: BCFTools
+### Nanopore: BCFTools
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -160,7 +161,7 @@ BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/
 
 ![MultiQC - BCFTools variant counts](images/mqc_bcftools_stats_plot.png)
 
-#### Nanopore: SnpEff and SnpSift
+### Nanopore: SnpEff and SnpSift
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -185,7 +186,7 @@ BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/
 
 ![MultiQC - SnpEff annotation counts](images/mqc_snpeff_plot.png)
 
-#### Nanopore: QUAST
+### Nanopore: QUAST
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -199,7 +200,7 @@ BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/
 
 [QUAST](http://bioinf.spbau.ru/quast) is used to generate a single report with which to evaluate the quality of the consensus sequence across all of the samples provided to the pipeline. The HTML results can be opened within any browser (we recommend using Google Chrome). Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
 
-#### Nanopore: Pangolin
+### Nanopore: Pangolin
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -213,9 +214,9 @@ BAM files are further processed with [SAMtools](http://samtools.sourceforge.net/
 
 Lineage analysis with [`Pangolin`](https://github.com/cov-lineages/pangolin)
 
-### Nanopore: Workflow reporting and genomes
+## Nanopore: Workflow reporting and genomes
 
-#### Nanopore: MultiQC
+### Nanopore: MultiQC
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -236,7 +237,7 @@ The pipeline has special steps which also allow the software versions to be repo
 
 An example MultiQC report generated from a full-sized dataset can be viewed on the [nf-core website](https://nf-co.re/viralrecon/results).
 
-#### Nanopore: Pipeline information
+### Nanopore: Pipeline information
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -251,7 +252,7 @@ An example MultiQC report generated from a full-sized dataset can be viewed on t
 
 [Nextflow](https://www.nextflow.io/docs/latest/tracing.html) provides excellent functionality for generating various reports relevant to the running and execution of the pipeline. This will allow you to troubleshoot errors with the running of the pipeline, and also provide you with other information such as launch commands, run times and resource usage.
 
-## Illumina: Pipeline overview
+# Illumina: Pipeline overview
 
 Please click [here](https://raw.githack.com/nf-core/viralrecon/master/docs/html/multiqc_report.html) to see an example MultiQC report generated using the parameters defined in [this configuration file](https://github.com/nf-core/viralrecon/blob/master/conf/test_full.config) to run the pipeline on [samples](https://zenodo.org/record/3735111) which were prepared from the [ncov-2019 ARTIC Network V1 amplicon set](https://artic.network/ncov-2019) and sequenced on the Illumina MiSeq platform in 301bp paired-end format.
 
@@ -287,9 +288,9 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   * [Reference genome files](#reference-genome-files) - Save reference genome indices/files
   * [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
-### Illumina: Preprocessing
+## Illumina: Preprocessing
 
-#### parallel-fastq-dump
+### parallel-fastq-dump
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -308,11 +309,11 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 Please see the [usage docs](https://github.com/nf-core/viralrecon/blob/master/docs/usage.md#supported-public-repository-ids) for a list of supported public repository identifiers and how to provide them to the pipeline. The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well as their associated md5sums. If a download link exists, the files will be downloaded by FTP otherwise they will be downloaded using [parallel-fastq-dump](https://github.com/rvalieris/parallel-fastq-dump).
 
-#### cat
+### cat
 
 If multiple libraries/runs have been provided for the same sample in the input samplesheet (e.g. to increase sequencing depth) then these will be merged at the very beginning of the pipeline in order to have consistent sample naming throughout the pipeline. Please refer to the [usage docs](https://github.com/nf-core/viralrecon/blob/dev/docs/usage.md#format) to see how to specify these samples in the input samplesheet.
 
-#### FastQC
+### FastQC
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -330,7 +331,7 @@ If multiple libraries/runs have been provided for the same sample in the input s
 
 ![MultiQC - FastQC per base sequence plot](images/mqc_fastqc_plot.png)
 
-#### fastp
+### fastp
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -353,11 +354,11 @@ If multiple libraries/runs have been provided for the same sample in the input s
 
 ![MultiQC - fastp filtered reads plot](images/mqc_fastp_plot.png)
 
-### Illumina: Variant calling
+## Illumina: Variant calling
 
 A file called `summary_variants_metrics_mqc.tsv` containing a selection of read and variant calling metrics will be saved in the `variants/` results directory. The same metrics have also been added to the top of the MultiQC report.
 
-#### Bowtie 2
+### Bowtie 2
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -373,7 +374,7 @@ A file called `summary_variants_metrics_mqc.tsv` containing a selection of read 
 
 ![MultiQC - Bowtie2 alignment score plot](images/mqc_bowtie2_plot.png)
 
-#### SAMtools
+### SAMtools
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -390,7 +391,7 @@ Bowtie 2 BAM files are further processed with [SAMtools](http://samtools.sourcef
 
 ![MultiQC - SAMtools alignment scores plot](images/mqc_samtools_stats_plot.png)
 
-#### iVar trim
+### iVar trim
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -409,7 +410,7 @@ If the `--protocol amplicon` parameter is provided then [iVar](http://gensoft.pa
 
 ![MultiQC - iVar trim primer heatmap](images/mqc_ivar_trim_plot.png)
 
-#### picard MarkDuplicates
+### picard MarkDuplicates
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -430,7 +431,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 ![MultiQC - Picard MarkDuplicates metrics plot](images/mqc_picard_duplicates_plot.png)
 
-#### picard CollectMultipleMetrics
+### picard CollectMultipleMetrics
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -449,7 +450,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 ![MultiQC - Picard insert size plot](images/mqc_picard_insert_size_plot.png)
 
-#### mosdepth
+### mosdepth
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -494,7 +495,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
   <img src="images/r_amplicon_barplot.png" alt="R - Sample per-amplicon coverage plot">
 </p>
 
-#### iVar variants and iVar consensus
+### iVar variants and iVar consensus
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -527,7 +528,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 ![MultiQC - iVar variants called plot](images/mqc_ivar_variants_plot.png)
 
-#### BCFTools and BEDTools
+### BCFTools and BEDTools
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -557,7 +558,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 ![MultiQC - BCFTools variant counts](images/mqc_bcftools_stats_plot.png)
 
-#### SnpEff and SnpSift
+### SnpEff and SnpSift
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -580,7 +581,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 ![MultiQC - SnpEff annotation counts](images/mqc_snpeff_plot.png)
 
-#### QUAST
+### QUAST
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -594,7 +595,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 [QUAST](http://bioinf.spbau.ru/quast) is used to generate a single report with which to evaluate the quality of the consensus sequence across all of the samples provided to the pipeline. The HTML results can be opened within any browser (we recommend using Google Chrome). Please see the [QUAST output docs](http://quast.sourceforge.net/docs/manual.html#sec3) for more detailed information regarding the output files.
 
-#### BCFTools isec
+### BCFTools isec
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -611,11 +612,11 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 [BCFTools isec](http://samtools.github.io/bcftools/bcftools.html#isec) can be used to intersect the variant calls generated by the 3 different callers used in the pipeline. This permits a quick assessment of how consistently a particular variant is being called using different algorithms and to prioritise the investigation of the variants.
 
-### Illumina: De novo assembly
+## Illumina: De novo assembly
 
 A file called `summary_assembly_metrics_mqc.tsv` containing a selection of read and *de novo* assembly related metrics will be saved in the `assembly/` results directory. The same metrics have also been added to the top of the MultiQC report.
 
-#### Cutadapt
+### Cutadapt
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -635,7 +636,7 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 
 ![MultiQC - Cutadapt filtered reads plot](images/mqc_cutadapt_plot.png)
 
-#### Kraken 2
+### Kraken 2
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -653,7 +654,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 ![MultiQC - Kraken 2 classification plot](images/mqc_kraken2_plot.png)
 
-#### SPAdes
+### SPAdes
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -671,7 +672,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [Bandage](https://rrwick.github.io/Bandage/) is a program for visualising *de novo* assembly graphs. By displaying connections which are not present in the contigs file, Bandage opens up new possibilities for analysing *de novo* assemblies.
 
-#### Unicycler
+### Unicycler
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -687,7 +688,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [Unicycler](https://github.com/rrwick/Unicycler) is an assembly pipeline for bacterial genomes. It can assemble Illumina-only read sets where it functions as a SPAdes-optimiser.
 
-#### minia
+### minia
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -701,7 +702,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [Minia](https://github.com/GATB/minia) is a short-read assembler based on a de Bruijn graph, capable of assembling a human genome on a desktop computer in a day. The output of Minia is a set of contigs. Minia produces results of similar contiguity and accuracy to other de Bruijn assemblers.
 
-#### BLAST
+### BLAST
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -716,7 +717,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [blastn](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch) is used to align the assembled contigs against the virus reference genome.
 
-#### ABACAS
+### ABACAS
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -738,7 +739,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [ABACAS](https://www.sanger.ac.uk/science/tools/pagit) was developed to rapidly contiguate (align, order, orientate), visualize and design primers to close gaps on shotgun assembled contigs based on a reference sequence.
 
-#### PlasmidID
+### PlasmidID
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -756,7 +757,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [PlasmidID](https://github.com/BU-ISCIII/plasmidID) was used to graphically represent the alignment of the reference genome relative to a given assembly. This helps to visualize the coverage of the reference genome in the assembly. To find more information about the output files refer to the [documentation](https://github.com/BU-ISCIII/plasmidID/wiki/Understanding-the-image:-track-by-track).
 
-#### Assembly QUAST
+### Assembly QUAST
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -772,7 +773,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 ![MultiQC - QUAST contig counts](images/mqc_quast_plot.png)
 
-#### Minimap2, seqwish, vg
+### Minimap2, seqwish, vg
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -799,7 +800,7 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [Bandage](https://github.com/rrwick/Bandage), a Bioinformatics Application for Navigating De novo Assembly Graphs Easily, is a GUI program that allows users to interact with the assembly graphs made by de novo assemblers and other graphs in GFA format. Bandage was used to render induced genome variation graphs as static PNG and SVG images.
 
-#### Assembly SnpEff and SnpSift
+### Assembly SnpEff and SnpSift
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -820,9 +821,9 @@ We used a Kraken 2 database in this workflow to filter out reads specific to the
 
 [SnpSift](http://snpeff.sourceforge.net/SnpSift.html) annotates genomic variants using databases, filters, and manipulates genomic annotated variants. After annotation with SnpEff, you can use SnpSift to help filter large genomic datasets in order to find the most significant variants.
 
-### Illumina: Workflow reporting and genomes
+## Illumina: Workflow reporting and genomes
 
-#### MultiQC
+### MultiQC
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -844,7 +845,7 @@ The pipeline has special steps which also allow the software versions to be repo
 
 Please click [here](https://raw.githack.com/nf-core/viralrecon/master/docs/html/multiqc_report.html) to see an example MultiQC report generated using the parameters defined in [this configuration file](https://github.com/nf-core/viralrecon/blob/master/conf/test_full.config) to run the pipeline on [samples](https://zenodo.org/record/3735111) which were prepared from the [ncov-2019 ARTIC Network V1 amplicon set](https://artic.network/ncov-2019) and sequenced on the Illumina MiSeq platform in 301bp paired-end format.
 
-#### Reference genome files
+### Reference genome files
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -862,7 +863,7 @@ Please click [here](https://raw.githack.com/nf-core/viralrecon/master/docs/html/
 
 A number of genome-specific files are generated by the pipeline because they are required for the downstream processing of the results. If the `--save_reference` parameter is provided then the Bowtie 2 alignment indices, BLAST and Kraken 2 databases downloaded/generated by the pipeline will be saved in the `genome/` directory. It is recommended to use the `--save_reference` parameter if you are using the pipeline to build a Kraken 2 database for the host genome. This can be quite a time-consuming process and it permits their reuse for future runs of the pipeline or for other purposes.
 
-#### Pipeline information
+### Pipeline information
 
 <details markdown="1">
 <summary>Output files</summary>
