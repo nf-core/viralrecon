@@ -71,28 +71,35 @@ workflow ASSEMBLY_SPADES {
     )
 
     emit:
-    scaffolds         = SPADES.out.scaffolds              // channel: [ val(meta), [ scaffolds ] ]
-    contigs           = SPADES.out.contigs                // channel: [ val(meta), [ contigs ] ]
-    transcripts       = SPADES.out.transcripts            // channel: [ val(meta), [ transcripts ] ]
-    gene_clusters     = SPADES.out.gene_clusters          // channel: [ val(meta), [ gene_clusters ] ]
-    gfa               = SPADES.out.gfa                    // channel: [ val(meta), [ gfa ] ]
-    log_out           = SPADES.out.log                    // channel: [ val(meta), [ log ] ]
-    spades_version    = SPADES.out.version                //    path: *.version.txt
+    scaffolds          = SPADES.out.scaffolds               // channel: [ val(meta), [ scaffolds ] ]
+    contigs            = SPADES.out.contigs                 // channel: [ val(meta), [ contigs ] ]
+    transcripts        = SPADES.out.transcripts             // channel: [ val(meta), [ transcripts ] ]
+    gene_clusters      = SPADES.out.gene_clusters           // channel: [ val(meta), [ gene_clusters ] ]
+    gfa                = SPADES.out.gfa                     // channel: [ val(meta), [ gfa ] ]
+    log_out            = SPADES.out.log                     // channel: [ val(meta), [ log ] ]
+    spades_version     = SPADES.out.version                 //    path: *.version.txt
 
-    bandage_png       = ch_bandage_png                    // channel: [ val(meta), [ png ] ]
-    bandage_svg       = ch_bandage_svg                    // channel: [ val(meta), [ svg ] ]
-    bandage_version   = ch_bandage_version                //    path: *.version.txt
+    bandage_png        = ch_bandage_png                     // channel: [ val(meta), [ png ] ]
+    bandage_svg        = ch_bandage_svg                     // channel: [ val(meta), [ svg ] ]
+    bandage_version    = ch_bandage_version                 //    path: *.version.txt
 
-    blast_txt         = ASSEMBLY_QC.out.blast_txt         // channel: [ val(meta), [ txt ] ]
-    blast_version     = ASSEMBLY_QC.out.blast_version     //    path: *.version.txt
+    blast_txt          = ASSEMBLY_QC.out.blast_txt          // channel: [ val(meta), [ txt ] ]
+    blast_version      = ASSEMBLY_QC.out.blast_version      //    path: *.version.txt
 
-    quast_results     = ASSEMBLY_QC.out.quast_results     // channel: [ val(meta), [ results ] ]
-    quast_tsv         = ASSEMBLY_QC.out.quast_tsv         // channel: [ val(meta), [ tsv ] ]
-    quast_version     = ASSEMBLY_QC.out.quast_version     //    path: *.version.txt
+    quast_results      = ASSEMBLY_QC.out.quast_results      // channel: [ val(meta), [ results ] ]
+    quast_tsv          = ASSEMBLY_QC.out.quast_tsv          // channel: [ val(meta), [ tsv ] ]
+    quast_version      = ASSEMBLY_QC.out.quast_version      //    path: *.version.txt
     
-    abacas_results    = ASSEMBLY_QC.out.abacas_results    // channel: [ val(meta), [ results ] ]
-    abacas_version    = ASSEMBLY_QC.out.abacas_version    //    path: *.version.txt
+    abacas_results     = ASSEMBLY_QC.out.abacas_results     // channel: [ val(meta), [ results ] ]
+    abacas_version     = ASSEMBLY_QC.out.abacas_version     //    path: *.version.txt
 
-    plasmidid_results = ASSEMBLY_QC.out.plasmidid_results // channel: [ val(meta), [ results ] ]
-    plasmidid_version = ASSEMBLY_QC.out.plasmidid_version //    path: *.version.txt
+    plasmidid_html     = ASSEMBLY_QC.out.plasmidid_html     // channel: [ val(meta), [ html ] ]
+    plasmidid_tab      = ASSEMBLY_QC.out.plasmidid_tab      // channel: [ val(meta), [ tab ] ]
+    plasmidid_images   = ASSEMBLY_QC.out.plasmidid_images   // channel: [ val(meta), [ images/ ] ]
+    plasmidid_logs     = ASSEMBLY_QC.out.plasmidid_logs     // channel: [ val(meta), [ logs/ ] ]
+    plasmidid_data     = ASSEMBLY_QC.out.plasmidid_data     // channel: [ val(meta), [ data/ ] ]
+    plasmidid_database = ASSEMBLY_QC.out.plasmidid_database // channel: [ val(meta), [ database/ ] ]
+    plasmidid_fasta    = ASSEMBLY_QC.out.plasmidid_fasta    // channel: [ val(meta), [ fasta_files/ ] ]
+    plasmidid_kmer     = ASSEMBLY_QC.out.plasmidid_kmer     // channel: [ val(meta), [ kmer/ ] ]
+    plasmidid_version  = ASSEMBLY_QC.out.plasmidid_version  //    path: *.version.txt
 }
