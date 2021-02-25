@@ -47,5 +47,5 @@ process MULTIQC {
     multiqc -f $options.args $custom_config .
     """
 }
-// multiqc_to_custom_tsv.py
+// multiqc_to_custom_tsv_nanopore.py
 // multiqc -f $options.args $custom_config .
