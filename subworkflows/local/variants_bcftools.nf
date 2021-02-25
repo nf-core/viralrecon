@@ -98,7 +98,7 @@ workflow VARIANTS_BCFTOOLS {
     emit:
     vcf              = BCFTOOLS_MPILEUP.out.vcf     // channel: [ val(meta), [ vcf ] ]
     tbi              = BCFTOOLS_MPILEUP.out.tbi     // channel: [ val(meta), [ tbi ] ]
-    stats            = BCFTOOLS_MPILEUP.out.txt     // channel: [ val(meta), [ txt ] ]
+    stats            = BCFTOOLS_MPILEUP.out.stats   // channel: [ val(meta), [ txt ] ]
     bcftools_version = BCFTOOLS_MPILEUP.out.version //    path: *.version.txt
     
     consensus        = ch_consensus                 // channel: [ val(meta), [ fasta ] ]
