@@ -17,11 +17,11 @@ params.snpeff_tabix_options        = [:]
 params.snpeff_stats_options        = [:]
 params.pangolin_options            = [:]
 
-include { BCFTOOLS_MPILEUP } from '../../modules/local/bcftools_mpileup'         addParams( options: params.bcftools_mpileup_options ) 
-include { QUAST            } from '../../modules/nf-core/software/quast/main'    addParams( options: params.quast_options            )
-include { PANGOLIN         } from '../../modules/nf-core/software/pangolin/main' addParams( options: params.pangolin_options         )
-include { MAKE_CONSENSUS   } from './make_consensus'                             addParams( genomecov_options: params.consensus_genomecov_options, merge_options: params.consensus_merge_options, mask_options: params.consensus_mask_options, maskfasta_options: params.consensus_maskfasta_options, bcftools_options: params.consensus_bcftools_options, plot_bases_options: params.consensus_plot_options )
-include { SNPEFF_SNPSIFT   } from './snpeff_snpsift'                             addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
+include { BCFTOOLS_MPILEUP } from '../../modules/nf-core/software/bcftools/mpileup/main' addParams( options: params.bcftools_mpileup_options ) 
+include { QUAST            } from '../../modules/nf-core/software/quast/main'            addParams( options: params.quast_options            )
+include { PANGOLIN         } from '../../modules/nf-core/software/pangolin/main'         addParams( options: params.pangolin_options         )
+include { MAKE_CONSENSUS   } from './make_consensus'                                     addParams( genomecov_options: params.consensus_genomecov_options, merge_options: params.consensus_merge_options, mask_options: params.consensus_mask_options, maskfasta_options: params.consensus_maskfasta_options, bcftools_options: params.consensus_bcftools_options, plot_bases_options: params.consensus_plot_options )
+include { SNPEFF_SNPSIFT   } from './snpeff_snpsift'                                     addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
 
 workflow VARIANTS_BCFTOOLS {
     take:
