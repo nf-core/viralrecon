@@ -60,11 +60,11 @@ workflow ASSEMBLY_QC {
      */
     ch_plasmidid_results = Channel.empty()
     ch_plasmidid_version = Channel.empty()
-    // if (!params.skip_plasmidid) {
-    //     PLASMIDID ( scaffolds, fasta )
-    //    ch_plasmidid_results = PLASMIDID.out.results
-    //    ch_plasmidid_version = PLASMIDID.out.version
-    // }
+    if (!params.skip_plasmidid) {
+        PLASMIDID ( scaffolds, fasta )
+        ch_plasmidid_results = PLASMIDID.out.results
+        ch_plasmidid_version = PLASMIDID.out.version
+    }
 
     emit:
     blast_txt         = ch_blast_txt         // channel: [ val(meta), [ txt ] ]
