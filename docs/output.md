@@ -712,11 +712,10 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 <summary>Output files</summary>
 
 * `illumina/assembly/<ASSEMBLER>/plasmidid/<SAMPLE>/`
+  * `*_final_results.html`: Summary file with reference coverage stats and contigs for visualization.
+  * `*_final_results.tab`: Summary file with reference coverage stats and contigs.
   * `images/<SAMPLE>_<REF_NAME>.png`: PNG file with the visualization of the alignment between the viral assembly and the reference viral genome.
-  * `data/`: Files used for drawing the circos images.
-  * `database/`: Annotation files used for drawing the circos images.
-  * `fasta_files`: Folder with fasta files that correspond to the selection of contigs/scaffolds required to reconstruct the reference genome generated in the `images/` folder.
-  * `log/`: Log files.
+  * `logs/`: Log files.
 
 > **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades').
 
