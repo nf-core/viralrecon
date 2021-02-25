@@ -4,7 +4,7 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 def options    = initOptions(params.options)
 
-process BCFTOOLS_CONSENSUS {
+process BCFTOOLS_MPILEUP {
     tag "$meta.id"
     label 'process_medium'
     publishDir "${params.outdir}",
@@ -19,20 +19,29 @@ process BCFTOOLS_CONSENSUS {
     }
 
     input:
-    tuple val(meta), path(vcf), path(tbi), path(fasta)
+    tuple val(meta), path(bam)
+    path  fasta
 
     output:
-    tuple val(meta), path("*.fa"), emit: fasta
-    path  "*.version.txt"        , emit: version
+    tuple val(meta), path("*.gz")      , emit: vcf
+    tuple val(meta), path("*.tbi")     , emit: tbi
+    tuple val(meta), path("*stats.txt"), emit: stats
+    path  "*.version.txt"              , emit: version
 
     script:
     def software = getSoftwareName(task.process)
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
-    cat $fasta | bcftools consensus $vcf $options.args > ${prefix}.fa
-    header=\$(head -n 1 ${prefix}.fa | sed 's/>//g')
-    sed -i "s/\${header}/${meta.id}/g" ${prefix}.fa
-
+    echo "${meta.id}" > sample_name.list
+    bcftools mpileup \\
+        --fasta-ref $fasta \\
+        $options.args \\
+        $bam \\
+        | bcftools call --output-type v $options.args2 \\
+        | bcftools reheader --samples sample_name.list \\
+        | bcftools view --output-file ${prefix}.vcf.gz --output-type z $options.args3
+    tabix -p vcf -f ${prefix}.vcf.gz
+    bcftools stats ${prefix}.vcf.gz > ${prefix}.bcftools_stats.txt
     echo \$(bcftools --version 2>&1) | sed 's/^.*bcftools //; s/ .*\$//' > ${software}.version.txt
     """
 }
