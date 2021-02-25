@@ -275,10 +275,6 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 ### cat
 
-If multiple libraries/runs have been provided for the same sample in the input samplesheet (e.g. to increase sequencing depth) then these will be merged at the very beginning of the pipeline in order to have consistent sample naming throughout the pipeline. Please refer to the [usage docs](https://github.com/nf-core/viralrecon/blob/dev/docs/usage.md#format) to see how to specify these samples in the input samplesheet.
-
-### cat
-
 <details markdown="1">
 <summary>Output files</summary>
 
