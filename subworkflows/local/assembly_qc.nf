@@ -57,28 +57,49 @@ workflow ASSEMBLY_QC {
 
     /*
      * Assembly report with PlasmidID
-     */
-    ch_plasmidid_results = Channel.empty()
-    ch_plasmidid_version = Channel.empty()
+     */    
+    ch_plasmidid_html     = Channel.empty()
+    ch_plasmidid_tab      = Channel.empty()
+    ch_plasmidid_images   = Channel.empty()
+    ch_plasmidid_logs     = Channel.empty()
+    ch_plasmidid_data     = Channel.empty()
+    ch_plasmidid_database = Channel.empty()
+    ch_plasmidid_fasta    = Channel.empty()
+    ch_plasmidid_kmer     = Channel.empty()
+    ch_plasmidid_version  = Channel.empty()
     if (!params.skip_plasmidid) {
         PLASMIDID ( scaffolds, fasta )
-        ch_plasmidid_results = PLASMIDID.out.results
-        ch_plasmidid_version = PLASMIDID.out.version
+        ch_plasmidid_html     = PLASMIDID.out.html
+        ch_plasmidid_tab      = PLASMIDID.out.tab
+        ch_plasmidid_images   = PLASMIDID.out.images
+        ch_plasmidid_logs     = PLASMIDID.out.logs
+        ch_plasmidid_data     = PLASMIDID.out.data
+        ch_plasmidid_database = PLASMIDID.out.database
+        ch_plasmidid_fasta    = PLASMIDID.out.fasta_files
+        ch_plasmidid_kmer     = PLASMIDID.out.kmer
+        ch_plasmidid_version  = PLASMIDID.out.version
     }
 
     emit:
-    blast_txt         = ch_blast_txt         // channel: [ val(meta), [ txt ] ]
-    blast_version     = ch_blast_version     //    path: *.version.txt
+    blast_txt          = ch_blast_txt          // channel: [ val(meta), [ txt ] ]
+    blast_version      = ch_blast_version      //    path: *.version.txt
 
-    quast_results     = ch_quast_results     // channel: [ val(meta), [ results ] ]
-    quast_tsv         = ch_quast_tsv         // channel: [ val(meta), [ tsv ] ]
-    quast_version     = ch_quast_version     //    path: *.version.txt
+    quast_results      = ch_quast_results      // channel: [ val(meta), [ results ] ]
+    quast_tsv          = ch_quast_tsv          // channel: [ val(meta), [ tsv ] ]
+    quast_version      = ch_quast_version      //    path: *.version.txt
 
-    abacas_results    = ch_abacas_results    // channel: [ val(meta), [ results ] ]
-    abacas_version    = ch_abacas_version    //    path: *.version.txt
+    abacas_results     = ch_abacas_results     // channel: [ val(meta), [ results ] ]
+    abacas_version     = ch_abacas_version     //    path: *.version.txt
 
-    plasmidid_results = ch_plasmidid_results // channel: [ val(meta), [ results ] ]
-    plasmidid_version = ch_plasmidid_version //    path: *.version.txt
+    plasmidid_html     = ch_plasmidid_html     // channel: [ val(meta), [ html ] ]
+    plasmidid_tab      = ch_plasmidid_tab      // channel: [ val(meta), [ tab ] ]
+    plasmidid_images   = ch_plasmidid_images   // channel: [ val(meta), [ images/ ] ]
+    plasmidid_logs     = ch_plasmidid_logs     // channel: [ val(meta), [ logs/ ] ]
+    plasmidid_data     = ch_plasmidid_data     // channel: [ val(meta), [ data/ ] ]
+    plasmidid_database = ch_plasmidid_database // channel: [ val(meta), [ database/ ] ]
+    plasmidid_fasta    = ch_plasmidid_fasta    // channel: [ val(meta), [ fasta_files/ ] ]
+    plasmidid_kmer     = ch_plasmidid_kmer     // channel: [ val(meta), [ kmer/ ] ]
+    plasmidid_version  = ch_plasmidid_version  //    path: *.version.txt
 
 }
 
