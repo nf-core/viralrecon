@@ -23,8 +23,15 @@ process PLASMIDID {
     path  fasta
     
     output:
-    tuple val(meta), path("${prefix}"), emit: results
-    path '*.version.txt'              , emit: version
+    tuple val(meta), path("${prefix}/*final_results.html"), emit: html
+    tuple val(meta), path("${prefix}/*final_results.tab") , emit: tab
+    tuple val(meta), path("${prefix}/images/")            , emit: images
+    tuple val(meta), path("${prefix}/logs/")              , emit: logs
+    tuple val(meta), path("${prefix}/data/")              , emit: data
+    tuple val(meta), path("${prefix}/database/")          , emit: database
+    tuple val(meta), path("${prefix}/fasta_files/")       , emit: fasta_files
+    tuple val(meta), path("${prefix}/kmer/")              , emit: kmer
+    path '*.version.txt'                                  , emit: version
 
     script:
     def software = getSoftwareName(task.process)

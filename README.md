@@ -52,9 +52,6 @@ The pipeline has numerous options to allow you to run only specific aspects of t
         * Contiguate assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
         * Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))
         * Assembly assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
-        * Call variants relative to reference ([`Minimap2`](https://github.com/lh3/minimap2), [`seqwish`](https://github.com/ekg/seqwish), [`vg`](https://github.com/vgteam/vg), [`Bandage`](https://github.com/rrwick/Bandage))
-        * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
-        * Lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin))
 8. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
 
 ### Nanopore

@@ -6,6 +6,7 @@ def options    = initOptions(params.options)
 
 process BCFTOOLS_MPILEUP {
     tag "$meta.id"
+    label 'process_medium'
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:meta.id) }
@@ -24,7 +25,7 @@ process BCFTOOLS_MPILEUP {
     output:
     tuple val(meta), path("*.gz")      , emit: vcf
     tuple val(meta), path("*.tbi")     , emit: tbi
-    tuple val(meta), path("*stats.txt"), emit: txt
+    tuple val(meta), path("*stats.txt"), emit: stats
     path  "*.version.txt"              , emit: version
 
     script:
@@ -32,7 +33,6 @@ process BCFTOOLS_MPILEUP {
     def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
     echo "${meta.id}" > sample_name.list
-
     bcftools mpileup \\
         --fasta-ref $fasta \\
         $options.args \\
@@ -40,10 +40,8 @@ process BCFTOOLS_MPILEUP {
         | bcftools call --output-type v $options.args2 \\
         | bcftools reheader --samples sample_name.list \\
         | bcftools view --output-file ${prefix}.vcf.gz --output-type z $options.args3
-
     tabix -p vcf -f ${prefix}.vcf.gz
     bcftools stats ${prefix}.vcf.gz > ${prefix}.bcftools_stats.txt
-
     echo \$(bcftools --version 2>&1) | sed 's/^.*bcftools //; s/ .*\$//' > ${software}.version.txt
     """
 }

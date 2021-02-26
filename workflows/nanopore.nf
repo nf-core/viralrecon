@@ -329,7 +329,7 @@ workflow NANOPORE {
     /*
      * MODULE: Lineage analysis with Pangolin
      */
-    if (!params.skip_variants_pangolin) {
+    if (!params.skip_pangolin) {
         PANGOLIN ( 
             ARTIC_MINION.out.fasta
         )
@@ -340,7 +340,7 @@ workflow NANOPORE {
      * SUBWORKFLOW: Annotate variants with snpEff
      */
     ch_snpeff_multiqc = Channel.empty()
-    if (params.gff && !params.skip_variants_snpeff) {
+    if (params.gff && !params.skip_snpeff) {
         SNPEFF_SNPSIFT ( 
             ARTIC_MINION.out.vcf, 
             PREPARE_GENOME.out.snpeff_db, 
