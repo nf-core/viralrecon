@@ -343,7 +343,7 @@ workflow ILLUMINA {
     ch_picard_collectmultiplemetrics_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_picard_metrics) {
         PICARD_COLLECTWGSMETRICS (
-            ch_bam,
+            ch_bam.join(ch_bai, by: [0]),
             PREPARE_GENOME.out.fasta
         )
         ch_picard_collectwgsmetrics_multiqc = PICARD_COLLECTWGSMETRICS.out.metrics
