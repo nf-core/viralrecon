@@ -13,6 +13,7 @@ def valid_params = [
     artic_minion_aligner  : ['minimap2', 'bwa']
 ]
 
+
 // Validate input parameters
 Workflow.validate_nanopore_params(params, log, valid_params)
 
@@ -55,15 +56,15 @@ artic_minion_options.args += params.artic_minion_aligner == 'bwa'    ? " --bwa" 
 def multiqc_options   = modules['nanopore_multiqc']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 
-include { PYCOQC                              } from '../modules/local/pycoqc'                              addParams( options: modules['nanopore_pycoqc']     )
-include { NANOPLOT                            } from '../modules/local/nanoplot'                            addParams( options: modules['nanopore_nanoplot']   )
-include { ARTIC_GUPPYPLEX                     } from '../modules/local/artic_guppyplex'                     addParams( options: modules['nanopore_artic_guppyplex']  )
-include { ARTIC_MINION                        } from '../modules/local/artic_minion'                        addParams( options: artic_minion_options        )
-include { MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_fail_no_barcodes'     addParams( options: [publish_files: false]      )
-include { MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_fail_barcode_count'   addParams( options: [publish_files: false]      )
-include { MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_fail_guppyplex_count' addParams( options: [publish_files: false]      )
-include { GET_SOFTWARE_VERSIONS               } from '../modules/local/get_software_versions'               addParams( options: [publish_files: ['csv':'']] )
-include { MULTIQC                             } from '../modules/local/multiqc_nanopore'                    addParams( options: multiqc_options             )
+include { PYCOQC                              } from '../modules/local/pycoqc'                              addParams( options: modules['nanopore_pycoqc']                   )
+include { NANOPLOT                            } from '../modules/local/nanoplot'                            addParams( options: modules['nanopore_nanoplot']                 )
+include { ARTIC_GUPPYPLEX                     } from '../modules/local/artic_guppyplex'                     addParams( options: modules['nanopore_artic_guppyplex']          )
+include { ARTIC_MINION                        } from '../modules/local/artic_minion'                        addParams( options: artic_minion_options                         )
+include { MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_fail_no_barcodes'     addParams( options: [publish_files: false]                       )
+include { MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_fail_barcode_count'   addParams( options: [publish_files: false]                       )
+include { MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_fail_guppyplex_count' addParams( options: [publish_files: false]                       )
+include { GET_SOFTWARE_VERSIONS               } from '../modules/local/get_software_versions'               addParams( options: [publish_files: ['csv':'']]                  )
+include { MULTIQC                             } from '../modules/local/multiqc_nanopore'                    addParams( options: multiqc_options                              )
 
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
@@ -262,11 +263,11 @@ workflow NANOPORE {
         PREPARE_GENOME.out.primer_bed,
         ch_medaka_model.collect().ifEmpty([]),
         params.artic_scheme,
-        params.primer_set_version,
+        params.primer_set_version
     )
     
     /*
-     * SUBWORKFLOW: Filter unmapped reads from BAM and trim reads with iVar
+     * SUBWORKFLOW: Filter unmapped reads from BAM
      */
     FILTER_BAM_SAMTOOLS ( 
         ARTIC_MINION.out.bam 
@@ -288,7 +289,7 @@ workflow NANOPORE {
     if (!params.skip_mosdepth) {
 
         MOSDEPTH_GENOME (
-            FILTER_BAM_SAMTOOLS.out.bam.join(FILTER_BAM_SAMTOOLS.out.bai, by: [0]),
+            ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
             ch_dummy_file,
             200
         )
@@ -300,7 +301,7 @@ workflow NANOPORE {
         )
         
         MOSDEPTH_AMPLICON (
-            FILTER_BAM_SAMTOOLS.out.bam.join(FILTER_BAM_SAMTOOLS.out.bai, by: [0]),
+            ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
             PREPARE_GENOME.out.primer_collapsed_bed,
             0
         )
@@ -310,6 +311,16 @@ workflow NANOPORE {
         )
     }
 
+    /*
+     * MODULE: Lineage analysis with Pangolin
+     */
+    if (!params.skip_pangolin) {
+        PANGOLIN ( 
+            ARTIC_MINION.out.fasta
+        )
+        ch_software_versions = ch_software_versions.mix(PANGOLIN.out.version.ifEmpty(null))
+    }
+    
     /*
      * MODULE: Consensus QC across all samples with QUAST
      */
@@ -326,16 +337,6 @@ workflow NANOPORE {
         ch_software_versions = ch_software_versions.mix(QUAST.out.version.ifEmpty(null))
     }
 
-    /*
-     * MODULE: Lineage analysis with Pangolin
-     */
-    if (!params.skip_pangolin) {
-        PANGOLIN ( 
-            ARTIC_MINION.out.fasta
-        )
-        ch_software_versions = ch_software_versions.mix(PANGOLIN.out.version.ifEmpty(null))
-    }
-    
     /*
      * SUBWORKFLOW: Annotate variants with snpEff
      */
