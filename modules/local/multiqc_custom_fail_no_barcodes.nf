@@ -18,7 +18,6 @@ process MULTIQC_CUSTOM_FAIL_NO_BARCODES {
     input:
     val fail_no_barcodes
     
-
     output:
     path "*.tsv"
 
