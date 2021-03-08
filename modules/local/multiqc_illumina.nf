@@ -56,16 +56,18 @@ process MULTIQC {
     path ('assembly_minia/*')
         
     output:
-    path "*multiqc_report.html", emit: report
-    path "*_data"              , emit: data
-    path "*_plots"             , optional:true, emit: plots
+    path "*multiqc_report.html"     , emit: report
+    path "*_data"                   , emit: data
+    path "*variants_metrics_mqc.csv", emit: csv_variants
+    path "*assembly_metrics_mqc.csv", emit: csv_assembly
+    path "*_plots"                  , optional:true, emit: plots
 
     script:
     def software      = getSoftwareName(task.process)
     def custom_config = params.multiqc_config ? "--config $multiqc_custom_config" : ''
     """
     multiqc -f $options.args $custom_config .
-    multiqc_to_custom_tsv.py --platform illumina
+    multiqc_to_custom_csv.py --platform illumina
     multiqc -f $options.args $custom_config .
     """
 }
