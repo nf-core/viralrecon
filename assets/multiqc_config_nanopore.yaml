@@ -50,15 +50,23 @@ extra_fn_clean_exts:
 
 # See https://github.com/ewels/MultiQC_TestData/blob/master/data/custom_content/with_config/table_headerconfig/multiqc_config.yaml
 custom_data:
+    fail_barcodes_no_sample:
+        section_name: 'WARNING: Barcodes without sample id'
+        description: "List of barcodes that appear to have reads in the '--fastq_dir' folder but were not specified in mappings samplesheet via '--input'."
+        plot_type: 'table'
+        pconfig:
+            id: 'fail_barcodes_no_sample_table'
+            table_title: 'Barcodes without sample id'
+            namespace: 'Barcodes without sample id'
+            format: '{:,.0f}'
     fail_no_barcode_samples:
         section_name: 'WARNING: No barcode'
         description: "List of samples that were specified in mappings samplesheet via '--input' but didn't have an associated barcode in the '--fastq_dir' folder."
         plot_type: 'table'
         pconfig:
             id: 'fail_no_barcode_samples_table'
-            table_title: 'Samples without barcodes'
-            namespace: 'Samples without barcodes'
-            format: '{:,.0f}'
+            table_title: 'Sample ids without barcode'
+            namespace: 'Sample ids without barcode'
     fail_barcode_count_samples:
         section_name: 'WARNING: Fail barcode read count'
         description: "Samples that failed the minimum number of reads required per barcode specified via the '--min_barcode_reads' parameter, and hence were ignored for the downstream processing steps."
