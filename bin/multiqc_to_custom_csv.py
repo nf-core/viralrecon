@@ -93,7 +93,7 @@ def metrics_dict_to_file(file_field_list, multiqc_data_dir, out_file, valid_samp
         make_dir(os.path.dirname(out_file))
         fout = open(out_file,'w')
         header = ['Sample'] + field_list
-        fout.write('{}\n'.format('\t'.join(header)))
+        fout.write('{}\n'.format(','.join(header)))
         for k in sorted(metrics_dict.keys()):
             row_list = [k]
             for field in field_list:
@@ -101,7 +101,7 @@ def metrics_dict_to_file(file_field_list, multiqc_data_dir, out_file, valid_samp
                     row_list.append(metrics_dict[k][field])
                 else:
                     row_list.append('NA')
-            fout.write('{}\n'.format('\t'.join(map(str,row_list))))
+            fout.write('{}\n'.format(','.join(map(str,row_list))))
         fout.close()
     return metrics_dict
 
@@ -182,7 +182,7 @@ def main(args=None):
         metrics_dict_to_file(
             file_field_list   = illumina_variant_files,
             multiqc_data_dir  = args.MULTIQC_DATA_DIR,
-            out_file          = args.OUT_PREFIX+'_variants_metrics_mqc.tsv',
+            out_file          = args.OUT_PREFIX+'_variants_metrics_mqc.csv',
             valid_sample_list = is_pe_dict.keys()
         )
 
@@ -190,7 +190,7 @@ def main(args=None):
         metrics_dict_to_file(
             file_field_list   = illumina_assembly_files,
             multiqc_data_dir  = args.MULTIQC_DATA_DIR,
-            out_file          = args.OUT_PREFIX+'_assembly_metrics_mqc.tsv',
+            out_file          = args.OUT_PREFIX+'_assembly_metrics_mqc.csv',
             valid_sample_list = is_pe_dict.keys()
         )
 
@@ -205,7 +205,7 @@ def main(args=None):
         metrics_dict_to_file(
             file_field_list   = nanopore_variant_files,
             multiqc_data_dir  = args.MULTIQC_DATA_DIR,
-            out_file          = args.OUT_PREFIX+'_variants_metrics_mqc.tsv',
+            out_file          = args.OUT_PREFIX+'_variants_metrics_mqc.csv',
             valid_sample_list = sample_list
         )
 
