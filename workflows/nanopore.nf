@@ -56,18 +56,19 @@ artic_minion_options.args += params.artic_minion_aligner == 'bwa'    ? " --bwa" 
 def multiqc_options   = modules['nanopore_multiqc']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 
-include { PYCOQC                              } from '../modules/local/pycoqc'                              addParams( options: modules['nanopore_pycoqc']                   )
-include { NANOPLOT                            } from '../modules/local/nanoplot'                            addParams( options: modules['nanopore_nanoplot']                 )
-include { ARTIC_GUPPYPLEX                     } from '../modules/local/artic_guppyplex'                     addParams( options: modules['nanopore_artic_guppyplex']          )
-include { ARTIC_MINION                        } from '../modules/local/artic_minion'                        addParams( options: artic_minion_options                         )
-include { MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_fail_no_barcodes'     addParams( options: [publish_files: false]                       )
-include { MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_fail_barcode_count'   addParams( options: [publish_files: false]                       )
-include { MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_fail_guppyplex_count' addParams( options: [publish_files: false]                       )
-include { GET_SOFTWARE_VERSIONS               } from '../modules/local/get_software_versions'               addParams( options: [publish_files: ['csv':'']]                  )
-include { MULTIQC                             } from '../modules/local/multiqc_nanopore'                    addParams( options: multiqc_options                              )
+include { PYCOQC                } from '../modules/local/pycoqc'                addParams( options: modules['nanopore_pycoqc']          )
+include { NANOPLOT              } from '../modules/local/nanoplot'              addParams( options: modules['nanopore_nanoplot']        )
+include { ARTIC_GUPPYPLEX       } from '../modules/local/artic_guppyplex'       addParams( options: modules['nanopore_artic_guppyplex'] )
+include { ARTIC_MINION          } from '../modules/local/artic_minion'          addParams( options: artic_minion_options                )
+include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files: ['csv':'']]         )
+include { MULTIQC               } from '../modules/local/multiqc_nanopore'      addParams( options: multiqc_options                     )
 
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
+include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME  } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME            } from '../modules/local/plot_mosdepth_regions'     addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON          } from '../modules/local/plot_mosdepth_regions'     addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
 
 /*
  * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -91,11 +92,11 @@ include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'          
 /*
  * MODULE: Installed directly from nf-core/modules
  */
-include { BCFTOOLS_STATS } from '../modules/nf-core/software/bcftools/stats/main' addParams( options: modules['nanopore_bcftools_stats'] )
-include { QUAST          } from '../modules/nf-core/software/quast/main'          addParams( options: modules['nanopore_quast']          )
-include { PANGOLIN       } from '../modules/nf-core/software/pangolin/main'       addParams( options: modules['nanopore_pangolin']       )
-include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main' addParams( options: modules['nanopore_mosdepth_genome']   )
-include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main' addParams( options: modules['nanopore_mosdepth_amplicon'] )
+include { BCFTOOLS_STATS                } from '../modules/nf-core/software/bcftools/stats/main' addParams( options: modules['nanopore_bcftools_stats']    )
+include { QUAST                         } from '../modules/nf-core/software/quast/main'          addParams( options: modules['nanopore_quast']             )
+include { PANGOLIN                      } from '../modules/nf-core/software/pangolin/main'       addParams( options: modules['nanopore_pangolin']          )
+include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'       addParams( options: modules['nanopore_mosdepth_genome']   )
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'       addParams( options: modules['nanopore_mosdepth_amplicon'] )
 
 /*
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
@@ -163,6 +164,41 @@ workflow NANOPORE {
             .join(ch_fastq_dirs, remainder: true)
             .set { ch_fastq_dirs }
 
+            /*
+             * MODULE: Create custom content file for MultiQC to report barcodes were allocated reads but no sample name in samplesheet
+             */
+            ch_fastq_dirs
+                .filter { it[1] == null }
+                .map { it -> [ "${it[0]}\t${it[-1]}" ] }
+                .set { ch_barcodes_no_sample }
+
+            MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME ( 
+                ch_barcodes_no_sample.collect(),
+                'Barcode',
+                'Read count',
+                'fail_barcodes_no_sample'
+            )
+            
+            /*
+             * MODULE: Create custom content file for MultiQC to report samples that were in samplesheet but have no barcodes
+             */
+            ch_fastq_dirs
+                .filter { it[-1] == null }
+                .map { it -> [ "${it[1]}\t${it[0]}" ] }
+                .set { ch_samples_no_barcode }
+
+            MULTIQC_CUSTOM_FAIL_NO_BARCODES ( 
+                ch_samples_no_barcode.collect(),
+                'Sample',
+                'Missing barcode',
+                'fail_no_barcode_samples'
+            )
+            
+            ch_fastq_dirs    
+                .filter { (it[1] != null)  }
+                .filter { (it[-1] != null) }
+                .set { ch_fastq_dirs }
+            
         } else {
             ch_fastq_dirs
                 .map { barcode, dir, count -> [ barcode, barcode, dir, count ] }
@@ -179,22 +215,9 @@ workflow NANOPORE {
     }
     
     /*
-     * MODULE: Create custom content file for MultiQC to report samples that were in samplesheet but have no barcodes
-     */
-    ch_fastq_dirs
-        .filter { it[-1] == null }
-        .map { it -> [ "${it[1]}\t${it[0]}" ] }
-        .set { ch_samples_no_barcode }
-
-    MULTIQC_CUSTOM_FAIL_NO_BARCODES ( 
-        ch_samples_no_barcode.collect()
-    )
-    
-    /*
      * MODULE: Create custom content file for MultiQC to report samples with reads < params.min_barcode_reads
      */
     ch_fastq_dirs
-        .filter { it[-1] != null }
         .branch { barcode, sample, dir, count  ->
             pass: count > params.min_barcode_reads
                 pass_barcode_reads[sample] = count
@@ -206,7 +229,10 @@ workflow NANOPORE {
         .set { ch_pass_fail_barcode_count }
 
     MULTIQC_CUSTOM_FAIL_BARCODE_COUNT ( 
-        ch_pass_fail_barcode_count.fail.collect()
+        ch_pass_fail_barcode_count.fail.collect(),
+        'Sample',
+        'Barcode count',
+        'fail_barcode_count_samples'
     )
 
     // Re-arrange channels to have meta map of information for sample
@@ -239,7 +265,10 @@ workflow NANOPORE {
         .set { ch_pass_fail_guppyplex_count }
 
     MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT ( 
-        ch_pass_fail_guppyplex_count.fail.collect()
+        ch_pass_fail_guppyplex_count.fail.collect(),
+        'Sample',
+        'Read count',
+        'fail_guppyplex_count_samples'
     )
 
     /*
@@ -382,6 +411,7 @@ workflow NANOPORE {
             GET_SOFTWARE_VERSIONS.out.yaml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
             PYCOQC.out.json.collect().ifEmpty([]),
+            MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME.out.ifEmpty([]),
             MULTIQC_CUSTOM_FAIL_NO_BARCODES.out.ifEmpty([]),
             MULTIQC_CUSTOM_FAIL_BARCODE_COUNT.out.ifEmpty([]),
             MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT.out.ifEmpty([]),
