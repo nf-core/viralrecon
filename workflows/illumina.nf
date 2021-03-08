@@ -56,13 +56,13 @@ def modules = params.modules.clone()
 def multiqc_options   = modules['illumina_multiqc']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 
-include { MULTIQC_CUSTOM_FAIL_MAPPED } from '../modules/local/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]                       )
-include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'   addParams( options: modules['illumina_picard_collectwgsmetrics'] )
-include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'              addParams( options: modules['illumina_bcftools_isec']            ) 
-include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: modules['illumina_cutadapt']                 )
-include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'                addParams( options: modules['illumina_kraken2_run']              ) 
-include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'      addParams( options: [publish_files: ['csv':'']]                  )
-include { MULTIQC                    } from '../modules/local/multiqc_illumina'           addParams( options: multiqc_options                              )
+include { MULTIQC_CUSTOM_TWOCOL_TSV  } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]                       )
+include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'  addParams( options: modules['illumina_picard_collectwgsmetrics'] )
+include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec']            ) 
+include { CUTADAPT                   } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']                 )
+include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'               addParams( options: modules['illumina_kraken2_run']              ) 
+include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]                  )
+include { MULTIQC                    } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                              )
 
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
@@ -289,8 +289,11 @@ workflow ILLUMINA {
             }
             .set { ch_pass_fail_mapped }
 
-        MULTIQC_CUSTOM_FAIL_MAPPED ( 
-            ch_pass_fail_mapped.fail.collect()
+        MULTIQC_CUSTOM_TWOCOL_TSV ( 
+            ch_pass_fail_mapped.fail.collect(),
+            'Sample',
+            'Mapped reads',
+            'fail_mapped_samples'
         )
         .set { ch_fail_mapping_multiqc }
     }
