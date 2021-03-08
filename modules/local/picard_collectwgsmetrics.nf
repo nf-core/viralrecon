@@ -19,7 +19,7 @@ process PICARD_COLLECTWGSMETRICS {
     }
         
     input:
-    tuple val(meta), path(bam)
+    tuple val(meta), path(bam), path(bai)
     path  fasta
 
     output:
