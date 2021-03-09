@@ -38,7 +38,6 @@ def yaml_fields_to_dict(yaml_file, append_dict={}, field_mapping_list=[], valid_
         'mapped_passed', 'number_of_SNPs', 'number_of_indels', 'MISSENSE',
         '# contigs (>= 0 bp)', '# contigs (>= 5000 bp)', 'Largest contig'
     ]
-
     with open(yaml_file) as f:
         yaml_dict = yaml.safe_load(f)
         for k in yaml_dict.keys():
@@ -113,6 +112,7 @@ def main(args=None):
     illumina_variant_files = [
         ('multiqc_fastp.yaml',                                     [('# Input reads', ['before_filtering','total_reads']),
                                                                     ('# Trimmed reads (fastp)', ['after_filtering','total_reads'])]),
+        ('multiqc_general_stats.yaml',                             [('% Non-host reads (Kraken 2)', ['PREPROCESS: Kraken 2_mqc-generalstats-preprocess_kraken_2-Unclassified'])]),
         ('multiqc_samtools_flagstat_samtools_bowtie2.yaml',        [('# Mapped reads', ['mapped_passed']),
                                                                     ('% Mapped reads', ['mapped_passed_pct'])]),
         ('multiqc_samtools_flagstat_samtools_ivar.yaml',           [('# Trimmed reads (iVar)', ['flagstat_total'])]),
@@ -124,9 +124,9 @@ def main(args=None):
                                                                     ('Coverage median (picard)', ['MEDIAN_COVERAGE']),
                                                                     ('Coverage std dev (picard)', ['SD_COVERAGE']),
                                                                     ('% Coverage > 10x (picard)', ['PCT_10X'])]),
-        ('multiqc_general_stats.yaml',                             [('Coverage median (mosdepth)', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-median_coverage']),
-                                                                    ('% Coverage > 1x (mosdepth)', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-1_x_pc']),
-                                                                    ('% Coverage > 10x (mosdepth)', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-10_x_pc'])]),
+        ('multiqc_general_stats.yaml',                             [('Coverage median', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-median_coverage']),
+                                                                    ('% Coverage > 1x', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-1_x_pc']),
+                                                                    ('% Coverage > 10x', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-10_x_pc'])]),
         ('multiqc_bcftools_stats_bcftools_ivar.yaml',              [('# SNPs (iVar)', ['number_of_SNPs']),
                                                                     ('# INDELs (iVar)', ['number_of_indels'])]),
         ('multiqc_bcftools_stats_bcftools_bcftools.yaml',          [('# SNPs (BCFTools)', ['number_of_SNPs']),
@@ -140,7 +140,7 @@ def main(args=None):
     illumina_assembly_files = [
         ('multiqc_fastp.yaml',                                     [('# Input reads', ['before_filtering','total_reads'])]),
         ('multiqc_cutadapt.yaml',                                  [('# Trimmed reads (Cutadapt)', ['r_written'])]),
-        ('multiqc_general_stats.yaml',                             [('% Non-host reads (Kraken 2)', ['ASSEMBLY: Kraken 2_mqc-generalstats-assembly_kraken_2-Unclassified'])]),
+        ('multiqc_general_stats.yaml',                             [('% Non-host reads (Kraken 2)', ['PREPROCESS: Kraken 2_mqc-generalstats-preprocess_kraken_2-Unclassified'])]),
         ('multiqc_quast_quast_spades.yaml',                        [('# Contigs (SPAdes)', ['# contigs (>= 0 bp)']),
                                                                     ('Largest contig (SPAdes)', ['Largest contig']),
                                                                     ('% Genome fraction (SPAdes)', ['Genome fraction (%)']),
