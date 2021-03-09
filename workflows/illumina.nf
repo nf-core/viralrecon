@@ -55,6 +55,12 @@ def modules = params.modules.clone()
 
 def multiqc_options   = modules['illumina_multiqc']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
+if (!params.skip_assembly) {
+    multiqc_options.publish_files.put('assembly_metrics_mqc.csv','assembly')
+}
+if (!params.skip_variants) {
+    multiqc_options.publish_files.put('variants_metrics_mqc.csv','variants')
+}
 
 include { MULTIQC_CUSTOM_TWOCOL_TSV  } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]                       )
 include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'  addParams( options: modules['illumina_picard_collectwgsmetrics'] )
@@ -131,17 +137,11 @@ if (params.save_trimmed_fail) { fastp_options.publish_files.put('fail.fastq.gz',
 def bowtie2_align_options = modules['illumina_bowtie2_align']
 if (params.save_unaligned) { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
 
-def bowtie2_sort_bam_options = modules['illumina_bowtie2_sort_bam']
-if (params.protocol != 'amplicon' && params.skip_markduplicates) {
-    bowtie2_sort_bam_options.publish_files.put('bam','')
-    bowtie2_sort_bam_options.publish_files.put('bai','')
-}
-
 def markduplicates_options   = modules['illumina_picard_markduplicates']
 markduplicates_options.args += params.filter_duplicates ? " REMOVE_DUPLICATES=true" : ""
 
 include { FASTQC_FASTP           } from '../subworkflows/nf-core/fastqc_fastp'           addParams( fastqc_raw_options: modules['illumina_fastqc_raw'], fastqc_trim_options: modules['illumina_fastqc_trim'], fastp_options: fastp_options )
-include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'          addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options                                                       )
+include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'          addParams( align_options: bowtie2_align_options, samtools_options: modules['illumina_bowtie2_sort_bam']                                           )
 include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['illumina_picard_markduplicates_sort_bam']                   )
 
 ////////////////////////////////////////////////////
