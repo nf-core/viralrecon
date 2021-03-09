@@ -169,6 +169,7 @@ workflow NANOPORE {
              */
             ch_fastq_dirs
                 .filter { it[1] == null }
+                .filter { it[-1] >= params.min_barcode_reads }
                 .map { it -> [ "${it[0]}\t${it[-1]}" ] }
                 .set { ch_barcodes_no_sample }
 
