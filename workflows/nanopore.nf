@@ -165,7 +165,7 @@ workflow NANOPORE {
             .set { ch_fastq_dirs }
 
             /*
-             * MODULE: Create custom content file for MultiQC to report barcodes were allocated reads but no sample name in samplesheet
+             * MODULE: Create custom content file for MultiQC to report barcodes were allocated reads >= params.min_barcode_reads but no sample name in samplesheet
              */
             ch_fastq_dirs
                 .filter { it[1] == null }
