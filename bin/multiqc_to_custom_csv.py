@@ -38,42 +38,56 @@ def yaml_fields_to_dict(yaml_file, append_dict={}, field_mapping_list=[], valid_
         'mapped_passed', 'number_of_SNPs', 'number_of_indels', 'MISSENSE',
         '# contigs (>= 0 bp)', '# contigs (>= 5000 bp)', 'Largest contig'
     ]
-    with open(yaml_file) as f:
-        yaml_dict = yaml.safe_load(f)
-        for k in yaml_dict.keys():
-            key = k
-            if os.path.basename(yaml_file).startswith('multiqc_picard_insertSize'):
-                if k[-3:] == '_FR':
-                    key = k[:-3]
-            if os.path.basename(yaml_file).startswith('multiqc_cutadapt'):
-                names = [x for x in valid_sample_list if key[:-2] == x]
-                names += [x for x in valid_sample_list if key == x]
-                if names != []:
-                    key = names[0]
-            include_sample = True
-            if len(valid_sample_list) != 0 and key not in valid_sample_list:
-                include_sample = False
-            if include_sample:
+    if os.path.exists(yaml_file):
+        with open(yaml_file) as f:
+            yaml_dict = yaml.safe_load(f)
+            for k in yaml_dict.keys():
+                key = k
+                if os.path.basename(yaml_file).startswith('multiqc_picard_insertSize'):
+                    if k[-3:] == '_FR':
+                        key = k[:-3]
+                if os.path.basename(yaml_file).startswith('multiqc_cutadapt'):
+                    names = [x for x in valid_sample_list if key[:-2] == x]
+                    names += [x for x in valid_sample_list if key == x]
+                    if names != []:
+                        key = names[0]
+                include_sample = True
+                if len(valid_sample_list) != 0 and key not in valid_sample_list:
+                    include_sample = False
+                if include_sample:
+                    if key not in append_dict:
+                        append_dict[key] = {}
+                    if field_mapping_list != []:
+                        for i,j in field_mapping_list:
+                            val = list(find_tag(yaml_dict[k], j[0]))
+                            ## Fix for Cutadapt reporting reads/pairs as separate values
+                            if j[0] == 'r_written' and len(val) == 0:
+                                val = [list(find_tag(yaml_dict[k], 'pairs_written'))[0] * 2]
+                            if len(val) != 0:
+                                val = val[0]
+                                if len(j) == 2:
+                                    val = list(find_tag(val, j[1]))[0]
+                                if j[0] in integer_fields:
+                                    val = int(val)
+                                if i not in append_dict[key]:
+                                    append_dict[key][i] = val
+                                else:
+                                    print('WARNING: {} key already exists in dictionary so will be overwritten. YAML file {}.'.format(i,yaml_file))
+                    else:
+                        append_dict[key] = yaml_dict[k]
+    else:
+        if len(valid_sample_list) != 0:
+            for key in valid_sample_list:
                 if key not in append_dict:
                     append_dict[key] = {}
                 if field_mapping_list != []:
                     for i,j in field_mapping_list:
-                        val = list(find_tag(yaml_dict[k], j[0]))
-                        ## Fix for Cutadapt reporting reads/pairs as separate values
-                        if j[0] == 'r_written' and len(val) == 0:
-                            val = [list(find_tag(yaml_dict[k], 'pairs_written'))[0] * 2]
-                        if len(val) != 0:
-                            val = val[0]
-                            if len(j) == 2:
-                                val = list(find_tag(val, j[1]))[0]
-                            if j[0] in integer_fields:
-                                val = int(val)
-                            if i not in append_dict[key]:
-                                append_dict[key][i] = val
-                            else:
-                                print('WARNING: {} key already exists in dictionary so will be overwritten. YAML file {}.'.format(i,yaml_file))
+                        if i not in append_dict[key]:
+                            append_dict[key][i] = 'NA'
+                        else:
+                            print('WARNING: {} key already exists in dictionary so will be overwritten. YAML file {}.'.format(i,yaml_file))
                 else:
-                    append_dict[key] = yaml_dict[k]
+                    append_dict[key] = 'NA'
     return append_dict
 
 
@@ -82,11 +96,8 @@ def metrics_dict_to_file(file_field_list, multiqc_data_dir, out_file, valid_samp
     field_list = []
     for yaml_file,mapping_list in file_field_list:
         yaml_file = os.path.join(multiqc_data_dir, yaml_file)
-        if os.path.exists(yaml_file):
-            metrics_dict = yaml_fields_to_dict(yaml_file=yaml_file, append_dict=metrics_dict, field_mapping_list=mapping_list, valid_sample_list=valid_sample_list)
-            field_list += [x[0] for x in mapping_list]
-        else:
-            print('WARNING: File does not exist: {}'.format(yaml_file))
+        metrics_dict = yaml_fields_to_dict(yaml_file=yaml_file, append_dict=metrics_dict, field_mapping_list=mapping_list, valid_sample_list=valid_sample_list)
+        field_list += [x[0] for x in mapping_list]
 
     if metrics_dict != {}:
         make_dir(os.path.dirname(out_file))
