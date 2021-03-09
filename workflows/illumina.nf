@@ -234,7 +234,7 @@ workflow ILLUMINA {
             ch_assembly_fastq = KRAKEN2_RUN.out.unclassified
         }        
     }
-
+    
     /*
      * SUBWORKFLOW: Alignment with Bowtie2
      */
