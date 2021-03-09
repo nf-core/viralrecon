@@ -48,7 +48,7 @@ process MULTIQC {
     """
     multiqc -f $options.args $custom_config .
     multiqc_to_custom_csv.py --platform nanopore
-    #multiqc -f $options.args $custom_config .
+    multiqc -f $options.args $custom_config .
     """
 }
 
