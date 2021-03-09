@@ -71,13 +71,42 @@ workflow PREPARE_GENOME {
     }
 
     /*
+     * Prepare files required for amplicon data
+     */
+    ch_primer_bed           = Channel.empty()
+    ch_primer_fasta         = Channel.empty()
+    ch_primer_collapsed_bed = Channel.empty()
+    if (params.protocol == 'amplicon') {
+        if (params.primer_bed) {
+            if (params.primer_bed.endsWith('.gz')) {
+                ch_primer_bed = GUNZIP_PRIMER_BED ( params.primer_bed ).gunzip
+            } else {
+                ch_primer_bed = file(params.primer_bed)
+            }
+        }
+
+        if (!params.skip_variants && !params.skip_mosdepth) {
+            ch_primer_collapsed_bed = COLLAPSE_PRIMERS ( ch_primer_bed, params.primer_left_suffix, params.primer_right_suffix )
+        }
+
+        if (!params.skip_assembly && !params.skip_cutadapt) {
+            if (params.primer_fasta) {
+                if (params.primer_fasta.endsWith('.gz')) {
+                    ch_primer_fasta = GUNZIP_PRIMER_FASTA ( params.primer_fasta ).gunzip
+                } else {
+                    ch_primer_fasta = file(params.primer_fasta)
+                }
+            } else {
+                ch_primer_fasta = BEDTOOLS_GETFASTA ( ch_primer_bed, ch_fasta ).fasta
+            }
+        }
+    }
+
+    /*
      * Prepare reference files required for variant calling
      */
-    ch_bowtie2_index        = Channel.empty()
-    ch_primer_bed           = Channel.empty()
-    ch_primer_collapsed_bed = Channel.empty()
+    ch_bowtie2_index = Channel.empty()
     if (!params.skip_variants) {
-
         if (params.bowtie2_index) {
             if (params.bowtie2_index.endsWith('.tar.gz')) {
                 ch_bowtie2_index = UNTAR_BOWTIE2_INDEX ( params.bowtie2_index ).untar
@@ -85,31 +114,15 @@ workflow PREPARE_GENOME {
                 ch_bowtie2_index = file(params.bowtie2_index)
             }
         } else {
-            ch_bowtie2_index   = BOWTIE2_BUILD ( ch_fasta ).index
-        }
-
-        if (params.protocol == 'amplicon') {
-            if (params.primer_bed) {
-                if (params.primer_bed.endsWith('.gz')) {
-                    ch_primer_bed = GUNZIP_PRIMER_BED ( params.primer_bed ).gunzip
-                } else {
-                    ch_primer_bed = file(params.primer_bed)
-                }
-            }
-
-            if (!params.skip_mosdepth) {
-                ch_primer_collapsed_bed = COLLAPSE_PRIMERS ( ch_primer_bed, params.primer_left_suffix, params.primer_right_suffix )
-            }
+            ch_bowtie2_index = BOWTIE2_BUILD ( ch_fasta ).index
         }
     }
 
     /*
      * Prepare reference files required for de novo assembly
      */
-    ch_blast_db     = Channel.empty()
-    ch_primer_fasta = Channel.empty()
+    ch_blast_db = Channel.empty()
     if (!params.skip_assembly) {
-        
         if (!params.skip_blast) {
             if (params.blast_db) {
                 if (params.blast_db.endsWith('.tar.gz')) {
@@ -119,18 +132,6 @@ workflow PREPARE_GENOME {
                 }
             } else {
                 ch_blast_db = BLAST_MAKEBLASTDB ( ch_fasta ).db
-            }
-        }
-
-        if (params.protocol == 'amplicon' && !params.skip_cutadapt) {
-            if (params.primer_fasta) {
-                if (params.primer_fasta.endsWith('.gz')) {
-                    ch_primer_fasta = GUNZIP_PRIMER_FASTA ( params.primer_fasta ).gunzip
-                } else {
-                    ch_primer_fasta = file(params.primer_fasta)
-                }
-            } else {
-                ch_primer_fasta = BEDTOOLS_GETFASTA ( ch_primer_bed, ch_fasta ).fasta
             }
         }
     }
