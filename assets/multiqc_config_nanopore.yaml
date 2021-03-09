@@ -43,7 +43,13 @@ bcftools:
     collapse_complementary_changes: true
 
 extra_fn_clean_exts:
+    - '.consensus'
     - '.pass'
+    - '.mapped'
+    - '.snpeff'
+
+# extra_fn_clean_exts:
+#     - '.pass'
 
 # See https://github.com/ewels/MultiQC_TestData/blob/master/data/custom_content/with_config/table_headerconfig/multiqc_config.yaml
 custom_data:
@@ -117,7 +123,7 @@ custom_data:
             namespace: 'Variant calling metrics'
             only_defined_headers: False
             format: '{:,.0f}'
-            
+
 # # Customise the module search patterns to speed up execution time
 # #  - Skip module sub-tools that we are not interested in
 # #  - Replace file-content searching with filename pattern searching
