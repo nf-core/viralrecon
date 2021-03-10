@@ -76,6 +76,7 @@ def yaml_fields_to_dict(yaml_file, append_dict={}, field_mapping_list=[], valid_
                     else:
                         append_dict[key] = yaml_dict[k]
     else:
+        print('WARNING: File does not exist: {}'.format(yaml_file))
         if len(valid_sample_list) != 0:
             for key in valid_sample_list:
                 if key not in append_dict:
