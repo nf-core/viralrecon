@@ -138,6 +138,8 @@ workflow NANOPORE {
     
     barcode_dirs       = file("${params.fastq_dir}/barcode*", type: 'dir' , maxdepth: 1)
     single_barcode_dir = file("${params.fastq_dir}/*.fastq" , type: 'file', maxdepth: 1)
+    ch_custom_no_sample_name_multiqc = Channel.empty()
+    ch_custom_no_barcodes_multiqc    = Channel.empty()
     if (barcode_dirs) {
         Channel
             .fromPath( barcode_dirs )
@@ -179,6 +181,7 @@ workflow NANOPORE {
                 'Read count',
                 'fail_barcodes_no_sample'
             )
+            ch_custom_no_sample_name_multiqc = MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME.out
             
             /*
              * MODULE: Create custom content file for MultiQC to report samples that were in samplesheet but have no barcodes
@@ -194,6 +197,7 @@ workflow NANOPORE {
                 'Missing barcode',
                 'fail_no_barcode_samples'
             )
+            ch_custom_no_barcodes_multiqc = MULTIQC_CUSTOM_FAIL_NO_BARCODES.out
             
             ch_fastq_dirs    
                 .filter { (it[1] != null)  }
@@ -411,8 +415,8 @@ workflow NANOPORE {
             ch_multiqc_custom_config.collect().ifEmpty([]),
             GET_SOFTWARE_VERSIONS.out.yaml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
-            MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME.out.ifEmpty([]),
-            MULTIQC_CUSTOM_FAIL_NO_BARCODES.out.ifEmpty([]),
+            ch_custom_no_sample_name_multiqc.ifEmpty([]),
+            ch_custom_no_barcodes_multiqc.ifEmpty([]),
             MULTIQC_CUSTOM_FAIL_BARCODE_COUNT.out.ifEmpty([]),
             MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT.out.ifEmpty([]),
             PYCOQC.out.json.collect().ifEmpty([]),
