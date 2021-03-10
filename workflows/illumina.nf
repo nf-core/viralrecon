@@ -55,14 +55,19 @@ def modules = params.modules.clone()
 
 def multiqc_options   = modules['illumina_multiqc']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
+if (!params.skip_assembly) {
+    multiqc_options.publish_files.put('assembly_metrics_mqc.csv','assembly')
+}
+if (!params.skip_variants) {
+    multiqc_options.publish_files.put('variants_metrics_mqc.csv','variants')
+}
 
-include { MULTIQC_CUSTOM_FAIL_MAPPED } from '../modules/local/multiqc_custom_fail_mapped' addParams( options: [publish_files: false]                       )
-include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'   addParams( options: modules['illumina_picard_collectwgsmetrics'] )
-include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'              addParams( options: modules['illumina_bcftools_isec']            ) 
-include { CUTADAPT                   } from '../modules/local/cutadapt'                   addParams( options: modules['illumina_cutadapt']                 )
-include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'                addParams( options: modules['illumina_kraken2_run']              ) 
-include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'      addParams( options: [publish_files: ['csv':'']]                  )
-include { MULTIQC                    } from '../modules/local/multiqc_illumina'           addParams( options: multiqc_options                              )
+include { MULTIQC_CUSTOM_TWOCOL_TSV  } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]            )
+include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] ) 
+include { CUTADAPT                   } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']      )
+include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'               addParams( options: modules['illumina_kraken2_run']   ) 
+include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]       )
+include { MULTIQC                    } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                   )
 
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
@@ -131,17 +136,11 @@ if (params.save_trimmed_fail) { fastp_options.publish_files.put('fail.fastq.gz',
 def bowtie2_align_options = modules['illumina_bowtie2_align']
 if (params.save_unaligned) { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
 
-def bowtie2_sort_bam_options = modules['illumina_bowtie2_sort_bam']
-if (params.protocol != 'amplicon' && params.skip_markduplicates) {
-    bowtie2_sort_bam_options.publish_files.put('bam','')
-    bowtie2_sort_bam_options.publish_files.put('bai','')
-}
-
 def markduplicates_options   = modules['illumina_picard_markduplicates']
 markduplicates_options.args += params.filter_duplicates ? " REMOVE_DUPLICATES=true" : ""
 
 include { FASTQC_FASTP           } from '../subworkflows/nf-core/fastqc_fastp'           addParams( fastqc_raw_options: modules['illumina_fastqc_raw'], fastqc_trim_options: modules['illumina_fastqc_trim'], fastp_options: fastp_options )
-include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'          addParams( align_options: bowtie2_align_options, samtools_options: bowtie2_sort_bam_options                                                       )
+include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'          addParams( align_options: bowtie2_align_options, samtools_options: modules['illumina_bowtie2_sort_bam']                                           )
 include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['illumina_picard_markduplicates_sort_bam']                   )
 
 ////////////////////////////////////////////////////
@@ -234,16 +233,14 @@ workflow ILLUMINA {
             ch_assembly_fastq = KRAKEN2_RUN.out.unclassified
         }        
     }
-
+    
     /*
      * SUBWORKFLOW: Alignment with Bowtie2
      */
     ch_bam                      = Channel.empty()
     ch_bai                      = Channel.empty()
     ch_bowtie2_multiqc          = Channel.empty()
-    ch_bowtie2_stats_multiqc    = Channel.empty()
     ch_bowtie2_flagstat_multiqc = Channel.empty()
-    ch_bowtie2_idxstats_multiqc = Channel.empty()
     if (!params.skip_variants) {
         ALIGN_BOWTIE2 (
             ch_variants_fastq,
@@ -252,9 +249,7 @@ workflow ILLUMINA {
         ch_bam                      = ALIGN_BOWTIE2.out.bam
         ch_bai                      = ALIGN_BOWTIE2.out.bai
         ch_bowtie2_multiqc          = ALIGN_BOWTIE2.out.log_out
-        ch_bowtie2_stats_multiqc    = ALIGN_BOWTIE2.out.stats
         ch_bowtie2_flagstat_multiqc = ALIGN_BOWTIE2.out.flagstat
-        ch_bowtie2_idxstats_multiqc = ALIGN_BOWTIE2.out.idxstats
         ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.bowtie2_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
     }
@@ -289,8 +284,11 @@ workflow ILLUMINA {
             }
             .set { ch_pass_fail_mapped }
 
-        MULTIQC_CUSTOM_FAIL_MAPPED ( 
-            ch_pass_fail_mapped.fail.collect()
+        MULTIQC_CUSTOM_TWOCOL_TSV ( 
+            ch_pass_fail_mapped.fail.collect(),
+            'Sample',
+            'Mapped reads',
+            'fail_mapped_samples'
         )
         .set { ch_fail_mapping_multiqc }
     }
@@ -298,10 +296,7 @@ workflow ILLUMINA {
     /*
      * SUBWORKFLOW: Trim primer sequences from reads with iVar
      */
-    ch_ivar_trim_multiqc          = Channel.empty()
-    ch_ivar_trim_stats_multiqc    = Channel.empty()
     ch_ivar_trim_flagstat_multiqc = Channel.empty()
-    ch_ivar_trim_idxstats_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_ivar_trim && params.protocol == 'amplicon') {
         PRIMER_TRIM_IVAR (
             ch_bam.join(ch_bai, by: [0]),
@@ -309,10 +304,7 @@ workflow ILLUMINA {
         )
         ch_bam                        = PRIMER_TRIM_IVAR.out.bam
         ch_bai                        = PRIMER_TRIM_IVAR.out.bai
-        ch_ivar_trim_multiqc          = PRIMER_TRIM_IVAR.out.log_out
-        ch_ivar_trim_stats_multiqc    = PRIMER_TRIM_IVAR.out.stats
         ch_ivar_trim_flagstat_multiqc = PRIMER_TRIM_IVAR.out.flagstat
-        ch_ivar_trim_idxstats_multiqc = PRIMER_TRIM_IVAR.out.idxstats
         ch_software_versions  = ch_software_versions.mix(PRIMER_TRIM_IVAR.out.ivar_version.first().ifEmpty(null))
     }
 
@@ -320,9 +312,7 @@ workflow ILLUMINA {
      * SUBWORKFLOW: Mark duplicate reads
      */
     ch_markduplicates_multiqc          = Channel.empty()
-    ch_markduplicates_stats_multiqc    = Channel.empty()
     ch_markduplicates_flagstat_multiqc = Channel.empty()
-    ch_markduplicates_idxstats_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_markduplicates) {
         MARK_DUPLICATES_PICARD (
             ch_bam
@@ -330,30 +320,21 @@ workflow ILLUMINA {
         ch_bam                             = MARK_DUPLICATES_PICARD.out.bam
         ch_bai                             = MARK_DUPLICATES_PICARD.out.bai
         ch_markduplicates_multiqc          = MARK_DUPLICATES_PICARD.out.metrics
-        ch_markduplicates_stats_multiqc    = MARK_DUPLICATES_PICARD.out.stats
         ch_markduplicates_flagstat_multiqc = MARK_DUPLICATES_PICARD.out.flagstat
-        ch_markduplicates_idxstats_multiqc = MARK_DUPLICATES_PICARD.out.idxstats
         ch_software_versions = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
     }
 
     /*
      * MODULE: Picard metrics
      */
-    ch_picard_collectwgsmetrics_multiqc      = Channel.empty()
     ch_picard_collectmultiplemetrics_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_picard_metrics) {
-        PICARD_COLLECTWGSMETRICS (
-            ch_bam,
-            PREPARE_GENOME.out.fasta
-        )
-        ch_picard_collectwgsmetrics_multiqc = PICARD_COLLECTWGSMETRICS.out.metrics
-        ch_software_versions = ch_software_versions.mix(PICARD_COLLECTWGSMETRICS.out.version.first().ifEmpty(null))
-
         PICARD_COLLECTMULTIPLEMETRICS (
             ch_bam,
             PREPARE_GENOME.out.fasta
         )
         ch_picard_collectmultiplemetrics_multiqc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
+        ch_software_versions = ch_software_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.version.first().ifEmpty(null))
     }
 
     /*
@@ -464,8 +445,7 @@ workflow ILLUMINA {
     /*
      * MODULE: Primer trimming with Cutadapt
      */
-    ch_cutadapt_multiqc        = Channel.empty()
-    ch_cutadapt_fastqc_multiqc = Channel.empty()
+    ch_cutadapt_multiqc = Channel.empty()
     if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
         CUTADAPT (
             ch_assembly_fastq,
@@ -479,7 +459,6 @@ workflow ILLUMINA {
             FASTQC ( 
                 CUTADAPT.out.reads 
             )
-            ch_cutadapt_fastqc_multiqc = FASTQC.out.zip
         }
     }
 
@@ -574,22 +553,13 @@ workflow ILLUMINA {
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
             ch_fail_mapping_multiqc.ifEmpty([]),
             FASTQC_FASTP.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
-            FASTQC_FASTP.out.fastqc_trim_zip.collect{it[1]}.ifEmpty([]),
             FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
             ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_bowtie2_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bowtie2_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_bowtie2_idxstats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bowtie2_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_ivar_trim_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_trim_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_ivar_trim_idxstats_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_ivar_trim_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_markduplicates_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_markduplicates_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_markduplicates_idxstats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_markduplicates_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_picard_collectwgsmetrics_multiqc.collect{it[1]}.ifEmpty([]),
             ch_picard_collectmultiplemetrics_multiqc.collect{it[1]}.ifEmpty([]),
             ch_mosdepth_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_counts_multiqc.collect{it[1]}.ifEmpty([]),
@@ -600,7 +570,6 @@ workflow ILLUMINA {
             ch_bcftools_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_quast_multiqc.collect().ifEmpty([]),
             ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_cutadapt_fastqc_multiqc.collect{it[1]}.ifEmpty([]),
             ch_spades_quast_multiqc.collect().ifEmpty([]),
             ch_unicycler_quast_multiqc.collect().ifEmpty([]),
             ch_minia_quast_multiqc.collect().ifEmpty([])

@@ -3,7 +3,7 @@ include { saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-process MULTIQC_CUSTOM_FAIL_NO_BARCODES {
+process MULTIQC_CUSTOM_TWOCOL_TSV {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:'') }
@@ -16,21 +16,23 @@ process MULTIQC_CUSTOM_FAIL_NO_BARCODES {
     }
     
     input:
-    val fail_no_barcodes
-    
+    val tsv_data
+    val col1_name
+    val col2_name
+    val out_prefix
 
     output:
     path "*.tsv"
 
     script:
-    if (fail_no_barcodes.size() > 0) {
+    if (tsv_data.size() > 0) {
         """
-        echo "Sample\tMissing barcode" > fail_no_barcode_samples_mqc.tsv
-        echo "${fail_no_barcodes.join('\n')}" >> fail_no_barcode_samples_mqc.tsv
+        echo "${col1_name}\t${col2_name}" > ${out_prefix}_mqc.tsv
+        echo "${tsv_data.join('\n')}" >> ${out_prefix}_mqc.tsv
         """
     } else {
         """
-        touch fail_no_barcode_samples_mqc.tsv
+        touch ${out_prefix}_mqc.tsv
         """
     }
 }

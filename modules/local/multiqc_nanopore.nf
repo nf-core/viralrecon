@@ -10,11 +10,11 @@ process MULTIQC {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:'') }
 
-    conda (params.enable_conda ? "bioconda::multiqc=1.9" : null)
+    conda (params.enable_conda ? "bioconda::multiqc=1.10" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/multiqc:1.9--pyh9f0ad1d_0"
+        container "https://depot.galaxyproject.org/singularity/multiqc:1.10--py_0"
     } else {
-        container "quay.io/biocontainers/multiqc:1.9--pyh9f0ad1d_0"
+        container "quay.io/biocontainers/multiqc:1.10--py_0"
     }
 
     input:
@@ -22,13 +22,12 @@ process MULTIQC {
     path multiqc_custom_config
     path software_versions
     path workflow_summary
+    path fail_barcodes_no_sample
+    path fail_no_barcode_samples
+    path fail_barcode_count_samples
+    path fail_guppyplex_count_samples
     path ('pycoqc/*')
-    path fail_no_barcodes_summary
-    path fail_barcode_count_summary
-    path fail_guppyplex_count_summary
     path ('artic_minion/*')
-    path ('samtools_stats/*')
-    path ('samtools_stats/*')
     path ('samtools_stats/*')
     path ('bcftools_stats/*')
     path ('mosdepth/*')
@@ -38,6 +37,7 @@ process MULTIQC {
     output:
     path "*multiqc_report.html", emit: report
     path "*_data"              , emit: data
+    path "*.csv"               , emit: csv
     path "*_plots"             , optional:true, emit: plots
 
     script:
@@ -45,7 +45,8 @@ process MULTIQC {
     def custom_config = params.multiqc_config ? "--config $multiqc_custom_config" : ''
     """
     multiqc -f $options.args $custom_config .
+    multiqc_to_custom_csv.py --platform nanopore
+    multiqc -f $options.args $custom_config .
     """
 }
-// multiqc_to_custom_tsv_nanopore.py
-// multiqc -f $options.args $custom_config .
+

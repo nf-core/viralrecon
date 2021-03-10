@@ -10,11 +10,11 @@ process MULTIQC {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:'') }
 
-    conda (params.enable_conda ? "bioconda::multiqc=1.9" : null)
+    conda (params.enable_conda ? "bioconda::multiqc=1.10" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/multiqc:1.9--pyh9f0ad1d_0"
+        container "https://depot.galaxyproject.org/singularity/multiqc:1.10--py_0"
     } else {
-        container "quay.io/biocontainers/multiqc:1.9--pyh9f0ad1d_0"
+        container "quay.io/biocontainers/multiqc:1.10--py_0"
     }
 
     input:
@@ -25,21 +25,12 @@ process MULTIQC {
     path fail_mapping_summary
     path ('fastqc/*')
     path ('fastp/*')
-    path ('fastp/*')
     path ('kraken2/*')
     path ('bowtie2/*')
     path ('bowtie2/*')
-    path ('bowtie2/*')
-    path ('bowtie2/*')
-    path ('ivar_trim/*')
-    path ('ivar_trim/*')
-    path ('ivar_trim/*')
     path ('ivar_trim/*')
     path ('picard_markduplicates/*')
     path ('picard_markduplicates/*')
-    path ('picard_markduplicates/*')
-    path ('picard_markduplicates/*')
-    path ('picard_metrics/*')
     path ('picard_metrics/*')
     path ('mosdepth/*')
     path ('variants_ivar/*')
@@ -50,22 +41,23 @@ process MULTIQC {
     path ('variants_bcftools/*')
     path ('variants_bcftools/*')
     path ('cutadapt/*')
-    path ('cutadapt/*')
     path ('assembly_spades/*')
     path ('assembly_unicycler/*')
     path ('assembly_minia/*')
         
     output:
-    path "*multiqc_report.html", emit: report
-    path "*_data"              , emit: data
-    path "*_plots"             , optional:true, emit: plots
+    path "*multiqc_report.html"     , emit: report
+    path "*_data"                   , emit: data
+    path "*variants_metrics_mqc.csv", emit: csv_variants
+    path "*assembly_metrics_mqc.csv", emit: csv_assembly
+    path "*_plots"                  , optional:true, emit: plots
 
     script:
     def software      = getSoftwareName(task.process)
     def custom_config = params.multiqc_config ? "--config $multiqc_custom_config" : ''
     """
     multiqc -f $options.args $custom_config .
-    multiqc_to_custom_tsv_illumina.py
+    multiqc_to_custom_csv.py --platform illumina
     multiqc -f $options.args $custom_config .
     """
 }
