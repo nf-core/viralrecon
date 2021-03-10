@@ -14,14 +14,14 @@ run_modules:
     - samtools
     - picard
     - mosdepth
-    - ivar
     - bcftools
     #- snpeff
     - quast
     - cutadapt
 
-exclude_modules:
-    - 'general_stats'
+# exclude_modules:
+#     - 'general_stats'
+#skip_generalstats: true
 
 module_order:
     - fastqc:
@@ -33,12 +33,6 @@ module_order:
     - fastp:
         name: 'PREPROCESS: fastp (adapter trimming)'
         info: 'This section of the report shows fastp results for reads after adapter and quality trimming.'
-    - fastqc:
-        name: 'PREPROCESS: FastQC (adapter trimming)'
-        anchor: 'fastqc_fastp'
-        info: 'This section of the report shows FastQC results for reads after adapter and quality trimming.'
-        path_filters:
-            - './fastp/*.zip'
     - kraken:
         name: 'PREPROCESS: Kraken 2'
         info: 'This section of the report shows Kraken 2 classification results for reads after adapter trimming with fastp.'
@@ -51,9 +45,6 @@ module_order:
         info: 'This section of the report shows SAMTools counts/statistics after mapping with Bowtie 2.'
         path_filters:
             - './bowtie2/*'
-    - ivar:
-        name: 'VARIANTS: iVar trim'
-        info: 'This section of the report shows counts observed for each amplicon primer per sample as detected by iVar trim.'
     - samtools:
         name: 'VARIANTS: SAMTools (iVar)'
         anchor: 'samtools_ivar'
@@ -111,12 +102,6 @@ module_order:
     - cutadapt:
         name: 'ASSEMBLY: Cutadapt (primer trimming)'
         info: 'This section of the report shows Cutadapt results for reads after primer sequence trimming.'
-    - fastqc:
-        name: 'ASSEMBLY: FastQC (primer trimming)'
-        anchor: 'fastqc_cutadapt'
-        info: 'This section of the report shows FastQC results for reads after primer sequence trimming with Cutadapt.'
-        path_filters:
-            - './cutadapt/*.zip'
     - quast:
         name: 'ASSEMBLY: QUAST (SPAdes)'
         anchor: 'quast_spades'
@@ -324,8 +309,6 @@ sp:
         fn: '*.fastp.json'
     bowtie2:
         fn: '*.bowtie2.log'
-    ivar/trim:
-        fn: '*.ivar.log'
     mosdepth/global_dist:
         fn: '*.global.dist.txt'
     cutadapt:
