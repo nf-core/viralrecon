@@ -241,9 +241,7 @@ workflow ILLUMINA {
     ch_bam                      = Channel.empty()
     ch_bai                      = Channel.empty()
     ch_bowtie2_multiqc          = Channel.empty()
-    ch_bowtie2_stats_multiqc    = Channel.empty()
     ch_bowtie2_flagstat_multiqc = Channel.empty()
-    ch_bowtie2_idxstats_multiqc = Channel.empty()
     if (!params.skip_variants) {
         ALIGN_BOWTIE2 (
             ch_variants_fastq,
@@ -252,9 +250,7 @@ workflow ILLUMINA {
         ch_bam                      = ALIGN_BOWTIE2.out.bam
         ch_bai                      = ALIGN_BOWTIE2.out.bai
         ch_bowtie2_multiqc          = ALIGN_BOWTIE2.out.log_out
-        ch_bowtie2_stats_multiqc    = ALIGN_BOWTIE2.out.stats
         ch_bowtie2_flagstat_multiqc = ALIGN_BOWTIE2.out.flagstat
-        ch_bowtie2_idxstats_multiqc = ALIGN_BOWTIE2.out.idxstats
         ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.bowtie2_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
     }
@@ -301,10 +297,7 @@ workflow ILLUMINA {
     /*
      * SUBWORKFLOW: Trim primer sequences from reads with iVar
      */
-    ch_ivar_trim_multiqc          = Channel.empty()
-    ch_ivar_trim_stats_multiqc    = Channel.empty()
     ch_ivar_trim_flagstat_multiqc = Channel.empty()
-    ch_ivar_trim_idxstats_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_ivar_trim && params.protocol == 'amplicon') {
         PRIMER_TRIM_IVAR (
             ch_bam.join(ch_bai, by: [0]),
@@ -312,10 +305,7 @@ workflow ILLUMINA {
         )
         ch_bam                        = PRIMER_TRIM_IVAR.out.bam
         ch_bai                        = PRIMER_TRIM_IVAR.out.bai
-        ch_ivar_trim_multiqc          = PRIMER_TRIM_IVAR.out.log_out
-        ch_ivar_trim_stats_multiqc    = PRIMER_TRIM_IVAR.out.stats
         ch_ivar_trim_flagstat_multiqc = PRIMER_TRIM_IVAR.out.flagstat
-        ch_ivar_trim_idxstats_multiqc = PRIMER_TRIM_IVAR.out.idxstats
         ch_software_versions  = ch_software_versions.mix(PRIMER_TRIM_IVAR.out.ivar_version.first().ifEmpty(null))
     }
 
@@ -323,9 +313,7 @@ workflow ILLUMINA {
      * SUBWORKFLOW: Mark duplicate reads
      */
     ch_markduplicates_multiqc          = Channel.empty()
-    ch_markduplicates_stats_multiqc    = Channel.empty()
     ch_markduplicates_flagstat_multiqc = Channel.empty()
-    ch_markduplicates_idxstats_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_markduplicates) {
         MARK_DUPLICATES_PICARD (
             ch_bam
@@ -333,9 +321,7 @@ workflow ILLUMINA {
         ch_bam                             = MARK_DUPLICATES_PICARD.out.bam
         ch_bai                             = MARK_DUPLICATES_PICARD.out.bai
         ch_markduplicates_multiqc          = MARK_DUPLICATES_PICARD.out.metrics
-        ch_markduplicates_stats_multiqc    = MARK_DUPLICATES_PICARD.out.stats
         ch_markduplicates_flagstat_multiqc = MARK_DUPLICATES_PICARD.out.flagstat
-        ch_markduplicates_idxstats_multiqc = MARK_DUPLICATES_PICARD.out.idxstats
         ch_software_versions = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
     }
 
@@ -467,8 +453,7 @@ workflow ILLUMINA {
     /*
      * MODULE: Primer trimming with Cutadapt
      */
-    ch_cutadapt_multiqc        = Channel.empty()
-    ch_cutadapt_fastqc_multiqc = Channel.empty()
+    ch_cutadapt_multiqc = Channel.empty()
     if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
         CUTADAPT (
             ch_assembly_fastq,
@@ -482,7 +467,6 @@ workflow ILLUMINA {
             FASTQC ( 
                 CUTADAPT.out.reads 
             )
-            ch_cutadapt_fastqc_multiqc = FASTQC.out.zip
         }
     }
 
@@ -577,20 +561,12 @@ workflow ILLUMINA {
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
             ch_fail_mapping_multiqc.ifEmpty([]),
             FASTQC_FASTP.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
-            FASTQC_FASTP.out.fastqc_trim_zip.collect{it[1]}.ifEmpty([]),
             FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
             ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_bowtie2_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bowtie2_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_bowtie2_idxstats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bowtie2_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_ivar_trim_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_trim_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_ivar_trim_idxstats_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_ivar_trim_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_markduplicates_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_markduplicates_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_markduplicates_idxstats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_markduplicates_multiqc.collect{it[1]}.ifEmpty([]),
             ch_picard_collectwgsmetrics_multiqc.collect{it[1]}.ifEmpty([]),
             ch_picard_collectmultiplemetrics_multiqc.collect{it[1]}.ifEmpty([]),
@@ -603,7 +579,6 @@ workflow ILLUMINA {
             ch_bcftools_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_quast_multiqc.collect().ifEmpty([]),
             ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_cutadapt_fastqc_multiqc.collect{it[1]}.ifEmpty([]),
             ch_spades_quast_multiqc.collect().ifEmpty([]),
             ch_unicycler_quast_multiqc.collect().ifEmpty([]),
             ch_minia_quast_multiqc.collect().ifEmpty([])
