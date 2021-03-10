@@ -32,7 +32,6 @@ process MULTIQC {
     path ('picard_markduplicates/*')
     path ('picard_markduplicates/*')
     path ('picard_metrics/*')
-    path ('picard_metrics/*')
     path ('mosdepth/*')
     path ('variants_ivar/*')
     path ('variants_ivar/*')

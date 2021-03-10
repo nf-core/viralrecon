@@ -62,13 +62,12 @@ if (!params.skip_variants) {
     multiqc_options.publish_files.put('variants_metrics_mqc.csv','variants')
 }
 
-include { MULTIQC_CUSTOM_TWOCOL_TSV  } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]                       )
-include { PICARD_COLLECTWGSMETRICS   } from '../modules/local/picard_collectwgsmetrics'  addParams( options: modules['illumina_picard_collectwgsmetrics'] )
-include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec']            ) 
-include { CUTADAPT                   } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']                 )
-include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'               addParams( options: modules['illumina_kraken2_run']              ) 
-include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]                  )
-include { MULTIQC                    } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                              )
+include { MULTIQC_CUSTOM_TWOCOL_TSV  } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]            )
+include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] ) 
+include { CUTADAPT                   } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']      )
+include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'               addParams( options: modules['illumina_kraken2_run']   ) 
+include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]       )
+include { MULTIQC                    } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                   )
 
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
@@ -328,21 +327,14 @@ workflow ILLUMINA {
     /*
      * MODULE: Picard metrics
      */
-    ch_picard_collectwgsmetrics_multiqc      = Channel.empty()
     ch_picard_collectmultiplemetrics_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_picard_metrics) {
-        PICARD_COLLECTWGSMETRICS (
-            ch_bam.join(ch_bai, by: [0]),
-            PREPARE_GENOME.out.fasta
-        )
-        ch_picard_collectwgsmetrics_multiqc = PICARD_COLLECTWGSMETRICS.out.metrics
-        ch_software_versions = ch_software_versions.mix(PICARD_COLLECTWGSMETRICS.out.version.first().ifEmpty(null))
-
         PICARD_COLLECTMULTIPLEMETRICS (
             ch_bam,
             PREPARE_GENOME.out.fasta
         )
         ch_picard_collectmultiplemetrics_multiqc = PICARD_COLLECTMULTIPLEMETRICS.out.metrics
+        ch_software_versions = ch_software_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.version.first().ifEmpty(null))
     }
 
     /*
@@ -568,7 +560,6 @@ workflow ILLUMINA {
             ch_ivar_trim_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
             ch_markduplicates_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
             ch_markduplicates_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_picard_collectwgsmetrics_multiqc.collect{it[1]}.ifEmpty([]),
             ch_picard_collectmultiplemetrics_multiqc.collect{it[1]}.ifEmpty([]),
             ch_mosdepth_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_counts_multiqc.collect{it[1]}.ifEmpty([]),

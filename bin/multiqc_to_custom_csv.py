@@ -132,20 +132,16 @@ def main(args=None):
                                                                     ('# Reads after MarkDuplicates', ['flagstat_total'])]),
         ('multiqc_picard_insertSize.yaml',                         [('Insert size mean', ['MEAN_INSERT_SIZE']),
                                                                     ('Insert size std dev', ['STANDARD_DEVIATION'])]),
-        ('multiqc_picard_wgsmetrics.yaml',                         [('Coverage mean (picard)', ['MEAN_COVERAGE']),
-                                                                    ('Coverage median (picard)', ['MEDIAN_COVERAGE']),
-                                                                    ('Coverage std dev (picard)', ['SD_COVERAGE']),
-                                                                    ('% Coverage > 10x (picard)', ['PCT_10X'])]),
         ('multiqc_general_stats.yaml',                             [('Coverage median', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-median_coverage']),
                                                                     ('% Coverage > 1x', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-1_x_pc']),
                                                                     ('% Coverage > 10x', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-10_x_pc'])]),
         ('multiqc_bcftools_stats_bcftools_ivar.yaml',              [('# SNPs (iVar)', ['number_of_SNPs']),
                                                                     ('# INDELs (iVar)', ['number_of_indels'])]),
+        ('multiqc_snpeff_snpeff_ivar.yaml',                        [('# Missense variants (iVar)', ['MISSENSE'])]),
+        ('multiqc_quast_quast_ivar.yaml',                          [('# Ns per 100kb consensus (iVar)', ["# N's per 100 kbp"])]),
         ('multiqc_bcftools_stats_bcftools_bcftools.yaml',          [('# SNPs (BCFTools)', ['number_of_SNPs']),
                                                                     ('# INDELs (BCFTools)', ['number_of_indels'])]),
-        ('multiqc_snpeff_snpeff_ivar.yaml',                        [('# Missense variants (iVar)', ['MISSENSE'])]),
         ('multiqc_snpeff_snpeff_bcftools.yaml',                    [('# Missense variants (BCFTools)', ['MISSENSE'])]),
-        ('multiqc_quast_quast_ivar.yaml',                          [('# Ns per 100kb consensus (iVar)', ["# N's per 100 kbp"])]),
         ('multiqc_quast_quast_bcftools.yaml',                      [('# Ns per 100kb consensus (BCFTools)', ["# N's per 100 kbp"])])
     ]
 

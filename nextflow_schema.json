@@ -319,7 +319,7 @@
                 "skip_picard_metrics": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip Picard CollectMultipleMetrics and CollectWgsMetrics steps."
+                    "description": "Skip Picard CollectMultipleMetrics steps."
                 },
                 "skip_mosdepth": {
                     "type": "boolean",
