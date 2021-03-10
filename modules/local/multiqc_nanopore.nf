@@ -22,14 +22,12 @@ process MULTIQC {
     path multiqc_custom_config
     path software_versions
     path workflow_summary
-    path ('pycoqc/*')
     path fail_barcodes_no_sample
     path fail_no_barcode_samples
     path fail_barcode_count_samples
     path fail_guppyplex_count_samples
+    path ('pycoqc/*')
     path ('artic_minion/*')
-    path ('samtools_stats/*')
-    path ('samtools_stats/*')
     path ('samtools_stats/*')
     path ('bcftools_stats/*')
     path ('mosdepth/*')
