@@ -47,6 +47,12 @@ workflow ASSEMBLY_SPADES {
         .filter { meta, scaffold -> scaffold.size() > 0 }
         .set { ch_scaffolds }
     
+    SPADES
+        .out
+        .gfa
+        .filter { meta, gfa -> gfa.size() > 0 }
+        .set { ch_gfa }
+    
     /*
      * Generate assembly visualisation with Bandage
      */
@@ -54,7 +60,7 @@ workflow ASSEMBLY_SPADES {
     ch_bandage_svg     = Channel.empty()
     ch_bandage_version = Channel.empty()
     if (!params.skip_bandage) {
-        BANDAGE_IMAGE ( SPADES.out.gfa )
+        BANDAGE_IMAGE ( ch_gfa )
         ch_bandage_version = BANDAGE_IMAGE.out.version
         ch_bandage_png     = BANDAGE_IMAGE.out.png
         ch_bandage_svg     = BANDAGE_IMAGE.out.svg
