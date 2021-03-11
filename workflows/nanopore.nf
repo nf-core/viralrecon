@@ -147,7 +147,7 @@ workflow NANOPORE {
             .map { dir ->
                 def count = 0
                 for (x in dir.listFiles()) {
-                    if (x.isFile()) {
+                    if (x.isFile() && x.toString().endsWith('.fastq')) {
                         count += x.countFastq()
                     }
                 }
