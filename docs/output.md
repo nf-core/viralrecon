@@ -684,7 +684,7 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 
 * `illumina/assembly/<ASSEMBLER>/blastn/`
   * `*.blastn.txt`: BLAST results against the target virus.
-  * `*.blastn.filtered.txt`: Filtered BLAST results.
+  * `*.filter.blastn.txt`: Filtered BLAST results.
 
 **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades').
 
