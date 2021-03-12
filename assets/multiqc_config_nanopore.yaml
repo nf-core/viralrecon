@@ -99,13 +99,13 @@ custom_data:
                 format: '{:,.0f}'
             'Coverage median':
                 description: 'Median coverage calculated by mosdepth'
-                format: '{:,.1f}'
+                format: '{:,.2f}'
             '% Coverage > 1x':
                 description: 'Coverage > 1x calculated by mosdepth'
-                format: '{:,.1f}'
+                format: '{:,.2f}'
             '% Coverage > 10x':
                 description: 'Coverage > 10x calculated by mosdepth'
-                format: '{:,.1f}'
+                format: '{:,.2f}'
             '# SNPs':
                 description: 'Total number of SNPs called by artic minion that pass quality filters'
                 format: '{:,.0f}'

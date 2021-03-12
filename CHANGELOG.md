@@ -5,22 +5,143 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [[2.0dev](https://github.com/nf-core/rnaseq/releases/tag/2.0)] - 2021-XX-XX
 
-### `Fixed`
+### :warning: Major enhancements
 
-* [#142](https://github.com/nf-core/viralrecon/issues/142) - Unknown method invocation `toBytes` on String type
-* [#138](https://github.com/nf-core/viralrecon/issues/138) - Problem masking the consensus sequence
+* Pipeline has been re-implemented in [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html).
+* All software containers are now exclusively obtained from [Biocontainers](https://biocontainers.pro/#/registry).
+* You will need to install Nextflow `>=21.03.0-edge` to run the pipeline. If you are using Singularity, then features introduced in that release now enable the pipeline to directly download Singularity images hosted by Biocontainers as opposed to performing a conversion from Docker images (see [#496](https://github.com/nf-core/rnaseq/issues/496)).
+* Default human `--kraken2_db` link has been changed from Zenodo to an AWS S3 bucket for more reliable downloads.
+* Illumina and Nanopore runs containing the same 48 samples sequenced on both platforms have been uploaded to the nf-core AWS account for full-sized tests on release.
+* Variant graph processes to call variants relative to the reference genome directly from _de novo_ assemblies have been deprecated and removed.
+* Variant calling with Varscan 2 has been deprecated and removed due to [licensing restrictions](https://github.com/dkoboldt/varscan/issues/12).
 
-### `Added`
+### Other enhancements & fixes
 
-* Update pipeline template to nf-core/tools `1.12.1`
+* Updated pipeline template to nf-core/tools `1.12.1`.
+* Bumped Nextflow version `19.10.0` -> `21.03.0-edge`.
+* Optimise MultiQC configuration and input files for faster run-time on huge sample numbers.
+* [#122](https://github.com/nf-core/viralrecon/issues/122) - Single SPAdes command to rule them all.
+* [#138](https://github.com/nf-core/viralrecon/issues/138) - Problem masking the consensus sequence.
+* [#142](https://github.com/nf-core/viralrecon/issues/142) - Unknown method invocation `toBytes` on String type.
 
-### `Removed`
+### Parameters
 
-### `Dependencies`
+| Old parameter                 | New parameter                         |
+|-------------------------------|---------------------------------------|
+| `--amplicon_bed`              | `--primer_bed`                        |
+| `--amplicon_fasta`            | `--primer_fasta`                      |
+| `--amplicon_left_suffix`      | `--primer_left_suffix`                |
+| `--amplicon_right_suffix`     | `--primer_right_suffix`               |
+| `--filter_dups`               | `--filter_duplicates`                 |
+| `--skip_adapter_trimming`     | `--skip_fastp`                        |
+| `--skip_amplicon_trimming`    | `--skip_cutadapt`                     |
+|                               | `--artic_minion_aligner`              |
+|                               | `--artic_minion_caller`               |
+|                               | `--artic_minion_medaka_model`         |
+|                               | `--blast_db`                          |
+|                               | `--enable_conda`                      |
+|                               | `--fast5_dir`                         |
+|                               | `--fastq_dir`                         |
+|                               | `--kraken2_assembly_host_filter`      |
+|                               | `--kraken2_variants_host_filter`      |
+|                               | `--min_barcode_reads`                 |
+|                               | `--min_guppyplex_reads`               |
+|                               | `--multiqc_title`                     |
+|                               | `--platform`                          |
+|                               | `--primer_set`                        |
+|                               | `--primer_set_version`                |
+|                               | `--public_data_ids`                   |
+|                               | `--save_trimmed_fail`                 |
+|                               | `--save_unaligned`                    |
+|                               | `--sequencing_summary`                |
+|                               | `--singularity_pull_docker_container` |
+|                               | `--skip_bandage`                      |
+|                               | `--skip_consensus`                    |
+|                               | `--skip_ivar_trim`                    |
+|                               | `--skip_nanoplot`                     |
+|                               | `--skip_pangolin`                     |
+|                               | `--skip_pycoqc`                       |
+|                               | `--skip_sra_fastq_download`           |
+|                               | `--spades_hmm`                        |
+|                               | `--spades_mode`                       |
+| `--cut_mean_quality`          |                                       |
+| `--filter_unmapped`           |                                       |
+| `--ivar_trim_min_len`         |                                       |
+| `--ivar_trim_min_qual`        |                                       |
+| `--ivar_trim_window_width`    |                                       |
+| `--kraken2_use_ftp`           |                                       |
+| `--max_allele_freq`           |                                       |
+| `--min_allele_freq`           |                                       |
+| `--min_base_qual`             |                                       |
+| `--min_coverage`              |                                       |
+| `--min_trim_length`           |                                       |
+| `--minia_kmer`                |                                       |
+| `--mpileup_depth`             |                                       |
+| `--name`                      |                                       |
+| `--qualified_quality_phred`   |                                       |
+| `--save_align_intermeds`      |                                       |
+| `--save_kraken2_fastq`        |                                       |
+| `--save_sra_fastq`            |                                       |
+| `--skip_sra`                  |                                       |
+| `--skip_vg`                   |                                       |
+| `--unqualified_percent_limit` |                                       |
+| `--varscan2_strand_filter`    |                                       |
+
+> **NB:** Parameter has been __updated__ if both old and new parameter information is present.  
+> **NB:** Parameter has been __added__ if just the new parameter information is present.  
+> **NB:** Parameter has been __removed__ if new parameter information isn't present.
+
+### Software dependencies
+
+Note, since the pipeline is now using Nextflow DSL2, each process will be run with its own [Biocontainer](https://biocontainers.pro/#/registry). This means that on occasion it is entirely possible for the pipeline to be using different versions of the same tool. However, the overall software dependency changes compared to the last release have been listed below for reference.
+
+| Dependency                    | Old version | New version |
+|-------------------------------|-------------|-------------|
+| `artic`                       |             | 1.2.1       |
+| `bc`                          | 1.07.1      |             |
+| `bcftools`                    | 1.9         | 1.11        |
+| `bedtools`                    | 2.29.2      | 2.30.0      |
+| `bioconductor-biostrings`     | 2.54.0      | 2.58.0      |
+| `bioconductor-complexheatmap` | 2.2.0       | 2.6.2       |
+| `blast`                       | 2.9.0       | 2.10.1      |
+| `bowtie2`                     | 2.4.1       | 2.4.2       |
+| `cutadapt`                    | 2.10        | 3.2         |
+| `ivar`                        | 1.2.2       | 1.3.1       |
+| `kraken2`                     | 2.0.9beta   | 2.1.1       |
+| `nanoplot`                    |             | 1.32.1      |
+| `markdown`                    | 3.2.2       |             |
+| `minimap2`                    | 2.17        |             |
+| `mosdepth`                    | 0.2.6       | 0.3.1       |
+| `multiqc`                     | 1.9         | 1.10        |
+| `parallel-fastq-dump`         | 0.6.6       |             |
+| `pangolin`                    |             | 2.3.2       |
+| `picard`                      | 2.23.0      | 2.23.9      |
+| `pigz`                        | 2.3.4       |             |
+| `pycoqc`                      |             | 2.5.2       |
+| `pygments`                    | 2.6.1       |             |
+| `pymdown-extensions`          | 7.1         |             |
+| `python`                      | 3.6.10      | 3.8.3       |
+| `r-base`                      | 3.6.2       | 4.0.3       |
+| `r-ggplot2`                   | 3.3.1       | 3.3.3       |
+| `r-tidyr`                     | 1.1.0       |             |
+| `requests`                    |             | 2.24.0      |
+| `samtools`                    | 1.9         | 1.10        |
+| `seqwish`                     | 0.4.1       |             |
+| `snpeff`                      | 4.5covid19  | 5.0         |
+| `spades`                      | 3.14.0      | 3.15.0      |
+| `sra-tools`                   | 2.10.7      |             |
+| `tabix`                       |             | 0.2.6       |
+| `unicycler`                   | 0.4.7       | 0.4.8       |
+| `varscan`                     | 2.4.4       |             |
+| `vg`                          | 1.24.0      |             |
+
+> **NB:** Dependency has been __updated__ if both old and new version information is present.  
+> **NB:** Dependency has been __added__ if just the new version information is present.  
+> **NB:** Dependency has been __removed__ if new version information isn't present.  
 
 ## [[1.1.0](https://github.com/nf-core/rnaseq/releases/tag/1.1.0)] - 2020-06-23
 
-### `Added`
+### Added
 
 * [#112](https://github.com/nf-core/viralrecon/issues/112) - Per-amplicon coverage plot
 * [#124](https://github.com/nf-core/viralrecon/issues/124) - Intersect variants across callers
@@ -40,11 +161,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * `--ivar_trim_window_width` - width of sliding window
 * [#118] Updated GitHub Actions AWS workflow for small and full size tests.
 
-### `Removed`
+### Removed
 
 * `--skip_qc` parameter
 
-### `Dependencies`
+### Dependencies
 
 * Add mosdepth `0.2.6`
 * Add bioconductor-complexheatmap `2.2.0`

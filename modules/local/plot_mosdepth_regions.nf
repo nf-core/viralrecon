@@ -2,7 +2,7 @@
 include { initOptions; saveFiles } from './functions'
 
 params.options = [:]
-def options    = initOptions(params.options)
+options        = initOptions(params.options)
 
 process PLOT_MOSDEPTH_REGIONS {
     label 'process_medium'

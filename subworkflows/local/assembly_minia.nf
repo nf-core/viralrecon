@@ -2,14 +2,15 @@
  * Assembly and downstream processing for minia scaffolds
  */
 
-params.minia_options     = [:]
-params.blastn_options    = [:]
-params.abacas_options    = [:]
-params.plasmidid_options = [:]
-params.quast_options     = [:]
+params.minia_options         = [:]
+params.blastn_options        = [:]
+params.blastn_filter_options = [:]
+params.abacas_options        = [:]
+params.plasmidid_options     = [:]
+params.quast_options         = [:]
 
 include { MINIA       } from '../../modules/local/minia' addParams( options: params.minia_options ) 
-include { ASSEMBLY_QC } from './assembly_qc'             addParams( blastn_options: params.blastn_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
+include { ASSEMBLY_QC } from './assembly_qc'             addParams( blastn_options: params.blastn_options, blastn_filter_options: params.blastn_filter_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
 
 workflow ASSEMBLY_MINIA {
     take:
@@ -17,6 +18,7 @@ workflow ASSEMBLY_MINIA {
     fasta         // channel: /path/to/genome.fasta
     gff           // channel: /path/to/genome.gff
     blast_db      // channel: /path/to/blast_db/
+    blast_header  // channel: /path/to/blast_header.txt
     
     main:
     /*
@@ -40,7 +42,8 @@ workflow ASSEMBLY_MINIA {
         ch_contigs,
         fasta,
         gff,
-        blast_db
+        blast_db,
+        blast_header
     )
 
     emit:
@@ -50,6 +53,7 @@ workflow ASSEMBLY_MINIA {
     minia_version      = MINIA.out.version                  //    path: *.version.txt
 
     blast_txt          = ASSEMBLY_QC.out.blast_txt          // channel: [ val(meta), [ txt ] ]
+    blast_filter_txt   = ASSEMBLY_QC.out.blast_filter_txt   // channel: [ val(meta), [ txt ] ]
     blast_version      = ASSEMBLY_QC.out.blast_version      //    path: *.version.txt
 
     quast_results      = ASSEMBLY_QC.out.quast_results      // channel: [ val(meta), [ results ] ]
