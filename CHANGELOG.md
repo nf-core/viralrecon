@@ -61,7 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 |                               | `--skip_nanoplot`                     |
 |                               | `--skip_pangolin`                     |
 |                               | `--skip_pycoqc`                       |
-|                               | `--skip_qc`                           |
 |                               | `--skip_sra_fastq_download`           |
 |                               | `--spades_hmm`                        |
 |                               | `--spades_mode`                       |

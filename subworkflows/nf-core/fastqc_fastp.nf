@@ -18,7 +18,7 @@ workflow FASTQC_FASTP {
     fastqc_raw_html = Channel.empty()
     fastqc_raw_zip  = Channel.empty()
     fastqc_version  = Channel.empty()
-    if (!params.skip_fastqc && !params.skip_qc) {
+    if (!params.skip_fastqc) {
         FASTQC_RAW ( reads ).html.set { fastqc_raw_html }
         fastqc_raw_zip = FASTQC_RAW.out.zip
         fastqc_version = FASTQC_RAW.out.version
@@ -40,7 +40,7 @@ workflow FASTQC_FASTP {
         trim_reads_fail = FASTP.out.reads_fail
         fastp_version   = FASTP.out.version
 
-        if (!params.skip_fastqc && !params.skip_qc) {
+        if (!params.skip_fastqc) {
             FASTQC_TRIM ( trim_reads ).html.set { fastqc_trim_html }
             fastqc_trim_zip = FASTQC_TRIM.out.zip
         }
