@@ -207,11 +207,10 @@ There are a number of ways you can install Nextflow `edge` releases, the main di
 NXF_VER="20.11.0-edge" nextflow run nf-core/rnaseq -profile test,docker -r 3.0
 ```
 
-* If you have Nextflow installed already you can update it using the commands below:
+* If you have Nextflow installed already, another alternative to the option above is to `export` it as an environment variable before you run the pipeline command:
 
 ```bash
 export NXF_VER="20.11.0-edge"
-nextflow self-update
 nextflow run nf-core/rnaseq -profile test,docker -r 3.0
 ```
 
