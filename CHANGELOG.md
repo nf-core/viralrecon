@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Pipeline has been re-implemented in [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html).
 * All software containers are now exclusively obtained from [Biocontainers](https://biocontainers.pro/#/registry).
-* You will need to install Nextflow `>=21.02.0-edge` to run the pipeline. If you are using Singularity, then features introduced in that release now enable the pipeline to directly download Singularity images hosted by Biocontainers as opposed to performing a conversion from Docker images (see [#496](https://github.com/nf-core/rnaseq/issues/496)).
+* You will need to install Nextflow `>=21.03.0-edge` to run the pipeline. If you are using Singularity, then features introduced in that release now enable the pipeline to directly download Singularity images hosted by Biocontainers as opposed to performing a conversion from Docker images (see [#496](https://github.com/nf-core/rnaseq/issues/496)).
 * Default human `--kraken2_db` link has been changed from Zenodo to an AWS S3 bucket for more reliable downloads.
 * Illumina and Nanopore runs containing the same 48 samples sequenced on both platforms have been uploaded to the nf-core AWS account for full-sized tests on release.
 * Variant graph processes to call variants relative to the reference genome directly from _de novo_ assemblies have been deprecated.
@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Other enhancements & fixes
 
 * Updated pipeline template to nf-core/tools `1.12.1`.
-* Bumped Nextflow version `19.10.0` -> `21.02.0-edge`.
+* Bumped Nextflow version `19.10.0` -> `21.03.0-edge`.
 * Optimise MultiQC configuration and input files for faster run-time on huge sample numbers.
 * [#122](https://github.com/nf-core/viralrecon/issues/122) - Single SPAdes command to rule them all.
 * [#138](https://github.com/nf-core/viralrecon/issues/138) - Problem masking the consensus sequence.
