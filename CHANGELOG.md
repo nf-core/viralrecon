@@ -12,8 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * You will need to install Nextflow `>=21.03.0-edge` to run the pipeline. If you are using Singularity, then features introduced in that release now enable the pipeline to directly download Singularity images hosted by Biocontainers as opposed to performing a conversion from Docker images (see [#496](https://github.com/nf-core/rnaseq/issues/496)).
 * Default human `--kraken2_db` link has been changed from Zenodo to an AWS S3 bucket for more reliable downloads.
 * Illumina and Nanopore runs containing the same 48 samples sequenced on both platforms have been uploaded to the nf-core AWS account for full-sized tests on release.
-* Variant graph processes to call variants relative to the reference genome directly from _de novo_ assemblies have been deprecated.
-* Variant calling with Varscan 2 has been deprecated due to [licensing restrictions](https://github.com/dkoboldt/varscan/issues/12).
+* Variant graph processes to call variants relative to the reference genome directly from _de novo_ assemblies have been deprecated and removed.
+* Variant calling with Varscan 2 has been deprecated and removed due to [licensing restrictions](https://github.com/dkoboldt/varscan/issues/12).
 
 ### Other enhancements & fixes
 
