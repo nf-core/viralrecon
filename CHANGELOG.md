@@ -90,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **NB:** Parameter has been __updated__ if both old and new parameter information is present.  
 > **NB:** Parameter has been __added__ if just the new parameter information is present.  
-> **NB:** Parameter has been __removed__ if new parameter information isn't present. 
+> **NB:** Parameter has been __removed__ if new parameter information isn't present.
 
 ### Software dependencies
 
