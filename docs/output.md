@@ -227,7 +227,7 @@ BAM files containing the original alignments from either Minimap2 or BWA are fur
 
 </details>
 
-Lineage analysis with [`Pangolin`](https://github.com/cov-lineages/pangolin)
+Phylogenetic Assignment of Named Global Outbreak LINeages ([`Pangolin`](https://github.com/cov-lineages/pangolin)) has been used extensively during the COVID-19 pandemic in order to to assign lineages to SARS-CoV-2 genome sequenced samples. A [web application](https://pangolin.cog-uk.io/) also exists that allows users to upload genome sequences via a web browser to assign lineages to genome sequences of SARS-CoV-2, view descriptive characteristics of the assigned lineage(s), view the placement of the lineage in a phylogeny of global samples, view the temporal and geographic distribution of the assigned lineage(s).
 
 ## Nanopore: Workflow reporting
 
@@ -586,7 +586,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 </details>
 
-Lineage analysis with [`Pangolin`](https://github.com/cov-lineages/pangolin)
+Phylogenetic Assignment of Named Global Outbreak LINeages ([`Pangolin`](https://github.com/cov-lineages/pangolin)) has been used extensively during the COVID-19 pandemic in order to to assign lineages to SARS-CoV-2 genome sequenced samples. A [web application](https://pangolin.cog-uk.io/) also exists that allows users to upload genome sequences via a web browser to assign lineages to genome sequences of SARS-CoV-2, view descriptive characteristics of the assigned lineage(s), view the placement of the lineage in a phylogeny of global samples, view the temporal and geographic distribution of the assigned lineage(s).
 
 ### BCFTools isec
 
