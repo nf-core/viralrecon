@@ -10,7 +10,7 @@ params.abacas_options        = [:]
 params.plasmidid_options     = [:]
 params.quast_options         = [:]
 
-include { SPADES        } from '../../modules/local/spades'                        addParams( options: params.spades_options  ) 
+include { SPADES        } from '../../modules/nf-core/software/spades/main'        addParams( options: params.spades_options  ) 
 include { BANDAGE_IMAGE } from '../../modules/nf-core/software/bandage/image/main' addParams( options: params.bandage_options ) 
 include { ASSEMBLY_QC   } from './assembly_qc'                                     addParams( blastn_options: params.blastn_options, blastn_filter_options: params.blastn_filter_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
 
@@ -18,7 +18,6 @@ workflow ASSEMBLY_SPADES {
     take:
     reads         // channel: [ val(meta), [ reads ] ]
     hmm           // channel: /path/to/spades.hmm
-    coronaspades  // boolean: run coronaspades.py
     fasta         // channel: /path/to/genome.fasta
     gff           // channel: /path/to/genome.gff
     blast_db      // channel: /path/to/blast_db/
@@ -38,7 +37,7 @@ workflow ASSEMBLY_SPADES {
     /*
      * Assemble reads with SPAdes
      */
-    SPADES ( ch_reads, hmm, coronaspades )
+    SPADES ( ch_reads, hmm )
 
     /*
      * Filter for empty scaffold files

@@ -103,7 +103,7 @@ if (params.skip_markduplicates) {
 }
 
 def spades_options   = modules['illumina_spades']
-spades_options.args += (params.spades_mode && params.spades_mode != 'corona') ? " --${params.spades_mode}" : ""
+spades_options.args += params.spades_mode ? " --${params.spades_mode}" : ""
 
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'             addParams( options: [:] )
 include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome_illumina' addParams( genome_options: publish_genome_options, index_options: publish_index_options, db_options: publish_db_options, bowtie2_build_options: bowtie2_build_options, bedtools_getfasta_options: bedtools_getfasta_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options, makeblastdb_options: makeblastdb_options, kraken2_build_options: kraken2_build_options )
@@ -470,7 +470,6 @@ workflow ILLUMINA {
         ASSEMBLY_SPADES (
             ch_assembly_fastq,
             ch_spades_hmm,
-            params.spades_mode == 'corona',
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.gff,
             PREPARE_GENOME.out.blast_db,
