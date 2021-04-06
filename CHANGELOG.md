@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Other enhancements & fixes
 
-* Updated pipeline template to nf-core/tools `1.12.1`.
+* Updated pipeline template to nf-core/tools `1.13.3`.
 * Bumped Nextflow version `19.10.0` -> `21.03.0-edge`.
 * Optimise MultiQC configuration and input files for faster run-time on huge sample numbers.
 * [#122](https://github.com/nf-core/viralrecon/issues/122) - Single SPAdes command to rule them all.
