@@ -15,7 +15,7 @@ def valid_params = [
 
 
 // Validate input parameters
-Workflow.validate_nanopore_params(params, log, valid_params)
+Workflow.validateNanoporeParams(params, log, valid_params)
 
 def checkPathParamList = [
     params.input, params.fastq_dir, params.fast5_dir, 
@@ -134,7 +134,7 @@ workflow NANOPORE {
     )
 
     // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
-    Workflow.check_primer_suffixes(PREPARE_GENOME.out.primer_bed, params.primer_left_suffix, params.primer_right_suffix, log)
+    Workflow.checkPrimerSuffixes(PREPARE_GENOME.out.primer_bed, params.primer_left_suffix, params.primer_right_suffix, log)
     
     barcode_dirs       = file("${params.fastq_dir}/barcode*", type: 'dir' , maxdepth: 1)
     single_barcode_dir = file("${params.fastq_dir}/*.fastq" , type: 'file', maxdepth: 1)
@@ -407,7 +407,7 @@ workflow NANOPORE {
      * MODULE: MultiQC
      */
     if (!params.skip_multiqc) {
-        workflow_summary    = Schema.params_summary_multiqc(workflow, params.summary_params)
+        workflow_summary    = Workflow.paramsSummaryMultiqc(workflow, params.summary_params)
         ch_workflow_summary = Channel.value(workflow_summary)
 
         MULTIQC (

@@ -8,24 +8,24 @@ class Workflow {
     private static String citation(workflow) {
         return "If you use ${workflow.manifest.name} for your analysis please cite:\n\n" +
                "* The pipeline\n" + 
-               "  https://doi.org/10.5281/zenodo.1400710\n\n" +
+               "  https://doi.org/10.5281/zenodo.3901628\n\n" +
                "* The nf-core framework\n" +
                "  https://doi.org/10.1038/s41587-020-0439-x\n\n" +
                "* Software dependencies\n" +
                "  https://github.com/${workflow.manifest.name}/blob/master/CITATIONS.md"
     }
 
-    static void validate_main_params(workflow, params, log) {
+    static void validateMainParams(workflow, params, log) {
         // Check that conda channels are set-up correctly
         if (params.enable_conda) {
-            Checks.check_conda_channels(log)
+            Checks.checkCondaChannels(log)
         }
 
         // Check AWS batch settings
-        Checks.aws_batch(workflow, params)
+        Checks.awsBatch(workflow, params)
 
         // Check the hostnames against configured profiles
-        Checks.hostname(workflow, params, log)
+        Checks.hostName(workflow, params, log)
 
         // Check sequencing platform
         def platformList = ['illumina', 'nanopore']
@@ -40,8 +40,8 @@ class Workflow {
         }
     }
 
-    static void validate_illumina_params(params, log, valid_params) {
-        genome_exists(params, log)
+    static void validateIlluminaParams(params, log, valid_params) {
+        genomeExists(params, log)
 
         // Generic parameter validation
         if (!valid_params['protocols'].contains(params.protocol)) {
@@ -86,8 +86,8 @@ class Workflow {
         }
     }
 
-    static void validate_nanopore_params(params, log, valid_params) {
-        genome_exists(params, log)
+    static void validateNanoporeParams(params, log, valid_params) {
+        genomeExists(params, log)
 
         // Generic parameter validation
         if (!params.fasta) { 
@@ -140,7 +140,7 @@ class Workflow {
     }
 
     // Print a warning after SRA download has completed
-    static void sra_download(log) {
+    static void sraDownload(log) {
         log.warn "=============================================================================\n" +
                  "  THIS IS AN EXPERIMENTAL FEATURE!\n\n" + 
                  "  Please double-check the samplesheet that has been auto-created using the\n" +
@@ -152,7 +152,7 @@ class Workflow {
     }
 
     // Exit pipeline if incorrect --genome key provided
-    static void genome_exists(params, log) {
+    static void genomeExists(params, log) {
         if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
             log.error "=============================================================================\n" +
                       "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
@@ -163,7 +163,7 @@ class Workflow {
         }
     }
 
-    static String get_genome_attribute(params, attribute, log, primer_set='', primer_set_version=0) {
+    static String getGenomeAttribute(params, attribute, log, primer_set='', primer_set_version=0) {
         def val = ''
         def support_str = " The default genome config used by the pipeline can be found here:\n" +
                           "   - https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config\n\n" +
@@ -218,7 +218,7 @@ class Workflow {
     }
 
     // Print warning if genome fasta has more than one sequence
-    static void is_multifasta(fasta, log) {
+    static void isMultiFasta(fasta, log) {
         def count = 0
         def line  = null
         fasta.withReader { reader ->
@@ -239,7 +239,7 @@ class Workflow {
     }
 
     // Function that parses and returns the number of mapped reasds from flagstat files
-    static ArrayList get_flagstat_mapped_reads(workflow, params, log, flagstat) {
+    static ArrayList getFlagstatMappedReads(workflow, params, log, flagstat) {
         def mapped_reads = 0
         flagstat.eachLine { line ->
             if (line.contains(' mapped (')) {
@@ -249,7 +249,7 @@ class Workflow {
         
         def pass = false
         def logname = flagstat.getBaseName() - 'flagstat'
-        Map colors = Headers.log_colours(params.monochrome_logs)
+        Map colors = Utils.logColours(params.monochrome_logs)
         if (mapped_reads <= params.min_mapped_reads.toInteger()) {
             log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} [FAIL] Mapped read threshold >= ${params.min_mapped_reads}. IGNORING FOR FURTHER DOWNSTREAM ANALYSIS: ${mapped_reads} - $logname${colors.reset}."
         } else {
@@ -260,7 +260,7 @@ class Workflow {
     }
 
     // Function to check whether primer BED file has the correct suffixes as provided to the pipeline
-    static void check_primer_suffixes(primer_bed_file, primer_left_suffix, primer_right_suffix, log) {
+    static void checkPrimerSuffixes(primer_bed_file, primer_left_suffix, primer_right_suffix, log) {
         def total = 0
         def left  = 0
         def right = 0
@@ -283,5 +283,32 @@ class Workflow {
                     "  for the coverage plots generated by the pipeline.\n" +
                     "==================================================================================="
         }
+    }
+
+    /*
+     * Get workflow summary for MultiQC
+     */
+    static String paramsSummaryMultiqc(workflow, summary) {
+        String summary_section = ''
+        for (group in summary.keySet()) {
+            def group_params = summary.get(group)  // This gets the parameters of that particular group
+            if (group_params) {
+                summary_section += "    <p style=\"font-size:110%\"><b>$group</b></p>\n"
+                summary_section += "    <dl class=\"dl-horizontal\">\n"
+                for (param in group_params.keySet()) {
+                    summary_section += "        <dt>$param</dt><dd><samp>${group_params.get(param) ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>\n"
+                }
+                summary_section += "    </dl>\n"
+            }
+        }
+
+        String yaml_file_text  = "id: '${workflow.manifest.name.replace('/','-')}-summary'\n"
+        yaml_file_text        += "description: ' - this information is collected when the pipeline is started.'\n"
+        yaml_file_text        += "section_name: '${workflow.manifest.name} Workflow Summary'\n"
+        yaml_file_text        += "section_href: 'https://github.com/${workflow.manifest.name}'\n"
+        yaml_file_text        += "plot_type: 'html'\n"
+        yaml_file_text        += "data: |\n"
+        yaml_file_text        += "${summary_section}"
+        return yaml_file_text
     }
 }
