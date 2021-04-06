@@ -15,7 +15,12 @@ class Workflow {
                "  https://github.com/${workflow.manifest.name}/blob/master/CITATIONS.md"
     }
 
-    static void validateMainParams(workflow, params, log) {
+    static void validateMainParams(workflow, params, json_schema, log) {
+        // Validate workflow parameters via the JSON schema
+        if (params.validate_params) {
+            NfcoreSchema.validateParameters(params, json_schema, log)
+        }
+
         // Check that conda channels are set-up correctly
         if (params.enable_conda) {
             Checks.checkCondaChannels(log)
