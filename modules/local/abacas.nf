@@ -10,10 +10,14 @@ process ABACAS {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:meta.id) }
-        
-    conda (params.enable_conda ? 'hcc::abacas=1.3.1' : null)
-    container 'biocontainers/abacas:v1.3.1-5-deb_cv1'
-    
+
+    conda (params.enable_conda ? "bioconda::abacas=1.3.1" : null)
+    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
+        container "https://depot.galaxyproject.org/singularity/abacas:1.3.1--pl526_0"
+    } else {
+        container "quay.io/biocontainers/abacas:1.3.1--pl526_0"
+    }
+
     input:
     tuple val(meta), path(scaffold)
     path  fasta
