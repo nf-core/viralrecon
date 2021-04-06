@@ -16,7 +16,7 @@ def valid_params = [
 ]
 
 // Validate input parameters
-Workflow.validate_illumina_params(params, log, valid_params)
+Workflow.validateIlluminaParams(params, log, valid_params)
 
 // Check input path parameters to see if they exist
 def checkPathParamList = [
@@ -164,11 +164,11 @@ workflow ILLUMINA {
     )
 
     // Check genome fasta only contains a single contig
-    Workflow.is_multifasta(PREPARE_GENOME.out.fasta, log)
+    Workflow.isMultiFasta(PREPARE_GENOME.out.fasta, log)
 
     // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
     if (params.protocol == 'amplicon' && !params.skip_variants) {
-        Workflow.check_primer_suffixes(PREPARE_GENOME.out.primer_bed, params.primer_left_suffix, params.primer_right_suffix, log)
+        Workflow.checkPrimerSuffixes(PREPARE_GENOME.out.primer_bed, params.primer_left_suffix, params.primer_right_suffix, log)
     }
     
     /*
@@ -260,7 +260,7 @@ workflow ILLUMINA {
     ch_fail_mapping_multiqc = Channel.empty()
     if (!params.skip_variants) {
         ch_bowtie2_flagstat_multiqc
-            .map { meta, flagstat -> [ meta ] + Workflow.get_flagstat_mapped_reads(workflow, params, log, flagstat) }
+            .map { meta, flagstat -> [ meta ] + Workflow.getFlagstatMappedReads(workflow, params, log, flagstat) }
             .set { ch_mapped_reads }
 
         ch_bam
@@ -546,7 +546,7 @@ workflow ILLUMINA {
      * MODULE: MultiQC
      */
     if (!params.skip_multiqc) {
-        workflow_summary    = Schema.params_summary_multiqc(workflow, params.summary_params)
+        workflow_summary    = Workflow.paramsSummaryMultiqc(workflow, params.summary_params)
         ch_workflow_summary = Channel.value(workflow_summary)
 
         MULTIQC (

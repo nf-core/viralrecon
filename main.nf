@@ -15,10 +15,14 @@ nextflow.enable.dsl = 2
 /* --               PRINT HELP                 -- */
 ////////////////////////////////////////////////////
 
+log.info Utils.logo(workflow, params.monochrome_logs)
+
 def json_schema = "$projectDir/nextflow_schema.json"
 if (params.help) {
     def command = "nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'MN908947.3' -profile docker"
-    log.info Schema.params_help(workflow, params, json_schema, command)
+    log.info NfcoreSchema.paramsHelp(workflow, params, json_schema, command)
+    log.info Workflow.citation(workflow)
+    log.info Utils.dashedLine(params.monochrome_logs)
     exit 0
 }
 
@@ -34,26 +38,28 @@ if (!params.public_data_ids && params.platform == 'illumina' && params.protocol 
 } else if (!params.public_data_ids && params.platform == 'nanopore') {
     primer_set          = 'artic'
     primer_set_version  = params.primer_set_version
-    params.artic_scheme = Workflow.get_genome_attribute(params, 'scheme', log, primer_set, primer_set_version)
+    params.artic_scheme = Workflow.getGenomeAttribute(params, 'scheme', log, primer_set, primer_set_version)
 }
 
-params.fasta         = Workflow.get_genome_attribute(params, 'fasta'     , log, primer_set, primer_set_version)
-params.gff           = Workflow.get_genome_attribute(params, 'gff'       , log, primer_set, primer_set_version)
-params.bowtie2_index = Workflow.get_genome_attribute(params, 'bowtie2'   , log, primer_set, primer_set_version)
-params.primer_bed    = Workflow.get_genome_attribute(params, 'primer_bed', log, primer_set, primer_set_version)
+params.fasta         = Workflow.getGenomeAttribute(params, 'fasta'     , log, primer_set, primer_set_version)
+params.gff           = Workflow.getGenomeAttribute(params, 'gff'       , log, primer_set, primer_set_version)
+params.bowtie2_index = Workflow.getGenomeAttribute(params, 'bowtie2'   , log, primer_set, primer_set_version)
+params.primer_bed    = Workflow.getGenomeAttribute(params, 'primer_bed', log, primer_set, primer_set_version)
 
 ////////////////////////////////////////////////////
 /* --         PRINT PARAMETER SUMMARY          -- */
 ////////////////////////////////////////////////////
 
-def summary_params = Schema.params_summary_map(workflow, params, json_schema)
-log.info Schema.params_summary_log(workflow, params, json_schema)
+def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params, json_schema)
+log.info NfcoreSchema.paramsSummaryLog(workflow, params, json_schema)
+log.info Workflow.citation(workflow)
+log.info Utils.dashedLine(params.monochrome_logs)
 
 ////////////////////////////////////////////////////
 /* --          PARAMETER CHECKS                -- */
 ////////////////////////////////////////////////////
 
-Workflow.validate_main_params(workflow, params, log)
+Workflow.validateMainParams(workflow, params, log)
 
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */
