@@ -112,11 +112,12 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `markdown`                    | 3.2.2       |             |
 | `minimap2`                    | 2.17        |             |
 | `mosdepth`                    | 0.2.6       | 0.3.1       |
-| `multiqc`                     | 1.9         | 1.10        |
+| `multiqc`                     | 1.9         | 1.10.1      |
 | `parallel-fastq-dump`         | 0.6.6       |             |
-| `pangolin`                    |             | 2.3.2       |
+| `pangolin`                    |             | 2.3.8       |
 | `picard`                      | 2.23.0      | 2.23.9      |
 | `pigz`                        | 2.3.4       |             |
+| `plasmidid`                   | 1.6.3       | 1.6.4       |
 | `pycoqc`                      |             | 2.5.2       |
 | `pygments`                    | 2.6.1       |             |
 | `pymdown-extensions`          | 7.1         |             |
@@ -128,7 +129,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `samtools`                    | 1.9         | 1.10        |
 | `seqwish`                     | 0.4.1       |             |
 | `snpeff`                      | 4.5covid19  | 5.0         |
-| `spades`                      | 3.14.0      | 3.15.0      |
+| `spades`                      | 3.14.0      | 3.15.2      |
 | `sra-tools`                   | 2.10.7      |             |
 | `tabix`                       |             | 0.2.6       |
 | `unicycler`                   | 0.4.7       | 0.4.8       |
