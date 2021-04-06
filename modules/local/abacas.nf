@@ -41,6 +41,6 @@ process ABACAS {
     mv nucmer.tiling ${prefix}.abacas.nucmer.tiling
     mv unused_contigs.out ${prefix}.abacas.unused.contigs.out
 
-    echo \$(abacas.pl -v 2>&1) | sed 's/^.*blastn: //; s/ .*\$//' > ${software}.version.txt
+    echo \$(abacas.pl -v 2>&1) | sed 's/^.*ABACAS.//; s/ .*\$//' > ${software}.version.txt
     """
 }
