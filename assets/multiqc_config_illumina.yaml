@@ -19,7 +19,7 @@ run_modules:
     - picard
     - mosdepth
     - bcftools
-    #- snpeff
+    - snpeff
     - quast
     - cutadapt
 
@@ -139,23 +139,23 @@ custom_plot_config:
         cpswitch_c_active: False
         smooth_points: 1000
 
-extra_fn_clean_exts:
-    - '.kraken2'
-    - '.bowtie2'
-    - '.ivar_trim'
-    - '.mpileup'
-    - '.snpeff'
-    - '.consensus'
-    - '.trim'
-    - '.markduplicates'
-    - '.primer_trim'
-    - '.scaffolds'
-    - '.contigs'
-    - '.unclassified'
-
 # extra_fn_clean_exts:
+#     - '.kraken2'
+#     - '.bowtie2'
+#     - '.ivar_trim'
+#     - '.mpileup'
+#     - '.snpeff'
+#     - '.consensus'
+#     - '.trim'
 #     - '.markduplicates'
+#     - '.primer_trim'
+#     - '.scaffolds'
+#     - '.contigs'
 #     - '.unclassified'
+
+extra_fn_clean_exts:
+    - '.markduplicates'
+    - '.unclassified'
 
 # See https://github.com/ewels/MultiQC_TestData/blob/master/data/custom_content/with_config/table_headerconfig/multiqc_config.yaml
 custom_data:

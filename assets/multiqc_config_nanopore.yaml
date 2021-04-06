@@ -15,7 +15,7 @@ run_modules:
     - samtools
     - bcftools
     - mosdepth
-    #- snpeff
+    - snpeff
     - quast
 
 module_order:
@@ -43,14 +43,14 @@ report_section_order:
 bcftools:
     collapse_complementary_changes: true
 
-extra_fn_clean_exts:
-    - '.consensus'
-    - '.pass'
-    - '.mapped'
-    - '.snpeff'
-
 # extra_fn_clean_exts:
+#     - '.consensus'
 #     - '.pass'
+#     - '.mapped'
+#     - '.snpeff'
+
+extra_fn_clean_exts:
+    - '.pass'
 
 # See https://github.com/ewels/MultiQC_TestData/blob/master/data/custom_content/with_config/table_headerconfig/multiqc_config.yaml
 custom_data:
