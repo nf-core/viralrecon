@@ -59,7 +59,7 @@ log.info Utils.dashedLine(params.monochrome_logs)
 /* --          PARAMETER CHECKS                -- */
 ////////////////////////////////////////////////////
 
-Workflow.validateMainParams(workflow, params, log)
+Workflow.validateMainParams(workflow, params, json_schema, log)
 
 ////////////////////////////////////////////////////
 /* --           RUN MAIN WORKFLOW              -- */
