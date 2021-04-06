@@ -43,12 +43,6 @@ report_section_order:
 bcftools:
     collapse_complementary_changes: true
 
-# extra_fn_clean_exts:
-#     - '.consensus'
-#     - '.pass'
-#     - '.mapped'
-#     - '.snpeff'
-
 extra_fn_clean_exts:
     - '.pass'
 
