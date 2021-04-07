@@ -48,8 +48,8 @@ process MULTIQC {
     output:
     path "*multiqc_report.html"     , emit: report
     path "*_data"                   , emit: data
-    path "*variants_metrics_mqc.csv", emit: csv_variants
-    path "*assembly_metrics_mqc.csv", emit: csv_assembly
+    path "*variants_metrics_mqc.csv", optional:true, emit: csv_variants
+    path "*assembly_metrics_mqc.csv", optional:true, emit: csv_assembly
     path "*_plots"                  , optional:true, emit: plots
 
     script:

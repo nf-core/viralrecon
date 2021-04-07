@@ -37,7 +37,7 @@ process MULTIQC {
     output:
     path "*multiqc_report.html", emit: report
     path "*_data"              , emit: data
-    path "*.csv"               , emit: csv
+    path "*.csv"               , optional:true, emit: csv
     path "*_plots"             , optional:true, emit: plots
 
     script:
