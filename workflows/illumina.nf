@@ -29,7 +29,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
-if (params.input)      { ch_input = file(params.input)           } else { exit 1, 'Input samplesheet file not specified!' }
+if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   }
 
 def callers    = params.callers    ? params.callers.split(',').collect{ it.trim().toLowerCase() }    : []
@@ -65,7 +65,6 @@ if (!params.skip_variants) {
 include { MULTIQC_CUSTOM_TWOCOL_TSV  } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]            )
 include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] ) 
 include { CUTADAPT                   } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']      )
-include { KRAKEN2_RUN                } from '../modules/local/kraken2_run'               addParams( options: modules['illumina_kraken2_run']   ) 
 include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]       )
 include { MULTIQC                    } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                   )
 
@@ -103,7 +102,7 @@ if (params.skip_markduplicates) {
 }
 
 def spades_options   = modules['illumina_spades']
-spades_options.args += (params.spades_mode && params.spades_mode != 'corona') ? " --${params.spades_mode}" : ""
+spades_options.args += params.spades_mode ? " --${params.spades_mode}" : ""
 
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'             addParams( options: [:] )
 include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome_illumina' addParams( genome_options: publish_genome_options, index_options: publish_index_options, db_options: publish_db_options, bowtie2_build_options: bowtie2_build_options, bedtools_getfasta_options: bedtools_getfasta_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options, makeblastdb_options: makeblastdb_options, kraken2_build_options: kraken2_build_options )
@@ -123,6 +122,7 @@ include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'      
  */
 include { CAT_FASTQ                     } from '../modules/nf-core/software/cat/fastq/main'                     addParams( options: modules['illumina_cat_fastq']                     ) 
 include { FASTQC                        } from '../modules/nf-core/software/fastqc/main'                        addParams( options: modules['illumina_cutadapt_fastqc']               )
+include { KRAKEN2_RUN                   } from '../modules/nf-core/software/kraken2/run/main'                   addParams( options: modules['illumina_kraken2_run']                   ) 
 include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['illumina_picard_collectmultiplemetrics'] )
 include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_genome']               )
 include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_amplicon']             )
@@ -470,7 +470,6 @@ workflow ILLUMINA {
         ASSEMBLY_SPADES (
             ch_assembly_fastq,
             ch_spades_hmm,
-            params.spades_mode == 'corona',
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.gff,
             PREPARE_GENOME.out.blast_db,

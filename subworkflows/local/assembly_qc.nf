@@ -56,11 +56,11 @@ workflow ASSEMBLY_QC {
      */
     ch_abacas_results = Channel.empty()
     ch_abacas_version = Channel.empty()
-    // if (!params.skip_abacas) {
-    //     ABACAS ( scaffolds, fasta )
-    //     ch_abacas_results = ABACAS.out.results
-    //     ch_abacas_version = ABACAS.out.version
-    // }
+    if (!params.skip_abacas) {
+        ABACAS ( scaffolds, fasta )
+        ch_abacas_results = ABACAS.out.results
+        ch_abacas_version = ABACAS.out.version
+    }
 
     /*
      * Assembly report with PlasmidID

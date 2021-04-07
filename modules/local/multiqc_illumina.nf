@@ -10,11 +10,11 @@ process MULTIQC {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), publish_id:'') }
 
-    conda (params.enable_conda ? "bioconda::multiqc=1.10" : null)
+    conda (params.enable_conda ? "bioconda::multiqc=1.10.1" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/multiqc:1.10--py_0"
+        container "https://depot.galaxyproject.org/singularity/multiqc:1.10.1--py_0"
     } else {
-        container "quay.io/biocontainers/multiqc:1.10--py_0"
+        container "quay.io/biocontainers/multiqc:1.10.1--py_0"
     }
 
     input:
@@ -48,8 +48,8 @@ process MULTIQC {
     output:
     path "*multiqc_report.html"     , emit: report
     path "*_data"                   , emit: data
-    path "*variants_metrics_mqc.csv", emit: csv_variants
-    path "*assembly_metrics_mqc.csv", emit: csv_assembly
+    path "*variants_metrics_mqc.csv", optional:true, emit: csv_variants
+    path "*assembly_metrics_mqc.csv", optional:true, emit: csv_assembly
     path "*_plots"                  , optional:true, emit: plots
 
     script:
