@@ -13,7 +13,6 @@ def valid_params = [
     artic_minion_aligner  : ['minimap2', 'bwa']
 ]
 
-
 // Validate input parameters
 Workflow.validateNanoporeParams(params, log, valid_params)
 
@@ -56,8 +55,6 @@ artic_minion_options.args += params.artic_minion_aligner == 'bwa'    ? " --bwa" 
 def multiqc_options   = modules['nanopore_multiqc']
 multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
 
-include { PYCOQC                } from '../modules/local/pycoqc'                addParams( options: modules['nanopore_pycoqc']          )
-include { NANOPLOT              } from '../modules/local/nanoplot'              addParams( options: modules['nanopore_nanoplot']        )
 include { ARTIC_GUPPYPLEX       } from '../modules/local/artic_guppyplex'       addParams( options: modules['nanopore_artic_guppyplex'] )
 include { ARTIC_MINION          } from '../modules/local/artic_minion'          addParams( options: artic_minion_options                )
 include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files: ['csv':'']]         )
@@ -92,6 +89,8 @@ include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'          
 /*
  * MODULE: Installed directly from nf-core/modules
  */
+include { PYCOQC                        } from '../modules/nf-core/software/pycoqc/main'         addParams( options: modules['nanopore_pycoqc']            )
+include { NANOPLOT                      } from '../modules/nf-core/software/nanoplot/main'       addParams( options: modules['nanopore_nanoplot']          )
 include { BCFTOOLS_STATS                } from '../modules/nf-core/software/bcftools/stats/main' addParams( options: modules['nanopore_bcftools_stats']    )
 include { QUAST                         } from '../modules/nf-core/software/quast/main'          addParams( options: modules['nanopore_quast']             )
 include { PANGOLIN                      } from '../modules/nf-core/software/pangolin/main'       addParams( options: modules['nanopore_pangolin']          )
