@@ -89,7 +89,7 @@ include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'          
 /*
  * MODULE: Installed directly from nf-core/modules
  */
-include { PYCOQC                        } from '../modules/nf-core/software/pyqcoqc/main'        addParams( options: modules['nanopore_pycoqc']            )
+include { PYCOQC                        } from '../modules/nf-core/software/pycoqc/main'         addParams( options: modules['nanopore_pycoqc']            )
 include { NANOPLOT                      } from '../modules/nf-core/software/nanoplot/main'       addParams( options: modules['nanopore_nanoplot']          )
 include { BCFTOOLS_STATS                } from '../modules/nf-core/software/bcftools/stats/main' addParams( options: modules['nanopore_bcftools_stats']    )
 include { QUAST                         } from '../modules/nf-core/software/quast/main'          addParams( options: modules['nanopore_quast']             )
