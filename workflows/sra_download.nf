@@ -61,6 +61,7 @@ workflow SRA_DOWNLOAD {
                 meta.single_end = meta.single_end.toBoolean()
                 [ meta, [ meta.fastq_1, meta.fastq_2 ] ]
         }
+        .unique()
         .set { ch_sra_reads }
 
     if (!params.skip_sra_fastq_download) {
@@ -93,6 +94,7 @@ workflow SRA_DOWNLOAD {
             .map { meta, reads -> if (!meta.fastq_1) "${meta.id.split('_')[0..-2].join('_')}" }
             .unique()
             .collectFile(name: no_ids_file, sort: true, newLine: true)
+
     }
 }
 
