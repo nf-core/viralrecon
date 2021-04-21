@@ -49,11 +49,11 @@ if (params.artic_minion_caller == 'medaka') {
 def modules = params.modules.clone()
 
 def artic_minion_options   = modules['nanopore_artic_minion']
-artic_minion_options.args += params.artic_minion_caller  == 'medaka' ? " --medaka" : ""
-artic_minion_options.args += params.artic_minion_aligner == 'bwa'    ? " --bwa"    : " --minimap2"
+artic_minion_options.args += params.artic_minion_caller  == 'medaka' ? Utils.joinModuleArgs(['--medaka']) : ''
+artic_minion_options.args += params.artic_minion_aligner == 'bwa'    ? Utils.joinModuleArgs(['--bwa'])    : Utils.joinModuleArgs(['--minimap2'])
 
 def multiqc_options   = modules['nanopore_multiqc']
-multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
+multiqc_options.args += params.multiqc_title ? Utils.joinModuleArgs(["--title \"$params.multiqc_title\""]) : ''
 
 include { ARTIC_GUPPYPLEX       } from '../modules/local/artic_guppyplex'       addParams( options: modules['nanopore_artic_guppyplex'] )
 include { ARTIC_MINION          } from '../modules/local/artic_minion'          addParams( options: artic_minion_options                )
