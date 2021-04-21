@@ -29,7 +29,21 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
-if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
+// Check if samplesheet or reads are provided
+def samplesheet_provided = false
+if ( params.input && ( Checks.hasExtension( params.input, "csv" ))) {
+    ch_samplesheet = file(params.input)
+    samplesheet_provided = true
+} else if (params.input && ( Checks.hasExtension( params.input, "fastq.gz" ))) {
+        Channel
+        .fromFilePairs( params.input, size: params.single_end ? 1 : 2 )
+        .ifEmpty { exit 1, "Cannot find any reads matching: ${params.input}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --single_end on the command line." }
+        .set { ch_file_pairs }
+} else {
+        exit 1, 'Input not specified or wrong extension. Supported file extensions are *.csv (samplesheet) or *.fastq.gz (fastq file pairs).'
+}
+
+if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input not specified!' }
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   }
 
 def callers    = params.callers    ? params.callers.split(',').collect{ it.trim().toLowerCase() }    : []
@@ -105,6 +119,7 @@ def spades_options   = modules['illumina_spades']
 spades_options.args += params.spades_mode ? " --${params.spades_mode}" : ""
 
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'             addParams( options: [:] )
+include { INPUT_GLOBS_CHECK  } from '../subworkflows/local/input_globs_check'       addParams( options: [:] )
 include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome_illumina' addParams( genome_options: publish_genome_options, index_options: publish_index_options, db_options: publish_db_options, bowtie2_build_options: bowtie2_build_options, bedtools_getfasta_options: bedtools_getfasta_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options, makeblastdb_options: makeblastdb_options, kraken2_build_options: kraken2_build_options )
 include { PRIMER_TRIM_IVAR   } from '../subworkflows/local/primer_trim_ivar'        addParams( ivar_trim_options: ivar_trim_options, samtools_options: ivar_trim_sort_bam_options )
 include { VARIANTS_IVAR      } from '../subworkflows/local/variants_ivar'           addParams( ivar_variants_options: modules['illumina_ivar_variants'], ivar_variants_to_vcf_options: modules['illumina_ivar_variants_to_vcf'], tabix_bgzip_options: modules['illumina_ivar_tabix_bgzip'], tabix_tabix_options: modules['illumina_ivar_tabix_tabix'], bcftools_stats_options: modules['illumina_ivar_bcftools_stats'], ivar_consensus_options: modules['illumina_ivar_consensus'], consensus_plot_options: modules['illumina_ivar_consensus_plot'], quast_options: modules['illumina_ivar_quast'], snpeff_options: modules['illumina_ivar_snpeff'], snpsift_options: modules['illumina_ivar_snpsift'], snpeff_bgzip_options: modules['illumina_ivar_snpeff_bgzip'], snpeff_tabix_options: modules['illumina_ivar_snpeff_tabix'], snpeff_stats_options: modules['illumina_ivar_snpeff_stats'], pangolin_options: modules['illumina_ivar_pangolin'] )
@@ -170,38 +185,52 @@ workflow ILLUMINA {
     if (params.protocol == 'amplicon' && !params.skip_variants) {
         Workflow.checkPrimerSuffixes(PREPARE_GENOME.out.primer_bed, params.primer_left_suffix, params.primer_right_suffix, log)
     }
-    
+
     /*
      * SUBWORKFLOW: Read in samplesheet, validate and stage input files
      */
-    INPUT_CHECK ( 
-        ch_input,
-        params.platform
-    )
-    .map {
-        meta, fastq ->
-            meta.id = meta.id.split('_')[0..-2].join('_')
-            [ meta, fastq ] 
-    }
-    .groupTuple(by: [0])
-    .branch {
-        meta, fastq ->
-            single  : fastq.size() == 1
-                return [ meta, fastq.flatten() ]
-            multiple: fastq.size() > 1
-                return [ meta, fastq.flatten() ]
-    }
-    .set { ch_fastq }
     
-    /*
-     * MODULE: Concatenate FastQ files from same sample if required
-     */
-    CAT_FASTQ ( 
-        ch_fastq.multiple
-    )
-    .mix(ch_fastq.single)
-    .set { ch_cat_fastq }
+    if ( samplesheet_provided ) {
+
+        INPUT_CHECK ( 
+            ch_input,
+            params.platform
+        )
+        .map {
+            meta, fastq ->
+                meta.id = meta.id.split('_')[0..-2].join('_')
+                [ meta, fastq ] 
+        }
+        .groupTuple(by: [0])
+        .branch {
+            meta, fastq ->
+                single  : fastq.size() == 1
+                    return [ meta, fastq.flatten() ]
+                multiple: fastq.size() > 1
+                    return [ meta, fastq.flatten() ]
+        }
+        .set { ch_fastq }
+
+        /*
+        * MODULE: Concatenate FastQ files from same sample if required
+        */
+        CAT_FASTQ ( 
+            ch_fastq.multiple
+        )
+        .mix(ch_fastq.single)
+        .set { ch_cat_fastq }
+
+    } else {
+
+        INPUT_GLOBS_CHECK (
+            ch_file_pairs,
+            params.platform
+        )
+
+        ch_cat_fastq = INPUT_GLOBS_CHECK.out.reads
+    }
     
+
     /*
      * SUBWORKFLOW: Read QC and trim adapters
      */

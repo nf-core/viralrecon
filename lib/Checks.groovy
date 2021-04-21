@@ -63,5 +63,8 @@ class Checks {
             }
         }
     }
-        
+
+    static boolean hasExtension(file, extension) {
+        return file.toString().toLowerCase().endsWith(extension.toLowerCase())
+    }
 }
