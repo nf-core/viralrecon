@@ -43,7 +43,6 @@ if ( params.input && ( Checks.hasExtension( params.input, "csv" ))) {
         exit 1, 'Input not specified or wrong extension. Supported file extensions are *.csv (samplesheet) or *.fastq.gz (fastq file pairs).'
 }
 
-if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input not specified!' }
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   }
 
 def callers    = params.callers    ? params.callers.split(',').collect{ it.trim().toLowerCase() }    : []
