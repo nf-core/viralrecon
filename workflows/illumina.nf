@@ -35,12 +35,14 @@ if ( params.input && ( Checks.hasExtension( params.input, "csv" ))) {
     ch_input = file(params.input)
     samplesheet_provided = true
 } else if (params.input && ( Checks.hasExtension( params.input, "fastq.gz" ))) {
-        Channel
+    Channel
         .fromFilePairs( params.input, size: params.single_end ? 1 : 2 )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.input}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --single_end on the command line." }
         .set { ch_file_pairs }
+} else if (!params.input && params.input_pairs) {
+    ch_file_pairs = Channel.from(params.input_pairs)
 } else {
-        exit 1, 'Input not specified or wrong extension. Supported file extensions are *.csv (samplesheet) or *.fastq.gz (fastq file pairs).'
+    exit 1, 'Input not specified or wrong extension. Supported file extensions are *.csv (samplesheet) or *.fastq.gz (fastq file pairs).'
 }
 
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   }

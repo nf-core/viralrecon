@@ -137,3 +137,25 @@ jobs:
       - name: Run pipeline with minimal Nanopore data and various options
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker ${{ matrix.parameters }}
+  
+  test_glob:
+    name: test input glob
+    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
+    runs-on: ubuntu-latest
+    env:
+      NXF_VER: '21.03.0-edge'
+      NXF_ANSI_LOG: false
+    steps:
+      - name: Check out pipeline code
+        uses: actions/checkout@v2
+
+      - name: Install Nextflow
+        env:
+          CAPSULE_LOG: none
+        run: |
+          wget -qO- get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+
+      - name: Run pipeline with various parameters
+        run: |
+          nextflow run ${GITHUB_WORKSPACE} -profile test_glob,docker
