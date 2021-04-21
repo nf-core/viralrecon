@@ -32,7 +32,7 @@ ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 // Check if samplesheet or reads are provided
 def samplesheet_provided = false
 if ( params.input && ( Checks.hasExtension( params.input, "csv" ))) {
-    ch_samplesheet = file(params.input)
+    ch_input = file(params.input)
     samplesheet_provided = true
 } else if (params.input && ( Checks.hasExtension( params.input, "fastq.gz" ))) {
         Channel
