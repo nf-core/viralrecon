@@ -5,7 +5,7 @@
 class Workflow {
 
     // Citation string
-    private static String citation(workflow) {
+    public static String citation(workflow) {
         return "If you use ${workflow.manifest.name} for your analysis please cite:\n\n" +
                "* The pipeline\n" + 
                "  https://doi.org/10.5281/zenodo.3901628\n\n" +
@@ -15,7 +15,7 @@ class Workflow {
                "  https://github.com/${workflow.manifest.name}/blob/master/CITATIONS.md"
     }
 
-    static void validateMainParams(workflow, params, json_schema, log) {
+    public static void validateMainParams(workflow, params, json_schema, log) {
         // Validate workflow parameters via the JSON schema
         if (params.validate_params) {
             NfcoreSchema.validateParameters(params, json_schema, log)
@@ -45,7 +45,7 @@ class Workflow {
         }
     }
 
-    static void validateIlluminaParams(params, log, valid_params) {
+    public static void validateIlluminaParams(params, log, valid_params) {
         genomeExists(params, log)
 
         // Generic parameter validation
@@ -91,7 +91,7 @@ class Workflow {
         }
     }
 
-    static void validateNanoporeParams(params, log, valid_params) {
+    public static void validateNanoporeParams(params, log, valid_params) {
         genomeExists(params, log)
 
         // Generic parameter validation
@@ -144,31 +144,7 @@ class Workflow {
         }
     }
 
-    // Print a warning after SRA download has completed
-    static void sraDownload(log) {
-        log.warn "=============================================================================\n" +
-                 "  THIS IS AN EXPERIMENTAL FEATURE!\n\n" + 
-                 "  Please double-check the samplesheet that has been auto-created using the\n" +
-                 "  public database ids provided via the '--public_data_ids' parameter.\n\n" +
-                 "  All of the sample metadata obtained from the ENA has been appended\n" +
-                 "  as additional columns to help you manually curate the samplesheet before\n" +
-                 "  you run the main branch of the pipeline.\n" +
-                 "==================================================================================="
-    }
-
-    // Exit pipeline if incorrect --genome key provided
-    static void genomeExists(params, log) {
-        if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-            log.error "=============================================================================\n" +
-                      "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
-                      "  Currently, the available genome keys are:\n" +
-                      "  ${params.genomes.keySet().join(", ")}\n" +
-                      "==================================================================================="
-            System.exit(1)
-        }
-    }
-
-    static String getGenomeAttribute(params, attribute, log, primer_set='', primer_set_version=0) {
+    public static String getGenomeAttribute(params, attribute, log, primer_set='', primer_set_version=0) {
         def val = ''
         def support_str = " The default genome config used by the pipeline can be found here:\n" +
                           "   - https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config\n\n" +
@@ -223,7 +199,7 @@ class Workflow {
     }
 
     // Print warning if genome fasta has more than one sequence
-    static void isMultiFasta(fasta, log) {
+    public static void isMultiFasta(fasta, log) {
         def count = 0
         def line  = null
         fasta.withReader { reader ->
@@ -244,7 +220,7 @@ class Workflow {
     }
 
     // Function that parses and returns the number of mapped reasds from flagstat files
-    static ArrayList getFlagstatMappedReads(workflow, params, log, flagstat) {
+    public static ArrayList getFlagstatMappedReads(workflow, params, log, flagstat) {
         def mapped_reads = 0
         flagstat.eachLine { line ->
             if (line.contains(' mapped (')) {
@@ -265,7 +241,7 @@ class Workflow {
     }
 
     // Function to check whether primer BED file has the correct suffixes as provided to the pipeline
-    static void checkPrimerSuffixes(primer_bed_file, primer_left_suffix, primer_right_suffix, log) {
+    public static void checkPrimerSuffixes(primer_bed_file, primer_left_suffix, primer_right_suffix, log) {
         def total = 0
         def left  = 0
         def right = 0
@@ -293,7 +269,7 @@ class Workflow {
     /*
      * Get workflow summary for MultiQC
      */
-    static String paramsSummaryMultiqc(workflow, summary) {
+    public static String paramsSummaryMultiqc(workflow, summary) {
         String summary_section = ''
         for (group in summary.keySet()) {
             def group_params = summary.get(group)  // This gets the parameters of that particular group
@@ -315,5 +291,29 @@ class Workflow {
         yaml_file_text        += "data: |\n"
         yaml_file_text        += "${summary_section}"
         return yaml_file_text
+    }
+
+    // Print a warning after SRA download has completed
+    public static void sraDownload(log) {
+        log.warn "=============================================================================\n" +
+                 "  THIS IS AN EXPERIMENTAL FEATURE!\n\n" + 
+                 "  Please double-check the samplesheet that has been auto-created using the\n" +
+                 "  public database ids provided via the '--public_data_ids' parameter.\n\n" +
+                 "  All of the sample metadata obtained from the ENA has been appended\n" +
+                 "  as additional columns to help you manually curate the samplesheet before\n" +
+                 "  you run the main branch of the pipeline.\n" +
+                 "==================================================================================="
+    }
+
+    // Exit pipeline if incorrect --genome key provided
+    private static void genomeExists(params, log) {
+        if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
+            log.error "=============================================================================\n" +
+                      "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
+                      "  Currently, the available genome keys are:\n" +
+                      "  ${params.genomes.keySet().join(", ")}\n" +
+                      "==================================================================================="
+            System.exit(1)
+        }
     }
 }

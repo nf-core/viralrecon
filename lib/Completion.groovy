@@ -3,7 +3,7 @@
  */
 
 class Completion {
-    static void email(workflow, params, summary_params, projectDir, log, multiqc_report=[], fail_mapped_reads=[:]) {
+    public static void email(workflow, params, summary_params, projectDir, log, multiqc_report=[], fail_mapped_reads=[:]) {
 
         // Set up the e-mail variables
         def subject = "[$workflow.manifest.name] Successful: $workflow.runName"
@@ -118,7 +118,7 @@ class Completion {
         output_tf.withWriter { w -> w << email_txt }
     }
 
-    static void summary(workflow, params, log, fail_mapped_reads=[:], pass_mapped_reads=[:]) {
+    public static void summary(workflow, params, log, fail_mapped_reads=[:], pass_mapped_reads=[:]) {
         Map colors = Utils.logColours(params.monochrome_logs)
 
         if (pass_mapped_reads.size() > 0) {
