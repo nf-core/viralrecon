@@ -209,9 +209,22 @@ workflow ILLUMINA {
     FASTQC_FASTP (
         ch_cat_fastq
     )
-    ch_variants_fastq    = FASTQC_FASTP.out.reads
     ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
     ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
+
+    /*
+     * Filter empty FastQ files after adapter trimming
+     */
+    FASTQC_FASTP
+        .out
+        .reads
+        .filter { 
+            meta, reads ->
+                def reads1 = reads
+                if (!meta.single_end) reads1 = reads[0]
+                reads1.countFastq() > 0
+        }
+        .set { ch_variants_fastq }
     
     /*
      * MODULE: Run Kraken2 for removal of host reads
