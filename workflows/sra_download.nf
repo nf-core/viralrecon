@@ -94,7 +94,6 @@ workflow SRA_DOWNLOAD {
             .map { meta, reads -> if (!meta.fastq_1) "${meta.id.split('_')[0..-2].join('_')}" }
             .unique()
             .collectFile(name: no_ids_file, sort: true, newLine: true)
-
     }
 }
 
