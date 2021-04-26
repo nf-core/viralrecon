@@ -199,10 +199,10 @@ class Workflow {
     }
 
     // Print warning if genome fasta has more than one sequence
-    public static void isMultiFasta(fasta, log) {
+    public static void isMultiFasta(fasta_file, log) {
         def count = 0
         def line  = null
-        fasta.withReader { reader ->
+        fasta_file.withReader { reader ->
             while (line = reader.readLine()) {
                 if (line.contains('>')) {
                     count++
@@ -220,22 +220,18 @@ class Workflow {
     }
 
     // Function that parses and returns the number of mapped reasds from flagstat files
-    public static ArrayList getFlagstatMappedReads(workflow, params, log, flagstat) {
+    public static ArrayList getFlagstatMappedReads(flagstat_file, params) {
         def mapped_reads = 0
-        flagstat.eachLine { line ->
+        flagstat_file.eachLine { line ->
             if (line.contains(' mapped (')) {
                 mapped_reads = line.tokenize().first().toInteger()
             }
         }
         
         def pass = false
-        def logname = flagstat.getBaseName() - 'flagstat'
-        Map colors = Utils.logColours(params.monochrome_logs)
-        if (mapped_reads <= params.min_mapped_reads.toInteger()) {
-            log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} [FAIL] Mapped read threshold >= ${params.min_mapped_reads}. IGNORING FOR FURTHER DOWNSTREAM ANALYSIS: ${mapped_reads} - $logname${colors.reset}."
-        } else {
+        def logname = flagstat_file.getBaseName() - 'flagstat'
+        if (mapped_reads > params.min_mapped_reads.toInteger()) {
             pass = true
-            //log.info "-${colors.purple}[$workflow.manifest.name]${colors.green} [PASS] Mapped read threshold >=${params.min_mapped_reads}: ${mapped_reads} - $logname${colors.reset}."
         }
         return [ mapped_reads, pass ]
     }

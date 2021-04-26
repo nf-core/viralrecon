@@ -280,7 +280,7 @@ workflow ILLUMINA {
     ch_fail_mapping_multiqc = Channel.empty()
     if (!params.skip_variants) {
         ch_bowtie2_flagstat_multiqc
-            .map { meta, flagstat -> [ meta ] + Workflow.getFlagstatMappedReads(workflow, params, log, flagstat) }
+            .map { meta, flagstat -> [ meta ] + Workflow.getFlagstatMappedReads(flagstat, params) }
             .set { ch_mapped_reads }
 
         ch_bam
