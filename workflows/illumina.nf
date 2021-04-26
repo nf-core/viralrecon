@@ -54,7 +54,8 @@ ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_hea
 def modules = params.modules.clone()
 
 def multiqc_options   = modules['illumina_multiqc']
-multiqc_options.args += params.multiqc_title ? " --title \"$params.multiqc_title\"" : ''
+multiqc_options.args += params.multiqc_title ? Utils.joinModuleArgs(["--title \"$params.multiqc_title\""]) : ''
+
 if (!params.skip_assembly) {
     multiqc_options.publish_files.put('assembly_metrics_mqc.csv','assembly')
 }
@@ -93,7 +94,7 @@ if (!params.save_reference) {
 }
 
 def ivar_trim_options   = modules['illumina_ivar_trim']
-ivar_trim_options.args += params.ivar_trim_noprimer ? "" : " -e"
+ivar_trim_options.args += params.ivar_trim_noprimer ? '' : Utils.joinModuleArgs(['-e'])
 
 def ivar_trim_sort_bam_options = modules['illumina_ivar_trim_sort_bam']
 if (params.skip_markduplicates) {
@@ -102,7 +103,7 @@ if (params.skip_markduplicates) {
 }
 
 def spades_options   = modules['illumina_spades']
-spades_options.args += params.spades_mode ? " --${params.spades_mode}" : ""
+spades_options.args += params.spades_mode ? Utils.joinModuleArgs(["--${params.spades_mode}"]) : ''
 
 include { INPUT_CHECK        } from '../subworkflows/local/input_check'             addParams( options: [:] )
 include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome_illumina' addParams( genome_options: publish_genome_options, index_options: publish_index_options, db_options: publish_db_options, bowtie2_build_options: bowtie2_build_options, bedtools_getfasta_options: bedtools_getfasta_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options, makeblastdb_options: makeblastdb_options, kraken2_build_options: kraken2_build_options )
@@ -137,7 +138,7 @@ def bowtie2_align_options = modules['illumina_bowtie2_align']
 if (params.save_unaligned) { bowtie2_align_options.publish_files.put('fastq.gz','unmapped') }
 
 def markduplicates_options   = modules['illumina_picard_markduplicates']
-markduplicates_options.args += params.filter_duplicates ? " REMOVE_DUPLICATES=true" : ""
+markduplicates_options.args += params.filter_duplicates ?  Utils.joinModuleArgs(['REMOVE_DUPLICATES=true']) : ''
 
 include { FASTQC_FASTP           } from '../subworkflows/nf-core/fastqc_fastp'           addParams( fastqc_raw_options: modules['illumina_fastqc_raw'], fastqc_trim_options: modules['illumina_fastqc_trim'], fastp_options: fastp_options )
 include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'          addParams( align_options: bowtie2_align_options, samtools_options: modules['illumina_bowtie2_sort_bam']                                           )
@@ -164,11 +165,17 @@ workflow ILLUMINA {
     )
 
     // Check genome fasta only contains a single contig
-    Workflow.isMultiFasta(PREPARE_GENOME.out.fasta, log)
+    PREPARE_GENOME
+        .out
+        .fasta
+        .map { Workflow.isMultiFasta(it, log) }
 
     // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
     if (params.protocol == 'amplicon' && !params.skip_variants) {
-        Workflow.checkPrimerSuffixes(PREPARE_GENOME.out.primer_bed, params.primer_left_suffix, params.primer_right_suffix, log)
+        PREPARE_GENOME
+            .out
+            .primer_bed
+            .map { Workflow.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }
     }
     
     /*
@@ -208,9 +215,22 @@ workflow ILLUMINA {
     FASTQC_FASTP (
         ch_cat_fastq
     )
-    ch_variants_fastq    = FASTQC_FASTP.out.reads
     ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
     ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
+
+    /*
+     * Filter empty FastQ files after adapter trimming
+     */
+    FASTQC_FASTP
+        .out
+        .reads
+        .filter { 
+            meta, reads ->
+                def reads1 = reads
+                if (!meta.single_end) reads1 = reads[0]
+                reads1.countFastq() > 0
+        }
+        .set { ch_variants_fastq }
     
     /*
      * MODULE: Run Kraken2 for removal of host reads
@@ -260,7 +280,7 @@ workflow ILLUMINA {
     ch_fail_mapping_multiqc = Channel.empty()
     if (!params.skip_variants) {
         ch_bowtie2_flagstat_multiqc
-            .map { meta, flagstat -> [ meta ] + Workflow.getFlagstatMappedReads(workflow, params, log, flagstat) }
+            .map { meta, flagstat -> [ meta ] + Workflow.getFlagstatMappedReads(flagstat, params) }
             .set { ch_mapped_reads }
 
         ch_bam
