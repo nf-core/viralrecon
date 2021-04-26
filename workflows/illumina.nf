@@ -165,11 +165,17 @@ workflow ILLUMINA {
     )
 
     // Check genome fasta only contains a single contig
-    Workflow.isMultiFasta(PREPARE_GENOME.out.fasta, log)
+    PREPARE_GENOME
+        .out
+        .fasta
+        .map { Workflow.isMultiFasta(it, log) }
 
     // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
     if (params.protocol == 'amplicon' && !params.skip_variants) {
-        Workflow.checkPrimerSuffixes(PREPARE_GENOME.out.primer_bed, params.primer_left_suffix, params.primer_right_suffix, log)
+        PREPARE_GENOME
+            .out
+            .primer_bed
+            .map { Workflow.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }
     }
     
     /*

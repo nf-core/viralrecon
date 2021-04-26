@@ -133,7 +133,10 @@ workflow NANOPORE {
     )
 
     // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
-    Workflow.checkPrimerSuffixes(PREPARE_GENOME.out.primer_bed, params.primer_left_suffix, params.primer_right_suffix, log)
+    PREPARE_GENOME
+        .out
+        .primer_bed
+        .map { Workflow.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }    
     
     barcode_dirs       = file("${params.fastq_dir}/barcode*", type: 'dir' , maxdepth: 1)
     single_barcode_dir = file("${params.fastq_dir}/*.fastq" , type: 'file', maxdepth: 1)
