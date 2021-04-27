@@ -55,7 +55,6 @@ artic_minion_options.args += params.artic_minion_aligner == 'bwa'    ? Utils.joi
 def multiqc_options   = modules['nanopore_multiqc']
 multiqc_options.args += params.multiqc_title ? Utils.joinModuleArgs(["--title \"$params.multiqc_title\""]) : ''
 
-include { ARTIC_GUPPYPLEX       } from '../modules/local/artic_guppyplex'       addParams( options: modules['nanopore_artic_guppyplex'] )
 include { ARTIC_MINION          } from '../modules/local/artic_minion'          addParams( options: artic_minion_options                )
 include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files: ['csv':'']]         )
 include { MULTIQC               } from '../modules/local/multiqc_nanopore'      addParams( options: multiqc_options                     )
@@ -89,13 +88,14 @@ include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'          
 /*
  * MODULE: Installed directly from nf-core/modules
  */
-include { PYCOQC                        } from '../modules/nf-core/software/pycoqc/main'         addParams( options: modules['nanopore_pycoqc']            )
-include { NANOPLOT                      } from '../modules/nf-core/software/nanoplot/main'       addParams( options: modules['nanopore_nanoplot']          )
-include { BCFTOOLS_STATS                } from '../modules/nf-core/software/bcftools/stats/main' addParams( options: modules['nanopore_bcftools_stats']    )
-include { QUAST                         } from '../modules/nf-core/software/quast/main'          addParams( options: modules['nanopore_quast']             )
-include { PANGOLIN                      } from '../modules/nf-core/software/pangolin/main'       addParams( options: modules['nanopore_pangolin']          )
-include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'       addParams( options: modules['nanopore_mosdepth_genome']   )
-include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'       addParams( options: modules['nanopore_mosdepth_amplicon'] )
+include { PYCOQC                        } from '../modules/nf-core/software/pycoqc/main'          addParams( options: modules['nanopore_pycoqc']            )
+include { NANOPLOT                      } from '../modules/nf-core/software/nanoplot/main'        addParams( options: modules['nanopore_nanoplot']          )
+include { ARTIC_GUPPYPLEX               } from '../modules/nf-core/software/artic/guppyplex/main' addParams( options: modules['nanopore_artic_guppyplex']   )
+include { BCFTOOLS_STATS                } from '../modules/nf-core/software/bcftools/stats/main'  addParams( options: modules['nanopore_bcftools_stats']    )
+include { QUAST                         } from '../modules/nf-core/software/quast/main'           addParams( options: modules['nanopore_quast']             )
+include { PANGOLIN                      } from '../modules/nf-core/software/pangolin/main'        addParams( options: modules['nanopore_pangolin']          )
+include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'        addParams( options: modules['nanopore_mosdepth_genome']   )
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'        addParams( options: modules['nanopore_mosdepth_amplicon'] )
 
 /*
  * SUBWORKFLOW: Consisting entirely of nf-core/modules
