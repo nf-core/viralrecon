@@ -14,9 +14,9 @@ import groovy.json.JsonBuilder
 class NfcoreSchema {
 
     /*
-    * Function to loop over all parameters defined in schema and check
-    * whether the given paremeters adhere to the specificiations
-    */
+     * Function to loop over all parameters defined in schema and check
+     * whether the given paremeters adhere to the specificiations
+     */
     /* groovylint-disable-next-line UnusedPrivateMethodParameter */
     public static void validateParameters(params, jsonSchema, log) {
         def has_error = false
@@ -402,7 +402,7 @@ class NfcoreSchema {
         return new_params
     }
 
-     /*
+    /*
      * This method tries to read a JSON params file
      */
     private static LinkedHashMap paramsLoad(String json_schema) {
