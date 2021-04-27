@@ -7,22 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :warning: Major enhancements
 
-* Pipeline has been re-implemented in [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html).
-* All software containers are now exclusively obtained from [Biocontainers](https://biocontainers.pro/#/registry).
-* Updated Nextflow version to `v21.04.0-edge` (see [nextflow#572](https://github.com/nextflow-io/nextflow/issues/1964)).
-* Default human `--kraken2_db` link has been changed from Zenodo to an AWS S3 bucket for more reliable downloads.
-* Illumina and Nanopore runs containing the same 48 samples sequenced on both platforms have been uploaded to the nf-core AWS account for full-sized tests on release.
-* Variant graph processes to call variants relative to the reference genome directly from _de novo_ assemblies have been deprecated and removed.
-* Variant calling with Varscan 2 has been deprecated and removed due to [licensing restrictions](https://github.com/dkoboldt/varscan/issues/12).
+* Pipeline has been re-implemented in [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html)
+* All software containers are now exclusively obtained from [Biocontainers](https://biocontainers.pro/#/registry)
+* Updated Nextflow version to `v21.04.0-edge` (see [nextflow#572](https://github.com/nextflow-io/nextflow/issues/1964))
+* Default human `--kraken2_db` link has been changed from Zenodo to an AWS S3 bucket for more reliable downloads
+* Illumina and Nanopore runs containing the same 48 samples sequenced on both platforms have been uploaded to the nf-core AWS account for full-sized tests on release
+* Variant graph processes to call variants relative to the reference genome directly from _de novo_ assemblies have been deprecated and removed
+* Variant calling with Varscan 2 has been deprecated and removed due to [licensing restrictions](https://github.com/dkoboldt/varscan/issues/12)
 
 ### Other enhancements & fixes
 
-* Updated pipeline template to nf-core/tools `1.13.3`.
-* Bumped Nextflow version `19.10.0` -> `21.03.0-edge`.
-* Optimise MultiQC configuration and input files for faster run-time on huge sample numbers.
-* [#122](https://github.com/nf-core/viralrecon/issues/122) - Single SPAdes command to rule them all.
-* [#138](https://github.com/nf-core/viralrecon/issues/138) - Problem masking the consensus sequence.
-* [#142](https://github.com/nf-core/viralrecon/issues/142) - Unknown method invocation `toBytes` on String type.
+* Updated pipeline template to nf-core/tools `1.13.3`
+* Bumped Nextflow version `19.10.0` -> `21.04.0-edge`
+* Optimise MultiQC configuration and input files for faster run-time on huge sample numbers
+* [#122](https://github.com/nf-core/viralrecon/issues/122) - Single SPAdes command to rule them all
+* [#138](https://github.com/nf-core/viralrecon/issues/138) - Problem masking the consensus sequence
+* [#142](https://github.com/nf-core/viralrecon/issues/142) - Unknown method invocation `toBytes` on String type
+* [#170](https://github.com/nf-core/viralrecon/issues/170) - ivar trimming of Swift libraries new offset feature
 
 ### Parameters
 
@@ -42,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 |                               | `--enable_conda`                      |
 |                               | `--fast5_dir`                         |
 |                               | `--fastq_dir`                         |
+|                               | `--ivar_trim_offset`                  |
 |                               | `--kraken2_assembly_host_filter`      |
 |                               | `--kraken2_variants_host_filter`      |
 |                               | `--min_barcode_reads`                 |
@@ -108,7 +110,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `cutadapt`                    | 2.10        | 3.2         |
 | `ivar`                        | 1.2.2       | 1.3.1       |
 | `kraken2`                     | 2.0.9beta   | 2.1.1       |
-| `nanoplot`                    |             | 1.32.1      |
+| `nanoplot`                    |             | 1.36.1      |
 | `markdown`                    | 3.2.2       |             |
 | `minimap2`                    | 2.17        |             |
 | `mosdepth`                    | 0.2.6       | 0.3.1       |

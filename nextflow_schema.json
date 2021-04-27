@@ -290,6 +290,13 @@
                     "description": "This option unsets the '-e' parameter in 'ivar trim' to discard reads without primers.",
                     "fa_icon": "fas fa-cut"
                 },
+                "ivar_trim_offset": {
+                    "type": "integer",
+                    "default": "0",
+                    "description": "This option sets the '-x' parameter in 'ivar trim' so that reads that occur at the specified offset positions relative to primer positions will also be trimmed.",
+                    "fa_icon": "fas fa-cut",
+                    "help_text": "This parameter will need to be set for some amplicon-based sequencing protocols (e.g. SWIFT) as described and implemented [here](https://github.com/andersen-lab/ivar/pull/88)"
+                },
                 "filter_duplicates": {
                     "type": "boolean",
                     "fa_icon": "fas fa-clone",
