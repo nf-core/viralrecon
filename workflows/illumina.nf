@@ -179,10 +179,12 @@ workflow ILLUMINA {
             .map { Workflow.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }
 
         // Check if the primer BED file supplied to the pipeline is from the SWIFT/SNAP protocol
-        PREPARE_GENOME
-            .out
-            .primer_bed
-            .map { Workflow.checkIfSwiftProtocol(it, log) }
+        if (!params.ivar_trim_offset) {
+            PREPARE_GENOME
+                .out
+                .primer_bed
+                .map { Workflow.checkIfSwiftProtocol(it, log) }
+        }
     }
     
     /*
