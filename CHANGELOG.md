@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [#138](https://github.com/nf-core/viralrecon/issues/138) - Problem masking the consensus sequence
 * [#142](https://github.com/nf-core/viralrecon/issues/142) - Unknown method invocation `toBytes` on String type
 * [#170](https://github.com/nf-core/viralrecon/issues/170) - ivar trimming of Swift libraries new offset feature
+* [#175](https://github.com/nf-core/viralrecon/issues/175) - MultiQC report does not include all the metrics
 
 ### Parameters
 
