@@ -5,8 +5,6 @@ report_comment: >
 
 data_format: 'yaml'
 
-skip_generalstats: true
-
 max_table_rows: 10000
 
 run_modules:

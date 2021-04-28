@@ -22,7 +22,8 @@ library(tidyverse)
 option_list <- list(make_option(c("-i", "--input_files"), type="character", default=NULL, help="Comma-separated list of mosdepth regions output file (typically end in *.regions.bed.gz)", metavar="input_files"),
                     make_option(c("-s", "--input_suffix"), type="character", default='.regions.bed.gz', help="Portion of filename after sample name to trim for plot title e.g. '.regions.bed.gz' if 'SAMPLE1.regions.bed.gz'", metavar="input_suffix"),
                     make_option(c("-o", "--output_dir"), type="character", default='./', help="Output directory", metavar="path"),
-                    make_option(c("-p", "--output_suffix"), type="character", default='regions', help="Output suffix", metavar="output_suffix"))
+                    make_option(c("-p", "--output_suffix"), type="character", default='regions', help="Output suffix", metavar="output_suffix"),
+                    make_option(c("-r", "--regions_prefix"), type="character", default=NULL, help="Replace this prefix from region names before plotting", metavar="regions_prefix"))
 
 opt_parser <- OptionParser(option_list=option_list)
 opt <- parse_args(opt_parser)
@@ -65,6 +66,9 @@ for (input_file in INPUT_FILES) {
 ## Reformat table
 if (ncol(dat) == 6) {
     colnames(dat) <- c('chrom', 'start','end', 'region', 'coverage', 'sample')
+    if (!is.null(opt$regions_prefix)) {
+        dat$region <- as.character(gsub(opt$regions_prefix, '', dat$region))
+    }
     dat$region <- factor(dat$region, levels=unique(dat$region[order(dat$start)]))
 } else {
     colnames(dat) <- c('chrom', 'start','end', 'coverage', 'sample')
@@ -93,7 +97,7 @@ for (sample in unique(dat$sample)) {
                 theme_bw() +
                 theme(plot.title=element_text(size=10),
                       axis.text.x=element_text(size=10),
-                      axis.text.y=element_text(size=8)) +
+                      axis.text.y=element_text(size=6)) +
                 coord_flip() +
                 scale_x_discrete(expand=c(0, 0)) +
                 scale_y_continuous(trans=log10_trans(),
@@ -106,7 +110,7 @@ for (sample in unique(dat$sample)) {
                 ggtitle(paste(sample,'median coverage per amplicon'))
 
           outfile <- paste(OUTDIR,sample,".",OUTSUFFIX,".coverage.pdf", sep='')
-          ggsave(file=outfile, plot, height=3+(0.3*length(unique(sample_dat$region))), width=16, units="cm")
+          ggsave(file=outfile, plot, height=3+(0.2*length(unique(sample_dat$region))), width=16, units="cm", limitsize=FALSE)
     } else {
         plot <- ggplot(sample_dat,aes(x=end,y=coverage)) +
                 geom_ribbon(aes(ymin=0, ymax=coverage), fill="#D55E00", data=) +
