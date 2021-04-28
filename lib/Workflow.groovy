@@ -265,17 +265,17 @@ class Workflow {
     }
 
     // Check if the primer BED file supplied to the pipeline is from the SWIFT/SNAP protocol
-    public static void checkIfSwiftProtocol(primer_bed_file, log) {
+    public static void checkIfSwiftProtocol(primer_bed_file, name_prefix, log) {
         def count = 0
         def line  = null
         primer_bed_file.withReader { reader ->
             while (line = reader.readLine()) {
                 def name = line.split('\t')[3]
-                if (name.contains('covid19genome')) {
+                if (name.contains(name_prefix)) {
                     count++
                     if (count > 1) {
                         log.warn "=============================================================================\n" +
-                                 "  Found 'covid19genome' in the name field of the primer BED file!\n" + 
+                                 "  Found '${name_prefix}' in the name field of the primer BED file!\n" + 
                                  "  This suggests that you have used the SWIFT/SNAP protocol to prep your samples.\n" + 
                                  "  If so, please set '--ivar_trim_offset 5' as suggested in the issue below:\n" +
                                  "  https://github.com/nf-core/viralrecon/issues/170\n" +

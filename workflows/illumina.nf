@@ -183,7 +183,7 @@ workflow ILLUMINA {
             PREPARE_GENOME
                 .out
                 .primer_bed
-                .map { Workflow.checkIfSwiftProtocol(it, log) }
+                .map { Workflow.checkIfSwiftProtocol(it, 'test', log) }
         }
     }
     
