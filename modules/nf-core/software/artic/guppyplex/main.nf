@@ -20,7 +20,7 @@ process ARTIC_GUPPYPLEX {
 
     input:
     tuple val(meta), path(fastq_dir)
-    
+
     output:
     tuple val(meta), path("*.fastq.gz"), emit: fastq
     path  "*.version.txt"              , emit: version
@@ -34,9 +34,8 @@ process ARTIC_GUPPYPLEX {
         $options.args \\
         --directory $fastq_dir \\
         --output ${prefix}.fastq
-    
-    pigz -p $task.cpus *.fastq
 
+    pigz -p $task.cpus *.fastq
     echo \$(artic --version 2>&1) | sed 's/^.*artic //; s/ .*\$//' > ${software}.version.txt
     """
 }

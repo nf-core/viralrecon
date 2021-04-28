@@ -95,6 +95,7 @@ if (!params.save_reference) {
 
 def ivar_trim_options   = modules['illumina_ivar_trim']
 ivar_trim_options.args += params.ivar_trim_noprimer ? '' : Utils.joinModuleArgs(['-e'])
+ivar_trim_options.args += params.ivar_trim_offset   ? Utils.joinModuleArgs(["-x ${params.ivar_trim_offset}"]) : ''
 
 def ivar_trim_sort_bam_options = modules['illumina_ivar_trim_sort_bam']
 if (params.skip_markduplicates) {
@@ -170,12 +171,20 @@ workflow ILLUMINA {
         .fasta
         .map { Workflow.isMultiFasta(it, log) }
 
-    // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
     if (params.protocol == 'amplicon' && !params.skip_variants) {
+        // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
         PREPARE_GENOME
             .out
             .primer_bed
             .map { Workflow.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }
+
+        // Check if the primer BED file supplied to the pipeline is from the SWIFT/SNAP protocol
+        if (!params.ivar_trim_offset) {
+            PREPARE_GENOME
+                .out
+                .primer_bed
+                .map { Workflow.checkIfSwiftProtocol(it, 'covid19genome', log) }
+        }
     }
     
     /*
