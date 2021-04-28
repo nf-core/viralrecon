@@ -58,6 +58,6 @@ process MULTIQC {
     """
     multiqc -f $options.args $custom_config .
     multiqc_to_custom_csv.py --platform illumina
-    multiqc -f $options.args $custom_config .
+    multiqc -f $options.args -e general_stats $custom_config .
     """
 }
