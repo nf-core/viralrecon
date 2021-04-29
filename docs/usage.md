@@ -76,6 +76,14 @@ The final sample information for all identifiers is obtained from the ENA which 
 
 As a bonus, the pipeline will also generate a valid samplesheet with paths to the downloaded data that can be used with the `--input` parameter to run the main analysis arm of the pipeline, however, it is highly recommended that you double-check that all of the identifiers you defined using `--public_data_ids` are represented in the samplesheet. All of the sample metadata obtained from the ENA has been appended as additional columns to help you manually curate the samplesheet before you run the pipeline if required.
 
+If you have a GEO accession (found in the data availability section of published papers) you can directly download a text file containing the appropriate SRA ids to pass to the pipeline:
+
+* Search for your GEO accession on [GEO](https://www.ncbi.nlm.nih.gov/geo)
+* Click `SRA Run Selector` at the bottom of the GEO accession page
+* Select the desired samples in the `SRA Run Selector` and then download the `Accession List`
+
+This downloads a text file called `SRR_Acc_List.txt` which can be directly provided to the pipeline e.g. `--public_data_ids SRR_Acc_List.txt`.
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
@@ -266,35 +274,3 @@ We recommend adding the following line to your environment to limit this (typica
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
-
-## Nextflow edge releases
-
-Stable releases will be becoming more infrequent as Nextflow shifts its development model to becoming more dynamic via the usage of plugins. This will allow functionality to be added as an extension to the core codebase with a release cycle that could potentially be independent to that of Nextflow itself. As a result of the reduction in stable releases, some pipelines may be required to use Nextflow `edge` releases in order to be able to exploit cutting "edge" features e.g. version 3.0 of the nf-core/rnaseq pipeline requires Nextflow `>=20.11.0-edge` in order to be able to directly download Singularity containers over `http` (see [nf-core/rnaseq#496](https://github.com/nf-core/rnaseq/issues/496)).
-
-There are a number of ways you can install Nextflow `edge` releases, the main difference with stable releases being that you have to `export` the version you would like to install before issuing the appropriate installation/execution commands as highlighted below.
-
-* If you have Nextflow installed already, you can issue the version you would like to use on the same line as the pipeline command and it will be fetched if required before the pipeline execution.
-
-```bash
-NXF_VER="20.11.0-edge" nextflow run nf-core/rnaseq -profile test,docker -r 3.0
-```
-
-* If you have Nextflow installed already, another alternative to the option above is to `export` it as an environment variable before you run the pipeline command:
-
-```bash
-export NXF_VER="20.11.0-edge"
-nextflow run nf-core/rnaseq -profile test,docker -r 3.0
-```
-
-* If you would like to download and install a Nextflow `edge` release from scratch with minimal fuss:
-
-```bash
-export NXF_VER="20.11.0-edge"
-wget -qO- get.nextflow.io | bash
-sudo mv nextflow /usr/local/bin/
-nextflow run nf-core/rnaseq -profile test,docker -r 3.0
-```
-
-> Note if you don't have `sudo` privileges required for the last command above then you can move the `nextflow` binary to somewhere else and export that directory to `$PATH` instead. One way of doing that on Linux would be to add `export PATH=$PATH:/path/to/nextflow/binary/` to your `~/.bashrc` file so that it is available every time you login to your system.
-
-* Manually download and install Nextflow from the available [assets](https://github.com/nextflow-io/nextflow/releases) on Github. See [Nextflow installation docs](https://www.nextflow.io/docs/latest/getstarted.html#installation).
