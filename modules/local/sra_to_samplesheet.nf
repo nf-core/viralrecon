@@ -13,6 +13,8 @@ process SRA_TO_SAMPLESHEET {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
+    memory 100.MB
+
     input:
     tuple val(meta), path(fastq)
 
