@@ -1,33 +1,24 @@
-////////////////////////////////////////////////////
-/* --         LOCAL PARAMETER VALUES           -- */
-////////////////////////////////////////////////////
-
-params.summary_params = [:]
-
-////////////////////////////////////////////////////
-/* --          VALIDATE INPUTS                 -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ VALIDATE INPUTS
+========================================================================================
+*/
 
 def valid_params = [
     artic_minion_caller   : ['nanopolish', 'medaka'],
     artic_minion_aligner  : ['minimap2', 'bwa']
 ]
 
+def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
+
 // Validate input parameters
-Workflow.validateNanoporeParams(params, log, valid_params)
+WorkflowNanopore.initialise(params, log, valid_params)
 
 def checkPathParamList = [
     params.input, params.fastq_dir, params.fast5_dir, 
     params.sequencing_summary, params.gff
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
-
-// Stage dummy file to be used as an optional input where required
-ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
-
-// MultiQC config files
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
-ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
 
 if (params.input)              { ch_input              = file(params.input)              }
 if (params.fast5_dir)          { ch_fast5_dir          = file(params.fast5_dir)          } else { ch_fast5_dir          = ch_dummy_file     }
@@ -41,9 +32,23 @@ if (params.artic_minion_caller == 'medaka') {
     }
 }
 
-////////////////////////////////////////////////////
-/* --    IMPORT LOCAL MODULES/SUBWORKFLOWS     -- */
-////////////////////////////////////////////////////
+// Stage dummy file to be used as an optional input where required
+ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
+
+/*
+========================================================================================
+ CONFIG FILES       
+========================================================================================
+*/
+
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
+
+/*
+========================================================================================
+ IMPORT LOCAL MODULES/SUBWORKFLOWS
+========================================================================================
+*/
 
 // Don't overwrite global params.modules, create a copy instead and use that within the main script.
 def modules = params.modules.clone()
@@ -81,9 +86,11 @@ include { INPUT_CHECK    } from '../subworkflows/local/input_check'             
 include { PREPARE_GENOME } from '../subworkflows/local/prepare_genome_nanopore' addParams( genome_options: publish_genome_options, collapse_primers_options: collapse_primers_options, snpeff_build_options: snpeff_build_options )
 include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'          addParams( snpeff_options: modules['nanopore_snpeff'], snpsift_options: modules['nanopore_snpsift'], bgzip_options: modules['nanopore_snpeff_bgzip'], tabix_options: modules['nanopore_snpeff_tabix'], stats_options: modules['nanopore_snpeff_stats'] )
 
-////////////////////////////////////////////////////
-/* --    IMPORT NF-CORE MODULES/SUBWORKFLOWS   -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ IMPORT NF-CORE MODULES/SUBWORKFLOWS
+========================================================================================
+*/
 
 /*
  * MODULE: Installed directly from nf-core/modules
@@ -102,9 +109,11 @@ include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosd
  */
 include { FILTER_BAM_SAMTOOLS } from '../subworkflows/nf-core/filter_bam_samtools' addParams( samtools_view_options: modules['nanopore_filter_bam'], samtools_index_options: modules['nanopore_filter_bam_stats'] )
 
-////////////////////////////////////////////////////
-/* --           RUN MAIN WORKFLOW              -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ RUN MAIN WORKFLOW
+========================================================================================
+*/
 
 // Info required for completion email and summary
 def multiqc_report     = []
@@ -136,7 +145,7 @@ workflow NANOPORE {
     PREPARE_GENOME
         .out
         .primer_bed
-        .map { Workflow.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }    
+        .map { WorkflowCommons.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }    
     
     barcode_dirs       = file("${params.fastq_dir}/barcode*", type: 'dir' , maxdepth: 1)
     single_barcode_dir = file("${params.fastq_dir}/*.fastq" , type: 'file', maxdepth: 1)
@@ -409,7 +418,7 @@ workflow NANOPORE {
      * MODULE: MultiQC
      */
     if (!params.skip_multiqc) {
-        workflow_summary    = Workflow.paramsSummaryMultiqc(workflow, params.summary_params)
+        workflow_summary    = WorkflowCommons.paramsSummaryMultiqc(workflow, summary_params)
         ch_workflow_summary = Channel.value(workflow_summary)
 
         MULTIQC (
@@ -433,15 +442,19 @@ workflow NANOPORE {
     }
 }
 
-////////////////////////////////////////////////////
-/* --              COMPLETION EMAIL            -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ COMPLETION EMAIL AND SUMMARY
+========================================================================================
+*/
 
 workflow.onComplete {
-    Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report)
-    Completion.summary(workflow, params, log)
+    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
+    NfcoreTemplate.summary(workflow, params, log)
 }
 
-////////////////////////////////////////////////////
-/* --                  THE END                 -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ THE END
+========================================================================================
+*/

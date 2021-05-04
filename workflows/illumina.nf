@@ -1,12 +1,8 @@
-////////////////////////////////////////////////////
-/* --         LOCAL PARAMETER VALUES           -- */
-////////////////////////////////////////////////////
-
-params.summary_params = [:]
-
-////////////////////////////////////////////////////
-/* --          VALIDATE INPUTS                 -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ VALIDATE INPUTS
+========================================================================================
+*/
 
 def valid_params = [
     protocols   : ['metagenomic', 'amplicon'],
@@ -15,8 +11,10 @@ def valid_params = [
     spades_modes: ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
 ]
 
+def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
+
 // Validate input parameters
-Workflow.validateIlluminaParams(params, log, valid_params)
+WorkflowIllumina.initialise(params, log, valid_params)
 
 // Check input path parameters to see if they exist
 def checkPathParamList = [
@@ -26,18 +24,20 @@ def checkPathParamList = [
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-// Stage dummy file to be used as an optional input where required
-ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
-
 if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   }
 
 def callers    = params.callers    ? params.callers.split(',').collect{ it.trim().toLowerCase() }    : []
 def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
 
-////////////////////////////////////////////////////
-/* --          CONFIG FILES                    -- */
-////////////////////////////////////////////////////
+// Stage dummy file to be used as an optional input where required
+ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
+
+/*
+========================================================================================
+ CONFIG FILES       
+========================================================================================
+*/
 
 ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yaml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
@@ -46,9 +46,11 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 ch_blast_outfmt6_header     = file("$projectDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
 ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_header_mqc.txt", checkIfExists: true)
 
-////////////////////////////////////////////////////
-/* --    IMPORT LOCAL MODULES/SUBWORKFLOWS     -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ IMPORT LOCAL MODULES/SUBWORKFLOWS
+========================================================================================
+*/
 
 // Don't overwrite global params.modules, create a copy instead and use that within the main script.
 def modules = params.modules.clone()
@@ -115,9 +117,11 @@ include { ASSEMBLY_SPADES    } from '../subworkflows/local/assembly_spades'     
 include { ASSEMBLY_UNICYCLER } from '../subworkflows/local/assembly_unicycler'      addParams( unicycler_options: modules['illumina_unicycler'], bandage_options: modules['illumina_unicycler_bandage'], blastn_options: modules['illumina_unicycler_blastn'], blastn_filter_options: modules['illumina_unicycler_blastn_filter'], abacas_options: modules['illumina_unicycler_abacas'], plasmidid_options: modules['illumina_unicycler_plasmidid'], quast_options: modules['illumina_unicycler_quast'] )
 include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'          addParams( minia_options: modules['illumina_minia'], blastn_options: modules['illumina_minia_blastn'], blastn_filter_options: modules['illumina_minia_blastn_filter'], abacas_options: modules['illumina_minia_abacas'], plasmidid_options: modules['illumina_minia_plasmidid'], quast_options: modules['illumina_minia_quast'] )
 
-////////////////////////////////////////////////////
-/* --    IMPORT NF-CORE MODULES/SUBWORKFLOWS   -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ IMPORT NF-CORE MODULES/SUBWORKFLOWS
+========================================================================================
+*/
 
 /*
  * MODULE: Installed directly from nf-core/modules
@@ -145,9 +149,12 @@ include { FASTQC_FASTP           } from '../subworkflows/nf-core/fastqc_fastp'  
 include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'          addParams( align_options: bowtie2_align_options, samtools_options: modules['illumina_bowtie2_sort_bam']                                           )
 include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['illumina_picard_markduplicates_sort_bam']                   )
 
-////////////////////////////////////////////////////
-/* --           RUN MAIN WORKFLOW              -- */
-////////////////////////////////////////////////////
+
+/*
+========================================================================================
+ RUN MAIN WORKFLOW
+========================================================================================
+*/
 
 // Info required for completion email and summary
 def multiqc_report    = []
@@ -169,21 +176,21 @@ workflow ILLUMINA {
     PREPARE_GENOME
         .out
         .fasta
-        .map { Workflow.isMultiFasta(it, log) }
+        .map { WorkflowIllumina.isMultiFasta(it, log) }
 
     if (params.protocol == 'amplicon' && !params.skip_variants) {
         // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
         PREPARE_GENOME
             .out
             .primer_bed
-            .map { Workflow.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }
+            .map { WorkflowCommons.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }
 
         // Check if the primer BED file supplied to the pipeline is from the SWIFT/SNAP protocol
         if (!params.ivar_trim_offset) {
             PREPARE_GENOME
                 .out
                 .primer_bed
-                .map { Workflow.checkIfSwiftProtocol(it, 'covid19genome', log) }
+                .map { WorkflowIllumina.checkIfSwiftProtocol(it, 'covid19genome', log) }
         }
     }
     
@@ -236,7 +243,7 @@ workflow ILLUMINA {
             .join(FASTQC_FASTP.out.trim_json)
             .map { 
                 meta, reads, json ->
-                    if (Workflow.getFastpReadsAfterFiltering(json) > 0) [ meta, reads ]
+                    if (WorkflowIllumina.getFastpReadsAfterFiltering(json) > 0) [ meta, reads ]
             }
             .set { ch_variants_fastq }
     }
@@ -289,7 +296,7 @@ workflow ILLUMINA {
     ch_fail_mapping_multiqc = Channel.empty()
     if (!params.skip_variants) {
         ch_bowtie2_flagstat_multiqc
-            .map { meta, flagstat -> [ meta ] + Workflow.getFlagstatMappedReads(flagstat, params) }
+            .map { meta, flagstat -> [ meta ] + WorkflowIllumina.getFlagstatMappedReads(flagstat, params) }
             .set { ch_mapped_reads }
 
         ch_bam
@@ -574,7 +581,7 @@ workflow ILLUMINA {
      * MODULE: MultiQC
      */
     if (!params.skip_multiqc) {
-        workflow_summary    = Workflow.paramsSummaryMultiqc(workflow, params.summary_params)
+        workflow_summary    = WorkflowCommons.paramsSummaryMultiqc(workflow, summary_params)
         ch_workflow_summary = Channel.value(workflow_summary)
 
         MULTIQC (
@@ -609,15 +616,19 @@ workflow ILLUMINA {
     }
 }
 
-////////////////////////////////////////////////////
-/* --              COMPLETION EMAIL            -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ COMPLETION EMAIL AND SUMMARY
+========================================================================================
+*/
 
 workflow.onComplete {
-    Completion.email(workflow, params, params.summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
-    Completion.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
+    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
+    NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
 }
 
-////////////////////////////////////////////////////
-/* --                  THE END                 -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ THE END
+========================================================================================
+*/

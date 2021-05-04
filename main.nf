@@ -1,34 +1,21 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
-                         nf-core/viralrecon
+ nf-core/viralrecon
 ========================================================================================
- nf-core/viralrecon Analysis Pipeline.
- #### Homepage / Documentation
- https://github.com/nf-core/viralrecon
+ Github : https://github.com/nf-core/viralrecon
+ Website: https://nf-co.re/viralrecon
+ Slack  : https://nfcore.slack.com/channels/viralrecon
 ----------------------------------------------------------------------------------------
 */
 
 nextflow.enable.dsl = 2
 
-////////////////////////////////////////////////////
-/* --               PRINT HELP                 -- */
-////////////////////////////////////////////////////
-
-log.info Utils.logo(workflow, params.monochrome_logs)
-
-def json_schema = "$projectDir/nextflow_schema.json"
-if (params.help) {
-    def command = "nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'MN908947.3' -profile docker"
-    log.info NfcoreSchema.paramsHelp(workflow, params, json_schema, command)
-    log.info Workflow.citation(workflow)
-    log.info Utils.dashedLine(params.monochrome_logs)
-    exit 0
-}
-
-////////////////////////////////////////////////////
-/* --        GENOME PARAMETER VALUES           -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ GENOME PARAMETER VALUES       
+========================================================================================
+*/
 
 def primer_set         = ''
 def primer_set_version = 0
@@ -38,57 +25,69 @@ if (!params.public_data_ids && params.platform == 'illumina' && params.protocol 
 } else if (!params.public_data_ids && params.platform == 'nanopore') {
     primer_set          = 'artic'
     primer_set_version  = params.primer_set_version
-    params.artic_scheme = Workflow.getGenomeAttribute(params, 'scheme', log, primer_set, primer_set_version)
+    params.artic_scheme = WorkflowMain.getGenomeAttribute(params, 'scheme', log, primer_set, primer_set_version)
 }
 
-params.fasta         = Workflow.getGenomeAttribute(params, 'fasta'     , log, primer_set, primer_set_version)
-params.gff           = Workflow.getGenomeAttribute(params, 'gff'       , log, primer_set, primer_set_version)
-params.bowtie2_index = Workflow.getGenomeAttribute(params, 'bowtie2'   , log, primer_set, primer_set_version)
-params.primer_bed    = Workflow.getGenomeAttribute(params, 'primer_bed', log, primer_set, primer_set_version)
+params.fasta         = WorkflowMain.getGenomeAttribute(params, 'fasta'     , log, primer_set, primer_set_version)
+params.gff           = WorkflowMain.getGenomeAttribute(params, 'gff'       , log, primer_set, primer_set_version)
+params.bowtie2_index = WorkflowMain.getGenomeAttribute(params, 'bowtie2'   , log, primer_set, primer_set_version)
+params.primer_bed    = WorkflowMain.getGenomeAttribute(params, 'primer_bed', log, primer_set, primer_set_version)
 
-////////////////////////////////////////////////////
-/* --         PRINT PARAMETER SUMMARY          -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ VALIDATE & PRINT PARAMETER SUMMARY
+========================================================================================
+*/
+    
+WorkflowMain.initialise(workflow, params, log)
 
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params, json_schema)
-log.info NfcoreSchema.paramsSummaryLog(workflow, params, json_schema)
-log.info Workflow.citation(workflow)
-log.info Utils.dashedLine(params.monochrome_logs)
+/*
+========================================================================================
+ NAMED WORKFLOW FOR PIPELINE
+========================================================================================
+*/
 
-////////////////////////////////////////////////////
-/* --          PARAMETER CHECKS                -- */
-////////////////////////////////////////////////////
-
-Workflow.validateMainParams(workflow, params, json_schema, log)
-
-////////////////////////////////////////////////////
-/* --           RUN MAIN WORKFLOW              -- */
-////////////////////////////////////////////////////
-
-workflow {
+workflow NFCORE_VIRALRECON {
+    
     /*
      * WORKFLOW: Get SRA run information for public database ids, download and md5sum check FastQ files, auto-create samplesheet
      */
     if (params.public_data_ids) {
-        include { SRA_DOWNLOAD } from './workflows/sra_download' addParams( summary_params: summary_params )
+        include { SRA_DOWNLOAD } from './workflows/sra_download'
         SRA_DOWNLOAD ()
     
     /*
      * WORKFLOW: Variant and de novo assembly analysis for Illumina data
      */
     } else if (params.platform == 'illumina') {
-        include { ILLUMINA } from './workflows/illumina' addParams( summary_params: summary_params )
+        include { ILLUMINA } from './workflows/illumina'
         ILLUMINA ()
 
     /*
      * WORKFLOW: Variant analysis for Nanopore data
      */ 
     } else if (params.platform == 'nanopore') {
-        include { NANOPORE } from './workflows/nanopore' addParams( summary_params: summary_params )
+        include { NANOPORE } from './workflows/nanopore'
         NANOPORE ()
     }
 }
 
-////////////////////////////////////////////////////
-/* --                  THE END                 -- */
-////////////////////////////////////////////////////
+/*
+========================================================================================
+ RUN ALL WORKFLOWS
+========================================================================================
+*/
+
+/*
+ * WORKFLOW: Execute a single named workflow for the pipeline
+ * See: https://github.com/nf-core/rnaseq/issues/619
+ */
+workflow {
+    NFCORE_VIRALRECON ()
+}
+
+/*
+========================================================================================
+ THE END
+========================================================================================
+*/
