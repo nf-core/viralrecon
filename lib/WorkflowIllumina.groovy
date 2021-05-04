@@ -67,10 +67,10 @@ class WorkflowIllumina {
                     count++
                     if (count > 1) {
                         log.warn "=============================================================================\n" +
-                                 "  This pipeline does not officially support multi-fasta genome files!\n\n" + 
-                                 "  The parameters and processes are tailored for viral genome analysis.\n" +
-                                 "  Please amend the '--fasta' parameter.\n" +
-                                 "==================================================================================="
+                            "  This pipeline does not officially support multi-fasta genome files!\n\n" + 
+                            "  The parameters and processes are tailored for viral genome analysis.\n" +
+                            "  Please amend the '--fasta' parameter.\n" +
+                            "==================================================================================="
                         break
                     }
                 }
@@ -110,11 +110,11 @@ class WorkflowIllumina {
                     count++
                     if (count > 1) {
                         log.warn "=============================================================================\n" +
-                                 "  Found '${name_prefix}' in the name field of the primer BED file!\n" + 
-                                 "  This suggests that you have used the SWIFT/SNAP protocol to prep your samples.\n" + 
-                                 "  If so, please set '--ivar_trim_offset 5' as suggested in the issue below:\n" +
-                                 "  https://github.com/nf-core/viralrecon/issues/170\n" +
-                                 "==================================================================================="
+                            "  Found '${name_prefix}' in the name field of the primer BED file!\n" + 
+                            "  This suggests that you have used the SWIFT/SNAP protocol to prep your samples.\n" + 
+                            "  If so, please set '--ivar_trim_offset 5' as suggested in the issue below:\n" +
+                            "  https://github.com/nf-core/viralrecon/issues/170\n" +
+                            "==================================================================================="
                         break
                     }
                 }
@@ -130,5 +130,3 @@ class WorkflowIllumina {
         return json['after_filtering']['total_reads'].toInteger()
     }
 }
-
-    

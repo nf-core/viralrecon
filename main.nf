@@ -1,11 +1,11 @@
 #!/usr/bin/env nextflow
 /*
 ========================================================================================
- nf-core/viralrecon
+    nf-core/viralrecon
 ========================================================================================
- Github : https://github.com/nf-core/viralrecon
- Website: https://nf-co.re/viralrecon
- Slack  : https://nfcore.slack.com/channels/viralrecon
+    Github : https://github.com/nf-core/viralrecon
+    Website: https://nf-co.re/viralrecon
+    Slack  : https://nfcore.slack.com/channels/viralrecon
 ----------------------------------------------------------------------------------------
 */
 
@@ -13,7 +13,7 @@ nextflow.enable.dsl = 2
 
 /*
 ========================================================================================
- GENOME PARAMETER VALUES       
+    GENOME PARAMETER VALUES       
 ========================================================================================
 */
 
@@ -35,7 +35,7 @@ params.primer_bed    = WorkflowMain.getGenomeAttribute(params, 'primer_bed', log
 
 /*
 ========================================================================================
- VALIDATE & PRINT PARAMETER SUMMARY
+    VALIDATE & PRINT PARAMETER SUMMARY
 ========================================================================================
 */
     
@@ -43,7 +43,7 @@ WorkflowMain.initialise(workflow, params, log)
 
 /*
 ========================================================================================
- NAMED WORKFLOW FOR PIPELINE
+    NAMED WORKFLOW FOR PIPELINE
 ========================================================================================
 */
 
@@ -74,7 +74,7 @@ workflow NFCORE_VIRALRECON {
 
 /*
 ========================================================================================
- RUN ALL WORKFLOWS
+    RUN ALL WORKFLOWS
 ========================================================================================
 */
 
@@ -88,6 +88,6 @@ workflow {
 
 /*
 ========================================================================================
- THE END
+    THE END
 ========================================================================================
 */

@@ -9,12 +9,12 @@ class WorkflowMain {
      */
     public static String citation(workflow) {
         return "If you use ${workflow.manifest.name} for your analysis please cite:\n\n" +
-               "* The pipeline\n" + 
-               "  https://doi.org/10.5281/zenodo.3901628\n\n" +
-               "* The nf-core framework\n" +
-               "  https://doi.org/10.1038/s41587-020-0439-x\n\n" +
-               "* Software dependencies\n" +
-               "  https://github.com/${workflow.manifest.name}/blob/master/CITATIONS.md"
+            "* The pipeline\n" + 
+            "  https://doi.org/10.5281/zenodo.3901628\n\n" +
+            "* The nf-core framework\n" +
+            "  https://doi.org/10.1038/s41587-020-0439-x\n\n" +
+            "* Software dependencies\n" +
+            "  https://github.com/${workflow.manifest.name}/blob/master/CITATIONS.md"
     }
 
     /*
@@ -89,11 +89,11 @@ class WorkflowMain {
      */
     public static String getGenomeAttribute(params, attribute, log, primer_set='', primer_set_version=0) {
         def val = ''
-        def support_str = " The default genome config used by the pipeline can be found here:\n" +
-                          "   - https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config\n\n" +
-                          " If you would still like to blame us please come and find us on nf-core Slack:\n" + 
-                          "   - https://nf-co.re/viralrecon#contributions-and-support\n" +
-                          "============================================================================="
+        def support_link =  " The default genome config used by the pipeline can be found here:\n" +
+                            "   - https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config\n\n" +
+                            " If you would still like to blame us please come and find us on nf-core Slack:\n" + 
+                            "   - https://nf-co.re/viralrecon#contributions-and-support\n" +
+                            "============================================================================="
         if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
             def genome_map = params.genomes[ params.genome ]
             if (primer_set) {
@@ -106,31 +106,31 @@ class WorkflowMain {
                             genome_map = genome_map[ primer_set_version ]
                         } else {
                             log.error "=============================================================================\n" +
-                                      " --primer_set_version '${primer_set_version}' not found!\n\n" +
-                                      " Currently, the available primer set version keys are: ${genome_map.keySet().join(", ")}\n\n" +
-                                      " Please check:\n" +
-                                      "   - The value provided to --primer_set_version (currently '${primer_set_version}')\n" +
-                                      "   - The value provided to --primer_set (currently '${primer_set}')\n" +
-                                      "   - The value provided to --genome (currently '${params.genome}')\n" +
-                                      "   - Any custom config files provided to the pipeline.\n\n" + support_str
+                                " --primer_set_version '${primer_set_version}' not found!\n\n" +
+                                " Currently, the available primer set version keys are: ${genome_map.keySet().join(", ")}\n\n" +
+                                " Please check:\n" +
+                                "   - The value provided to --primer_set_version (currently '${primer_set_version}')\n" +
+                                "   - The value provided to --primer_set (currently '${primer_set}')\n" +
+                                "   - The value provided to --genome (currently '${params.genome}')\n" +
+                                "   - Any custom config files provided to the pipeline.\n\n" + support_link
                             System.exit(1)
                         }
                     } else {
                         log.error "=============================================================================\n" +
-                                  " --primer_set '${primer_set}' not found!\n\n" +
-                                  " Currently, the available primer set keys are: ${genome_map.keySet().join(", ")}\n\n" +
-                                  " Please check:\n" +
-                                  "   - The value provided to --primer_set (currently '${primer_set}')\n" +
-                                  "   - The value provided to --genome (currently '${params.genome}')\n" +
-                                  "   - Any custom config files provided to the pipeline.\n\n" + support_str
+                            " --primer_set '${primer_set}' not found!\n\n" +
+                            " Currently, the available primer set keys are: ${genome_map.keySet().join(", ")}\n\n" +
+                            " Please check:\n" +
+                            "   - The value provided to --primer_set (currently '${primer_set}')\n" +
+                            "   - The value provided to --genome (currently '${params.genome}')\n" +
+                            "   - Any custom config files provided to the pipeline.\n\n" + support_link
                         System.exit(1)
                     }
                 } else {
                     log.error "=============================================================================\n" +
-                              " Genome '${params.genome}' does not contain any primer sets!\n\n" +
-                              " Please check:\n" +
-                              "   - The value provided to --genome (currently '${params.genome}')\n" +
-                              "   - Any custom config files provided to the pipeline.\n\n" + support_str
+                        " Genome '${params.genome}' does not contain any primer sets!\n\n" +
+                        " Please check:\n" +
+                        "   - The value provided to --genome (currently '${params.genome}')\n" +
+                        "   - Any custom config files provided to the pipeline.\n\n" + support_link
                     System.exit(1)
                 }
             }
@@ -141,5 +141,3 @@ class WorkflowMain {
         return val
     }
 }
-
-    
