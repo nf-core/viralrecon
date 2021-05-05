@@ -33,7 +33,7 @@ SAMPLE_2,AEG588A2_S4_L003_R1_001.fastq.gz,
 
 ### Nanopore samplesheet format
 
-You have the option to provide a samplesheet to the pipeline that maps sample ids to barcode ids. This allows you to associate barocode ids to clinical/public database identifiers that can be used to QC or pre-process the data with more appropriate sample names.
+You have the option to provide a samplesheet to the pipeline that maps sample ids to barcode ids. This allows you to associate barcode ids to clinical/public database identifiers that can be used to QC or pre-process the data with more appropriate sample names.
 
 ```bash
 --input '[path to samplesheet file]'

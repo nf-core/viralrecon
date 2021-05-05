@@ -52,7 +52,7 @@ if (tail(strsplit(OUTDIR,"")[[1]],1)!="/") {
 }
 ## Create the directory if it doesn't already exist.
 if (!file.exists(OUTDIR)) {
-  dir.create(OUTDIR, recursive=TRUE)
+    dir.create(OUTDIR, recursive=TRUE)
 }
 
 ################################################
@@ -72,13 +72,13 @@ for (input_file in INPUT_FILES) {
 ################################################
 ################################################
 
-bases_std <- c("A","C","T","G")
-base_cols <- c("A" = "#009E73",
-               "C" = "#0072B2",
-               "T" = "#D55E00",
-               "G" = "#000000",
-               "N" = "#E69F00",
-               "X" = "#999999")
+bases_std <-  c("A","C","T","G")
+base_cols <-  c("A" = "#009E73",
+                "C" = "#0072B2",
+                "T" = "#D55E00",
+                "G" = "#000000",
+                "N" = "#E69F00",
+                "X" = "#999999")
 
 for (idx in 1:length(dat)) {
 
@@ -100,13 +100,13 @@ for (idx in 1:length(dat)) {
     write.table(base_tab, file=outfile, col.names=TRUE, row.names=FALSE, sep="\t", quote=FALSE)
 
     ## Barplot of base frequencies
-    barplot <- ggplot(base_tab, aes(x=base,y=perc)) +
-               geom_bar(stat="identity") +
-               theme_classic() +
-               scale_y_continuous(limits=c(0,100),breaks=c(0,25,50,75,100)) +
-               ylab("% Observed") +
-               xlab("Base") +
-               ggtitle(PREFIXES[idx])
+    barplot <-  ggplot(base_tab, aes(x=base,y=perc)) +
+                geom_bar(stat="identity") +
+                theme_classic() +
+                scale_y_continuous(limits=c(0,100),breaks=c(0,25,50,75,100)) +
+                ylab("% Observed") +
+                xlab("Base") +
+                ggtitle(PREFIXES[idx])
     outfile <- paste(OUTDIR, PREFIXES[idx], ".base_counts.pdf", sep='')
     ggsave(file=outfile, barplot, width=12, height=10, units="cm")
 
@@ -158,7 +158,7 @@ for (idx in 1:length(dat)) {
                     xlab("Position (Kb)") +
                     ylab(paste(obase,"density", sep=' ')) +
                     ggtitle(PREFIXES[idx])
-      outfile <- paste(OUTDIR, PREFIXES[idx], ".", obase, "_density.pdf", sep='')
-      ggsave(file=outfile, lineplot, width=18, height=10, units="cm")
+        outfile <- paste(OUTDIR, PREFIXES[idx], ".", obase, "_density.pdf", sep='')
+        ggsave(file=outfile, lineplot, width=18, height=10, units="cm")
     }
 }
