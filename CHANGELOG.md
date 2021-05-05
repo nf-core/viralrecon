@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * All software containers are now exclusively obtained from [Biocontainers](https://biocontainers.pro/#/registry)
 * Updated minimum Nextflow version to `v21.04.0` (see [nextflow#572](https://github.com/nextflow-io/nextflow/issues/1964))
 * Default human `--kraken2_db` link has been changed from Zenodo to an AWS S3 bucket for more reliable downloads
+* [BCFtools](http://samtools.github.io/bcftools/bcftools.html) and [iVar](https://github.com/andersen-lab/ivar) will be run by default for Illumina metagenomics and amplicon data, respectively. However, this behaviour can be customised with the `--callers` parameter.
 * Illumina and Nanopore runs containing the same 48 samples sequenced on both platforms have been uploaded to the nf-core AWS account for full-sized tests on release
 * Variant graph processes to call variants relative to the reference genome directly from _de novo_ assemblies have been deprecated and removed
 * Variant calling with Varscan 2 has been deprecated and removed due to [licensing restrictions](https://github.com/dkoboldt/varscan/issues/12)
