@@ -30,8 +30,9 @@ ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   }
 
-def callers    = params.callers    ? params.callers.split(',').collect{ it.trim().toLowerCase() }    : []
 def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
+def callers    = params.callers    ? params.callers.split(',').collect{ it.trim().toLowerCase() }    : []
+if (!callers)  { callers = params.protocol == 'amplicon' ? ['ivar'] : ['bcftools'] }
 
 /*
 ========================================================================================
@@ -148,7 +149,6 @@ markduplicates_options.args += params.filter_duplicates ?  Utils.joinModuleArgs(
 include { FASTQC_FASTP           } from '../subworkflows/nf-core/fastqc_fastp'           addParams( fastqc_raw_options: modules['illumina_fastqc_raw'], fastqc_trim_options: modules['illumina_fastqc_trim'], fastp_options: fastp_options )
 include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'          addParams( align_options: bowtie2_align_options, samtools_options: modules['illumina_bowtie2_sort_bam']                                           )
 include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard' addParams( markduplicates_options: markduplicates_options, samtools_options: modules['illumina_picard_markduplicates_sort_bam']                   )
-
 
 /*
 ========================================================================================
