@@ -550,7 +550,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 * `illumina/variants/<CALLER>/snpeff/bcftools_stats/`
   * `*.bcftools_stats.txt`: Statistics and counts obtained from VCF file.
 
-**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar').
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
 
 </details>
 
@@ -568,7 +568,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 * `illumina/variants/<CALLER>/quast/`
   * `report.html`: Results report in HTML format. Also available in various other file formats i.e. `report.pdf`, `report.tex`, `report.tsv` and `report.txt`.
 
-**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar').
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
 
 </details>
 
@@ -582,7 +582,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 * `illumina/variants/<CALLER>/pangolin/`
   * `*.pangolin.csv`: Lineage analysis results from Pangolin.
 
-**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar').
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
 
 </details>
 
