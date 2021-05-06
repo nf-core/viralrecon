@@ -68,6 +68,7 @@ include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME  } fro
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_PANGOLIN             } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME            } from '../modules/local/plot_mosdepth_regions'     addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON          } from '../modules/local/plot_mosdepth_regions'     addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
 
@@ -360,11 +361,32 @@ workflow NANOPORE {
     /*
      * MODULE: Lineage analysis with Pangolin
      */
+    ch_pangolin_multiqc = Channel.empty()
     if (!params.skip_pangolin) {
         PANGOLIN ( 
             ARTIC_MINION.out.fasta
         )
         ch_software_versions = ch_software_versions.mix(PANGOLIN.out.version.ifEmpty(null))
+
+        /*
+         * MODULE: Get Pangolin lineage information for MultiQC report
+         */
+        PANGOLIN
+            .out
+            .report
+            .map { meta, report ->
+                def lineage = WorkflowCommons.getPangolinLineage(report)
+                return [ "$meta.id\t$lineage" ]
+            }
+            .set { ch_pangolin_multiqc }
+
+        MULTIQC_CUSTOM_PANGOLIN ( 
+            ch_pangolin_multiqc.collect(),
+            'Sample',
+            'Lineage',
+            'pangolin_lineage'
+        )
+        .set { ch_pangolin_multiqc }
     }
 
     /*
@@ -448,7 +470,8 @@ workflow NANOPORE {
             BCFTOOLS_STATS.out.stats.collect{it[1]}.ifEmpty([]),
             ch_mosdepth_multiqc.collect{it[1]}.ifEmpty([]),
             ch_quast_multiqc.collect().ifEmpty([]),
-            ch_snpeff_multiqc.collect{it[1]}.ifEmpty([])
+            ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_pangolin_multiqc.collect().ifEmpty([])
         )
         multiqc_report = MULTIQC.out.report.toList()
     }

@@ -33,6 +33,7 @@ process MULTIQC {
     path ('mosdepth/*')
     path ('quast/*')
     path ('snpeff/*')
+    path ('pangolin/*')
 
     output:
     path "*multiqc_report.html", emit: report
@@ -46,7 +47,7 @@ process MULTIQC {
     """
     multiqc -f $options.args $custom_config .
     multiqc_to_custom_csv.py --platform nanopore
-    multiqc -f $options.args -e general_stats $custom_config .
+    multiqc -f $options.args -e general_stats --ignore *pangolin_lineage_mqc.tsv $custom_config .
     """
 }
 

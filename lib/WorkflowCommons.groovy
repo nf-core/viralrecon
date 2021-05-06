@@ -72,4 +72,15 @@ class WorkflowCommons {
                 "==================================================================================="
         }
     }
+
+    /*
+     * Function to get lineage from Pangolin output file
+     */
+    public static String getPangolinLineage(pangolin_report) {
+        def lineage = ''
+        pangolin_report.eachLine { line ->
+            lineage = line.split(',')[1]
+        }
+        return lineage
+    }
 }
