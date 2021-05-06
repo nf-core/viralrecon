@@ -12,9 +12,9 @@ process MULTIQC {
 
     conda (params.enable_conda ? "bioconda::multiqc=1.10.1" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/multiqc:1.10.1--py_0"
+        container "https://depot.galaxyproject.org/singularity/multiqc:1.10.1--pyhdfd78af_1"
     } else {
-        container "quay.io/biocontainers/multiqc:1.10.1--py_0"
+        container "quay.io/biocontainers/multiqc:1.10.1--pyhdfd78af_1"
     }
 
     input:
@@ -33,6 +33,7 @@ process MULTIQC {
     path ('mosdepth/*')
     path ('quast/*')
     path ('snpeff/*')
+    path ('pangolin/*')
 
     output:
     path "*multiqc_report.html", emit: report
@@ -46,6 +47,7 @@ process MULTIQC {
     """
     multiqc -f $options.args $custom_config .
     multiqc_to_custom_csv.py --platform nanopore
+    find ./ -type l -name "*pangolin_lineage_mqc.tsv" -exec rm -f {} \\;
     multiqc -f $options.args -e general_stats $custom_config .
     """
 }
