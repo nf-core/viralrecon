@@ -128,8 +128,6 @@ def main(args=None):
         ('multiqc_bowtie2.yaml',                                   [('% Mapped reads', ['overall_alignment_rate'])]),
         ('multiqc_samtools_flagstat_samtools_bowtie2.yaml',        [('# Mapped reads', ['mapped_passed'])]),
         ('multiqc_samtools_flagstat_samtools_ivar.yaml',           [('# Trimmed reads (iVar)', ['flagstat_total'])]),
-        ('multiqc_samtools_flagstat_samtools_markduplicates.yaml', [('# Duplicate reads', ['duplicates_passed']),
-                                                                    ('# Reads after MarkDuplicates', ['flagstat_total'])]),
         ('multiqc_general_stats.yaml',                             [('Coverage median', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-median_coverage']),
                                                                     ('% Coverage > 1x', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-1_x_pc']),
                                                                     ('% Coverage > 10x', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-10_x_pc'])]),

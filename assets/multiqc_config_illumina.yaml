@@ -157,12 +157,6 @@ custom_data:
             '# Trimmed reads (iVar)':
                 description: 'Total number of reads remaining after primer trimming with iVar'
                 format: '{:,.0f}'
-            '# Duplicate reads':
-                description: 'Total number of duplicate marked reads with picard MarkDuplicates'
-                format: '{:,.0f}'
-            '# Reads after MarkDuplicates':
-                description: 'Total number of reads after running picard MarkDuplicates'
-                format: '{:,.0f}'
             'Coverage median':
                 description: 'Median coverage calculated by mosdepth'
                 format: '{:,.2f}'
