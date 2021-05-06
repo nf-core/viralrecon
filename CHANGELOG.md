@@ -121,7 +121,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `multiqc`                     | 1.9         | 1.10.1      |
 | `nanoplot`                    |             | 1.36.1      |
 | `nextclade_js`                |             | 0.14.2      |
-| `pangolin`                    |             | 2.3.8       |
+| `pangolin`                    |             | 2.4.2       |
 | `parallel-fastq-dump`         | 0.6.6       |             |
 | `picard`                      | 2.23.0      | 2.23.9      |
 | `pigz`                        | 2.3.4       |             |
