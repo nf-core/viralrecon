@@ -56,7 +56,6 @@
 * [NanoPlot](https://pubmed.ncbi.nlm.nih.gov/29547981/)
   > De Coster W, D'Hert S, Schultz DT, Cruts M, Van Broeckhoven C. NanoPack: visualizing and processing long-read sequencing data. Bioinformatics. 2018 Aug 1;34(15):2666-2669. doi: 10.1093/bioinformatics/bty149. PubMed PMID: 29547981; PubMed Central PMCID: PMC6061794.
 
-
 * [Nextstrain](https://pubmed.ncbi.nlm.nih.gov/29790939/)
   > Hadfield J, Megill C, Bell SM, Huddleston J, Potter B, Callender C, Sagulenko P, Bedford T, Neher RA. Nextstrain: real-time tracking of pathogen evolution. Bioinformatics. 2018 Dec 1;34(23):4121-4123. doi: 10.1093/bioinformatics/bty407. PubMed PMID: 29790939; PubMed Central PMCID: PMC6247931.
 
