@@ -101,6 +101,7 @@ include { ARTIC_GUPPYPLEX               } from '../modules/nf-core/software/arti
 include { BCFTOOLS_STATS                } from '../modules/nf-core/software/bcftools/stats/main'  addParams( options: modules['nanopore_bcftools_stats']    )
 include { QUAST                         } from '../modules/nf-core/software/quast/main'           addParams( options: modules['nanopore_quast']             )
 include { PANGOLIN                      } from '../modules/nf-core/software/pangolin/main'        addParams( options: modules['nanopore_pangolin']          )
+include { NEXTCLADE                     } from '../modules/nf-core/software/nextclade/main'       addParams( options: modules['nanopore_nextclade']         )
 include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'        addParams( options: modules['nanopore_mosdepth_genome']   )
 include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'        addParams( options: modules['nanopore_mosdepth_amplicon'] )
 
@@ -364,6 +365,17 @@ workflow NANOPORE {
             ARTIC_MINION.out.fasta
         )
         ch_software_versions = ch_software_versions.mix(PANGOLIN.out.version.ifEmpty(null))
+    }
+
+    /*
+     * MODULE: Clade assignment, mutation calling, and sequence quality checks with Nextclade
+     */
+    if (!params.skip_nextclade) {
+        NEXTCLADE ( 
+            ARTIC_MINION.out.fasta,
+            'csv'
+        )
+        ch_software_versions = ch_software_versions.mix(NEXTCLADE.out.version.ifEmpty(null))
     }
     
     /*
