@@ -20,6 +20,7 @@ The directories listed below will be created in the results directory after the 
   * [SnpEff and SnpSift](#nanopore-snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
   * [QUAST](#nanopore-quast) - Consensus assessment report
   * [Pangolin](#nanopore-pangolin) - Lineage analysis
+  * [Nextclade](#nanopore-nextclade) - Clade assignment, mutation calling and sequence quality checks
 * [Workflow reporting](#nanopore-workflow-reporting)
   * [MultiQC](#nanopore-multiqc) - Present QC, visualisation and custom reporting for sequencing, raw reads, alignment and variant calling results
 
@@ -229,6 +230,20 @@ BAM files containing the original alignments from either Minimap2 or BWA are fur
 
 Phylogenetic Assignment of Named Global Outbreak LINeages ([`Pangolin`](https://github.com/cov-lineages/pangolin)) has been used extensively during the COVID-19 pandemic to assign lineages to SARS-CoV-2 genome sequenced samples. A [web application](https://pangolin.cog-uk.io/) also exists that allows users to upload genome sequences via a web browser to assign lineages to genome sequences of SARS-CoV-2, view descriptive characteristics of the assigned lineage(s), view the placement of the lineage in a phylogeny of global samples, and view the temporal and geographic distribution of the assigned lineage(s).
 
+### Nanopore: Nextclade
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `nanopore/<CALLER>/nextclade/`
+  * `*.csv`: Analysis results from Nextlade containing genome clade assignment, mutation calling and sequence quality checks.
+
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--artic_minion_caller` parameter (Default: 'nanopolish').
+
+</details>
+
+[Nextclade](https://github.com/nextstrain/nextclade) performs viral genome clade assignment, mutation calling and sequence quality checks for the consensus sequences generated in this pipeline. Similar to Pangolin, it has been used extensively during the COVID-19 pandemic. A [web application](https://clades.nextstrain.org/) also exists that allows users to upload genome sequences via a web browser.
+
 ## Nanopore: Workflow reporting
 
 ### Nanopore: MultiQC
@@ -270,6 +285,7 @@ An example MultiQC report generated from a full-sized dataset can be viewed on t
     * [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
     * [QUAST](#quast) - Consensus assessment report
     * [Pangolin](#pangolin) - Lineage analysis
+    * [Nextclade](#nextclade) - Clade assignment, mutation calling and sequence quality checks
   * [BCFTools isec](#bcftools-isec) - Intersect variants across all callers
 * [De novo assembly](#illumina-de-novo-assembly)
   * [Cutadapt](#cutadapt) - Primer trimming for amplicon data
@@ -587,6 +603,20 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 </details>
 
 Phylogenetic Assignment of Named Global Outbreak LINeages ([`Pangolin`](https://github.com/cov-lineages/pangolin)) has been used extensively during the COVID-19 pandemic in order to to assign lineages to SARS-CoV-2 genome sequenced samples. A [web application](https://pangolin.cog-uk.io/) also exists that allows users to upload genome sequences via a web browser to assign lineages to genome sequences of SARS-CoV-2, view descriptive characteristics of the assigned lineage(s), view the placement of the lineage in a phylogeny of global samples, and view the temporal and geographic distribution of the assigned lineage(s).
+
+### Nextclade
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `illumina/variants/<CALLER>/nextclade/`
+  * `*.csv`: Analysis results from Nextlade containing genome clade assignment, mutation calling and sequence quality checks.
+
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
+
+</details>
+
+[Nextclade](https://github.com/nextstrain/nextclade) performs viral genome clade assignment, mutation calling and sequence quality checks for the consensus sequences generated in this pipeline. Similar to Pangolin, it has been used extensively during the COVID-19 pandemic. A [web application](https://clades.nextstrain.org/) also exists that allows users to upload genome sequences via a web browser.
 
 ### BCFTools isec
 
