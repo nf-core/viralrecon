@@ -47,8 +47,7 @@ process MULTIQC {
     """
     multiqc -f $options.args $custom_config .
     multiqc_to_custom_csv.py --platform nanopore
-    find ./ -type l -name "*pangolin_lineage_mqc.tsv" -exec rm -f {} \\;
-    multiqc -f $options.args -e general_stats $custom_config .
+    multiqc -f $options.args -e general_stats --ignore *pangolin_lineage_mqc.tsv $custom_config .
     """
 }
 
