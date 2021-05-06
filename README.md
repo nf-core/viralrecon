@@ -44,6 +44,7 @@ The pipeline has numerous options to allow you to run only specific aspects of t
         * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
         * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
         * Lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin))
+        * Clade assignment, mutation calling and sequence quality checks ([`Nextclade`](https://github.com/nextstrain/nextclade))
     8. Intersect variants across callers ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html))
 7. _De novo_ assembly
     1. Primer trimming ([`Cutadapt`](https://cutadapt.readthedocs.io/en/stable/guide.html); *amplicon data only*)
@@ -67,6 +68,7 @@ The pipeline has numerous options to allow you to run only specific aspects of t
     * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
     * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
     * Lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin))
+    * Clade assignment, mutation calling and sequence quality checks ([`Nextclade`](https://github.com/nextstrain/nextclade))
 8. Present QC, visualisation and custom reporting for sequencing, raw reads, alignment and variant calling results ([`MultiQC`](http://multiqc.info/))
 
 ## Quick Start
