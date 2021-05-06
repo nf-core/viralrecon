@@ -30,13 +30,13 @@ process MULTIQC {
     path ('bowtie2/*')
     path ('ivar_trim/*')
     path ('picard_markduplicates/*')
-    path ('picard_markduplicates/*')
-    path ('picard_metrics/*')
     path ('mosdepth/*')
     path ('variants_ivar/*')
     path ('variants_ivar/*')
     path ('variants_ivar/*')
     path ('variants_ivar/*')
+    path ('variants_ivar/*')
+    path ('variants_bcftools/*')
     path ('variants_bcftools/*')
     path ('variants_bcftools/*')
     path ('variants_bcftools/*')
@@ -58,6 +58,6 @@ process MULTIQC {
     """
     multiqc -f $options.args $custom_config .
     multiqc_to_custom_csv.py --platform illumina
-    multiqc -f $options.args -e general_stats $custom_config .
+    multiqc -f $options.args -e general_stats --ignore *pangolin_lineage_mqc.tsv $custom_config .
     """
 }

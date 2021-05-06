@@ -128,10 +128,6 @@ def main(args=None):
         ('multiqc_bowtie2.yaml',                                   [('% Mapped reads', ['overall_alignment_rate'])]),
         ('multiqc_samtools_flagstat_samtools_bowtie2.yaml',        [('# Mapped reads', ['mapped_passed'])]),
         ('multiqc_samtools_flagstat_samtools_ivar.yaml',           [('# Trimmed reads (iVar)', ['flagstat_total'])]),
-        ('multiqc_samtools_flagstat_samtools_markduplicates.yaml', [('# Duplicate reads', ['duplicates_passed']),
-                                                                    ('# Reads after MarkDuplicates', ['flagstat_total'])]),
-        ('multiqc_picard_insertSize.yaml',                         [('Insert size mean', ['MEAN_INSERT_SIZE']),
-                                                                    ('Insert size std dev', ['STANDARD_DEVIATION'])]),
         ('multiqc_general_stats.yaml',                             [('Coverage median', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-median_coverage']),
                                                                     ('% Coverage > 1x', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-1_x_pc']),
                                                                     ('% Coverage > 10x', ['VARIANTS: mosdepth_mqc-generalstats-variants_mosdepth-10_x_pc'])]),
@@ -139,10 +135,12 @@ def main(args=None):
                                                                     ('# INDELs (iVar)', ['number_of_indels'])]),
         ('multiqc_snpeff_snpeff_ivar.yaml',                        [('# Missense variants (iVar)', ['MISSENSE'])]),
         ('multiqc_quast_quast_ivar.yaml',                          [('# Ns per 100kb consensus (iVar)', ["# N's per 100 kbp"])]),
+        ('multiqc_ivar_pangolin_lineage.yaml',                     [('Pangolin lineage (iVar)', ["Lineage"])]),
         ('multiqc_bcftools_stats_bcftools_bcftools.yaml',          [('# SNPs (BCFTools)', ['number_of_SNPs']),
                                                                     ('# INDELs (BCFTools)', ['number_of_indels'])]),
         ('multiqc_snpeff_snpeff_bcftools.yaml',                    [('# Missense variants (BCFTools)', ['MISSENSE'])]),
-        ('multiqc_quast_quast_bcftools.yaml',                      [('# Ns per 100kb consensus (BCFTools)', ["# N's per 100 kbp"])])
+        ('multiqc_quast_quast_bcftools.yaml',                      [('# Ns per 100kb consensus (BCFTools)', ["# N's per 100 kbp"])]),
+        ('multiqc_bcftools_pangolin_lineage.yaml',                 [('Pangolin lineage (BCFTools)', ["Lineage"])])
     ]
 
     illumina_assembly_files = [
@@ -171,7 +169,8 @@ def main(args=None):
         ('multiqc_bcftools_stats.yaml',                            [('# SNPs', ['number_of_SNPs']),
                                                                     ('# INDELs', ['number_of_indels'])]),
         ('multiqc_snpeff.yaml',                                    [('# Missense variants', ['MISSENSE'])]),
-        ('multiqc_quast.yaml',                                     [('# Ns per 100kb consensus', ["# N's per 100 kbp"])])
+        ('multiqc_quast.yaml',                                     [('# Ns per 100kb consensus', ["# N's per 100 kbp"])]),
+        ('multiqc_pangolin_lineage.yaml',                          [('Pangolin lineage', ["Lineage"])])
     ]
 
     if args.PLATFORM == 'illumina':
