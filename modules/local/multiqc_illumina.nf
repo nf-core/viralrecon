@@ -12,9 +12,9 @@ process MULTIQC {
         
     conda (params.enable_conda ? "bioconda::multiqc=1.10.1" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/multiqc:1.10.1--py_0"
+        container "https://depot.galaxyproject.org/singularity/multiqc:1.10.1--pyhdfd78af_1"
     } else {
-        container "quay.io/biocontainers/multiqc:1.10.1--py_0"
+        container "quay.io/biocontainers/multiqc:1.10.1--pyhdfd78af_1"
     }
 
     input:
@@ -30,13 +30,13 @@ process MULTIQC {
     path ('bowtie2/*')
     path ('ivar_trim/*')
     path ('picard_markduplicates/*')
-    path ('picard_markduplicates/*')
-    path ('picard_metrics/*')
     path ('mosdepth/*')
     path ('variants_ivar/*')
     path ('variants_ivar/*')
     path ('variants_ivar/*')
     path ('variants_ivar/*')
+    path ('variants_ivar/*')
+    path ('variants_bcftools/*')
     path ('variants_bcftools/*')
     path ('variants_bcftools/*')
     path ('variants_bcftools/*')
@@ -58,6 +58,7 @@ process MULTIQC {
     """
     multiqc -f $options.args $custom_config .
     multiqc_to_custom_csv.py --platform illumina
-    multiqc -f $options.args -e general_stats $custom_config .
+    find ./ -type l -name "*pangolin_lineage_mqc.tsv" -exec rm -f {} \\;
+    multiqc -f $options.args -e general_stats $custom_config .    
     """
 }
