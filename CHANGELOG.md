@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Illumina and Nanopore runs containing the same 48 samples sequenced on both platforms have been uploaded to the nf-core AWS account for full-sized tests on release
 * Added [Pangolin](https://github.com/cov-lineages/pangolin) for lineage analysis
 * Added [Nextclade](https://github.com/nextstrain/nextclade) for clade assignment, mutation calling and consensus sequence quality checks
+* Added [`ASCIIGenome`](https://asciigenome.readthedocs.io/en/latest/) for individual variant screenshots with annotation tracks
 * Variant graph processes to call variants relative to the reference genome directly from _de novo_ assemblies have been deprecated and removed
 * Variant calling with Varscan 2 has been deprecated and removed due to [licensing restrictions](https://github.com/dkoboldt/varscan/issues/12)
 
@@ -61,6 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 |                               | `--save_unaligned`                    |
 |                               | `--sequencing_summary`                |
 |                               | `--singularity_pull_docker_container` |
+|                               | `--skip_asciigenome`                  |
 |                               | `--skip_bandage`                      |
 |                               | `--skip_consensus`                    |
 |                               | `--skip_ivar_trim`                    |
@@ -105,6 +107,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | Dependency                    | Old version | New version |
 |-------------------------------|-------------|-------------|
 | `artic`                       |             | 1.2.1       |
+| `asciigenome`                 |             | 1.16.0      |
 | `bc`                          | 1.07.1      |             |
 | `bcftools`                    | 1.9         | 1.11        |
 | `bedtools`                    | 2.29.2      | 2.30.0      |
