@@ -26,7 +26,7 @@ The directories listed below will be created in the results directory after the 
 
 ## Nanopore: Preprocessing
 
-A file called `summary_variants_metrics_mqc.csv` containing a selection of read and variant calling metrics will be saved in the top-level results directory. The same metrics will also be added to the top of the MultiQC report.
+A file called `summary_variants_metrics_mqc.csv` containing a selection of read alignmnet and variant calling metrics will be saved in the `multiqc/<CALLER>/` output directory which is determined by the `--artic_minion_caller` parameter (Default: `nanopolish/`). The same metrics will also be added to the top of the MultiQC report.
 
 ### Nanopore: pycoQC
 
@@ -254,6 +254,7 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([`Pangolin`](https://
 * `multiqc/<CALLER>/`  
   * `multiqc_report.html`: a standalone HTML file that can be viewed in your web browser.
   * `multiqc_data/`: directory containing parsed statistics from the different tools used in the pipeline.
+  * `summary_variants_metrics_mqc.csv`: file containing a selection of read alignmnet and variant calling metrics. The same metrics will also be added to the top of the MultiQC report.`
 
 </details>
 
@@ -377,7 +378,7 @@ We use a Kraken 2 database in this workflow to filter out reads specific to the 
 
 ## Illumina: Variant calling
 
-A file called `summary_variants_metrics_mqc.csv` containing a selection of read and variant calling metrics will be saved in the `variants/` results directory. The same metrics will also be added to the top of the MultiQC report.
+A file called `summary_variants_metrics_mqc.csv` containing a selection of read alignment and variant calling metrics will be saved in the `variants/` results directory. The same metrics will also be added to the top of the MultiQC report.
 
 ### Bowtie 2
 
@@ -637,7 +638,7 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([`Pangolin`](https://
 
 ## Illumina: De novo assembly
 
-A file called `summary_assembly_metrics_mqc.csv` containing a selection of read and *de novo* assembly related metrics will be saved in the `assembly/` results directory. The same metrics will also be added to the top of the MultiQC report.
+A file called `summary_assembly_metrics_mqc.csv` containing a selection of read alignment and *de novo* assembly related metrics will be saved in the `assembly/` results directory. The same metrics will also be added to the top of the MultiQC report.
 
 ### Cutadapt
 
