@@ -17,11 +17,13 @@ params.snpeff_tabix_options        = [:]
 params.snpeff_stats_options        = [:]
 params.pangolin_options            = [:]
 params.nextclade_options           = [:]
+params.asciigenome_options         = [:]
 
 include { BCFTOOLS_MPILEUP } from '../../modules/nf-core/software/bcftools/mpileup/main' addParams( options: params.bcftools_mpileup_options ) 
 include { QUAST            } from '../../modules/nf-core/software/quast/main'            addParams( options: params.quast_options            )
 include { PANGOLIN         } from '../../modules/nf-core/software/pangolin/main'         addParams( options: params.pangolin_options         )
 include { NEXTCLADE        } from '../../modules/nf-core/software/nextclade/main'        addParams( options: params.nextclade_options        )
+include { ASCIIGENOME      } from '../../modules/local/asciigenome'                      addParams( options: params.asciigenome_options      )
 include { MAKE_CONSENSUS   } from './make_consensus'                                     addParams( genomecov_options: params.consensus_genomecov_options, merge_options: params.consensus_merge_options, mask_options: params.consensus_mask_options, maskfasta_options: params.consensus_maskfasta_options, bcftools_options: params.consensus_bcftools_options, plot_bases_options: params.consensus_plot_options )
 include { SNPEFF_SNPSIFT   } from './snpeff_snpsift'                                     addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
 
@@ -29,6 +31,7 @@ workflow VARIANTS_BCFTOOLS {
     take:
     bam           // channel: [ val(meta), [ bam ] ]
     fasta         // channel: /path/to/genome.fasta
+    bed           // channel: /path/to/primers.bed
     gff           // channel: /path/to/genome.gff
     snpeff_db     // channel: /path/to/snpeff_db/
     snpeff_config // channel: /path/to/snpeff.config
@@ -105,34 +108,65 @@ workflow VARIANTS_BCFTOOLS {
         ch_snpsift_version = SNPEFF_SNPSIFT.out.snpsift_version
     }
 
+    /*
+     * MODULE: Variant screenshots with ASCIIGenome
+     */
+    ch_asciigenome_pdf     = Channel.empty()
+    ch_asciigenome_version = Channel.empty()
+    if (!params.skip_asciigenome) {
+        bam
+            .join(BCFTOOLS_MPILEUP.out.vcf, by: [0])
+            .join(BCFTOOLS_MPILEUP.out.stats, by: [0])
+            .map { meta, bam, vcf, stats ->
+                if (WorkflowCommons.getNumVariantsFromBCFToolsStats(stats) > 0) {
+                    return [ meta, bam, vcf ]
+                }
+            }
+            .set { ch_asciigenome }
+
+        ASCIIGENOME (
+            ch_asciigenome,
+            fasta,
+            bed,
+            gff,
+            50,
+            50
+        )
+        ch_asciigenome_pdf     = ASCIIGENOME.out.pdf
+        ch_asciigenome_version = ASCIIGENOME.out.version
+    }
+
     emit:
-    vcf              = BCFTOOLS_MPILEUP.out.vcf     // channel: [ val(meta), [ vcf ] ]
-    tbi              = BCFTOOLS_MPILEUP.out.tbi     // channel: [ val(meta), [ tbi ] ]
-    stats            = BCFTOOLS_MPILEUP.out.stats   // channel: [ val(meta), [ txt ] ]
-    bcftools_version = BCFTOOLS_MPILEUP.out.version //    path: *.version.txt
+    vcf                 = BCFTOOLS_MPILEUP.out.vcf     // channel: [ val(meta), [ vcf ] ]
+    tbi                 = BCFTOOLS_MPILEUP.out.tbi     // channel: [ val(meta), [ tbi ] ]
+    stats               = BCFTOOLS_MPILEUP.out.stats   // channel: [ val(meta), [ txt ] ]
+    bcftools_version    = BCFTOOLS_MPILEUP.out.version //    path: *.version.txt
     
-    consensus        = ch_consensus                 // channel: [ val(meta), [ fasta ] ]
-    bases_tsv        = ch_bases_tsv                 // channel: [ val(meta), [ tsv ] ]
-    bases_pdf        = ch_bases_pdf                 // channel: [ val(meta), [ pdf ] ]
-    bedtools_version = ch_bedtools_version          //    path: *.version.txt 
+    consensus           = ch_consensus                 // channel: [ val(meta), [ fasta ] ]
+    bases_tsv           = ch_bases_tsv                 // channel: [ val(meta), [ tsv ] ]
+    bases_pdf           = ch_bases_pdf                 // channel: [ val(meta), [ pdf ] ]
+    bedtools_version    = ch_bedtools_version          //    path: *.version.txt 
     
-    quast_results    = ch_quast_results             // channel: [ val(meta), [ results ] ]
-    quast_tsv        = ch_quast_tsv                 // channel: [ val(meta), [ tsv ] ]
-    quast_version    = ch_quast_version             //    path: *.version.txt
+    quast_results       = ch_quast_results             // channel: [ val(meta), [ results ] ]
+    quast_tsv           = ch_quast_tsv                 // channel: [ val(meta), [ tsv ] ]
+    quast_version       = ch_quast_version             //    path: *.version.txt
 
-    snpeff_vcf       = ch_snpeff_vcf                // channel: [ val(meta), [ vcf.gz ] ]
-    snpeff_tbi       = ch_snpeff_tbi                // channel: [ val(meta), [ tbi ] ]
-    snpeff_stats     = ch_snpeff_stats              // channel: [ val(meta), [ txt ] ]
-    snpeff_csv       = ch_snpeff_csv                // channel: [ val(meta), [ csv ] ]
-    snpeff_txt       = ch_snpeff_txt                // channel: [ val(meta), [ txt ] ]
-    snpeff_html      = ch_snpeff_html               // channel: [ val(meta), [ html ] ]
-    snpsift_txt      = ch_snpsift_txt               // channel: [ val(meta), [ txt ] ]
-    snpeff_version   = ch_snpeff_version            //    path: *.version.txt
-    snpsift_version  = ch_snpsift_version           //    path: *.version.txt
+    snpeff_vcf          = ch_snpeff_vcf                // channel: [ val(meta), [ vcf.gz ] ]
+    snpeff_tbi          = ch_snpeff_tbi                // channel: [ val(meta), [ tbi ] ]
+    snpeff_stats        = ch_snpeff_stats              // channel: [ val(meta), [ txt ] ]
+    snpeff_csv          = ch_snpeff_csv                // channel: [ val(meta), [ csv ] ]
+    snpeff_txt          = ch_snpeff_txt                // channel: [ val(meta), [ txt ] ]
+    snpeff_html         = ch_snpeff_html               // channel: [ val(meta), [ html ] ]
+    snpsift_txt         = ch_snpsift_txt               // channel: [ val(meta), [ txt ] ]
+    snpeff_version      = ch_snpeff_version            //    path: *.version.txt
+    snpsift_version     = ch_snpsift_version           //    path: *.version.txt
 
-    pangolin_report  = ch_pangolin_report           // channel: [ val(meta), [ csv ] ]
-    pangolin_version = ch_pangolin_version          //    path: *.version.txt
+    pangolin_report     = ch_pangolin_report           // channel: [ val(meta), [ csv ] ]
+    pangolin_version    = ch_pangolin_version          //    path: *.version.txt
 
-    nextclade_report  = ch_nextclade_report         // channel: [ val(meta), [ csv ] ]
-    nextclade_version = ch_nextclade_version        //    path: *.version.txt
+    nextclade_report    = ch_nextclade_report          // channel: [ val(meta), [ csv ] ]
+    nextclade_version   = ch_nextclade_version         //    path: *.version.txt
+
+    asciigenome_pdf     = ch_asciigenome_pdf           // channel: [ val(meta), [ pdf ] ]
+    asciigenome_version = ch_asciigenome_version       //    path: *.version.txt
 }
