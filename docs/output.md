@@ -21,6 +21,7 @@ The directories listed below will be created in the results directory after the 
   * [QUAST](#nanopore-quast) - Consensus assessment report
   * [Pangolin](#nanopore-pangolin) - Lineage analysis
   * [Nextclade](#nanopore-nextclade) - Clade assignment, mutation calling and sequence quality checks
+  * [ASCIIGenome](#nanopore-asciigenome) - Individual variant screenshots with annotation tracks
 * [Workflow reporting](#nanopore-workflow-reporting)
   * [MultiQC](#nanopore-multiqc) - Present QC, visualisation and custom reporting for sequencing, raw reads, alignment and variant calling results
 
@@ -244,6 +245,19 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([`Pangolin`](https://
 
 [Nextclade](https://github.com/nextstrain/nextclade) performs viral genome clade assignment, mutation calling and sequence quality checks for the consensus sequences generated in this pipeline. Similar to Pangolin, it has been used extensively during the COVID-19 pandemic. A [web application](https://clades.nextstrain.org/) also exists that allows users to upload genome sequences via a web browser.
 
+### Nanopore: ASCIIGenome
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `<CALLER>/asciigenome/<SAMPLE>/`
+  * `*.pdf`: Individual variant screenshots with annotation tracks in PDF format.
+
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--artic_minion_caller` parameter (Default: 'nanopolish').
+
+</details>
+
+[`ASCIIGenome`](https://asciigenome.readthedocs.io/en/latest/)
 ## Nanopore: Workflow reporting
 
 ### Nanopore: MultiQC
@@ -287,6 +301,7 @@ An example MultiQC report generated from a full-sized dataset can be viewed on t
     * [QUAST](#quast) - Consensus assessment report
     * [Pangolin](#pangolin) - Lineage analysis
     * [Nextclade](#nextclade) - Clade assignment, mutation calling and sequence quality checks
+    * [ASCIIGenome](#asciigenome) - Individual variant screenshots with annotation tracks
   * [BCFTools isec](#bcftools-isec) - Intersect variants across all callers
 * [De novo assembly](#illumina-de-novo-assembly)
   * [Cutadapt](#cutadapt) - Primer trimming for amplicon data
@@ -616,6 +631,20 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([`Pangolin`](https://
 </details>
 
 [Nextclade](https://github.com/nextstrain/nextclade) performs viral genome clade assignment, mutation calling and sequence quality checks for the consensus sequences generated in this pipeline. Similar to Pangolin, it has been used extensively during the COVID-19 pandemic. A [web application](https://clades.nextstrain.org/) also exists that allows users to upload genome sequences via a web browser.
+
+### ASCIIGenome
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `variants/<CALLER>/asciigenome/<SAMPLE>/`
+  * `*.pdf`: Individual variant screenshots with annotation tracks in PDF format.
+
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
+
+</details>
+
+[`ASCIIGenome`](https://asciigenome.readthedocs.io/en/latest/)
 
 ### BCFTools isec
 
