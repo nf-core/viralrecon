@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [[2.0dev](https://github.com/nf-core/rnaseq/releases/tag/2.0)] - 2021-XX-XX
+## [[2.0](https://github.com/nf-core/rnaseq/releases/tag/2.0)] - 2021-05-13
 
 ### :warning: Major enhancements
 
@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Default human `--kraken2_db` link has been changed from Zenodo to an AWS S3 bucket for more reliable downloads
 * [BCFtools](http://samtools.github.io/bcftools/bcftools.html) and [iVar](https://github.com/andersen-lab/ivar) will be run by default for Illumina metagenomics and amplicon data, respectively. However, this behaviour can be customised with the `--callers` parameter.
 * Illumina and Nanopore runs containing the same 48 samples sequenced on both platforms have been uploaded to the nf-core AWS account for full-sized tests on release
+* Added [Pangolin](https://github.com/cov-lineages/pangolin) for lineage analysis
+* Added [Nextclade](https://github.com/nextstrain/nextclade) for clade assignment, mutation calling and consensus sequence quality checks
 * Variant graph processes to call variants relative to the reference genome directly from _de novo_ assemblies have been deprecated and removed
 * Variant calling with Varscan 2 has been deprecated and removed due to [licensing restrictions](https://github.com/dkoboldt/varscan/issues/12)
 
@@ -65,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 |                               | `--skip_nanoplot`                     |
 |                               | `--skip_pangolin`                     |
 |                               | `--skip_pycoqc`                       |
+|                               | `--skip_nextclade`                    |
 |                               | `--skip_sra_fastq_download`           |
 |                               | `--spades_hmm`                        |
 |                               | `--spades_mode`                       |
@@ -112,13 +115,14 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `cutadapt`                    | 2.10        | 3.2         |
 | `ivar`                        | 1.2.2       | 1.3.1       |
 | `kraken2`                     | 2.0.9beta   | 2.1.1       |
-| `nanoplot`                    |             | 1.36.1      |
 | `markdown`                    | 3.2.2       |             |
 | `minimap2`                    | 2.17        |             |
 | `mosdepth`                    | 0.2.6       | 0.3.1       |
 | `multiqc`                     | 1.9         | 1.10.1      |
+| `nanoplot`                    |             | 1.36.1      |
+| `nextclade_js`                |             | 0.14.2      |
+| `pangolin`                    |             | 2.4.2       |
 | `parallel-fastq-dump`         | 0.6.6       |             |
-| `pangolin`                    |             | 2.3.8       |
 | `picard`                      | 2.23.0      | 2.23.9      |
 | `pigz`                        | 2.3.4       |             |
 | `plasmidid`                   | 1.6.3       | 1.6.4       |

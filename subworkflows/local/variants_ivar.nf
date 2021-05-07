@@ -16,6 +16,7 @@ params.snpeff_bgzip_options         = [:]
 params.snpeff_tabix_options         = [:]
 params.snpeff_stats_options         = [:]
 params.pangolin_options             = [:]
+params.nextclade_options            = [:]
 
 include { IVAR_VARIANTS_TO_VCF  } from '../../modules/local/ivar_variants_to_vcf'           addParams( options: params.ivar_variants_to_vcf_options )
 include { PLOT_BASE_DENSITY     } from '../../modules/local/plot_base_density'              addParams( options: params.consensus_plot_options       )
@@ -23,6 +24,7 @@ include { IVAR_VARIANTS         } from '../../modules/nf-core/software/ivar/vari
 include { IVAR_CONSENSUS        } from '../../modules/nf-core/software/ivar/consensus/main' addParams( options: params.ivar_consensus_options       )
 include { QUAST                 } from '../../modules/nf-core/software/quast/main'          addParams( options: params.quast_options                )
 include { PANGOLIN              } from '../../modules/nf-core/software/pangolin/main'       addParams( options: params.pangolin_options             )
+include { NEXTCLADE             } from '../../modules/nf-core/software/nextclade/main'      addParams( options: params.nextclade_options            )
 include { VCF_BGZIP_TABIX_STATS } from '../nf-core/vcf_bgzip_tabix_stats'                   addParams( bgzip_options: params.tabix_bgzip_options, tabix_options: params.tabix_tabix_options, stats_options: params.bcftools_stats_options )
 include { SNPEFF_SNPSIFT        } from './snpeff_snpsift'                                   addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
 
@@ -51,15 +53,17 @@ workflow VARIANTS_IVAR {
     /*
      * Create genome consensus
      */
-    ch_consensus        = Channel.empty()
-    ch_consensus_qual   = Channel.empty()
-    ch_bases_tsv        = Channel.empty()
-    ch_bases_pdf        = Channel.empty()
-    ch_quast_results    = Channel.empty()
-    ch_quast_tsv        = Channel.empty()
-    ch_quast_version    = Channel.empty()
-    ch_pangolin_report  = Channel.empty()
-    ch_pangolin_version = Channel.empty()
+    ch_consensus         = Channel.empty()
+    ch_consensus_qual    = Channel.empty()
+    ch_bases_tsv         = Channel.empty()
+    ch_bases_pdf         = Channel.empty()
+    ch_quast_results     = Channel.empty()
+    ch_quast_tsv         = Channel.empty()
+    ch_quast_version     = Channel.empty()
+    ch_pangolin_report   = Channel.empty()
+    ch_pangolin_version  = Channel.empty()
+    ch_nextclade_report  = Channel.empty()
+    ch_nextclade_version = Channel.empty()
     if (!params.skip_consensus) {
         IVAR_CONSENSUS ( bam, fasta )
         ch_consensus       = IVAR_CONSENSUS.out.fasta
@@ -80,6 +84,12 @@ workflow VARIANTS_IVAR {
             PANGOLIN ( ch_consensus )
             ch_pangolin_report  = PANGOLIN.out.report
             ch_pangolin_version = PANGOLIN.out.version
+        }
+
+        if (!params.skip_nextclade) {
+            NEXTCLADE ( ch_consensus, 'csv' )
+            ch_nextclade_report  = NEXTCLADE.out.csv
+            ch_nextclade_version = NEXTCLADE.out.version
         }
     }
 
@@ -143,5 +153,8 @@ workflow VARIANTS_IVAR {
 
     pangolin_report  = ch_pangolin_report                         // channel: [ val(meta), [ csv ] ]
     pangolin_version = ch_pangolin_version                        //    path: *.version.txt
+
+    nextclade_report  = ch_nextclade_report         // channel: [ val(meta), [ csv ] ]
+    nextclade_version = ch_nextclade_version        //    path: *.version.txt
 }
 
