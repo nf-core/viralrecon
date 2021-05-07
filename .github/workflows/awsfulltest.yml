@@ -16,7 +16,6 @@ env:
   AWS_JOB_QUEUE: ${{ secrets.AWS_JOB_QUEUE }}
   AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
 
-
 jobs:
   run-awstest:
     name: Run AWS full tests
