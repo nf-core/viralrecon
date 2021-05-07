@@ -83,4 +83,16 @@ class WorkflowCommons {
         }
         return lineage
     }
+
+    /*
+     * Function to get number of variants reported in BCFTools stats file
+     */
+    public static Integer getNumVariantsFromBCFToolsStats(bcftools_stats) {
+        def num_vars = 0
+        bcftools_stats.eachLine { line ->
+            def matcher = line =~ /SN\s*0\s*number\sof\srecords:\s*([\d]+)/
+            if (matcher) num_vars = matcher[0][1].toInteger()
+        }
+        return num_vars
+    }
 }
