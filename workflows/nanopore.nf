@@ -53,16 +53,12 @@ ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multi
 // Don't overwrite global params.modules, create a copy instead and use that within the main script.
 def modules = params.modules.clone()
 
-def artic_minion_options   = modules['nanopore_artic_minion']
-artic_minion_options.args += params.artic_minion_caller  == 'medaka' ? Utils.joinModuleArgs(['--medaka']) : ''
-artic_minion_options.args += params.artic_minion_aligner == 'bwa'    ? Utils.joinModuleArgs(['--bwa'])    : Utils.joinModuleArgs(['--minimap2'])
-
 def multiqc_options   = modules['nanopore_multiqc']
 multiqc_options.args += params.multiqc_title ? Utils.joinModuleArgs(["--title \"$params.multiqc_title\""]) : ''
 
-include { ARTIC_MINION          } from '../modules/local/artic_minion'          addParams( options: artic_minion_options                )
-include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files: ['csv':'']]         )
-include { MULTIQC               } from '../modules/local/multiqc_nanopore'      addParams( options: multiqc_options                     )
+include { ASCIIGENOME           } from '../modules/local/asciigenome'           addParams( options: modules['nanopore_asciigenome'] )
+include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files: ['csv':'']]     )
+include { MULTIQC               } from '../modules/local/multiqc_nanopore'      addParams( options: multiqc_options                 )
 
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME  } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
@@ -96,9 +92,15 @@ include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'          
 /*
  * MODULE: Installed directly from nf-core/modules
  */
+
+def artic_minion_options   = modules['nanopore_artic_minion']
+artic_minion_options.args += params.artic_minion_caller  == 'medaka' ? Utils.joinModuleArgs(['--medaka']) : ''
+artic_minion_options.args += params.artic_minion_aligner == 'bwa'    ? Utils.joinModuleArgs(['--bwa'])    : Utils.joinModuleArgs(['--minimap2'])
+
 include { PYCOQC                        } from '../modules/nf-core/software/pycoqc/main'          addParams( options: modules['nanopore_pycoqc']            )
 include { NANOPLOT                      } from '../modules/nf-core/software/nanoplot/main'        addParams( options: modules['nanopore_nanoplot']          )
 include { ARTIC_GUPPYPLEX               } from '../modules/nf-core/software/artic/guppyplex/main' addParams( options: modules['nanopore_artic_guppyplex']   )
+include { ARTIC_MINION                  } from '../modules/nf-core/software/artic/minion/main'    addParams( options: artic_minion_options                  )
 include { BCFTOOLS_STATS                } from '../modules/nf-core/software/bcftools/stats/main'  addParams( options: modules['nanopore_bcftools_stats']    )
 include { QUAST                         } from '../modules/nf-core/software/quast/main'           addParams( options: modules['nanopore_quast']             )
 include { PANGOLIN                      } from '../modules/nf-core/software/pangolin/main'        addParams( options: modules['nanopore_pangolin']          )
@@ -430,6 +432,33 @@ workflow NANOPORE {
         ch_snpeff_multiqc = SNPEFF_SNPSIFT.out.csv
         ch_software_versions = ch_software_versions.mix(SNPEFF_SNPSIFT.out.snpeff_version.ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(SNPEFF_SNPSIFT.out.snpsift_version.ifEmpty(null))
+    }
+
+    /*
+     * MODULE: Variant screenshots with ASCIIGenome
+     */
+    if (!params.skip_asciigenome) {
+        ARTIC_MINION
+            .out
+            .bam_primertrimmed
+            .join(ARTIC_MINION.out.vcf, by: [0])
+            .join(BCFTOOLS_STATS.out.stats, by: [0])
+            .map { meta, bam, vcf, stats ->
+                if (WorkflowCommons.getNumVariantsFromBCFToolsStats(stats) > 0) {
+                    return [ meta, bam, vcf ]
+                }
+            }
+            .set { ch_asciigenome }
+
+        ASCIIGENOME (
+            ch_asciigenome,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.primer_bed,
+            params.gff ? PREPARE_GENOME.out.gff : [],
+            50,
+            50
+        )
+        ch_software_versions = ch_software_versions.mix(ASCIIGENOME.out.version.ifEmpty(null))
     }
 
     /*
