@@ -60,10 +60,10 @@ def multiqc_options   = modules['illumina_multiqc']
 multiqc_options.args += params.multiqc_title ? Utils.joinModuleArgs(["--title \"$params.multiqc_title\""]) : ''
 
 if (!params.skip_assembly) {
-    multiqc_options.publish_files.put('assembly_metrics_mqc.csv','assembly')
+    multiqc_options.publish_files.put('assembly_metrics_mqc.csv','')
 }
 if (!params.skip_variants) {
-    multiqc_options.publish_files.put('variants_metrics_mqc.csv','variants')
+    multiqc_options.publish_files.put('variants_metrics_mqc.csv','')
 }
 
 include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] ) 
