@@ -44,6 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 |                               | `--artic_minion_aligner`              |
 |                               | `--artic_minion_caller`               |
 |                               | `--artic_minion_medaka_model`         |
+|                               | `--asciigenome_read_depth`            |
+|                               | `--asciigenome_window_size`           |
 |                               | `--blast_db`                          |
 |                               | `--enable_conda`                      |
 |                               | `--fast5_dir`                         |
