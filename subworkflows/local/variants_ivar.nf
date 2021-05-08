@@ -142,8 +142,8 @@ workflow VARIANTS_IVAR {
             fasta,
             bed,
             gff,
-            50,
-            50
+            params.asciigenome_window_size,
+            params.asciigenome_read_depth
         )
         ch_asciigenome_pdf     = ASCIIGENOME.out.pdf
         ch_asciigenome_version = ASCIIGENOME.out.version

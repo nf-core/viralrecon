@@ -455,8 +455,8 @@ workflow NANOPORE {
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.primer_bed,
             params.gff ? PREPARE_GENOME.out.gff : [],
-            50,
-            50
+            params.asciigenome_window_size,
+            params.asciigenome_read_depth
         )
         ch_software_versions = ch_software_versions.mix(ASCIIGENOME.out.version.ifEmpty(null))
     }
