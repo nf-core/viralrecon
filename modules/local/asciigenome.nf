@@ -33,8 +33,8 @@ process ASCIIGENOME {
     script:
     def software   = getSoftwareName(task.process)
     def prefix     = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
-    def bed_track  = bed ? "$bed" : ''
     def gff_track  = gff ? "$gff" : ''
+    def bed_track  = bed ? "$bed" : ''
     def paired_end = meta.single_end ? '' : '&& readsAsPairs -on'    
     """
     zcat $vcf \\
