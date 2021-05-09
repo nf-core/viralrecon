@@ -34,8 +34,8 @@ workflow VARIANTS_IVAR {
     take:
     bam                 // channel: [ val(meta), [ bam ] ]
     fasta               // channel: /path/to/genome.fasta
-    bed                 // channel: /path/to/primers.bed
     gff                 // channel: /path/to/genome.gff
+    bed                 // channel: /path/to/primers.bed
     snpeff_db           // channel: /path/to/snpeff_db/
     snpeff_config       // channel: /path/to/snpeff.config
     ivar_multiqc_header // channel: /path/to/multiqc_header for ivar variants
