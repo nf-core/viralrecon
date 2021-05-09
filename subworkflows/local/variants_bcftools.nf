@@ -127,8 +127,8 @@ workflow VARIANTS_BCFTOOLS {
         ASCIIGENOME (
             ch_asciigenome,
             fasta,
-            bed,
             gff,
+            bed,
             params.asciigenome_window_size,
             params.asciigenome_read_depth
         )

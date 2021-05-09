@@ -140,8 +140,8 @@ workflow VARIANTS_IVAR {
         ASCIIGENOME (
             ch_asciigenome,
             fasta,
-            bed,
             gff,
+            bed,
             params.asciigenome_window_size,
             params.asciigenome_read_depth
         )

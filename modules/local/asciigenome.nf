@@ -21,8 +21,8 @@ process ASCIIGENOME {
     input:
     tuple val(meta), path(bam), path(vcf)
     path  fasta
-    path  bed
     path  gff
+    path  bed
     val   window
     val   track_height
 
