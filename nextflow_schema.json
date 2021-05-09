@@ -300,6 +300,18 @@
                     "fa_icon": "fas fa-clone",
                     "description": "Filtered duplicates reads detected by Picard MarkDuplicates from alignments."
                 },
+                "asciigenome_read_depth": {
+                    "type": "integer",
+                    "default": 50,
+                    "description": "Maximum read depth used to generate ASCIIGenome screenshots for variant locii.",
+                    "fa_icon": "fas fa-align-center"
+                },
+                "asciigenome_window_size": {
+                    "type": "integer",
+                    "default": 50,
+                    "description": "Maximum window size before and after variant locii used to generate ASCIIGenome screenshots.",
+                    "fa_icon": "fab fa-windows"
+                },
                 "save_unaligned": {
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
@@ -684,15 +696,5 @@
         {
             "$ref": "#/definitions/institutional_config_options"
         }
-    ],
-    "properties": {
-        "asciigenome_read_depth": {
-            "type": "integer",
-            "default": 50
-        },
-        "asciigenome_window_size": {
-            "type": "integer",
-            "default": 50
-        }
-    }
+    ]
 }
