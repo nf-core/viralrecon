@@ -259,7 +259,9 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 
 As described in the documentation, [ASCIIGenome](https://asciigenome.readthedocs.io/en/latest/) is a command-line genome browser that can be run from a terminal window and is solely based on ASCII characters. The closest program to ASCIIGenome is probably [samtools tview](http://www.htslib.org/doc/samtools-tview.html) but ASCIIGenome offers much more flexibility, similar to popular GUI viewers like the [IGV](https://software.broadinstitute.org/software/igv/) browser. We are using the batch processing mode of ASCIIGenome in this pipeline to generate individual screenshots for all of the variant sites reported for each sample in the VCF files. This is incredibly useful to be able to quickly QC the variants called by the pipeline without having to tediously load all of the relevant tracks into a conventional genome browser. Where possible, the BAM read alignments, VCF variant file, primer BED file and GFF annotation track will be represented in the screenshot for contextual purposes. The screenshot below shows a SNP called relative to the MN908947.3 SARS-CoV-2 reference genome that overlaps the ORF7a protein and the nCoV-2019_91_LEFT primer from the ARIC v3 protocol.
 
-![ASCIIGenome screenshot](images/asciigenome_screenshot.png)
+<p markdown="1" align="center">
+  <img src="images/asciigenome_screenshot.png" alt="ASCIIGenome screenshot">
+</p>
 
 ## Nanopore: Workflow reporting
 
@@ -649,7 +651,9 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 
 As described in the documentation, [ASCIIGenome](https://asciigenome.readthedocs.io/en/latest/) is a command-line genome browser that can be run from a terminal window and is solely based on ASCII characters. The closest program to ASCIIGenome is probably [samtools tview](http://www.htslib.org/doc/samtools-tview.html) but ASCIIGenome offers much more flexibility, similar to popular GUI viewers like the [IGV](https://software.broadinstitute.org/software/igv/) browser. We are using the batch processing mode of ASCIIGenome in this pipeline to generate individual screenshots for all of the variant sites reported for each sample in the VCF files. This is incredibly useful to be able to quickly QC the variants called by the pipeline without having to tediously load all of the relevant tracks into a conventional genome browser. Where possible, the BAM read alignments, VCF variant file, primer BED file and GFF annotation track will be represented in the screenshot for contextual purposes. The screenshot below shows a SNP called relative to the MN908947.3 SARS-CoV-2 reference genome that overlaps the ORF7a protein and the nCoV-2019_91_LEFT primer from the ARIC v3 protocol.
 
-![ASCIIGenome screenshot](images/asciigenome_screenshot.png)
+<p markdown="1" align="center">
+  <img src="images/asciigenome_screenshot.png" alt="ASCIIGenome screenshot">
+</p>
 
 ### BCFTools isec
 
