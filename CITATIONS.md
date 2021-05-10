@@ -13,6 +13,9 @@
 * [ABACAS](https://www.ncbi.nlm.nih.gov/pubmed/19497936/)
   > Assefa S, Keane TM, Otto TD, Newbold C, Berriman M. ABACAS: algorithm-based automatic contiguation of assembled sequences. Bioinformatics. 2009 Aug 1;25(15):1968-9. doi: 10.1093/bioinformatics/btp347. Epub 2009 Jun 3. PubMed PMID: 19497936; PubMed Central PMCID: PMC2712343.
 
+* [ASCIIGenome](https://www.ncbi.nlm.nih.gov/pubmed/28119307/)
+  > Beraldi D. ASCIIGenome: a command line genome browser for console terminals. Bioinformatics. 2017 May 15;33(10):1568-1569. doi: 10.1093/bioinformatics/btx007. PubMed PMID: 28119307; PubMed Central PMCID: PMC5423454.
+
 * [ARTIC network](https://github.com/artic-network)
 
 * [Bandage](https://www.ncbi.nlm.nih.gov/pubmed/26099265)

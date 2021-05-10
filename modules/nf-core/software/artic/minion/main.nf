@@ -10,7 +10,7 @@ process ARTIC_MINION {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
-        
+
     conda (params.enable_conda ? "bioconda::artic=1.2.1" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/artic:1.2.1--py_0"
@@ -27,7 +27,7 @@ process ARTIC_MINION {
     path  medaka_model
     val   scheme
     val   scheme_version
-    
+
     output:
     tuple val(meta), path("${prefix}.*")                              , emit: results
     tuple val(meta), path("${prefix}.sorted.bam")                     , emit: bam
@@ -67,7 +67,7 @@ process ARTIC_MINION {
         $summary \\
         $scheme \\
         $prefix
-        
+
     echo \$(artic --version 2>&1) | sed 's/^.*artic //; s/ .*\$//' > ${software}.version.txt
     """
 }

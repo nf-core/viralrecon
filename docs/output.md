@@ -21,6 +21,7 @@ The directories listed below will be created in the results directory after the 
   * [QUAST](#nanopore-quast) - Consensus assessment report
   * [Pangolin](#nanopore-pangolin) - Lineage analysis
   * [Nextclade](#nanopore-nextclade) - Clade assignment, mutation calling and sequence quality checks
+  * [ASCIIGenome](#nanopore-asciigenome) - Individual variant screenshots with annotation tracks
 * [Workflow reporting](#nanopore-workflow-reporting)
   * [MultiQC](#nanopore-multiqc) - Present QC, visualisation and custom reporting for sequencing, raw reads, alignment and variant calling results
 
@@ -228,7 +229,7 @@ BAM files containing the original alignments from either Minimap2 or BWA are fur
 
 </details>
 
-Phylogenetic Assignment of Named Global Outbreak LINeages ([`Pangolin`](https://github.com/cov-lineages/pangolin)) has been used extensively during the COVID-19 pandemic to assign lineages to SARS-CoV-2 genome sequenced samples. A [web application](https://pangolin.cog-uk.io/) also exists that allows users to upload genome sequences via a web browser to assign lineages to genome sequences of SARS-CoV-2, view descriptive characteristics of the assigned lineage(s), view the placement of the lineage in a phylogeny of global samples, and view the temporal and geographic distribution of the assigned lineage(s).
+Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://github.com/cov-lineages/pangolin)) has been used extensively during the COVID-19 pandemic to assign lineages to SARS-CoV-2 genome sequenced samples. A [web application](https://pangolin.cog-uk.io/) also exists that allows users to upload genome sequences via a web browser to assign lineages to genome sequences of SARS-CoV-2, view descriptive characteristics of the assigned lineage(s), view the placement of the lineage in a phylogeny of global samples, and view the temporal and geographic distribution of the assigned lineage(s).
 
 ### Nanopore: Nextclade
 
@@ -243,6 +244,24 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([`Pangolin`](https://
 </details>
 
 [Nextclade](https://github.com/nextstrain/nextclade) performs viral genome clade assignment, mutation calling and sequence quality checks for the consensus sequences generated in this pipeline. Similar to Pangolin, it has been used extensively during the COVID-19 pandemic. A [web application](https://clades.nextstrain.org/) also exists that allows users to upload genome sequences via a web browser.
+
+### Nanopore: ASCIIGenome
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `<CALLER>/asciigenome/<SAMPLE>/`
+  * `*.pdf`: Individual variant screenshots with annotation tracks in PDF format.
+
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--artic_minion_caller` parameter (Default: 'nanopolish').
+
+</details>
+
+As described in the documentation, [ASCIIGenome](https://asciigenome.readthedocs.io/en/latest/) is a command-line genome browser that can be run from a terminal window and is solely based on ASCII characters. The closest program to ASCIIGenome is probably [samtools tview](http://www.htslib.org/doc/samtools-tview.html) but ASCIIGenome offers much more flexibility, similar to popular GUI viewers like the [IGV](https://software.broadinstitute.org/software/igv/) browser. We are using the batch processing mode of ASCIIGenome in this pipeline to generate individual screenshots for all of the variant sites reported for each sample in the VCF files. This is incredibly useful to be able to quickly QC the variants called by the pipeline without having to tediously load all of the relevant tracks into a conventional genome browser. Where possible, the BAM read alignments, VCF variant file, primer BED file and GFF annotation track will be represented in the screenshot for contextual purposes. The screenshot below shows a SNP called relative to the MN908947.3 SARS-CoV-2 reference genome that overlaps the ORF7a protein and the nCoV-2019_91_LEFT primer from the ARIC v3 protocol.
+
+<p markdown="1" align="center">
+  <img src="images/asciigenome_screenshot.png" alt="ASCIIGenome screenshot">
+</p>
 
 ## Nanopore: Workflow reporting
 
@@ -287,6 +306,7 @@ An example MultiQC report generated from a full-sized dataset can be viewed on t
     * [QUAST](#quast) - Consensus assessment report
     * [Pangolin](#pangolin) - Lineage analysis
     * [Nextclade](#nextclade) - Clade assignment, mutation calling and sequence quality checks
+    * [ASCIIGenome](#asciigenome) - Individual variant screenshots with annotation tracks
   * [BCFTools isec](#bcftools-isec) - Intersect variants across all callers
 * [De novo assembly](#illumina-de-novo-assembly)
   * [Cutadapt](#cutadapt) - Primer trimming for amplicon data
@@ -601,7 +621,7 @@ Unless you are using [UMIs](https://emea.illumina.com/science/sequencing-method-
 
 </details>
 
-Phylogenetic Assignment of Named Global Outbreak LINeages ([`Pangolin`](https://github.com/cov-lineages/pangolin)) has been used extensively during the COVID-19 pandemic in order to to assign lineages to SARS-CoV-2 genome sequenced samples. A [web application](https://pangolin.cog-uk.io/) also exists that allows users to upload genome sequences via a web browser to assign lineages to genome sequences of SARS-CoV-2, view descriptive characteristics of the assigned lineage(s), view the placement of the lineage in a phylogeny of global samples, and view the temporal and geographic distribution of the assigned lineage(s).
+Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://github.com/cov-lineages/pangolin)) has been used extensively during the COVID-19 pandemic in order to to assign lineages to SARS-CoV-2 genome sequenced samples. A [web application](https://pangolin.cog-uk.io/) also exists that allows users to upload genome sequences via a web browser to assign lineages to genome sequences of SARS-CoV-2, view descriptive characteristics of the assigned lineage(s), view the placement of the lineage in a phylogeny of global samples, and view the temporal and geographic distribution of the assigned lineage(s).
 
 ### Nextclade
 
@@ -616,6 +636,24 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([`Pangolin`](https://
 </details>
 
 [Nextclade](https://github.com/nextstrain/nextclade) performs viral genome clade assignment, mutation calling and sequence quality checks for the consensus sequences generated in this pipeline. Similar to Pangolin, it has been used extensively during the COVID-19 pandemic. A [web application](https://clades.nextstrain.org/) also exists that allows users to upload genome sequences via a web browser.
+
+### ASCIIGenome
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `variants/<CALLER>/asciigenome/<SAMPLE>/`
+  * `*.pdf`: Individual variant screenshots with annotation tracks in PDF format.
+
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
+
+</details>
+
+As described in the documentation, [ASCIIGenome](https://asciigenome.readthedocs.io/en/latest/) is a command-line genome browser that can be run from a terminal window and is solely based on ASCII characters. The closest program to ASCIIGenome is probably [samtools tview](http://www.htslib.org/doc/samtools-tview.html) but ASCIIGenome offers much more flexibility, similar to popular GUI viewers like the [IGV](https://software.broadinstitute.org/software/igv/) browser. We are using the batch processing mode of ASCIIGenome in this pipeline to generate individual screenshots for all of the variant sites reported for each sample in the VCF files. This is incredibly useful to be able to quickly QC the variants called by the pipeline without having to tediously load all of the relevant tracks into a conventional genome browser. Where possible, the BAM read alignments, VCF variant file, primer BED file and GFF annotation track will be represented in the screenshot for contextual purposes. The screenshot below shows a SNP called relative to the MN908947.3 SARS-CoV-2 reference genome that overlaps the ORF7a protein and the nCoV-2019_91_LEFT primer from the ARIC v3 protocol.
+
+<p markdown="1" align="center">
+  <img src="images/asciigenome_screenshot.png" alt="ASCIIGenome screenshot">
+</p>
 
 ### BCFTools isec
 

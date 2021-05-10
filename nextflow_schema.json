@@ -42,8 +42,8 @@
                 }
             }
         },
-        "sra_download": {
-            "title": "SRA download",
+        "sra_download_options": {
+            "title": "SRA download options",
             "type": "object",
             "description": "Options for downloading publicy available data from the SRA.",
             "default": "",
@@ -89,11 +89,6 @@
                     "description": "Path to directory or tar.gz archive for pre-built Bowtie2 index.",
                     "fa_icon": "fas fa-bezier-curve"
                 },
-                "blast_db": {
-                    "type": "string",
-                    "fa_icon": "fas fa-database",
-                    "description": "Path to directory or tar.gz archive for pre-built BLAST database."
-                },
                 "primer_bed": {
                     "type": "string",
                     "description": "If the '--protocol amplicon' parameter is provided then iVar is used to trim primer sequences after read alignment and before variant calling.",
@@ -105,18 +100,6 @@
                     "description": "If the '--protocol amplicon' parameter is provided then Cutadapt is used to trim primer sequences from FastQ files before de novo assembly.",
                     "help_text": "This file must contain amplicon primer sequences in Fasta format. An example is shown below:\n\n```\n>nCoV-2019_1_LEFT\nACCAACCAACTTTCGATCTCTTGT\n>nCoV-2019_1_RIGHT\nCATCTTTAAGATGTTGACGTGCCTC\n>nCoV-2019_2_LEFT\nCTGTTTTACAGGTTCGCGACGT\n>nCoV-2019_2_RIGHT\nTAAGGATCAGTGCCAAGCTCGT\n```",
                     "fa_icon": "fas fa-stream"
-                },
-                "primer_left_suffix": {
-                    "type": "string",
-                    "default": "_LEFT",
-                    "fa_icon": "fas fa-arrow-left",
-                    "description": "Suffix used in name field of '--primer_bed' to indicate left primer position."
-                },
-                "primer_right_suffix": {
-                    "type": "string",
-                    "default": "_RIGHT",
-                    "fa_icon": "fas fa-arrow-right",
-                    "description": "Suffix used in name field of '--primer_bed' to indicate right primer position."
                 },
                 "primer_set": {
                     "type": "string",
@@ -130,6 +113,18 @@
                     "description": "Version of the primer set e.g. '--primer_set artic --primer_set_version 3'.",
                     "help_text": "Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard keys. See https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config"
                 },
+                "primer_left_suffix": {
+                    "type": "string",
+                    "default": "_LEFT",
+                    "fa_icon": "fas fa-arrow-left",
+                    "description": "Suffix used in name field of '--primer_bed' to indicate left primer position."
+                },
+                "primer_right_suffix": {
+                    "type": "string",
+                    "default": "_RIGHT",
+                    "fa_icon": "fas fa-arrow-right",
+                    "description": "Suffix used in name field of '--primer_bed' to indicate right primer position."
+                },
                 "save_reference": {
                     "type": "boolean",
                     "fa_icon": "fas fa-save",
@@ -140,7 +135,7 @@
         "nanopore_options": {
             "title": "Nanopore options",
             "type": "object",
-            "description": "Options specific to running the pipeline on Nanopore data using the ARTIC fieldbioinformatics pipeline.",
+            "description": "Options exclusive to running the pipeline on Nanopore data using the ARTIC fieldbioinformatics pipeline.",
             "default": "",
             "fa_icon": "fas fa-truck-loading",
             "properties": {
@@ -210,44 +205,83 @@
                 }
             }
         },
-        "read_trimming_options": {
-            "title": "Read trimming options",
+        "nanopore_illumina_options": {
+            "title": "Nanopore/Illumina options",
             "type": "object",
-            "description": "Options to adjust read trimming criteria.",
+            "description": "Options common to both the Nanopore and Illumina workflows in the pipeline.",
             "default": "",
             "properties": {
-                "save_trimmed_fail": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-save",
-                    "description": "Save the trimmed FastQ files in the results directory.",
-                    "help_text": "By default, trimmed FastQ files will not be saved to the results directory. Specify this flag (or set to true in your config file) to copy these files to the results directory when complete."
+                "asciigenome_read_depth": {
+                    "type": "integer",
+                    "default": 50,
+                    "description": "Maximum read depth used to generate ASCIIGenome screenshots for variant locii.",
+                    "fa_icon": "fas fa-align-center"
                 },
-                "skip_fastp": {
+                "asciigenome_window_size": {
+                    "type": "integer",
+                    "default": 50,
+                    "description": "Maximum window size before and after variant locii used to generate ASCIIGenome screenshots.",
+                    "fa_icon": "fab fa-windows"
+                },
+                "multiqc_title": {
+                    "type": "string",
+                    "hidden": true,
+                    "fa_icon": "fas fa-signature",
+                    "description": "Custom title for the MultiQC report."
+                },
+                "multiqc_config": {
+                    "type": "string",
+                    "description": "Custom config file to supply to MultiQC.",
+                    "fa_icon": "fas fa-cog",
+                    "hidden": true
+                },
+                "max_multiqc_email_size": {
+                    "type": "string",
+                    "description": "File size limit when attaching MultiQC reports to summary emails.",
+                    "default": "25.MB",
+                    "fa_icon": "fas fa-file-upload",
+                    "hidden": true,
+                    "help_text": "If file generated by pipeline exceeds the threshold, it will not be attached."
+                },
+                "skip_mosdepth": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip the initial read trimming step peformed by fastp."
+                    "description": "Skip genome-wide and amplicon coverage plot generation from mosdepth output."
+                },
+                "skip_pangolin": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip Pangolin lineage analysis for genome consensus sequence."
+                },
+                "skip_nextclade": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip Nextclade clade assignment, mutation calling, and sequence quality checks for genome consensus sequence."
+                },
+                "skip_asciigenome": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip variant screenshot generation with ASCIIGenome."
+                },
+                "skip_variants_quast": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip generation of QUAST aggregated report for consensus sequences."
+                },
+                "skip_multiqc": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip MultiQC."
                 }
             },
-            "fa_icon": "fas fa-cut"
+            "fa_icon": "fas fa-retweet"
         },
-        "kraken2_options": {
-            "title": "Kraken2 options",
+        "illumina_qc_read_trimming_and_filtering_options": {
+            "title": "Illumina QC, read trimming and filtering options",
             "type": "object",
-            "description": "Options for host read filtering with Kraken2.",
+            "description": "Options to adjust QC, read trimming and host read filtering with Kraken2 for the Illumina workflow.",
             "default": "",
-            "fa_icon": "fab fa-gitkraken",
             "properties": {
-                "kraken2_variants_host_filter": {
-                    "type": "boolean",
-                    "fa_icon": "fab fa-gitkraken",
-                    "description": "Remove host reads identified by Kraken2 before running variant calling steps in the pipeline."
-                },
-                "kraken2_assembly_host_filter": {
-                    "type": "boolean",
-                    "default": true,
-                    "fa_icon": "fab fa-gitkraken",
-                    "description": "Remove host reads identified by Kraken2 before running aseembly steps in the pipeline."
-                },
                 "kraken2_db": {
                     "type": "string",
                     "default": "s3://nf-core-awsmegatests/viralrecon/input_data/kraken2_human.tar.gz",
@@ -260,17 +294,50 @@
                     "fa_icon": "fab fa-gitkraken",
                     "description": "Name for host genome as recognised by Kraken2 when using the 'kraken2 build' command."
                 },
+                "kraken2_variants_host_filter": {
+                    "type": "boolean",
+                    "fa_icon": "fab fa-gitkraken",
+                    "description": "Remove host reads identified by Kraken2 before running variant calling steps in the pipeline."
+                },
+                "kraken2_assembly_host_filter": {
+                    "type": "boolean",
+                    "default": true,
+                    "fa_icon": "fab fa-gitkraken",
+                    "description": "Remove host reads identified by Kraken2 before running aseembly steps in the pipeline."
+                },
+                "save_trimmed_fail": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-save",
+                    "description": "Save the trimmed FastQ files in the results directory.",
+                    "help_text": "By default, trimmed FastQ files will not be saved to the results directory. Specify this flag (or set to true in your config file) to copy these files to the results directory when complete."
+                },
+                "skip_fastqc": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip FastQC."
+                },
                 "skip_kraken2": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip Kraken2 process for removing host classified reads."
+                },
+                "skip_fastp": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip the initial read trimming step peformed by fastp."
+                },
+                "skip_cutadapt": {
+                    "type": "boolean",
+                    "description": "Skip the amplicon trimming step with Cutadapt when using --protocol amplicon.",
+                    "fa_icon": "fas fa-fast-forward"
                 }
-            }
+            },
+            "fa_icon": "fas fa-cut"
         },
-        "variant_calling_options": {
-            "title": "Variant calling options",
+        "illumina_variant_calling_options": {
+            "title": "Illumina variant calling options",
             "type": "object",
-            "description": "Various options for the variant calling branch of the pipeline.",
+            "description": "Various options for the variant calling branch of the Illumina workflow.",
             "default": "",
             "properties": {
                 "callers": {
@@ -326,35 +393,15 @@
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip Picard CollectMultipleMetrics steps."
                 },
-                "skip_mosdepth": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip genome-wide and amplicon coverage plot generation from mosdepth output."
-                },
-                "skip_consensus": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip genome consensus creation step and any downstream QC."
-                },
                 "skip_snpeff": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip SnpEff and SnpSift annotation of variants."
                 },
-                "skip_variants_quast": {
+                "skip_consensus": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip generation of QUAST aggregated report for consensus sequences."
-                },
-                "skip_pangolin": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip Pangolin lineage analysis for genome consensus sequence."
-                },
-                "skip_nextclade": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip Nextclade clade assignment, mutation calling, and sequence quality checks for genome consensus sequence."
+                    "description": "Skip genome consensus creation step and any downstream QC."
                 },
                 "skip_variants": {
                     "type": "boolean",
@@ -364,10 +411,10 @@
             },
             "fa_icon": "fas fa-dna"
         },
-        "de_novo_assembly_options": {
-            "title": "De novo assembly options",
+        "illumina_de_novo_assembly_options": {
+            "title": "Illumina de novo assembly options",
             "type": "object",
-            "description": "Various options for the de novo assembly branch of the pipeline.",
+            "description": "Various options for the de novo assembly branch of the Illumina workflow.",
             "default": "",
             "properties": {
                 "assemblers": {
@@ -387,10 +434,10 @@
                     "fa_icon": "fab fa-digg",
                     "description": "Path to profile HMMs specific for gene/organism to enhance SPAdes assembly."
                 },
-                "skip_cutadapt": {
-                    "type": "boolean",
-                    "description": "Skip the amplicon trimming step with Cutadapt when using --protocol amplicon.",
-                    "fa_icon": "fas fa-fast-forward"
+                "blast_db": {
+                    "type": "string",
+                    "fa_icon": "fas fa-database",
+                    "description": "Path to directory or tar.gz archive for pre-built BLAST database."
                 },
                 "skip_bandage": {
                     "type": "boolean",
@@ -424,25 +471,6 @@
                 }
             },
             "fa_icon": "fas fa-random"
-        },
-        "process_skipping_options": {
-            "title": "Process skipping options",
-            "type": "object",
-            "description": "Options to skip various steps within the workflow.",
-            "default": "",
-            "properties": {
-                "skip_fastqc": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip FastQC."
-                },
-                "skip_multiqc": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip MultiQC."
-                }
-            },
-            "fa_icon": "fas fa-fast-forward"
         },
         "generic_options": {
             "title": "Generic options",
@@ -488,32 +516,12 @@
                     "hidden": true,
                     "help_text": "Set to receive plain-text e-mails instead of HTML formatted."
                 },
-                "max_multiqc_email_size": {
-                    "type": "string",
-                    "description": "File size limit when attaching MultiQC reports to summary emails.",
-                    "default": "25.MB",
-                    "fa_icon": "fas fa-file-upload",
-                    "hidden": true,
-                    "help_text": "If file generated by pipeline exceeds the threshold, it will not be attached."
-                },
                 "monochrome_logs": {
                     "type": "boolean",
                     "description": "Do not use coloured log outputs.",
                     "fa_icon": "fas fa-palette",
                     "hidden": true,
                     "help_text": "Set to disable colourful command line output and live life in monochrome."
-                },
-                "multiqc_config": {
-                    "type": "string",
-                    "description": "Custom config file to supply to MultiQC.",
-                    "fa_icon": "fas fa-cog",
-                    "hidden": true
-                },
-                "multiqc_title": {
-                    "type": "string",
-                    "hidden": true,
-                    "fa_icon": "fas fa-signature",
-                    "description": "Custom title for the MultiQC report."
                 },
                 "tracedir": {
                     "type": "string",
@@ -647,7 +655,7 @@
             "$ref": "#/definitions/input_output_options"
         },
         {
-            "$ref": "#/definitions/sra_download"
+            "$ref": "#/definitions/sra_download_options"
         },
         {
             "$ref": "#/definitions/reference_genome_options"
@@ -656,19 +664,16 @@
             "$ref": "#/definitions/nanopore_options"
         },
         {
-            "$ref": "#/definitions/read_trimming_options"
+            "$ref": "#/definitions/nanopore_illumina_options"
         },
         {
-            "$ref": "#/definitions/kraken2_options"
+            "$ref": "#/definitions/illumina_qc_read_trimming_and_filtering_options"
         },
         {
-            "$ref": "#/definitions/variant_calling_options"
+            "$ref": "#/definitions/illumina_variant_calling_options"
         },
         {
-            "$ref": "#/definitions/de_novo_assembly_options"
-        },
-        {
-            "$ref": "#/definitions/process_skipping_options"
+            "$ref": "#/definitions/illumina_de_novo_assembly_options"
         },
         {
             "$ref": "#/definitions/generic_options"

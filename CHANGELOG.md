@@ -10,16 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Pipeline has been re-implemented in [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html)
 * All software containers are now exclusively obtained from [Biocontainers](https://biocontainers.pro/#/registry)
 * Updated minimum Nextflow version to `v21.04.0` (see [nextflow#572](https://github.com/nextflow-io/nextflow/issues/1964))
-* Default human `--kraken2_db` link has been changed from Zenodo to an AWS S3 bucket for more reliable downloads
 * [BCFtools](http://samtools.github.io/bcftools/bcftools.html) and [iVar](https://github.com/andersen-lab/ivar) will be run by default for Illumina metagenomics and amplicon data, respectively. However, this behaviour can be customised with the `--callers` parameter.
-* Illumina and Nanopore runs containing the same 48 samples sequenced on both platforms have been uploaded to the nf-core AWS account for full-sized tests on release
-* Added [Pangolin](https://github.com/cov-lineages/pangolin) for lineage analysis
-* Added [Nextclade](https://github.com/nextstrain/nextclade) for clade assignment, mutation calling and consensus sequence quality checks
 * Variant graph processes to call variants relative to the reference genome directly from _de novo_ assemblies have been deprecated and removed
 * Variant calling with Varscan 2 has been deprecated and removed due to [licensing restrictions](https://github.com/dkoboldt/varscan/issues/12)
+* New tools:
+  * [Pangolin](https://github.com/cov-lineages/pangolin) for lineage analysis
+  * [Nextclade](https://github.com/nextstrain/nextclade) for clade assignment, mutation calling and consensus sequence quality checks
+  * [ASCIIGenome](https://asciigenome.readthedocs.io/en/latest/) for individual variant screenshots with annotation tracks
 
 ### Other enhancements & fixes
 
+* Illumina and Nanopore runs containing the same 48 samples sequenced on both platforms have been uploaded to the nf-core AWS account for full-sized tests on release
+* Default human `--kraken2_db` link has been changed from Zenodo to an AWS S3 bucket for more reliable downloads
 * Updated pipeline template to nf-core/tools `1.13.3`
 * Optimise MultiQC configuration and input files for faster run-time on huge sample numbers
 * [#122](https://github.com/nf-core/viralrecon/issues/122) - Single SPAdes command to rule them all
@@ -43,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 |                               | `--artic_minion_aligner`              |
 |                               | `--artic_minion_caller`               |
 |                               | `--artic_minion_medaka_model`         |
+|                               | `--asciigenome_read_depth`            |
+|                               | `--asciigenome_window_size`           |
 |                               | `--blast_db`                          |
 |                               | `--enable_conda`                      |
 |                               | `--fast5_dir`                         |
@@ -61,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 |                               | `--save_unaligned`                    |
 |                               | `--sequencing_summary`                |
 |                               | `--singularity_pull_docker_container` |
+|                               | `--skip_asciigenome`                  |
 |                               | `--skip_bandage`                      |
 |                               | `--skip_consensus`                    |
 |                               | `--skip_ivar_trim`                    |
@@ -105,6 +110,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | Dependency                    | Old version | New version |
 |-------------------------------|-------------|-------------|
 | `artic`                       |             | 1.2.1       |
+| `asciigenome`                 |             | 1.16.0      |
 | `bc`                          | 1.07.1      |             |
 | `bcftools`                    | 1.9         | 1.11        |
 | `bedtools`                    | 2.29.2      | 2.30.0      |
