@@ -16,8 +16,8 @@ def parse_args(args=None):
     parser.add_argument('-r2', '--read2_extension', type=str, dest="READ2_EXTENSION", default='_R2_001.fastq.gz', help="File extension for read 2.")
     parser.add_argument('-se', '--single_end', dest="SINGLE_END", action='store_true', help="Single-end information will be auto-detected but this option forces paired-end FastQ files to be treated as single-end so only read 1 information is included in the samplesheet.")
     parser.add_argument('-sn', '--sanitise_name', dest="SANITISE_NAME", action='store_true', help="Whether to further sanitise FastQ file name to get sample id. Used in conjunction with --sanitise_name_delimiter and --sanitise_name_index.")
-    parser.add_argument('-sd', '--sanitise_name_delimiter', type=str, dest="SANITISE_NAME_DELIMITER", default='_', help="Delimiter tO use to sanitise sample name.")
-    parser.add_argument('-si', '--sanitise_name_index', type=int, dest="SANITISE_NAME_INDEX", default=1, help="After splitting FastQ file name by --sanitise_name_delimiter all elements before this index will be joined to create final sample name.")
+    parser.add_argument('-sd', '--sanitise_name_delimiter', type=str, dest="SANITISE_NAME_DELIMITER", default='_', help="Delimiter to use to sanitise sample name.")
+    parser.add_argument('-si', '--sanitise_name_index', type=int, dest="SANITISE_NAME_INDEX", default=1, help="After splitting FastQ file name by --sanitise_name_delimiter all elements before this index (1-based) will be joined to create final sample name.")
     return parser.parse_args(args)
 
 def fastq_dir_to_samplesheet(fastq_dir, samplesheet_file, read1_extension='_R1_001.fastq.gz', read2_extension='_R2_001.fastq.gz', single_end=False, sanitise_name=False, sanitise_name_delimiter='_', sanitise_name_index=1):
