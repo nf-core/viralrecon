@@ -138,7 +138,7 @@ The pipeline has numerous options to allow you to run only specific aspects of t
             -profile <docker/singularity/podman/conda/institute>
         ```
 
-    * An executable Python script called [`fastq_dir_to_samplesheet.py`](https://github.com/nf-core/viralrecon/blob/master/bin/fastq_dir_to_samplesheet.py) has been provided if you are using `--platform illumina` and would like to auto-create an input samplesheet based on a directory containing FastQ files **before** you run the pipeline e.g.
+    * An executable Python script called [`fastq_dir_to_samplesheet.py`](https://github.com/nf-core/viralrecon/blob/master/bin/fastq_dir_to_samplesheet.py) has been provided if you are using `--platform illumina` and would like to auto-create an input samplesheet based on a directory containing FastQ files **before** you run the pipeline (requires Python 3 installed locally) e.g.
 
         ```console
         ~/.nextflow/assets/nf-core/viralrecon/bin/fastq_dir_to_samplesheet.py <FASTQ_DIR> samplesheet.csv
