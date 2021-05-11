@@ -32,7 +32,7 @@ workflow PREPARE_GENOME {
     dummy_file
 
     main:
-    
+
     //
     // Uncompress genome fasta file if required
     //

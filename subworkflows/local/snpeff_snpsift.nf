@@ -20,7 +20,7 @@ workflow SNPEFF_SNPSIFT {
     fasta  // path   : genome.fasta
 
     main:
-    
+
     SNPEFF_ANN ( vcf, db, config, fasta )
 
     VCF_BGZIP_TABIX_STATS ( SNPEFF_ANN.out.vcf )

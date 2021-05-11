@@ -23,7 +23,7 @@ workflow ASSEMBLY_UNICYCLER {
     blast_header  // channel: /path/to/blast_header.txt
 
     main:
-    
+
     //
     // Assemble reads with Unicycler
     //
