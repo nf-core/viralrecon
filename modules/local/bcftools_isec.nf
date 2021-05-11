@@ -9,7 +9,7 @@ process BCFTOOLS_ISEC {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
-        
+
     conda (params.enable_conda ? "bioconda::bcftools=1.11" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/bcftools:1.11--h7c999a4_0"

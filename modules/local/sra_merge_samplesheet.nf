@@ -20,15 +20,15 @@ process SRA_MERGE_SAMPLESHEET {
 
     input:
     path ('samplesheets/*')
-    
+
     output:
     path "*csv", emit: csv
-    
+
     script:
     """
     head -n 1 `ls ./samplesheets/* | head -n 1` > samplesheet.csv
     for fileid in `ls ./samplesheets/*`; do
-         awk 'NR>1' \$fileid >> samplesheet.csv
+        awk 'NR>1' \$fileid >> samplesheet.csv
     done
     """
 }

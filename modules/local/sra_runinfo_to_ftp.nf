@@ -17,13 +17,13 @@ process SRA_RUNINFO_TO_FTP {
     } else {
         container "quay.io/biocontainers/python:3.8.3"
     }
-        
+
     input:
     path runinfo
-    
+
     output:
     path "*.tsv", emit: tsv
-    
+
     script:
     """
     sra_runinfo_to_ftp.py ${runinfo.join(',')} ${runinfo.toString().tokenize(".")[0]}.runinfo_ftp.tsv

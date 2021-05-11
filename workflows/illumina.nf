@@ -242,7 +242,7 @@ workflow ILLUMINA {
     if (!params.skip_fastp) {
         ch_variants_fastq
             .join(FASTQC_FASTP.out.trim_json)
-            .map { 
+            .map {
                 meta, reads, json ->
                     if (WorkflowIllumina.getFastpReadsAfterFiltering(json) > 0) [ meta, reads ]
             }

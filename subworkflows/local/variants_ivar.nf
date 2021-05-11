@@ -162,12 +162,12 @@ workflow VARIANTS_IVAR {
     stats               = VCF_BGZIP_TABIX_STATS.out.stats            // channel: [ val(meta), [ txt ] ]
     tabix_version       = VCF_BGZIP_TABIX_STATS.out.tabix_version    //    path: *.version.txt
     bcftools_version    = VCF_BGZIP_TABIX_STATS.out.bcftools_version //    path: *.version.txt
-    
+
     consensus           = ch_consensus                               // channel: [ val(meta), [ fasta ] ]
     consensus_qual      = ch_consensus_qual                          // channel: [ val(meta), [ fasta ] ]
     bases_tsv           = ch_bases_tsv                               // channel: [ val(meta), [ tsv ] ]
     bases_pdf           = ch_bases_pdf                               // channel: [ val(meta), [ pdf ] ]
-    
+
     quast_results       = ch_quast_results                           // channel: [ val(meta), [ results ] ]
     quast_tsv           = ch_quast_tsv                               // channel: [ val(meta), [ tsv ] ]
     quast_version       = ch_quast_version                           //    path: *.version.txt

@@ -10,7 +10,7 @@ process ASCIIGENOME {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
-        
+
     conda (params.enable_conda ? "bioconda::asciigenome=1.16.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container "https://depot.galaxyproject.org/singularity/asciigenome:1.16.0--0"
@@ -35,7 +35,7 @@ process ASCIIGENOME {
     def prefix     = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     def gff_track  = gff ? "$gff" : ''
     def bed_track  = bed ? "$bed" : ''
-    def paired_end = meta.single_end ? '' : '&& readsAsPairs -on'    
+    def paired_end = meta.single_end ? '' : '&& readsAsPairs -on'
     """
     zcat $vcf \\
         | grep -v '#' \\
@@ -52,7 +52,7 @@ process ASCIIGENOME {
         $bed_track \\
         $gff_track \\
         > /dev/null
-    
+
     echo \$(ASCIIGenome -ni --version 2>&1) | sed -e "s/ASCIIGenome //g" > ${software}.version.txt
     """
 }

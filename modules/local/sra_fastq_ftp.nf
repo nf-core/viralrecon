@@ -21,7 +21,7 @@ process SRA_FASTQ_FTP {
     } else {
         container "biocontainers/biocontainers:v1.2.0_cv1"
     }
-    
+
     input:
     tuple val(meta), val(fastq)
 
@@ -29,7 +29,7 @@ process SRA_FASTQ_FTP {
     tuple val(meta), path("*fastq.gz"), emit: fastq
     tuple val(meta), path("*md5")     , emit: md5
 
-    script:    
+    script:
     if (meta.single_end) {
         """
         bash -c 'until curl $options.args -L ${fastq[0]} -o ${meta.id}.fastq.gz; do sleep 1; done';

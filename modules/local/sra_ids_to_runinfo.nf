@@ -19,13 +19,13 @@ process SRA_IDS_TO_RUNINFO {
     } else {
         container "quay.io/biocontainers/requests:2.24.0"
     }
-    
+
     input:
     val id
-    
+
     output:
     path "*.tsv", emit: tsv
-    
+
     script:
     """
     echo $id > id.txt

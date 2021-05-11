@@ -20,7 +20,7 @@ process SRA_TO_SAMPLESHEET {
 
     output:
     tuple val(meta), path("*csv"), emit: csv
-    
+
     exec:
     //  Remove custom keys needed to download the data
     def meta_map = meta.clone()
