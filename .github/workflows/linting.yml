@@ -18,7 +18,7 @@ jobs:
       - name: Install markdownlint
         run: npm install -g markdownlint-cli
       - name: Run Markdownlint
-        run: markdownlint ${GITHUB_WORKSPACE} -c ${GITHUB_WORKSPACE}/.github/markdownlint.yml
+        run: markdownlint ${GITHUB_WORKSPACE} -c ${GITHUB_WORKSPACE}/.markdownlint.yml
 
       # If the above check failed, post a comment on the PR explaining the failure
       - name: Post PR comment
@@ -46,6 +46,20 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           allow-repeats: false
 
+  EditorConfig:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "10"
+
+      - name: Install editorconfig-checker
+        run: npm install -g editorconfig-checker
+
+      - name: Run ECLint check
+        run: editorconfig-checker -exclude README.md $(git ls-files | grep -v test)
 
   YAML:
     runs-on: ubuntu-latest
