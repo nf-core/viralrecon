@@ -39,7 +39,7 @@ workflow VARIANTS_IVAR {
     snpeff_db           // channel: /path/to/snpeff_db/
     snpeff_config       // channel: /path/to/snpeff.config
     ivar_multiqc_header // channel: /path/to/multiqc_header for ivar variants
-    
+
     main:
     /*
      * Call variants
@@ -71,7 +71,7 @@ workflow VARIANTS_IVAR {
         IVAR_CONSENSUS ( bam, fasta )
         ch_consensus       = IVAR_CONSENSUS.out.fasta
         ch_consensus_qual  = IVAR_CONSENSUS.out.qual
-    
+
         PLOT_BASE_DENSITY ( ch_consensus )
         ch_bases_tsv = PLOT_BASE_DENSITY.out.tsv
         ch_bases_pdf = PLOT_BASE_DENSITY.out.pdf
@@ -191,4 +191,3 @@ workflow VARIANTS_IVAR {
     asciigenome_pdf     = ch_asciigenome_pdf                         // channel: [ val(meta), [ pdf ] ]
     asciigenome_version = ch_asciigenome_version                     //    path: *.version.txt
 }
-

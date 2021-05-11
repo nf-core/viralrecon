@@ -19,7 +19,7 @@ params.pangolin_options            = [:]
 params.nextclade_options           = [:]
 params.asciigenome_options         = [:]
 
-include { BCFTOOLS_MPILEUP } from '../../modules/nf-core/software/bcftools/mpileup/main' addParams( options: params.bcftools_mpileup_options ) 
+include { BCFTOOLS_MPILEUP } from '../../modules/nf-core/software/bcftools/mpileup/main' addParams( options: params.bcftools_mpileup_options )
 include { QUAST            } from '../../modules/nf-core/software/quast/main'            addParams( options: params.quast_options            )
 include { PANGOLIN         } from '../../modules/nf-core/software/pangolin/main'         addParams( options: params.pangolin_options         )
 include { NEXTCLADE        } from '../../modules/nf-core/software/nextclade/main'        addParams( options: params.nextclade_options        )
@@ -35,7 +35,7 @@ workflow VARIANTS_BCFTOOLS {
     bed           // channel: /path/to/primers.bed
     snpeff_db     // channel: /path/to/snpeff_db/
     snpeff_config // channel: /path/to/snpeff.config
-    
+
     main:
     /*
      * Call variants
@@ -62,7 +62,7 @@ workflow VARIANTS_BCFTOOLS {
         ch_bases_tsv        = MAKE_CONSENSUS.out.tsv
         ch_bases_pdf        = MAKE_CONSENSUS.out.pdf
         ch_bedtools_version = MAKE_CONSENSUS.out.bedtools_version
-    
+
         if (!params.skip_variants_quast) {
             QUAST ( ch_consensus.collect{ it[1] }, fasta, gff, true, params.gff )
             ch_quast_results = QUAST.out.results
@@ -141,12 +141,12 @@ workflow VARIANTS_BCFTOOLS {
     tbi                 = BCFTOOLS_MPILEUP.out.tbi     // channel: [ val(meta), [ tbi ] ]
     stats               = BCFTOOLS_MPILEUP.out.stats   // channel: [ val(meta), [ txt ] ]
     bcftools_version    = BCFTOOLS_MPILEUP.out.version //    path: *.version.txt
-    
+
     consensus           = ch_consensus                 // channel: [ val(meta), [ fasta ] ]
     bases_tsv           = ch_bases_tsv                 // channel: [ val(meta), [ tsv ] ]
     bases_pdf           = ch_bases_pdf                 // channel: [ val(meta), [ pdf ] ]
-    bedtools_version    = ch_bedtools_version          //    path: *.version.txt 
-    
+    bedtools_version    = ch_bedtools_version          //    path: *.version.txt
+
     quast_results       = ch_quast_results             // channel: [ val(meta), [ results ] ]
     quast_tsv           = ch_quast_tsv                 // channel: [ val(meta), [ tsv ] ]
     quast_version       = ch_quast_version             //    path: *.version.txt

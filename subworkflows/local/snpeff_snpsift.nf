@@ -18,14 +18,14 @@ workflow SNPEFF_SNPSIFT {
     db     // path   : snpEff database
     config // path   : snpEff config
     fasta  // path   : genome.fasta
-    
+
     main:
     SNPEFF_ANN ( vcf, db, config, fasta )
 
     VCF_BGZIP_TABIX_STATS ( SNPEFF_ANN.out.vcf )
 
     SNPSIFT_EXTRACTFIELDS ( VCF_BGZIP_TABIX_STATS.out.vcf )
-    
+
     emit:
     csv              = SNPEFF_ANN.out.csv                         // channel: [ val(meta), [ csv ] ]
     txt              = SNPEFF_ANN.out.txt                         // channel: [ val(meta), [ txt ] ]

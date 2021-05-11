@@ -18,18 +18,18 @@ class WorkflowIllumina {
             System.exit(1)
         }
 
-        if (!params.fasta) { 
+        if (!params.fasta) {
             log.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
             System.exit(1)
         }
 
         if (!params.skip_kraken2 && !params.kraken2_db) {
-            if (!params.kraken2_db_name) { 
+            if (!params.kraken2_db_name) {
                 log.error "Please specify a valid name to build Kraken2 database for host e.g. '--kraken2_db_name human'."
                 System.exit(1)
             }
         }
-        
+
         // Variant calling parameter validation
         def callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
         if ((valid_params['callers'] + callers).unique().size() != valid_params['callers'].size()) {
@@ -67,7 +67,7 @@ class WorkflowIllumina {
                     count++
                     if (count > 1) {
                         log.warn "=============================================================================\n" +
-                            "  This pipeline does not officially support multi-fasta genome files!\n\n" + 
+                            "  This pipeline does not officially support multi-fasta genome files!\n\n" +
                             "  The parameters and processes are tailored for viral genome analysis.\n" +
                             "  Please amend the '--fasta' parameter.\n" +
                             "==================================================================================="
@@ -88,7 +88,7 @@ class WorkflowIllumina {
                 mapped_reads = line.tokenize().first().toInteger()
             }
         }
-        
+
         def pass = false
         def logname = flagstat_file.getBaseName() - 'flagstat'
         if (mapped_reads > params.min_mapped_reads.toInteger()) {
@@ -110,8 +110,8 @@ class WorkflowIllumina {
                     count++
                     if (count > 1) {
                         log.warn "=============================================================================\n" +
-                            "  Found '${name_prefix}' in the name field of the primer BED file!\n" + 
-                            "  This suggests that you have used the SWIFT/SNAP protocol to prep your samples.\n" + 
+                            "  Found '${name_prefix}' in the name field of the primer BED file!\n" +
+                            "  This suggests that you have used the SWIFT/SNAP protocol to prep your samples.\n" +
                             "  If so, please set '--ivar_trim_offset 5' as suggested in the issue below:\n" +
                             "  https://github.com/nf-core/viralrecon/issues/170\n" +
                             "==================================================================================="

@@ -36,7 +36,7 @@ if (!callers)  { callers = params.protocol == 'amplicon' ? ['ivar'] : ['bcftools
 
 /*
 ========================================================================================
-    CONFIG FILES       
+    CONFIG FILES
 ========================================================================================
 */
 
@@ -66,7 +66,7 @@ if (!params.skip_variants) {
     multiqc_options.publish_files.put('variants_metrics_mqc.csv','')
 }
 
-include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] ) 
+include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] )
 include { CUTADAPT                   } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']      )
 include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]       )
 include { MULTIQC                    } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                   )
@@ -88,7 +88,7 @@ def snpeff_build_options      = modules['illumina_snpeff_build']
 def makeblastdb_options       = modules['illumina_blast_makeblastdb']
 def kraken2_build_options     = modules['illumina_kraken2_build']
 def collapse_primers_options  = modules['illumina_collapse_primers_illumina']
-if (!params.save_reference) { 
+if (!params.save_reference) {
     bedtools_getfasta_options['publish_files'] = false
     bowtie2_build_options['publish_files']     = false
     snpeff_build_options['publish_files']      = false
@@ -128,9 +128,9 @@ include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'      
 /*
  * MODULE: Installed directly from nf-core/modules
  */
-include { CAT_FASTQ                     } from '../modules/nf-core/software/cat/fastq/main'                     addParams( options: modules['illumina_cat_fastq']                     ) 
+include { CAT_FASTQ                     } from '../modules/nf-core/software/cat/fastq/main'                     addParams( options: modules['illumina_cat_fastq']                     )
 include { FASTQC                        } from '../modules/nf-core/software/fastqc/main'                        addParams( options: modules['illumina_cutadapt_fastqc']               )
-include { KRAKEN2_RUN                   } from '../modules/nf-core/software/kraken2/run/main'                   addParams( options: modules['illumina_kraken2_run']                   ) 
+include { KRAKEN2_RUN                   } from '../modules/nf-core/software/kraken2/run/main'                   addParams( options: modules['illumina_kraken2_run']                   )
 include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['illumina_picard_collectmultiplemetrics'] )
 include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_genome']               )
 include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_amplicon']             )
@@ -194,18 +194,18 @@ workflow ILLUMINA {
                 .map { WorkflowIllumina.checkIfSwiftProtocol(it, 'covid19genome', log) }
         }
     }
-    
+
     /*
      * SUBWORKFLOW: Read in samplesheet, validate and stage input files
      */
-    INPUT_CHECK ( 
+    INPUT_CHECK (
         ch_input,
         params.platform
     )
     .map {
         meta, fastq ->
             meta.id = meta.id.split('_')[0..-2].join('_')
-            [ meta, fastq ] 
+            [ meta, fastq ]
     }
     .groupTuple(by: [0])
     .branch {
@@ -216,16 +216,16 @@ workflow ILLUMINA {
                 return [ meta, fastq.flatten() ]
     }
     .set { ch_fastq }
-    
+
     /*
      * MODULE: Concatenate FastQ files from same sample if required
      */
-    CAT_FASTQ ( 
+    CAT_FASTQ (
         ch_fastq.multiple
     )
     .mix(ch_fastq.single)
     .set { ch_cat_fastq }
-    
+
     /*
      * SUBWORKFLOW: Read QC and trim adapters
      */
@@ -248,14 +248,14 @@ workflow ILLUMINA {
             }
             .set { ch_variants_fastq }
     }
-    
+
     /*
      * MODULE: Run Kraken2 for removal of host reads
      */
     ch_assembly_fastq  = ch_variants_fastq
     ch_kraken2_multiqc = Channel.empty()
     if (!params.skip_kraken2) {
-        KRAKEN2_RUN ( 
+        KRAKEN2_RUN (
             ch_variants_fastq,
             PREPARE_GENOME.out.kraken2_db
         )
@@ -268,9 +268,9 @@ workflow ILLUMINA {
 
         if (params.kraken2_assembly_host_filter) {
             ch_assembly_fastq = KRAKEN2_RUN.out.unclassified
-        }        
+        }
     }
-    
+
     /*
      * SUBWORKFLOW: Alignment with Bowtie2
      */
@@ -321,7 +321,7 @@ workflow ILLUMINA {
             }
             .set { ch_pass_fail_mapped }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED ( 
+        MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED (
             ch_pass_fail_mapped.fail.collect(),
             'Sample',
             'Mapped reads',
@@ -329,7 +329,7 @@ workflow ILLUMINA {
         )
         .set { ch_fail_mapping_multiqc }
     }
-    
+
     /*
      * SUBWORKFLOW: Trim primer sequences from reads with iVar
      */
@@ -387,7 +387,7 @@ workflow ILLUMINA {
         PLOT_MOSDEPTH_REGIONS_GENOME (
             MOSDEPTH_GENOME.out.regions_bed.collect { it[1] }
         )
-        
+
         if (params.protocol == 'amplicon') {
             MOSDEPTH_AMPLICON (
                 ch_bam.join(ch_bai, by: [0]),
@@ -395,7 +395,7 @@ workflow ILLUMINA {
                 0
             )
 
-            PLOT_MOSDEPTH_REGIONS_AMPLICON ( 
+            PLOT_MOSDEPTH_REGIONS_AMPLICON (
                 MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
             )
         }
@@ -448,7 +448,7 @@ workflow ILLUMINA {
             }
             .set { ch_ivar_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN ( 
+        MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN (
             ch_ivar_pangolin_multiqc.collect(),
             'Sample',
             'Lineage',
@@ -456,7 +456,7 @@ workflow ILLUMINA {
         )
         .set { ch_ivar_pangolin_multiqc }
     }
-    
+
     /*
      * SUBWORKFLOW: Call variants with BCFTools
      */
@@ -500,7 +500,7 @@ workflow ILLUMINA {
             }
             .set { ch_bcftools_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN ( 
+        MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN (
             ch_bcftools_pangolin_multiqc.collect(),
             'Sample',
             'Lineage',
@@ -535,8 +535,8 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(CUTADAPT.out.version.first().ifEmpty(null))
 
         if (!params.skip_fastqc) {
-            FASTQC ( 
-                CUTADAPT.out.reads 
+            FASTQC (
+                CUTADAPT.out.reads
             )
         }
     }
@@ -616,7 +616,7 @@ workflow ILLUMINA {
         .collect()
         .set { ch_software_versions }
 
-    GET_SOFTWARE_VERSIONS ( 
+    GET_SOFTWARE_VERSIONS (
         ch_software_versions
     )
 

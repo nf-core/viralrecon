@@ -11,7 +11,7 @@ include { BAM_STATS_SAMTOOLS } from './bam_stats_samtools'                      
 workflow BAM_SORT_SAMTOOLS {
     take:
     bam // channel: [ val(meta), [ bam ] ]
-    
+
     main:
     SAMTOOLS_SORT      ( bam )
     SAMTOOLS_INDEX     ( SAMTOOLS_SORT.out.bam )

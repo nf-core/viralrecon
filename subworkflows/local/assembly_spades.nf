@@ -10,8 +10,8 @@ params.abacas_options        = [:]
 params.plasmidid_options     = [:]
 params.quast_options         = [:]
 
-include { SPADES        } from '../../modules/nf-core/software/spades/main'        addParams( options: params.spades_options  ) 
-include { BANDAGE_IMAGE } from '../../modules/nf-core/software/bandage/image/main' addParams( options: params.bandage_options ) 
+include { SPADES        } from '../../modules/nf-core/software/spades/main'        addParams( options: params.spades_options  )
+include { BANDAGE_IMAGE } from '../../modules/nf-core/software/bandage/image/main' addParams( options: params.bandage_options )
 include { ASSEMBLY_QC   } from './assembly_qc'                                     addParams( blastn_options: params.blastn_options, blastn_filter_options: params.blastn_filter_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
 
 workflow ASSEMBLY_SPADES {
@@ -22,7 +22,7 @@ workflow ASSEMBLY_SPADES {
     gff           // channel: /path/to/genome.gff
     blast_db      // channel: /path/to/blast_db/
     blast_header  // channel: /path/to/blast_header.txt
-    
+
     main:
     /*
      * Filter for paired-end samples if running metaSPAdes / metaviralSPAdes / metaplasmidSPAdes
@@ -33,7 +33,7 @@ workflow ASSEMBLY_SPADES {
             .filter { meta, fastq -> !meta.single_end }
             .set { ch_reads }
     }
-    
+
     /*
      * Assemble reads with SPAdes
      */
@@ -47,13 +47,13 @@ workflow ASSEMBLY_SPADES {
         .scaffolds
         .filter { meta, scaffold -> scaffold.size() > 0 }
         .set { ch_scaffolds }
-    
+
     SPADES
         .out
         .gfa
         .filter { meta, gfa -> gfa.size() > 0 }
         .set { ch_gfa }
-    
+
     /*
      * Generate assembly visualisation with Bandage
      */
@@ -70,7 +70,7 @@ workflow ASSEMBLY_SPADES {
     /*
      * Downstream assembly steps
      */
-    ASSEMBLY_QC ( 
+    ASSEMBLY_QC (
         ch_scaffolds,
         fasta,
         gff,
@@ -98,7 +98,7 @@ workflow ASSEMBLY_SPADES {
     quast_results      = ASSEMBLY_QC.out.quast_results      // channel: [ val(meta), [ results ] ]
     quast_tsv          = ASSEMBLY_QC.out.quast_tsv          // channel: [ val(meta), [ tsv ] ]
     quast_version      = ASSEMBLY_QC.out.quast_version      //    path: *.version.txt
-    
+
     abacas_results     = ASSEMBLY_QC.out.abacas_results     // channel: [ val(meta), [ results ] ]
     abacas_version     = ASSEMBLY_QC.out.abacas_version     //    path: *.version.txt
 

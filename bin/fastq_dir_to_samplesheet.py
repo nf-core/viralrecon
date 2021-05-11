@@ -30,7 +30,7 @@ def fastq_dir_to_samplesheet(fastq_dir, samplesheet_file, read1_extension='_R1_0
         if sanitise_name:
             sample = sanitise_name_delimiter.join(os.path.basename(read1_file).split(sanitise_name_delimiter)[:sanitise_name_index])
         read_dict[sample] = [read1_file]
-    
+
     ## Get read 2 files
     read2_files = glob.glob(os.path.join(fastq_dir, f'*{read2_extension}'), recursive=False)
     if not single_end and len(read2_files) != 0:
@@ -64,8 +64,8 @@ def main(args=None):
         read1_extension         = args.READ1_EXTENSION,
         read2_extension         = args.READ2_EXTENSION,
         single_end              = args.SINGLE_END,
-        sanitise_name           = args.SANITISE_NAME, 
-        sanitise_name_delimiter = args.SANITISE_NAME_DELIMITER, 
+        sanitise_name           = args.SANITISE_NAME,
+        sanitise_name_delimiter = args.SANITISE_NAME_DELIMITER,
         sanitise_name_index     = args.SANITISE_NAME_INDEX
     )
 

@@ -21,7 +21,7 @@ workflow ASSEMBLY_QC {
     gff          // channel: /path/to/genome.gff
     blast_db     // channel: /path/to/blast_db/
     blast_header // channel: /path/to/blast_header.txt
-    
+
     main:
     /*
      * Run blastn on assembly scaffolds
@@ -64,7 +64,7 @@ workflow ASSEMBLY_QC {
 
     /*
      * Assembly report with PlasmidID
-     */    
+     */
     ch_plasmidid_html     = Channel.empty()
     ch_plasmidid_tab      = Channel.empty()
     ch_plasmidid_images   = Channel.empty()
@@ -91,7 +91,7 @@ workflow ASSEMBLY_QC {
     blast_txt          = ch_blast_txt          // channel: [ val(meta), [ txt ] ]
     blast_filter_txt   = ch_blast_filter_txt   // channel: [ val(meta), [ txt ] ]
     blast_version      = ch_blast_version      //    path: *.version.txt
-    
+
     quast_results      = ch_quast_results      // channel: [ val(meta), [ results ] ]
     quast_tsv          = ch_quast_tsv          // channel: [ val(meta), [ tsv ] ]
     quast_version      = ch_quast_version      //    path: *.version.txt
@@ -110,4 +110,3 @@ workflow ASSEMBLY_QC {
     plasmidid_version  = ch_plasmidid_version  //    path: *.version.txt
 
 }
-

@@ -24,7 +24,7 @@ workflow PRIMER_TRIM_IVAR {
      * Sort, index BAM file and run samtools stats, flagstat and idxstats
      */
     BAM_SORT_SAMTOOLS ( IVAR_TRIM.out.bam )
-    
+
     emit:
     bam_orig         = IVAR_TRIM.out.bam              // channel: [ val(meta), bam   ]
     log_out          = IVAR_TRIM.out.log              // channel: [ val(meta), log   ]

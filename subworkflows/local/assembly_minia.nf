@@ -9,7 +9,7 @@ params.abacas_options        = [:]
 params.plasmidid_options     = [:]
 params.quast_options         = [:]
 
-include { MINIA       } from '../../modules/nf-core/software/minia/main' addParams( options: params.minia_options ) 
+include { MINIA       } from '../../modules/nf-core/software/minia/main' addParams( options: params.minia_options )
 include { ASSEMBLY_QC } from './assembly_qc'                             addParams( blastn_options: params.blastn_options, blastn_filter_options: params.blastn_filter_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
 
 workflow ASSEMBLY_MINIA {
@@ -19,7 +19,7 @@ workflow ASSEMBLY_MINIA {
     gff           // channel: /path/to/genome.gff
     blast_db      // channel: /path/to/blast_db/
     blast_header  // channel: /path/to/blast_header.txt
-    
+
     main:
     /*
      * Assemble reads with minia
@@ -38,7 +38,7 @@ workflow ASSEMBLY_MINIA {
     /*
      * Downstream assembly steps
      */
-    ASSEMBLY_QC ( 
+    ASSEMBLY_QC (
         ch_contigs,
         fasta,
         gff,
@@ -59,7 +59,7 @@ workflow ASSEMBLY_MINIA {
     quast_results      = ASSEMBLY_QC.out.quast_results      // channel: [ val(meta), [ results ] ]
     quast_tsv          = ASSEMBLY_QC.out.quast_tsv          // channel: [ val(meta), [ tsv ] ]
     quast_version      = ASSEMBLY_QC.out.quast_version      //    path: *.version.txt
-    
+
     abacas_results     = ASSEMBLY_QC.out.abacas_results     // channel: [ val(meta), [ results ] ]
     abacas_version     = ASSEMBLY_QC.out.abacas_version     //    path: *.version.txt
 

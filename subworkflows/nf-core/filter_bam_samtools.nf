@@ -12,7 +12,7 @@ include { BAM_STATS_SAMTOOLS } from '../nf-core/bam_stats_samtools'             
 workflow FILTER_BAM_SAMTOOLS {
     take:
     bam // channel: [ val(meta), [ bam ] ]
-    
+
     main:
     /*
      * Filter BAM using Samtools view

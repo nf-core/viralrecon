@@ -177,26 +177,26 @@ For example, if the nf-core/rnaseq pipeline is failing after multiple re-submiss
 Error executing process > 'RNASEQ:ALIGN_STAR:STAR_ALIGN (WT_REP1)'
 
 Caused by:
-  Process `RNASEQ:ALIGN_STAR:STAR_ALIGN (WT_REP1)` terminated with an error exit status (137)
+    Process `RNASEQ:ALIGN_STAR:STAR_ALIGN (WT_REP1)` terminated with an error exit status (137)
 
 Command executed:
-  STAR \
-      --genomeDir star \
-      --readFilesIn WT_REP1_trimmed.fq.gz  \
-      --runThreadN 2 \
-      --outFileNamePrefix WT_REP1. \
-      <TRUNCATED>
+    STAR \
+        --genomeDir star \
+        --readFilesIn WT_REP1_trimmed.fq.gz  \
+        --runThreadN 2 \
+        --outFileNamePrefix WT_REP1. \
+        <TRUNCATED>
 
 Command exit status:
-  137
+    137
 
 Command output:
-  (empty)
+    (empty)
 
 Command error:
-  .command.sh: line 9:  30 Killed    STAR --genomeDir star --readFilesIn WT_REP1_trimmed.fq.gz --runThreadN 2 --outFileNamePrefix WT_REP1. <TRUNCATED>
+    .command.sh: line 9:  30 Killed    STAR --genomeDir star --readFilesIn WT_REP1_trimmed.fq.gz --runThreadN 2 --outFileNamePrefix WT_REP1. <TRUNCATED>
 Work dir:
-  /home/pipelinetest/work/9d/172ca5881234073e8d76f2a19c88fb
+    /home/pipelinetest/work/9d/172ca5881234073e8d76f2a19c88fb
 
 Tip: you can replicate the issue by changing to the process work dir and entering the command `bash .command.run`
 ```
@@ -205,9 +205,9 @@ To bypass this error you would need to find exactly which resources are set by t
 
 ```nextflow
 process {
-  withName: STAR_ALIGN {
-    memory = 100.GB
-  }
+    withName: STAR_ALIGN {
+        memory = 100.GB
+    }
 }
 ```
 
@@ -240,11 +240,11 @@ As you will see in the example below, we have:
 ```nextflow
 params {
     modules {
-      'star_align' {
-        args          = "--quantMode TranscriptomeSAM --twopassMode Basic --outSAMtype BAM Unsorted --readFilesCommand zcat --runRNGseed 0 --outFilterMultimapNmax 20 --alignSJDBoverhangMin 1 --outSAMattributes NH HI AS NM MD --quantTranscriptomeBan Singleend --outFilterMismatchNmax 16"
-        publish_dir   = "my_star_directory"
-        publish_files = ['out':'log', 'tab':'log', 'bam':'']
-      }
+        'star_align' {
+            args          = "--quantMode TranscriptomeSAM --twopassMode Basic --outSAMtype BAM Unsorted --readFilesCommand zcat --runRNGseed 0 --outFilterMultimapNmax 20 --alignSJDBoverhangMin 1 --outSAMattributes NH HI AS NM MD --quantTranscriptomeBan Singleend --outFilterMismatchNmax 16"
+            publish_dir   = "my_star_directory"
+            publish_files = ['out':'log', 'tab':'log', 'bam':'']
+        }
     }
 }
 ```

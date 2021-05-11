@@ -12,7 +12,7 @@ include { VCF_TABIX_STATS } from './vcf_tabix_stats'                            
 workflow VCF_BGZIP_TABIX_STATS {
     take:
     vcf // channel: [ val(meta), [ vcf ] ]
-    
+
     main:
     TABIX_BGZIP  ( vcf )
     VCF_TABIX_STATS ( TABIX_BGZIP.out.gz )

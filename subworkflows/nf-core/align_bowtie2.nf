@@ -12,7 +12,7 @@ workflow ALIGN_BOWTIE2 {
     take:
     reads // channel: [ val(meta), [ reads ] ]
     index // channel: /path/to/bowtie2/index/
-    
+
     main:
     /*
      * Map reads with BOWTIE2

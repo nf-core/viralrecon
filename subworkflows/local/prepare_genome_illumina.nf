@@ -14,7 +14,7 @@ params.kraken2_build_options     = [:]
 
 include {
     GUNZIP as GUNZIP_FASTA
-    GUNZIP as GUNZIP_GFF               
+    GUNZIP as GUNZIP_GFF
     GUNZIP as GUNZIP_PRIMER_BED
     GUNZIP as GUNZIP_PRIMER_FASTA      } from '../../modules/nf-core/software/gunzip/main'            addParams( options: params.genome_options            )
 include { UNTAR as UNTAR_BOWTIE2_INDEX } from '../../modules/nf-core/software/untar/main'             addParams( options: params.index_options             )
@@ -146,7 +146,7 @@ workflow PREPARE_GENOME {
         ch_snpeff_db     = SNPEFF_BUILD.out.db
         ch_snpeff_config = SNPEFF_BUILD.out.config
     }
-    
+
     emit:
     fasta                = ch_fasta                 // path: genome.fasta
     gff                  = ch_gff                   // path: genome.gff

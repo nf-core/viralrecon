@@ -9,7 +9,7 @@ class WorkflowMain {
      */
     public static String citation(workflow) {
         return "If you use ${workflow.manifest.name} for your analysis please cite:\n\n" +
-            "* The pipeline\n" + 
+            "* The pipeline\n" +
             "  https://doi.org/10.5281/zenodo.3901628\n\n" +
             "* The nf-core framework\n" +
             "  https://doi.org/10.1038/s41587-020-0439-x\n\n" +
@@ -91,7 +91,7 @@ class WorkflowMain {
         def val = ''
         def support_link =  " The default genome config used by the pipeline can be found here:\n" +
                             "   - https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config\n\n" +
-                            " If you would still like to blame us please come and find us on nf-core Slack:\n" + 
+                            " If you would still like to blame us please come and find us on nf-core Slack:\n" +
                             "   - https://nf-co.re/viralrecon#contributions-and-support\n" +
                             "============================================================================="
         if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {

@@ -9,10 +9,10 @@ indent_size = 4
 indent_style = space
 
 [*.{yml,yaml}]
-indent_size = 2
+indent_size = 4
 
 # These files are edited upstream in nf-core/modules
-[/modules/**]
+[/modules/nf-core/**]
 charset = unset
 end_of_line = unset
 insert_final_newline = unset
