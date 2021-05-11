@@ -19,8 +19,8 @@ workflow PREPARE_GENOME {
 
     main:
     /*
-     * Uncompress genome fasta file if required
-     */
+    * Uncompress genome fasta file if required
+    */
     if (params.fasta.endsWith('.gz')) {
         ch_fasta = GUNZIP_FASTA ( params.fasta ).gunzip
     } else {
@@ -28,8 +28,8 @@ workflow PREPARE_GENOME {
     }
 
     /*
-     * Uncompress GFF annotation file
-     */
+    * Uncompress GFF annotation file
+    */
     if (params.gff) {
         if (params.gff.endsWith('.gz')) {
             ch_gff = GUNZIP_GFF ( params.gff ).gunzip
@@ -41,8 +41,8 @@ workflow PREPARE_GENOME {
     }
 
     /*
-     * Uncompress primer BED file
-     */
+    * Uncompress primer BED file
+    */
     ch_primer_bed = Channel.empty()
     if (params.primer_bed) {
         if (params.primer_bed.endsWith('.gz')) {
@@ -53,16 +53,16 @@ workflow PREPARE_GENOME {
     }
 
     /*
-     * Generate collapsed BED file
-     */
+    * Generate collapsed BED file
+    */
     ch_primer_collapsed_bed = Channel.empty()
     if (!params.skip_mosdepth) {
         ch_primer_collapsed_bed = COLLAPSE_PRIMERS ( ch_primer_bed, params.primer_left_suffix, params.primer_right_suffix )
     }
 
     /*
-     * Make snpEff database
-     */
+    * Make snpEff database
+    */
     ch_snpeff_db     = Channel.empty()
     ch_snpeff_config = Channel.empty()
     if (params.gff && !params.skip_snpeff) {

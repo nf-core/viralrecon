@@ -33,8 +33,8 @@ workflow PREPARE_GENOME {
 
     main:
     /*
-     * Uncompress genome fasta file if required
-     */
+    * Uncompress genome fasta file if required
+    */
     if (params.fasta.endsWith('.gz')) {
         ch_fasta = GUNZIP_FASTA ( params.fasta ).gunzip
     } else {
@@ -42,8 +42,8 @@ workflow PREPARE_GENOME {
     }
 
     /*
-     * Uncompress GFF annotation file
-     */
+    * Uncompress GFF annotation file
+    */
     if (params.gff) {
         if (params.gff.endsWith('.gz')) {
             ch_gff = GUNZIP_GFF ( params.gff ).gunzip
@@ -55,8 +55,8 @@ workflow PREPARE_GENOME {
     }
 
     /*
-     * Prepare reference files required for variant calling
-     */
+    * Prepare reference files required for variant calling
+    */
     ch_kraken2_db = Channel.empty()
     if (!params.skip_kraken2) {
         if (params.kraken2_db) {
@@ -71,8 +71,8 @@ workflow PREPARE_GENOME {
     }
 
     /*
-     * Prepare files required for amplicon data
-     */
+    * Prepare files required for amplicon data
+    */
     ch_primer_bed           = Channel.empty()
     ch_primer_fasta         = Channel.empty()
     ch_primer_collapsed_bed = Channel.empty()
@@ -103,8 +103,8 @@ workflow PREPARE_GENOME {
     }
 
     /*
-     * Prepare reference files required for variant calling
-     */
+    * Prepare reference files required for variant calling
+    */
     ch_bowtie2_index = Channel.empty()
     if (!params.skip_variants) {
         if (params.bowtie2_index) {
@@ -119,8 +119,8 @@ workflow PREPARE_GENOME {
     }
 
     /*
-     * Prepare reference files required for de novo assembly
-     */
+    * Prepare reference files required for de novo assembly
+    */
     ch_blast_db = Channel.empty()
     if (!params.skip_assembly) {
         if (!params.skip_blast) {
@@ -137,8 +137,8 @@ workflow PREPARE_GENOME {
     }
 
     /*
-     * Make snpEff database
-     */
+    * Make snpEff database
+    */
     ch_snpeff_db     = Channel.empty()
     ch_snpeff_config = Channel.empty()
     if (!params.skip_variants && params.gff && !params.skip_snpeff) {

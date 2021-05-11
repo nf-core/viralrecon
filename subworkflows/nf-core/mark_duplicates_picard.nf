@@ -15,13 +15,13 @@ workflow MARK_DUPLICATES_PICARD {
 
     main:
     /*
-     * Picard MarkDuplicates
-     */
+    * Picard MarkDuplicates
+    */
     PICARD_MARKDUPLICATES ( bam )
 
     /*
-     * Index BAM file and run samtools stats, flagstat and idxstats
-     */
+    * Index BAM file and run samtools stats, flagstat and idxstats
+    */
     SAMTOOLS_INDEX     ( PICARD_MARKDUPLICATES.out.bam )
     BAM_STATS_SAMTOOLS ( PICARD_MARKDUPLICATES.out.bam.join(SAMTOOLS_INDEX.out.bai, by: [0]) )
 

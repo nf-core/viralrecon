@@ -16,13 +16,13 @@ workflow PRIMER_TRIM_IVAR {
 
     main:
     /*
-     * iVar trim primers
-     */
+    * iVar trim primers
+    */
     IVAR_TRIM ( bam, bed )
 
     /*
-     * Sort, index BAM file and run samtools stats, flagstat and idxstats
-     */
+    * Sort, index BAM file and run samtools stats, flagstat and idxstats
+    */
     BAM_SORT_SAMTOOLS ( IVAR_TRIM.out.bam )
 
     emit:

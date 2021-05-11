@@ -24,8 +24,8 @@ workflow ASSEMBLY_QC {
 
     main:
     /*
-     * Run blastn on assembly scaffolds
-     */
+    * Run blastn on assembly scaffolds
+    */
     ch_blast_txt        = Channel.empty()
     ch_blast_filter_txt = Channel.empty()
     ch_blast_version    = Channel.empty()
@@ -39,8 +39,8 @@ workflow ASSEMBLY_QC {
     }
 
     /*
-     * Assembly QC across all samples with QUAST
-     */
+    * Assembly QC across all samples with QUAST
+    */
     ch_quast_results = Channel.empty()
     ch_quast_tsv     = Channel.empty()
     ch_quast_version = Channel.empty()
@@ -52,8 +52,8 @@ workflow ASSEMBLY_QC {
     }
 
     /*
-     * Contiguate assembly with ABACAS
-     */
+    * Contiguate assembly with ABACAS
+    */
     ch_abacas_results = Channel.empty()
     ch_abacas_version = Channel.empty()
     if (!params.skip_abacas) {
@@ -63,8 +63,8 @@ workflow ASSEMBLY_QC {
     }
 
     /*
-     * Assembly report with PlasmidID
-     */
+    * Assembly report with PlasmidID
+    */
     ch_plasmidid_html     = Channel.empty()
     ch_plasmidid_tab      = Channel.empty()
     ch_plasmidid_images   = Channel.empty()

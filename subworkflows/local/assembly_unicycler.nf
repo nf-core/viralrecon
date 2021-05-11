@@ -24,13 +24,13 @@ workflow ASSEMBLY_UNICYCLER {
 
     main:
     /*
-     * Assemble reads with Unicycler
-     */
+    * Assemble reads with Unicycler
+    */
     UNICYCLER ( reads )
 
     /*
-     * Filter for empty scaffold files
-     */
+    * Filter for empty scaffold files
+    */
     UNICYCLER
         .out
         .scaffolds
@@ -44,8 +44,8 @@ workflow ASSEMBLY_UNICYCLER {
         .set { ch_gfa }
 
     /*
-     * Generate assembly visualisation with Bandage
-     */
+    * Generate assembly visualisation with Bandage
+    */
     ch_bandage_png     = Channel.empty()
     ch_bandage_svg     = Channel.empty()
     ch_bandage_version = Channel.empty()
@@ -57,8 +57,8 @@ workflow ASSEMBLY_UNICYCLER {
     }
 
     /*
-     * Downstream assembly steps
-     */
+    * Downstream assembly steps
+    */
     ASSEMBLY_QC (
         ch_scaffolds,
         fasta,

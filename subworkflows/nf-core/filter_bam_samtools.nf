@@ -15,13 +15,13 @@ workflow FILTER_BAM_SAMTOOLS {
 
     main:
     /*
-     * Filter BAM using Samtools view
-     */
+    * Filter BAM using Samtools view
+    */
     SAMTOOLS_VIEW ( bam )
 
     /*
-     * Index BAM file and run samtools stats, flagstat and idxstats
-     */
+    * Index BAM file and run samtools stats, flagstat and idxstats
+    */
     SAMTOOLS_INDEX     ( SAMTOOLS_VIEW.out.bam )
     BAM_STATS_SAMTOOLS ( SAMTOOLS_VIEW.out.bam.join(SAMTOOLS_INDEX.out.bai, by: [0]) )
 

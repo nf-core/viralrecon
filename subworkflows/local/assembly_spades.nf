@@ -25,8 +25,8 @@ workflow ASSEMBLY_SPADES {
 
     main:
     /*
-     * Filter for paired-end samples if running metaSPAdes / metaviralSPAdes / metaplasmidSPAdes
-     */
+    * Filter for paired-end samples if running metaSPAdes / metaviralSPAdes / metaplasmidSPAdes
+    */
     ch_reads = reads
     if (params.spades_options.args.contains('--meta') || params.spades_options.args.contains('--bio')) {
         reads
@@ -35,13 +35,13 @@ workflow ASSEMBLY_SPADES {
     }
 
     /*
-     * Assemble reads with SPAdes
-     */
+    * Assemble reads with SPAdes
+    */
     SPADES ( ch_reads, hmm )
 
     /*
-     * Filter for empty scaffold files
-     */
+    * Filter for empty scaffold files
+    */
     SPADES
         .out
         .scaffolds
@@ -55,8 +55,8 @@ workflow ASSEMBLY_SPADES {
         .set { ch_gfa }
 
     /*
-     * Generate assembly visualisation with Bandage
-     */
+    * Generate assembly visualisation with Bandage
+    */
     ch_bandage_png     = Channel.empty()
     ch_bandage_svg     = Channel.empty()
     ch_bandage_version = Channel.empty()
@@ -68,8 +68,8 @@ workflow ASSEMBLY_SPADES {
     }
 
     /*
-     * Downstream assembly steps
-     */
+    * Downstream assembly steps
+    */
     ASSEMBLY_QC (
         ch_scaffolds,
         fasta,

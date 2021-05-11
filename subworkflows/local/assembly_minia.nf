@@ -22,13 +22,13 @@ workflow ASSEMBLY_MINIA {
 
     main:
     /*
-     * Assemble reads with minia
-     */
+    * Assemble reads with minia
+    */
     MINIA ( reads )
 
     /*
-     * Filter for empty contig files
-     */
+    * Filter for empty contig files
+    */
     MINIA
         .out
         .contigs
@@ -36,8 +36,8 @@ workflow ASSEMBLY_MINIA {
         .set { ch_contigs }
 
     /*
-     * Downstream assembly steps
-     */
+    * Downstream assembly steps
+    */
     ASSEMBLY_QC (
         ch_contigs,
         fasta,
