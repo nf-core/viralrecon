@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * Illumina and Nanopore runs containing the same 48 samples sequenced on both platforms have been uploaded to the nf-core AWS account for full-sized tests on release
 * Default human `--kraken2_db` link has been changed from Zenodo to an AWS S3 bucket for more reliable downloads
-* Updated pipeline template to nf-core/tools `1.13.3`
+* Updated pipeline template to nf-core/tools `1.14`
 * Optimise MultiQC configuration and input files for faster run-time on huge sample numbers
 * [#122](https://github.com/nf-core/viralrecon/issues/122) - Single SPAdes command to rule them all
 * [#138](https://github.com/nf-core/viralrecon/issues/138) - Problem masking the consensus sequence
