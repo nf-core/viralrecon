@@ -24,12 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Default human `--kraken2_db` link has been changed from Zenodo to an AWS S3 bucket for more reliable downloads
 * Updated pipeline template to nf-core/tools `1.14`
 * Optimise MultiQC configuration and input files for faster run-time on huge sample numbers
-* [#122](https://github.com/nf-core/viralrecon/issues/122) - Single SPAdes command to rule them all
-* [#138](https://github.com/nf-core/viralrecon/issues/138) - Problem masking the consensus sequence
-* [#142](https://github.com/nf-core/viralrecon/issues/142) - Unknown method invocation `toBytes` on String type
-* [#169](https://github.com/nf-core/viralrecon/issues/169) - ggplot2 error when generating mosdepth amplicon plot with Swift v2 primers
-* [#170](https://github.com/nf-core/viralrecon/issues/170) - ivar trimming of Swift libraries new offset feature
-* [#175](https://github.com/nf-core/viralrecon/issues/175) - MultiQC report does not include all the metrics
+* [[#122](https://github.com/nf-core/viralrecon/issues/122)] - Single SPAdes command to rule them all
+* [[#138](https://github.com/nf-core/viralrecon/issues/138)] - Problem masking the consensus sequence
+* [[#142](https://github.com/nf-core/viralrecon/issues/142)] - Unknown method invocation `toBytes` on String type
+* [[#169](https://github.com/nf-core/viralrecon/issues/169)] - ggplot2 error when generating mosdepth amplicon plot with Swift v2 primers
+* [[#170](https://github.com/nf-core/viralrecon/issues/170)] - ivar trimming of Swift libraries new offset feature
+* [[#175](https://github.com/nf-core/viralrecon/issues/175)] - MultiQC report does not include all the metrics
+* [[#188](https://github.com/nf-core/viralrecon/pull/188)] - Add and fix EditorConfig linting in entire pipeline
 
 ### Parameters
 
