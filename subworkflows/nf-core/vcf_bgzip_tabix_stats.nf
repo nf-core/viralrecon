@@ -1,6 +1,6 @@
-/*
- * Run BCFTools bgzip, tabix and stats commands
- */
+//
+// Run BCFTools bgzip, tabix and stats commands
+//
 
 params.bgzip_options = [:]
 params.tabix_options = [:]

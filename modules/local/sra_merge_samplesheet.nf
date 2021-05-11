@@ -3,9 +3,6 @@ include { saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-/*
- * Merge samplesheets across all samples
- */
 process SRA_MERGE_SAMPLESHEET {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,

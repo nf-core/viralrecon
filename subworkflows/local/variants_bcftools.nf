@@ -1,6 +1,6 @@
-/*
- * Variant calling and downstream processing for BCFTools
- */
+//
+// Variant calling and downstream processing for BCFTools
+//
 
 params.bcftools_mpileup_options    = [:]
 params.quast_options               = [:]
@@ -37,14 +37,15 @@ workflow VARIANTS_BCFTOOLS {
     snpeff_config // channel: /path/to/snpeff.config
 
     main:
-    /*
-    * Call variants
-    */
+
+    //
+    // Call variants
+    //
     BCFTOOLS_MPILEUP ( bam, fasta )
 
-    /*
-    * Create genome consensus using variants in VCF, run QUAST and pangolin
-    */
+    //
+    // Create genome consensus using variants in VCF, run QUAST and pangolin
+    //
     ch_consensus         = Channel.empty()
     ch_bases_tsv         = Channel.empty()
     ch_bases_pdf         = Channel.empty()
@@ -83,9 +84,9 @@ workflow VARIANTS_BCFTOOLS {
         }
     }
 
-    /*
-    * Annotate variants
-    */
+    //
+    // Annotate variants
+    //
     ch_snpeff_vcf      = Channel.empty()
     ch_snpeff_tbi      = Channel.empty()
     ch_snpeff_stats    = Channel.empty()
@@ -108,9 +109,9 @@ workflow VARIANTS_BCFTOOLS {
         ch_snpsift_version = SNPEFF_SNPSIFT.out.snpsift_version
     }
 
-    /*
-    * MODULE: Variant screenshots with ASCIIGenome
-    */
+    //
+    // Variant screenshots with ASCIIGenome
+    //
     ch_asciigenome_pdf     = Channel.empty()
     ch_asciigenome_version = Channel.empty()
     if (!params.skip_asciigenome) {

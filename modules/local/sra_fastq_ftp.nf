@@ -4,9 +4,6 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 options        = initOptions(params.options)
 
-/*
- * Download SRA data via FTP
- */
 process SRA_FASTQ_FTP {
     tag "$meta.id"
     label 'process_medium'

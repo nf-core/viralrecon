@@ -1,6 +1,6 @@
-/*
- * Variant calling and downstream processing for IVar
- */
+//
+// Variant calling and downstream processing for IVar
+//
 
 params.ivar_variants_options        = [:]
 params.ivar_variants_to_vcf_options = [:]
@@ -41,21 +41,22 @@ workflow VARIANTS_IVAR {
     ivar_multiqc_header // channel: /path/to/multiqc_header for ivar variants
 
     main:
-    /*
-    * Call variants
-    */
+
+    //
+    // Call variants
+    //
     IVAR_VARIANTS ( bam, fasta, gff )
 
-    /*
-    * Convert original iVar output to VCF, zip and index
-    */
+    //
+    // Convert original iVar output to VCF, zip and index
+    //
     IVAR_VARIANTS_TO_VCF ( IVAR_VARIANTS.out.tsv, ivar_multiqc_header )
 
     VCF_BGZIP_TABIX_STATS ( IVAR_VARIANTS_TO_VCF.out.vcf )
 
-    /*
-    * Create genome consensus
-    */
+    //
+    // Create genome consensus
+    //
     ch_consensus         = Channel.empty()
     ch_consensus_qual    = Channel.empty()
     ch_bases_tsv         = Channel.empty()
@@ -96,9 +97,9 @@ workflow VARIANTS_IVAR {
         }
     }
 
-    /*
-    * Annotate variants
-    */
+    //
+    // Annotate variants
+    //
     ch_snpeff_vcf      = Channel.empty()
     ch_snpeff_tbi      = Channel.empty()
     ch_snpeff_stats    = Channel.empty()
@@ -121,9 +122,9 @@ workflow VARIANTS_IVAR {
         ch_snpsift_version = SNPEFF_SNPSIFT.out.snpsift_version
     }
 
-    /*
-    * MODULE: Variant screenshots with ASCIIGenome
-    */
+    //
+    // Variant screenshots with ASCIIGenome
+    //
     ch_asciigenome_pdf     = Channel.empty()
     ch_asciigenome_version = Channel.empty()
     if (!params.skip_asciigenome) {

@@ -1,14 +1,14 @@
-/*
- * This file holds several functions specific to the workflow/illumina.nf in the nf-core/viralrecon pipeline
- */
+//
+// This file holds several functions specific to the workflow/illumina.nf in the nf-core/viralrecon pipeline
+//
 
 import groovy.json.JsonSlurper
 
 class WorkflowIllumina {
 
-    /*
-     * Check and validate parameters
-     */
+    //
+    // Check and validate parameters
+    //
     public static void initialise(params, log, valid_params) {
         WorkflowCommons.genomeExistsError(params, log)
 
@@ -55,9 +55,9 @@ class WorkflowIllumina {
         }
     }
 
-    /*
-     * Print warning if genome fasta has more than one sequence
-     */
+    //
+    // Print warning if genome fasta has more than one sequence
+    //
     public static void isMultiFasta(fasta_file, log) {
         def count = 0
         def line  = null
@@ -78,9 +78,9 @@ class WorkflowIllumina {
         }
     }
 
-    /*
-     * Function that parses and returns the number of mapped reasds from flagstat files
-     */
+    //
+    // Function that parses and returns the number of mapped reasds from flagstat files
+    //
     public static ArrayList getFlagstatMappedReads(flagstat_file, params) {
         def mapped_reads = 0
         flagstat_file.eachLine { line ->
@@ -97,9 +97,9 @@ class WorkflowIllumina {
         return [ mapped_reads, pass ]
     }
 
-    /*
-     * Check if the primer BED file supplied to the pipeline is from the SWIFT/SNAP protocol
-     */
+    //
+    // Check if the primer BED file supplied to the pipeline is from the SWIFT/SNAP protocol
+    //
     public static void checkIfSwiftProtocol(primer_bed_file, name_prefix, log) {
         def count = 0
         def line  = null
@@ -122,9 +122,9 @@ class WorkflowIllumina {
         }
     }
 
-    /*
-     * Function that parses fastp json output file to get total number of reads after trimming
-     */
+    //
+    // Function that parses fastp json output file to get total number of reads after trimming
+    //
     public static Integer getFastpReadsAfterFiltering(json_file) {
         def Map json = (Map) new JsonSlurper().parseText(json_file.text).get('summary')
         return json['after_filtering']['total_reads'].toInteger()

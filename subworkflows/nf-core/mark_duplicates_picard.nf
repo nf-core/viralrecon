@@ -1,6 +1,6 @@
-/*
- * Picard MarkDuplicates, sort, index BAM file and run samtools stats, flagstat and idxstats
- */
+//
+// Picard MarkDuplicates, sort, index BAM file and run samtools stats, flagstat and idxstats
+//
 
 params.markduplicates_options = [:]
 params.samtools_options       = [:]
@@ -14,14 +14,15 @@ workflow MARK_DUPLICATES_PICARD {
     bam // channel: [ val(meta), [ bam ] ]
 
     main:
-    /*
-    * Picard MarkDuplicates
-    */
+
+    //
+    // Picard MarkDuplicates
+    //
     PICARD_MARKDUPLICATES ( bam )
 
-    /*
-    * Index BAM file and run samtools stats, flagstat and idxstats
-    */
+    //
+    // Index BAM file and run samtools stats, flagstat and idxstats
+    //
     SAMTOOLS_INDEX     ( PICARD_MARKDUPLICATES.out.bam )
     BAM_STATS_SAMTOOLS ( PICARD_MARKDUPLICATES.out.bam.join(SAMTOOLS_INDEX.out.bai, by: [0]) )
 

@@ -1,6 +1,6 @@
-/*
- * Sort, index BAM file and run samtools stats, flagstat and idxstats
- */
+//
+// Sort, index BAM file and run samtools stats, flagstat and idxstats
+//
 
 params.options = [:]
 

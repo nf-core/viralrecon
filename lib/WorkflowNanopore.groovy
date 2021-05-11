@@ -1,12 +1,12 @@
-/*
- * This file holds several functions specific to the workflow/nanopore.nf in the nf-core/viralrecon pipeline
- */
+//
+// This file holds several functions specific to the workflow/nanopore.nf in the nf-core/viralrecon pipeline
+//
 
 class WorkflowNanopore {
 
-    /*
-     * Check and validate parameters
-     */
+    //
+    // Check and validate parameters
+    //
     public static void initialise(params, log, valid_params) {
         WorkflowCommons.genomeExistsError(params, log)
 

@@ -4,9 +4,6 @@ include { initOptions; saveFiles } from './functions'
 params.options = [:]
 options        = initOptions(params.options)
 
-/*
- * Make a consensus mask
- */
 process MAKE_BED_MASK {
     tag "$meta.id"
     publishDir "${params.outdir}",

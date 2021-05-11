@@ -1,14 +1,14 @@
-/*
- * This file holds several functions used within the nf-core pipeline template.
- */
+//
+// This file holds several functions used within the nf-core pipeline template.
+//
 
 import org.yaml.snakeyaml.Yaml
 
 class NfcoreTemplate {
 
-    /*
-     * Check AWS Batch related parameters have been specified correctly
-     */
+    //
+    // Check AWS Batch related parameters have been specified correctly
+    //
     public static void awsBatch(workflow, params) {
         if (workflow.profile.contains('awsbatch')) {
             // Check params.awsqueue and params.awsregion have been set if running on AWSBatch
@@ -18,9 +18,9 @@ class NfcoreTemplate {
         }
     }
 
-    /*
-     * Check params.hostnames
-     */
+    //
+    // Check params.hostnames
+    //
     public static void hostName(workflow, params, log) {
         Map colors = logColours(params.monochrome_logs)
         if (params.hostnames) {
@@ -39,9 +39,9 @@ class NfcoreTemplate {
         }
     }
 
-    /*
-     * Construct and send completion email
-     */
+    //
+    // Construct and send completion email
+    //
     public static void email(workflow, params, summary_params, projectDir, log, multiqc_report=[], fail_mapped_reads=[:]) {
 
         // Set up the e-mail variables
@@ -157,9 +157,9 @@ class NfcoreTemplate {
         output_tf.withWriter { w -> w << email_txt }
     }
 
-    /*
-     * Print pipeline summary on completion
-     */
+    //
+    // Print pipeline summary on completion
+    //
     public static void summary(workflow, params, log, fail_mapped_reads=[:], pass_mapped_reads=[:]) {
         Map colors = logColours(params.monochrome_logs)
 
@@ -197,9 +197,9 @@ class NfcoreTemplate {
         }
     }
 
-    /*
-     * ANSII Colours used for terminal logging
-     */
+    //
+    // ANSII Colours used for terminal logging
+    //
     public static Map logColours(Boolean monochrome_logs) {
         Map colorcodes = [:]
 
@@ -265,17 +265,17 @@ class NfcoreTemplate {
         return colorcodes
     }
 
-    /*
-     * Does what is says on the tin
-     */
+    //
+    // Does what is says on the tin
+    //
     public static String dashedLine(monochrome_logs) {
         Map colors = logColours(monochrome_logs)
         return "-${colors.dim}----------------------------------------------------${colors.reset}-"
     }
 
-    /*
-     * nf-core logo
-     */
+    //
+    // nf-core logo
+    //
     public static String logo(workflow, monochrome_logs) {
         Map colors = logColours(monochrome_logs)
         String.format(

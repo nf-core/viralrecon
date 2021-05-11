@@ -1,6 +1,6 @@
-/*
- * Uncompress and prepare reference genome files
-*/
+//
+// Uncompress and prepare reference genome files
+//
 
 params.genome_options           = [:]
 params.collapse_primers_options = [:]
@@ -18,18 +18,19 @@ workflow PREPARE_GENOME {
     dummy_file
 
     main:
-    /*
-    * Uncompress genome fasta file if required
-    */
+
+    //
+    // Uncompress genome fasta file if required
+    //
     if (params.fasta.endsWith('.gz')) {
         ch_fasta = GUNZIP_FASTA ( params.fasta ).gunzip
     } else {
         ch_fasta = file(params.fasta)
     }
 
-    /*
-    * Uncompress GFF annotation file
-    */
+    //
+    // Uncompress GFF annotation file
+    //
     if (params.gff) {
         if (params.gff.endsWith('.gz')) {
             ch_gff = GUNZIP_GFF ( params.gff ).gunzip
@@ -40,9 +41,9 @@ workflow PREPARE_GENOME {
         ch_gff = dummy_file
     }
 
-    /*
-    * Uncompress primer BED file
-    */
+    //
+    // Uncompress primer BED file
+    //
     ch_primer_bed = Channel.empty()
     if (params.primer_bed) {
         if (params.primer_bed.endsWith('.gz')) {
@@ -52,17 +53,17 @@ workflow PREPARE_GENOME {
         }
     }
 
-    /*
-    * Generate collapsed BED file
-    */
+    //
+    // Generate collapsed BED file
+    //
     ch_primer_collapsed_bed = Channel.empty()
     if (!params.skip_mosdepth) {
         ch_primer_collapsed_bed = COLLAPSE_PRIMERS ( ch_primer_bed, params.primer_left_suffix, params.primer_right_suffix )
     }
 
-    /*
-    * Make snpEff database
-    */
+    //
+    // Make snpEff database
+    //
     ch_snpeff_db     = Channel.empty()
     ch_snpeff_config = Channel.empty()
     if (params.gff && !params.skip_snpeff) {

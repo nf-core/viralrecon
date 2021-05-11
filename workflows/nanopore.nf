@@ -68,9 +68,9 @@ include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_PANGOLIN             } fro
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME            } from '../modules/local/plot_mosdepth_regions'     addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON          } from '../modules/local/plot_mosdepth_regions'     addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
 
-/*
- * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
- */
+//
+// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
+//
 def publish_genome_options   = params.save_reference ? [publish_dir: 'genome'] : [publish_files: false]
 def collapse_primers_options = modules['nanopore_collapse_primers']
 def snpeff_build_options     = modules['nanopore_snpeff_build']
@@ -89,9 +89,9 @@ include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'          
 ========================================================================================
 */
 
-/*
- * MODULE: Installed directly from nf-core/modules
- */
+//
+// MODULE: Installed directly from nf-core/modules
+//
 
 def artic_minion_options   = modules['nanopore_artic_minion']
 artic_minion_options.args += params.artic_minion_caller  == 'medaka' ? Utils.joinModuleArgs(['--medaka']) : ''
@@ -108,9 +108,9 @@ include { NEXTCLADE                     } from '../modules/nf-core/software/next
 include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'        addParams( options: modules['nanopore_mosdepth_genome']   )
 include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'        addParams( options: modules['nanopore_mosdepth_amplicon'] )
 
-/*
- * SUBWORKFLOW: Consisting entirely of nf-core/modules
- */
+//
+// SUBWORKFLOW: Consisting entirely of nf-core/modules
+//
 include { FILTER_BAM_SAMTOOLS } from '../subworkflows/nf-core/filter_bam_samtools' addParams( samtools_view_options: modules['nanopore_filter_bam'], samtools_index_options: modules['nanopore_filter_bam_stats'] )
 
 /*
@@ -128,9 +128,9 @@ workflow NANOPORE {
 
     ch_software_versions = Channel.empty()
 
-    /*
-     * MODULE: PycoQC on sequencing summary file
-     */
+    //
+    // MODULE: PycoQC on sequencing summary file
+    //
     if (params.sequencing_summary && !params.skip_pycoqc) {
         PYCOQC (
             ch_sequencing_summary
@@ -138,9 +138,9 @@ workflow NANOPORE {
     }
     ch_software_versions = ch_software_versions.mix(PYCOQC.out.version.ifEmpty(null))
 
-    /*
-     * SUBWORKFLOW: Uncompress and prepare reference genome files
-     */
+    //
+    // SUBWORKFLOW: Uncompress and prepare reference genome files
+    //
     PREPARE_GENOME (
         ch_dummy_file
     )
@@ -170,9 +170,9 @@ workflow NANOPORE {
             }
             .set { ch_fastq_dirs }
 
-        /*
-         * SUBWORKFLOW: Read in samplesheet containing sample to barcode mappings
-         */
+        //
+        // SUBWORKFLOW: Read in samplesheet containing sample to barcode mappings
+        //
         if (params.input) {
             INPUT_CHECK (
                 ch_input,
@@ -181,9 +181,9 @@ workflow NANOPORE {
             .join(ch_fastq_dirs, remainder: true)
             .set { ch_fastq_dirs }
 
-            /*
-             * MODULE: Create custom content file for MultiQC to report barcodes were allocated reads >= params.min_barcode_reads but no sample name in samplesheet
-             */
+            //
+            // MODULE: Create custom content file for MultiQC to report barcodes were allocated reads >= params.min_barcode_reads but no sample name in samplesheet
+            //
             ch_fastq_dirs
                 .filter { it[1] == null }
                 .filter { it[-1] >= params.min_barcode_reads }
@@ -198,9 +198,9 @@ workflow NANOPORE {
             )
             ch_custom_no_sample_name_multiqc = MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME.out
 
-            /*
-             * MODULE: Create custom content file for MultiQC to report samples that were in samplesheet but have no barcodes
-             */
+            //
+            // MODULE: Create custom content file for MultiQC to report samples that were in samplesheet but have no barcodes
+            //
             ch_fastq_dirs
                 .filter { it[-1] == null }
                 .map { it -> [ "${it[1]}\t${it[0]}" ] }
@@ -234,9 +234,9 @@ workflow NANOPORE {
         System.exit(1)
     }
 
-    /*
-     * MODULE: Create custom content file for MultiQC to report samples with reads < params.min_barcode_reads
-     */
+    //
+    // MODULE: Create custom content file for MultiQC to report samples with reads < params.min_barcode_reads
+    //
     ch_fastq_dirs
         .branch { barcode, sample, dir, count  ->
             pass: count > params.min_barcode_reads
@@ -261,17 +261,17 @@ workflow NANOPORE {
         .map { barcode, sample, dir, count -> [ [ id: sample, barcode:barcode ], dir ] }
         .set { ch_fastq_dirs }
 
-    /*
-     * MODULE: Run Artic Guppyplex
-     */
+    //
+    // MODULE: Run Artic Guppyplex
+    //
     ARTIC_GUPPYPLEX (
         ch_fastq_dirs
     )
     ch_software_versions = ch_software_versions.mix(ARTIC_GUPPYPLEX.out.version.first().ifEmpty(null))
 
-    /*
-     * MODULE: Create custom content file for MultiQC to report samples with reads < params.min_guppyplex_reads
-     */
+    //
+    // MODULE: Create custom content file for MultiQC to report samples with reads < params.min_guppyplex_reads
+    //
     ARTIC_GUPPYPLEX
         .out
         .fastq
@@ -291,9 +291,9 @@ workflow NANOPORE {
         'fail_guppyplex_count_samples'
     )
 
-    /*
-     * MODULE: Nanoplot QC for FastQ files
-     */
+    //
+    // MODULE: Nanoplot QC for FastQ files
+    //
     if (!params.skip_nanoplot) {
         NANOPLOT (
             ARTIC_GUPPYPLEX.out.fastq
@@ -301,9 +301,9 @@ workflow NANOPORE {
         ch_software_versions = ch_software_versions.mix(NANOPLOT.out.version.first().ifEmpty(null))
     }
 
-    /*
-     * MODULE: Run Artic minion
-     */
+    //
+    // MODULE: Run Artic minion
+    //
     ARTIC_MINION (
         ARTIC_GUPPYPLEX.out.fastq.filter { it[-1].countFastq() > params.min_guppyplex_reads },
         ch_fast5_dir,
@@ -315,25 +315,25 @@ workflow NANOPORE {
         params.primer_set_version
     )
 
-    /*
-     * SUBWORKFLOW: Filter unmapped reads from BAM
-     */
+    //
+    // SUBWORKFLOW: Filter unmapped reads from BAM
+    //
     FILTER_BAM_SAMTOOLS (
         ARTIC_MINION.out.bam
     )
     ch_software_versions = ch_software_versions.mix(FILTER_BAM_SAMTOOLS.out.samtools_version.first().ifEmpty(null))
 
-    /*
-     * MODULE: VCF stats with bcftools stats
-     */
+    //
+    // MODULE: VCF stats with bcftools stats
+    //
     BCFTOOLS_STATS (
         ARTIC_MINION.out.vcf
     )
     ch_software_versions = ch_software_versions.mix(BCFTOOLS_STATS.out.version.ifEmpty(null))
 
-    /*
-     * MODULE: Genome-wide and amplicon-specific coverage QC plots
-     */
+    //
+    // MODULE: Genome-wide and amplicon-specific coverage QC plots
+    //
     ch_mosdepth_multiqc = Channel.empty()
     if (!params.skip_mosdepth) {
 
@@ -360,9 +360,9 @@ workflow NANOPORE {
         )
     }
 
-    /*
-     * MODULE: Lineage analysis with Pangolin
-     */
+    //
+    // MODULE: Lineage analysis with Pangolin
+    //
     ch_pangolin_multiqc = Channel.empty()
     if (!params.skip_pangolin) {
         PANGOLIN (
@@ -370,9 +370,9 @@ workflow NANOPORE {
         )
         ch_software_versions = ch_software_versions.mix(PANGOLIN.out.version.ifEmpty(null))
 
-        /*
-         * MODULE: Get Pangolin lineage information for MultiQC report
-         */
+        //
+        // MODULE: Get Pangolin lineage information for MultiQC report
+        //
         PANGOLIN
             .out
             .report
@@ -391,9 +391,9 @@ workflow NANOPORE {
         .set { ch_pangolin_multiqc }
     }
 
-    /*
-     * MODULE: Clade assignment, mutation calling, and sequence quality checks with Nextclade
-     */
+    //
+    // MODULE: Clade assignment, mutation calling, and sequence quality checks with Nextclade
+    //
     if (!params.skip_nextclade) {
         NEXTCLADE (
             ARTIC_MINION.out.fasta,
@@ -402,9 +402,9 @@ workflow NANOPORE {
         ch_software_versions = ch_software_versions.mix(NEXTCLADE.out.version.ifEmpty(null))
     }
 
-    /*
-     * MODULE: Consensus QC across all samples with QUAST
-     */
+    //
+    // MODULE: Consensus QC across all samples with QUAST
+    //
     ch_quast_multiqc = Channel.empty()
     if (!params.skip_variants_quast) {
         QUAST (
@@ -418,9 +418,9 @@ workflow NANOPORE {
         ch_software_versions = ch_software_versions.mix(QUAST.out.version.ifEmpty(null))
     }
 
-    /*
-     * SUBWORKFLOW: Annotate variants with snpEff
-     */
+    //
+    // SUBWORKFLOW: Annotate variants with snpEff
+    //
     ch_snpeff_multiqc = Channel.empty()
     if (params.gff && !params.skip_snpeff) {
         SNPEFF_SNPSIFT (
@@ -434,9 +434,9 @@ workflow NANOPORE {
         ch_software_versions = ch_software_versions.mix(SNPEFF_SNPSIFT.out.snpsift_version.ifEmpty(null))
     }
 
-    /*
-     * MODULE: Variant screenshots with ASCIIGenome
-     */
+    //
+    // MODULE: Variant screenshots with ASCIIGenome
+    //
     if (!params.skip_asciigenome) {
         ARTIC_MINION
             .out
@@ -461,10 +461,9 @@ workflow NANOPORE {
         ch_software_versions = ch_software_versions.mix(ASCIIGENOME.out.version.ifEmpty(null))
     }
 
-    /*
-     * MODULE: Pipeline reporting
-     */
-    // Get unique list of files containing version information
+    //
+    // MODULE: Pipeline reporting
+    //
     ch_software_versions
         .map { it -> if (it) [ it.baseName, it ] }
         .groupTuple()
@@ -477,9 +476,9 @@ workflow NANOPORE {
         ch_software_versions
     )
 
-    /*
-     * MODULE: MultiQC
-     */
+    //
+    // MODULE: MultiQC
+    //
     if (!params.skip_multiqc) {
         workflow_summary    = WorkflowCommons.paramsSummaryMultiqc(workflow, summary_params)
         ch_workflow_summary = Channel.value(workflow_summary)

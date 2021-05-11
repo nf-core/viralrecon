@@ -1,6 +1,6 @@
-/*
- * Assembly and downstream processing for minia scaffolds
- */
+//
+// Assembly and downstream processing for minia scaffolds
+//
 
 params.minia_options         = [:]
 params.blastn_options        = [:]
@@ -21,23 +21,24 @@ workflow ASSEMBLY_MINIA {
     blast_header  // channel: /path/to/blast_header.txt
 
     main:
-    /*
-    * Assemble reads with minia
-    */
+
+    //
+    // Assemble reads with minia
+    //
     MINIA ( reads )
 
-    /*
-    * Filter for empty contig files
-    */
+    //
+    // Filter for empty contig files
+    //
     MINIA
         .out
         .contigs
         .filter { meta, contig -> contig.size() > 0 }
         .set { ch_contigs }
 
-    /*
-    * Downstream assembly steps
-    */
+    //
+    // Downstream assembly steps
+    //
     ASSEMBLY_QC (
         ch_contigs,
         fasta,
@@ -72,5 +73,4 @@ workflow ASSEMBLY_MINIA {
     plasmidid_fasta    = ASSEMBLY_QC.out.plasmidid_fasta    // channel: [ val(meta), [ fasta_files/ ] ]
     plasmidid_kmer     = ASSEMBLY_QC.out.plasmidid_kmer     // channel: [ val(meta), [ kmer/ ] ]
     plasmidid_version  = ASSEMBLY_QC.out.plasmidid_version  //    path: *.version.txt
-
 }

@@ -1,6 +1,6 @@
-/*
- * Read QC and trimming
- */
+//
+// Read QC and trimming
+//
 
 params.fastqc_raw_options  = [:]
 params.fastqc_trim_options = [:]

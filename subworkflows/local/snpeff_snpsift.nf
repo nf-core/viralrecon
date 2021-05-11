@@ -1,6 +1,6 @@
-/*
- * Run snpEff, bgzip, tabix, stats and SnpSift commands
- */
+//
+// Run snpEff, bgzip, tabix, stats and SnpSift commands
+//
 
 params.snpeff_options  = [:]
 params.bgzip_options   = [:]
@@ -20,6 +20,7 @@ workflow SNPEFF_SNPSIFT {
     fasta  // path   : genome.fasta
 
     main:
+    
     SNPEFF_ANN ( vcf, db, config, fasta )
 
     VCF_BGZIP_TABIX_STATS ( SNPEFF_ANN.out.vcf )

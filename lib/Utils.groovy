@@ -1,14 +1,14 @@
-/*
- * This file holds several Groovy functions that could be useful for any Nextflow pipeline
- */
+//
+// This file holds several Groovy functions that could be useful for any Nextflow pipeline
+//
 
 import org.yaml.snakeyaml.Yaml
 
 class Utils {
 
-    /*
-    * When running with -profile conda, warn if channels have not been set-up appropriately
-    */
+    //
+    // When running with -profile conda, warn if channels have not been set-up appropriately
+    //
     public static void checkCondaChannels(log) {
         Yaml parser = new Yaml()
         def channels = []
@@ -38,9 +38,9 @@ class Utils {
         }
     }
 
-    /*
-    * Join module args with appropriate spacing
-    */
+    //
+    // Join module args with appropriate spacing
+    //
     public static String joinModuleArgs(args_list) {
         return ' ' + args_list.join(' ')
     }

@@ -1,6 +1,6 @@
-/*
- * Run SAMtools stats, flagstat and idxstats
- */
+//
+// Run SAMtools stats, flagstat and idxstats
+//
 
 params.options = [:]
 

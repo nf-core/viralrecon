@@ -1,6 +1,6 @@
-/*
- * Run BCFTools tabix and stats commands
- */
+//
+// Run BCFTools tabix and stats commands
+//
 
 params.tabix_options = [:]
 params.stats_options = [:]

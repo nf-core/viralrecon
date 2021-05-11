@@ -3,9 +3,6 @@ include { saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-/*
- * Fetch SRA / ENA / GEO run information via the ENA API
- */
 process SRA_IDS_TO_RUNINFO {
     tag "$id"
     label 'error_retry'

@@ -1,6 +1,6 @@
-/*
- * Run various tools to generate a masked genome consensus sequence
- */
+//
+// Run various tools to generate a masked genome consensus sequence
+//
 
 params.genomecov_options  = [:]
 params.merge_options      = [:]
@@ -40,5 +40,4 @@ workflow MAKE_CONSENSUS {
     pdf              = PLOT_BASE_DENSITY.out.pdf      // channel: [ val(meta), [ pdf ] ]
     bedtools_version = BEDTOOLS_MERGE.out.version     //    path: *.version.txt
     bcftools_version = BCFTOOLS_CONSENSUS.out.version //    path: *.version.txt
-
 }

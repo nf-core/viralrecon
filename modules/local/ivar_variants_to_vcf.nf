@@ -4,9 +4,6 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 options        = initOptions(params.options)
 
-/*
- * Convert IVar tsv output to vcf
- */
 process IVAR_VARIANTS_TO_VCF {
     tag "$meta.id"
     publishDir "${params.outdir}",

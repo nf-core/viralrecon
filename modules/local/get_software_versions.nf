@@ -3,9 +3,6 @@ include { saveFiles } from './functions'
 
 params.options = [:]
 
-/*
- * Parse software version numbers
- */
 process GET_SOFTWARE_VERSIONS {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,

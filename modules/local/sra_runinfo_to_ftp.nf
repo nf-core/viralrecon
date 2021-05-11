@@ -3,9 +3,6 @@ include { saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-/*
- * Create samplesheet for pipeline from SRA run information fetched via the ENA API
- */
 process SRA_RUNINFO_TO_FTP {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,

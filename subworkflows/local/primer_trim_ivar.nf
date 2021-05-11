@@ -1,6 +1,6 @@
-/*
- * iVar trim, sort, index BAM file and run samtools stats, flagstat and idxstats
- */
+//
+// iVar trim, sort, index BAM file and run samtools stats, flagstat and idxstats
+//
 
 params.ivar_trim_options = [:]
 params.samtools_options  = [:]
@@ -15,14 +15,15 @@ workflow PRIMER_TRIM_IVAR {
     bed // path   : bed
 
     main:
-    /*
-    * iVar trim primers
-    */
+
+    //
+    // iVar trim primers
+    //
     IVAR_TRIM ( bam, bed )
 
-    /*
-    * Sort, index BAM file and run samtools stats, flagstat and idxstats
-    */
+    //
+    // Sort, index BAM file and run samtools stats, flagstat and idxstats
+    //
     BAM_SORT_SAMTOOLS ( IVAR_TRIM.out.bam )
 
     emit:

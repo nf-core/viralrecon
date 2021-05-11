@@ -1,6 +1,6 @@
-/*
- * Check input samplesheet and get read channels
- */
+//
+// Check input samplesheet and get read channels
+//
 
 params.options = [:]
 

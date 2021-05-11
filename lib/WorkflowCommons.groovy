@@ -1,12 +1,12 @@
-/*
- *This file holds several functions common to the multiple workflows in the nf-core/viralrecon pipeline
- */
+//
+// This file holds several functions common to the multiple workflows in the nf-core/viralrecon pipeline
+//
 
 class WorkflowCommons {
 
-    /*
-     * Exit pipeline if incorrect --genome key provided
-     */
+    //
+    // Exit pipeline if incorrect --genome key provided
+    //
     private static void genomeExistsError(params, log) {
         if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
             log.error "=============================================================================\n" +
@@ -18,9 +18,9 @@ class WorkflowCommons {
         }
     }
 
-    /*
-     * Get workflow summary for MultiQC
-     */
+    //
+    // Get workflow summary for MultiQC
+    //
     public static String paramsSummaryMultiqc(workflow, summary) {
         String summary_section = ''
         for (group in summary.keySet()) {
@@ -45,9 +45,9 @@ class WorkflowCommons {
         return yaml_file_text
     }
 
-    /*
-     * Function to check whether primer BED file has the correct suffixes as provided to the pipeline
-     */
+    //
+    // Function to check whether primer BED file has the correct suffixes as provided to the pipeline
+    //
     public static void checkPrimerSuffixes(primer_bed_file, primer_left_suffix, primer_right_suffix, log) {
         def total = 0
         def left  = 0
@@ -73,9 +73,9 @@ class WorkflowCommons {
         }
     }
 
-    /*
-     * Function to get lineage from Pangolin output file
-     */
+    //
+    // Function to get lineage from Pangolin output file
+    //
     public static String getPangolinLineage(pangolin_report) {
         def lineage = ''
         pangolin_report.eachLine { line ->
@@ -84,9 +84,9 @@ class WorkflowCommons {
         return lineage
     }
 
-    /*
-     * Function to get number of variants reported in BCFTools stats file
-     */
+    //
+    // Function to get number of variants reported in BCFTools stats file
+    //
     public static Integer getNumVariantsFromBCFToolsStats(bcftools_stats) {
         def num_vars = 0
         bcftools_stats.eachLine { line ->
