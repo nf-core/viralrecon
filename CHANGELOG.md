@@ -14,9 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Variant graph processes to call variants relative to the reference genome directly from _de novo_ assemblies have been deprecated and removed
 * Variant calling with Varscan 2 has been deprecated and removed due to [licensing restrictions](https://github.com/dkoboldt/varscan/issues/12)
 * New tools:
-  * [Pangolin](https://github.com/cov-lineages/pangolin) for lineage analysis
-  * [Nextclade](https://github.com/nextstrain/nextclade) for clade assignment, mutation calling and consensus sequence quality checks
-  * [ASCIIGenome](https://asciigenome.readthedocs.io/en/latest/) for individual variant screenshots with annotation tracks
+    * [Pangolin](https://github.com/cov-lineages/pangolin) for lineage analysis
+    * [Nextclade](https://github.com/nextstrain/nextclade) for clade assignment, mutation calling and consensus sequence quality checks
+    * [ASCIIGenome](https://asciigenome.readthedocs.io/en/latest/) for individual variant screenshots with annotation tracks
 
 ### Other enhancements & fixes
 
@@ -99,8 +99,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | `--unqualified_percent_limit` |                                       |
 | `--varscan2_strand_filter`    |                                       |
 
-> **NB:** Parameter has been __updated__ if both old and new parameter information is present.  
-> **NB:** Parameter has been __added__ if just the new parameter information is present.  
+> **NB:** Parameter has been __updated__ if both old and new parameter information is present.
+> **NB:** Parameter has been __added__ if just the new parameter information is present.
 > **NB:** Parameter has been __removed__ if new parameter information isn't present.
 
 ### Software dependencies
@@ -150,9 +150,9 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `varscan`                     | 2.4.4       |             |
 | `vg`                          | 1.24.0      |             |
 
-> **NB:** Dependency has been __updated__ if both old and new version information is present.  
-> **NB:** Dependency has been __added__ if just the new version information is present.  
-> **NB:** Dependency has been __removed__ if new version information isn't present.  
+> **NB:** Dependency has been __updated__ if both old and new version information is present.
+> **NB:** Dependency has been __added__ if just the new version information is present.
+> **NB:** Dependency has been __removed__ if new version information isn't present.
 
 ## [[1.1.0](https://github.com/nf-core/rnaseq/releases/tag/1.1.0)] - 2020-06-23
 
@@ -162,18 +162,18 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 * [#124](https://github.com/nf-core/viralrecon/issues/124) - Intersect variants across callers
 * [nf-core/tools#616](https://github.com/nf-core/tools/pull/616) - Updated GitHub Actions to build Docker image and push to Docker Hub
 * Parameters:
-  * `--min_mapped_reads` to circumvent failures for samples with low number of mapped reads
-  * `--varscan2_strand_filter` to toggle the default Varscan 2 strand filter
-  * `--skip_mosdepth` - skip genome-wide and amplicon coverage plot generation from mosdepth output
-  * `--amplicon_left_suffix` - to provide left primer suffix used in name field of `--amplicon_bed`
-  * `--amplicon_right_suffix` - to provide right primer suffix used in name field of `--amplicon_bed`
-  * Unify parameter specification with COG-UK pipeline:
-    * `--min_allele_freq` - minimum allele frequency threshold for calling variants
-    * `--mpileup_depth` - SAMTools mpileup max per-file depth
-    * `--ivar_exclude_reads` renamed to `--ivar_trim_noprimer`
-    * `--ivar_trim_min_len` - minimum length of read to retain after primer trimming
-    * `--ivar_trim_min_qual` - minimum quality threshold for sliding window to pass
-    * `--ivar_trim_window_width` - width of sliding window
+    * `--min_mapped_reads` to circumvent failures for samples with low number of mapped reads
+    * `--varscan2_strand_filter` to toggle the default Varscan 2 strand filter
+    * `--skip_mosdepth` - skip genome-wide and amplicon coverage plot generation from mosdepth output
+    * `--amplicon_left_suffix` - to provide left primer suffix used in name field of `--amplicon_bed`
+    * `--amplicon_right_suffix` - to provide right primer suffix used in name field of `--amplicon_bed`
+    * Unify parameter specification with COG-UK pipeline:
+        * `--min_allele_freq` - minimum allele frequency threshold for calling variants
+        * `--mpileup_depth` - SAMTools mpileup max per-file depth
+        * `--ivar_exclude_reads` renamed to `--ivar_trim_noprimer`
+        * `--ivar_trim_min_len` - minimum length of read to retain after primer trimming
+        * `--ivar_trim_min_qual` - minimum quality threshold for sliding window to pass
+        * `--ivar_trim_window_width` - width of sliding window
 * [#118] Updated GitHub Actions AWS workflow for small and full size tests.
 
 ### Removed
