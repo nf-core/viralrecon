@@ -1,6 +1,6 @@
-/*
- * Sort, index BAM file and run samtools stats, flagstat and idxstats
- */
+//
+// Sort, index BAM file and run samtools stats, flagstat and idxstats
+//
 
 params.options = [:]
 
@@ -11,7 +11,7 @@ include { BAM_STATS_SAMTOOLS } from './bam_stats_samtools'                      
 workflow BAM_SORT_SAMTOOLS {
     take:
     bam // channel: [ val(meta), [ bam ] ]
-    
+
     main:
     SAMTOOLS_SORT      ( bam )
     SAMTOOLS_INDEX     ( SAMTOOLS_SORT.out.bam )

@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         # Nextflow versions: check pipeline minimum and current latest
-        nxf_ver: [21.04.0]
+        nxf_ver: [21.04.0, ""]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -41,11 +41,20 @@ jobs:
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
     runs-on: ubuntu-latest
     env:
-      NXF_VER: '21.04.0'
+      NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
     strategy:
       matrix:
-        parameters: [--skip_fastp, --skip_variants, --skip_cutadapt, --skip_kraken2, --skip_assembly, '--spades_mode corona', '--spades_mode metaviral']
+        parameters:
+          [
+            --skip_fastp,
+            --skip_variants,
+            --skip_cutadapt,
+            --skip_kraken2,
+            --skip_assembly,
+            "--spades_mode corona",
+            "--spades_mode metaviral",
+          ]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -66,11 +75,11 @@ jobs:
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
     runs-on: ubuntu-latest
     env:
-      NXF_VER: '21.04.0'
+      NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
     strategy:
       matrix:
-        parameters: [--skip_sra_fastq_download, '']
+        parameters: [--skip_sra_fastq_download, ""]
 
     steps:
       - name: Check out pipeline code
@@ -92,7 +101,7 @@ jobs:
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
     runs-on: ubuntu-latest
     env:
-      NXF_VER: '21.04.0'
+      NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
     strategy:
       matrix:
@@ -117,11 +126,18 @@ jobs:
     if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
     runs-on: ubuntu-latest
     env:
-      NXF_VER: '21.04.0'
+      NXF_VER: ${{ matrix.nxf_ver }}
       NXF_ANSI_LOG: false
     strategy:
       matrix:
-        parameters: [--gff false, --input false, --min_barcode_reads 10000, --min_guppyplex_reads 10000, "--artic_minion_caller medaka"]
+        parameters:
+          [
+            --gff false,
+            --input false,
+            --min_barcode_reads 10000,
+            --min_guppyplex_reads 10000,
+            "--artic_minion_caller medaka",
+          ]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2

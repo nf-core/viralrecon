@@ -19,7 +19,7 @@ process SAMPLESHEET_CHECK {
     input:
     path samplesheet
     val  platform
-    
+
     output:
     path '*.csv'
 

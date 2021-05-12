@@ -4,9 +4,6 @@ include { saveFiles; getSoftwareName } from './functions'
 params.options     = [:]
 params.results_dir = ''
 
-/*
- * Stage FastQ files downloaded by SRA and auto-create a samplesheet for the pipeline
- */
 process SRA_TO_SAMPLESHEET {
     tag "$meta.id"
     publishDir "${params.outdir}",
@@ -20,7 +17,7 @@ process SRA_TO_SAMPLESHEET {
 
     output:
     tuple val(meta), path("*csv"), emit: csv
-    
+
     exec:
     //  Remove custom keys needed to download the data
     def meta_map = meta.clone()

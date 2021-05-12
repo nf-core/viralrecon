@@ -17,10 +17,10 @@ process PLOT_BASE_DENSITY {
     } else {
         container "quay.io/biocontainers/mulled-v2-ad9dd5f398966bf899ae05f8e7c54d0fb10cdfa7:05678da05b8e5a7a5130e90a9f9a6c585b965afa-0"
     }
-    
+
     input:
     tuple val(meta), path(fasta)
-    
+
     output:
     tuple val(meta), path('*.pdf'), emit: pdf
     tuple val(meta), path('*.tsv'), emit: tsv
@@ -34,6 +34,3 @@ process PLOT_BASE_DENSITY {
         --output_dir ./
     """
 }
-
-
-

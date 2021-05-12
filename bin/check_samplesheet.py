@@ -188,7 +188,7 @@ def check_nanopore_samplesheet(file_in, file_out):
                     print_error("Barcode entry is not an integer!", 'Line', line)
                 else:
                     barcode = 'barcode%s' % (barcode.zfill(2))
-                
+
             ## Create sample mapping dictionary = { sample: barcode }
             if barcode in sample_mapping_dict.values():
                 print_error("Samplesheet contains duplicate entries in the 'barcode' column!", "Line", line)

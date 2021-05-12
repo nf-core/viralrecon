@@ -17,14 +17,14 @@ process FILTER_BLASTN {
     } else {
         container "biocontainers/biocontainers:v1.2.0_cv1"
     }
-    
+
     input:
     tuple val(meta), path(hits)
     path header
-    
+
     output:
     tuple val(meta), path('*.txt'), emit: txt
-    
+
     script:
     def prefix = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """

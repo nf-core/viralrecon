@@ -1,6 +1,6 @@
-/*
- * Downstream analysis for assembly scaffolds
- */
+//
+// Downstream analysis for assembly scaffolds
+//
 
 params.blastn_options        = [:]
 params.blastn_filter_options = [:]
@@ -21,11 +21,12 @@ workflow ASSEMBLY_QC {
     gff          // channel: /path/to/genome.gff
     blast_db     // channel: /path/to/blast_db/
     blast_header // channel: /path/to/blast_header.txt
-    
+
     main:
-    /*
-     * Run blastn on assembly scaffolds
-     */
+
+    //
+    // Run blastn on assembly scaffolds
+    //
     ch_blast_txt        = Channel.empty()
     ch_blast_filter_txt = Channel.empty()
     ch_blast_version    = Channel.empty()
@@ -38,9 +39,9 @@ workflow ASSEMBLY_QC {
         ch_blast_filter_txt = FILTER_BLASTN.out.txt
     }
 
-    /*
-     * Assembly QC across all samples with QUAST
-     */
+    //
+    // Assembly QC across all samples with QUAST
+    //
     ch_quast_results = Channel.empty()
     ch_quast_tsv     = Channel.empty()
     ch_quast_version = Channel.empty()
@@ -51,9 +52,9 @@ workflow ASSEMBLY_QC {
         ch_quast_version = QUAST.out.version
     }
 
-    /*
-     * Contiguate assembly with ABACAS
-     */
+    //
+    // Contiguate assembly with ABACAS
+    //
     ch_abacas_results = Channel.empty()
     ch_abacas_version = Channel.empty()
     if (!params.skip_abacas) {
@@ -62,9 +63,9 @@ workflow ASSEMBLY_QC {
         ch_abacas_version = ABACAS.out.version
     }
 
-    /*
-     * Assembly report with PlasmidID
-     */    
+    //
+    // Assembly report with PlasmidID
+    //
     ch_plasmidid_html     = Channel.empty()
     ch_plasmidid_tab      = Channel.empty()
     ch_plasmidid_images   = Channel.empty()
@@ -91,7 +92,7 @@ workflow ASSEMBLY_QC {
     blast_txt          = ch_blast_txt          // channel: [ val(meta), [ txt ] ]
     blast_filter_txt   = ch_blast_filter_txt   // channel: [ val(meta), [ txt ] ]
     blast_version      = ch_blast_version      //    path: *.version.txt
-    
+
     quast_results      = ch_quast_results      // channel: [ val(meta), [ results ] ]
     quast_tsv          = ch_quast_tsv          // channel: [ val(meta), [ tsv ] ]
     quast_version      = ch_quast_version      //    path: *.version.txt
@@ -108,6 +109,4 @@ workflow ASSEMBLY_QC {
     plasmidid_fasta    = ch_plasmidid_fasta    // channel: [ val(meta), [ fasta_files/ ] ]
     plasmidid_kmer     = ch_plasmidid_kmer     // channel: [ val(meta), [ kmer/ ] ]
     plasmidid_version  = ch_plasmidid_version  //    path: *.version.txt
-
 }
-

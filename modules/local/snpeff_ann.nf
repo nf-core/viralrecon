@@ -10,7 +10,7 @@ process SNPEFF_ANN {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
-        
+
     conda (params.enable_conda ? 'bioconda::snpeff=5.0' : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
         container 'https://depot.galaxyproject.org/singularity/snpeff:5.0--0'
@@ -23,7 +23,7 @@ process SNPEFF_ANN {
     path  db
     path  config
     path  fasta
-    
+
     output:
     tuple val(meta), path("*.vcf")      , emit: vcf
     tuple val(meta), path("*.csv")      , emit: csv
@@ -43,8 +43,7 @@ process SNPEFF_ANN {
         -csvStats ${prefix}.snpeff.csv \\
         > ${prefix}.snpeff.vcf
     mv snpEff_summary.html ${prefix}.snpeff.summary.html
-    
+
     echo \$(snpEff -version 2>&1) | sed 's/^.*SnpEff //; s/ .*\$//' > ${software}.version.txt
     """
 }
-

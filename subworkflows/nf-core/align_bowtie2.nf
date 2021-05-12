@@ -1,6 +1,6 @@
-/*
- * Alignment with BOWTIE2
- */
+//
+// Alignment with Bowtie2
+//
 
 params.align_options    = [:]
 params.samtools_options = [:]
@@ -12,16 +12,17 @@ workflow ALIGN_BOWTIE2 {
     take:
     reads // channel: [ val(meta), [ reads ] ]
     index // channel: /path/to/bowtie2/index/
-    
+
     main:
-    /*
-     * Map reads with BOWTIE2
-     */
+
+    //
+    // Map reads with Bowtie2
+    //
     BOWTIE2_ALIGN ( reads, index )
 
-    /*
-     * Sort, index BAM file and run samtools stats, flagstat and idxstats
-     */
+    //
+    // Sort, index BAM file and run samtools stats, flagstat and idxstats
+    //
     BAM_SORT_SAMTOOLS ( BOWTIE2_ALIGN.out.bam )
 
     emit:

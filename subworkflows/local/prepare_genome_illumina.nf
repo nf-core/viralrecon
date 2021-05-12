@@ -1,6 +1,6 @@
-/*
- * Uncompress and prepare reference genome files
-*/
+//
+// Uncompress and prepare reference genome files
+//
 
 params.genome_options            = [:]
 params.index_options             = [:]
@@ -14,7 +14,7 @@ params.kraken2_build_options     = [:]
 
 include {
     GUNZIP as GUNZIP_FASTA
-    GUNZIP as GUNZIP_GFF               
+    GUNZIP as GUNZIP_GFF
     GUNZIP as GUNZIP_PRIMER_BED
     GUNZIP as GUNZIP_PRIMER_FASTA      } from '../../modules/nf-core/software/gunzip/main'            addParams( options: params.genome_options            )
 include { UNTAR as UNTAR_BOWTIE2_INDEX } from '../../modules/nf-core/software/untar/main'             addParams( options: params.index_options             )
@@ -32,18 +32,19 @@ workflow PREPARE_GENOME {
     dummy_file
 
     main:
-    /*
-     * Uncompress genome fasta file if required
-     */
+
+    //
+    // Uncompress genome fasta file if required
+    //
     if (params.fasta.endsWith('.gz')) {
         ch_fasta = GUNZIP_FASTA ( params.fasta ).gunzip
     } else {
         ch_fasta = file(params.fasta)
     }
 
-    /*
-     * Uncompress GFF annotation file
-     */
+    //
+    // Uncompress GFF annotation file
+    //
     if (params.gff) {
         if (params.gff.endsWith('.gz')) {
             ch_gff = GUNZIP_GFF ( params.gff ).gunzip
@@ -54,9 +55,9 @@ workflow PREPARE_GENOME {
         ch_gff = dummy_file
     }
 
-    /*
-     * Prepare reference files required for variant calling
-     */
+    //
+    // Prepare reference files required for variant calling
+    //
     ch_kraken2_db = Channel.empty()
     if (!params.skip_kraken2) {
         if (params.kraken2_db) {
@@ -70,9 +71,9 @@ workflow PREPARE_GENOME {
         }
     }
 
-    /*
-     * Prepare files required for amplicon data
-     */
+    //
+    // Prepare files required for amplicon data
+    //
     ch_primer_bed           = Channel.empty()
     ch_primer_fasta         = Channel.empty()
     ch_primer_collapsed_bed = Channel.empty()
@@ -102,9 +103,9 @@ workflow PREPARE_GENOME {
         }
     }
 
-    /*
-     * Prepare reference files required for variant calling
-     */
+    //
+    // Prepare reference files required for variant calling
+    //
     ch_bowtie2_index = Channel.empty()
     if (!params.skip_variants) {
         if (params.bowtie2_index) {
@@ -118,9 +119,9 @@ workflow PREPARE_GENOME {
         }
     }
 
-    /*
-     * Prepare reference files required for de novo assembly
-     */
+    //
+    // Prepare reference files required for de novo assembly
+    //
     ch_blast_db = Channel.empty()
     if (!params.skip_assembly) {
         if (!params.skip_blast) {
@@ -136,9 +137,9 @@ workflow PREPARE_GENOME {
         }
     }
 
-    /*
-     * Make snpEff database
-     */
+    //
+    // Make snpEff database
+    //
     ch_snpeff_db     = Channel.empty()
     ch_snpeff_config = Channel.empty()
     if (!params.skip_variants && params.gff && !params.skip_snpeff) {
@@ -146,7 +147,7 @@ workflow PREPARE_GENOME {
         ch_snpeff_db     = SNPEFF_BUILD.out.db
         ch_snpeff_config = SNPEFF_BUILD.out.config
     }
-    
+
     emit:
     fasta                = ch_fasta                 // path: genome.fasta
     gff                  = ch_gff                   // path: genome.gff

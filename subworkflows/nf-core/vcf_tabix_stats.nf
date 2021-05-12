@@ -1,6 +1,6 @@
-/*
- * Run BCFTools tabix and stats commands
- */
+//
+// Run BCFTools tabix and stats commands
+//
 
 params.tabix_options = [:]
 params.stats_options = [:]
@@ -11,7 +11,7 @@ include { BCFTOOLS_STATS } from '../../modules/nf-core/software/bcftools/stats/m
 workflow VCF_TABIX_STATS {
     take:
     vcf // channel: [ val(meta), [ vcf ] ]
-    
+
     main:
     TABIX_TABIX    ( vcf )
     BCFTOOLS_STATS ( vcf )

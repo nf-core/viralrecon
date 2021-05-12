@@ -208,7 +208,7 @@ def main(args=None):
         if os.path.exists(yaml_file):
             metrics_dict = yaml_fields_to_dict(yaml_file=yaml_file, append_dict={}, field_mapping_list=[('# Mapped reads', ['mapped_passed'])], valid_sample_list=[])
             sample_list = metrics_dict.keys()
-        
+
         metrics_dict_to_file(
             file_field_list   = nanopore_variant_files,
             multiqc_data_dir  = args.MULTIQC_DATA_DIR,

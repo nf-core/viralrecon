@@ -1,6 +1,6 @@
-/*
- * Assembly and downstream processing for Unicycler scaffolds
- */
+//
+// Assembly and downstream processing for Unicycler scaffolds
+//
 
 params.unicycler_options     = [:]
 params.bandage_options       = [:]
@@ -10,8 +10,8 @@ params.abacas_options        = [:]
 params.plasmidid_options     = [:]
 params.quast_options         = [:]
 
-include { UNICYCLER     } from '../../modules/nf-core/software/unicycler/main'     addParams( options: params.unicycler_options ) 
-include { BANDAGE_IMAGE } from '../../modules/nf-core/software/bandage/image/main' addParams( options: params.bandage_options   ) 
+include { UNICYCLER     } from '../../modules/nf-core/software/unicycler/main'     addParams( options: params.unicycler_options )
+include { BANDAGE_IMAGE } from '../../modules/nf-core/software/bandage/image/main' addParams( options: params.bandage_options   )
 include { ASSEMBLY_QC   } from './assembly_qc'                                     addParams( blastn_options: params.blastn_options, blastn_filter_options: params.blastn_filter_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
 
 workflow ASSEMBLY_UNICYCLER {
@@ -21,31 +21,32 @@ workflow ASSEMBLY_UNICYCLER {
     gff           // channel: /path/to/genome.gff
     blast_db      // channel: /path/to/blast_db/
     blast_header  // channel: /path/to/blast_header.txt
-    
+
     main:
-    /*
-     * Assemble reads with Unicycler
-     */
+
+    //
+    // Assemble reads with Unicycler
+    //
     UNICYCLER ( reads )
 
-    /*
-     * Filter for empty scaffold files
-     */
+    //
+    // Filter for empty scaffold files
+    //
     UNICYCLER
         .out
         .scaffolds
         .filter { meta, scaffold -> scaffold.size() > 0 }
         .set { ch_scaffolds }
-    
+
     UNICYCLER
         .out
         .gfa
         .filter { meta, gfa -> gfa.size() > 0 }
         .set { ch_gfa }
 
-    /*
-     * Generate assembly visualisation with Bandage
-     */
+    //
+    // Generate assembly visualisation with Bandage
+    //
     ch_bandage_png     = Channel.empty()
     ch_bandage_svg     = Channel.empty()
     ch_bandage_version = Channel.empty()
@@ -56,10 +57,10 @@ workflow ASSEMBLY_UNICYCLER {
         ch_bandage_svg     = BANDAGE_IMAGE.out.svg
     }
 
-    /*
-     * Downstream assembly steps
-     */
-    ASSEMBLY_QC ( 
+    //
+    // Downstream assembly steps
+    //
+    ASSEMBLY_QC (
         ch_scaffolds,
         fasta,
         gff,
@@ -84,7 +85,7 @@ workflow ASSEMBLY_UNICYCLER {
     quast_results      = ASSEMBLY_QC.out.quast_results      // channel: [ val(meta), [ results ] ]
     quast_tsv          = ASSEMBLY_QC.out.quast_tsv          // channel: [ val(meta), [ tsv ] ]
     quast_version      = ASSEMBLY_QC.out.quast_version      //    path: *.version.txt
-    
+
     abacas_results     = ASSEMBLY_QC.out.abacas_results     // channel: [ val(meta), [ results ] ]
     abacas_version     = ASSEMBLY_QC.out.abacas_version     //    path: *.version.txt
 
@@ -97,5 +98,4 @@ workflow ASSEMBLY_UNICYCLER {
     plasmidid_fasta    = ASSEMBLY_QC.out.plasmidid_fasta    // channel: [ val(meta), [ fasta_files/ ] ]
     plasmidid_kmer     = ASSEMBLY_QC.out.plasmidid_kmer     // channel: [ val(meta), [ kmer/ ] ]
     plasmidid_version  = ASSEMBLY_QC.out.plasmidid_version  //    path: *.version.txt
-
 }

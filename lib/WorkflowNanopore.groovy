@@ -1,17 +1,17 @@
-/*
- * This file holds several functions specific to the workflow/nanopore.nf in the nf-core/viralrecon pipeline
- */
+//
+// This file holds several functions specific to the workflow/nanopore.nf in the nf-core/viralrecon pipeline
+//
 
 class WorkflowNanopore {
 
-    /*
-     * Check and validate parameters
-     */
+    //
+    // Check and validate parameters
+    //
     public static void initialise(params, log, valid_params) {
         WorkflowCommons.genomeExistsError(params, log)
 
         // Generic parameter validation
-        if (!params.fasta) { 
+        if (!params.fasta) {
             log.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
             System.exit(1)
         }

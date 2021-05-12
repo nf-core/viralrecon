@@ -4,9 +4,6 @@ include { initOptions; saveFiles; getSoftwareName } from './functions'
 params.options = [:]
 options        = initOptions(params.options)
 
-/*
- * Convert IVar tsv output to vcf
- */
 process IVAR_VARIANTS_TO_VCF {
     tag "$meta.id"
     publishDir "${params.outdir}",
@@ -23,7 +20,7 @@ process IVAR_VARIANTS_TO_VCF {
     input:
     tuple val(meta), path(tsv)
     path  header
-    
+
     output:
     tuple val(meta), path("*.vcf"), emit: vcf
     tuple val(meta), path("*.log"), emit: log
@@ -37,7 +34,7 @@ process IVAR_VARIANTS_TO_VCF {
         ${prefix}.vcf \\
         $options.args \\
         > ${prefix}.variant_counts.log
-    
+
     cat $header ${prefix}.variant_counts.log > ${prefix}.variant_counts_mqc.tsv
     """
 }

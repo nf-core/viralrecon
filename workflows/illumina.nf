@@ -36,7 +36,7 @@ if (!callers)  { callers = params.protocol == 'amplicon' ? ['ivar'] : ['bcftools
 
 /*
 ========================================================================================
-    CONFIG FILES       
+    CONFIG FILES
 ========================================================================================
 */
 
@@ -66,7 +66,7 @@ if (!params.skip_variants) {
     multiqc_options.publish_files.put('variants_metrics_mqc.csv','')
 }
 
-include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] ) 
+include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] )
 include { CUTADAPT                   } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']      )
 include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]       )
 include { MULTIQC                    } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                   )
@@ -76,9 +76,9 @@ include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED    
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
 
-/*
- * SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
- */
+//
+// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
+//
 def publish_genome_options    = params.save_reference ? [publish_dir: 'genome']       : [publish_files: false]
 def publish_index_options     = params.save_reference ? [publish_dir: 'genome/index'] : [publish_files: false]
 def publish_db_options        = params.save_reference ? [publish_dir: 'genome/db']    : [publish_files: false]
@@ -88,7 +88,7 @@ def snpeff_build_options      = modules['illumina_snpeff_build']
 def makeblastdb_options       = modules['illumina_blast_makeblastdb']
 def kraken2_build_options     = modules['illumina_kraken2_build']
 def collapse_primers_options  = modules['illumina_collapse_primers_illumina']
-if (!params.save_reference) { 
+if (!params.save_reference) {
     bedtools_getfasta_options['publish_files'] = false
     bowtie2_build_options['publish_files']     = false
     snpeff_build_options['publish_files']      = false
@@ -125,19 +125,19 @@ include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'      
 ========================================================================================
 */
 
-/*
- * MODULE: Installed directly from nf-core/modules
- */
-include { CAT_FASTQ                     } from '../modules/nf-core/software/cat/fastq/main'                     addParams( options: modules['illumina_cat_fastq']                     ) 
+//
+// MODULE: Installed directly from nf-core/modules
+//
+include { CAT_FASTQ                     } from '../modules/nf-core/software/cat/fastq/main'                     addParams( options: modules['illumina_cat_fastq']                     )
 include { FASTQC                        } from '../modules/nf-core/software/fastqc/main'                        addParams( options: modules['illumina_cutadapt_fastqc']               )
-include { KRAKEN2_RUN                   } from '../modules/nf-core/software/kraken2/run/main'                   addParams( options: modules['illumina_kraken2_run']                   ) 
+include { KRAKEN2_RUN                   } from '../modules/nf-core/software/kraken2/run/main'                   addParams( options: modules['illumina_kraken2_run']                   )
 include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['illumina_picard_collectmultiplemetrics'] )
 include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_genome']               )
 include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_amplicon']             )
 
-/*
- * SUBWORKFLOW: Consisting entirely of nf-core/modules
- */
+//
+// SUBWORKFLOW: Consisting entirely of nf-core/modules
+//
 def fastp_options = modules['illumina_fastp']
 if (params.save_trimmed_fail) { fastp_options.publish_files.put('fail.fastq.gz','') }
 
@@ -166,9 +166,9 @@ workflow ILLUMINA {
 
     ch_software_versions = Channel.empty()
 
-    /*
-     * SUBWORKFLOW: Uncompress and prepare reference genome files
-     */
+    //
+    // SUBWORKFLOW: Uncompress and prepare reference genome files
+    //
     PREPARE_GENOME (
         ch_dummy_file
     )
@@ -194,18 +194,18 @@ workflow ILLUMINA {
                 .map { WorkflowIllumina.checkIfSwiftProtocol(it, 'covid19genome', log) }
         }
     }
-    
-    /*
-     * SUBWORKFLOW: Read in samplesheet, validate and stage input files
-     */
-    INPUT_CHECK ( 
+
+    //
+    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
+    //
+    INPUT_CHECK (
         ch_input,
         params.platform
     )
     .map {
         meta, fastq ->
             meta.id = meta.id.split('_')[0..-2].join('_')
-            [ meta, fastq ] 
+            [ meta, fastq ]
     }
     .groupTuple(by: [0])
     .branch {
@@ -216,19 +216,19 @@ workflow ILLUMINA {
                 return [ meta, fastq.flatten() ]
     }
     .set { ch_fastq }
-    
-    /*
-     * MODULE: Concatenate FastQ files from same sample if required
-     */
-    CAT_FASTQ ( 
+
+    //
+    // MODULE: Concatenate FastQ files from same sample if required
+    //
+    CAT_FASTQ (
         ch_fastq.multiple
     )
     .mix(ch_fastq.single)
     .set { ch_cat_fastq }
-    
-    /*
-     * SUBWORKFLOW: Read QC and trim adapters
-     */
+
+    //
+    // SUBWORKFLOW: Read QC and trim adapters
+    //
     FASTQC_FASTP (
         ch_cat_fastq
     )
@@ -236,26 +236,26 @@ workflow ILLUMINA {
     ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastqc_version.first().ifEmpty(null))
     ch_software_versions = ch_software_versions.mix(FASTQC_FASTP.out.fastp_version.first().ifEmpty(null))
 
-    /*
-     * Filter empty FastQ files after adapter trimming
-     */
+    //
+    // Filter empty FastQ files after adapter trimming
+    //
     if (!params.skip_fastp) {
         ch_variants_fastq
             .join(FASTQC_FASTP.out.trim_json)
-            .map { 
+            .map {
                 meta, reads, json ->
                     if (WorkflowIllumina.getFastpReadsAfterFiltering(json) > 0) [ meta, reads ]
             }
             .set { ch_variants_fastq }
     }
-    
-    /*
-     * MODULE: Run Kraken2 for removal of host reads
-     */
+
+    //
+    // MODULE: Run Kraken2 for removal of host reads
+    //
     ch_assembly_fastq  = ch_variants_fastq
     ch_kraken2_multiqc = Channel.empty()
     if (!params.skip_kraken2) {
-        KRAKEN2_RUN ( 
+        KRAKEN2_RUN (
             ch_variants_fastq,
             PREPARE_GENOME.out.kraken2_db
         )
@@ -268,12 +268,12 @@ workflow ILLUMINA {
 
         if (params.kraken2_assembly_host_filter) {
             ch_assembly_fastq = KRAKEN2_RUN.out.unclassified
-        }        
+        }
     }
-    
-    /*
-     * SUBWORKFLOW: Alignment with Bowtie2
-     */
+
+    //
+    // SUBWORKFLOW: Alignment with Bowtie2
+    //
     ch_bam                      = Channel.empty()
     ch_bai                      = Channel.empty()
     ch_bowtie2_multiqc          = Channel.empty()
@@ -291,9 +291,9 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(ALIGN_BOWTIE2.out.samtools_version.first().ifEmpty(null))
     }
 
-    /*
-     * Filter channels to get samples that passed Bowtie2 minimum mapped reads threshold
-     */
+    //
+    // Filter channels to get samples that passed Bowtie2 minimum mapped reads threshold
+    //
     ch_fail_mapping_multiqc = Channel.empty()
     if (!params.skip_variants) {
         ch_bowtie2_flagstat_multiqc
@@ -321,7 +321,7 @@ workflow ILLUMINA {
             }
             .set { ch_pass_fail_mapped }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED ( 
+        MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED (
             ch_pass_fail_mapped.fail.collect(),
             'Sample',
             'Mapped reads',
@@ -329,10 +329,10 @@ workflow ILLUMINA {
         )
         .set { ch_fail_mapping_multiqc }
     }
-    
-    /*
-     * SUBWORKFLOW: Trim primer sequences from reads with iVar
-     */
+
+    //
+    // SUBWORKFLOW: Trim primer sequences from reads with iVar
+    //
     ch_ivar_trim_flagstat_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_ivar_trim && params.protocol == 'amplicon') {
         PRIMER_TRIM_IVAR (
@@ -345,9 +345,9 @@ workflow ILLUMINA {
         ch_software_versions  = ch_software_versions.mix(PRIMER_TRIM_IVAR.out.ivar_version.first().ifEmpty(null))
     }
 
-    /*
-     * SUBWORKFLOW: Mark duplicate reads
-     */
+    //
+    // SUBWORKFLOW: Mark duplicate reads
+    //
     ch_markduplicates_flagstat_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_markduplicates) {
         MARK_DUPLICATES_PICARD (
@@ -359,9 +359,9 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(MARK_DUPLICATES_PICARD.out.picard_version.first().ifEmpty(null))
     }
 
-    /*
-     * MODULE: Picard metrics
-     */
+    //
+    // MODULE: Picard metrics
+    //
     if (!params.skip_variants && !params.skip_picard_metrics) {
         PICARD_COLLECTMULTIPLEMETRICS (
             ch_bam,
@@ -370,9 +370,9 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.version.first().ifEmpty(null))
     }
 
-    /*
-     * MODULE: Genome-wide and amplicon-specific coverage QC plots
-     */
+    //
+    // MODULE: Genome-wide and amplicon-specific coverage QC plots
+    //
     ch_mosdepth_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_mosdepth) {
 
@@ -387,7 +387,7 @@ workflow ILLUMINA {
         PLOT_MOSDEPTH_REGIONS_GENOME (
             MOSDEPTH_GENOME.out.regions_bed.collect { it[1] }
         )
-        
+
         if (params.protocol == 'amplicon') {
             MOSDEPTH_AMPLICON (
                 ch_bam.join(ch_bai, by: [0]),
@@ -395,15 +395,15 @@ workflow ILLUMINA {
                 0
             )
 
-            PLOT_MOSDEPTH_REGIONS_AMPLICON ( 
+            PLOT_MOSDEPTH_REGIONS_AMPLICON (
                 MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
             )
         }
     }
 
-    /*
-     * SUBWORKFLOW: Call variants with IVar
-     */
+    //
+    // SUBWORKFLOW: Call variants with IVar
+    //
     ch_ivar_vcf              = Channel.empty()
     ch_ivar_tbi              = Channel.empty()
     ch_ivar_counts_multiqc   = Channel.empty()
@@ -438,9 +438,9 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.nextclade_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.asciigenome_version.first().ifEmpty(null))
 
-        /*
-         * MODULE: Get Pangolin lineage information for MultiQC report
-         */
+        //
+        // MODULE: Get Pangolin lineage information for MultiQC report
+        //
         ch_ivar_pangolin_report
             .map { meta, report ->
                 def lineage = WorkflowCommons.getPangolinLineage(report)
@@ -448,7 +448,7 @@ workflow ILLUMINA {
             }
             .set { ch_ivar_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN ( 
+        MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN (
             ch_ivar_pangolin_multiqc.collect(),
             'Sample',
             'Lineage',
@@ -456,10 +456,10 @@ workflow ILLUMINA {
         )
         .set { ch_ivar_pangolin_multiqc }
     }
-    
-    /*
-     * SUBWORKFLOW: Call variants with BCFTools
-     */
+
+    //
+    // SUBWORKFLOW: Call variants with BCFTools
+    //
     ch_bcftools_vcf              = Channel.empty()
     ch_bcftools_tbi              = Channel.empty()
     ch_bcftools_stats_multiqc    = Channel.empty()
@@ -490,9 +490,9 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.nextclade_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.asciigenome_version.first().ifEmpty(null))
 
-        /*
-         * MODULE: Get Pangolin lineage information for MultiQC report
-         */
+        //
+        // MODULE: Get Pangolin lineage information for MultiQC report
+        //
         ch_bcftools_pangolin_report
             .map { meta, report ->
                 def lineage = WorkflowCommons.getPangolinLineage(report)
@@ -500,7 +500,7 @@ workflow ILLUMINA {
             }
             .set { ch_bcftools_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN ( 
+        MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN (
             ch_bcftools_pangolin_multiqc.collect(),
             'Sample',
             'Lineage',
@@ -509,9 +509,9 @@ workflow ILLUMINA {
         .set { ch_bcftools_pangolin_multiqc }
     }
 
-    /*
-     * MODULE: Intersect variants across callers
-     */
+    //
+    // MODULE: Intersect variants across callers
+    //
     if (!params.skip_variants && callers.size() > 1) {
         BCFTOOLS_ISEC (
             ch_ivar_vcf
@@ -521,9 +521,9 @@ workflow ILLUMINA {
         )
     }
 
-    /*
-     * MODULE: Primer trimming with Cutadapt
-     */
+    //
+    // MODULE: Primer trimming with Cutadapt
+    //
     ch_cutadapt_multiqc = Channel.empty()
     if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
         CUTADAPT (
@@ -535,15 +535,15 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(CUTADAPT.out.version.first().ifEmpty(null))
 
         if (!params.skip_fastqc) {
-            FASTQC ( 
-                CUTADAPT.out.reads 
+            FASTQC (
+                CUTADAPT.out.reads
             )
         }
     }
 
-    /*
-     * SUBWORKFLOW: Run SPAdes assembly and downstream analysis
-     */
+    //
+    // SUBWORKFLOW: Run SPAdes assembly and downstream analysis
+    //
     ch_spades_quast_multiqc = Channel.empty()
     if (!params.skip_assembly && 'spades' in assemblers) {
         ASSEMBLY_SPADES (
@@ -563,9 +563,9 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(ASSEMBLY_SPADES.out.plasmidid_version.first().ifEmpty(null))
     }
 
-    /*
-     * SUBWORKFLOW: Run Unicycler assembly and downstream analysis
-     */
+    //
+    // SUBWORKFLOW: Run Unicycler assembly and downstream analysis
+    //
     ch_unicycler_quast_multiqc = Channel.empty()
     if (!params.skip_assembly && 'unicycler' in assemblers) {
         ASSEMBLY_UNICYCLER (
@@ -584,9 +584,9 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(ASSEMBLY_UNICYCLER.out.plasmidid_version.first().ifEmpty(null))
     }
 
-    /*
-     * SUBWORKFLOW: Run minia assembly and downstream analysis
-     */
+    //
+    // SUBWORKFLOW: Run minia assembly and downstream analysis
+    //
     ch_minia_quast_multiqc = Channel.empty()
     if (!params.skip_assembly && 'minia' in assemblers) {
         ASSEMBLY_MINIA (
@@ -604,10 +604,9 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(ASSEMBLY_MINIA.out.plasmidid_version.first().ifEmpty(null))
     }
 
-    /*
-     * MODULE: Pipeline reporting
-     */
-    // Get unique list of files containing version information
+    //
+    // MODULE: Pipeline reporting
+    //
     ch_software_versions
         .map { it -> if (it) [ it.baseName, it ] }
         .groupTuple()
@@ -616,13 +615,13 @@ workflow ILLUMINA {
         .collect()
         .set { ch_software_versions }
 
-    GET_SOFTWARE_VERSIONS ( 
+    GET_SOFTWARE_VERSIONS (
         ch_software_versions
     )
 
-    /*
-     * MODULE: MultiQC
-     */
+    //
+    // MODULE: MultiQC
+    //
     if (!params.skip_multiqc) {
         workflow_summary    = WorkflowCommons.paramsSummaryMultiqc(workflow, summary_params)
         ch_workflow_summary = Channel.value(workflow_summary)

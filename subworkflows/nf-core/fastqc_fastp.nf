@@ -1,6 +1,6 @@
-/*
- * Read QC and trimming
- */
+//
+// Read QC and trimming
+//
 
 params.fastqc_raw_options  = [:]
 params.fastqc_trim_options = [:]
@@ -13,7 +13,7 @@ include { FASTP                 } from '../../modules/nf-core/software/fastp/mai
 workflow FASTQC_FASTP {
     take:
     reads // channel: [ val(meta), [ reads ] ]
-    
+
     main:
     fastqc_raw_html = Channel.empty()
     fastqc_raw_zip  = Channel.empty()

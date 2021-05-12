@@ -50,4 +50,3 @@ process MULTIQC {
     multiqc -f $options.args -e general_stats --ignore *pangolin_lineage_mqc.tsv $custom_config .
     """
 }
-

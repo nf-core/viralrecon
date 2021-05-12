@@ -1,15 +1,15 @@
-/*
- *This file holds several functions specific to the main.nf workflow in the nf-core/viralrecon pipeline
- */
+//
+// This file holds several functions specific to the main.nf workflow in the nf-core/viralrecon pipeline
+//
 
 class WorkflowMain {
 
-    /*
-     * Citation string for pipeline
-     */
+    //
+    // Citation string for pipeline
+    //
     public static String citation(workflow) {
         return "If you use ${workflow.manifest.name} for your analysis please cite:\n\n" +
-            "* The pipeline\n" + 
+            "* The pipeline\n" +
             "  https://doi.org/10.5281/zenodo.3901628\n\n" +
             "* The nf-core framework\n" +
             "  https://doi.org/10.1038/s41587-020-0439-x\n\n" +
@@ -17,9 +17,9 @@ class WorkflowMain {
             "  https://github.com/${workflow.manifest.name}/blob/master/CITATIONS.md"
     }
 
-    /*
-     * Print help to screen if required
-     */
+    //
+    // Print help to screen if required
+    //
     public static String help(workflow, params, log) {
         def command = "nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'MN908947.3' -profile docker"
         def help_string = ''
@@ -30,9 +30,9 @@ class WorkflowMain {
         return help_string
     }
 
-    /*
-     * Print parameter summary log to screen
-     */
+    //
+    // Print parameter summary log to screen
+    //
     public static String paramsSummaryLog(workflow, params, log) {
         def summary_log = ''
         summary_log += NfcoreTemplate.logo(workflow, params.monochrome_logs)
@@ -42,9 +42,9 @@ class WorkflowMain {
         return summary_log
     }
 
-    /*
-     * Validate parameters and print summary to screen
-     */
+    //
+    // Validate parameters and print summary to screen
+    //
     public static void initialise(workflow, params, log) {
         // Print help to screen if required
         if (params.help) {
@@ -84,14 +84,14 @@ class WorkflowMain {
         }
     }
 
-    /*
-     * Get attribute from genome config file e.g. fasta
-     */
+    //
+    // Get attribute from genome config file e.g. fasta
+    //
     public static String getGenomeAttribute(params, attribute, log, primer_set='', primer_set_version=0) {
         def val = ''
         def support_link =  " The default genome config used by the pipeline can be found here:\n" +
                             "   - https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config\n\n" +
-                            " If you would still like to blame us please come and find us on nf-core Slack:\n" + 
+                            " If you would still like to blame us please come and find us on nf-core Slack:\n" +
                             "   - https://nf-co.re/viralrecon#contributions-and-support\n" +
                             "============================================================================="
         if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {

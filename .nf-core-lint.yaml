@@ -4,7 +4,10 @@ files_unchanged:
   - .github/workflows/linting.yml
   - assets/email_template.html
   - assets/email_template.txt
+  - assets/sendmail_template.txt
   - lib/NfcoreSchema.groovy
+  - docs/README.md
 files_exist:
   - bin/markdown_to_html.py
+  - .github/markdownlint.yml
 actions_awsfulltest: False

@@ -13,7 +13,7 @@ nextflow.enable.dsl = 2
 
 /*
 ========================================================================================
-    GENOME PARAMETER VALUES       
+    GENOME PARAMETER VALUES
 ========================================================================================
 */
 
@@ -38,7 +38,7 @@ params.primer_bed    = WorkflowMain.getGenomeAttribute(params, 'primer_bed', log
     VALIDATE & PRINT PARAMETER SUMMARY
 ========================================================================================
 */
-    
+
 WorkflowMain.initialise(workflow, params, log)
 
 /*
@@ -48,24 +48,24 @@ WorkflowMain.initialise(workflow, params, log)
 */
 
 workflow NFCORE_VIRALRECON {
-    
-    /*
-     * WORKFLOW: Get SRA run information for public database ids, download and md5sum check FastQ files, auto-create samplesheet
-     */
+
+    //
+    // WORKFLOW: Get SRA run information for public database ids, download and md5sum check FastQ files, auto-create samplesheet
+    //
     if (params.public_data_ids) {
         include { SRA_DOWNLOAD } from './workflows/sra_download'
         SRA_DOWNLOAD ()
-    
-    /*
-     * WORKFLOW: Variant and de novo assembly analysis for Illumina data
-     */
+
+    //
+    // WORKFLOW: Variant and de novo assembly analysis for Illumina data
+    //
     } else if (params.platform == 'illumina') {
         include { ILLUMINA } from './workflows/illumina'
         ILLUMINA ()
 
-    /*
-     * WORKFLOW: Variant analysis for Nanopore data
-     */ 
+    //
+    // WORKFLOW: Variant analysis for Nanopore data
+    //
     } else if (params.platform == 'nanopore') {
         include { NANOPORE } from './workflows/nanopore'
         NANOPORE ()
@@ -78,10 +78,10 @@ workflow NFCORE_VIRALRECON {
 ========================================================================================
 */
 
-/*
- * WORKFLOW: Execute a single named workflow for the pipeline
- * See: https://github.com/nf-core/rnaseq/issues/619
- */
+//
+// WORKFLOW: Execute a single named workflow for the pipeline
+// See: https://github.com/nf-core/rnaseq/issues/619
+//
 workflow {
     NFCORE_VIRALRECON ()
 }

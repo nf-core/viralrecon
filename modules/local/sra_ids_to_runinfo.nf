@@ -3,9 +3,6 @@ include { saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-/*
- * Fetch SRA / ENA / GEO run information via the ENA API
- */
 process SRA_IDS_TO_RUNINFO {
     tag "$id"
     label 'error_retry'
@@ -19,13 +16,13 @@ process SRA_IDS_TO_RUNINFO {
     } else {
         container "quay.io/biocontainers/requests:2.24.0"
     }
-    
+
     input:
     val id
-    
+
     output:
     path "*.tsv", emit: tsv
-    
+
     script:
     """
     echo $id > id.txt

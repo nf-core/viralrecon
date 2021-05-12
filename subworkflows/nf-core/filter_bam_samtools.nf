@@ -1,6 +1,6 @@
-/*
- * filter co-ordinate sorted BAM, index and run samtools stats, flagstat and idxstats
- */
+//
+// Filter co-ordinate sorted BAM, index and run samtools stats, flagstat and idxstats
+//
 
 params.samtools_view_options  = [:]
 params.samtools_index_options = [:]
@@ -12,16 +12,17 @@ include { BAM_STATS_SAMTOOLS } from '../nf-core/bam_stats_samtools'             
 workflow FILTER_BAM_SAMTOOLS {
     take:
     bam // channel: [ val(meta), [ bam ] ]
-    
+
     main:
-    /*
-     * Filter BAM using Samtools view
-     */
+
+    //
+    // Filter BAM using Samtools view
+    //
     SAMTOOLS_VIEW ( bam )
 
-    /*
-     * Index BAM file and run samtools stats, flagstat and idxstats
-     */
+    //
+    // Index BAM file and run samtools stats, flagstat and idxstats
+    //
     SAMTOOLS_INDEX     ( SAMTOOLS_VIEW.out.bam )
     BAM_STATS_SAMTOOLS ( SAMTOOLS_VIEW.out.bam.join(SAMTOOLS_INDEX.out.bai, by: [0]) )
 

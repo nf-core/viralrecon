@@ -1,6 +1,6 @@
-/*
- * Variant calling and downstream processing for IVar
- */
+//
+// Variant calling and downstream processing for IVar
+//
 
 params.ivar_variants_options        = [:]
 params.ivar_variants_to_vcf_options = [:]
@@ -39,23 +39,24 @@ workflow VARIANTS_IVAR {
     snpeff_db           // channel: /path/to/snpeff_db/
     snpeff_config       // channel: /path/to/snpeff.config
     ivar_multiqc_header // channel: /path/to/multiqc_header for ivar variants
-    
+
     main:
-    /*
-     * Call variants
-     */
+
+    //
+    // Call variants
+    //
     IVAR_VARIANTS ( bam, fasta, gff )
 
-    /*
-     * Convert original iVar output to VCF, zip and index
-     */
+    //
+    // Convert original iVar output to VCF, zip and index
+    //
     IVAR_VARIANTS_TO_VCF ( IVAR_VARIANTS.out.tsv, ivar_multiqc_header )
 
     VCF_BGZIP_TABIX_STATS ( IVAR_VARIANTS_TO_VCF.out.vcf )
 
-    /*
-     * Create genome consensus
-     */
+    //
+    // Create genome consensus
+    //
     ch_consensus         = Channel.empty()
     ch_consensus_qual    = Channel.empty()
     ch_bases_tsv         = Channel.empty()
@@ -71,7 +72,7 @@ workflow VARIANTS_IVAR {
         IVAR_CONSENSUS ( bam, fasta )
         ch_consensus       = IVAR_CONSENSUS.out.fasta
         ch_consensus_qual  = IVAR_CONSENSUS.out.qual
-    
+
         PLOT_BASE_DENSITY ( ch_consensus )
         ch_bases_tsv = PLOT_BASE_DENSITY.out.tsv
         ch_bases_pdf = PLOT_BASE_DENSITY.out.pdf
@@ -96,9 +97,9 @@ workflow VARIANTS_IVAR {
         }
     }
 
-    /*
-     * Annotate variants
-     */
+    //
+    // Annotate variants
+    //
     ch_snpeff_vcf      = Channel.empty()
     ch_snpeff_tbi      = Channel.empty()
     ch_snpeff_stats    = Channel.empty()
@@ -121,9 +122,9 @@ workflow VARIANTS_IVAR {
         ch_snpsift_version = SNPEFF_SNPSIFT.out.snpsift_version
     }
 
-    /*
-     * MODULE: Variant screenshots with ASCIIGenome
-     */
+    //
+    // Variant screenshots with ASCIIGenome
+    //
     ch_asciigenome_pdf     = Channel.empty()
     ch_asciigenome_version = Channel.empty()
     if (!params.skip_asciigenome) {
@@ -162,12 +163,12 @@ workflow VARIANTS_IVAR {
     stats               = VCF_BGZIP_TABIX_STATS.out.stats            // channel: [ val(meta), [ txt ] ]
     tabix_version       = VCF_BGZIP_TABIX_STATS.out.tabix_version    //    path: *.version.txt
     bcftools_version    = VCF_BGZIP_TABIX_STATS.out.bcftools_version //    path: *.version.txt
-    
+
     consensus           = ch_consensus                               // channel: [ val(meta), [ fasta ] ]
     consensus_qual      = ch_consensus_qual                          // channel: [ val(meta), [ fasta ] ]
     bases_tsv           = ch_bases_tsv                               // channel: [ val(meta), [ tsv ] ]
     bases_pdf           = ch_bases_pdf                               // channel: [ val(meta), [ pdf ] ]
-    
+
     quast_results       = ch_quast_results                           // channel: [ val(meta), [ results ] ]
     quast_tsv           = ch_quast_tsv                               // channel: [ val(meta), [ tsv ] ]
     quast_version       = ch_quast_version                           //    path: *.version.txt
@@ -191,4 +192,3 @@ workflow VARIANTS_IVAR {
     asciigenome_pdf     = ch_asciigenome_pdf                         // channel: [ val(meta), [ pdf ] ]
     asciigenome_version = ch_asciigenome_version                     //    path: *.version.txt
 }
-
