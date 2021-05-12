@@ -54,6 +54,14 @@ def fastq_dir_to_samplesheet(fastq_dir, samplesheet_file, read1_extension='_R1_0
                 if len(reads) == 1:
                     sample_info += ','
                 fout.write(f'{sample_info}\n')
+    else:
+        error_str  = "\nWARNING: No FastQ files found so samplesheet has not been created!\n\n"
+        error_str += "Please check the values provided for the:\n"
+        error_str += "  - Path to the directory containing the FastQ files\n"
+        error_str += "  - '--read1_extension' parameter\n"
+        error_str += "  - '--read2_extension' parameter\n"
+        print(error_str)
+        sys.exit(1)
 
 def main(args=None):
     args = parse_args(args)
