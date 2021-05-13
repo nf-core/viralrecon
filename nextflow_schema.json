@@ -13,6 +13,10 @@
             "properties": {
                 "input": {
                     "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/csv",
+                    "pattern": "\\.csv$",
+                    "schema": "assets/schema_input.json",
                     "fa_icon": "fas fa-file-csv",
                     "help_text": "You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/viralrecon/docs/usage#introduction).",
                     "description": "Path to comma-separated file containing information about the samples you would like to analyse."
@@ -29,6 +33,7 @@
                 },
                 "outdir": {
                     "type": "string",
+                    "format": "directory-path",
                     "description": "The output directory where the results will be saved.",
                     "default": "./results",
                     "fa_icon": "fas fa-folder-open"
@@ -51,6 +56,10 @@
             "properties": {
                 "public_data_ids": {
                     "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
+                    "pattern": "\\.txt$",
+                    "schema": "assets/schema_public_data_ids.json",
                     "description": "File containing SRA/ENA/GEO identifiers one per line in order to download their associated FastQ files.",
                     "fa_icon": "fas fa-database"
                 },
@@ -75,28 +84,41 @@
                 },
                 "fasta": {
                     "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
+                    "pattern": "\\.fn?a(sta)?(\\.gz)?$",
                     "fa_icon": "fas fa-font",
                     "description": "Path to FASTA genome file.",
                     "help_text": "If you have no genome reference available, the pipeline can build one using a FASTA file. This requires additional time and resources, so it's better to use a pre-build index if possible."
                 },
                 "gff": {
                     "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
+                    "pattern": "\\.gff(\\.gz)?$",
                     "description": "Full path to GFF annotation file.",
                     "fa_icon": "fas fa-file-invoice"
                 },
                 "bowtie2_index": {
                     "type": "string",
+                    "format": "path",
                     "description": "Path to directory or tar.gz archive for pre-built Bowtie2 index.",
                     "fa_icon": "fas fa-bezier-curve"
                 },
                 "primer_bed": {
                     "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
+                    "pattern": "\\.bed(\\.gz)?$",
                     "description": "If the '--protocol amplicon' parameter is provided then iVar is used to trim primer sequences after read alignment and before variant calling.",
                     "help_text": "iVar uses the primer positions relative to the viral genome supplied in this file to soft clip primer sequences from a coordinate sorted BAM file. The file must be in BED format as highlighted below:\n\n```\nMN908947.3 30 54 nCoV-2019_1_LEFT 60 -\nMN908947.3 385 410 nCoV-2019_1_RIGHT 60 +\nMN908947.3 320 342 nCoV-2019_2_LEFT 60 -\nMN908947.3 704 726 nCoV-2019_2_RIGHT 60 +\n```",
                     "fa_icon": "fas fa-stream"
                 },
                 "primer_fasta": {
                     "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
+                    "pattern": "\\.fn?a(sta)?(\\.gz)?$",
                     "description": "If the '--protocol amplicon' parameter is provided then Cutadapt is used to trim primer sequences from FastQ files before de novo assembly.",
                     "help_text": "This file must contain amplicon primer sequences in Fasta format. An example is shown below:\n\n```\n>nCoV-2019_1_LEFT\nACCAACCAACTTTCGATCTCTTGT\n>nCoV-2019_1_RIGHT\nCATCTTTAAGATGTTGACGTGCCTC\n>nCoV-2019_2_LEFT\nCTGTTTTACAGGTTCGCGACGT\n>nCoV-2019_2_RIGHT\nTAAGGATCAGTGCCAAGCTCGT\n```",
                     "fa_icon": "fas fa-stream"
@@ -141,18 +163,23 @@
             "properties": {
                 "fastq_dir": {
                     "type": "string",
+                    "format": "directory-path",
                     "description": "Path to a folder containing fastq files from the Nanopore run.",
                     "help_text": "e.g. '--fastq_dir ./20191023_1522_MC-110615_0_FAO93606_12bf9b4f/fastq_pass/'.",
                     "fa_icon": "fas fa-folder-open"
                 },
                 "fast5_dir": {
                     "type": "string",
+                    "format": "directory-path",
                     "description": "Path to a folder containing fast5 files from the Nanopore run.",
                     "help_text": "e.g. '--fast5_dir ./20191023_1522_MC-110615_0_FAO93606_12bf9b4f/fast5_pass/'. Not required when running the pipeline with the '--artic_minion_caller medaka' workflow.",
                     "fa_icon": "fas fa-folder-open"
                 },
                 "sequencing_summary": {
                     "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
+                    "pattern": "\\.txt$",
                     "description": "Sequencing summary file generated after Nanopore run completion.",
                     "help_text": " e.g. '--sequencing_summary ./20191023_1522_MC-110615_0_FAO93606_12bf9b4f/sequencing_summary.txt'. Not required when running the pipeline with the '--artic_minion_caller medaka' workflow.",
                     "fa_icon": "fas fa-file"
@@ -231,6 +258,8 @@
                 },
                 "multiqc_config": {
                     "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
                     "description": "Custom config file to supply to MultiQC.",
                     "fa_icon": "fas fa-cog",
                     "hidden": true
@@ -284,6 +313,7 @@
             "properties": {
                 "kraken2_db": {
                     "type": "string",
+                    "format": "path",
                     "default": "s3://nf-core-awsmegatests/viralrecon/input_data/kraken2_human.tar.gz",
                     "fa_icon": "fab fa-gitkraken",
                     "description": "Full path to Kraken2 database built from host genome."
@@ -431,11 +461,13 @@
                 },
                 "spades_hmm": {
                     "type": "string",
+                    "format": "file-path",
                     "fa_icon": "fab fa-digg",
                     "description": "Path to profile HMMs specific for gene/organism to enhance SPAdes assembly."
                 },
                 "blast_db": {
                     "type": "string",
+                    "format": "path",
                     "fa_icon": "fas fa-database",
                     "description": "Path to directory or tar.gz archive for pre-built BLAST database."
                 },
@@ -525,6 +557,7 @@
                 },
                 "tracedir": {
                     "type": "string",
+                    "format": "directory-path",
                     "description": "Directory to keep pipeline Nextflow logs and reports.",
                     "default": "${params.outdir}/pipeline_info",
                     "fa_icon": "fas fa-cogs",
@@ -568,7 +601,7 @@
             "properties": {
                 "max_cpus": {
                     "type": "integer",
-                    "description": "Maximum number of CPUs that can be requested    for any single job.",
+                    "description": "Maximum number of CPUs that can be requested for any single job.",
                     "default": 16,
                     "fa_icon": "fas fa-microchip",
                     "hidden": true,
@@ -611,6 +644,7 @@
                 },
                 "custom_config_base": {
                     "type": "string",
+                    "format": "directory-path",
                     "description": "Base directory for Institutional configs.",
                     "default": "https://raw.githubusercontent.com/nf-core/configs/master",
                     "hidden": true,

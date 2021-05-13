@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Other enhancements & fixes
 
 * Illumina and Nanopore runs containing the same 48 samples sequenced on both platforms have been uploaded to the nf-core AWS account for full-sized tests on release
+* Initial implementation of a standardised samplesheet JSON schema to use with user interfaces and for validation
 * Default human `--kraken2_db` link has been changed from Zenodo to an AWS S3 bucket for more reliable downloads
 * Updated pipeline template to nf-core/tools `1.14`
 * Optimise MultiQC configuration and input files for faster run-time on huge sample numbers
