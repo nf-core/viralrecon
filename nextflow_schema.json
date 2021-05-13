@@ -568,7 +568,7 @@
             "properties": {
                 "max_cpus": {
                     "type": "integer",
-                    "description": "Maximum number of CPUs that can be requested    for any single job.",
+                    "description": "Maximum number of CPUs that can be requested for any single job.",
                     "default": 16,
                     "fa_icon": "fas fa-microchip",
                     "hidden": true,
