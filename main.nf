@@ -19,10 +19,10 @@ nextflow.enable.dsl = 2
 
 def primer_set         = ''
 def primer_set_version = 0
-if (!params.public_data_ids && params.platform == 'illumina' && params.protocol == 'amplicon') {
+if (params.platform == 'illumina' && params.protocol == 'amplicon') {
     primer_set         = params.primer_set
     primer_set_version = params.primer_set_version
-} else if (!params.public_data_ids && params.platform == 'nanopore') {
+} else if (params.platform == 'nanopore') {
     primer_set          = 'artic'
     primer_set_version  = params.primer_set_version
     params.artic_scheme = WorkflowMain.getGenomeAttribute(params, 'scheme', log, primer_set, primer_set_version)
