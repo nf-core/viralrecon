@@ -77,6 +77,7 @@ def check_illumina_samplesheet(file_in, file_out):
 
             ## Check sample name entries
             sample, fastq_1, fastq_2 = lspl[: len(HEADER)]
+            sample = sample.replace('-', '_')
             if sample:
                 if sample.find(" ") != -1:
                     print_error("Sample entry contains spaces!", "Line", line)
@@ -176,6 +177,7 @@ def check_nanopore_samplesheet(file_in, file_out):
 
             ## Check sample entry
             sample, barcode = lspl[: len(HEADER)]
+            sample = sample.replace('-', '_')
             if sample:
                 if sample.find(" ") != -1:
                     print_error("Sample entry contains spaces!", "Line", line)
