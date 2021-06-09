@@ -240,6 +240,7 @@ workflow ILLUMINA {
     //
     // Filter empty FastQ files after adapter trimming
     //
+    ch_fail_reads_multiqc = Channel.empty()
     if (!params.skip_fastp) {
         ch_variants_fastq
             .join(FASTQC_FASTP.out.trim_json)
@@ -249,11 +250,11 @@ workflow ILLUMINA {
                     [ meta, reads, json, pass ]
             }
             .set { ch_pass_fail_reads }
-        
+
         ch_pass_fail_reads
             .map { meta, reads, json, pass -> if (pass) [ meta, reads ] }
             .set { ch_variants_fastq }
-        
+
         ch_pass_fail_reads
             .map {
                 meta, reads, json, pass ->
