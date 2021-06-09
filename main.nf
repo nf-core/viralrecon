@@ -50,13 +50,6 @@ WorkflowMain.initialise(workflow, params, log)
 workflow NFCORE_VIRALRECON {
 
     //
-    // WORKFLOW: Get SRA run information for public database ids, download and md5sum check FastQ files, auto-create samplesheet
-    //
-    if (params.public_data_ids) {
-        include { SRA_DOWNLOAD } from './workflows/sra_download'
-        SRA_DOWNLOAD ()
-
-    //
     // WORKFLOW: Variant and de novo assembly analysis for Illumina data
     //
     } else if (params.platform == 'illumina') {
