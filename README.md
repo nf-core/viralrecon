@@ -135,7 +135,7 @@ The pipeline has numerous options to allow you to run only specific aspects of t
         ~/.nextflow/assets/nf-core/viralrecon/bin/fastq_dir_to_samplesheet.py <FASTQ_DIR> samplesheet.csv
         ```
 
-    * You can find the default keys used to specify `--genome` in the [genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config). Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard keys. If you are able to get permissions from the vendor/supplier to share the primer information then we would be more than happy to support it within the pipeline.
+    * You can find the default keys used to specify `--genome` in the [genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config). Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard keys; see [usage docs](https://nf-co.re/viralrecon/usage#illumina-primer-sets).
 
 ## Documentation
 
