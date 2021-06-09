@@ -52,7 +52,7 @@ workflow NFCORE_VIRALRECON {
     //
     // WORKFLOW: Variant and de novo assembly analysis for Illumina data
     //
-    } else if (params.platform == 'illumina') {
+    if (params.platform == 'illumina') {
         include { ILLUMINA } from './workflows/illumina'
         ILLUMINA ()
 
