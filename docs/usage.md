@@ -69,7 +69,7 @@ The default variant caller used by artic minion is [Nanopolish](https://github.c
 ```console
 .
 └── fastq_pass
-    └── barcode26
+    └── barcode01
         ├── FAP51364_pass_barcode01_97ca62ca_0.fastq
         ├── FAP51364_pass_barcode01_97ca62ca_1.fastq
         ├── FAP51364_pass_barcode01_97ca62ca_2.fastq
