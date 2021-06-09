@@ -22,6 +22,7 @@ process MULTIQC {
     path multiqc_custom_config
     path software_versions
     path workflow_summary
+    path fail_reads_summary
     path fail_mapping_summary
     path ('fastqc/*')
     path ('fastp/*')

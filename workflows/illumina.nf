@@ -66,15 +66,16 @@ if (!params.skip_variants) {
     multiqc_options.publish_files.put('variants_metrics_mqc.csv','')
 }
 
-include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] )
-include { CUTADAPT                   } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']      )
-include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]       )
-include { MULTIQC                    } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                   )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
+include { BCFTOOLS_ISEC             } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] )
+include { CUTADAPT                  } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']      )
+include { GET_SOFTWARE_VERSIONS     } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]       )
+include { MULTIQC                   } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                   )
+include { MULTIQC_CUSTOM_ONECOL_TXT } from '../modules/local/multiqc_custom_onecol_txt' addParams( options: [publish_files: false]            )
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED       } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -244,9 +245,30 @@ workflow ILLUMINA {
             .join(FASTQC_FASTP.out.trim_json)
             .map {
                 meta, reads, json ->
-                    if (WorkflowIllumina.getFastpReadsAfterFiltering(json) > 0) [ meta, reads ]
+                    pass = WorkflowIllumina.getFastpReadsAfterFiltering(json) > 0
+                    [ meta, reads, pass ]
             }
+            .set { ch_pass_fail_reads }
+        
+        ch_pass_fail_reads
+            .map { meta, reads, pass -> if (pass) [ meta, reads ] }
             .set { ch_variants_fastq }
+        
+        ch_pass_fail_reads
+            .map {
+                meta, reads, pass ->
+                if (!pass) {
+                    fail_mapped_reads[meta.id] = 0
+                    return [ "$meta.id" ]
+                }
+            }
+            .set { ch_pass_fail_reads }
+
+        MULTIQC_CUSTOM_ONECOL_TXT (
+            ch_pass_fail_reads.collect(),
+            'fail_mapped_reads'
+        )
+        .set { ch_fail_reads_multiqc }
     }
 
     //
@@ -631,6 +653,7 @@ workflow ILLUMINA {
             ch_multiqc_custom_config.collect().ifEmpty([]),
             GET_SOFTWARE_VERSIONS.out.yaml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+            ch_fail_reads_multiqc.ifEmpty([]),
             ch_fail_mapping_multiqc.ifEmpty([]),
             FASTQC_FASTP.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
             FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
