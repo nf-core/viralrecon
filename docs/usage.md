@@ -54,6 +54,72 @@ sample,barcode
 | `sample`  | Custom sample name, one per barcode.                                                                                        |
 | `barcode` | Barcode identifier attributed to that sample during multiplexing. Must be an integer.                                       |
 
+## Nanopore input format
+
+For Nanopore data the pipeline only supports amplicon-based analysis obtained from primer sets created and maintained by the [ARTIC Network](https://artic.network/). The [artic minion](https://artic.readthedocs.io/en/latest/commands/) tool from the [ARTIC field bioinformatics pipeline](https://github.com/artic-network/fieldbioinformatics) is used to align reads, call variants and to generate the consensus sequence.
+
+### Nanopolish
+
+The default variant caller used by artic minion is [Nanopolish](https://github.com/jts/nanopolish) and this requires that you provide `*.fastq`, `*.fast5` and `sequencing_summary.txt` files as input to the pipeline. These files can typically be obtained after demultiplexing and basecalling the sequencing data using [Guppy](https://nanoporetech.com/nanopore-sequencing-data-analysis) (see [ARTIC SOP docs](https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html)). This pipeline requires that the files are organised in the format outlined below:
+
+```console
+.
+└── fastq_pass
+    └── barcode26
+        ├── FAP51364_pass_barcode01_97ca62ca_0.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_1.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_2.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_3.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_4.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_5.fastq
+    <TRUNCATED>
+```
+
+```console
+.
+└── fast5_pass
+    ├── barcode01
+        ├── FAP51364_pass_barcode01_97ca62ca_0.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_1.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_2.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_3.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_4.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_5.fast5
+    <TRUNCATED>
+```
+
+The command to run the pipeline would then be:
+
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --platform nanopore \
+    --genome 'MN908947.3' \
+    --primer_set_version 3 \
+    --fastq_dir fastq_pass/ \
+    --fast5_dir fast5_pass/ \
+    --sequencing_summary sequencing_summary.txt \
+    -profile <docker/singularity/podman/conda/institute>
+```
+
+### Medaka
+
+You also have the option of using [Medaka](https://github.com/nanoporetech/medaka) as an alternative variant caller to Nanopolish via the `--artic_minion_caller medaka` parameter. Medaka is faster than Nanopolish, performs mostly the same and can be run directly from `fastq` input files as opposed to requiring the `fastq`, `fast5` and `sequencing_summary.txt` files required to run Nanopolish. You must provide the appropriate [Medaka model](https://github.com/nanoporetech/medaka#models) via the `--artic_minion_medaka_model` parameter if using `--artic_minion_caller medaka`. The `fastq` files have to be organised in the same way as for Nanopolish as outlined in the section above.
+
+The command to run the pipeline would then be:
+
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --platform nanopore \
+    --genome 'MN908947.3' \
+    --primer_set_version 3 \
+    --fastq_dir fastq_pass/ \
+    --artic_minion_caller medaka \
+    --artic_minion_medaka_model ./r941_min_high_g360_model.hdf5 \
+    -profile <docker/singularity/podman/conda/institute>
+```
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
