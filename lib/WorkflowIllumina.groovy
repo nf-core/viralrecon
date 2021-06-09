@@ -129,4 +129,12 @@ class WorkflowIllumina {
         def Map json = (Map) new JsonSlurper().parseText(json_file.text).get('summary')
         return json['after_filtering']['total_reads'].toInteger()
     }
+
+    //
+    // Function that parses fastp json output file to get total number of reads before trimming
+    //
+    public static Integer getFastpReadsBeforeFiltering(json_file) {
+        def Map json = (Map) new JsonSlurper().parseText(json_file.text).get('summary')
+        return json['before_filtering']['total_reads'].toInteger()
+    }
 }

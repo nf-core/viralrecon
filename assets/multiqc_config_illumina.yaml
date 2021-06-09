@@ -258,12 +258,13 @@ custom_data:
       format: "{:.0f}"
   fail_mapped_reads:
     section_name: "WARNING: Fail Reads Check"
-    description: "List of samples that had 0 reads after adapter trimming, and hence were ignored for the downstream processing steps."
+    description: "List of samples that had no reads after adapter trimming, and hence were ignored for the downstream processing steps."
     plot_type: "table"
     pconfig:
       id: "fail_mapped_reads_table"
       table_title: "Samples failed read threshold"
       namespace: "Samples failed read threshold"
+      format: "{:,.0f}"
   fail_mapped_samples:
     section_name: "WARNING: Fail Alignment Check"
     description: "List of samples that failed the Bowtie2 minimum mapped reads threshold specified via the '--min_mapped_reads' parameter, and hence were ignored for the downstream processing steps."

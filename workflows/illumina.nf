@@ -70,7 +70,7 @@ include { BCFTOOLS_ISEC             } from '../modules/local/bcftools_isec'     
 include { CUTADAPT                  } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']      )
 include { GET_SOFTWARE_VERSIONS     } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]       )
 include { MULTIQC                   } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                   )
-include { MULTIQC_CUSTOM_ONECOL_TXT } from '../modules/local/multiqc_custom_onecol_txt' addParams( options: [publish_files: false]            )
+include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_READS        } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED       } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
@@ -246,26 +246,29 @@ workflow ILLUMINA {
             .map {
                 meta, reads, json ->
                     pass = WorkflowIllumina.getFastpReadsAfterFiltering(json) > 0
-                    [ meta, reads, pass ]
+                    [ meta, reads, json, pass ]
             }
             .set { ch_pass_fail_reads }
         
         ch_pass_fail_reads
-            .map { meta, reads, pass -> if (pass) [ meta, reads ] }
+            .map { meta, reads, json, pass -> if (pass) [ meta, reads ] }
             .set { ch_variants_fastq }
         
         ch_pass_fail_reads
             .map {
-                meta, reads, pass ->
+                meta, reads, json, pass ->
                 if (!pass) {
                     fail_mapped_reads[meta.id] = 0
-                    return [ "$meta.id" ]
+                    num_reads = WorkflowIllumina.getFastpReadsBeforeFiltering(json)
+                    return [ "$meta.id\t$num_reads" ]
                 }
             }
             .set { ch_pass_fail_reads }
 
-        MULTIQC_CUSTOM_ONECOL_TXT (
+        MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_READS (
             ch_pass_fail_reads.collect(),
+            'Sample',
+            'Reads before trimming',
             'fail_mapped_reads'
         )
         .set { ch_fail_reads_multiqc }

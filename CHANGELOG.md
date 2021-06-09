@@ -8,10 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Enhancements & fixes
 
 * Removed workflow to download data from public databases in favour of using [nf-core/fetchngs](https://nf-co.re/fetchngs)
+* Dashes in sample names will be converted to underscores to avoid issues when creating the summary metrics via QUAST
+* Add warning to MultiQC report for samples that have no reads after adapter trimming
 * Added docs about structure of data required for running Nanopore data
 * Added docs about using other primer sets for Illumina data
 * Added docs about overwriting default container definitions to use latest versions e.g. Pangolin
-* Dashes in sample names will be converted to underscores to avoid issues when creating the summary metrics via QUAST
 
 ### Software dependencies
 
