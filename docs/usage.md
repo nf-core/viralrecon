@@ -10,7 +10,7 @@
 
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
 
-```bash
+```console
 --input '[path to samplesheet file]'
 ```
 
@@ -18,7 +18,7 @@ The `sample` identifiers have to be the same when you have re-sequenced the same
 
 A final samplesheet file may look something like the one below. `SAMPLE_1` was sequenced twice in Illumina PE format, `SAMPLE_2` was sequenced once in Illumina SE format.
 
-```bash
+```console
 sample,fastq_1,fastq_2
 SAMPLE_1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
 SAMPLE_1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
@@ -35,13 +35,13 @@ SAMPLE_2,AEG588A2_S4_L003_R1_001.fastq.gz,
 
 You have the option to provide a samplesheet to the pipeline that maps sample ids to barcode ids. This allows you to associate barcode ids to clinical/public database identifiers that can be used to QC or pre-process the data with more appropriate sample names.
 
-```bash
+```console
 --input '[path to samplesheet file]'
 ```
 
 It has to be a comma-separated file with 2 columns. A final samplesheet file may look something like the one below:
 
-```bash
+```console
 sample,barcode
 21X983255,1
 70H209408,2
@@ -120,11 +120,55 @@ nextflow run nf-core/viralrecon \
     -profile <docker/singularity/podman/conda/institute>
 ```
 
+## Illumina primer sets
+
+The Illumina processing mode of the pipeline has been tested on numerous different primer sets. Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard parameter keys. If you are able to get permissions from the vendor/supplier to share the primer information then we would be more than happy to support it within the pipeline.
+
+For SARS-CoV-2 data we recommend using the "MN908947.3" genome because it is supported out-of-the-box by the most commonly used primer sets available from the [ARTIC Network](https://artic.network/). For ease of use, we are also maintaining a version of the "MN908947.3" genome along with the appropriate links to the ARTIC primer sets in the [genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config) used by the pipeline. The genomes config file can be updated independently from the main pipeline code to make it possible to dynamically extend this file for other viral genomes/primer sets on request.
+
+For further information or help, don't hesitate to get in touch on the [Slack `#viralrecon` channel](https://nfcore.slack.com/channels/viralrecon) (you can join with [this invite](https://nf-co.re/join/slack)).
+
+### ARTIC primer sets
+
+An example command using v3 ARTIC primers with "MN908947.3":
+
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --platform illumina \
+    --protocol amplicon \
+    --genome 'MN908947.3' \
+    --primer_set artic \
+    --primer_set_version 3 \
+    --skip_assembly \
+    -profile <docker/singularity/podman/conda/institute>
+```
+
+### SWIFT primer sets
+
+The [SWIFT amplicon panel](https://swiftbiosci.com/swift-amplicon-sars-cov-2-panel/) is another commonly used method used to prep and sequence SARS-CoV-2 samples. We haven't been able to obtain explicit permission to host standard SWIFT primer sets but you can obtain a masterfile which is freely available from their website that contains the primer sequences as well as genomic co-ordinates. You just need to convert this file to [BED6](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format and provide it to the pipeline with `--primer_bed swift_primers.bed`. Be sure to check the values provided to [`--primer_left_suffix`] and [`--primer_right_suffix`] match the primer names defined in the BED file as highlighted in [this issue](https://github.com/nf-core/viralrecon/issues/169). For an explanation behind the usage of the `--ivar_trim_offset 5` for SWIFT primer sets see [this issue](https://github.com/nf-core/viralrecon/issues/170).
+
+An example command using SWIFT primers with "MN908947.3":
+
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --platform illumina \
+    --protocol amplicon \
+    --genome 'MN908947.3' \
+    --primer_bed swift_primers.bed \
+    --primer_left_suffix '_F' \
+    --primer_right_suffix '_R' \
+    --ivar_trim_offset 5 \
+    --skip_assembly \
+    -profile <docker/singularity/podman/conda/institute>
+```
+
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
-```bash
+```console
 nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'MN908947.3' -profile docker
 ```
 
@@ -132,7 +176,7 @@ This will launch the pipeline with the `docker` configuration profile. See below
 
 Note that the pipeline will create the following files in your working directory:
 
-```bash
+```console
 work            # Directory containing the nextflow working files
 results         # Finished results (configurable, see below)
 .nextflow_log   # Log file from Nextflow
@@ -143,7 +187,7 @@ results         # Finished results (configurable, see below)
 
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
-```bash
+```console
 nextflow pull nf-core/viralrecon
 ```
 
@@ -307,6 +351,6 @@ Some HPC setups also allow you to run nextflow within a cluster job submitted yo
 In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
 We recommend adding the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
 
-```bash
+```console
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
