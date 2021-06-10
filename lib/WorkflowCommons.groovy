@@ -81,8 +81,8 @@ class WorkflowCommons {
         def headers = []
         def field   = ''
         pangolin_report.readLines().eachWithIndex { row, row_index ->
-            if (row_index == 0) { 
-                headers = row.split(',') 
+            if (row_index == 0) {
+                headers = row.split(',')
             } else {
                 def col_map = [:]
                 def cells = row.split(',').eachWithIndex { cell, cell_index ->
