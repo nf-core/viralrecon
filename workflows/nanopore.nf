@@ -55,13 +55,13 @@ include { ASCIIGENOME           } from '../modules/local/asciigenome'           
 include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files: ['tsv':'']]     )
 include { MULTIQC               } from '../modules/local/multiqc_nanopore'      addParams( options: multiqc_options                 )
 
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME  } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_PANGOLIN             } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME            } from '../modules/local/plot_mosdepth_regions'     addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON          } from '../modules/local/plot_mosdepth_regions'     addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME  } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_PANGOLIN             } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME     } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -368,14 +368,15 @@ workflow NANOPORE {
             .out
             .report
             .map { meta, report ->
-                def lineage = WorkflowCommons.getPangolinLineage(report)
-                return [ "$meta.id\t$lineage" ]
+                def lineage      = WorkflowCommons.getFieldFromPangolinReport(report, 'lineage')
+                def scorpio_call = WorkflowCommons.getFieldFromPangolinReport(report, 'scorpio_call')
+                return [ "$meta.id\t$lineage\t$scorpio_call" ]
             }
             .set { ch_pangolin_multiqc }
 
         MULTIQC_CUSTOM_PANGOLIN (
             ch_pangolin_multiqc.collect(),
-            'Sample\tLineage',
+            'Sample\tLineage\tScorpio call',
             'pangolin_lineage'
         )
         .set { ch_pangolin_multiqc }
