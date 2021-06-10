@@ -4,9 +4,9 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
-## Introduction
+## Samplesheet format
 
-### Illumina samplesheet format
+### Illumina
 
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
 
@@ -31,9 +31,9 @@ SAMPLE_2,AEG588A2_S4_L003_R1_001.fastq.gz,
 | `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".  |
 | `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".  |
 
-> **NB:** Dashes (`-`) in sample names are converted to underscores (`_`) when running [QUAST](http://quast.sourceforge.net/quast) and this causes issues when creating the summary metrics for the pipeline. As a result, dashes in sample names will automatically be replaced with underscores to bypass this issue.
+> **NB:** Dashes (`-`) and spaces in sample names are automatically converted to underscores (`_`) to avoid downstream issues in the pipeline.
 
-### Nanopore samplesheet format
+### Nanopore
 
 You have the option to provide a samplesheet to the pipeline that maps sample ids to barcode ids. This allows you to associate barcode ids to clinical/public database identifiers that can be used to QC or pre-process the data with more appropriate sample names.
 
@@ -56,7 +56,7 @@ sample,barcode
 | `sample`  | Custom sample name, one per barcode.                                                                                        |
 | `barcode` | Barcode identifier attributed to that sample during multiplexing. Must be an integer.                                       |
 
-> **NB:** Dashes (`-`) in sample names are converted to underscores (`_`) when running [QUAST](http://quast.sourceforge.net/quast) and this causes issues when creating the summary metrics for the pipeline. As a result, dashes in sample names will automatically be replaced with underscores to bypass this issue.
+> **NB:** Dashes (`-`) and spaces in sample names are automatically converted to underscores (`_`) to avoid downstream issues in the pipeline.
 
 ## Nanopore input format
 
