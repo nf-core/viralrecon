@@ -19,10 +19,10 @@ nextflow.enable.dsl = 2
 
 def primer_set         = ''
 def primer_set_version = 0
-if (!params.public_data_ids && params.platform == 'illumina' && params.protocol == 'amplicon') {
+if (params.platform == 'illumina' && params.protocol == 'amplicon') {
     primer_set         = params.primer_set
     primer_set_version = params.primer_set_version
-} else if (!params.public_data_ids && params.platform == 'nanopore') {
+} else if (params.platform == 'nanopore') {
     primer_set          = 'artic'
     primer_set_version  = params.primer_set_version
     params.artic_scheme = WorkflowMain.getGenomeAttribute(params, 'scheme', log, primer_set, primer_set_version)
@@ -47,27 +47,24 @@ WorkflowMain.initialise(workflow, params, log)
 ========================================================================================
 */
 
-workflow NFCORE_VIRALRECON {
+if (params.platform == 'illumina') {
+    include { ILLUMINA } from './workflows/illumina'
+} else if (params.platform == 'nanopore') {
+    include { NANOPORE } from './workflows/nanopore'
+}
 
-    //
-    // WORKFLOW: Get SRA run information for public database ids, download and md5sum check FastQ files, auto-create samplesheet
-    //
-    if (params.public_data_ids) {
-        include { SRA_DOWNLOAD } from './workflows/sra_download'
-        SRA_DOWNLOAD ()
+workflow NFCORE_VIRALRECON {
 
     //
     // WORKFLOW: Variant and de novo assembly analysis for Illumina data
     //
-    } else if (params.platform == 'illumina') {
-        include { ILLUMINA } from './workflows/illumina'
+    if (params.platform == 'illumina') {
         ILLUMINA ()
 
     //
     // WORKFLOW: Variant analysis for Nanopore data
     //
     } else if (params.platform == 'nanopore') {
-        include { NANOPORE } from './workflows/nanopore'
         NANOPORE ()
     }
 }

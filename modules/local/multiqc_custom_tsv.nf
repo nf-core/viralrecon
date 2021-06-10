@@ -3,7 +3,7 @@ include { saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-process SRA_MERGE_SAMPLESHEET {
+process MULTIQC_CUSTOM_TSV {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:[:], publish_by_meta:[]) }
@@ -16,16 +16,22 @@ process SRA_MERGE_SAMPLESHEET {
     }
 
     input:
-    path ('samplesheets/*')
+    val tsv_data
+    val col_names
+    val out_prefix
 
     output:
-    path "*csv", emit: csv
+    path "*.tsv"
 
     script:
-    """
-    head -n 1 `ls ./samplesheets/* | head -n 1` > samplesheet.csv
-    for fileid in `ls ./samplesheets/*`; do
-        awk 'NR>1' \$fileid >> samplesheet.csv
-    done
-    """
+    if (tsv_data.size() > 0) {
+        """
+        echo "${col_names}" > ${out_prefix}_mqc.tsv
+        echo "${tsv_data.join('\n')}" >> ${out_prefix}_mqc.tsv
+        """
+    } else {
+        """
+        touch ${out_prefix}_mqc.tsv
+        """
+    }
 }

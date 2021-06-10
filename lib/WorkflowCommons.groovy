@@ -74,14 +74,26 @@ class WorkflowCommons {
     }
 
     //
-    // Function to get lineage from Pangolin output file
+    // Function to get field entry from Pangolin output file
     //
-    public static String getPangolinLineage(pangolin_report) {
-        def lineage = ''
-        pangolin_report.eachLine { line ->
-            lineage = line.split(',')[1]
+    // See: https://stackoverflow.com/a/67766919
+    public static String getFieldFromPangolinReport(pangolin_report, col_name) {
+        def headers = []
+        def field   = ''
+        pangolin_report.readLines().eachWithIndex { row, row_index ->
+            if (row_index == 0) {
+                headers = row.split(',')
+            } else {
+                def col_map = [:]
+                def cells = row.split(',').eachWithIndex { cell, cell_index ->
+                    col_map[headers[cell_index]] = cell
+                }
+                if (col_map.containsKey(col_name)) {
+                    field = col_map[col_name]
+                }
+            }
         }
-        return lineage
+        return field
     }
 
     //

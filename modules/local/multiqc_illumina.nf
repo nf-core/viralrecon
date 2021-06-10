@@ -22,6 +22,7 @@ process MULTIQC {
     path multiqc_custom_config
     path software_versions
     path workflow_summary
+    path fail_reads_summary
     path fail_mapping_summary
     path ('fastqc/*')
     path ('fastp/*')
@@ -56,8 +57,21 @@ process MULTIQC {
     def software      = getSoftwareName(task.process)
     def custom_config = params.multiqc_config ? "--config $multiqc_custom_config" : ''
     """
+    ## Run MultiQC once to parse tool logs
     multiqc -f $options.args $custom_config .
+
+    ## Parse YAML files dumped by MultiQC to obtain metrics
     multiqc_to_custom_csv.py --platform illumina
+
+    if grep -q skip_assembly workflow_summary_mqc.yaml; then
+        rm -f *assembly_metrics_mqc.csv
+    fi
+
+    if grep -q skip_variants workflow_summary_mqc.yaml; then
+        rm -f *variants_metrics_mqc.csv
+    fi
+
+    ## Run MultiQC a second time
     multiqc -f $options.args -e general_stats --ignore *pangolin_lineage_mqc.tsv $custom_config .
     """
 }

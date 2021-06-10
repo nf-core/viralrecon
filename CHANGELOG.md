@@ -3,11 +3,41 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unpublished Version / DEV]
+## [[2.1](https://github.com/nf-core/rnaseq/releases/tag/2.1)] - 2021-06-11
 
 ### Enhancements & fixes
 
+* Removed workflow to download data from public databases in favour of using [nf-core/fetchngs](https://nf-co.re/fetchngs)
+* Added Pangolin VOC scorpio calls to default variant calling summary metrics
+* Dashes in sample names will be converted to underscores to avoid issues when creating the summary metrics via QUAST
+* Add warning to MultiQC report for samples that have no reads after adapter trimming
+* Added docs about structure of data required for running Nanopore data
+* Added docs about using other primer sets for Illumina data
+* Added docs about overwriting default container definitions to use latest versions e.g. Pangolin
+
 ### Parameters
+
+| Old parameter                 | New parameter                         |
+|-------------------------------|---------------------------------------|
+| `--public_data_ids`           |                                       |
+| `--skip_sra_fastq_download`   |                                       |
+
+> **NB:** Parameter has been __updated__ if both old and new parameter information is present.
+> **NB:** Parameter has been __added__ if just the new parameter information is present.
+> **NB:** Parameter has been __removed__ if new parameter information isn't present.
+
+### Software dependencies
+
+Note, since the pipeline is now using Nextflow DSL2, each process will be run with its own [Biocontainer](https://biocontainers.pro/#/registry). This means that on occasion it is entirely possible for the pipeline to be using different versions of the same tool. However, the overall software dependency changes compared to the last release have been listed below for reference.
+
+| Dependency                    | Old version | New version |
+|-------------------------------|-------------|-------------|
+| `nextclade_js`                | 0.14.2      | 0.14.4      |
+| `pangolin`                    | 2.4.2       | 3.0.5       |
+
+> **NB:** Dependency has been __updated__ if both old and new version information is present.
+> **NB:** Dependency has been __added__ if just the new version information is present.
+> **NB:** Dependency has been __removed__ if new version information isn't present.
 
 ## [[2.0](https://github.com/nf-core/rnaseq/releases/tag/2.0)] - 2021-05-13
 

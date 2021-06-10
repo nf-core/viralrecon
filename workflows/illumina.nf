@@ -66,15 +66,16 @@ if (!params.skip_variants) {
     multiqc_options.publish_files.put('variants_metrics_mqc.csv','')
 }
 
-include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] )
-include { CUTADAPT                   } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']      )
-include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]       )
-include { MULTIQC                    } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                   )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED       } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
+include { BCFTOOLS_ISEC         } from '../modules/local/bcftools_isec'         addParams( options: modules['illumina_bcftools_isec'] )
+include { CUTADAPT              } from '../modules/local/cutadapt'              addParams( options: modules['illumina_cutadapt']      )
+include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files: ['tsv':'']]       )
+include { MULTIQC               } from '../modules/local/multiqc_illumina'      addParams( options: multiqc_options                   )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_FAIL_READS        } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_FAIL_MAPPED       } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME      } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON    } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -239,14 +240,38 @@ workflow ILLUMINA {
     //
     // Filter empty FastQ files after adapter trimming
     //
+    ch_fail_reads_multiqc = Channel.empty()
     if (!params.skip_fastp) {
         ch_variants_fastq
             .join(FASTQC_FASTP.out.trim_json)
             .map {
                 meta, reads, json ->
-                    if (WorkflowIllumina.getFastpReadsAfterFiltering(json) > 0) [ meta, reads ]
+                    pass = WorkflowIllumina.getFastpReadsAfterFiltering(json) > 0
+                    [ meta, reads, json, pass ]
             }
+            .set { ch_pass_fail_reads }
+
+        ch_pass_fail_reads
+            .map { meta, reads, json, pass -> if (pass) [ meta, reads ] }
             .set { ch_variants_fastq }
+
+        ch_pass_fail_reads
+            .map {
+                meta, reads, json, pass ->
+                if (!pass) {
+                    fail_mapped_reads[meta.id] = 0
+                    num_reads = WorkflowIllumina.getFastpReadsBeforeFiltering(json)
+                    return [ "$meta.id\t$num_reads" ]
+                }
+            }
+            .set { ch_pass_fail_reads }
+
+        MULTIQC_CUSTOM_TSV_FAIL_READS (
+            ch_pass_fail_reads.collect(),
+            'Sample\tReads before trimming',
+            'fail_mapped_reads'
+        )
+        .set { ch_fail_reads_multiqc }
     }
 
     //
@@ -321,10 +346,9 @@ workflow ILLUMINA {
             }
             .set { ch_pass_fail_mapped }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED (
+        MULTIQC_CUSTOM_TSV_FAIL_MAPPED (
             ch_pass_fail_mapped.fail.collect(),
-            'Sample',
-            'Mapped reads',
+            'Sample\tMapped reads',
             'fail_mapped_samples'
         )
         .set { ch_fail_mapping_multiqc }
@@ -443,15 +467,15 @@ workflow ILLUMINA {
         //
         ch_ivar_pangolin_report
             .map { meta, report ->
-                def lineage = WorkflowCommons.getPangolinLineage(report)
-                return [ "$meta.id\t$lineage" ]
+                def lineage      = WorkflowCommons.getFieldFromPangolinReport(report, 'lineage')
+                def scorpio_call = WorkflowCommons.getFieldFromPangolinReport(report, 'scorpio_call')
+                return [ "$meta.id\t$lineage\t$scorpio_call" ]
             }
             .set { ch_ivar_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN (
+        MULTIQC_CUSTOM_TSV_IVAR_PANGOLIN (
             ch_ivar_pangolin_multiqc.collect(),
-            'Sample',
-            'Lineage',
+            'Sample\tLineage\tScorpio call',
             'ivar_pangolin_lineage'
         )
         .set { ch_ivar_pangolin_multiqc }
@@ -495,15 +519,15 @@ workflow ILLUMINA {
         //
         ch_bcftools_pangolin_report
             .map { meta, report ->
-                def lineage = WorkflowCommons.getPangolinLineage(report)
-                return [ "$meta.id\t$lineage" ]
+                def lineage      = WorkflowCommons.getFieldFromPangolinReport(report, 'lineage')
+                def scorpio_call = WorkflowCommons.getFieldFromPangolinReport(report, 'scorpio_call')
+                return [ "$meta.id\t$lineage\t$scorpio_call" ]
             }
             .set { ch_bcftools_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN (
+        MULTIQC_CUSTOM_TSV_BCFTOOLS_PANGOLIN (
             ch_bcftools_pangolin_multiqc.collect(),
-            'Sample',
-            'Lineage',
+            'Sample\tLineage\tScorpio call',
             'bcftools_pangolin_lineage'
         )
         .set { ch_bcftools_pangolin_multiqc }
@@ -631,6 +655,7 @@ workflow ILLUMINA {
             ch_multiqc_custom_config.collect().ifEmpty([]),
             GET_SOFTWARE_VERSIONS.out.yaml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+            ch_fail_reads_multiqc.ifEmpty([]),
             ch_fail_mapping_multiqc.ifEmpty([]),
             FASTQC_FASTP.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
             FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
