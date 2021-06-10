@@ -446,6 +446,7 @@ workflow NANOPORE {
         ASCIIGENOME (
             ch_asciigenome,
             PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.chrom_sizes,
             params.gff ? PREPARE_GENOME.out.gff : [],
             PREPARE_GENOME.out.primer_bed,
             params.asciigenome_window_size,
