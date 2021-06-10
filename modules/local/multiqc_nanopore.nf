@@ -26,6 +26,7 @@ process MULTIQC {
     path fail_no_barcode_samples
     path fail_barcode_count_samples
     path fail_guppyplex_count_samples
+    path 'amplicon_heatmap_mqc.tsv'
     path ('pycoqc/*')
     path ('artic_minion/*')
     path ('samtools_stats/*')
