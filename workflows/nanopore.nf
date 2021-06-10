@@ -12,7 +12,9 @@ def valid_params = [
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
 // Validate input parameters
-WorkflowNanopore.initialise(params, log, valid_params)
+if (params.platform == 'nanopore') {
+    WorkflowNanopore.initialise(params, log, valid_params)
+}
 
 def checkPathParamList = [
     params.input, params.fastq_dir, params.fast5_dir,
@@ -22,6 +24,10 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
+
+// MultiQC config files
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
 
 if (params.input)              { ch_input              = file(params.input)              }
 if (params.fast5_dir)          { ch_fast5_dir          = file(params.fast5_dir)          } else { ch_fast5_dir          = ch_dummy_file     }
@@ -34,15 +40,6 @@ if (params.artic_minion_caller == 'medaka') {
         ch_medaka_model = Channel.fromPath(params.artic_minion_medaka_model)
     }
 }
-
-/*
-========================================================================================
-    CONFIG FILES
-========================================================================================
-*/
-
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
-ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
 
 /*
 ========================================================================================
@@ -511,9 +508,11 @@ workflow NANOPORE {
 ========================================================================================
 */
 
-workflow.onComplete {
-    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
-    NfcoreTemplate.summary(workflow, params, log)
+if (params.platform == 'nanopore') {
+    workflow.onComplete {
+        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
+        NfcoreTemplate.summary(workflow, params, log)
+    }
 }
 
 /*

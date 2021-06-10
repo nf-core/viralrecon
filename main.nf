@@ -47,20 +47,21 @@ WorkflowMain.initialise(workflow, params, log)
 ========================================================================================
 */
 
+include { ILLUMINA } from './workflows/illumina'
+include { NANOPORE } from './workflows/nanopore'
+
 workflow NFCORE_VIRALRECON {
 
     //
     // WORKFLOW: Variant and de novo assembly analysis for Illumina data
     //
     if (params.platform == 'illumina') {
-        include { ILLUMINA } from './workflows/illumina'
         ILLUMINA ()
 
     //
     // WORKFLOW: Variant analysis for Nanopore data
     //
     } else if (params.platform == 'nanopore') {
-        include { NANOPORE } from './workflows/nanopore'
         NANOPORE ()
     }
 }

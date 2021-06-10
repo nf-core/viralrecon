@@ -14,7 +14,9 @@ def valid_params = [
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
 // Validate input parameters
-WorkflowIllumina.initialise(params, log, valid_params)
+if (params.platform == 'illumina') {
+    WorkflowIllumina.initialise(params, log, valid_params)
+}
 
 // Check input path parameters to see if they exist
 def checkPathParamList = [
@@ -691,9 +693,11 @@ workflow ILLUMINA {
 ========================================================================================
 */
 
-workflow.onComplete {
-    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
-    NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
+if (params.platform == 'illumina') {
+    workflow.onComplete {
+        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
+        NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
+    }
 }
 
 /*
