@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added docs about structure of data required for running Nanopore data
 * Added docs about using other primer sets for Illumina data
 * Added docs about overwriting default container definitions to use latest versions e.g. Pangolin
+* [[#196](https://github.com/nf-core/viralrecon/issues/196)] - Add mosdepth heatmap to MultiQC report
+* [[#198](https://github.com/nf-core/viralrecon/issues/198)] - ASCIIGenome failing during analysis
+* [[#201](https://github.com/nf-core/viralrecon/issues/201)] - Conditional include are not expected to work
 
 ### Parameters
 
