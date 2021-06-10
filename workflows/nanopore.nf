@@ -325,7 +325,8 @@ workflow NANOPORE {
     //
     // MODULE: Genome-wide and amplicon-specific coverage QC plots
     //
-    ch_mosdepth_multiqc = Channel.empty()
+    ch_mosdepth_multiqc         = Channel.empty()
+    ch_amplicon_heatmap_multiqc = Channel.empty()
     if (!params.skip_mosdepth) {
 
         MOSDEPTH_GENOME (
@@ -349,6 +350,7 @@ workflow NANOPORE {
         PLOT_MOSDEPTH_REGIONS_AMPLICON (
             MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
         )
+        ch_amplicon_heatmap_multiqc = PLOT_MOSDEPTH_REGIONS_AMPLICON.out.heatmap_tsv
     }
 
     //
@@ -483,6 +485,7 @@ workflow NANOPORE {
             ch_custom_no_barcodes_multiqc.ifEmpty([]),
             MULTIQC_CUSTOM_FAIL_BARCODE_COUNT.out.ifEmpty([]),
             MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT.out.ifEmpty([]),
+            ch_amplicon_heatmap_multiqc.ifEmpty([]),
             PYCOQC.out.json.collect().ifEmpty([]),
             ARTIC_MINION.out.json.collect{it[1]}.ifEmpty([]),
             FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]),
