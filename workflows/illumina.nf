@@ -72,12 +72,12 @@ include { BCFTOOLS_ISEC             } from '../modules/local/bcftools_isec'     
 include { CUTADAPT                  } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']      )
 include { GET_SOFTWARE_VERSIONS     } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['tsv':'']]       )
 include { MULTIQC                   } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                   )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_READS        } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED       } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_FAIL_READS        } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false]        )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_FAIL_MAPPED       } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false]        )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false]        )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false]        )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME      } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON    } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -268,10 +268,9 @@ workflow ILLUMINA {
             }
             .set { ch_pass_fail_reads }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_READS (
+        MULTIQC_CUSTOM_TSV_FAIL_READS (
             ch_pass_fail_reads.collect(),
-            'Sample',
-            'Reads before trimming',
+            'Sample\tReads before trimming',
             'fail_mapped_reads'
         )
         .set { ch_fail_reads_multiqc }
@@ -349,10 +348,9 @@ workflow ILLUMINA {
             }
             .set { ch_pass_fail_mapped }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED (
+        MULTIQC_CUSTOM_TSV_FAIL_MAPPED (
             ch_pass_fail_mapped.fail.collect(),
-            'Sample',
-            'Mapped reads',
+            'Sample\tMapped reads',
             'fail_mapped_samples'
         )
         .set { ch_fail_mapping_multiqc }
@@ -476,10 +474,9 @@ workflow ILLUMINA {
             }
             .set { ch_ivar_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN (
+        MULTIQC_CUSTOM_TSV_IVAR_PANGOLIN (
             ch_ivar_pangolin_multiqc.collect(),
-            'Sample',
-            'Lineage',
+            'Sample\tLineage',
             'ivar_pangolin_lineage'
         )
         .set { ch_ivar_pangolin_multiqc }
@@ -528,10 +525,9 @@ workflow ILLUMINA {
             }
             .set { ch_bcftools_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN (
+        MULTIQC_CUSTOM_TSV_BCFTOOLS_PANGOLIN (
             ch_bcftools_pangolin_multiqc.collect(),
-            'Sample',
-            'Lineage',
+            'Sample\tLineage',
             'bcftools_pangolin_lineage'
         )
         .set { ch_bcftools_pangolin_multiqc }

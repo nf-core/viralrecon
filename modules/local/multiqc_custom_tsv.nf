@@ -3,7 +3,7 @@ include { saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-process MULTIQC_CUSTOM_TWOCOL_TSV {
+process MULTIQC_CUSTOM_TSV {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:[:], publish_by_meta:[]) }
@@ -17,8 +17,7 @@ process MULTIQC_CUSTOM_TWOCOL_TSV {
 
     input:
     val tsv_data
-    val col1_name
-    val col2_name
+    val col_names
     val out_prefix
 
     output:
@@ -27,7 +26,7 @@ process MULTIQC_CUSTOM_TWOCOL_TSV {
     script:
     if (tsv_data.size() > 0) {
         """
-        echo "${col1_name}\t${col2_name}" > ${out_prefix}_mqc.tsv
+        echo "${col_names}" > ${out_prefix}_mqc.tsv
         echo "${tsv_data.join('\n')}" >> ${out_prefix}_mqc.tsv
         """
     } else {
