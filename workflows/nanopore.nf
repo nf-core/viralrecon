@@ -54,7 +54,7 @@ def multiqc_options   = modules['nanopore_multiqc']
 multiqc_options.args += params.multiqc_title ? Utils.joinModuleArgs(["--title \"$params.multiqc_title\""]) : ''
 
 include { ASCIIGENOME           } from '../modules/local/asciigenome'           addParams( options: modules['nanopore_asciigenome'] )
-include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files: ['csv':'']]     )
+include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files: ['tsv':'']]     )
 include { MULTIQC               } from '../modules/local/multiqc_nanopore'      addParams( options: multiqc_options                 )
 
 include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME  } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
