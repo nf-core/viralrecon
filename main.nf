@@ -47,8 +47,11 @@ WorkflowMain.initialise(workflow, params, log)
 ========================================================================================
 */
 
-include { ILLUMINA } from './workflows/illumina'
-include { NANOPORE } from './workflows/nanopore'
+if (params.platform == 'illumina') {
+    include { ILLUMINA } from './workflows/illumina'
+} else if (params.platform == 'nanopore') {
+    include { NANOPORE } from './workflows/nanopore'
+}
 
 workflow NFCORE_VIRALRECON {
 

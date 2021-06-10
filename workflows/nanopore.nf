@@ -12,9 +12,7 @@ def valid_params = [
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
 // Validate input parameters
-if (params.platform == 'nanopore') {
-    WorkflowNanopore.initialise(params, log, valid_params)
-}
+WorkflowNanopore.initialise(params, log, valid_params)
 
 def checkPathParamList = [
     params.input, params.fastq_dir, params.fast5_dir,
@@ -503,11 +501,9 @@ workflow NANOPORE {
 ========================================================================================
 */
 
-if (params.platform == 'nanopore') {
-    workflow.onComplete {
-        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
-        NfcoreTemplate.summary(workflow, params, log)
-    }
+workflow.onComplete {
+    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
+    NfcoreTemplate.summary(workflow, params, log)
 }
 
 /*
