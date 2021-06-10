@@ -24,6 +24,7 @@ process MULTIQC {
     path workflow_summary
     path fail_reads_summary
     path fail_mapping_summary
+    path 'amplicon_heatmap_mqc.tsv'
     path ('fastqc/*')
     path ('fastp/*')
     path ('kraken2/*')
