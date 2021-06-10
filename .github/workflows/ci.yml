@@ -54,6 +54,7 @@ jobs:
             --skip_assembly,
             "--spades_mode corona",
             "--spades_mode metaviral",
+            "--skip_plasmidid false --skip_asciigenome",
           ]
     steps:
       - name: Check out pipeline code
