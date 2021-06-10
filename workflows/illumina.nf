@@ -397,7 +397,8 @@ workflow ILLUMINA {
     //
     // MODULE: Genome-wide and amplicon-specific coverage QC plots
     //
-    ch_mosdepth_multiqc = Channel.empty()
+    ch_mosdepth_multiqc         = Channel.empty()
+    ch_amplicon_heatmap_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_mosdepth) {
 
         MOSDEPTH_GENOME (
@@ -422,6 +423,7 @@ workflow ILLUMINA {
             PLOT_MOSDEPTH_REGIONS_AMPLICON (
                 MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
             )
+            ch_amplicon_heatmap_multiqc = PLOT_MOSDEPTH_REGIONS_AMPLICON.out.heatmap_tsv
         }
     }
 
@@ -657,6 +659,7 @@ workflow ILLUMINA {
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
             ch_fail_reads_multiqc.ifEmpty([]),
             ch_fail_mapping_multiqc.ifEmpty([]),
+            ch_amplicon_heatmap_multiqc.ifEmpty([]),
             FASTQC_FASTP.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
             FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
             ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
