@@ -1,5 +1,5 @@
 #id: 'ivar_variants'
-#section_name: 'VARIANTS: iVar variant counts'
+#section_name: 'VARIANTS: Total variants (iVar)'
 #description: "is calculated from the total number of variants called by
 #              <a href='https://andersen-lab.github.io/ivar/html/manualpage.html' target='_blank'>iVar</a>."
 #plot_type: 'bargraph'

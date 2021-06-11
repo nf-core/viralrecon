@@ -34,7 +34,7 @@ process MULTIQC {
     path ('mosdepth/*')
     path ('quast/*')
     path ('snpeff/*')
-    path ('pangolin/*')
+    path pangolin_lineage
 
     output:
     path "*multiqc_report.html", emit: report
@@ -46,8 +46,13 @@ process MULTIQC {
     def software      = getSoftwareName(task.process)
     def custom_config = params.multiqc_config ? "--config $multiqc_custom_config" : ''
     """
+    ## Run MultiQC once to parse tool logs
     multiqc -f $options.args $custom_config .
+
+    ## Parse YAML files dumped by MultiQC to obtain metrics
     multiqc_to_custom_csv.py --platform nanopore
-    multiqc -f $options.args -e general_stats --ignore *pangolin_lineage_mqc.tsv $custom_config .
+
+    ## Run MultiQC a second time
+    multiqc -f $options.args -e general_stats $custom_config .
     """
 }

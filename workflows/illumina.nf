@@ -70,12 +70,12 @@ include { BCFTOOLS_ISEC         } from '../modules/local/bcftools_isec'         
 include { CUTADAPT              } from '../modules/local/cutadapt'              addParams( options: modules['illumina_cutadapt']      )
 include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files: ['tsv':'']]       )
 include { MULTIQC               } from '../modules/local/multiqc_illumina'      addParams( options: multiqc_options                   )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_FAIL_READS        } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_FAIL_MAPPED       } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME      } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON    } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_FAIL_READS        } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_FAIL_MAPPED       } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_CSV_FROM_MAP as MULTIQC_CUSTOM_CSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_csv_from_map' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_CSV_FROM_MAP as MULTIQC_CUSTOM_CSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_csv_from_map' addParams( options: [publish_files: false] )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -470,15 +470,13 @@ workflow ILLUMINA {
         //
         ch_ivar_pangolin_report
             .map { meta, report ->
-                def lineage      = WorkflowCommons.getFieldFromPangolinReport(report, 'lineage')
-                def scorpio_call = WorkflowCommons.getFieldFromPangolinReport(report, 'scorpio_call')
-                return [ "$meta.id\t$lineage\t$scorpio_call" ]
+                def fields = WorkflowCommons.getPangolinFieldMap(report, log)
+                return [sample:meta.id] << fields
             }
             .set { ch_ivar_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_TSV_IVAR_PANGOLIN (
+        MULTIQC_CUSTOM_CSV_IVAR_PANGOLIN (
             ch_ivar_pangolin_multiqc.collect(),
-            'Sample\tLineage\tScorpio call',
             'ivar_pangolin_lineage'
         )
         .set { ch_ivar_pangolin_multiqc }
@@ -523,15 +521,13 @@ workflow ILLUMINA {
         //
         ch_bcftools_pangolin_report
             .map { meta, report ->
-                def lineage      = WorkflowCommons.getFieldFromPangolinReport(report, 'lineage')
-                def scorpio_call = WorkflowCommons.getFieldFromPangolinReport(report, 'scorpio_call')
-                return [ "$meta.id\t$lineage\t$scorpio_call" ]
+                def fields = WorkflowCommons.getPangolinFieldMap(report, log)
+                return [sample:meta.id] << fields
             }
             .set { ch_bcftools_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_TSV_BCFTOOLS_PANGOLIN (
+        MULTIQC_CUSTOM_CSV_BCFTOOLS_PANGOLIN (
             ch_bcftools_pangolin_multiqc.collect(),
-            'Sample\tLineage\tScorpio call',
             'bcftools_pangolin_lineage'
         )
         .set { ch_bcftools_pangolin_multiqc }

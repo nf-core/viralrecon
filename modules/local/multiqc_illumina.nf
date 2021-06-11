@@ -73,6 +73,6 @@ process MULTIQC {
     fi
 
     ## Run MultiQC a second time
-    multiqc -f $options.args -e general_stats --ignore *pangolin_lineage_mqc.tsv $custom_config .
+    multiqc -f $options.args -e general_stats $custom_config .
     """
 }
