@@ -69,6 +69,12 @@ module_order:
       info: "This section of the report shows SnpEff results for variants called by iVar."
       path_filters:
         - "./variants_ivar/*.csv"
+  - quast:
+      name: "VARIANTS: QUAST (iVar)"
+      anchor: "quast_ivar"
+      info: "This section of the report shows QUAST results for consensus sequences generated from variants with iVar."
+      path_filters:
+        - "./variants_ivar/*.tsv"
   - bcftools:
       name: "VARIANTS: BCFTools (BCFTools)"
       anchor: "bcftools_bcftools"
@@ -81,6 +87,12 @@ module_order:
       info: "This section of the report shows SnpEff results for variants called by BCFTools."
       path_filters:
         - "./variants_bcftools/*.csv"
+  - quast:
+      name: "VARIANTS: QUAST (BCFTools)"
+      anchor: "quast_bcftools"
+      info: "This section of the report shows QUAST results for consensus sequence generated from BCFTools variants."
+      path_filters:
+        - "./variants_bcftools/*.tsv"
   - cutadapt:
       name: "ASSEMBLY: Cutadapt (primer trimming)"
       info: "This section of the report shows Cutadapt results for reads after primer sequence trimming."

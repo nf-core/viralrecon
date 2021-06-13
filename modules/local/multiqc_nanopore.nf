@@ -52,6 +52,9 @@ process MULTIQC {
     ## Parse YAML files dumped by MultiQC to obtain metrics
     multiqc_to_custom_csv.py --platform nanopore
 
+    ## Manually remove files that we don't want in the report
+    rm -rf quast
+
     ## Run MultiQC a second time
     multiqc -f $options.args -e general_stats $custom_config .
     """
