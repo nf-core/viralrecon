@@ -74,26 +74,24 @@ class WorkflowCommons {
     }
 
     //
-    // Function to get field entry from Pangolin output file
+    // Function to read in all fields into a Groovy Map from Pangolin output file
     //
     // See: https://stackoverflow.com/a/67766919
-    public static String getFieldFromPangolinReport(pangolin_report, col_name) {
-        def headers = []
-        def field   = ''
+    public static Map getPangolinFieldMap(pangolin_report, log) {
+        def headers   = []
+        def field_map = [:]
         pangolin_report.readLines().eachWithIndex { row, row_index ->
+            def vals = row.split(',')
             if (row_index == 0) {
-                headers = row.split(',')
+                headers = vals
             } else {
-                def col_map = [:]
-                def cells = row.split(',').eachWithIndex { cell, cell_index ->
-                    col_map[headers[cell_index]] = cell
-                }
-                if (col_map.containsKey(col_name)) {
-                    field = col_map[col_name]
+                def cells = headers.eachWithIndex { header, header_index ->
+                    def val = (header_index <= vals.size()-1) ? vals[header_index] : ''
+                    field_map[header] = val ?: 'NA'
                 }
             }
         }
-        return field
+        return field_map
     }
 
     //

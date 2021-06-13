@@ -24,6 +24,7 @@ process MULTIQC {
     path workflow_summary
     path fail_reads_summary
     path fail_mapping_summary
+    path 'amplicon_heatmap_mqc.tsv'
     path ('fastqc/*')
     path ('fastp/*')
     path ('kraken2/*')
@@ -63,6 +64,7 @@ process MULTIQC {
     ## Parse YAML files dumped by MultiQC to obtain metrics
     multiqc_to_custom_csv.py --platform illumina
 
+    ## Manually remove files that we don't want in the report
     if grep -q skip_assembly workflow_summary_mqc.yaml; then
         rm -f *assembly_metrics_mqc.csv
     fi
@@ -71,7 +73,10 @@ process MULTIQC {
         rm -f *variants_metrics_mqc.csv
     fi
 
+    rm -f variants_ivar/report.tsv
+    rm -f variants_bcftools/report.tsv
+
     ## Run MultiQC a second time
-    multiqc -f $options.args -e general_stats --ignore *pangolin_lineage_mqc.tsv $custom_config .
+    multiqc -f $options.args -e general_stats $custom_config .
     """
 }

@@ -34,6 +34,7 @@ workflow VARIANTS_IVAR {
     take:
     bam                 // channel: [ val(meta), [ bam ] ]
     fasta               // channel: /path/to/genome.fasta
+    sizes               // channel: /path/to/genome.sizes
     gff                 // channel: /path/to/genome.gff
     bed                 // channel: /path/to/primers.bed
     snpeff_db           // channel: /path/to/snpeff_db/
@@ -141,6 +142,7 @@ workflow VARIANTS_IVAR {
         ASCIIGENOME (
             ch_asciigenome,
             fasta,
+            sizes,
             gff,
             bed,
             params.asciigenome_window_size,

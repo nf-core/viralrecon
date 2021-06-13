@@ -10,6 +10,7 @@ include {
     GUNZIP as GUNZIP_FASTA
     GUNZIP as GUNZIP_GFF
     GUNZIP as GUNZIP_PRIMER_BED } from '../../modules/nf-core/software/gunzip/main' addParams( options: params.genome_options           )
+include { GET_CHROM_SIZES       } from '../../modules/local/get_chrom_sizes'        addParams( options: params.genome_options           )
 include { COLLAPSE_PRIMERS      } from '../../modules/local/collapse_primers'       addParams( options: params.collapse_primers_options )
 include { SNPEFF_BUILD          } from '../../modules/local/snpeff_build'           addParams( options: params.snpeff_build_options     )
 
@@ -39,6 +40,14 @@ workflow PREPARE_GENOME {
         }
     } else {
         ch_gff = dummy_file
+    }
+
+    //
+    // Create chromosome sizes file
+    //
+    ch_chrom_sizes = Channel.empty()
+    if (!params.skip_asciigenome) {
+        ch_chrom_sizes = GET_CHROM_SIZES ( ch_fasta ).sizes
     }
 
     //
@@ -75,6 +84,7 @@ workflow PREPARE_GENOME {
     emit:
     fasta                = ch_fasta                 // path: genome.fasta
     gff                  = ch_gff                   // path: genome.gff
+    chrom_sizes          = ch_chrom_sizes           // path: genome.sizes
     primer_bed           = ch_primer_bed            // path: primer.bed
     primer_collapsed_bed = ch_primer_collapsed_bed  // path: primer.collapsed.bed
     snpeff_db            = ch_snpeff_db             // path: snpeff_db

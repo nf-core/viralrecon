@@ -170,6 +170,11 @@ if (ncol(dat) == 6 && length(INPUT_FILES) > 1) {
     pdf(file=outfile, height=height, width=width)
     draw(heatmap, heatmap_legend_side="bottom")
     dev.off()
+
+    ## Write heatmap to file
+    mat <- mat[row_order(heatmap),]
+    outfile <- paste(OUTDIR,"all_samples.",OUTSUFFIX,".heatmap.tsv", sep='')
+    write.table(cbind(sample = rownames(mat), mat), file=outfile, row.names=FALSE, col.names=TRUE, sep="\t", quote=FALSE)
 }
 
 ################################################
