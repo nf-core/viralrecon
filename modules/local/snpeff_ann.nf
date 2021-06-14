@@ -18,8 +18,6 @@ process SNPEFF_ANN {
         container 'quay.io/biocontainers/snpeff:5.0--0'
     }
 
-    cache false
-
     input:
     tuple val(meta), path(vcf)
     path  db
