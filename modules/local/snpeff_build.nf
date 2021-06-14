@@ -28,8 +28,14 @@ process SNPEFF_BUILD {
     path '*.version.txt', emit: version
 
     script:
-    def software = getSoftwareName(task.process)
-    def basename = fasta.baseName
+    def software  = getSoftwareName(task.process)
+    def basename  = fasta.baseName
+    def avail_mem = 4
+    if (!task.memory) {
+        log.info '[snpEff] Available memory not known - defaulting to 4GB. Specify process memory requirements to change this.'
+    } else {
+        avail_mem = task.memory.giga
+    }
     """
     mkdir -p snpeff_db/genomes/
     cd snpeff_db/genomes/
@@ -43,7 +49,14 @@ process SNPEFF_BUILD {
     cd ../../
     echo "${basename}.genome : ${basename}" > snpeff.config
 
-    snpEff build -config snpeff.config -dataDir ./snpeff_db -gff3 -v ${basename}
+    snpEff \\
+        -Xmx${avail_mem}g \\
+        build \\
+        -config snpeff.config \\
+        -dataDir ./snpeff_db \\
+        -gff3 \\
+        -v \\
+        ${basename}
 
     echo \$(snpEff -version 2>&1) | sed 's/^.*SnpEff //; s/ .*\$//' > ${software}.version.txt
     """

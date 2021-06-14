@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [[#196](https://github.com/nf-core/viralrecon/issues/196)] - Add mosdepth heatmap to MultiQC report
 * [[#198](https://github.com/nf-core/viralrecon/issues/198)] - ASCIIGenome failing during analysis
 * [[#201](https://github.com/nf-core/viralrecon/issues/201)] - Conditional include are not expected to work
+* [[#204](https://github.com/nf-core/viralrecon/issues/204)] - Memory errors for SNP_EFF step
 
 ### Parameters
 
