@@ -72,10 +72,10 @@ include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' 
 include { MULTIQC               } from '../modules/local/multiqc_illumina'      addParams( options: multiqc_options                   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME      } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON    } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_FAIL_READS        } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_TSV_FAIL_MAPPED       } from '../modules/local/multiqc_custom_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_CSV_FROM_MAP as MULTIQC_CUSTOM_CSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_csv_from_map' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_CSV_FROM_MAP as MULTIQC_CUSTOM_CSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_csv_from_map' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_FAIL_READS     } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_FAIL_MAPPED    } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_CSV_FROM_MAP as MULTIQC_CUSTOM_CSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_csv_from_map'    addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_CSV_FROM_MAP as MULTIQC_CUSTOM_CSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_csv_from_map'    addParams( options: [publish_files: false] )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
