@@ -38,6 +38,8 @@ process MULTIQC {
     path ('variants_ivar/*')
     path ('variants_ivar/*')
     path ('variants_ivar/*')
+    path ('variants_ivar/*')
+    path ('variants_bcftools/*')
     path ('variants_bcftools/*')
     path ('variants_bcftools/*')
     path ('variants_bcftools/*')
@@ -77,6 +79,6 @@ process MULTIQC {
     rm -f variants_bcftools/report.tsv
 
     ## Run MultiQC a second time
-    multiqc -f $options.args -e general_stats $custom_config .
+    multiqc -f $options.args -e general_stats --ignore *nextclade_clade_mqc.tsv $custom_config .
     """
 }

@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [[2.1](https://github.com/nf-core/rnaseq/releases/tag/2.1)] - 2021-06-14
+## [[2.1](https://github.com/nf-core/rnaseq/releases/tag/2.1)] - 2021-06-15
 
 ### Enhancements & fixes
 
@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added docs about overwriting default container definitions to use latest versions e.g. Pangolin
 * Dashes and spaces in sample names will be converted to underscores to avoid issues when creating the summary metrics
 * [[#196](https://github.com/nf-core/viralrecon/issues/196)] - Add mosdepth heatmap to MultiQC report
+* [[#197](https://github.com/nf-core/viralrecon/issues/197)] - Output a .tsv comprising the Nextclade and Pangolin results for all samples processed
 * [[#198](https://github.com/nf-core/viralrecon/issues/198)] - ASCIIGenome failing during analysis
 * [[#201](https://github.com/nf-core/viralrecon/issues/201)] - Conditional include are not expected to work
 * [[#204](https://github.com/nf-core/viralrecon/issues/204)] - Memory errors for SNP_EFF step
