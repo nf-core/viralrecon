@@ -35,6 +35,7 @@ process MULTIQC {
     path ('quast/*')
     path ('snpeff/*')
     path pangolin_lineage
+    path nextclade_clade
 
     output:
     path "*multiqc_report.html", emit: report
@@ -56,6 +57,6 @@ process MULTIQC {
     rm -rf quast
 
     ## Run MultiQC a second time
-    multiqc -f $options.args -e general_stats $custom_config .
+    multiqc -f $options.args -e general_stats --ignore *nextclade_clade_mqc.tsv $custom_config .
     """
 }

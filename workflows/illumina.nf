@@ -470,7 +470,7 @@ workflow ILLUMINA {
         //
         ch_ivar_pangolin_report
             .map { meta, report ->
-                def fields = WorkflowCommons.getPangolinFieldMap(report, log)
+                def fields = WorkflowCommons.getPangolinFieldMap(report)
                 return [sample:meta.id] << fields
             }
             .set { ch_ivar_pangolin_multiqc }
@@ -521,7 +521,7 @@ workflow ILLUMINA {
         //
         ch_bcftools_pangolin_report
             .map { meta, report ->
-                def fields = WorkflowCommons.getPangolinFieldMap(report, log)
+                def fields = WorkflowCommons.getPangolinFieldMap(report)
                 return [sample:meta.id] << fields
             }
             .set { ch_bcftools_pangolin_multiqc }

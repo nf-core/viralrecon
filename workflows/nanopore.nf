@@ -60,6 +60,7 @@ include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME  } from '../m
 include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
 include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
 include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_NEXTCLADE            } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME     } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
 
@@ -370,7 +371,7 @@ workflow NANOPORE {
             .out
             .report
             .map { meta, report ->
-                def fields = WorkflowCommons.getPangolinFieldMap(report, log)
+                def fields = WorkflowCommons.getPangolinFieldMap(report)
                 return [sample:meta.id] << fields
             }
             .set { ch_pangolin_multiqc }
@@ -385,12 +386,32 @@ workflow NANOPORE {
     //
     // MODULE: Clade assignment, mutation calling, and sequence quality checks with Nextclade
     //
+    ch_nextclade_multiqc = Channel.empty()
     if (!params.skip_nextclade) {
         NEXTCLADE (
             ARTIC_MINION.out.fasta,
             'csv'
         )
         ch_software_versions = ch_software_versions.mix(NEXTCLADE.out.version.ifEmpty(null))
+
+        //
+        // MODULE: Get Nextclade clade information for MultiQC report
+        //
+        NEXTCLADE
+            .out
+            .csv
+            .map { meta, csv ->
+                def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
+                return [ "$meta.id\t$clade" ]
+            }
+            .set { ch_nextclade_multiqc }
+
+        MULTIQC_CUSTOM_NEXTCLADE (
+            ch_nextclade_multiqc.collect(),
+            'Sample\tclade',
+            'nextclade_clade'
+        )
+        .set { ch_nextclade_multiqc }
     }
 
     //
@@ -492,7 +513,8 @@ workflow NANOPORE {
             ch_mosdepth_multiqc.collect{it[1]}.ifEmpty([]),
             ch_quast_multiqc.collect().ifEmpty([]),
             ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_pangolin_multiqc.collect().ifEmpty([])
+            ch_pangolin_multiqc.collect().ifEmpty([]),
+            ch_nextclade_multiqc.collect().ifEmpty([])
         )
         multiqc_report = MULTIQC.out.report.toList()
     }
