@@ -60,6 +60,7 @@ include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_NO_SAMPLE_NAME  }
 include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_NO_BARCODES     } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
 include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_BARCODE_COUNT   } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
 include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_NEXTCLADE       } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME     } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
 
@@ -405,7 +406,7 @@ workflow NANOPORE {
             }
             .set { ch_nextclade_multiqc }
 
-        MULTIQC_CUSTOM_NEXTCLADE (
+        MULTIQC_CUSTOM_TSV_NEXTCLADE (
             ch_nextclade_multiqc.collect(),
             'Sample\tclade',
             'nextclade_clade'
