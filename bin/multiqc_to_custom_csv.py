@@ -139,11 +139,13 @@ def main(args=None):
         ('multiqc_snpeff_snpeff_ivar.yaml',                        [('# Missense variants (iVar)', ['MISSENSE'])]),
         ('multiqc_quast_quast_ivar.yaml',                          [('# Ns per 100kb consensus (iVar)', ["# N's per 100 kbp"])]),
         ('multiqc_variants:_pangolin_(ivar).yaml',                 [('Pangolin lineage (iVar)', ["lineage"])]),
+        ('multiqc_ivar_nextclade_clade.yaml',                      [('Nextclade clade (iVar)', ["clade"])]),
         ('multiqc_bcftools_stats_bcftools_bcftools.yaml',          [('# SNPs (BCFTools)', ['number_of_SNPs']),
                                                                     ('# INDELs (BCFTools)', ['number_of_indels'])]),
         ('multiqc_snpeff_snpeff_bcftools.yaml',                    [('# Missense variants (BCFTools)', ['MISSENSE'])]),
         ('multiqc_quast_quast_bcftools.yaml',                      [('# Ns per 100kb consensus (BCFTools)', ["# N's per 100 kbp"])]),
-        ('multiqc_variants:_pangolin_(bcftools).yaml',             [('Pangolin lineage (BCFTools)', ["lineage"])])
+        ('multiqc_variants:_pangolin_(bcftools).yaml',             [('Pangolin lineage (BCFTools)', ["lineage"])]),
+        ('multiqc_bcftools_nextclade_clade.yaml',                  [('Nextclade clade (BCFTools)', ["clade"])])
     ]
 
     illumina_assembly_files = [
