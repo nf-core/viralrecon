@@ -56,10 +56,10 @@ include { GET_SOFTWARE_VERSIONS       } from '../modules/local/get_software_vers
 include { MULTIQC                     } from '../modules/local/multiqc_nanopore'            addParams( options: multiqc_options                 )
 include { MULTIQC_CUSTOM_CSV_FROM_MAP } from '../modules/local/multiqc_custom_csv_from_map' addParams( options: [publish_files: false]          )
 
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME  } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TSV as MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_tsv'    addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME  } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME     } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
 

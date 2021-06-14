@@ -3,7 +3,7 @@ include { saveFiles; getSoftwareName } from './functions'
 
 params.options = [:]
 
-process MULTIQC_CUSTOM_TSV {
+process MULTIQC_CUSTOM_TSV_FROM_STRING {
     publishDir "${params.outdir}",
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:[:], publish_by_meta:[]) }
