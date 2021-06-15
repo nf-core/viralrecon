@@ -3,13 +3,19 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unpublished Version / DEV]
+
+### Enhancements & fixes
+
+### Parameters
+
 ## [[2.1](https://github.com/nf-core/rnaseq/releases/tag/2.1)] - 2021-06-15
 
 ### Enhancements & fixes
 
 * Removed workflow to download data from public databases in favour of using [nf-core/fetchngs](https://nf-co.re/fetchngs)
 * Added Pangolin results to MultiQC report
-* Add warning to MultiQC report for samples that have no reads after adapter trimming
+* Added warning to MultiQC report for samples that have no reads after adapter trimming
 * Added docs about structure of data required for running Nanopore data
 * Added docs about using other primer sets for Illumina data
 * Added docs about overwriting default container definitions to use latest versions e.g. Pangolin
