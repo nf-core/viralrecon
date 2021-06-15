@@ -11,16 +11,17 @@ process ASCIIGENOME {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
-    conda (params.enable_conda ? "bioconda::asciigenome=1.16.0" : null)
+    conda (params.enable_conda ? "bioconda::asciigenome=1.16.0 bioconda::bedtools=2.30.0" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/asciigenome:1.16.0--0"
+        container "https://depot.galaxyproject.org/singularity/mulled-v2-093691b47d719890dc19ac0c13c4528e9776897f:27211b8c38006480d69eb1be3ef09a7bf0a49d76-0"
     } else {
-        container "quay.io/biocontainers/asciigenome:1.16.0--0"
+        container "quay.io/biocontainers/mulled-v2-093691b47d719890dc19ac0c13c4528e9776897f:27211b8c38006480d69eb1be3ef09a7bf0a49d76-0"
     }
 
     input:
     tuple val(meta), path(bam), path(vcf)
     path  fasta
+    path  sizes
     path  gff
     path  bed
     val   window
@@ -39,13 +40,20 @@ process ASCIIGENOME {
     """
     zcat $vcf \\
         | grep -v '#' \\
-        | awk -v FS='\t' -v OFS='\t' '{print \$1, (\$2-$window-1), (\$2+$window)}' \\
+        | awk -v FS='\t' -v OFS='\t' '{print \$1, (\$2-1), (\$2)}' \\
         > variants.bed
+
+    bedtools \\
+        slop \\
+        -i variants.bed \\
+        -g $sizes \\
+        -b $window \\
+        > variants.slop.bed
 
     ASCIIGenome \\
         -ni \\
         -x "trackHeight 0 bam#1 && trackHeight $track_height bam@2 $paired_end && filterVariantReads && save ${prefix}.%r.pdf" \\
-        --batchFile variants.bed \\
+        --batchFile variants.slop.bed \\
         --fasta $fasta \\
         $bam \\
         $vcf \\

@@ -23,6 +23,10 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 // Stage dummy file to be used as an optional input where required
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
+// MultiQC config files
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
+
 if (params.input)              { ch_input              = file(params.input)              }
 if (params.fast5_dir)          { ch_fast5_dir          = file(params.fast5_dir)          } else { ch_fast5_dir          = ch_dummy_file     }
 if (params.sequencing_summary) { ch_sequencing_summary = file(params.sequencing_summary) } else { ch_sequencing_summary = ch_multiqc_config }
@@ -37,15 +41,6 @@ if (params.artic_minion_caller == 'medaka') {
 
 /*
 ========================================================================================
-    CONFIG FILES
-========================================================================================
-*/
-
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
-ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
-
-/*
-========================================================================================
     IMPORT LOCAL MODULES/SUBWORKFLOWS
 ========================================================================================
 */
@@ -56,17 +51,18 @@ def modules = params.modules.clone()
 def multiqc_options   = modules['nanopore_multiqc']
 multiqc_options.args += params.multiqc_title ? Utils.joinModuleArgs(["--title \"$params.multiqc_title\""]) : ''
 
-include { ASCIIGENOME           } from '../modules/local/asciigenome'           addParams( options: modules['nanopore_asciigenome'] )
-include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files: ['csv':'']]     )
-include { MULTIQC               } from '../modules/local/multiqc_nanopore'      addParams( options: multiqc_options                 )
+include { ASCIIGENOME                 } from '../modules/local/asciigenome'                 addParams( options: modules['nanopore_asciigenome'] )
+include { GET_SOFTWARE_VERSIONS       } from '../modules/local/get_software_versions'       addParams( options: [publish_files: ['tsv':'']]     )
+include { MULTIQC                     } from '../modules/local/multiqc_nanopore'            addParams( options: multiqc_options                 )
+include { MULTIQC_CUSTOM_CSV_FROM_MAP } from '../modules/local/multiqc_custom_csv_from_map' addParams( options: [publish_files: false]          )
 
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME  } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_NO_BARCODES     } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_BARCODE_COUNT   } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_PANGOLIN             } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false] )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME            } from '../modules/local/plot_mosdepth_regions'     addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON          } from '../modules/local/plot_mosdepth_regions'     addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_NO_SAMPLE_NAME  } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_NO_BARCODES     } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_BARCODE_COUNT   } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_GUPPYPLEX_COUNT } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_NEXTCLADE       } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME     } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_genome']   )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['nanopore_plot_mosdepth_regions_amplicon'] )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -190,13 +186,12 @@ workflow NANOPORE {
                 .map { it -> [ "${it[0]}\t${it[-1]}" ] }
                 .set { ch_barcodes_no_sample }
 
-            MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME (
+            MULTIQC_CUSTOM_TSV_NO_SAMPLE_NAME (
                 ch_barcodes_no_sample.collect(),
-                'Barcode',
-                'Read count',
+                'Barcode\tRead count',
                 'fail_barcodes_no_sample'
             )
-            ch_custom_no_sample_name_multiqc = MULTIQC_CUSTOM_FAIL_NO_SAMPLE_NAME.out
+            ch_custom_no_sample_name_multiqc = MULTIQC_CUSTOM_TSV_NO_SAMPLE_NAME.out
 
             //
             // MODULE: Create custom content file for MultiQC to report samples that were in samplesheet but have no barcodes
@@ -206,13 +201,12 @@ workflow NANOPORE {
                 .map { it -> [ "${it[1]}\t${it[0]}" ] }
                 .set { ch_samples_no_barcode }
 
-            MULTIQC_CUSTOM_FAIL_NO_BARCODES (
+            MULTIQC_CUSTOM_TSV_NO_BARCODES (
                 ch_samples_no_barcode.collect(),
-                'Sample',
-                'Missing barcode',
+                'Sample\tMissing barcode',
                 'fail_no_barcode_samples'
             )
-            ch_custom_no_barcodes_multiqc = MULTIQC_CUSTOM_FAIL_NO_BARCODES.out
+            ch_custom_no_barcodes_multiqc = MULTIQC_CUSTOM_TSV_NO_BARCODES.out
 
             ch_fastq_dirs
                 .filter { (it[1] != null)  }
@@ -248,10 +242,9 @@ workflow NANOPORE {
         }
         .set { ch_pass_fail_barcode_count }
 
-    MULTIQC_CUSTOM_FAIL_BARCODE_COUNT (
+    MULTIQC_CUSTOM_TSV_BARCODE_COUNT (
         ch_pass_fail_barcode_count.fail.collect(),
-        'Sample',
-        'Barcode count',
+        'Sample\tBarcode count',
         'fail_barcode_count_samples'
     )
 
@@ -284,10 +277,9 @@ workflow NANOPORE {
         }
         .set { ch_pass_fail_guppyplex_count }
 
-    MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT (
+    MULTIQC_CUSTOM_TSV_GUPPYPLEX_COUNT (
         ch_pass_fail_guppyplex_count.fail.collect(),
-        'Sample',
-        'Read count',
+        'Sample\tRead count',
         'fail_guppyplex_count_samples'
     )
 
@@ -334,7 +326,8 @@ workflow NANOPORE {
     //
     // MODULE: Genome-wide and amplicon-specific coverage QC plots
     //
-    ch_mosdepth_multiqc = Channel.empty()
+    ch_mosdepth_multiqc         = Channel.empty()
+    ch_amplicon_heatmap_multiqc = Channel.empty()
     if (!params.skip_mosdepth) {
 
         MOSDEPTH_GENOME (
@@ -358,6 +351,7 @@ workflow NANOPORE {
         PLOT_MOSDEPTH_REGIONS_AMPLICON (
             MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
         )
+        ch_amplicon_heatmap_multiqc = PLOT_MOSDEPTH_REGIONS_AMPLICON.out.heatmap_tsv
     }
 
     //
@@ -377,15 +371,13 @@ workflow NANOPORE {
             .out
             .report
             .map { meta, report ->
-                def lineage = WorkflowCommons.getPangolinLineage(report)
-                return [ "$meta.id\t$lineage" ]
+                def fields = WorkflowCommons.getPangolinFieldMap(report)
+                return [sample:meta.id] << fields
             }
             .set { ch_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_PANGOLIN (
+        MULTIQC_CUSTOM_CSV_FROM_MAP (
             ch_pangolin_multiqc.collect(),
-            'Sample',
-            'Lineage',
             'pangolin_lineage'
         )
         .set { ch_pangolin_multiqc }
@@ -394,12 +386,32 @@ workflow NANOPORE {
     //
     // MODULE: Clade assignment, mutation calling, and sequence quality checks with Nextclade
     //
+    ch_nextclade_multiqc = Channel.empty()
     if (!params.skip_nextclade) {
         NEXTCLADE (
             ARTIC_MINION.out.fasta,
             'csv'
         )
         ch_software_versions = ch_software_versions.mix(NEXTCLADE.out.version.ifEmpty(null))
+
+        //
+        // MODULE: Get Nextclade clade information for MultiQC report
+        //
+        NEXTCLADE
+            .out
+            .csv
+            .map { meta, csv ->
+                def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
+                return [ "$meta.id\t$clade" ]
+            }
+            .set { ch_nextclade_multiqc }
+
+        MULTIQC_CUSTOM_TSV_NEXTCLADE (
+            ch_nextclade_multiqc.collect(),
+            'Sample\tclade',
+            'nextclade_clade'
+        )
+        .set { ch_nextclade_multiqc }
     }
 
     //
@@ -453,6 +465,7 @@ workflow NANOPORE {
         ASCIIGENOME (
             ch_asciigenome,
             PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.chrom_sizes,
             params.gff ? PREPARE_GENOME.out.gff : [],
             PREPARE_GENOME.out.primer_bed,
             params.asciigenome_window_size,
@@ -490,8 +503,9 @@ workflow NANOPORE {
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
             ch_custom_no_sample_name_multiqc.ifEmpty([]),
             ch_custom_no_barcodes_multiqc.ifEmpty([]),
-            MULTIQC_CUSTOM_FAIL_BARCODE_COUNT.out.ifEmpty([]),
-            MULTIQC_CUSTOM_FAIL_GUPPYPLEX_COUNT.out.ifEmpty([]),
+            MULTIQC_CUSTOM_TSV_BARCODE_COUNT.out.ifEmpty([]),
+            MULTIQC_CUSTOM_TSV_GUPPYPLEX_COUNT.out.ifEmpty([]),
+            ch_amplicon_heatmap_multiqc.ifEmpty([]),
             PYCOQC.out.json.collect().ifEmpty([]),
             ARTIC_MINION.out.json.collect{it[1]}.ifEmpty([]),
             FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]),
@@ -499,7 +513,8 @@ workflow NANOPORE {
             ch_mosdepth_multiqc.collect{it[1]}.ifEmpty([]),
             ch_quast_multiqc.collect().ifEmpty([]),
             ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_pangolin_multiqc.collect().ifEmpty([])
+            ch_pangolin_multiqc.collect().ifEmpty([]),
+            ch_nextclade_multiqc.collect().ifEmpty([])
         )
         multiqc_report = MULTIQC.out.report.toList()
     }

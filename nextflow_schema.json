@@ -47,29 +47,6 @@
                 }
             }
         },
-        "sra_download_options": {
-            "title": "SRA download options",
-            "type": "object",
-            "description": "Options for downloading publicy available data from the SRA.",
-            "default": "",
-            "fa_icon": "fas fa-cloud-download-alt",
-            "properties": {
-                "public_data_ids": {
-                    "type": "string",
-                    "format": "file-path",
-                    "mimetype": "text/plain",
-                    "pattern": "\\.txt$",
-                    "schema": "assets/schema_public_data_ids.json",
-                    "description": "File containing SRA/ENA/GEO identifiers one per line in order to download their associated FastQ files.",
-                    "fa_icon": "fas fa-database"
-                },
-                "skip_sra_fastq_download": {
-                    "type": "boolean",
-                    "description": "Only download metadata for public data database ids and don't download the FastQ files.",
-                    "fa_icon": "fas fa-fast-forward"
-                }
-            }
-        },
         "reference_genome_options": {
             "title": "Reference genome options",
             "type": "object",
@@ -687,9 +664,6 @@
     "allOf": [
         {
             "$ref": "#/definitions/input_output_options"
-        },
-        {
-            "$ref": "#/definitions/sra_download_options"
         },
         {
             "$ref": "#/definitions/reference_genome_options"

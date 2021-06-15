@@ -74,14 +74,45 @@ class WorkflowCommons {
     }
 
     //
-    // Function to get lineage from Pangolin output file
+    // Function to read in all fields into a Groovy Map from Pangolin output file
     //
-    public static String getPangolinLineage(pangolin_report) {
-        def lineage = ''
-        pangolin_report.eachLine { line ->
-            lineage = line.split(',')[1]
+    // See: https://stackoverflow.com/a/67766919
+    public static Map getPangolinFieldMap(pangolin_report) {
+        def headers   = []
+        def field_map = [:]
+        pangolin_report.readLines().eachWithIndex { row, row_index ->
+            def vals = row.split(',')
+            if (row_index == 0) {
+                headers = vals
+            } else {
+                def cells = headers.eachWithIndex { header, header_index ->
+                    def val = (header_index <= vals.size()-1) ? vals[header_index] : ''
+                    field_map[header] = val ?: 'NA'
+                }
+            }
         }
-        return lineage
+        return field_map
+    }
+
+    //
+    // Function to read in all fields into a Groovy Map from Nextclade CSV output file
+    //
+    // See: https://stackoverflow.com/a/67766919
+    public static Map getNextcladeFieldMapFromCsv(nextclade_report) {
+        def headers   = []
+        def field_map = [:]
+        nextclade_report.readLines().eachWithIndex { row, row_index ->
+            def vals = row.split(';')
+            if (row_index == 0) {
+                headers = vals
+            } else {
+                def cells = headers.eachWithIndex { header, header_index ->
+                    def val = (header_index <= vals.size()-1) ? vals[header_index] : ''
+                    field_map[header] = val ?: 'NA'
+                }
+            }
+        }
+        return field_map
     }
 
     //

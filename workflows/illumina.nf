@@ -66,15 +66,18 @@ if (!params.skip_variants) {
     multiqc_options.publish_files.put('variants_metrics_mqc.csv','')
 }
 
-include { BCFTOOLS_ISEC              } from '../modules/local/bcftools_isec'             addParams( options: modules['illumina_bcftools_isec'] )
-include { CUTADAPT                   } from '../modules/local/cutadapt'                  addParams( options: modules['illumina_cutadapt']      )
-include { GET_SOFTWARE_VERSIONS      } from '../modules/local/get_software_versions'     addParams( options: [publish_files: ['csv':'']]       )
-include { MULTIQC                    } from '../modules/local/multiqc_illumina'          addParams( options: multiqc_options                   )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED       } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
-include { MULTIQC_CUSTOM_TWOCOL_TSV as MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_twocol_tsv' addParams( options: [publish_files: false]        )
+include { BCFTOOLS_ISEC         } from '../modules/local/bcftools_isec'         addParams( options: modules['illumina_bcftools_isec'] )
+include { CUTADAPT              } from '../modules/local/cutadapt'              addParams( options: modules['illumina_cutadapt']      )
+include { GET_SOFTWARE_VERSIONS } from '../modules/local/get_software_versions' addParams( options: [publish_files: ['tsv':'']]       )
+include { MULTIQC               } from '../modules/local/multiqc_illumina'      addParams( options: multiqc_options                   )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME      } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_genome']   )
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON    } from '../modules/local/plot_mosdepth_regions' addParams( options: modules['illumina_plot_mosdepth_regions_amplicon'] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_FAIL_READS         } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_FAIL_MAPPED        } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_IVAR_NEXTCLADE     } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_BCFTOOLS_NEXTCLADE } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_CSV_FROM_MAP as MULTIQC_CUSTOM_CSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_csv_from_map'    addParams( options: [publish_files: false] )
+include { MULTIQC_CUSTOM_CSV_FROM_MAP as MULTIQC_CUSTOM_CSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_csv_from_map'    addParams( options: [publish_files: false] )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -239,14 +242,38 @@ workflow ILLUMINA {
     //
     // Filter empty FastQ files after adapter trimming
     //
+    ch_fail_reads_multiqc = Channel.empty()
     if (!params.skip_fastp) {
         ch_variants_fastq
             .join(FASTQC_FASTP.out.trim_json)
             .map {
                 meta, reads, json ->
-                    if (WorkflowIllumina.getFastpReadsAfterFiltering(json) > 0) [ meta, reads ]
+                    pass = WorkflowIllumina.getFastpReadsAfterFiltering(json) > 0
+                    [ meta, reads, json, pass ]
             }
+            .set { ch_pass_fail_reads }
+
+        ch_pass_fail_reads
+            .map { meta, reads, json, pass -> if (pass) [ meta, reads ] }
             .set { ch_variants_fastq }
+
+        ch_pass_fail_reads
+            .map {
+                meta, reads, json, pass ->
+                if (!pass) {
+                    fail_mapped_reads[meta.id] = 0
+                    num_reads = WorkflowIllumina.getFastpReadsBeforeFiltering(json)
+                    return [ "$meta.id\t$num_reads" ]
+                }
+            }
+            .set { ch_pass_fail_reads }
+
+        MULTIQC_CUSTOM_TSV_FAIL_READS (
+            ch_pass_fail_reads.collect(),
+            'Sample\tReads before trimming',
+            'fail_mapped_reads'
+        )
+        .set { ch_fail_reads_multiqc }
     }
 
     //
@@ -321,10 +348,9 @@ workflow ILLUMINA {
             }
             .set { ch_pass_fail_mapped }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_FAIL_MAPPED (
+        MULTIQC_CUSTOM_TSV_FAIL_MAPPED (
             ch_pass_fail_mapped.fail.collect(),
-            'Sample',
-            'Mapped reads',
+            'Sample\tMapped reads',
             'fail_mapped_samples'
         )
         .set { ch_fail_mapping_multiqc }
@@ -373,7 +399,8 @@ workflow ILLUMINA {
     //
     // MODULE: Genome-wide and amplicon-specific coverage QC plots
     //
-    ch_mosdepth_multiqc = Channel.empty()
+    ch_mosdepth_multiqc         = Channel.empty()
+    ch_amplicon_heatmap_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_mosdepth) {
 
         MOSDEPTH_GENOME (
@@ -398,36 +425,40 @@ workflow ILLUMINA {
             PLOT_MOSDEPTH_REGIONS_AMPLICON (
                 MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
             )
+            ch_amplicon_heatmap_multiqc = PLOT_MOSDEPTH_REGIONS_AMPLICON.out.heatmap_tsv
         }
     }
 
     //
     // SUBWORKFLOW: Call variants with IVar
     //
-    ch_ivar_vcf              = Channel.empty()
-    ch_ivar_tbi              = Channel.empty()
-    ch_ivar_counts_multiqc   = Channel.empty()
-    ch_ivar_stats_multiqc    = Channel.empty()
-    ch_ivar_snpeff_multiqc   = Channel.empty()
-    ch_ivar_quast_multiqc    = Channel.empty()
-    ch_ivar_pangolin_multiqc = Channel.empty()
+    ch_ivar_vcf               = Channel.empty()
+    ch_ivar_tbi               = Channel.empty()
+    ch_ivar_counts_multiqc    = Channel.empty()
+    ch_ivar_stats_multiqc     = Channel.empty()
+    ch_ivar_snpeff_multiqc    = Channel.empty()
+    ch_ivar_quast_multiqc     = Channel.empty()
+    ch_ivar_pangolin_multiqc  = Channel.empty()
+    ch_ivar_nextclade_multiqc = Channel.empty()
     if (!params.skip_variants && 'ivar' in callers) {
         VARIANTS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.chrom_sizes,
             params.gff ? PREPARE_GENOME.out.gff : [],
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config,
             ch_ivar_variants_header_mqc
         )
-        ch_ivar_vcf             = VARIANTS_IVAR.out.vcf
-        ch_ivar_tbi             = VARIANTS_IVAR.out.tbi
-        ch_ivar_counts_multiqc  = VARIANTS_IVAR.out.multiqc_tsv
-        ch_ivar_stats_multiqc   = VARIANTS_IVAR.out.stats
-        ch_ivar_snpeff_multiqc  = VARIANTS_IVAR.out.snpeff_csv
-        ch_ivar_quast_multiqc   = VARIANTS_IVAR.out.quast_tsv
-        ch_ivar_pangolin_report = VARIANTS_IVAR.out.pangolin_report
+        ch_ivar_vcf              = VARIANTS_IVAR.out.vcf
+        ch_ivar_tbi              = VARIANTS_IVAR.out.tbi
+        ch_ivar_counts_multiqc   = VARIANTS_IVAR.out.multiqc_tsv
+        ch_ivar_stats_multiqc    = VARIANTS_IVAR.out.stats
+        ch_ivar_snpeff_multiqc   = VARIANTS_IVAR.out.snpeff_csv
+        ch_ivar_quast_multiqc    = VARIANTS_IVAR.out.quast_tsv
+        ch_ivar_pangolin_report  = VARIANTS_IVAR.out.pangolin_report
+        ch_ivar_nextclade_report = VARIANTS_IVAR.out.nextclade_report
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.ivar_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.tabix_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.bcftools_version.first().ifEmpty(null))
@@ -443,33 +474,50 @@ workflow ILLUMINA {
         //
         ch_ivar_pangolin_report
             .map { meta, report ->
-                def lineage = WorkflowCommons.getPangolinLineage(report)
-                return [ "$meta.id\t$lineage" ]
+                def fields = WorkflowCommons.getPangolinFieldMap(report)
+                return [sample:meta.id] << fields
             }
             .set { ch_ivar_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_IVAR_PANGOLIN (
+        MULTIQC_CUSTOM_CSV_IVAR_PANGOLIN (
             ch_ivar_pangolin_multiqc.collect(),
-            'Sample',
-            'Lineage',
             'ivar_pangolin_lineage'
         )
         .set { ch_ivar_pangolin_multiqc }
+
+        //
+        // MODULE: Get Nextclade clade information for MultiQC report
+        //
+        ch_ivar_nextclade_report
+            .map { meta, csv ->
+                def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
+                return [ "$meta.id\t$clade" ]
+            }
+            .set { ch_ivar_nextclade_multiqc }
+
+        MULTIQC_CUSTOM_TSV_IVAR_NEXTCLADE (
+            ch_ivar_nextclade_multiqc.collect(),
+            'Sample\tclade',
+            'ivar_nextclade_clade'
+        )
+        .set { ch_ivar_nextclade_multiqc }
     }
 
     //
     // SUBWORKFLOW: Call variants with BCFTools
     //
-    ch_bcftools_vcf              = Channel.empty()
-    ch_bcftools_tbi              = Channel.empty()
-    ch_bcftools_stats_multiqc    = Channel.empty()
-    ch_bcftools_snpeff_multiqc   = Channel.empty()
-    ch_bcftools_quast_multiqc    = Channel.empty()
-    ch_bcftools_pangolin_multiqc = Channel.empty()
+    ch_bcftools_vcf               = Channel.empty()
+    ch_bcftools_tbi               = Channel.empty()
+    ch_bcftools_stats_multiqc     = Channel.empty()
+    ch_bcftools_snpeff_multiqc    = Channel.empty()
+    ch_bcftools_quast_multiqc     = Channel.empty()
+    ch_bcftools_pangolin_multiqc  = Channel.empty()
+    ch_bcftools_nextclade_multiqc = Channel.empty()
     if (!params.skip_variants && 'bcftools' in callers) {
         VARIANTS_BCFTOOLS (
             ch_bam,
             PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.chrom_sizes,
             params.gff ? PREPARE_GENOME.out.gff : [],
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
@@ -481,6 +529,7 @@ workflow ILLUMINA {
         ch_bcftools_snpeff_multiqc   = VARIANTS_BCFTOOLS.out.snpeff_csv
         ch_bcftools_quast_multiqc    = VARIANTS_BCFTOOLS.out.quast_tsv
         ch_bcftools_pangolin_report  = VARIANTS_BCFTOOLS.out.pangolin_report
+        ch_bcftools_nextclade_report = VARIANTS_BCFTOOLS.out.nextclade_report
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.bedtools_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.quast_version.ifEmpty(null))
@@ -495,18 +544,33 @@ workflow ILLUMINA {
         //
         ch_bcftools_pangolin_report
             .map { meta, report ->
-                def lineage = WorkflowCommons.getPangolinLineage(report)
-                return [ "$meta.id\t$lineage" ]
+                def fields = WorkflowCommons.getPangolinFieldMap(report)
+                return [sample:meta.id] << fields
             }
             .set { ch_bcftools_pangolin_multiqc }
 
-        MULTIQC_CUSTOM_TWOCOL_TSV_BCFTOOLS_PANGOLIN (
+        MULTIQC_CUSTOM_CSV_BCFTOOLS_PANGOLIN (
             ch_bcftools_pangolin_multiqc.collect(),
-            'Sample',
-            'Lineage',
             'bcftools_pangolin_lineage'
         )
         .set { ch_bcftools_pangolin_multiqc }
+
+        //
+        // MODULE: Get Nextclade clade information for MultiQC report
+        //
+        ch_bcftools_nextclade_report
+            .map { meta, csv ->
+                def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
+                return [ "$meta.id\t$clade" ]
+            }
+            .set { ch_bcftools_nextclade_multiqc }
+
+        MULTIQC_CUSTOM_TSV_BCFTOOLS_NEXTCLADE (
+            ch_bcftools_nextclade_multiqc.collect(),
+            'Sample\tclade',
+            'bcftools_nextclade_clade'
+        )
+        .set { ch_bcftools_nextclade_multiqc }
     }
 
     //
@@ -631,7 +695,9 @@ workflow ILLUMINA {
             ch_multiqc_custom_config.collect().ifEmpty([]),
             GET_SOFTWARE_VERSIONS.out.yaml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
+            ch_fail_reads_multiqc.ifEmpty([]),
             ch_fail_mapping_multiqc.ifEmpty([]),
+            ch_amplicon_heatmap_multiqc.ifEmpty([]),
             FASTQC_FASTP.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
             FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
             ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
@@ -645,10 +711,12 @@ workflow ILLUMINA {
             ch_ivar_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_quast_multiqc.collect().ifEmpty([]),
             ch_ivar_pangolin_multiqc.collect().ifEmpty([]),
+            ch_ivar_nextclade_multiqc.collect().ifEmpty([]),
             ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_quast_multiqc.collect().ifEmpty([]),
             ch_bcftools_pangolin_multiqc.collect().ifEmpty([]),
+            ch_bcftools_nextclade_multiqc.collect().ifEmpty([]),
             ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
             ch_spades_quast_multiqc.collect().ifEmpty([]),
             ch_unicycler_quast_multiqc.collect().ifEmpty([]),

@@ -109,7 +109,10 @@ def metrics_dict_to_file(file_field_list, multiqc_data_dir, out_file, valid_samp
             row_list = [k]
             for field in field_list:
                 if field in metrics_dict[k]:
-                    row_list.append(metrics_dict[k][field])
+                    if metrics_dict[k][field]:
+                        row_list.append(metrics_dict[k][field])
+                    else:
+                        row_list.append('NA')
                 else:
                     row_list.append('NA')
             fout.write('{}\n'.format(','.join(map(str,row_list))))
@@ -135,12 +138,14 @@ def main(args=None):
                                                                     ('# INDELs (iVar)', ['number_of_indels'])]),
         ('multiqc_snpeff_snpeff_ivar.yaml',                        [('# Missense variants (iVar)', ['MISSENSE'])]),
         ('multiqc_quast_quast_ivar.yaml',                          [('# Ns per 100kb consensus (iVar)', ["# N's per 100 kbp"])]),
-        ('multiqc_ivar_pangolin_lineage.yaml',                     [('Pangolin lineage (iVar)', ["Lineage"])]),
+        ('multiqc_variants:_pangolin_(ivar).yaml',                 [('Pangolin lineage (iVar)', ["lineage"])]),
+        ('multiqc_ivar_nextclade_clade.yaml',                      [('Nextclade clade (iVar)', ["clade"])]),
         ('multiqc_bcftools_stats_bcftools_bcftools.yaml',          [('# SNPs (BCFTools)', ['number_of_SNPs']),
                                                                     ('# INDELs (BCFTools)', ['number_of_indels'])]),
         ('multiqc_snpeff_snpeff_bcftools.yaml',                    [('# Missense variants (BCFTools)', ['MISSENSE'])]),
         ('multiqc_quast_quast_bcftools.yaml',                      [('# Ns per 100kb consensus (BCFTools)', ["# N's per 100 kbp"])]),
-        ('multiqc_bcftools_pangolin_lineage.yaml',                 [('Pangolin lineage (BCFTools)', ["Lineage"])])
+        ('multiqc_variants:_pangolin_(bcftools).yaml',             [('Pangolin lineage (BCFTools)', ["lineage"])]),
+        ('multiqc_bcftools_nextclade_clade.yaml',                  [('Nextclade clade (BCFTools)', ["clade"])])
     ]
 
     illumina_assembly_files = [
@@ -170,7 +175,8 @@ def main(args=None):
                                                                     ('# INDELs', ['number_of_indels'])]),
         ('multiqc_snpeff.yaml',                                    [('# Missense variants', ['MISSENSE'])]),
         ('multiqc_quast.yaml',                                     [('# Ns per 100kb consensus', ["# N's per 100 kbp"])]),
-        ('multiqc_pangolin_lineage.yaml',                          [('Pangolin lineage', ["Lineage"])])
+        ('multiqc_pangolin.yaml',                                  [('Pangolin lineage', ["lineage"])]),
+        ('multiqc_nextclade_clade.yaml',                           [('Nextclade clade', ["clade"])])
     ]
 
     if args.PLATFORM == 'illumina':

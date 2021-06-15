@@ -21,8 +21,10 @@ process PLOT_MOSDEPTH_REGIONS {
     path beds
 
     output:
-    path '*.pdf', emit: pdf
-    path '*.tsv', emit: tsv
+    path '*coverage.pdf', emit: coverage_pdf
+    path '*coverage.tsv', emit: coverage_tsv
+    path '*heatmap.pdf' , optional:true, emit: heatmap_pdf
+    path '*heatmap.tsv' , optional:true, emit: heatmap_tsv
 
     script:
     def prefix = options.suffix ?: "mosdepth"

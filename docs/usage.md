@@ -4,13 +4,13 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
-## Introduction
+## Samplesheet format
 
-### Illumina samplesheet format
+### Illumina
 
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
 
-```bash
+```console
 --input '[path to samplesheet file]'
 ```
 
@@ -18,7 +18,7 @@ The `sample` identifiers have to be the same when you have re-sequenced the same
 
 A final samplesheet file may look something like the one below. `SAMPLE_1` was sequenced twice in Illumina PE format, `SAMPLE_2` was sequenced once in Illumina SE format.
 
-```bash
+```console
 sample,fastq_1,fastq_2
 SAMPLE_1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
 SAMPLE_1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
@@ -31,17 +31,19 @@ SAMPLE_2,AEG588A2_S4_L003_R1_001.fastq.gz,
 | `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".  |
 | `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".  |
 
-### Nanopore samplesheet format
+> **NB:** Dashes (`-`) and spaces in sample names are automatically converted to underscores (`_`) to avoid downstream issues in the pipeline.
+
+### Nanopore
 
 You have the option to provide a samplesheet to the pipeline that maps sample ids to barcode ids. This allows you to associate barcode ids to clinical/public database identifiers that can be used to QC or pre-process the data with more appropriate sample names.
 
-```bash
+```console
 --input '[path to samplesheet file]'
 ```
 
 It has to be a comma-separated file with 2 columns. A final samplesheet file may look something like the one below:
 
-```bash
+```console
 sample,barcode
 21X983255,1
 70H209408,2
@@ -54,41 +56,123 @@ sample,barcode
 | `sample`  | Custom sample name, one per barcode.                                                                                        |
 | `barcode` | Barcode identifier attributed to that sample during multiplexing. Must be an integer.                                       |
 
-## Direct download of public repository data
+> **NB:** Dashes (`-`) and spaces in sample names are automatically converted to underscores (`_`) to avoid downstream issues in the pipeline.
 
-> **NB:** This is an experimental feature but should work beautifully when it does! :)
+## Nanopore input format
 
-The pipeline has a separate workflow to automatically download raw FastQ files from public repositories. Identifiers can be provided in a file, one-per-line via the `--public_data_ids` parameter. Currently, the following identifiers are supported:
+For Nanopore data the pipeline only supports amplicon-based analysis obtained from primer sets created and maintained by the [ARTIC Network](https://artic.network/). The [artic minion](https://artic.readthedocs.io/en/latest/commands/) tool from the [ARTIC field bioinformatics pipeline](https://github.com/artic-network/fieldbioinformatics) is used to align reads, call variants and to generate the consensus sequence.
 
-| `SRA`        | `ENA`        | `GEO`      |
-|--------------|--------------|------------|
-| SRR11605097  | ERR4007730   | GSM4432381 |
-| SRX8171613   | ERX4009132   | GSE147507  |
-| SRS6531847   | ERS4399630   |            |
-| SAMN14689442 | SAMEA6638373 |            |
-| SRP256957    | ERP120836    |            |
-| SRA1068758   | ERA2420837   |            |
-| PRJNA625551  | PRJEB37513   |            |
+### Nanopolish
 
-If `SRR`/`ERR` run ids are provided then these will be resolved back to their appropriate `SRX`/`ERX` ids to be able to merge multiple runs from the same experiment. This is conceptually the same as merging multiple libraries sequenced from the same sample.
+The default variant caller used by artic minion is [Nanopolish](https://github.com/jts/nanopolish) and this requires that you provide `*.fastq`, `*.fast5` and `sequencing_summary.txt` files as input to the pipeline. These files can typically be obtained after demultiplexing and basecalling the sequencing data using [Guppy](https://nanoporetech.com/nanopore-sequencing-data-analysis) (see [ARTIC SOP docs](https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html)). This pipeline requires that the files are organised in the format outlined below:
 
-The final sample information for all identifiers is obtained from the ENA which provides direct download links for FastQ files as well as their associated md5 sums. If download links exist, the files will be downloaded in parallel by FTP otherwise they will NOT be downloaded.
+```console
+.
+└── fastq_pass
+    └── barcode01
+        ├── FAP51364_pass_barcode01_97ca62ca_0.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_1.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_2.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_3.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_4.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_5.fastq
+    <TRUNCATED>
+```
 
-As a bonus, the pipeline will also generate a valid samplesheet with paths to the downloaded data that can be used with the `--input` parameter to run the main analysis arm of the pipeline, however, it is highly recommended that you double-check that all of the identifiers you defined using `--public_data_ids` are represented in the samplesheet. All of the sample metadata obtained from the ENA has been appended as additional columns to help you manually curate the samplesheet before you run the pipeline if required.
+```console
+.
+└── fast5_pass
+    ├── barcode01
+        ├── FAP51364_pass_barcode01_97ca62ca_0.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_1.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_2.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_3.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_4.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_5.fast5
+    <TRUNCATED>
+```
 
-If you have a GEO accession (found in the data availability section of published papers) you can directly download a text file containing the appropriate SRA ids to pass to the pipeline:
+The command to run the pipeline would then be:
 
-* Search for your GEO accession on [GEO](https://www.ncbi.nlm.nih.gov/geo)
-* Click `SRA Run Selector` at the bottom of the GEO accession page
-* Select the desired samples in the `SRA Run Selector` and then download the `Accession List`
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --platform nanopore \
+    --genome 'MN908947.3' \
+    --primer_set_version 3 \
+    --fastq_dir fastq_pass/ \
+    --fast5_dir fast5_pass/ \
+    --sequencing_summary sequencing_summary.txt \
+    -profile <docker/singularity/podman/conda/institute>
+```
 
-This downloads a text file called `SRR_Acc_List.txt` which can be directly provided to the pipeline e.g. `--public_data_ids SRR_Acc_List.txt`.
+### Medaka
+
+You also have the option of using [Medaka](https://github.com/nanoporetech/medaka) as an alternative variant caller to Nanopolish via the `--artic_minion_caller medaka` parameter. Medaka is faster than Nanopolish, performs mostly the same and can be run directly from `fastq` input files as opposed to requiring the `fastq`, `fast5` and `sequencing_summary.txt` files required to run Nanopolish. You must provide the appropriate [Medaka model](https://github.com/nanoporetech/medaka#models) via the `--artic_minion_medaka_model` parameter if using `--artic_minion_caller medaka`. The `fastq` files have to be organised in the same way as for Nanopolish as outlined in the section above.
+
+The command to run the pipeline would then be:
+
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --platform nanopore \
+    --genome 'MN908947.3' \
+    --primer_set_version 3 \
+    --fastq_dir fastq_pass/ \
+    --artic_minion_caller medaka \
+    --artic_minion_medaka_model ./r941_min_high_g360_model.hdf5 \
+    -profile <docker/singularity/podman/conda/institute>
+```
+
+## Illumina primer sets
+
+The Illumina processing mode of the pipeline has been tested on numerous different primer sets. Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard parameter keys. If you are able to get permissions from the vendor/supplier to share the primer information then we would be more than happy to support it within the pipeline.
+
+For SARS-CoV-2 data we recommend using the "MN908947.3" genome because it is supported out-of-the-box by the most commonly used primer sets available from the [ARTIC Network](https://artic.network/). For ease of use, we are also maintaining a version of the "MN908947.3" genome along with the appropriate links to the ARTIC primer sets in the [genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config) used by the pipeline. The genomes config file can be updated independently from the main pipeline code to make it possible to dynamically extend this file for other viral genomes/primer sets on request.
+
+For further information or help, don't hesitate to get in touch on the [Slack `#viralrecon` channel](https://nfcore.slack.com/channels/viralrecon) (you can join with [this invite](https://nf-co.re/join/slack)).
+
+### ARTIC primer sets
+
+An example command using v3 ARTIC primers with "MN908947.3":
+
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --platform illumina \
+    --protocol amplicon \
+    --genome 'MN908947.3' \
+    --primer_set artic \
+    --primer_set_version 3 \
+    --skip_assembly \
+    -profile <docker/singularity/podman/conda/institute>
+```
+
+### SWIFT primer sets
+
+The [SWIFT amplicon panel](https://swiftbiosci.com/swift-amplicon-sars-cov-2-panel/) is another commonly used method used to prep and sequence SARS-CoV-2 samples. We haven't been able to obtain explicit permission to host standard SWIFT primer sets but you can obtain a masterfile which is freely available from their website that contains the primer sequences as well as genomic co-ordinates. You just need to convert this file to [BED6](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format and provide it to the pipeline with `--primer_bed swift_primers.bed`. Be sure to check the values provided to `--primer_left_suffix` and `--primer_right_suffix` match the primer names defined in the BED file as highlighted in [this issue](https://github.com/nf-core/viralrecon/issues/169). For an explanation behind the usage of the `--ivar_trim_offset 5` for SWIFT primer sets see [this issue](https://github.com/nf-core/viralrecon/issues/170).
+
+An example command using SWIFT primers with "MN908947.3":
+
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --platform illumina \
+    --protocol amplicon \
+    --genome 'MN908947.3' \
+    --primer_bed swift_primers.bed \
+    --primer_left_suffix '_F' \
+    --primer_right_suffix '_R' \
+    --ivar_trim_offset 5 \
+    --skip_assembly \
+    -profile <docker/singularity/podman/conda/institute>
+```
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
-```bash
+```console
 nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'MN908947.3' -profile docker
 ```
 
@@ -96,7 +180,7 @@ This will launch the pipeline with the `docker` configuration profile. See below
 
 Note that the pipeline will create the following files in your working directory:
 
-```bash
+```console
 work            # Directory containing the nextflow working files
 results         # Finished results (configurable, see below)
 .nextflow_log   # Log file from Nextflow
@@ -107,7 +191,7 @@ results         # Finished results (configurable, see below)
 
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
-```bash
+```console
 nextflow pull nf-core/viralrecon
 ```
 
@@ -249,6 +333,46 @@ params {
 }
 ```
 
+### Updating containers
+
+The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. If for some reason you need to use a different version of a particular tool with the pipeline then you just need to identify the `process` name and override the Nextflow `container` definition for that process using the `withName` declaration. For example, in the [nf-core/viralrecon](https://nf-co.re/viralrecon) pipeline a tool called [Pangolin](https://github.com/cov-lineages/pangolin) has been used during the COVID-19 pandemic to assign lineages to SARS-CoV-2 genome sequenced samples. Given that the lineage assignments change quite frequently it doesn't make sense to re-release the nf-core/viralrecon everytime a new version of Pangolin has been released. However, you can override the default container used by the pipeline by creating a custom config file and passing it as a command-line argument via `-c custom.config`.
+
+1. Check the default version used by the pipeline in the module file for [Pangolin](https://github.com/nf-core/viralrecon/blob/a85d5969f9025409e3618d6c280ef15ce417df65/modules/nf-core/software/pangolin/main.nf#L14-L19)
+2. Find the latest version of the Biocontainer available on [Quay.io](https://quay.io/repository/biocontainers/pangolin?tag=latest&tab=tags)
+3. Create the custom config accordingly:
+
+    * For Docker:
+
+        ```nextflow
+        process {
+            withName: PANGOLIN {
+                container = 'quay.io/biocontainers/pangolin:3.0.5--pyhdfd78af_0'
+            }
+        }
+        ```
+
+    * For Singularity:
+
+        ```nextflow
+        process {
+            withName: PANGOLIN {
+                container = 'https://depot.galaxyproject.org/singularity/pangolin:3.0.5--pyhdfd78af_0'
+            }
+        }
+        ```
+
+    * For Conda:
+
+        ```nextflow
+        process {
+            withName: PANGOLIN {
+                conda = 'bioconda::pangolin=3.0.5'
+            }
+        }
+        ```
+
+> **NB:** If you wish to periodically update individual tool-specific results (e.g. Pangolin) generated by the pipeline then you must ensure to keep the `work/` directory otherwise the `-resume` ability of the pipeline will be compromised and it will restart from scratch.
+
 ### nf-core/configs
 
 In most cases, you will only need to create a custom config as a one-off but if you and others within your organisation are likely to be running nf-core pipelines regularly and need to use the same settings regularly it may be a good idea to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter. You can then create a pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file (see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
@@ -271,6 +395,6 @@ Some HPC setups also allow you to run nextflow within a cluster job submitted yo
 In some cases, the Nextflow Java virtual machines can start to request a large amount of memory.
 We recommend adding the following line to your environment to limit this (typically in `~/.bashrc` or `~./bash_profile`):
 
-```bash
+```console
 NXF_OPTS='-Xms1g -Xmx4g'
 ```

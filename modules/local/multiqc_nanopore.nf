@@ -26,6 +26,7 @@ process MULTIQC {
     path fail_no_barcode_samples
     path fail_barcode_count_samples
     path fail_guppyplex_count_samples
+    path 'amplicon_heatmap_mqc.tsv'
     path ('pycoqc/*')
     path ('artic_minion/*')
     path ('samtools_stats/*')
@@ -33,7 +34,8 @@ process MULTIQC {
     path ('mosdepth/*')
     path ('quast/*')
     path ('snpeff/*')
-    path ('pangolin/*')
+    path pangolin_lineage
+    path nextclade_clade
 
     output:
     path "*multiqc_report.html", emit: report
@@ -45,8 +47,16 @@ process MULTIQC {
     def software      = getSoftwareName(task.process)
     def custom_config = params.multiqc_config ? "--config $multiqc_custom_config" : ''
     """
+    ## Run MultiQC once to parse tool logs
     multiqc -f $options.args $custom_config .
+
+    ## Parse YAML files dumped by MultiQC to obtain metrics
     multiqc_to_custom_csv.py --platform nanopore
-    multiqc -f $options.args -e general_stats --ignore *pangolin_lineage_mqc.tsv $custom_config .
+
+    ## Manually remove files that we don't want in the report
+    rm -rf quast
+
+    ## Run MultiQC a second time
+    multiqc -f $options.args -e general_stats --ignore *nextclade_clade_mqc.tsv $custom_config .
     """
 }
