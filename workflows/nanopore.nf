@@ -131,8 +131,8 @@ workflow NANOPORE {
         PYCOQC (
             ch_sequencing_summary
         )
+        ch_software_versions = ch_software_versions.mix(PYCOQC.out.version.ifEmpty(null))
     }
-    ch_software_versions = ch_software_versions.mix(PYCOQC.out.version.ifEmpty(null))
 
     //
     // SUBWORKFLOW: Uncompress and prepare reference genome files

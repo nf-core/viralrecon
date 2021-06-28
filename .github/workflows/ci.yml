@@ -111,7 +111,7 @@ jobs:
             --input false,
             --min_barcode_reads 10000,
             --min_guppyplex_reads 10000,
-            "--artic_minion_caller medaka",
+            "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false",
           ]
     steps:
       - name: Check out pipeline code
