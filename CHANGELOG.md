@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Enhancements & fixes
 
+* [[#212](https://github.com/nf-core/viralrecon/issues/212)] - Access to `PYCOQC.out` is undefined
+
 ### Parameters
 
 ## [[2.1](https://github.com/nf-core/rnaseq/releases/tag/2.1)] - 2021-06-15

@@ -127,12 +127,14 @@ workflow NANOPORE {
     //
     // MODULE: PycoQC on sequencing summary file
     //
+    ch_pycoqc_multiqc = Channel.empty()
     if (params.sequencing_summary && !params.skip_pycoqc) {
         PYCOQC (
             ch_sequencing_summary
         )
+        ch_pycoqc_multiqc    = PYCOQC.out.json
+        ch_software_versions = ch_software_versions.mix(PYCOQC.out.version.ifEmpty(null))
     }
-    ch_software_versions = ch_software_versions.mix(PYCOQC.out.version.ifEmpty(null))
 
     //
     // SUBWORKFLOW: Uncompress and prepare reference genome files
@@ -506,7 +508,7 @@ workflow NANOPORE {
             MULTIQC_CUSTOM_TSV_BARCODE_COUNT.out.ifEmpty([]),
             MULTIQC_CUSTOM_TSV_GUPPYPLEX_COUNT.out.ifEmpty([]),
             ch_amplicon_heatmap_multiqc.ifEmpty([]),
-            PYCOQC.out.json.collect().ifEmpty([]),
+            ch_pycoqc_multiqc.collect().ifEmpty([]),
             ARTIC_MINION.out.json.collect{it[1]}.ifEmpty([]),
             FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]),
             BCFTOOLS_STATS.out.stats.collect{it[1]}.ifEmpty([]),
