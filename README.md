@@ -82,7 +82,7 @@ The SRA download functionality has been removed from the pipeline (`>=2.1`) and 
 
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
-    ```bash
+    ```console
     nextflow run nf-core/viralrecon -profile test,<docker/singularity/podman/shifter/charliecloud/conda/institute>
     ```
 
