@@ -16,15 +16,16 @@ include { BCFTOOLS_CONSENSUS } from '../../modules/nf-core/modules/bcftools/cons
 include { MAKE_BED_MASK      } from '../../modules/local/make_bed_mask'                     addParams( options: params.mask_options       )
 include { PLOT_BASE_DENSITY  } from '../../modules/local/plot_base_density'                 addParams( options: params.plot_bases_options )
 
+
 workflow MAKE_CONSENSUS {
     take:
     bam_vcf // channel: [ val(meta), [ bam ], [ vcf ], [ tbi ] ]
     fasta
 
     main:
-    BEDTOOLS_GENOMECOV ( bam_vcf.map { meta, bam, vcf, tbi -> [ meta, bam ] } )
+    BEDTOOLS_GENOMECOV ( bam_vcf.map { meta, bam, vcf, tbi -> [ meta, bam ] }, [], 'bed' )
 
-    BEDTOOLS_MERGE ( BEDTOOLS_GENOMECOV.out.bed )
+    BEDTOOLS_MERGE ( BEDTOOLS_GENOMECOV.out.genomecov )
 
     MAKE_BED_MASK ( bam_vcf.map { meta, bam, vcf, tbi -> [ meta, vcf ] }.join( BEDTOOLS_MERGE.out.bed, by: [0] ) )
 
