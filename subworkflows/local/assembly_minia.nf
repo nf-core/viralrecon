@@ -9,8 +9,8 @@ params.abacas_options        = [:]
 params.plasmidid_options     = [:]
 params.quast_options         = [:]
 
-include { MINIA       } from '../../modules/nf-core/software/minia/main' addParams( options: params.minia_options )
-include { ASSEMBLY_QC } from './assembly_qc'                             addParams( blastn_options: params.blastn_options, blastn_filter_options: params.blastn_filter_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
+include { MINIA       } from '../../modules/nf-core/modules/minia/main' addParams( options: params.minia_options )
+include { ASSEMBLY_QC } from './assembly_qc'                            addParams( blastn_options: params.blastn_options, blastn_filter_options: params.blastn_filter_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
 
 workflow ASSEMBLY_MINIA {
     take:

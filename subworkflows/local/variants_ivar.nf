@@ -19,16 +19,16 @@ params.pangolin_options             = [:]
 params.nextclade_options            = [:]
 params.asciigenome_options          = [:]
 
-include { IVAR_VARIANTS_TO_VCF  } from '../../modules/local/ivar_variants_to_vcf'           addParams( options: params.ivar_variants_to_vcf_options )
-include { PLOT_BASE_DENSITY     } from '../../modules/local/plot_base_density'              addParams( options: params.consensus_plot_options       )
-include { IVAR_VARIANTS         } from '../../modules/nf-core/software/ivar/variants/main'  addParams( options: params.ivar_variants_options        )
-include { IVAR_CONSENSUS        } from '../../modules/nf-core/software/ivar/consensus/main' addParams( options: params.ivar_consensus_options       )
-include { QUAST                 } from '../../modules/nf-core/software/quast/main'          addParams( options: params.quast_options                )
-include { PANGOLIN              } from '../../modules/nf-core/software/pangolin/main'       addParams( options: params.pangolin_options             )
-include { NEXTCLADE             } from '../../modules/nf-core/software/nextclade/main'      addParams( options: params.nextclade_options            )
-include { ASCIIGENOME           } from '../../modules/local/asciigenome'                    addParams( options: params.asciigenome_options          )
-include { VCF_BGZIP_TABIX_STATS } from '../nf-core/vcf_bgzip_tabix_stats'                   addParams( bgzip_options: params.tabix_bgzip_options, tabix_options: params.tabix_tabix_options, stats_options: params.bcftools_stats_options )
-include { SNPEFF_SNPSIFT        } from './snpeff_snpsift'                                   addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
+include { IVAR_VARIANTS_TO_VCF  } from '../../modules/local/ivar_variants_to_vcf'          addParams( options: params.ivar_variants_to_vcf_options )
+include { PLOT_BASE_DENSITY     } from '../../modules/local/plot_base_density'             addParams( options: params.consensus_plot_options       )
+include { IVAR_VARIANTS         } from '../../modules/nf-core/modules/ivar/variants/main'  addParams( options: params.ivar_variants_options        )
+include { IVAR_CONSENSUS        } from '../../modules/nf-core/modules/ivar/consensus/main' addParams( options: params.ivar_consensus_options       )
+include { QUAST                 } from '../../modules/nf-core/modules/quast/main'          addParams( options: params.quast_options                )
+include { PANGOLIN              } from '../../modules/nf-core/modules/pangolin/main'       addParams( options: params.pangolin_options             )
+include { NEXTCLADE             } from '../../modules/nf-core/modules/nextclade/main'      addParams( options: params.nextclade_options            )
+include { ASCIIGENOME           } from '../../modules/local/asciigenome'                   addParams( options: params.asciigenome_options          )
+include { VCF_BGZIP_TABIX_STATS } from '../nf-core/vcf_bgzip_tabix_stats'                  addParams( bgzip_options: params.tabix_bgzip_options, tabix_options: params.tabix_tabix_options, stats_options: params.bcftools_stats_options )
+include { SNPEFF_SNPSIFT        } from './snpeff_snpsift'                                  addParams( snpeff_options: params.snpeff_options, snpsift_options: params.snpsift_options, bgzip_options: params.snpeff_bgzip_options, tabix_options: params.snpeff_tabix_options, stats_options:  params.snpeff_stats_options )
 
 workflow VARIANTS_IVAR {
     take:

@@ -131,12 +131,12 @@ include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'      
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { CAT_FASTQ                     } from '../modules/nf-core/software/cat/fastq/main'                     addParams( options: modules['illumina_cat_fastq']                     )
-include { FASTQC                        } from '../modules/nf-core/software/fastqc/main'                        addParams( options: modules['illumina_cutadapt_fastqc']               )
-include { KRAKEN2_RUN                   } from '../modules/nf-core/software/kraken2/run/main'                   addParams( options: modules['illumina_kraken2_run']                   )
-include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['illumina_picard_collectmultiplemetrics'] )
-include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_genome']               )
-include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_amplicon']             )
+include { CAT_FASTQ                     } from '../modules/nf-core/modules/cat/fastq/main'                     addParams( options: modules['illumina_cat_fastq']                     )
+include { FASTQC                        } from '../modules/nf-core/modules/fastqc/main'                        addParams( options: modules['illumina_cutadapt_fastqc']               )
+include { KRAKEN2_KRAKEN2               } from '../modules/nf-core/modules/kraken2/kraken2/main'               addParams( options: modules['illumina_kraken2_kraken2']               )
+include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/modules/picard/collectmultiplemetrics/main' addParams( options: modules['illumina_picard_collectmultiplemetrics'] )
+include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/modules/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_genome']               )
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/modules/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_amplicon']             )
 
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
@@ -282,19 +282,19 @@ workflow ILLUMINA {
     ch_assembly_fastq  = ch_variants_fastq
     ch_kraken2_multiqc = Channel.empty()
     if (!params.skip_kraken2) {
-        KRAKEN2_RUN (
+        KRAKEN2_KRAKEN2 (
             ch_variants_fastq,
             PREPARE_GENOME.out.kraken2_db
         )
-        ch_kraken2_multiqc   = KRAKEN2_RUN.out.txt
-        ch_software_versions = ch_software_versions.mix(KRAKEN2_RUN.out.version.first().ifEmpty(null))
+        ch_kraken2_multiqc   = KRAKEN2_KRAKEN2.out.txt
+        ch_software_versions = ch_software_versions.mix(KRAKEN2_KRAKEN2.out.version.first().ifEmpty(null))
 
         if (params.kraken2_variants_host_filter) {
-            ch_variants_fastq = KRAKEN2_RUN.out.unclassified
+            ch_variants_fastq = KRAKEN2_KRAKEN2.out.unclassified
         }
 
         if (params.kraken2_assembly_host_filter) {
-            ch_assembly_fastq = KRAKEN2_RUN.out.unclassified
+            ch_assembly_fastq = KRAKEN2_KRAKEN2.out.unclassified
         }
     }
 

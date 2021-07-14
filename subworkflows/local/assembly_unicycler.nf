@@ -10,9 +10,9 @@ params.abacas_options        = [:]
 params.plasmidid_options     = [:]
 params.quast_options         = [:]
 
-include { UNICYCLER     } from '../../modules/nf-core/software/unicycler/main'     addParams( options: params.unicycler_options )
-include { BANDAGE_IMAGE } from '../../modules/nf-core/software/bandage/image/main' addParams( options: params.bandage_options   )
-include { ASSEMBLY_QC   } from './assembly_qc'                                     addParams( blastn_options: params.blastn_options, blastn_filter_options: params.blastn_filter_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
+include { UNICYCLER     } from '../../modules/nf-core/modules/unicycler/main'     addParams( options: params.unicycler_options )
+include { BANDAGE_IMAGE } from '../../modules/nf-core/modules/bandage/image/main' addParams( options: params.bandage_options   )
+include { ASSEMBLY_QC   } from './assembly_qc'                                    addParams( blastn_options: params.blastn_options, blastn_filter_options: params.blastn_filter_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
 
 workflow ASSEMBLY_UNICYCLER {
     take:

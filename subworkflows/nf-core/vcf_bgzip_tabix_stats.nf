@@ -6,8 +6,8 @@ params.bgzip_options = [:]
 params.tabix_options = [:]
 params.stats_options = [:]
 
-include { TABIX_BGZIP     } from '../../modules/nf-core/software/tabix/bgzip/main' addParams( options: params.bgzip_options                                            )
-include { VCF_TABIX_STATS } from './vcf_tabix_stats'                               addParams( tabix_options: params.tabix_options, stats_options: params.stats_options )
+include { TABIX_BGZIP     } from '../../modules/nf-core/modules/tabix/bgzip/main' addParams( options: params.bgzip_options                                            )
+include { VCF_TABIX_STATS } from './vcf_tabix_stats'                              addParams( tabix_options: params.tabix_options, stats_options: params.stats_options )
 
 workflow VCF_BGZIP_TABIX_STATS {
     take:
