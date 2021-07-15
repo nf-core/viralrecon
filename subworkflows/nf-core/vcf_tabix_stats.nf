@@ -5,8 +5,8 @@
 params.tabix_options = [:]
 params.stats_options = [:]
 
-include { TABIX_TABIX    } from '../../modules/nf-core/software/tabix/tabix/main'    addParams( options: params.tabix_options )
-include { BCFTOOLS_STATS } from '../../modules/nf-core/software/bcftools/stats/main' addParams( options: params.stats_options )
+include { TABIX_TABIX    } from '../../modules/nf-core/modules/tabix/tabix/main'    addParams( options: params.tabix_options )
+include { BCFTOOLS_STATS } from '../../modules/nf-core/modules/bcftools/stats/main' addParams( options: params.stats_options )
 
 workflow VCF_TABIX_STATS {
     take:

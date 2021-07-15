@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Enhancements & fixes
 
+* Updated pipeline template to [nf-core/tools 2.0.1](https://github.com/nf-core/tools/releases/tag/2.0.1)
 * [[#212](https://github.com/nf-core/viralrecon/issues/212)] - Access to `PYCOQC.out` is undefined
 
 ### Parameters
