@@ -8,9 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Enhancements & fixes
 
 * Updated pipeline template to [nf-core/tools 2.0.1](https://github.com/nf-core/tools/releases/tag/2.0.1)
+* Remove custom content to render Pangolin report in MultiQC as it was officially added as a module in [v1.11](https://github.com/ewels/MultiQC/pull/1458)
 * [[#212](https://github.com/nf-core/viralrecon/issues/212)] - Access to `PYCOQC.out` is undefined
 
-### Parameters
+### Software dependencies
+
+Note, since the pipeline is now using Nextflow DSL2, each process will be run with its own [Biocontainer](https://biocontainers.pro/#/registry). This means that on occasion it is entirely possible for the pipeline to be using different versions of the same tool. However, the overall software dependency changes compared to the last release have been listed below for reference.
+
+| Dependency                    | Old version | New version |
+|-------------------------------|-------------|-------------|
+| `pangolin`                    | 3.0.5       | 3.1.7       |
+
+> **NB:** Dependency has been __updated__ if both old and new version information is present.
+> **NB:** Dependency has been __added__ if just the new version information is present.
+> **NB:** Dependency has been __removed__ if new version information isn't present.
 
 ## [[2.1](https://github.com/nf-core/rnaseq/releases/tag/2.1)] - 2021-06-15
 

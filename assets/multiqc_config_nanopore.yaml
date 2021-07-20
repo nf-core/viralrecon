@@ -15,8 +15,12 @@ run_modules:
   - mosdepth
   - snpeff
   - quast
+  - pangolin
 
 module_order:
+  - pangolin:
+      path_filters:
+        - "*.pangolin.csv"
   - pycoqc
   - samtools:
       path_filters:
@@ -35,8 +39,6 @@ module_order:
 report_section_order:
   amplicon_heatmap:
     before: summary_variants_metrics
-  pangolin_lineage:
-    after: amplicon_heatmap
   software_versions:
     order: -1001
   nf-core-viralrecon-summary:
@@ -44,9 +46,6 @@ report_section_order:
 
 bcftools:
   collapse_complementary_changes: true
-
-extra_fn_clean_exts:
-  - ".pass"
 
 # See https://github.com/ewels/MultiQC_TestData/blob/master/data/custom_content/with_config/table_headerconfig/multiqc_config.yaml
 custom_data:
@@ -85,15 +84,6 @@ custom_data:
       table_title: "Samples failed artic guppyplex read count threshold"
       namespace: "Samples failed artic guppyplex read count threshold"
       format: "{:,.0f}"
-  pangolin_lineage:
-    section_name: "Pangolin"
-    description: "Results generated from Pangolin lineage analysis"
-    plot_type: "table"
-    pconfig:
-      id: "pangolin_lineage_table"
-      table_title: "Pangolin lineage assignment"
-      namespace: "Pangolin lineage assignment"
-      scale: False
   amplicon_heatmap:
     section_name: "Amplicon coverage heatmap"
     description: "Heatmap to show median log10(coverage+1) per amplicon across samples."
@@ -166,6 +156,10 @@ custom_data:
       namespace: "Variant calling metrics"
       only_defined_headers: False
       format: "{:,.0f}"
+
+extra_fn_clean_exts:
+  - ".pass"
+  - "_ARTIC"
 
 # # Customise the module search patterns to speed up execution time
 # #  - Skip module sub-tools that we are not interested in

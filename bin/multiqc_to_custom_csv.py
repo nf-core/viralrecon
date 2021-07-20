@@ -236,7 +236,7 @@ def main(args=None):
             [("# Ns per 100kb consensus (iVar)", ["# N's per 100 kbp"])],
         ),
         (
-            "multiqc_variants:_pangolin_(ivar).yaml",
+            "multiqc_pangolin_pangolin_ivar.yaml",
             [("Pangolin lineage (iVar)", ["lineage"])],
         ),
         ("multiqc_ivar_nextclade_clade.yaml", [("Nextclade clade (iVar)", ["clade"])]),
@@ -256,7 +256,7 @@ def main(args=None):
             [("# Ns per 100kb consensus (BCFTools)", ["# N's per 100 kbp"])],
         ),
         (
-            "multiqc_variants:_pangolin_(bcftools).yaml",
+            "multiqc_pangolin_pangolin_bcftools.yaml",
             [("Pangolin lineage (BCFTools)", ["lineage"])],
         ),
         (

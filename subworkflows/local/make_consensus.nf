@@ -27,9 +27,9 @@ workflow MAKE_CONSENSUS {
 
     BEDTOOLS_MERGE ( BEDTOOLS_GENOMECOV.out.genomecov )
 
-    MAKE_BED_MASK ( bam_vcf.map { meta, bam, vcf, tbi -> [ meta, vcf ] }.join( BEDTOOLS_MERGE.out.bed, by: [0] ) )
+    MAKE_BED_MASK ( bam_vcf.map { meta, bam, vcf, tbi -> [ meta, vcf ] }.join( BEDTOOLS_MERGE.out.bed, by: [0] ), fasta )
 
-    BEDTOOLS_MASKFASTA ( MAKE_BED_MASK.out.bed, fasta )
+    BEDTOOLS_MASKFASTA ( MAKE_BED_MASK.out.bed, MAKE_BED_MASK.out.fasta.map{it[1]} )
 
     BCFTOOLS_CONSENSUS ( bam_vcf.map { meta, bam, vcf, tbi -> [ meta, vcf, tbi ] }.join( BEDTOOLS_MASKFASTA.out.fasta, by: [0] ) )
 

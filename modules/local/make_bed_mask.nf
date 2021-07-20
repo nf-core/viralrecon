@@ -19,13 +19,22 @@ process MAKE_BED_MASK {
 
     input:
     tuple val(meta), path(vcf), path(bed)
+    path  fasta
 
     output:
-    tuple val(meta), path("*.bed"), emit: bed
+    tuple val(meta), path("*.bed")  , emit: bed
+    tuple val(meta), path("*.fasta"), emit: fasta
 
     script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     def prefix = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
     """
-    make_bed_mask.py $vcf $bed ${prefix}.bed
+    make_bed_mask.py \\
+        $vcf \\
+        $bed \\
+        ${prefix}.bed
+
+    ## Rename fasta entry by sample name and not reference genome
+    FASTA_NAME=\$(head -n1 $fasta | sed 's/>//g')
+    sed "s/\${FASTA_NAME}/${meta.id}/g" $fasta > ${prefix}.fasta
     """
 }
