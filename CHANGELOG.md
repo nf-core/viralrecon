@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unpublished Version / DEV]
+## [[2.2](https://github.com/nf-core/rnaseq/releases/tag/2.2)] - 2021-07-26
 
 ### Enhancements & fixes
 
@@ -17,7 +17,9 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 
 | Dependency                    | Old version | New version |
 |-------------------------------|-------------|-------------|
+| `multiqc`                     | 1.10.1      | 1.11        |
 | `pangolin`                    | 3.0.5       | 3.1.7       |
+| `samtools`                    | 1.10        | 1.12        |
 
 > **NB:** Dependency has been __updated__ if both old and new version information is present.
 > **NB:** Dependency has been __added__ if just the new version information is present.
