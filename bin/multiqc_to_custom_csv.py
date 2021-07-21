@@ -159,7 +159,7 @@ def metrics_dict_to_file(
             for field in field_list:
                 if field in metrics_dict[k]:
                     if metrics_dict[k][field]:
-                        row_list.append(metrics_dict[k][field])
+                        row_list.append(metrics_dict[k][field].replace(',', ';'))
                     else:
                         row_list.append("NA")
                 else:
