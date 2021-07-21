@@ -76,8 +76,6 @@ include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_FAIL_READS       
 include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_FAIL_MAPPED        } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
 include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_IVAR_NEXTCLADE     } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
 include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_BCFTOOLS_NEXTCLADE } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_CSV_FROM_MAP as MULTIQC_CUSTOM_CSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_csv_from_map'    addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_CSV_FROM_MAP as MULTIQC_CUSTOM_CSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_csv_from_map'    addParams( options: [publish_files: false] )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -457,7 +455,7 @@ workflow ILLUMINA {
         ch_ivar_stats_multiqc    = VARIANTS_IVAR.out.stats
         ch_ivar_snpeff_multiqc   = VARIANTS_IVAR.out.snpeff_csv
         ch_ivar_quast_multiqc    = VARIANTS_IVAR.out.quast_tsv
-        ch_ivar_pangolin_report  = VARIANTS_IVAR.out.pangolin_report
+        ch_ivar_pangolin_multiqc = VARIANTS_IVAR.out.pangolin_report
         ch_ivar_nextclade_report = VARIANTS_IVAR.out.nextclade_report
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.ivar_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.tabix_version.first().ifEmpty(null))
@@ -468,22 +466,6 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.pangolin_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.nextclade_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.asciigenome_version.first().ifEmpty(null))
-
-        //
-        // MODULE: Get Pangolin lineage information for MultiQC report
-        //
-        ch_ivar_pangolin_report
-            .map { meta, report ->
-                def fields = WorkflowCommons.getPangolinFieldMap(report)
-                return [sample:meta.id] << fields
-            }
-            .set { ch_ivar_pangolin_multiqc }
-
-        MULTIQC_CUSTOM_CSV_IVAR_PANGOLIN (
-            ch_ivar_pangolin_multiqc.collect(),
-            'ivar_pangolin_lineage'
-        )
-        .set { ch_ivar_pangolin_multiqc }
 
         //
         // MODULE: Get Nextclade clade information for MultiQC report
@@ -528,7 +510,7 @@ workflow ILLUMINA {
         ch_bcftools_stats_multiqc    = VARIANTS_BCFTOOLS.out.stats
         ch_bcftools_snpeff_multiqc   = VARIANTS_BCFTOOLS.out.snpeff_csv
         ch_bcftools_quast_multiqc    = VARIANTS_BCFTOOLS.out.quast_tsv
-        ch_bcftools_pangolin_report  = VARIANTS_BCFTOOLS.out.pangolin_report
+        ch_bcftools_pangolin_multiqc = VARIANTS_BCFTOOLS.out.pangolin_report
         ch_bcftools_nextclade_report = VARIANTS_BCFTOOLS.out.nextclade_report
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.bedtools_version.first().ifEmpty(null))
@@ -538,22 +520,6 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.pangolin_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.nextclade_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.asciigenome_version.first().ifEmpty(null))
-
-        //
-        // MODULE: Get Pangolin lineage information for MultiQC report
-        //
-        ch_bcftools_pangolin_report
-            .map { meta, report ->
-                def fields = WorkflowCommons.getPangolinFieldMap(report)
-                return [sample:meta.id] << fields
-            }
-            .set { ch_bcftools_pangolin_multiqc }
-
-        MULTIQC_CUSTOM_CSV_BCFTOOLS_PANGOLIN (
-            ch_bcftools_pangolin_multiqc.collect(),
-            'bcftools_pangolin_lineage'
-        )
-        .set { ch_bcftools_pangolin_multiqc }
 
         //
         // MODULE: Get Nextclade clade information for MultiQC report
@@ -710,12 +676,12 @@ workflow ILLUMINA {
             ch_ivar_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_quast_multiqc.collect().ifEmpty([]),
-            ch_ivar_pangolin_multiqc.collect().ifEmpty([]),
+            ch_ivar_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_nextclade_multiqc.collect().ifEmpty([]),
             ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_quast_multiqc.collect().ifEmpty([]),
-            ch_bcftools_pangolin_multiqc.collect().ifEmpty([]),
+            ch_bcftools_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_nextclade_multiqc.collect().ifEmpty([]),
             ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
             ch_spades_quast_multiqc.collect().ifEmpty([]),
@@ -733,7 +699,9 @@ workflow ILLUMINA {
 */
 
 workflow.onComplete {
-    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
+    if (params.email || params.email_on_fail) {
+        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
+    }
     NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
 }
 
