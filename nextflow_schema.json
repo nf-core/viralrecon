@@ -15,7 +15,7 @@
                     "type": "string",
                     "format": "file-path",
                     "mimetype": "text/csv",
-                    "pattern": "\\.csv$",
+                    "pattern": "^\\S+\\.csv$",
                     "schema": "assets/schema_input.json",
                     "fa_icon": "fas fa-file-csv",
                     "help_text": "You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/viralrecon/docs/usage#introduction).",
@@ -63,7 +63,7 @@
                     "type": "string",
                     "format": "file-path",
                     "mimetype": "text/plain",
-                    "pattern": "\\.fn?a(sta)?(\\.gz)?$",
+                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
                     "fa_icon": "fas fa-font",
                     "description": "Path to FASTA genome file.",
                     "help_text": "If you have no genome reference available, the pipeline can build one using a FASTA file. This requires additional time and resources, so it's better to use a pre-build index if possible."
@@ -72,7 +72,7 @@
                     "type": "string",
                     "format": "file-path",
                     "mimetype": "text/plain",
-                    "pattern": "\\.gff(\\.gz)?$",
+                    "pattern": "^\\S+\\.gff(\\.gz)?$",
                     "description": "Full path to GFF annotation file.",
                     "fa_icon": "fas fa-file-invoice"
                 },
@@ -86,7 +86,7 @@
                     "type": "string",
                     "format": "file-path",
                     "mimetype": "text/plain",
-                    "pattern": "\\.bed(\\.gz)?$",
+                    "pattern": "^\\S+\\.bed(\\.gz)?$",
                     "description": "If the '--protocol amplicon' parameter is provided then iVar is used to trim primer sequences after read alignment and before variant calling.",
                     "help_text": "iVar uses the primer positions relative to the viral genome supplied in this file to soft clip primer sequences from a coordinate sorted BAM file. The file must be in BED format as highlighted below:\n\n```\nMN908947.3 30 54 nCoV-2019_1_LEFT 60 -\nMN908947.3 385 410 nCoV-2019_1_RIGHT 60 +\nMN908947.3 320 342 nCoV-2019_2_LEFT 60 -\nMN908947.3 704 726 nCoV-2019_2_RIGHT 60 +\n```",
                     "fa_icon": "fas fa-stream"
@@ -95,7 +95,7 @@
                     "type": "string",
                     "format": "file-path",
                     "mimetype": "text/plain",
-                    "pattern": "\\.fn?a(sta)?(\\.gz)?$",
+                    "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
                     "description": "If the '--protocol amplicon' parameter is provided then Cutadapt is used to trim primer sequences from FastQ files before de novo assembly.",
                     "help_text": "This file must contain amplicon primer sequences in Fasta format. An example is shown below:\n\n```\n>nCoV-2019_1_LEFT\nACCAACCAACTTTCGATCTCTTGT\n>nCoV-2019_1_RIGHT\nCATCTTTAAGATGTTGACGTGCCTC\n>nCoV-2019_2_LEFT\nCTGTTTTACAGGTTCGCGACGT\n>nCoV-2019_2_RIGHT\nTAAGGATCAGTGCCAAGCTCGT\n```",
                     "fa_icon": "fas fa-stream"
@@ -156,7 +156,7 @@
                     "type": "string",
                     "format": "file-path",
                     "mimetype": "text/plain",
-                    "pattern": "\\.txt$",
+                    "pattern": "^\\S+\\.txt$",
                     "description": "Sequencing summary file generated after Nanopore run completion.",
                     "help_text": " e.g. '--sequencing_summary ./20191023_1522_MC-110615_0_FAO93606_12bf9b4f/sequencing_summary.txt'. Not required when running the pipeline with the '--artic_minion_caller medaka' workflow.",
                     "fa_icon": "fas fa-file"

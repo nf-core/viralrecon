@@ -159,12 +159,12 @@ def metrics_dict_to_file(
             for field in field_list:
                 if field in metrics_dict[k]:
                     if metrics_dict[k][field]:
-                        row_list.append(metrics_dict[k][field])
+                        row_list.append(str(metrics_dict[k][field]).replace(',', ';'))
                     else:
                         row_list.append("NA")
                 else:
                     row_list.append("NA")
-            fout.write("{}\n".format(",".join(map(str, row_list))))
+            fout.write("{}\n".format(",".join(row_list)))
         fout.close()
     return metrics_dict
 
