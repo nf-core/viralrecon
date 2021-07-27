@@ -3,5 +3,4 @@ lint:
     - .markdownlint.yml
     - assets/email_template.html
     - assets/email_template.txt
-    - bin/scrape_software_versions.py
     - lib/NfcoreTemplate.groovy
