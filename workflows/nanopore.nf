@@ -387,8 +387,7 @@ workflow NANOPORE {
     ch_nextclade_multiqc = Channel.empty()
     if (!params.skip_nextclade) {
         NEXTCLADE (
-            ARTIC_MINION.out.fasta,
-            'csv'
+            ARTIC_MINION.out.fasta
         )
         ch_software_versions = ch_software_versions.mix(NEXTCLADE.out.version.ifEmpty(null))
 
