@@ -79,7 +79,7 @@ workflow VARIANTS_BCFTOOLS {
         }
 
         if (!params.skip_nextclade) {
-            NEXTCLADE ( ch_consensus, 'csv' )
+            NEXTCLADE ( ch_consensus )
             ch_nextclade_report  = NEXTCLADE.out.csv
             ch_nextclade_version = NEXTCLADE.out.version
         }

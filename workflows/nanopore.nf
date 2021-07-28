@@ -92,9 +92,23 @@ def artic_minion_options   = modules['nanopore_artic_minion']
 artic_minion_options.args += params.artic_minion_caller  == 'medaka' ? Utils.joinModuleArgs(['--medaka']) : ''
 artic_minion_options.args += params.artic_minion_aligner == 'bwa'    ? Utils.joinModuleArgs(['--bwa'])    : Utils.joinModuleArgs(['--minimap2'])
 
+def artic_guppyplex_options = modules['nanopore_artic_guppyplex']
+if (params.primer_set_version == 1200) {
+    def args_split = artic_guppyplex_options.args.tokenize()
+    def min_idx    = args_split.indexOf('--min-length')
+    def max_idx    = args_split.indexOf('--max-length')
+    if (min_idx != -1) {
+        args_split[min_idx+1] = '250'
+    }
+    if (max_idx != -1) {
+        args_split[max_idx+1] = '1500'
+    }
+    artic_guppyplex_options.args = args_split.join(' ')
+}
+
 include { PYCOQC                        } from '../modules/nf-core/modules/pycoqc/main'          addParams( options: modules['nanopore_pycoqc']            )
 include { NANOPLOT                      } from '../modules/nf-core/modules/nanoplot/main'        addParams( options: modules['nanopore_nanoplot']          )
-include { ARTIC_GUPPYPLEX               } from '../modules/nf-core/modules/artic/guppyplex/main' addParams( options: modules['nanopore_artic_guppyplex']   )
+include { ARTIC_GUPPYPLEX               } from '../modules/nf-core/modules/artic/guppyplex/main' addParams( options: artic_guppyplex_options               )
 include { ARTIC_MINION                  } from '../modules/nf-core/modules/artic/minion/main'    addParams( options: artic_minion_options                  )
 include { BCFTOOLS_STATS                } from '../modules/nf-core/modules/bcftools/stats/main'  addParams( options: modules['nanopore_bcftools_stats']    )
 include { QUAST                         } from '../modules/nf-core/modules/quast/main'           addParams( options: modules['nanopore_quast']             )
@@ -373,8 +387,7 @@ workflow NANOPORE {
     ch_nextclade_multiqc = Channel.empty()
     if (!params.skip_nextclade) {
         NEXTCLADE (
-            ARTIC_MINION.out.fasta,
-            'csv'
+            ARTIC_MINION.out.fasta
         )
         ch_software_versions = ch_software_versions.mix(NEXTCLADE.out.version.ifEmpty(null))
 
