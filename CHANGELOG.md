@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Updated pipeline template to [nf-core/tools 2.1](https://github.com/nf-core/tools/releases/tag/2.1)
 * Remove custom content to render Pangolin report in MultiQC as it was officially added as a module in [v1.11](https://github.com/ewels/MultiQC/pull/1458)
 * [[#212](https://github.com/nf-core/viralrecon/issues/212)] - Access to `PYCOQC.out` is undefined
+* [[#229](https://github.com/nf-core/viralrecon/issues/229)] - ARTIC Guppyplex settings for 1200bp ARTIC primers with Nanopore data
 
 ### Software dependencies
 
