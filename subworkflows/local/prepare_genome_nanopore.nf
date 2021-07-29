@@ -9,10 +9,10 @@ params.snpeff_build_options     = [:]
 include {
     GUNZIP as GUNZIP_FASTA
     GUNZIP as GUNZIP_GFF
-    GUNZIP as GUNZIP_PRIMER_BED } from '../../modules/nf-core/software/gunzip/main' addParams( options: params.genome_options           )
-include { GET_CHROM_SIZES       } from '../../modules/local/get_chrom_sizes'        addParams( options: params.genome_options           )
-include { COLLAPSE_PRIMERS      } from '../../modules/local/collapse_primers'       addParams( options: params.collapse_primers_options )
-include { SNPEFF_BUILD          } from '../../modules/local/snpeff_build'           addParams( options: params.snpeff_build_options     )
+    GUNZIP as GUNZIP_PRIMER_BED } from '../../modules/nf-core/modules/gunzip/main' addParams( options: params.genome_options           )
+include { GET_CHROM_SIZES       } from '../../modules/local/get_chrom_sizes'       addParams( options: params.genome_options           )
+include { COLLAPSE_PRIMERS      } from '../../modules/local/collapse_primers'      addParams( options: params.collapse_primers_options )
+include { SNPEFF_BUILD          } from '../../modules/local/snpeff_build'          addParams( options: params.snpeff_build_options     )
 
 workflow PREPARE_GENOME {
     take:

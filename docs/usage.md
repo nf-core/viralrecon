@@ -120,7 +120,7 @@ nextflow run nf-core/viralrecon \
     --primer_set_version 3 \
     --fastq_dir fastq_pass/ \
     --artic_minion_caller medaka \
-    --artic_minion_medaka_model ./r941_min_high_g360_model.hdf5 \
+    --artic_minion_medaka_model r941_min_high_g360 \
     -profile <docker/singularity/podman/conda/institute>
 ```
 

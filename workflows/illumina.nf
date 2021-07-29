@@ -76,8 +76,6 @@ include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_FAIL_READS       
 include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_FAIL_MAPPED        } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
 include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_IVAR_NEXTCLADE     } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
 include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_BCFTOOLS_NEXTCLADE } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_CSV_FROM_MAP as MULTIQC_CUSTOM_CSV_IVAR_PANGOLIN     } from '../modules/local/multiqc_custom_csv_from_map'    addParams( options: [publish_files: false] )
-include { MULTIQC_CUSTOM_CSV_FROM_MAP as MULTIQC_CUSTOM_CSV_BCFTOOLS_PANGOLIN } from '../modules/local/multiqc_custom_csv_from_map'    addParams( options: [publish_files: false] )
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -131,12 +129,12 @@ include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'      
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { CAT_FASTQ                     } from '../modules/nf-core/software/cat/fastq/main'                     addParams( options: modules['illumina_cat_fastq']                     )
-include { FASTQC                        } from '../modules/nf-core/software/fastqc/main'                        addParams( options: modules['illumina_cutadapt_fastqc']               )
-include { KRAKEN2_RUN                   } from '../modules/nf-core/software/kraken2/run/main'                   addParams( options: modules['illumina_kraken2_run']                   )
-include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/software/picard/collectmultiplemetrics/main' addParams( options: modules['illumina_picard_collectmultiplemetrics'] )
-include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_genome']               )
-include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_amplicon']             )
+include { CAT_FASTQ                     } from '../modules/nf-core/modules/cat/fastq/main'                     addParams( options: modules['illumina_cat_fastq']                     )
+include { FASTQC                        } from '../modules/nf-core/modules/fastqc/main'                        addParams( options: modules['illumina_cutadapt_fastqc']               )
+include { KRAKEN2_KRAKEN2               } from '../modules/nf-core/modules/kraken2/kraken2/main'               addParams( options: modules['illumina_kraken2_kraken2']               )
+include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/modules/picard/collectmultiplemetrics/main' addParams( options: modules['illumina_picard_collectmultiplemetrics'] )
+include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/modules/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_genome']               )
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/modules/mosdepth/main'                      addParams( options: modules['illumina_mosdepth_amplicon']             )
 
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
@@ -282,19 +280,19 @@ workflow ILLUMINA {
     ch_assembly_fastq  = ch_variants_fastq
     ch_kraken2_multiqc = Channel.empty()
     if (!params.skip_kraken2) {
-        KRAKEN2_RUN (
+        KRAKEN2_KRAKEN2 (
             ch_variants_fastq,
             PREPARE_GENOME.out.kraken2_db
         )
-        ch_kraken2_multiqc   = KRAKEN2_RUN.out.txt
-        ch_software_versions = ch_software_versions.mix(KRAKEN2_RUN.out.version.first().ifEmpty(null))
+        ch_kraken2_multiqc   = KRAKEN2_KRAKEN2.out.txt
+        ch_software_versions = ch_software_versions.mix(KRAKEN2_KRAKEN2.out.version.first().ifEmpty(null))
 
         if (params.kraken2_variants_host_filter) {
-            ch_variants_fastq = KRAKEN2_RUN.out.unclassified
+            ch_variants_fastq = KRAKEN2_KRAKEN2.out.unclassified
         }
 
         if (params.kraken2_assembly_host_filter) {
-            ch_assembly_fastq = KRAKEN2_RUN.out.unclassified
+            ch_assembly_fastq = KRAKEN2_KRAKEN2.out.unclassified
         }
     }
 
@@ -457,7 +455,7 @@ workflow ILLUMINA {
         ch_ivar_stats_multiqc    = VARIANTS_IVAR.out.stats
         ch_ivar_snpeff_multiqc   = VARIANTS_IVAR.out.snpeff_csv
         ch_ivar_quast_multiqc    = VARIANTS_IVAR.out.quast_tsv
-        ch_ivar_pangolin_report  = VARIANTS_IVAR.out.pangolin_report
+        ch_ivar_pangolin_multiqc = VARIANTS_IVAR.out.pangolin_report
         ch_ivar_nextclade_report = VARIANTS_IVAR.out.nextclade_report
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.ivar_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.tabix_version.first().ifEmpty(null))
@@ -468,22 +466,6 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.pangolin_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.nextclade_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_IVAR.out.asciigenome_version.first().ifEmpty(null))
-
-        //
-        // MODULE: Get Pangolin lineage information for MultiQC report
-        //
-        ch_ivar_pangolin_report
-            .map { meta, report ->
-                def fields = WorkflowCommons.getPangolinFieldMap(report)
-                return [sample:meta.id] << fields
-            }
-            .set { ch_ivar_pangolin_multiqc }
-
-        MULTIQC_CUSTOM_CSV_IVAR_PANGOLIN (
-            ch_ivar_pangolin_multiqc.collect(),
-            'ivar_pangolin_lineage'
-        )
-        .set { ch_ivar_pangolin_multiqc }
 
         //
         // MODULE: Get Nextclade clade information for MultiQC report
@@ -528,7 +510,7 @@ workflow ILLUMINA {
         ch_bcftools_stats_multiqc    = VARIANTS_BCFTOOLS.out.stats
         ch_bcftools_snpeff_multiqc   = VARIANTS_BCFTOOLS.out.snpeff_csv
         ch_bcftools_quast_multiqc    = VARIANTS_BCFTOOLS.out.quast_tsv
-        ch_bcftools_pangolin_report  = VARIANTS_BCFTOOLS.out.pangolin_report
+        ch_bcftools_pangolin_multiqc = VARIANTS_BCFTOOLS.out.pangolin_report
         ch_bcftools_nextclade_report = VARIANTS_BCFTOOLS.out.nextclade_report
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.bcftools_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.bedtools_version.first().ifEmpty(null))
@@ -538,22 +520,6 @@ workflow ILLUMINA {
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.pangolin_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.nextclade_version.first().ifEmpty(null))
         ch_software_versions = ch_software_versions.mix(VARIANTS_BCFTOOLS.out.asciigenome_version.first().ifEmpty(null))
-
-        //
-        // MODULE: Get Pangolin lineage information for MultiQC report
-        //
-        ch_bcftools_pangolin_report
-            .map { meta, report ->
-                def fields = WorkflowCommons.getPangolinFieldMap(report)
-                return [sample:meta.id] << fields
-            }
-            .set { ch_bcftools_pangolin_multiqc }
-
-        MULTIQC_CUSTOM_CSV_BCFTOOLS_PANGOLIN (
-            ch_bcftools_pangolin_multiqc.collect(),
-            'bcftools_pangolin_lineage'
-        )
-        .set { ch_bcftools_pangolin_multiqc }
 
         //
         // MODULE: Get Nextclade clade information for MultiQC report
@@ -710,12 +676,12 @@ workflow ILLUMINA {
             ch_ivar_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_quast_multiqc.collect().ifEmpty([]),
-            ch_ivar_pangolin_multiqc.collect().ifEmpty([]),
+            ch_ivar_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_nextclade_multiqc.collect().ifEmpty([]),
             ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_quast_multiqc.collect().ifEmpty([]),
-            ch_bcftools_pangolin_multiqc.collect().ifEmpty([]),
+            ch_bcftools_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_nextclade_multiqc.collect().ifEmpty([]),
             ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
             ch_spades_quast_multiqc.collect().ifEmpty([]),
@@ -733,7 +699,9 @@ workflow ILLUMINA {
 */
 
 workflow.onComplete {
-    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
+    if (params.email || params.email_on_fail) {
+        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
+    }
     NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
 }
 

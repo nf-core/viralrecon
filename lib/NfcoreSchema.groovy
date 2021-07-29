@@ -453,28 +453,28 @@ class NfcoreSchema {
         def Map schema_definitions = (Map) new JsonSlurper().parseText(json).get('definitions')
         def Map schema_properties = (Map) new JsonSlurper().parseText(json).get('properties')
         /* Tree looks like this in nf-core schema
-         * definitions <- this is what the first get('definitions') gets us
-            group 1
-                title
-                description
-                    properties
-                    parameter 1
-                        type
-                        description
-                    parameter 2
-                        type
-                        description
-            group 2
-                title
-                description
-                    properties
-                    parameter 1
-                        type
-                        description
-         * properties <- parameters can also be ungrouped, outside of definitions
-            parameter 1
-                type
-                description
+        * definitions <- this is what the first get('definitions') gets us
+                group 1
+                    title
+                    description
+                        properties
+                        parameter 1
+                            type
+                            description
+                        parameter 2
+                            type
+                            description
+                group 2
+                    title
+                    description
+                        properties
+                        parameter 1
+                            type
+                            description
+        * properties <- parameters can also be ungrouped, outside of definitions
+                parameter 1
+                    type
+                    description
         */
 
         // Grouped params

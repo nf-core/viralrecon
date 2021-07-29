@@ -23,7 +23,7 @@ process SAMPLESHEET_CHECK {
     output:
     path '*.csv'
 
-    script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
+    script: // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     """
     check_samplesheet.py \\
         $samplesheet \\

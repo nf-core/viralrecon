@@ -54,7 +54,6 @@ multiqc_options.args += params.multiqc_title ? Utils.joinModuleArgs(["--title \"
 include { ASCIIGENOME                 } from '../modules/local/asciigenome'                 addParams( options: modules['nanopore_asciigenome'] )
 include { GET_SOFTWARE_VERSIONS       } from '../modules/local/get_software_versions'       addParams( options: [publish_files: ['tsv':'']]     )
 include { MULTIQC                     } from '../modules/local/multiqc_nanopore'            addParams( options: multiqc_options                 )
-include { MULTIQC_CUSTOM_CSV_FROM_MAP } from '../modules/local/multiqc_custom_csv_from_map' addParams( options: [publish_files: false]          )
 
 include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_NO_SAMPLE_NAME  } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
 include { MULTIQC_CUSTOM_TSV_FROM_STRING as MULTIQC_CUSTOM_TSV_NO_BARCODES     } from '../modules/local/multiqc_custom_tsv_from_string' addParams( options: [publish_files: false] )
@@ -93,16 +92,30 @@ def artic_minion_options   = modules['nanopore_artic_minion']
 artic_minion_options.args += params.artic_minion_caller  == 'medaka' ? Utils.joinModuleArgs(['--medaka']) : ''
 artic_minion_options.args += params.artic_minion_aligner == 'bwa'    ? Utils.joinModuleArgs(['--bwa'])    : Utils.joinModuleArgs(['--minimap2'])
 
-include { PYCOQC                        } from '../modules/nf-core/software/pycoqc/main'          addParams( options: modules['nanopore_pycoqc']            )
-include { NANOPLOT                      } from '../modules/nf-core/software/nanoplot/main'        addParams( options: modules['nanopore_nanoplot']          )
-include { ARTIC_GUPPYPLEX               } from '../modules/nf-core/software/artic/guppyplex/main' addParams( options: modules['nanopore_artic_guppyplex']   )
-include { ARTIC_MINION                  } from '../modules/nf-core/software/artic/minion/main'    addParams( options: artic_minion_options                  )
-include { BCFTOOLS_STATS                } from '../modules/nf-core/software/bcftools/stats/main'  addParams( options: modules['nanopore_bcftools_stats']    )
-include { QUAST                         } from '../modules/nf-core/software/quast/main'           addParams( options: modules['nanopore_quast']             )
-include { PANGOLIN                      } from '../modules/nf-core/software/pangolin/main'        addParams( options: modules['nanopore_pangolin']          )
-include { NEXTCLADE                     } from '../modules/nf-core/software/nextclade/main'       addParams( options: modules['nanopore_nextclade']         )
-include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/software/mosdepth/main'        addParams( options: modules['nanopore_mosdepth_genome']   )
-include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/software/mosdepth/main'        addParams( options: modules['nanopore_mosdepth_amplicon'] )
+def artic_guppyplex_options = modules['nanopore_artic_guppyplex']
+if (params.primer_set_version == 1200) {
+    def args_split = artic_guppyplex_options.args.tokenize()
+    def min_idx    = args_split.indexOf('--min-length')
+    def max_idx    = args_split.indexOf('--max-length')
+    if (min_idx != -1) {
+        args_split[min_idx+1] = '250'
+    }
+    if (max_idx != -1) {
+        args_split[max_idx+1] = '1500'
+    }
+    artic_guppyplex_options.args = args_split.join(' ')
+}
+
+include { PYCOQC                        } from '../modules/nf-core/modules/pycoqc/main'          addParams( options: modules['nanopore_pycoqc']            )
+include { NANOPLOT                      } from '../modules/nf-core/modules/nanoplot/main'        addParams( options: modules['nanopore_nanoplot']          )
+include { ARTIC_GUPPYPLEX               } from '../modules/nf-core/modules/artic/guppyplex/main' addParams( options: artic_guppyplex_options               )
+include { ARTIC_MINION                  } from '../modules/nf-core/modules/artic/minion/main'    addParams( options: artic_minion_options                  )
+include { BCFTOOLS_STATS                } from '../modules/nf-core/modules/bcftools/stats/main'  addParams( options: modules['nanopore_bcftools_stats']    )
+include { QUAST                         } from '../modules/nf-core/modules/quast/main'           addParams( options: modules['nanopore_quast']             )
+include { PANGOLIN                      } from '../modules/nf-core/modules/pangolin/main'        addParams( options: modules['nanopore_pangolin']          )
+include { NEXTCLADE                     } from '../modules/nf-core/modules/nextclade/main'       addParams( options: modules['nanopore_nextclade']         )
+include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/modules/mosdepth/main'        addParams( options: modules['nanopore_mosdepth_genome']   )
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/modules/mosdepth/main'        addParams( options: modules['nanopore_mosdepth_amplicon'] )
 
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
@@ -127,12 +140,14 @@ workflow NANOPORE {
     //
     // MODULE: PycoQC on sequencing summary file
     //
+    ch_pycoqc_multiqc = Channel.empty()
     if (params.sequencing_summary && !params.skip_pycoqc) {
         PYCOQC (
             ch_sequencing_summary
         )
+        ch_pycoqc_multiqc    = PYCOQC.out.json
+        ch_software_versions = ch_software_versions.mix(PYCOQC.out.version.ifEmpty(null))
     }
-    ch_software_versions = ch_software_versions.mix(PYCOQC.out.version.ifEmpty(null))
 
     //
     // SUBWORKFLOW: Uncompress and prepare reference genome files
@@ -362,25 +377,8 @@ workflow NANOPORE {
         PANGOLIN (
             ARTIC_MINION.out.fasta
         )
+        ch_pangolin_multiqc  = PANGOLIN.out.report
         ch_software_versions = ch_software_versions.mix(PANGOLIN.out.version.ifEmpty(null))
-
-        //
-        // MODULE: Get Pangolin lineage information for MultiQC report
-        //
-        PANGOLIN
-            .out
-            .report
-            .map { meta, report ->
-                def fields = WorkflowCommons.getPangolinFieldMap(report)
-                return [sample:meta.id] << fields
-            }
-            .set { ch_pangolin_multiqc }
-
-        MULTIQC_CUSTOM_CSV_FROM_MAP (
-            ch_pangolin_multiqc.collect(),
-            'pangolin_lineage'
-        )
-        .set { ch_pangolin_multiqc }
     }
 
     //
@@ -389,8 +387,7 @@ workflow NANOPORE {
     ch_nextclade_multiqc = Channel.empty()
     if (!params.skip_nextclade) {
         NEXTCLADE (
-            ARTIC_MINION.out.fasta,
-            'csv'
+            ARTIC_MINION.out.fasta
         )
         ch_software_versions = ch_software_versions.mix(NEXTCLADE.out.version.ifEmpty(null))
 
@@ -506,14 +503,14 @@ workflow NANOPORE {
             MULTIQC_CUSTOM_TSV_BARCODE_COUNT.out.ifEmpty([]),
             MULTIQC_CUSTOM_TSV_GUPPYPLEX_COUNT.out.ifEmpty([]),
             ch_amplicon_heatmap_multiqc.ifEmpty([]),
-            PYCOQC.out.json.collect().ifEmpty([]),
+            ch_pycoqc_multiqc.collect().ifEmpty([]),
             ARTIC_MINION.out.json.collect{it[1]}.ifEmpty([]),
             FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]),
             BCFTOOLS_STATS.out.stats.collect{it[1]}.ifEmpty([]),
             ch_mosdepth_multiqc.collect{it[1]}.ifEmpty([]),
             ch_quast_multiqc.collect().ifEmpty([]),
             ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_pangolin_multiqc.collect().ifEmpty([]),
+            ch_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
             ch_nextclade_multiqc.collect().ifEmpty([])
         )
         multiqc_report = MULTIQC.out.report.toList()
@@ -527,7 +524,9 @@ workflow NANOPORE {
 */
 
 workflow.onComplete {
-    NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
+    if (params.email || params.email_on_fail) {
+        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
+    }
     NfcoreTemplate.summary(workflow, params, log)
 }
 

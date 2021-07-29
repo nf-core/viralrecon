@@ -10,11 +10,11 @@ process MULTIQC {
         mode: params.publish_dir_mode,
         saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:[:], publish_by_meta:[]) }
 
-    conda (params.enable_conda ? "bioconda::multiqc=1.10.1" : null)
+    conda (params.enable_conda ? "bioconda::multiqc=1.11" : null)
     if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/multiqc:1.10.1--pyhdfd78af_1"
+        container "https://depot.galaxyproject.org/singularity/multiqc:1.11--pyhdfd78af_0"
     } else {
-        container "quay.io/biocontainers/multiqc:1.10.1--pyhdfd78af_1"
+        container "quay.io/biocontainers/multiqc:1.11--pyhdfd78af_0"
     }
 
     input:
@@ -67,11 +67,11 @@ process MULTIQC {
     multiqc_to_custom_csv.py --platform illumina
 
     ## Manually remove files that we don't want in the report
-    if grep -q skip_assembly workflow_summary_mqc.yaml; then
+    if grep -q ">skip_assembly<" workflow_summary_mqc.yaml; then
         rm -f *assembly_metrics_mqc.csv
     fi
 
-    if grep -q skip_variants workflow_summary_mqc.yaml; then
+    if grep -q ">skip_variants<" workflow_summary_mqc.yaml; then
         rm -f *variants_metrics_mqc.csv
     fi
 

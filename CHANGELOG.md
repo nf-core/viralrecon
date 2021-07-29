@@ -3,13 +3,36 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[2.2](https://github.com/nf-core/rnaseq/releases/tag/2.2)] - 2021-07-29
+
+### Enhancements & fixes
+
+* Updated pipeline template to [nf-core/tools 2.1](https://github.com/nf-core/tools/releases/tag/2.1)
+* Remove custom content to render Pangolin report in MultiQC as it was officially added as a module in [v1.11](https://github.com/ewels/MultiQC/pull/1458)
+* [[#212](https://github.com/nf-core/viralrecon/issues/212)] - Access to `PYCOQC.out` is undefined
+* [[#229](https://github.com/nf-core/viralrecon/issues/229)] - ARTIC Guppyplex settings for 1200bp ARTIC primers with Nanopore data
+
+### Software dependencies
+
+Note, since the pipeline is now using Nextflow DSL2, each process will be run with its own [Biocontainer](https://biocontainers.pro/#/registry). This means that on occasion it is entirely possible for the pipeline to be using different versions of the same tool. However, the overall software dependency changes compared to the last release have been listed below for reference.
+
+| Dependency                    | Old version | New version |
+|-------------------------------|-------------|-------------|
+| `multiqc`                     | 1.10.1      | 1.11        |
+| `pangolin`                    | 3.0.5       | 3.1.7       |
+| `samtools`                    | 1.10        | 1.12        |
+
+> **NB:** Dependency has been __updated__ if both old and new version information is present.
+> **NB:** Dependency has been __added__ if just the new version information is present.
+> **NB:** Dependency has been __removed__ if new version information isn't present.
+
 ## [[2.1](https://github.com/nf-core/rnaseq/releases/tag/2.1)] - 2021-06-15
 
 ### Enhancements & fixes
 
 * Removed workflow to download data from public databases in favour of using [nf-core/fetchngs](https://nf-co.re/fetchngs)
 * Added Pangolin results to MultiQC report
-* Add warning to MultiQC report for samples that have no reads after adapter trimming
+* Added warning to MultiQC report for samples that have no reads after adapter trimming
 * Added docs about structure of data required for running Nanopore data
 * Added docs about using other primer sets for Illumina data
 * Added docs about overwriting default container definitions to use latest versions e.g. Pangolin
