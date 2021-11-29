@@ -103,9 +103,9 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0):
 
                 if p<0.05 and pass_test =="TRUE":
                     FILTER = "SB"
-                elif p>0.05 and pass_test =="TRUE":
+                elif p>=0.05 and pass_test =="TRUE":
                     FILTER = "PASS"
-                elif  p<=0.05 and pass_test == "FALSE":
+                elif  p<0.05 and pass_test == "FALSE":
                     FILTER = "SB,other"
                 else:
                     FILTER = "FAIL"
