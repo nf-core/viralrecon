@@ -35,10 +35,13 @@ class NfcoreTemplate {
     //
     // Construct and send completion email
     //
-    public static void email(workflow, params, summary_params, projectDir, log, multiqc_report=[]) {
+    public static void email(workflow, params, summary_params, projectDir, log, multiqc_report=[], fail_mapped_reads=[:]) {
 
         // Set up the e-mail variables
         def subject = "[$workflow.manifest.name] Successful: $workflow.runName"
+        if (fail_mapped_reads.size() > 0) {
+            subject = "[$workflow.manifest.name] Partially successful (${fail_mapped_reads.size()} skipped): $workflow.runName"
+        }
         if (!workflow.success) {
             subject = "[$workflow.manifest.name] FAILED: $workflow.runName"
         }
@@ -61,22 +64,24 @@ class NfcoreTemplate {
         misc_fields['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
 
         def email_fields = [:]
-        email_fields['version']      = workflow.manifest.version
-        email_fields['runName']      = workflow.runName
-        email_fields['success']      = workflow.success
-        email_fields['dateComplete'] = workflow.complete
-        email_fields['duration']     = workflow.duration
-        email_fields['exitStatus']   = workflow.exitStatus
-        email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
-        email_fields['errorReport']  = (workflow.errorReport ?: 'None')
-        email_fields['commandLine']  = workflow.commandLine
-        email_fields['projectDir']   = workflow.projectDir
-        email_fields['summary']      = summary << misc_fields
+        email_fields['version']           = workflow.manifest.version
+        email_fields['runName']           = workflow.runName
+        email_fields['success']           = workflow.success
+        email_fields['dateComplete']      = workflow.complete
+        email_fields['duration']          = workflow.duration
+        email_fields['exitStatus']        = workflow.exitStatus
+        email_fields['errorMessage']      = (workflow.errorMessage ?: 'None')
+        email_fields['errorReport']       = (workflow.errorReport ?: 'None')
+        email_fields['commandLine']       = workflow.commandLine
+        email_fields['projectDir']        = workflow.projectDir
+        email_fields['summary']           = summary << misc_fields
+        email_fields['fail_mapped_reads'] = fail_mapped_reads.keySet()
+        email_fields['min_mapped_reads']  = params.min_mapped_reads
 
         // On success try attach the multiqc report
         def mqc_report = null
         try {
-            if (workflow.success) {
+            if (workflow.success && !params.skip_multiqc) {
                 mqc_report = multiqc_report.getVal()
                 if (mqc_report.getClass() == ArrayList && mqc_report.size() >= 1) {
                     if (mqc_report.size() > 1) {
@@ -148,8 +153,31 @@ class NfcoreTemplate {
     //
     // Print pipeline summary on completion
     //
-    public static void summary(workflow, params, log) {
+    public static void summary(workflow, params, log, fail_mapped_reads=[:], pass_mapped_reads=[:]) {
         Map colors = logColours(params.monochrome_logs)
+
+        if (pass_mapped_reads.size() > 0) {
+            def idx = 0
+            def samp_aln = ''
+            def total_aln_count = pass_mapped_reads.size() + fail_mapped_reads.size()
+            for (samp in pass_mapped_reads) {
+                samp_aln += "    ${samp.value}: ${samp.key}\n"
+                idx += 1
+                if (idx > 5) {
+                    samp_aln += "    ..see pipeline reports for full list\n"
+                    break;
+                }
+            }
+            log.info "-${colors.purple}[$workflow.manifest.name]${colors.green} ${pass_mapped_reads.size()}/$total_aln_count samples passed Bowtie2 ${params.min_mapped_reads} mapped read threshold:\n${samp_aln}${colors.reset}-"
+        }
+        if (fail_mapped_reads.size() > 0) {
+            def samp_aln = ''
+            for (samp in fail_mapped_reads) {
+                samp_aln += "    ${samp.value}: ${samp.key}\n"
+            }
+            log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} ${fail_mapped_reads.size()} samples skipped since they failed Bowtie2 ${params.min_mapped_reads} mapped read threshold:\n${samp_aln}${colors.reset}-"
+        }
+
         if (workflow.success) {
             if (workflow.stats.ignoredCount == 0) {
                 log.info "-${colors.purple}[$workflow.manifest.name]${colors.green} Pipeline completed successfully${colors.reset}-"
