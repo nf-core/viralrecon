@@ -55,7 +55,7 @@
                 "git_sha": "e937c7950af70930d1f34bb961403d9d2aa81c7d"
             },
             "fastqc": {
-                "git_sha": "e937c7950af70930d1f34bb961403d9d2aa81c7d"
+                "git_sha": "9d0cad583b9a71a6509b754fdf589cbfbed08961"
             },
             "gunzip": {
                 "git_sha": "e937c7950af70930d1f34bb961403d9d2aa81c7d"
