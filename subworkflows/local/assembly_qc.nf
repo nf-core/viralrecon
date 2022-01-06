@@ -2,17 +2,11 @@
 // Downstream analysis for assembly scaffolds
 //
 
-params.blastn_options        = [:]
-params.blastn_filter_options = [:]
-params.abacas_options        = [:]
-params.plasmidid_options     = [:]
-params.quast_options         = [:]
-
-include { FILTER_BLASTN } from '../../modules/local/filter_blastn'               addParams( options: params.blastn_filter_options )
-include { ABACAS        } from '../../modules/nf-core/modules/abacas/main'       addParams( options: params.abacas_options        )
-include { BLAST_BLASTN  } from '../../modules/nf-core/modules/blast/blastn/main' addParams( options: params.blastn_options        )
-include { PLASMIDID     } from '../../modules/nf-core/modules/plasmidid/main'    addParams( options: params.plasmidid_options     )
-include { QUAST         } from '../../modules/nf-core/modules/quast/main'        addParams( options: params.quast_options         )
+include { FILTER_BLASTN } from '../../modules/local/filter_blastn'
+include { ABACAS        } from '../../modules/nf-core/modules/abacas/main'
+include { BLAST_BLASTN  } from '../../modules/nf-core/modules/blast/blastn/main'
+include { PLASMIDID     } from '../../modules/nf-core/modules/plasmidid/main'
+include { QUAST         } from '../../modules/nf-core/modules/quast/main'
 
 workflow ASSEMBLY_QC {
     take:
@@ -24,19 +18,27 @@ workflow ASSEMBLY_QC {
 
     main:
 
+    ch_versions = Channel.empty()
+
     //
     // Run blastn on assembly scaffolds
     //
     ch_blast_txt        = Channel.empty()
     ch_blast_filter_txt = Channel.empty()
-    ch_blast_version    = Channel.empty()
     if (!params.skip_blast) {
-        BLAST_BLASTN ( scaffolds, blast_db )
-        ch_blast_txt     = BLAST_BLASTN.out.txt
-        ch_blast_version = BLAST_BLASTN.out.version
+        BLAST_BLASTN (
+            scaffolds,
+            blast_db
+        )
+        ch_blast_txt = BLAST_BLASTN.out.txt
+        ch_versions  = ch_versions.mix(BLAST_BLASTN.out.versions.first())
 
-        FILTER_BLASTN ( BLAST_BLASTN.out.txt, blast_header )
+        FILTER_BLASTN (
+            BLAST_BLASTN.out.txt,
+            blast_header
+        )
         ch_blast_filter_txt = FILTER_BLASTN.out.txt
+        ch_versions         = ch_versions.mix(FILTER_BLASTN.out.versions.first())
     }
 
     //
@@ -44,23 +46,30 @@ workflow ASSEMBLY_QC {
     //
     ch_quast_results = Channel.empty()
     ch_quast_tsv     = Channel.empty()
-    ch_quast_version = Channel.empty()
     if (!params.skip_assembly_quast) {
-        QUAST ( scaffolds.collect{ it[1] }, fasta, gff, true, params.gff )
+        QUAST (
+            scaffolds.collect{ it[1] },
+            fasta,
+            gff,
+            true,
+            params.gff
+        )
         ch_quast_results = QUAST.out.results
         ch_quast_tsv     = QUAST.out.tsv
-        ch_quast_version = QUAST.out.version
+        ch_versions      = ch_versions.mix(QUAST.out.versions)
     }
 
     //
     // Contiguate assembly with ABACAS
     //
     ch_abacas_results = Channel.empty()
-    ch_abacas_version = Channel.empty()
     if (!params.skip_abacas) {
-        ABACAS ( scaffolds, fasta )
+        ABACAS (
+            scaffolds,
+            fasta
+        )
         ch_abacas_results = ABACAS.out.results
-        ch_abacas_version = ABACAS.out.version
+        ch_versions       = ch_versions.mix(ABACAS.out.versions.first())
     }
 
     //
@@ -74,9 +83,11 @@ workflow ASSEMBLY_QC {
     ch_plasmidid_database = Channel.empty()
     ch_plasmidid_fasta    = Channel.empty()
     ch_plasmidid_kmer     = Channel.empty()
-    ch_plasmidid_version  = Channel.empty()
     if (!params.skip_plasmidid) {
-        PLASMIDID ( scaffolds, fasta )
+        PLASMIDID (
+            scaffolds,
+            fasta
+        )
         ch_plasmidid_html     = PLASMIDID.out.html
         ch_plasmidid_tab      = PLASMIDID.out.tab
         ch_plasmidid_images   = PLASMIDID.out.images
@@ -85,20 +96,17 @@ workflow ASSEMBLY_QC {
         ch_plasmidid_database = PLASMIDID.out.database
         ch_plasmidid_fasta    = PLASMIDID.out.fasta_files
         ch_plasmidid_kmer     = PLASMIDID.out.kmer
-        ch_plasmidid_version  = PLASMIDID.out.version
+        ch_versions           = ch_versions.mix(PLASMIDID.out.versions.first())
     }
 
     emit:
     blast_txt          = ch_blast_txt          // channel: [ val(meta), [ txt ] ]
     blast_filter_txt   = ch_blast_filter_txt   // channel: [ val(meta), [ txt ] ]
-    blast_version      = ch_blast_version      //    path: *.version.txt
 
     quast_results      = ch_quast_results      // channel: [ val(meta), [ results ] ]
     quast_tsv          = ch_quast_tsv          // channel: [ val(meta), [ tsv ] ]
-    quast_version      = ch_quast_version      //    path: *.version.txt
 
     abacas_results     = ch_abacas_results     // channel: [ val(meta), [ results ] ]
-    abacas_version     = ch_abacas_version     //    path: *.version.txt
 
     plasmidid_html     = ch_plasmidid_html     // channel: [ val(meta), [ html ] ]
     plasmidid_tab      = ch_plasmidid_tab      // channel: [ val(meta), [ tab ] ]
@@ -108,5 +116,6 @@ workflow ASSEMBLY_QC {
     plasmidid_database = ch_plasmidid_database // channel: [ val(meta), [ database/ ] ]
     plasmidid_fasta    = ch_plasmidid_fasta    // channel: [ val(meta), [ fasta_files/ ] ]
     plasmidid_kmer     = ch_plasmidid_kmer     // channel: [ val(meta), [ kmer/ ] ]
-    plasmidid_version  = ch_plasmidid_version  //    path: *.version.txt
+
+    versions           = ch_versions           // channel: [ versions.yml ]
 }

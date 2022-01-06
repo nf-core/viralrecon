@@ -2,17 +2,12 @@
 // Uncompress and prepare reference genome files
 //
 
-params.genome_options           = [:]
-params.collapse_primers_options = [:]
-params.snpeff_build_options     = [:]
-
-include {
-    GUNZIP as GUNZIP_FASTA
-    GUNZIP as GUNZIP_GFF
-    GUNZIP as GUNZIP_PRIMER_BED } from '../../modules/nf-core/modules/gunzip/main' addParams( options: params.genome_options           )
-include { GET_CHROM_SIZES       } from '../../modules/local/get_chrom_sizes'       addParams( options: params.genome_options           )
-include { COLLAPSE_PRIMERS      } from '../../modules/local/collapse_primers'      addParams( options: params.collapse_primers_options )
-include { SNPEFF_BUILD          } from '../../modules/local/snpeff_build'          addParams( options: params.snpeff_build_options     )
+include { GUNZIP as GUNZIP_FASTA      } from '../../modules/nf-core/modules/gunzip/main'
+include { GUNZIP as GUNZIP_GFF        } from '../../modules/nf-core/modules/gunzip/main'
+include { GUNZIP as GUNZIP_PRIMER_BED } from '../../modules/nf-core/modules/gunzip/main'
+include { CUSTOM_GETCHROMSIZES        } from '../../modules/nf-core/modules/custom/getchromsizes/main'
+include { COLLAPSE_PRIMERS            } from '../../modules/local/collapse_primers'
+include { SNPEFF_BUILD                } from '../../modules/local/snpeff_build'
 
 workflow PREPARE_GENOME {
     take:
@@ -20,11 +15,17 @@ workflow PREPARE_GENOME {
 
     main:
 
+    ch_versions = Channel.empty()
+
     //
     // Uncompress genome fasta file if required
     //
     if (params.fasta.endsWith('.gz')) {
-        ch_fasta = GUNZIP_FASTA ( params.fasta ).gunzip
+        GUNZIP_FASTA (
+            [ [:], params.fasta ]
+        )
+        ch_fasta    = GUNZIP_FASTA.out.gunzip.map { it[1] }
+        ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
     } else {
         ch_fasta = file(params.fasta)
     }
@@ -34,7 +35,11 @@ workflow PREPARE_GENOME {
     //
     if (params.gff) {
         if (params.gff.endsWith('.gz')) {
-            ch_gff = GUNZIP_GFF ( params.gff ).gunzip
+            GUNZIP_GFF (
+                [ [:], params.gff ]
+            )
+            ch_gff      = GUNZIP_GFF.out.gunzip.map { it[1] }
+            ch_versions = ch_versions.mix(GUNZIP_GFF.out.versions)
         } else {
             ch_gff = file(params.gff)
         }
@@ -47,7 +52,11 @@ workflow PREPARE_GENOME {
     //
     ch_chrom_sizes = Channel.empty()
     if (!params.skip_asciigenome) {
-        ch_chrom_sizes = GET_CHROM_SIZES ( ch_fasta ).sizes
+        CUSTOM_GETCHROMSIZES (
+            ch_fasta
+        )
+        ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes
+        ch_versions    = ch_versions.mix(CUSTOM_GETCHROMSIZES.out.versions)
     }
 
     //
@@ -56,7 +65,11 @@ workflow PREPARE_GENOME {
     ch_primer_bed = Channel.empty()
     if (params.primer_bed) {
         if (params.primer_bed.endsWith('.gz')) {
-            ch_primer_bed = GUNZIP_PRIMER_BED ( params.primer_bed ).gunzip
+            GUNZIP_PRIMER_BED (
+                [ [:], params.primer_bed ]
+            )
+            ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { it[1] }
+            ch_versions   = ch_versions.mix(GUNZIP_PRIMER_BED.out.versions)
         } else {
             ch_primer_bed = file(params.primer_bed)
         }
@@ -67,7 +80,13 @@ workflow PREPARE_GENOME {
     //
     ch_primer_collapsed_bed = Channel.empty()
     if (!params.skip_mosdepth) {
-        ch_primer_collapsed_bed = COLLAPSE_PRIMERS ( ch_primer_bed, params.primer_left_suffix, params.primer_right_suffix )
+        COLLAPSE_PRIMERS (
+            ch_primer_bed,
+            params.primer_left_suffix,
+            params.primer_right_suffix
+        )
+        ch_primer_collapsed_bed = COLLAPSE_PRIMERS.out.bed
+        ch_versions             = ch_versions.mix(COLLAPSE_PRIMERS.out.versions)
     }
 
     //
@@ -76,9 +95,13 @@ workflow PREPARE_GENOME {
     ch_snpeff_db     = Channel.empty()
     ch_snpeff_config = Channel.empty()
     if (params.gff && !params.skip_snpeff) {
-        SNPEFF_BUILD ( ch_fasta, ch_gff )
+        SNPEFF_BUILD (
+            ch_fasta,
+            ch_gff
+        )
         ch_snpeff_db     = SNPEFF_BUILD.out.db
         ch_snpeff_config = SNPEFF_BUILD.out.config
+        ch_versions      = ch_versions.mix(SNPEFF_BUILD.out.versions)
     }
 
     emit:
@@ -89,4 +112,6 @@ workflow PREPARE_GENOME {
     primer_collapsed_bed = ch_primer_collapsed_bed  // path: primer.collapsed.bed
     snpeff_db            = ch_snpeff_db             // path: snpeff_db
     snpeff_config        = ch_snpeff_config         // path: snpeff.config
+
+    versions             = ch_versions              // channel: [ versions.yml ]
 }

@@ -1,33 +1,23 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process SNPSIFT_EXTRACTFIELDS {
     tag "$meta.id"
     label 'process_medium'
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
-    conda (params.enable_conda ? 'bioconda::snpsift=4.3.1t' : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container 'https://depot.galaxyproject.org/singularity/snpsift:4.3.1t--2'
-    } else {
-        container 'quay.io/biocontainers/snpsift:4.3.1t--2'
-    }
+    conda (params.enable_conda ? "bioconda::snpsift=4.3.1t" : null)
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/snpsift:4.3.1t--hdfd78af_3' :
+        'quay.io/biocontainers/snpsift:4.3.1t--hdfd78af_3' }"
 
     input:
     tuple val(meta), path(vcf)
 
     output:
     tuple val(meta), path("*.snpsift.txt"), emit: txt
-    path '*.version.txt'                  , emit: version
+    path "versions.yml"                   , emit: versions
 
     script:
-    def software  = getSoftwareName(task.process)
-    def prefix    = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+
     def avail_mem = 4
     if (!task.memory) {
         log.info '[SnpSift] Available memory not known - defaulting to 4GB. Specify process memory requirements to change this.'
@@ -40,7 +30,7 @@ process SNPSIFT_EXTRACTFIELDS {
         extractFields \\
         -s "," \\
         -e "." \\
-        $options.args \\
+        $args \\
         $vcf \\
         CHROM POS REF ALT \\
         "ANN[*].GENE" "ANN[*].GENEID" \\
@@ -53,6 +43,9 @@ process SNPSIFT_EXTRACTFIELDS {
         "EFF[*].FUNCLASS" "EFF[*].CODON" "EFF[*].AA" "EFF[*].AA_LEN" \\
         > ${prefix}.snpsift.txt
 
-    echo \$(SnpSift -h 2>&1) | sed 's/^.*SnpSift version //; s/ .*\$//' > ${software}.version.txt
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        snpsift: \$( echo \$(SnpSift split -h 2>&1) | sed 's/^.*version //' | sed 's/(.*//' | sed 's/t//g' )
+    END_VERSIONS
     """
 }
