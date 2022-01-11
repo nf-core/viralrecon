@@ -833,15 +833,13 @@ An example MultiQC report generated from a full-sized dataset can be viewed on t
 <summary>Output files</summary>
 
 * `genome/`
-    * Unzipped genome fasta file for viral genome
-    * Unzipped genome annotation GFF file for viral genome
-* `genome/index/`
     * `bowtie2/`: Bowtie 2 index for viral genome.
-* `genome/db/`
     * `blast_db/`: BLAST database for viral genome.
     * `kraken2_db/`: Kraken 2 database for host genome.
     * `snpeff_db/`: SnpEff database for viral genome.
     * `snpeff.config`: SnpEff config file for viral genome.
+    * Unzipped genome fasta file for viral genome
+    * Unzipped genome annotation GFF file for viral genome
 
 </details>
 
