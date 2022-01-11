@@ -2,8 +2,10 @@
 // Assembly and downstream processing for SPAdes scaffolds
 //
 
-include { SPADES        } from '../../modules/nf-core/modules/spades/main'
-include { BANDAGE_IMAGE } from '../../modules/nf-core/modules/bandage/image/main'
+include { SPADES                     } from '../../modules/nf-core/modules/spades/main'
+include { BANDAGE_IMAGE              } from '../../modules/nf-core/modules/bandage/image/main'
+include { GUNZIP as GUNZIP_SCAFFOLDS } from '../../modules/nf-core/modules/gunzip/main'
+include { GUNZIP as GUNZIP_GFA       } from '../../modules/nf-core/modules/gunzip/main'
 
 include { ASSEMBLY_QC   } from './assembly_qc'
 
@@ -41,17 +43,32 @@ workflow ASSEMBLY_SPADES {
     ch_versions = ch_versions.mix(SPADES.out.versions.first())
 
     //
+    // Unzip scaffolds file
+    //
+    GUNZIP_SCAFFOLDS (
+        SPADES.out.scaffolds
+    )
+    ch_versions = ch_versions.mix(GUNZIP_SCAFFOLDS.out.versions.first())
+
+    //
+    // Unzip gfa file
+    //
+    GUNZIP_GFA (
+        SPADES.out.gfa
+    )
+
+    //
     // Filter for empty scaffold files
     //
-    SPADES
+    GUNZIP_SCAFFOLDS
         .out
-        .scaffolds
+        .gunzip
         .filter { meta, scaffold -> scaffold.size() > 0 }
         .set { ch_scaffolds }
 
-    SPADES
+    GUNZIP_GFA
         .out
-        .gfa
+        .gunzip
         .filter { meta, gfa -> gfa.size() > 0 }
         .set { ch_gfa }
 

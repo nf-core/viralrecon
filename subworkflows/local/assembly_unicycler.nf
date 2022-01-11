@@ -2,18 +2,20 @@
 // Assembly and downstream processing for Unicycler scaffolds
 //
 
-include { UNICYCLER     } from '../../modules/nf-core/modules/unicycler/main'
-include { BANDAGE_IMAGE } from '../../modules/nf-core/modules/bandage/image/main'
+include { UNICYCLER                  } from '../../modules/nf-core/modules/unicycler/main'
+include { BANDAGE_IMAGE              } from '../../modules/nf-core/modules/bandage/image/main'
+include { GUNZIP as GUNZIP_SCAFFOLDS } from '../../modules/nf-core/modules/gunzip/main'
+include { GUNZIP as GUNZIP_GFA       } from '../../modules/nf-core/modules/gunzip/main'
 
 include { ASSEMBLY_QC   } from './assembly_qc'
 
 workflow ASSEMBLY_UNICYCLER {
     take:
-    reads         // channel: [ val(meta), [ reads ] ]
-    fasta         // channel: /path/to/genome.fasta
-    gff           // channel: /path/to/genome.gff
-    blast_db      // channel: /path/to/blast_db/
-    blast_header  // channel: /path/to/blast_header.txt
+    reads        // channel: [ val(meta), [ reads ] ]
+    fasta        // channel: /path/to/genome.fasta
+    gff          // channel: /path/to/genome.gff
+    blast_db     // channel: /path/to/blast_db/
+    blast_header // channel: /path/to/blast_header.txt
 
     main:
 
@@ -28,17 +30,32 @@ workflow ASSEMBLY_UNICYCLER {
     ch_versions = ch_versions.mix(UNICYCLER.out.versions.first())
 
     //
+    // Unzip scaffolds file
+    //
+    GUNZIP_SCAFFOLDS (
+        UNICYCLER.out.scaffolds
+    )
+    ch_versions = ch_versions.mix(GUNZIP_SCAFFOLDS.out.versions.first())
+
+    //
+    // Unzip gfa file
+    //
+    GUNZIP_GFA (
+        UNICYCLER.out.gfa
+    )
+
+    //
     // Filter for empty scaffold files
     //
-    UNICYCLER
+    GUNZIP_SCAFFOLDS
         .out
-        .scaffolds
+        .gunzip
         .filter { meta, scaffold -> scaffold.size() > 0 }
         .set { ch_scaffolds }
 
-    UNICYCLER
+    GUNZIP_GFA
         .out
-        .gfa
+        .gunzip
         .filter { meta, gfa -> gfa.size() > 0 }
         .set { ch_gfa }
 
