@@ -9,12 +9,13 @@ include { ASSEMBLY_QC   } from './assembly_qc'
 
 workflow ASSEMBLY_SPADES {
     take:
-    reads         // channel: [ val(meta), [ reads ] ]
-    hmm           // channel: /path/to/spades.hmm
-    fasta         // channel: /path/to/genome.fasta
-    gff           // channel: /path/to/genome.gff
-    blast_db      // channel: /path/to/blast_db/
-    blast_header  // channel: /path/to/blast_header.txt
+    reads        // channel: [ val(meta), [ reads ] ]
+    mode         // string : spades assembly mode e.g. 'rnaviral'
+    hmm          // channel: /path/to/spades.hmm
+    fasta        // channel: /path/to/genome.fasta
+    gff          // channel: /path/to/genome.gff
+    blast_db     // channel: /path/to/blast_db/
+    blast_header // channel: /path/to/blast_header.txt
 
     main:
 
@@ -24,11 +25,11 @@ workflow ASSEMBLY_SPADES {
     // Filter for paired-end samples if running metaSPAdes / metaviralSPAdes / metaplasmidSPAdes
     //
     ch_reads = reads
-    // if (params.spades_options.args.contains('--meta') || params.spades_options.args.contains('--bio')) {
-    //     reads
-    //         .filter { meta, fastq -> !meta.single_end }
-    //         .set { ch_reads }
-    // }
+    if (mode.contains('meta') || mode.contains('bio')) {
+        reads
+            .filter { meta, fastq -> !meta.single_end }
+            .set { ch_reads }
+    }
 
     //
     // Assemble reads with SPAdes
