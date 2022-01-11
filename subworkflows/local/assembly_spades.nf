@@ -29,7 +29,7 @@ workflow ASSEMBLY_SPADES {
     ch_reads = reads
     if (mode.contains('meta') || mode.contains('bio')) {
         reads
-            .filter { meta, fastq -> !meta.single_end }
+            .filter { meta, illumina, pacbio, nanopore -> !meta.single_end }
             .set { ch_reads }
     }
 
