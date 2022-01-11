@@ -28,7 +28,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
 
 if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
-if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = ch_dummy_file                   }
+if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = []                              }
 
 def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
 def callers    = params.callers    ? params.callers.split(',').collect{ it.trim().toLowerCase() }    : []
@@ -359,7 +359,7 @@ workflow ILLUMINA {
 
         MOSDEPTH_GENOME (
             ch_bam.join(ch_bai, by: [0]),
-            ch_dummy_file,
+            [],
             200
         )
         ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
@@ -517,54 +517,55 @@ workflow ILLUMINA {
         }
     }
 
-    // //
-    // // SUBWORKFLOW: Run SPAdes assembly and downstream analysis
-    // //
+    //
+    // SUBWORKFLOW: Run SPAdes assembly and downstream analysis
+    //
     ch_spades_quast_multiqc = Channel.empty()
-    // if (!params.skip_assembly && 'spades' in assemblers) {
-    //     ASSEMBLY_SPADES (
-    //         ch_assembly_fastq,
-    //         ch_spades_hmm,
-    //         PREPARE_GENOME.out.fasta,
-    //         PREPARE_GENOME.out.gff,
-    //         PREPARE_GENOME.out.blast_db,
-    //         ch_blast_outfmt6_header
-    //     )
-    //     ch_spades_quast_multiqc = ASSEMBLY_SPADES.out.quast_tsv
-    //     ch_versions             = ch_versions.mix(ASSEMBLY_SPADES.out.versions)
-    // }
+    if (!params.skip_assembly && 'spades' in assemblers) {
+        ASSEMBLY_SPADES (
+            ch_assembly_fastq.map { meta, fastq -> [ meta, fastq, [], [] ] },
+            params.spades_mode,
+            ch_spades_hmm,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gff,
+            PREPARE_GENOME.out.blast_db,
+            ch_blast_outfmt6_header
+        )
+        ch_spades_quast_multiqc = ASSEMBLY_SPADES.out.quast_tsv
+        ch_versions             = ch_versions.mix(ASSEMBLY_SPADES.out.versions)
+    }
 
-    // //
-    // // SUBWORKFLOW: Run Unicycler assembly and downstream analysis
-    // //
+    //
+    // SUBWORKFLOW: Run Unicycler assembly and downstream analysis
+    //
     ch_unicycler_quast_multiqc = Channel.empty()
-    // if (!params.skip_assembly && 'unicycler' in assemblers) {
-    //     ASSEMBLY_UNICYCLER (
-    //         ch_assembly_fastq,
-    //         PREPARE_GENOME.out.fasta,
-    //         PREPARE_GENOME.out.gff,
-    //         PREPARE_GENOME.out.blast_db,
-    //         ch_blast_outfmt6_header
-    //     )
-    //     ch_unicycler_quast_multiqc = ASSEMBLY_UNICYCLER.out.quast_tsv
-    //     ch_versions                = ch_versions.mix(ASSEMBLY_UNICYCLER.out.versions)
-    // }
+    if (!params.skip_assembly && 'unicycler' in assemblers) {
+        ASSEMBLY_UNICYCLER (
+            ch_assembly_fastq.map { meta, fastq -> [ meta, fastq, [] ] },
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gff,
+            PREPARE_GENOME.out.blast_db,
+            ch_blast_outfmt6_header
+        )
+        ch_unicycler_quast_multiqc = ASSEMBLY_UNICYCLER.out.quast_tsv
+        ch_versions                = ch_versions.mix(ASSEMBLY_UNICYCLER.out.versions)
+    }
 
-    // //
-    // // SUBWORKFLOW: Run minia assembly and downstream analysis
-    // //
+    //
+    // SUBWORKFLOW: Run minia assembly and downstream analysis
+    //
     ch_minia_quast_multiqc = Channel.empty()
-    // if (!params.skip_assembly && 'minia' in assemblers) {
-    //     ASSEMBLY_MINIA (
-    //         ch_assembly_fastq,
-    //         PREPARE_GENOME.out.fasta,
-    //         PREPARE_GENOME.out.gff,
-    //         PREPARE_GENOME.out.blast_db,
-    //         ch_blast_outfmt6_header
-    //     )
-    //     ch_minia_quast_multiqc = ASSEMBLY_MINIA.out.quast_tsv
-    //     ch_versions            = ch_versions.mix(ASSEMBLY_MINIA.out.versions)
-    // }
+    if (!params.skip_assembly && 'minia' in assemblers) {
+        ASSEMBLY_MINIA (
+            ch_assembly_fastq,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gff,
+            PREPARE_GENOME.out.blast_db,
+            ch_blast_outfmt6_header
+        )
+        ch_minia_quast_multiqc = ASSEMBLY_MINIA.out.quast_tsv
+        ch_versions            = ch_versions.mix(ASSEMBLY_MINIA.out.versions)
+    }
 
     //
     // MODULE: Pipeline reporting
