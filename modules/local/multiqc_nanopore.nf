@@ -41,10 +41,10 @@ process MULTIQC {
     multiqc -f $args $custom_config .
 
     ## Parse YAML files dumped by MultiQC to obtain metrics
-    multiqc_to_custom_csv.py --platform nanopore
+    #multiqc_to_custom_csv.py --platform nanopore
 
     ## Manually remove files that we don't want in the report
-    rm -rf quast
+    #rm -rf quast
 
     ## Run MultiQC a second time
     multiqc -f $args -e general_stats --ignore *nextclade_clade_mqc.tsv $custom_config .
