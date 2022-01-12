@@ -24,12 +24,20 @@
                 "platform": {
                     "type": "string",
                     "fa_icon": "fas fa-hdd",
-                    "description": "NGS platform used to sequence the samples"
+                    "description": "NGS platform used to sequence the samples.",
+                    "enum": [
+                        "illumina",
+                        "nanopore"
+                    ]
                 },
                 "protocol": {
                     "type": "string",
-                    "description": "Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplicon'.",
-                    "fa_icon": "fas fa-vials"
+                    "description": "Specifies the type of protocol used for sequencing.",
+                    "fa_icon": "fas fa-vials",
+                    "enum": [
+                        "metagenomic",
+                        "amplicon"
+                    ]
                 },
                 "outdir": {
                     "type": "string",
@@ -176,14 +184,22 @@
                 "artic_minion_caller": {
                     "type": "string",
                     "default": "nanopolish",
-                    "description": "Variant caller used when running artic minion. Available options are 'medaka' and 'nanopolish' (default).",
-                    "fa_icon": "fas fa-phone-volume"
+                    "description": "Variant caller used when running artic minion (default: 'nanopolish').",
+                    "fa_icon": "fas fa-phone-volume",
+                    "enum": [
+                        "nanopolish",
+                        "medaka"
+                    ]
                 },
                 "artic_minion_aligner": {
                     "type": "string",
                     "default": "minimap2",
-                    "description": "Aligner used when running artic minion. Available options are 'bwa' and 'minimap2' (default).",
-                    "fa_icon": "fas fa-map-signs"
+                    "description": "Aligner used when running artic minion (default: 'minimap2').",
+                    "fa_icon": "fas fa-map-signs",
+                    "enum": [
+                        "minimap2",
+                        "bwa"
+                    ]
                 },
                 "artic_scheme": {
                     "type": "string",
@@ -434,7 +450,18 @@
                     "type": "string",
                     "default": "rnaviral",
                     "fa_icon": "fab fa-digg",
-                    "description": "Specify the SPAdes mode you would like to run. Supported options are 'rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio'."
+                    "description": "Specify the SPAdes mode you would like to run (default: 'rnaviral').",
+                    "enum": [
+                        "rnaviral",
+                        "corona",
+                        "metaviral",
+                        "meta",
+                        "metaplasmid",
+                        "plasmid",
+                        "isolate",
+                        "rna",
+                        "bio"
+                    ]
                 },
                 "spades_hmm": {
                     "type": "string",

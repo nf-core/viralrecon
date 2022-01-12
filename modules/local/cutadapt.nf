@@ -1,48 +1,40 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process CUTADAPT {
     tag "$meta.id"
     label 'process_medium'
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
-    conda (params.enable_conda ? 'bioconda::cutadapt=3.2' : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container 'https://depot.galaxyproject.org/singularity/cutadapt:3.2--py38h0213d0e_0'
-    } else {
-        container 'quay.io/biocontainers/cutadapt:3.2--py38h0213d0e_0'
-    }
+    conda (params.enable_conda ? 'bioconda::cutadapt=3.5' : null)
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/cutadapt:3.5--py39h38f01e4_0' :
+        'quay.io/biocontainers/cutadapt:3.5--py39h38f01e4_0' }"
 
     input:
     tuple val(meta), path(reads)
-    path  adapters
+    path adapters
 
     output:
     tuple val(meta), path('*.fastq.gz'), emit: reads
     tuple val(meta), path('*.log')     , emit: log
-    path '*.version.txt'               , emit: version
+    path "versions.yml"                , emit: versions
 
     script:
-    def software = getSoftwareName(task.process)
-    def prefix   = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
-    def paired   = meta.single_end ? "-a file:adapters.sub.fa"   : "-a file:adapters.sub.fa -A file:adapters.sub.fa"
-    def trimmed  = meta.single_end ? "-o ${prefix}.fastq.gz" : "-o ${prefix}_1.fastq.gz -p ${prefix}_2.fastq.gz"
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    def paired = meta.single_end ? "-a file:adapters.sub.fa" : "-a file:adapters.sub.fa -A file:adapters.sub.fa"
+    def trimmed = meta.single_end ? "-o ${prefix}.fastq.gz" : "-o ${prefix}_1.fastq.gz -p ${prefix}_2.fastq.gz"
     """
     sed -r '/^[ACTGactg]+\$/ s/\$/X/g' $adapters > adapters.sub.fa
 
     cutadapt \\
         --cores $task.cpus \\
-        $options.args \\
+        $args \\
         $paired \\
         $trimmed \\
         $reads \\
         > ${prefix}.cutadapt.log
 
-    echo \$(cutadapt --version) > ${software}.version.txt
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        cutadapt: \$(cutadapt --version)
+    END_VERSIONS
     """
 }

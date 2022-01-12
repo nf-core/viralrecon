@@ -2,15 +2,9 @@
 // Assembly and downstream processing for minia scaffolds
 //
 
-params.minia_options         = [:]
-params.blastn_options        = [:]
-params.blastn_filter_options = [:]
-params.abacas_options        = [:]
-params.plasmidid_options     = [:]
-params.quast_options         = [:]
+include { MINIA       } from '../../modules/nf-core/modules/minia/main'
 
-include { MINIA       } from '../../modules/nf-core/modules/minia/main' addParams( options: params.minia_options )
-include { ASSEMBLY_QC } from './assembly_qc'                            addParams( blastn_options: params.blastn_options, blastn_filter_options: params.blastn_filter_options, abacas_options: params.abacas_options, plasmidid_options: params.plasmidid_options, quast_options: params.quast_options )
+include { ASSEMBLY_QC } from './assembly_qc'
 
 workflow ASSEMBLY_MINIA {
     take:
@@ -22,10 +16,15 @@ workflow ASSEMBLY_MINIA {
 
     main:
 
+    ch_versions = Channel.empty()
+
     //
     // Assemble reads with minia
     //
-    MINIA ( reads )
+    MINIA (
+        reads
+    )
+    ch_versions = ch_versions.mix(MINIA.out.versions.first())
 
     //
     // Filter for empty contig files
@@ -46,23 +45,20 @@ workflow ASSEMBLY_MINIA {
         blast_db,
         blast_header
     )
+    ch_versions = ch_versions.mix(ASSEMBLY_QC.out.versions)
 
     emit:
     contigs            = MINIA.out.contigs                  // channel: [ val(meta), [ contigs ] ]
     unitigs            = MINIA.out.unitigs                  // channel: [ val(meta), [ unitigs ] ]
     h5                 = MINIA.out.h5                       // channel: [ val(meta), [ h5 ] ]
-    minia_version      = MINIA.out.version                  //    path: *.version.txt
 
     blast_txt          = ASSEMBLY_QC.out.blast_txt          // channel: [ val(meta), [ txt ] ]
     blast_filter_txt   = ASSEMBLY_QC.out.blast_filter_txt   // channel: [ val(meta), [ txt ] ]
-    blast_version      = ASSEMBLY_QC.out.blast_version      //    path: *.version.txt
 
     quast_results      = ASSEMBLY_QC.out.quast_results      // channel: [ val(meta), [ results ] ]
     quast_tsv          = ASSEMBLY_QC.out.quast_tsv          // channel: [ val(meta), [ tsv ] ]
-    quast_version      = ASSEMBLY_QC.out.quast_version      //    path: *.version.txt
 
     abacas_results     = ASSEMBLY_QC.out.abacas_results     // channel: [ val(meta), [ results ] ]
-    abacas_version     = ASSEMBLY_QC.out.abacas_version     //    path: *.version.txt
 
     plasmidid_html     = ASSEMBLY_QC.out.plasmidid_html     // channel: [ val(meta), [ html ] ]
     plasmidid_tab      = ASSEMBLY_QC.out.plasmidid_tab      // channel: [ val(meta), [ tab ] ]
@@ -72,5 +68,6 @@ workflow ASSEMBLY_MINIA {
     plasmidid_database = ASSEMBLY_QC.out.plasmidid_database // channel: [ val(meta), [ database/ ] ]
     plasmidid_fasta    = ASSEMBLY_QC.out.plasmidid_fasta    // channel: [ val(meta), [ fasta_files/ ] ]
     plasmidid_kmer     = ASSEMBLY_QC.out.plasmidid_kmer     // channel: [ val(meta), [ kmer/ ] ]
-    plasmidid_version  = ASSEMBLY_QC.out.plasmidid_version  //    path: *.version.txt
+
+    versions           = ch_versions                        // channel: [ versions.yml ]
 }
