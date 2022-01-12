@@ -38,7 +38,7 @@ if (!callers)  { callers = params.protocol == 'amplicon' ? ['ivar'] : ['bcftools
 */
 
 ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yaml", checkIfExists: true)
-ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
+ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 // Header files
 ch_blast_outfmt6_header     = file("$projectDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
@@ -578,7 +578,7 @@ workflow ILLUMINA {
 
         MULTIQC (
             ch_multiqc_config,
-            ch_multiqc_custom_config.collect().ifEmpty([]),
+            ch_multiqc_custom_config,
             CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
             ch_fail_reads_multiqc.ifEmpty([]),

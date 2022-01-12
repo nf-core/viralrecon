@@ -39,7 +39,7 @@ if (params.artic_minion_caller == 'medaka') {
 */
 
 ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
-ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
+ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 /*
 ========================================================================================
@@ -462,7 +462,7 @@ workflow NANOPORE {
 
         MULTIQC (
             ch_multiqc_config,
-            ch_multiqc_custom_config.collect().ifEmpty([]),
+            ch_multiqc_custom_config,
             CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
             ch_custom_no_sample_name_multiqc.ifEmpty([]),
