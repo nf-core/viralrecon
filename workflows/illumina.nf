@@ -224,7 +224,7 @@ workflow ILLUMINA {
 
         MULTIQC_TSV_FAIL_READS (
             ch_pass_fail_reads.collect(),
-            'Sample\tReads before trimming',
+            ['Sample', 'Reads before trimming'],
             'fail_mapped_reads'
         )
         .set { ch_fail_reads_multiqc }
@@ -304,7 +304,7 @@ workflow ILLUMINA {
 
         MULTIQC_TSV_FAIL_MAPPED (
             ch_pass_fail_mapped.fail.collect(),
-            'Sample\tMapped reads',
+            ['Sample', 'Mapped reads'],
             'fail_mapped_samples'
         )
         .set { ch_fail_mapping_multiqc }
@@ -430,7 +430,7 @@ workflow ILLUMINA {
 
         MULTIQC_TSV_IVAR_NEXTCLADE (
             ch_ivar_nextclade_multiqc.collect(),
-            'Sample\tclade',
+            ['Sample', 'clade'],
             'ivar_nextclade_clade'
         )
         .set { ch_ivar_nextclade_multiqc }
@@ -477,7 +477,7 @@ workflow ILLUMINA {
 
         MULTIQC_TSV_BCFTOOLS_NEXTCLADE (
             ch_bcftools_nextclade_multiqc.collect(),
-            'Sample\tclade',
+            ['Sample', 'clade'],
             'bcftools_nextclade_clade'
         )
         .set { ch_bcftools_nextclade_multiqc }
