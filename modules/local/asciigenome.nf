@@ -1,41 +1,29 @@
-// Import generic module functions
-include { initOptions; saveFiles; getSoftwareName } from './functions'
-
-params.options = [:]
-options        = initOptions(params.options)
-
 process ASCIIGENOME {
     tag "$meta.id"
     label 'process_medium'
-    publishDir "${params.outdir}",
-        mode: params.publish_dir_mode,
-        saveAs: { filename -> saveFiles(filename:filename, options:params.options, publish_dir:getSoftwareName(task.process), meta:meta, publish_by_meta:['id']) }
 
     conda (params.enable_conda ? "bioconda::asciigenome=1.16.0 bioconda::bedtools=2.30.0" : null)
-    if (workflow.containerEngine == 'singularity' && !params.singularity_pull_docker_container) {
-        container "https://depot.galaxyproject.org/singularity/mulled-v2-093691b47d719890dc19ac0c13c4528e9776897f:27211b8c38006480d69eb1be3ef09a7bf0a49d76-0"
-    } else {
-        container "quay.io/biocontainers/mulled-v2-093691b47d719890dc19ac0c13c4528e9776897f:27211b8c38006480d69eb1be3ef09a7bf0a49d76-0"
-    }
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/mulled-v2-093691b47d719890dc19ac0c13c4528e9776897f:27211b8c38006480d69eb1be3ef09a7bf0a49d76-0' :
+        'quay.io/biocontainers/mulled-v2-093691b47d719890dc19ac0c13c4528e9776897f:27211b8c38006480d69eb1be3ef09a7bf0a49d76-0' }"
 
     input:
     tuple val(meta), path(bam), path(vcf)
-    path  fasta
-    path  sizes
-    path  gff
-    path  bed
-    val   window
-    val   track_height
+    path fasta
+    path sizes
+    path gff
+    path bed
+    val window
+    val track_height
 
     output:
     tuple val(meta), path("*pdf"), emit: pdf
-    path  "*.version.txt"        , emit: version
+    path "versions.yml"          , emit: versions
 
     script:
-    def software   = getSoftwareName(task.process)
-    def prefix     = options.suffix ? "${meta.id}${options.suffix}" : "${meta.id}"
-    def gff_track  = gff ? "$gff" : ''
-    def bed_track  = bed ? "$bed" : ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    def gff_track = gff ? "$gff" : ''
+    def bed_track = bed ? "$bed" : ''
     def paired_end = meta.single_end ? '' : '&& readsAsPairs -on'
     """
     zcat $vcf \\
@@ -61,6 +49,10 @@ process ASCIIGENOME {
         $gff_track \\
         > /dev/null
 
-    echo \$(ASCIIGenome -ni --version 2>&1) | sed -e "s/ASCIIGenome //g" > ${software}.version.txt
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        asciigenome: \$(echo \$(ASCIIGenome -ni --version 2>&1) | sed -e "s/ASCIIGenome //g")
+        bedtools: \$(bedtools --version | sed -e "s/bedtools v//g")
+    END_VERSIONS
     """
 }

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Enhancements & fixes
 
+* Port pipeline to the updated Nextflow DSL2 syntax adopted on nf-core/modules
+* Bump minimum Nextflow version from `21.04.0` -> `21.10.3`
+* Updated pipeline template to [nf-core/tools 2.2](https://github.com/nf-core/tools/releases/tag/2.2)
+
 ### Parameters
 
 ## [[2.2](https://github.com/nf-core/rnaseq/releases/tag/2.2)] - 2021-07-29

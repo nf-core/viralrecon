@@ -687,9 +687,9 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 <summary>Output files</summary>
 
 * `assembly/spades/<SPADES_MODE>/`
-    * `*.scaffolds.fa`: SPAdes scaffold assembly.
-    * `*.contigs.fa`: SPAdes assembly contigs.
-    * `*.assembly.gfa`: SPAdes assembly graph in [GFA](https://github.com/GFA-spec/GFA-spec/blob/master/GFA1.md) format.
+    * `*.scaffolds.fa.gz`: SPAdes scaffold assembly.
+    * `*.contigs.fa.gz`: SPAdes assembly contigs.
+    * `*.assembly.gfa.gz`: SPAdes assembly graph in [GFA](https://github.com/GFA-spec/GFA-spec/blob/master/GFA1.md) format.
 * `assembly/spades/<SPADES_MODE>/bandage/`
     * `*.png`: Bandage visualisation for SPAdes assembly graph in PNG format.
     * `*.svg`: Bandage visualisation for SPAdes assembly graph in SVG format.
@@ -708,8 +708,8 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 <summary>Output files</summary>
 
 * `assembly/unicycler/`
-    * `*.scaffolds.fa`: Unicycler scaffold assembly.
-    * `*.assembly.gfa`: Unicycler assembly graph in GFA format.
+    * `*.scaffolds.fa.gz`: Unicycler scaffold assembly.
+    * `*.assembly.gfa.gz`: Unicycler assembly graph in GFA format.
 * `assembly/unicycler/bandage/`
     * `*.png`: Bandage visualisation for Unicycler assembly graph in PNG format.
     * `*.svg`: Bandage visualisation for Unicycler assembly graph in SVG format.
@@ -833,15 +833,13 @@ An example MultiQC report generated from a full-sized dataset can be viewed on t
 <summary>Output files</summary>
 
 * `genome/`
-    * Unzipped genome fasta file for viral genome
-    * Unzipped genome annotation GFF file for viral genome
-* `genome/index/`
     * `bowtie2/`: Bowtie 2 index for viral genome.
-* `genome/db/`
     * `blast_db/`: BLAST database for viral genome.
     * `kraken2_db/`: Kraken 2 database for host genome.
     * `snpeff_db/`: SnpEff database for viral genome.
     * `snpeff.config`: SnpEff config file for viral genome.
+    * Unzipped genome fasta file for viral genome
+    * Unzipped genome annotation GFF file for viral genome
 
 </details>
 
