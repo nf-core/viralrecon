@@ -10,9 +10,6 @@ include { COLLAPSE_PRIMERS            } from '../../modules/local/collapse_prime
 include { SNPEFF_BUILD                } from '../../modules/local/snpeff_build'
 
 workflow PREPARE_GENOME {
-    take:
-    dummy_file
-
     main:
 
     ch_versions = Channel.empty()
@@ -44,7 +41,7 @@ workflow PREPARE_GENOME {
             ch_gff = file(params.gff)
         }
     } else {
-        ch_gff = dummy_file
+        ch_gff = []
     }
 
     //

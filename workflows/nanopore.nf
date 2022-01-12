@@ -20,16 +20,9 @@ def checkPathParamList = [
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-// Stage dummy file to be used as an optional input where required
-ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
-
-// MultiQC config files
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
-ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
-
 if (params.input)              { ch_input              = file(params.input)              }
-if (params.fast5_dir)          { ch_fast5_dir          = file(params.fast5_dir)          } else { ch_fast5_dir          = ch_dummy_file     }
-if (params.sequencing_summary) { ch_sequencing_summary = file(params.sequencing_summary) } else { ch_sequencing_summary = ch_multiqc_config }
+if (params.fast5_dir)          { ch_fast5_dir          = file(params.fast5_dir)          } else { ch_fast5_dir          = [] }
+if (params.sequencing_summary) { ch_sequencing_summary = file(params.sequencing_summary) } else { ch_sequencing_summary = [] }
 
 // Need to stage medaka model properly depending on whether it is a string or a file
 ch_medaka_model = Channel.empty()
@@ -38,6 +31,15 @@ if (params.artic_minion_caller == 'medaka') {
         ch_medaka_model = Channel.fromPath(params.artic_minion_medaka_model)
     }
 }
+
+/*
+========================================================================================
+    CONFIG FILES
+========================================================================================
+*/
+
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
 
 /*
 ========================================================================================
@@ -121,9 +123,7 @@ workflow NANOPORE {
     //
     // SUBWORKFLOW: Uncompress and prepare reference genome files
     //
-    PREPARE_GENOME (
-        ch_dummy_file
-    )
+    PREPARE_GENOME ()
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
     // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
@@ -320,7 +320,7 @@ workflow NANOPORE {
 
         MOSDEPTH_GENOME (
             ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
-            ch_dummy_file,
+            [],
             200
         )
         ch_mosdepth_multiqc  = MOSDEPTH_GENOME.out.global_txt
@@ -438,7 +438,7 @@ workflow NANOPORE {
             ch_asciigenome,
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.chrom_sizes,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            PREPARE_GENOME.out.gff,
             PREPARE_GENOME.out.primer_bed,
             params.asciigenome_window_size,
             params.asciigenome_read_depth
