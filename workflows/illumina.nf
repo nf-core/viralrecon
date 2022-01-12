@@ -24,9 +24,6 @@ def checkPathParamList = [
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-// Stage dummy file to be used as an optional input where required
-ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
-
 if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = []                              }
 
@@ -120,9 +117,7 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Uncompress and prepare reference genome files
     //
-    PREPARE_GENOME (
-        ch_dummy_file
-    )
+    PREPARE_GENOME ()
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
     // Check genome fasta only contains a single contig
@@ -402,7 +397,7 @@ workflow ILLUMINA {
             ch_bam,
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.chrom_sizes,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config,
@@ -451,7 +446,7 @@ workflow ILLUMINA {
             ch_bam,
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.chrom_sizes,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config
