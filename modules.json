@@ -10,7 +10,7 @@
                 "git_sha": "9d0cad583b9a71a6509b754fdf589cbfbed08961"
             },
             "artic/minion": {
-                "git_sha": "bdd8159c535e740ae6b831de6f28cc2ceda14ba9"
+                "git_sha": "104f896a268df93876c284fdc9e604015bcca243"
             },
             "bandage/image": {
                 "git_sha": "9d0cad583b9a71a6509b754fdf589cbfbed08961"
@@ -43,7 +43,7 @@
                 "git_sha": "20d8250d9f39ddb05dfb437603aaf99b5c0b2b41"
             },
             "bowtie2/align": {
-                "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
+                "git_sha": "3f9a0285816a2e0ae73a3875fb5ae4b409da5952"
             },
             "bowtie2/build": {
                 "git_sha": "e3285528aca2733ff2d544cb5e5fcc34599226f3"
@@ -76,7 +76,7 @@
                 "git_sha": "b4c6b430d0ae4899551bb44dbb78d6270c31e0b2"
             },
             "kraken2/kraken2": {
-                "git_sha": "9d0cad583b9a71a6509b754fdf589cbfbed08961"
+                "git_sha": "3f9a0285816a2e0ae73a3875fb5ae4b409da5952"
             },
             "minia": {
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
@@ -127,7 +127,7 @@
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
             },
             "samtools/view": {
-                "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
+                "git_sha": "05ba4d901db380c6def3bc242ab18a2d88b25819"
             },
             "spades": {
                 "git_sha": "9d0cad583b9a71a6509b754fdf589cbfbed08961"
