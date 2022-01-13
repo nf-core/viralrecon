@@ -143,7 +143,7 @@ workflow NANOPORE {
             .map { dir ->
                 def count = 0
                 for (x in dir.listFiles()) {
-                    if (x.isFile() && x.toString().endsWith('.fastq')) {
+                    if (x.isFile() && x.toString().contains('.fastq')) {
                         count += x.countFastq()
                     }
                 }
@@ -175,7 +175,7 @@ workflow NANOPORE {
 
             MULTIQC_TSV_NO_SAMPLE_NAME (
                 ch_barcodes_no_sample.collect(),
-                'Barcode\tRead count',
+                ['Barcode', 'Read count'],
                 'fail_barcodes_no_sample'
             )
             .set { ch_custom_no_sample_name_multiqc }
@@ -190,7 +190,7 @@ workflow NANOPORE {
 
             MULTIQC_TSV_NO_BARCODES (
                 ch_samples_no_barcode.collect(),
-                'Sample\tMissing barcode',
+                ['Sample', 'Missing barcode'],
                 'fail_no_barcode_samples'
             )
             .set { ch_custom_no_barcodes_multiqc }
@@ -231,7 +231,7 @@ workflow NANOPORE {
 
     MULTIQC_TSV_BARCODE_COUNT (
         ch_pass_fail_barcode_count.fail.collect(),
-        'Sample\tBarcode count',
+        ['Sample', 'Barcode count'],
         'fail_barcode_count_samples'
     )
 
@@ -266,7 +266,7 @@ workflow NANOPORE {
 
     MULTIQC_TSV_GUPPYPLEX_COUNT (
         ch_pass_fail_guppyplex_count.fail.collect(),
-        'Sample\tRead count',
+        ['Sample', 'Read count'],
         'fail_guppyplex_count_samples'
     )
 
@@ -381,7 +381,7 @@ workflow NANOPORE {
 
         MULTIQC_TSV_NEXTCLADE (
             ch_nextclade_multiqc.collect(),
-            'Sample\tclade',
+            ['Sample', 'clade'],
             'nextclade_clade'
         )
         .set { ch_nextclade_multiqc }
