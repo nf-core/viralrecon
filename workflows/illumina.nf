@@ -24,9 +24,6 @@ def checkPathParamList = [
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-// Stage dummy file to be used as an optional input where required
-ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
-
 if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = []                              }
 
@@ -41,7 +38,7 @@ if (!callers)  { callers = params.protocol == 'amplicon' ? ['ivar'] : ['bcftools
 */
 
 ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yaml", checkIfExists: true)
-ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
+ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 // Header files
 ch_blast_outfmt6_header     = file("$projectDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
@@ -120,9 +117,7 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Uncompress and prepare reference genome files
     //
-    PREPARE_GENOME (
-        ch_dummy_file
-    )
+    PREPARE_GENOME ()
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
     // Check genome fasta only contains a single contig
@@ -402,7 +397,7 @@ workflow ILLUMINA {
             ch_bam,
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.chrom_sizes,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config,
@@ -451,7 +446,7 @@ workflow ILLUMINA {
             ch_bam,
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.chrom_sizes,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config
@@ -583,7 +578,7 @@ workflow ILLUMINA {
 
         MULTIQC (
             ch_multiqc_config,
-            ch_multiqc_custom_config.collect().ifEmpty([]),
+            ch_multiqc_custom_config,
             CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
             ch_fail_reads_multiqc.ifEmpty([]),

@@ -127,7 +127,7 @@
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
             },
             "samtools/view": {
-                "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
+                "git_sha": "05ba4d901db380c6def3bc242ab18a2d88b25819"
             },
             "spades": {
                 "git_sha": "9d0cad583b9a71a6509b754fdf589cbfbed08961"

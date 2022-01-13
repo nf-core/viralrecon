@@ -35,7 +35,8 @@ workflow VARIANTS_IVAR {
     IVAR_VARIANTS (
         bam,
         fasta,
-        gff
+        gff,
+        params.save_mpileup
     )
     ch_versions = ch_versions.mix(IVAR_VARIANTS.out.versions.first())
 

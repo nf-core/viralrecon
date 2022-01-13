@@ -48,7 +48,7 @@ process MULTIQC {
 
     script:
     def args = task.ext.args ?: ''
-    def custom_config = params.multiqc_config ? "--config $multiqc_custom_config" : ''
+    def custom_config = multiqc_custom_config ? "--config $multiqc_custom_config" : ''
     """
     ## Run MultiQC once to parse tool logs
     multiqc -f $args $custom_config .
