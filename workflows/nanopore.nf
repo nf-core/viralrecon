@@ -80,6 +80,8 @@ include { PYCOQC                        } from '../modules/nf-core/modules/pycoq
 include { NANOPLOT                      } from '../modules/nf-core/modules/nanoplot/main'
 include { ARTIC_GUPPYPLEX               } from '../modules/nf-core/modules/artic/guppyplex/main'
 include { ARTIC_MINION                  } from '../modules/nf-core/modules/artic/minion/main'
+include { VCFLIB_VCFUNIQ                } from '../modules/nf-core/modules/vcflib/vcfuniq/main'
+include { TABIX_TABIX                   } from '../modules/nf-core/modules/tabix/tabix/main'
 include { BCFTOOLS_STATS                } from '../modules/nf-core/modules/bcftools/stats/main'
 include { QUAST                         } from '../modules/nf-core/modules/quast/main'
 include { PANGOLIN                      } from '../modules/nf-core/modules/pangolin/main'
@@ -296,20 +298,36 @@ workflow NANOPORE {
     ch_versions = ch_versions.mix(ARTIC_MINION.out.versions.first().ifEmpty(null))
 
     //
+    // MODULE: Remove duplicate variants
+    //
+    VCFLIB_VCFUNIQ (
+        ARTIC_MINION.out.vcf.join(ARTIC_MINION.out.tbi, by: [0]),
+    )
+    ch_versions = ch_versions.mix(VCFLIB_VCFUNIQ.out.versions.first().ifEmpty(null))
+    
+    //
+    // MODULE: Index VCF file
+    //
+    TABIX_TABIX (
+        VCFLIB_VCFUNIQ.out.vcf
+    )
+    ch_versions = ch_versions.mix(TABIX_TABIX.out.versions.first().ifEmpty(null))
+
+    //
+    // MODULE: VCF stats with bcftools stats
+    //
+    BCFTOOLS_STATS (
+        VCFLIB_VCFUNIQ.out.vcf
+    )
+    ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions.first().ifEmpty(null))
+
+    //
     // SUBWORKFLOW: Filter unmapped reads from BAM
     //
     FILTER_BAM_SAMTOOLS (
         ARTIC_MINION.out.bam
     )
     ch_versions = ch_versions.mix(FILTER_BAM_SAMTOOLS.out.versions)
-
-    //
-    // MODULE: VCF stats with bcftools stats
-    //
-    BCFTOOLS_STATS (
-        ARTIC_MINION.out.vcf
-    )
-    ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions.first().ifEmpty(null))
 
     //
     // MODULE: Genome-wide and amplicon-specific coverage QC plots
@@ -409,7 +427,7 @@ workflow NANOPORE {
     ch_snpeff_multiqc = Channel.empty()
     if (params.gff && !params.skip_snpeff) {
         SNPEFF_SNPSIFT (
-            ARTIC_MINION.out.vcf,
+            VCFLIB_VCFUNIQ.out.vcf,
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config,
             PREPARE_GENOME.out.fasta
@@ -425,7 +443,7 @@ workflow NANOPORE {
         ARTIC_MINION
             .out
             .bam_primertrimmed
-            .join(ARTIC_MINION.out.vcf, by: [0])
+            .join(VCFLIB_VCFUNIQ.out.vcf, by: [0])
             .join(BCFTOOLS_STATS.out.stats, by: [0])
             .map { meta, bam, vcf, stats ->
                 if (WorkflowCommons.getNumVariantsFromBCFToolsStats(stats) > 0) {
