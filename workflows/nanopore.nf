@@ -304,7 +304,7 @@ workflow NANOPORE {
         ARTIC_MINION.out.vcf.join(ARTIC_MINION.out.tbi, by: [0]),
     )
     ch_versions = ch_versions.mix(VCFLIB_VCFUNIQ.out.versions.first().ifEmpty(null))
-    
+
     //
     // MODULE: Index VCF file
     //
