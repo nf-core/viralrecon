@@ -143,6 +143,9 @@
             },
             "untar": {
                 "git_sha": "20d8250d9f39ddb05dfb437603aaf99b5c0b2b41"
+            },
+            "vcflib/vcfuniq": {
+                "git_sha": "280712419d6ef5e3fecdc6e9eb98f8746fcbe0b7"
             }
         }
     }
