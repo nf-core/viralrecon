@@ -2,15 +2,15 @@
 // Variant calling and downstream processing for BCFTools
 //
 
-include { BCFTOOLS_MPILEUP }      from '../../modules/nf-core/modules/bcftools/mpileup/main'
-include { QUAST            }      from '../../modules/nf-core/modules/quast/main'
-include { PANGOLIN         }      from '../../modules/nf-core/modules/pangolin/main'
-include { NEXTCLADE_DATASETGET  } from '../../modules/nf-core/modules/nextclade/datasetget/main'
-include { NEXTCLADE_RUN         } from '../../modules/nf-core/modules/nextclade/run/main'
-include { ASCIIGENOME      }      from '../../modules/local/asciigenome'
+include { BCFTOOLS_MPILEUP     } from '../../modules/nf-core/modules/bcftools/mpileup/main'
+include { QUAST                } from '../../modules/nf-core/modules/quast/main'
+include { PANGOLIN             } from '../../modules/nf-core/modules/pangolin/main'
+include { NEXTCLADE_DATASETGET } from '../../modules/nf-core/modules/nextclade/datasetget/main'
+include { NEXTCLADE_RUN        } from '../../modules/nf-core/modules/nextclade/run/main'
+include { ASCIIGENOME          } from '../../modules/local/asciigenome'
 
-include { MAKE_CONSENSUS   }      from './make_consensus'
-include { SNPEFF_SNPSIFT   }      from './snpeff_snpsift'
+include { MAKE_CONSENSUS       } from './make_consensus'
+include { SNPEFF_SNPSIFT       } from './snpeff_snpsift'
 
 workflow VARIANTS_BCFTOOLS {
     take:
