@@ -8,7 +8,8 @@ include { IVAR_VARIANTS         } from '../../modules/nf-core/modules/ivar/varia
 include { IVAR_CONSENSUS        } from '../../modules/nf-core/modules/ivar/consensus/main'
 include { QUAST                 } from '../../modules/nf-core/modules/quast/main'
 include { PANGOLIN              } from '../../modules/nf-core/modules/pangolin/main'
-include { NEXTCLADE             } from '../../modules/nf-core/modules/nextclade/main'
+include { NEXTCLADE_DATASETGET  } from '../../modules/nf-core/modules/nextclade/datasetget/main'
+include { NEXTCLADE_RUN         } from '../../modules/nf-core/modules/nextclade/run/main'
 include { ASCIIGENOME           } from '../../modules/local/asciigenome'
 
 include { VCF_BGZIP_TABIX_STATS } from '../nf-core/vcf_bgzip_tabix_stats'
@@ -103,11 +104,15 @@ workflow VARIANTS_IVAR {
         }
 
         if (!params.skip_nextclade) {
-            NEXTCLADE (
+            NEXTCLADE_DATASETGET (
+                'sars-cov-2'
+            )
+            NEXTCLADE_RUN (
+                NEXTCLADE_DATASETGET.out.dataset,
                 ch_consensus
             )
-            ch_nextclade_report = NEXTCLADE.out.csv
-            ch_versions         = ch_versions.mix(NEXTCLADE.out.versions.first())
+            ch_nextclade_report = NEXTCLADE_RUN.out.csv
+            ch_versions         = ch_versions.mix(NEXTCLADE_RUN.out.versions.first())
         }
     }
 

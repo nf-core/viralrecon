@@ -83,7 +83,8 @@ include { ARTIC_MINION                  } from '../modules/nf-core/modules/artic
 include { BCFTOOLS_STATS                } from '../modules/nf-core/modules/bcftools/stats/main'
 include { QUAST                         } from '../modules/nf-core/modules/quast/main'
 include { PANGOLIN                      } from '../modules/nf-core/modules/pangolin/main'
-include { NEXTCLADE                     } from '../modules/nf-core/modules/nextclade/main'
+include { NEXTCLADE_DATASETGET          } from '../modules/nf-core/modules/nextclade/datasetget/main'
+include { NEXTCLADE_RUN                 } from '../modules/nf-core/modules/nextclade/run/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/modules/mosdepth/main'
 include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/modules/mosdepth/main'
@@ -362,15 +363,19 @@ workflow NANOPORE {
     //
     ch_nextclade_multiqc = Channel.empty()
     if (!params.skip_nextclade) {
-        NEXTCLADE (
+        NEXTCLADE_DATASETGET (
+            'sars-cov-2'
+        )
+        NEXTCLADE_RUN (
+            NEXTCLADE_DATASETGET.out.dataset,
             ARTIC_MINION.out.fasta
         )
-        ch_versions = ch_versions.mix(NEXTCLADE.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(NEXTCLADE_RUN.out.versions.first().ifEmpty(null))
 
         //
         // MODULE: Get Nextclade clade information for MultiQC report
         //
-        NEXTCLADE
+        NEXTCLADE_RUN
             .out
             .csv
             .map { meta, csv ->
