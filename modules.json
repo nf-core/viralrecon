@@ -87,8 +87,11 @@
             "nanoplot": {
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
             },
-            "nextclade": {
-                "git_sha": "d473a247d2e0c619b0df877ea19d9a5a98c8e3c8"
+            "nextclade/datasetget": {
+                "git_sha": "efe55d52f09137467cf4aa1ca44dda8b24489158"
+            },
+            "nextclade/run": {
+                "git_sha": "efe55d52f09137467cf4aa1ca44dda8b24489158"
             },
             "pangolin": {
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
