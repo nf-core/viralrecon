@@ -19,6 +19,7 @@ workflow MAKE_CONSENSUS {
 
     MAKE_BED_MASK (
         bam_vcf
+        fasta
     )
     ch_versions = ch_versions.mix(MAKE_BED_MASK.out.versions.first())
 
