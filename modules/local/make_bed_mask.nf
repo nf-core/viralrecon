@@ -7,7 +7,8 @@ process MAKE_BED_MASK {
         'quay.io/biocontainers/python:3.9--1' }"
 
     input:
-    tuple val(meta), path(vcf), path(bed)
+    tuple val(meta), path(bam), path(vcf)
+    path  fasta
 
     output:
     tuple val(meta), path("*.bed")  , emit: bed
@@ -16,6 +17,7 @@ process MAKE_BED_MASK {
     script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
+    
     make_bed_mask.py \\
         $vcf \\
         $bed \\
