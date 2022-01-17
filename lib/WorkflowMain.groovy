@@ -134,6 +134,8 @@ class WorkflowMain {
             }
             if (genome_map.containsKey(attribute)) {
                 val = genome_map[ attribute ]
+            } else if (params.genomes[ params.genome ].containsKey(attribute)) {
+                val = params.genomes[ params.genome ][ attribute ]
             }
         }
         return val
