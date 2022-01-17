@@ -101,7 +101,7 @@ def rename_vars(dict_lines,num_collapse):
         dict_lines - Dict with var lines.
         num_collapse - number of lines to collapse [1,2]
     Returns::
-       Vars fixed.
+        Vars fixed.
     '''
     CHROM = dict_lines["CHROM"][0]
     POS = dict_lines["POS"][0]
