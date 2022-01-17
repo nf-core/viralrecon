@@ -37,7 +37,7 @@ workflow MAKE_CONSENSUS {
 
     BEDTOOLS_MASKFASTA (
         MAKE_BED_MASK.out.bed,
-        MAKE_BED_MASK.out.fasta.map{it[1]}
+        fasta
     )
     ch_versions = ch_versions.mix(BEDTOOLS_MASKFASTA.out.versions.first())
 
