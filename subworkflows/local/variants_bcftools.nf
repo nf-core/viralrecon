@@ -5,7 +5,7 @@
 include { BCFTOOLS_MPILEUP } from '../../modules/nf-core/modules/bcftools/mpileup/main'
 include { QUAST            } from '../../modules/nf-core/modules/quast/main'
 include { PANGOLIN         } from '../../modules/nf-core/modules/pangolin/main'
-include { NEXTCLADE        } from '../../modules/nf-core/modules/nextclade/main'
+include { NEXTCLADE_RUN    } from '../../modules/nf-core/modules/nextclade/run/main'
 include { ASCIIGENOME      } from '../../modules/local/asciigenome'
 
 include { MAKE_CONSENSUS   } from './make_consensus'
@@ -18,6 +18,7 @@ workflow VARIANTS_BCFTOOLS {
     sizes         // channel: /path/to/genome.sizes
     gff           // channel: /path/to/genome.gff
     bed           // channel: /path/to/primers.bed
+    nextclade_db  // channel: /path/to/nextclade_db/
     snpeff_db     // channel: /path/to/snpeff_db/
     snpeff_config // channel: /path/to/snpeff.config
 
@@ -76,11 +77,12 @@ workflow VARIANTS_BCFTOOLS {
         }
 
         if (!params.skip_nextclade) {
-            NEXTCLADE (
-                ch_consensus
+            NEXTCLADE_RUN (
+                ch_consensus,
+                nextclade_db
             )
-            ch_nextclade_report = NEXTCLADE.out.csv
-            ch_versions         = ch_versions.mix(NEXTCLADE.out.versions.first())
+            ch_nextclade_report = NEXTCLADE_RUN.out.csv
+            ch_versions         = ch_versions.mix(NEXTCLADE_RUN.out.versions.first())
         }
     }
 
