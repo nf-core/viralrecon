@@ -17,15 +17,15 @@ workflow MAKE_CONSENSUS {
 
     ch_versions = Channel.empty()
 
-    BEDTOOLS_MERGE (
-        BEDTOOLS_GENOMECOV.out.genomecov
-    )
-    ch_versions = ch_versions.mix(BEDTOOLS_MERGE.out.versions.first())
-
-    MAKE_BED_MASK (
-        bam_vcf.map { meta, bam, vcf, tbi -> [ meta, vcf ] }.join( BEDTOOLS_MERGE.out.bed, by: [0] ),
+   MAKE_BED_MASK (
+        bam_vcf.map { meta, bam, vcf, tbi -> [ meta, vcf ] }.join( BEDTOOLS_MERGE.out.bed, by: [0] $
     )
     ch_versions = ch_versions.mix(MAKE_BED_MASK.out.versions.first())
+
+    BEDTOOLS_MERGE (
+        MAKE_BED_MASK.out.genomecov
+    )
+    ch_versions = ch_versions.mix(BEDTOOLS_MERGE.out.versions.first())
 
     BEDTOOLS_MASKFASTA (
         MAKE_BED_MASK.out.bed,
