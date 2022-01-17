@@ -20,16 +20,9 @@ def checkPathParamList = [
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-// Stage dummy file to be used as an optional input where required
-ch_dummy_file = file("$projectDir/assets/dummy_file.txt", checkIfExists: true)
-
-// MultiQC config files
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
-ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
-
 if (params.input)              { ch_input              = file(params.input)              }
-if (params.fast5_dir)          { ch_fast5_dir          = file(params.fast5_dir)          } else { ch_fast5_dir          = ch_dummy_file     }
-if (params.sequencing_summary) { ch_sequencing_summary = file(params.sequencing_summary) } else { ch_sequencing_summary = ch_multiqc_config }
+if (params.fast5_dir)          { ch_fast5_dir          = file(params.fast5_dir)          } else { ch_fast5_dir          = [] }
+if (params.sequencing_summary) { ch_sequencing_summary = file(params.sequencing_summary) } else { ch_sequencing_summary = [] }
 
 // Need to stage medaka model properly depending on whether it is a string or a file
 ch_medaka_model = Channel.empty()
@@ -38,6 +31,15 @@ if (params.artic_minion_caller == 'medaka') {
         ch_medaka_model = Channel.fromPath(params.artic_minion_medaka_model)
     }
 }
+
+/*
+========================================================================================
+    CONFIG FILES
+========================================================================================
+*/
+
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
+ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 /*
 ========================================================================================
@@ -78,6 +80,8 @@ include { PYCOQC                        } from '../modules/nf-core/modules/pycoq
 include { NANOPLOT                      } from '../modules/nf-core/modules/nanoplot/main'
 include { ARTIC_GUPPYPLEX               } from '../modules/nf-core/modules/artic/guppyplex/main'
 include { ARTIC_MINION                  } from '../modules/nf-core/modules/artic/minion/main'
+include { VCFLIB_VCFUNIQ                } from '../modules/nf-core/modules/vcflib/vcfuniq/main'
+include { TABIX_TABIX                   } from '../modules/nf-core/modules/tabix/tabix/main'
 include { BCFTOOLS_STATS                } from '../modules/nf-core/modules/bcftools/stats/main'
 include { QUAST                         } from '../modules/nf-core/modules/quast/main'
 include { PANGOLIN                      } from '../modules/nf-core/modules/pangolin/main'
@@ -121,9 +125,7 @@ workflow NANOPORE {
     //
     // SUBWORKFLOW: Uncompress and prepare reference genome files
     //
-    PREPARE_GENOME (
-        ch_dummy_file
-    )
+    PREPARE_GENOME ()
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
     // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
@@ -143,7 +145,7 @@ workflow NANOPORE {
             .map { dir ->
                 def count = 0
                 for (x in dir.listFiles()) {
-                    if (x.isFile() && x.toString().endsWith('.fastq')) {
+                    if (x.isFile() && x.toString().contains('.fastq')) {
                         count += x.countFastq()
                     }
                 }
@@ -175,7 +177,7 @@ workflow NANOPORE {
 
             MULTIQC_TSV_NO_SAMPLE_NAME (
                 ch_barcodes_no_sample.collect(),
-                'Barcode\tRead count',
+                ['Barcode', 'Read count'],
                 'fail_barcodes_no_sample'
             )
             .set { ch_custom_no_sample_name_multiqc }
@@ -190,7 +192,7 @@ workflow NANOPORE {
 
             MULTIQC_TSV_NO_BARCODES (
                 ch_samples_no_barcode.collect(),
-                'Sample\tMissing barcode',
+                ['Sample', 'Missing barcode'],
                 'fail_no_barcode_samples'
             )
             .set { ch_custom_no_barcodes_multiqc }
@@ -231,7 +233,7 @@ workflow NANOPORE {
 
     MULTIQC_TSV_BARCODE_COUNT (
         ch_pass_fail_barcode_count.fail.collect(),
-        'Sample\tBarcode count',
+        ['Sample', 'Barcode count'],
         'fail_barcode_count_samples'
     )
 
@@ -266,7 +268,7 @@ workflow NANOPORE {
 
     MULTIQC_TSV_GUPPYPLEX_COUNT (
         ch_pass_fail_guppyplex_count.fail.collect(),
-        'Sample\tRead count',
+        ['Sample', 'Read count'],
         'fail_guppyplex_count_samples'
     )
 
@@ -296,20 +298,36 @@ workflow NANOPORE {
     ch_versions = ch_versions.mix(ARTIC_MINION.out.versions.first().ifEmpty(null))
 
     //
+    // MODULE: Remove duplicate variants
+    //
+    VCFLIB_VCFUNIQ (
+        ARTIC_MINION.out.vcf.join(ARTIC_MINION.out.tbi, by: [0]),
+    )
+    ch_versions = ch_versions.mix(VCFLIB_VCFUNIQ.out.versions.first().ifEmpty(null))
+
+    //
+    // MODULE: Index VCF file
+    //
+    TABIX_TABIX (
+        VCFLIB_VCFUNIQ.out.vcf
+    )
+    ch_versions = ch_versions.mix(TABIX_TABIX.out.versions.first().ifEmpty(null))
+
+    //
+    // MODULE: VCF stats with bcftools stats
+    //
+    BCFTOOLS_STATS (
+        VCFLIB_VCFUNIQ.out.vcf
+    )
+    ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions.first().ifEmpty(null))
+
+    //
     // SUBWORKFLOW: Filter unmapped reads from BAM
     //
     FILTER_BAM_SAMTOOLS (
         ARTIC_MINION.out.bam
     )
     ch_versions = ch_versions.mix(FILTER_BAM_SAMTOOLS.out.versions)
-
-    //
-    // MODULE: VCF stats with bcftools stats
-    //
-    BCFTOOLS_STATS (
-        ARTIC_MINION.out.vcf
-    )
-    ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions.first().ifEmpty(null))
 
     //
     // MODULE: Genome-wide and amplicon-specific coverage QC plots
@@ -320,7 +338,7 @@ workflow NANOPORE {
 
         MOSDEPTH_GENOME (
             ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
-            ch_dummy_file,
+            [],
             200
         )
         ch_mosdepth_multiqc  = MOSDEPTH_GENOME.out.global_txt
@@ -381,7 +399,7 @@ workflow NANOPORE {
 
         MULTIQC_TSV_NEXTCLADE (
             ch_nextclade_multiqc.collect(),
-            'Sample\tclade',
+            ['Sample', 'clade'],
             'nextclade_clade'
         )
         .set { ch_nextclade_multiqc }
@@ -409,7 +427,7 @@ workflow NANOPORE {
     ch_snpeff_multiqc = Channel.empty()
     if (params.gff && !params.skip_snpeff) {
         SNPEFF_SNPSIFT (
-            ARTIC_MINION.out.vcf,
+            VCFLIB_VCFUNIQ.out.vcf,
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config,
             PREPARE_GENOME.out.fasta
@@ -425,7 +443,7 @@ workflow NANOPORE {
         ARTIC_MINION
             .out
             .bam_primertrimmed
-            .join(ARTIC_MINION.out.vcf, by: [0])
+            .join(VCFLIB_VCFUNIQ.out.vcf, by: [0])
             .join(BCFTOOLS_STATS.out.stats, by: [0])
             .map { meta, bam, vcf, stats ->
                 if (WorkflowCommons.getNumVariantsFromBCFToolsStats(stats) > 0) {
@@ -438,7 +456,7 @@ workflow NANOPORE {
             ch_asciigenome,
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.chrom_sizes,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            PREPARE_GENOME.out.gff,
             PREPARE_GENOME.out.primer_bed,
             params.asciigenome_window_size,
             params.asciigenome_read_depth
@@ -462,7 +480,7 @@ workflow NANOPORE {
 
         MULTIQC (
             ch_multiqc_config,
-            ch_multiqc_custom_config.collect().ifEmpty([]),
+            ch_multiqc_custom_config,
             CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
             ch_custom_no_sample_name_multiqc.ifEmpty([]),

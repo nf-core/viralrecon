@@ -91,6 +91,9 @@
 * [Unicycler](https://www.ncbi.nlm.nih.gov/pubmed/28594827/)
     > Wick RR, Judd LM, Gorrie CL, Holt KE. Unicycler: Resolving bacterial genome assemblies from short and long sequencing reads. PLoS Comput Biol. 2017 Jun 8;13(6):e1005595. doi: 10.1371/journal.pcbi.1005595. eCollection 2017 Jun. PubMed PMID: 28594827; PubMed Central PMCID: PMC5481147.
 
+* [Vcflib](https://www.biorxiv.org/content/early/2021/05/23/2021.05.21.445151)
+    > Garrison E, Kronenberg ZN, Dawson ET, Pedersen BS, P Pjotr. Vcflib and tools for processing the VCF variant call format. bioRxiv 2021 May.doi: 10.1101/2021.05.21.445151.
+
 ## Software packaging/containerisation tools
 
 * [Anaconda](https://anaconda.com)

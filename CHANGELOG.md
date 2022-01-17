@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Port pipeline to the updated Nextflow DSL2 syntax adopted on nf-core/modules
 * Bump minimum Nextflow version from `21.04.0` -> `21.10.3`
 * Updated pipeline template to [nf-core/tools 2.2](https://github.com/nf-core/tools/releases/tag/2.2)
+* [[#218](https://github.com/nf-core/viralrecon/issues/218)] - Support for compressed FastQ files for Nanopore data
+* [[#232](https://github.com/nf-core/viralrecon/issues/232)] - Remove duplicate variants called by ARTIC ONT pipeline
 
 ### Parameters
 
