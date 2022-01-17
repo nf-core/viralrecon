@@ -233,7 +233,7 @@
             "properties": {
                 "nextclade_dataset": {
                     "type": "string",
-                    "description": "Full path to Nextclade dataset.",
+                    "description": "Full path to Nextclade dataset required for 'nextclade run' command.",
                     "fa_icon": "fas fa-project-diagram"
                 },
                 "nextclade_dataset_name": {
