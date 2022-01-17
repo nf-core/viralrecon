@@ -23,10 +23,6 @@ process MAKE_BED_MASK {
         $bed \\
         ${prefix}.bed
 
-    ## Rename fasta entry by sample name and not reference genome
-    FASTA_NAME=\$(head -n1 $fasta | sed 's/>//g')
-    sed "s/\${FASTA_NAME}/${meta.id}/g" $fasta > ${prefix}.fasta
-
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
