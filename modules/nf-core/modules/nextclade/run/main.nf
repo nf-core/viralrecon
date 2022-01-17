@@ -8,29 +8,29 @@ process NEXTCLADE_RUN {
         'quay.io/biocontainers/nextclade:1.9.0--h9ee0642_0' }"
 
     input:
-    path(dataset)
     tuple val(meta), path(fasta)
+    path dataset
 
     output:
-    tuple val(meta), path("${prefix}.csv")       , emit: csv
-    tuple val(meta), path("${prefix}.json")      , emit: json
-    tuple val(meta), path("${prefix}.tree.json") , emit: json_tree
-    tuple val(meta), path("${prefix}.tsv")       , emit: tsv
-    tuple val(meta), path("${prefix}.clades.tsv"), optional:true, emit: tsv_clades
-    path "versions.yml"                          , emit: versions
+    tuple val(meta), path("${prefix}.csv")      , emit: csv
+    tuple val(meta), path("${prefix}.tsv")      , emit: tsv
+    tuple val(meta), path("${prefix}.json")     , emit: json
+    tuple val(meta), path("${prefix}.tree.json"), emit: json_tree
+    path "versions.yml"                         , emit: versions
 
     script:
-    def args = task.ext.args   ?: ''
-    prefix   = task.ext.prefix ?: "${meta.id}"
+    def args = task.ext.args ?: ''
+    prefix = task.ext.prefix ?: "${meta.id}"
     """
     nextclade \\
+        run \\
         $args \\
         --jobs $task.cpus \\
         --input-fasta $fasta \\
         --input-dataset $dataset \\
-        --output-json ${prefix}.json \\
         --output-csv ${prefix}.csv \\
         --output-tsv ${prefix}.tsv \\
+        --output-json ${prefix}.json \\
         --output-tree ${prefix}.tree.json \\
         --output-basename ${prefix}
 

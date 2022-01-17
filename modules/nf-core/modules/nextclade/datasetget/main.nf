@@ -1,5 +1,5 @@
 process NEXTCLADE_DATASETGET {
-    tag "nextclade datasetget"
+    tag "$dataset"
     label 'process_low'
 
     conda (params.enable_conda ? "bioconda::nextclade=1.9.0" : null)
@@ -8,20 +8,28 @@ process NEXTCLADE_DATASETGET {
         'quay.io/biocontainers/nextclade:1.9.0--h9ee0642_0' }"
 
     input:
-    val(datasetName)
+    val dataset
+    val reference
+    val tag
 
     output:
-    path("dataset")    , emit: dataset
+    path "$prefix"     , emit: dataset
     path "versions.yml", emit: versions
 
     script:
-    def args = task.ext.args   ?: ''
+    def args = task.ext.args ?: ''
+    prefix = task.ext.prefix ?: "${dataset}"
+    def fasta = reference ? "--reference ${reference}" : ''
+    def version = tag ? "--tag ${tag}" : ''
     """
     nextclade \\
-        dataset get \\
+        dataset \\
+        get \\
         $args \\
-        --name $datasetName \\
-        --output-dir dataset
+        --name $dataset \\
+        $fasta \\
+        $version \\
+        --output-dir $prefix
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
