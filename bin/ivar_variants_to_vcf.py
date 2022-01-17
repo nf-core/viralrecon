@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import os
 import sys
 import re
@@ -63,13 +64,13 @@ def checkConsecutive(mylist):
             my_list.pop()
             if sorted(my_list) == list(range(min(my_list), max(my_list)+1)):
                 return len(my_list)
-        else: 
+        else:
             return False
         return False
 
 def is_same_codon(seq1,seq2):
     '''
-    Returns position where seq1 != seq2 
+    Returns position where seq1 != seq2
     '''
     if seq1 =="NA":
         return False
@@ -78,16 +79,16 @@ def is_same_codon(seq1,seq2):
     if len(ind_diff) > 1:
             print("There has been an issue, more than one difference between the seqs.")
             return False
-    else:        
+    else:
         return ind_diff[0]
-        
+
 def renameVars(dict_lines,dummy):
     CHROM = dict_lines["CHROM"][0]
     POS = dict_lines["POS"][0]
     ID = dict_lines["ID"][0]
     if dummy =="double":
-        REF = str(dict_lines["REF"][0]) + str(dict_lines["REF"][1]) 
-        ALT = str(dict_lines["ALT"][0]) + str(dict_lines["ALT"][1]) 
+        REF = str(dict_lines["REF"][0]) + str(dict_lines["REF"][1])
+        ALT = str(dict_lines["ALT"][0]) + str(dict_lines["ALT"][1])
     elif dummy =="triple":
         REF = str(dict_lines["REF"][0]) + str(dict_lines["REF"][1]) + str(dict_lines["REF"][2])
         ALT = str(dict_lines["ALT"][0]) + str(dict_lines["ALT"][1]) + str(dict_lines["ALT"][2])
@@ -99,9 +100,9 @@ def renameVars(dict_lines,dummy):
     QUAL = dict_lines["QUAL"][0]
     REF_CODON = REF
     ALT_CODON = ALT
-    FILTER =dict_lines["FILTER"][0]  
+    FILTER =dict_lines["FILTER"][0]
     # INFO DP depends on the decision in the todo above. SB is left with the first one (en principio)
-    INFO = dict_lines["INFO"][0]  
+    INFO = dict_lines["INFO"][0]
     FORMAT = dict_lines["FORMAT"][0]
     # sample depends on the decision in the todo above.
     SAMPLE = dict_lines["SAMPLE"][0]
@@ -136,7 +137,7 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
     header += (
         "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tINFO[SB]\tFORMAT\t" + filename + "\n"
     )
-    
+
     varList = []
     varCountDict = {"SNP": 0, "INS": 0, "DEL": 0}
     dict_lines = {'CHROM':[],'POS':[],'ID':[],'REF':[],'ALT':[],'REF_DP':[],'REF_RV':[],'ALT_DP':[],'ALT_RV':[],'QUAL':[],'REF_CODON':[],'ALT_CODON':[],'FILTER': [],'INFO':[],'FORMAT':[],'SAMPLE':[]}
@@ -148,11 +149,11 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
     fout.write(header)
 
     with open(FileIn) as f:
-        
+
         for line in f:
 
             if not re.match("REGION", line):
-                
+
                 line = re.split("\t", line)
                 CHROM = line[0]
                 POS = line[1]
@@ -181,10 +182,10 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
                 pass_test = line[13]
                 REF_CODON = line[15]
                 ALT_CODON = line[17]
-              
-                
-                
-                
+
+
+
+
 
                 if NotStrandBias:
 
@@ -205,7 +206,7 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
                         FILTER = "FAIL"
                     INFO = "DP=" + line[11]+":SB_pvalue="+str(round(p,5))
 
-                
+
                 FORMAT = "GT:REF_DP:REF_RV:REF_QUAL:ALT_DP:ALT_RV:ALT_QUAL:ALT_FREQ"
                 SAMPLE = (
                     "1:"
@@ -224,7 +225,7 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
                     + line[10]
                 )
                 param_list = [CHROM,POS,ID,REF,ALT,REF_DP,REF_RV,ALT_DP,ALT_RV,QUAL,REF_CODON,ALT_CODON,FILTER,INFO,FORMAT,SAMPLE]
-                
+
                 if NotMergeCodon:
                     writeLine = True
                     oline = (CHROM+ "\t"+ POS+ "\t"+ ID+ "\t"+ REF+ "\t"+ ALT+ "\t"+ QUAL+ "\t"+ FILTER+ "\t"+ INFO+ "\t"+ FORMAT+ "\t"+ SAMPLE+ "\n" )
@@ -264,12 +265,12 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
                                     dict_lines[list(dict_lines.keys())[i]].pop(0)
                                     dict_lines[list(dict_lines.keys())[i]].pop(0)
                                 dict_lines = {'CHROM':[],'POS':[],'ID':[],'REF':[],'ALT':[],'REF_DP':[],'REF_RV':[],'ALT_DP':[],    'ALT_RV':[],'QUAL':[],'REF_CODON':[],'ALT_CODON':[],'FILTER':[],'INFO':[],'FORMAT':[],'SAMPLE':[]}
-                            
+
                             elif is_same_codon(dict_lines["REF_CODON"][0],dict_lines["ALT_CODON"][0]) == 1:
                                 writeLine = True
                                 dummy = "double"
                                 CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO,FORMAT,SAMPLE = renameVars(dict_lines,dummy)
-                                oline = (CHROM+ "\t"+ POS+ "\t"+ ID+ "\t"+ REF+ "\t"+ ALT+ "\t"+ QUAL+ "\t"+ FILTER+ "\t"+ INFO+ "\t"+  FORMAT+ "\t"+ SAMPLE+ "\n" ) 
+                                oline = (CHROM+ "\t"+ POS+ "\t"+ ID+ "\t"+ REF+ "\t"+ ALT+ "\t"+ QUAL+ "\t"+ FILTER+ "\t"+ INFO+ "\t"+  FORMAT+ "\t"+ SAMPLE+ "\n" )
                                 for i,j in enumerate(dict_lines):
                                     dict_lines[list(dict_lines.keys())[i]].pop(0)
                                     dict_lines[list(dict_lines.keys())[i]].pop(0)
@@ -287,10 +288,10 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
                             for i,j in enumerate(dict_lines):
                                 dict_lines[list(dict_lines.keys())[i]].pop(0)
                     else:
-                        print("Something went terribly wrong!!" + str(len(dict_lines["POS"])))        
+                        print("Something went terribly wrong!!" + str(len(dict_lines["POS"])))
 
-                
-                      
+
+
                 if passOnly and FILTER != "PASS":
                     writeLine = False
                 if float(line[10]) < minAF:
@@ -303,9 +304,9 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
                     varCountDict[var_type] += 1
                     fout.write(oline)
 
-            
 
-    
+
+
 
     ## Print variant counts to pass to MultiQC
     varCountList = [(k, str(v)) for k, v in sorted(varCountDict.items())]
