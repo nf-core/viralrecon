@@ -2,7 +2,6 @@
 // Run various tools to generate a masked genome consensus sequence
 //
 
-include { BEDTOOLS_GENOMECOV } from '../../modules/nf-core/modules/bedtools/genomecov/main'
 include { BEDTOOLS_MERGE     } from '../../modules/nf-core/modules/bedtools/merge/main'
 include { BEDTOOLS_MASKFASTA } from '../../modules/nf-core/modules/bedtools/maskfasta/main'
 include { BCFTOOLS_CONSENSUS } from '../../modules/nf-core/modules/bcftools/consensus/main'
