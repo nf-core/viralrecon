@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Old parameter                 | New parameter                         |
 |-------------------------------|---------------------------------------|
+|                               | `--nextclade_dataset`                 |
 |                               | `--nextclade_dataset_name`            |
 |                               | `--nextclade_dataset_reference`       |
 |                               | `--nextclade_dataset_tag`             |
