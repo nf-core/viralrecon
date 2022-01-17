@@ -8,11 +8,9 @@ process MAKE_BED_MASK {
 
     input:
     tuple val(meta), path(vcf), path(bed)
-    path fasta
 
     output:
     tuple val(meta), path("*.bed")  , emit: bed
-    tuple val(meta), path("*.fasta"), emit: fasta
     path "versions.yml"             , emit: versions
 
     script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
