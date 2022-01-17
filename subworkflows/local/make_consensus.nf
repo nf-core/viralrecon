@@ -32,7 +32,6 @@ workflow MAKE_CONSENSUS {
 
     MAKE_BED_MASK (
         bam_vcf.map { meta, bam, vcf, tbi -> [ meta, vcf ] }.join( BEDTOOLS_MERGE.out.bed, by: [0] ),
-        fasta
     )
     ch_versions = ch_versions.mix(MAKE_BED_MASK.out.versions.first())
 
