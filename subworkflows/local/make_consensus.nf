@@ -18,13 +18,6 @@ workflow MAKE_CONSENSUS {
 
     ch_versions = Channel.empty()
 
-    BEDTOOLS_GENOMECOV (
-        bam_vcf.map { meta, bam, vcf, tbi -> [ meta, bam, 1 ] },
-        [],
-        'bed',
-    )
-    ch_versions = ch_versions.mix(BEDTOOLS_GENOMECOV.out.versions.first())
-
     BEDTOOLS_MERGE (
         BEDTOOLS_GENOMECOV.out.genomecov
     )
