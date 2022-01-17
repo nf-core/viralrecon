@@ -82,7 +82,7 @@ class WorkflowMain {
         }
 
         // Check Nextclade dataset parameters
-        if (!params.skip_nextclade) {
+        if (!params.skip_consensus && !params.skip_nextclade) {
             if (!params.nextclade_dataset && !params.nextclade_dataset_name) {
                 log.error "Nextclade dataset not specified with '--nextclade_dataset' or '--nextclade_dataset_name'. A list of available datasets can be obtained using the Nextclade 'nextclade dataset list' command."
                 System.exit(1)
