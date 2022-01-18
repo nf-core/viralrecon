@@ -18,18 +18,18 @@ workflow MAKE_CONSENSUS {
     ch_versions = Channel.empty()
 
     MAKE_BED_MASK (
-        bam_vcf
+        bam_vcf,
         fasta
     )
     ch_versions = ch_versions.mix(MAKE_BED_MASK.out.versions.first())
 
     BEDTOOLS_MERGE (
-        MAKE_BED_MASK.out.genomecov
+        MAKE_BED_MASK.out.bed
     )
     ch_versions = ch_versions.mix(BEDTOOLS_MERGE.out.versions.first())
 
     BEDTOOLS_MASKFASTA (
-        MAKE_BED_MASK.out.bed,
+        BEDTOOLS_MERGE.out.bed,
         fasta
     )
     ch_versions = ch_versions.mix(BEDTOOLS_MASKFASTA.out.versions.first())
