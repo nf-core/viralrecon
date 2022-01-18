@@ -99,7 +99,7 @@ def rename_vars(dict_lines,num_collapse):
         The function set the vars acordingly to the lines to collapse do to consecutive variants.
     Input:
         dict_lines - Dict with var lines.
-        num_collapse - number of lines to collapse [1,2]
+        num_collapse - number of lines to collapse [2,3]
     Returns::
         Vars fixed.
     '''
@@ -107,11 +107,11 @@ def rename_vars(dict_lines,num_collapse):
     POS = dict_lines["POS"][0]
     ID = dict_lines["ID"][0]
     # If two consecutive collapse 2 lines into one.
-    if num_collapse == 2:
+    if int(num_collapse) == 2:
         REF = str(dict_lines["REF"][0]) + str(dict_lines["REF"][1])
         ALT = str(dict_lines["ALT"][0]) + str(dict_lines["ALT"][1])
     # If three consecutive collapse 3 lines into one.
-    elif num_collapse == 3:
+    elif int(num_collapse) == 3:
         REF = str(dict_lines["REF"][0]) + str(dict_lines["REF"][1]) + str(dict_lines["REF"][2])
         ALT = str(dict_lines["ALT"][0]) + str(dict_lines["ALT"][1]) + str(dict_lines["ALT"][2])
     ## TODO Check how much differences we found among DPs in the three positions of a codon.
@@ -279,7 +279,6 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
                     elif  len(dict_lines["POS"]) == 2:
                         for i,j in enumerate(dict_lines):
                             dict_lines.setdefault(j, []).append(param_list[i])
-
                         # Are two positions in the dict consecutive?
                         if check_consecutive(dict_lines["POS"]) == 2:
                             ## If the first position is not on the third position of the codon they are in the same codon.
@@ -292,6 +291,12 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
                                 for i,j in enumerate(dict_lines):
                                     dict_lines[list(dict_lines.keys())[i]].pop(0)
                                     dict_lines[list(dict_lines.keys())[i]].pop(0)
+                            else:
+                                writeLine = True
+                                oline =(dict_lines["CHROM"][0] + "\t"+ dict_lines["POS"][0]+ "\t"+ dict_lines["ID"][0]+ "\t"+ dict_lines    ["REF"][0]+ "\t"+ dict_lines["ALT"][0]+ "\t"+ dict_lines["QUAL"][0]+ "\t"+ dict_lines["FILTER"][0]+ "\t"+   dict_lines["INFO"][0]+ "\t"+ dict_lines["FORMAT"][0]+ "\t"+ dict_lines["SAMPLE"][0]+ "\n")
+
+                                for i,j in enumerate(dict_lines):
+                                    dict_lines[list(dict_lines.keys())[i]].pop(0)
 
                         # Are the three positions in the dict consecutive?
                         elif check_consecutive(dict_lines["POS"]) == 3:
@@ -302,9 +307,9 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
                                 num_collapse = 3
                                 CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO,FORMAT,SAMPLE = rename_vars(dict_lines,num_collapse)
                                 oline = (CHROM+ "\t"+ POS+ "\t"+ ID+ "\t"+ REF+ "\t"+ ALT+ "\t"+ QUAL+ "\t"+ FILTER+ "\t"+ INFO+ "\t"+  FORMAT+ "\t"+ SAMPLE+ "\n" )
-                                #for i,j in enumerate(dict_lines):
-                                #    dict_lines[list(dict_lines.keys())[i]].pop(0)
-                                #    dict_lines[list(dict_lines.keys())[i]].pop(0)
+                                for i,j in enumerate(dict_lines):
+                                    dict_lines[list(dict_lines.keys())[i]].pop(0)
+                                    dict_lines[list(dict_lines.keys())[i]].pop(0)
 
                                 # we empty the dict_lines
                                 dict_lines = {'CHROM':[],'POS':[],'ID':[],'REF':[],'ALT':[],'REF_DP':[],'REF_RV':[],'ALT_DP':[],    'ALT_RV':[],'QUAL':[],'REF_CODON':[],'ALT_CODON':[],'FILTER':[],'INFO':[],'FORMAT':[],'SAMPLE':[]}
@@ -324,9 +329,9 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
 
                                 for i,j in enumerate(dict_lines):
                                     dict_lines[list(dict_lines.keys())[i]].pop(0)
+
                         elif check_consecutive(dict_lines["POS"]) == False:
                             writeLine = True
-
                             oline =(dict_lines["CHROM"][0] + "\t"+ dict_lines["POS"][0]+ "\t"+ dict_lines["ID"][0]+ "\t"+ dict_lines    ["REF"][0]+ "\t"+ dict_lines["ALT"][0]+ "\t"+ dict_lines["QUAL"][0]+ "\t"+ dict_lines["FILTER"][0]+ "\t"+   dict_lines["INFO"][0]+ "\t"+ dict_lines["FORMAT"][0]+ "\t"+ dict_lines["SAMPLE"][0]+ "\n")
 
                             for i,j in enumerate(dict_lines):
