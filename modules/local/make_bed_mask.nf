@@ -26,11 +26,11 @@ process MAKE_BED_MASK {
         --reference $fasta \\
         $bam | \\
         $save_mpileup  \\
-        awk -v OFS='\\t' '{print \$1, \$2-1, \$2, \$4}' | awk '\$4 < $args2' > lowcov.bes
+        awk -v OFS='\\t' '{print \$1, \$2-1, \$2, \$4}' | awk '\$4 < $args2' > lowcov_positions
 
     make_bed_mask.py \\
         $vcf \\
-        lowcov.bes \\
+        lowcov_positions \\
         ${prefix}.bed
 
     cat <<-END_VERSIONS > versions.yml
