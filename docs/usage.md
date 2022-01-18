@@ -337,7 +337,7 @@ The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementatio
 
 You can use a similar approach to update the version of Nextclade used by the pipeline:
 
-1. Check the default version used by the pipeline in the module file for [Nextclade](https://github.com/nf-core/viralrecon/blob/bc9ed7163796eed433580e3fa6d3421f65b939fe/modules/nf-core/modules/nextclade/main.nf#L5-L8)
+1. Check the default version used by the pipeline in the module file for [Nextclade](https://github.com/nf-core/viralrecon/blob/e582db9c70721aae530703ec9a2ab8b219c96a99/modules/nf-core/modules/nextclade/run/main.nf#L5-L8)
 2. Find the latest version of the Biocontainer available on [Quay.io](https://quay.io/repository/biocontainers/nextclade?tag=latest&tab=tags)
 3. Create the custom config accordingly:
 
