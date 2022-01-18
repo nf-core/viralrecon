@@ -85,7 +85,7 @@ include { TABIX_TABIX                   } from '../modules/nf-core/modules/tabix
 include { BCFTOOLS_STATS                } from '../modules/nf-core/modules/bcftools/stats/main'
 include { QUAST                         } from '../modules/nf-core/modules/quast/main'
 include { PANGOLIN                      } from '../modules/nf-core/modules/pangolin/main'
-include { NEXTCLADE                     } from '../modules/nf-core/modules/nextclade/main'
+include { NEXTCLADE_RUN                 } from '../modules/nf-core/modules/nextclade/run/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
 include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/modules/mosdepth/main'
 include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/modules/mosdepth/main'
@@ -380,15 +380,16 @@ workflow NANOPORE {
     //
     ch_nextclade_multiqc = Channel.empty()
     if (!params.skip_nextclade) {
-        NEXTCLADE (
-            ARTIC_MINION.out.fasta
+        NEXTCLADE_RUN (
+            ARTIC_MINION.out.fasta,
+            PREPARE_GENOME.out.nextclade_db
         )
-        ch_versions = ch_versions.mix(NEXTCLADE.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(NEXTCLADE_RUN.out.versions.first().ifEmpty(null))
 
         //
         // MODULE: Get Nextclade clade information for MultiQC report
         //
-        NEXTCLADE
+        NEXTCLADE_RUN
             .out
             .csv
             .map { meta, csv ->

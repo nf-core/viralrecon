@@ -5,7 +5,9 @@
 include { GUNZIP as GUNZIP_FASTA      } from '../../modules/nf-core/modules/gunzip/main'
 include { GUNZIP as GUNZIP_GFF        } from '../../modules/nf-core/modules/gunzip/main'
 include { GUNZIP as GUNZIP_PRIMER_BED } from '../../modules/nf-core/modules/gunzip/main'
+include { UNTAR                       } from '../../modules/nf-core/modules/untar/main'
 include { CUSTOM_GETCHROMSIZES        } from '../../modules/nf-core/modules/custom/getchromsizes/main'
+include { NEXTCLADE_DATASETGET        } from '../../modules/nf-core/modules/nextclade/datasetget/main'
 include { COLLAPSE_PRIMERS            } from '../../modules/local/collapse_primers'
 include { SNPEFF_BUILD                } from '../../modules/local/snpeff_build'
 
@@ -87,6 +89,32 @@ workflow PREPARE_GENOME {
     }
 
     //
+    // Prepare Nextclade dataset
+    //
+    ch_nextclade_db = Channel.empty()
+    if (!params.skip_consensus && !params.skip_nextclade) {
+        if (params.nextclade_dataset) {
+            if (params.nextclade_dataset.endsWith('.tar.gz')) {
+                UNTAR (
+                    params.nextclade_dataset
+                )
+                ch_nextclade_db = UNTAR.out.untar
+                ch_versions     = ch_versions.mix(UNTAR.out.versions)
+            } else {
+                ch_nextclade_db = file(params.nextclade_dataset)
+            }
+        } else if (params.nextclade_dataset_name) {
+            NEXTCLADE_DATASETGET (
+                params.nextclade_dataset_name,
+                params.nextclade_dataset_reference,
+                params.nextclade_dataset_tag
+            )
+            ch_nextclade_db = NEXTCLADE_DATASETGET.out.dataset
+            ch_versions     = ch_versions.mix(NEXTCLADE_DATASETGET.out.versions)
+        }
+    }
+
+    //
     // Make snpEff database
     //
     ch_snpeff_db     = Channel.empty()
@@ -107,6 +135,7 @@ workflow PREPARE_GENOME {
     chrom_sizes          = ch_chrom_sizes           // path: genome.sizes
     primer_bed           = ch_primer_bed            // path: primer.bed
     primer_collapsed_bed = ch_primer_collapsed_bed  // path: primer.collapsed.bed
+    nextclade_db         = ch_nextclade_db          // path: nextclade_db
     snpeff_db            = ch_snpeff_db             // path: snpeff_db
     snpeff_config        = ch_snpeff_config         // path: snpeff.config
 

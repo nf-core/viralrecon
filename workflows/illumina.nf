@@ -399,6 +399,7 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.chrom_sizes,
             PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
+            PREPARE_GENOME.out.nextclade_db,
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config,
             ch_ivar_variants_header_mqc
@@ -448,6 +449,7 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.chrom_sizes,
             PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
+            PREPARE_GENOME.out.nextclade_db,
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config
         )

@@ -12,8 +12,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Updated pipeline template to [nf-core/tools 2.2](https://github.com/nf-core/tools/releases/tag/2.2)
 * [[#218](https://github.com/nf-core/viralrecon/issues/218)] - Support for compressed FastQ files for Nanopore data
 * [[#232](https://github.com/nf-core/viralrecon/issues/232)] - Remove duplicate variants called by ARTIC ONT pipeline
+* [[#235](https://github.com/nf-core/viralrecon/issues/235)] - Nextclade version bump
 
 ### Parameters
+
+| Old parameter                 | New parameter                         |
+|-------------------------------|---------------------------------------|
+|                               | `--nextclade_dataset`                 |
+|                               | `--nextclade_dataset_name`            |
+|                               | `--nextclade_dataset_reference`       |
+|                               | `--nextclade_dataset_tag`             |
+
+> **NB:** Parameter has been __updated__ if both old and new parameter information is present.
+> **NB:** Parameter has been __added__ if just the new parameter information is present.
+> **NB:** Parameter has been __removed__ if new parameter information isn't present.
 
 ## [[2.2](https://github.com/nf-core/rnaseq/releases/tag/2.2)] - 2021-07-29
 
