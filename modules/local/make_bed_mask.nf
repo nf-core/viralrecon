@@ -1,7 +1,7 @@
 process MAKE_BED_MASK {
     tag "$meta.id"
 
-    conda (params.enable_conda ? "conda-forge::python=3.9.5 bioconda::samtools=1.12" : null)
+    conda (params.enable_conda ? "conda-forge::python=3.9.5 conda-forge::gawk=5.1.0 bioconda::samtools=1.12" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/plasmidid:1.6.5--hdfd78af_0' :
         'quay.io/biocontainers/plasmidid:1.6.5--hdfd78af_0' }"
