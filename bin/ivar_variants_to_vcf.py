@@ -168,6 +168,7 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
         '##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">\n'
         '##FILTER=<ID=PASS,Description="Result of p-value <= 0.05">\n'
         '##FILTER=<ID=FAIL,Description="Result of p-value > 0.05">\n'
+        '##FILTER=<ID=SB,Description="Strand-bias fisher-test p-value < 0.05">\n'
         '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n'
         '##FORMAT=<ID=REF_DP,Number=1,Type=Integer,Description="Depth of reference base">\n'
         '##FORMAT=<ID=REF_RV,Number=1,Type=Integer,Description="Depth of reference base on reverse reads">\n'
@@ -177,8 +178,9 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
         '##FORMAT=<ID=ALT_QUAL,Number=1,Type=String,Description="Mean quality of alternate base">\n'
         '##FORMAT=<ID=ALT_FREQ,Number=1,Type=String,Description="Frequency of alternate base">\n'
     )
+    if
     header += (
-        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tINFO[SB]\tFORMAT\t" + filename + "\n"
+        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + filename + "\n"
     )
 
     varList = []
