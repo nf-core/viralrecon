@@ -69,7 +69,8 @@ workflow VARIANTS_IVAR {
     if (!params.skip_consensus) {
         IVAR_CONSENSUS (
             bam,
-            fasta
+            fasta,
+            params.save_mpileup
         )
         ch_consensus      = IVAR_CONSENSUS.out.fasta
         ch_consensus_qual = IVAR_CONSENSUS.out.qual
