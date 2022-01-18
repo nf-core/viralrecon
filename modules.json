@@ -24,9 +24,6 @@
             "bcftools/stats": {
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
             },
-            "bedtools/genomecov": {
-                "git_sha": "9d0cad583b9a71a6509b754fdf589cbfbed08961"
-            },
             "bedtools/getfasta": {
                 "git_sha": "d473a247d2e0c619b0df877ea19d9a5a98c8e3c8"
             },

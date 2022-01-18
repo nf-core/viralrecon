@@ -18,8 +18,9 @@ workflow MAKE_CONSENSUS {
     ch_versions = Channel.empty()
 
     MAKE_BED_MASK (
-        bam_vcf,
-        fasta
+        bam_vcf.map { meta, bam, vcf, tbi -> [ meta, bam, vcf ] },
+        fasta,
+        params.save_mpileup
     )
     ch_versions = ch_versions.mix(MAKE_BED_MASK.out.versions.first())
 
