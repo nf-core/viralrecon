@@ -302,6 +302,7 @@ process {
 The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. If for some reason you need to use a different version of a particular tool with the pipeline then you just need to identify the `process` name and override the Nextflow `container` definition for that process using the `withName` declaration.
 
 #### Pangolin
+
 For example, in the [nf-core/viralrecon](https://nf-co.re/viralrecon) pipeline a tool called [Pangolin](https://github.com/cov-lineages/pangolin) has been used during the COVID-19 pandemic to assign lineages to SARS-CoV-2 genome sequenced samples. Given that the lineage assignments change quite frequently it doesn't make sense to re-release the nf-core/viralrecon everytime a new version of Pangolin has been released. However, you can override the default container used by the pipeline by creating a custom config file and passing it as a command-line argument via `-c custom.config`.
 
 1. Check the default version used by the pipeline in the module file for [Pangolin](https://github.com/nf-core/viralrecon/blob/a85d5969f9025409e3618d6c280ef15ce417df65/modules/nf-core/software/pangolin/main.nf#L14-L19)
@@ -339,6 +340,7 @@ For example, in the [nf-core/viralrecon](https://nf-co.re/viralrecon) pipeline a
         ```
 
 #### Nextclade
+
 You can use a similar approach to update the version of Nextclade used by the pipeline:
 
 1. Check the default version used by the pipeline in the module file for [Nextclade](https://github.com/nf-core/viralrecon/blob/bc9ed7163796eed433580e3fa6d3421f65b939fe/modules/nf-core/modules/nextclade/main.nf#L5-L8)
@@ -375,7 +377,7 @@ You can use a similar approach to update the version of Nextclade used by the pi
         }
         ```
 
-**Nextclade datasets**
+##### Nextclade datasets
 
 A [`nextclade dataset`](https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html#nextclade-datasets) feature was introduced in [Nextclade CLI v1.3.0](https://github.com/nextstrain/nextclade/releases/tag/1.3.0) that fetches input genome files such as reference sequences and trees from a central dataset repository. We have uploaded Nextclade dataset [v2022-01-05](https://github.com/nextstrain/nextclade_data/releases/tag/2022-01-06--15-17-13--UTC) to [nf-core/test-datasets](https://github.com/nf-core/test-datasets/blob/viralrecon/genome/MN908947.3/nextclade_sars-cov-2_MN908947_2022-01-05T19_54_31Z.tar.gz), and for reproducibility, this will be used by default if you specifiy `--genome 'MN908947.3'` when running the pipeline. However, there are a number of ways you can use a more recent version of the dataset:
 
