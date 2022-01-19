@@ -145,7 +145,7 @@ The SRA download functionality has been removed from the pipeline (`>=2.1`) and 
       * SARS-CoV-2 reference genomes
       * primersets
       * Nextclade datasets  
- 
+
        Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard keys; see [usage docs](https://nf-co.re/viralrecon/usage#illumina-primer-sets).
 
 ## Documentation
