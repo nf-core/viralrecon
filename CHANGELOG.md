@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [[#218](https://github.com/nf-core/viralrecon/issues/218)] - Support for compressed FastQ files for Nanopore data
 * [[#232](https://github.com/nf-core/viralrecon/issues/232)] - Remove duplicate variants called by ARTIC ONT pipeline
 * [[#235](https://github.com/nf-core/viralrecon/issues/235)] - Nextclade version bump
+* [[#244](https://github.com/nf-core/viralrecon/issues/244)] - Fix BCFtools consensus generation and masking
 
 ### Parameters
 

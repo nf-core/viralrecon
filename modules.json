@@ -16,16 +16,13 @@
                 "git_sha": "9d0cad583b9a71a6509b754fdf589cbfbed08961"
             },
             "bcftools/consensus": {
-                "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
+                "git_sha": "bb90e4fb78a977d469aad2a614c673b1981e7806"
             },
             "bcftools/mpileup": {
-                "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
+                "git_sha": "bb90e4fb78a977d469aad2a614c673b1981e7806"
             },
             "bcftools/stats": {
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
-            },
-            "bedtools/genomecov": {
-                "git_sha": "9d0cad583b9a71a6509b754fdf589cbfbed08961"
             },
             "bedtools/getfasta": {
                 "git_sha": "d473a247d2e0c619b0df877ea19d9a5a98c8e3c8"
@@ -67,13 +64,13 @@
                 "git_sha": "20d8250d9f39ddb05dfb437603aaf99b5c0b2b41"
             },
             "ivar/consensus": {
-                "git_sha": "9d0cad583b9a71a6509b754fdf589cbfbed08961"
+                "git_sha": "bb90e4fb78a977d469aad2a614c673b1981e7806"
             },
             "ivar/trim": {
                 "git_sha": "9d0cad583b9a71a6509b754fdf589cbfbed08961"
             },
             "ivar/variants": {
-                "git_sha": "b4c6b430d0ae4899551bb44dbb78d6270c31e0b2"
+                "git_sha": "bb90e4fb78a977d469aad2a614c673b1981e7806"
             },
             "kraken2/kraken2": {
                 "git_sha": "3f9a0285816a2e0ae73a3875fb5ae4b409da5952"
