@@ -142,9 +142,9 @@ The SRA download functionality has been removed from the pipeline (`>=2.1`) and 
         ```
 
     * You can find the default keys used to specify `--genome` in the [genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config). This provides default params for
-      * SARS-CoV-2 reference genomes
-      * primersets
-      * Nextclade datasets  
+      * Reference genomes (including SARS-CoV-2)
+      * Genome associates primer sets
+      * [Nextclade datasets](https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html)
 
        Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard keys; see [usage docs](https://nf-co.re/viralrecon/usage#illumina-primer-sets).
 
