@@ -141,7 +141,7 @@ The SRA download functionality has been removed from the pipeline (`>=2.1`) and 
         ./fastq_dir_to_samplesheet.py <FASTQ_DIR> samplesheet.csv
         ```
 
-    * You can find the default keys used to specify `--genome` in the [genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config). This provides default params for
+    * You can find the default keys used to specify `--genome` in the [genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config). This provides default options for
       * Reference genomes (including SARS-CoV-2)
       * Genome associates primer sets
       * [Nextclade datasets](https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html)
