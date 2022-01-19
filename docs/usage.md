@@ -385,7 +385,7 @@ A [`nextclade dataset`](https://docs.nextstrain.org/projects/nextclade/en/latest
 * Let the pipeline create and use the latest version by setting: `--nextclade_dataset false --nextclade_dataset_tag false`
 * Let the pipeline create and use a specific, tagged version by setting: `--nextclade_dataset false --nextclade_dataset_tag <DATASET_TAG>`
 
-The Nextclade data releases can be found on their [Github page](https://github.com/nextstrain/nextclade_data/releases). Use the tag specified for each release e.g `2022-01-05T19:54:31Z` in the example below.
+The Nextclade dataset releases can be found on their [Github page](https://github.com/nextstrain/nextclade_data/releases). Use the tag specified for each release e.g `2022-01-05T19:54:31Z` in the example below:
 
 ![Nextclade tag example](images/nextclade_tag_example.png)
 
