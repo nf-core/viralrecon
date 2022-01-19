@@ -147,13 +147,12 @@ The SRA download functionality has been removed from the pipeline (`>=2.1`) and 
       * [Nextclade datasets](https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html)
 
         The Pangolin and Nextclade lineage and clade definitions change regularly as new SARS-CoV-2 lineages are discovered. For instructions to use more recent versions of lineage analysis tools like Pangolin and Nextclade please refer to the [updating containers](https://nf-co.re/viralrecon/usage#updating-containers) section in the usage docs.
-       
+
        Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard keys; see [usage docs](https://nf-co.re/viralrecon/usage#illumina-primer-sets).
 
 ## Documentation
 
 The nf-core/viralrecon pipeline comes with documentation about the pipeline [usage](https://nf-co.re/viralrecon/usage), [parameters](https://nf-co.re/viralrecon/parameters) and [output](https://nf-co.re/viralrecon/output).
-
 
 ## Credits
 
