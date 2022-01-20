@@ -19,7 +19,7 @@ def parse_args(args=None):
 
 def find_indels_vcf(vcf_in):
     encoding = "utf-8"
-    dels_pos_len = {}
+    indels_pos_len = {}
     with gzip.open(vcf_in, "r") as f:
         for line in f:
             if "#" not in str(line, encoding):
@@ -28,8 +28,8 @@ def find_indels_vcf(vcf_in):
                 ref = line[3]
                 alt = line[4]
                 if len(ref) != len(alt):
-                    dels_pos_len[var_pos] = len(ref)
-    return dels_pos_len
+                    indels_pos_len[var_pos] = len(ref)
+    return indels_pos_len
 
 
 def make_bed_mask(bed_in, bed_out, indels_pos_len):
