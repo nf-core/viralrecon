@@ -33,7 +33,7 @@ def parse_args(args=None):
     )
     parser.add_argument(
         "-nsb",
-        "--not_strand_bias",
+        "--ignore_strand_bias",
         dest="NOT_STRAND_BIAS",
         default=False,
         help="Does not take into account strand bias, use this option when not using amplicons for sequencing",
@@ -41,7 +41,7 @@ def parse_args(args=None):
     )
     parser.add_argument(
         "-nmc",
-        "--not_merge_codons",
+        "--ignore_merge_codons",
         dest="NOT_MERGE_CODONS",
         help="Only output variants without taking into accout if the positions are consecutive and belong to the same codon.",
         action="store_true"
