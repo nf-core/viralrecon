@@ -299,7 +299,11 @@ process {
 
 ### Updating containers
 
-The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. If for some reason you need to use a different version of a particular tool with the pipeline then you just need to identify the `process` name and override the Nextflow `container` definition for that process using the `withName` declaration. For example, in the [nf-core/viralrecon](https://nf-co.re/viralrecon) pipeline a tool called [Pangolin](https://github.com/cov-lineages/pangolin) has been used during the COVID-19 pandemic to assign lineages to SARS-CoV-2 genome sequenced samples. Given that the lineage assignments change quite frequently it doesn't make sense to re-release the nf-core/viralrecon everytime a new version of Pangolin has been released. However, you can override the default container used by the pipeline by creating a custom config file and passing it as a command-line argument via `-c custom.config`.
+The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. If for some reason you need to use a different version of a particular tool with the pipeline then you just need to identify the `process` name and override the Nextflow `container` definition for that process using the `withName` declaration.
+
+#### Pangolin
+
+For example, in the [nf-core/viralrecon](https://nf-co.re/viralrecon) pipeline a tool called [Pangolin](https://github.com/cov-lineages/pangolin) has been used during the COVID-19 pandemic to assign lineages to SARS-CoV-2 genome sequenced samples. Given that the lineage assignments change quite frequently it doesn't make sense to re-release the nf-core/viralrecon everytime a new version of Pangolin has been released. However, you can override the default container used by the pipeline by creating a custom config file and passing it as a command-line argument via `-c custom.config`.
 
 1. Check the default version used by the pipeline in the module file for [Pangolin](https://github.com/nf-core/viralrecon/blob/a85d5969f9025409e3618d6c280ef15ce417df65/modules/nf-core/software/pangolin/main.nf#L14-L19)
 2. Find the latest version of the Biocontainer available on [Quay.io](https://quay.io/repository/biocontainers/pangolin?tag=latest&tab=tags)
@@ -310,7 +314,7 @@ The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementatio
         ```nextflow
         process {
             withName: PANGOLIN {
-                container = 'quay.io/biocontainers/pangolin:3.0.5--pyhdfd78af_0'
+                container = 'quay.io/biocontainers/pangolin:3.1.17--pyhdfd78af_1'
             }
         }
         ```
@@ -320,7 +324,7 @@ The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementatio
         ```nextflow
         process {
             withName: PANGOLIN {
-                container = 'https://depot.galaxyproject.org/singularity/pangolin:3.0.5--pyhdfd78af_0'
+                container = 'https://depot.galaxyproject.org/singularity/pangolin:3.1.17--pyhdfd78af_1'
             }
         }
         ```
@@ -330,10 +334,62 @@ The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementatio
         ```nextflow
         process {
             withName: PANGOLIN {
-                conda = 'bioconda::pangolin=3.0.5'
+                conda = 'bioconda::pangolin=3.1.17'
             }
         }
         ```
+
+#### Nextclade
+
+You can use a similar approach to update the version of Nextclade used by the pipeline:
+
+1. Check the default version used by the pipeline in the module file for [Nextclade](https://github.com/nf-core/viralrecon/blob/e582db9c70721aae530703ec9a2ab8b219c96a99/modules/nf-core/modules/nextclade/run/main.nf#L5-L8)
+2. Find the latest version of the Biocontainer available on [Quay.io](https://quay.io/repository/biocontainers/nextclade?tag=latest&tab=tags)
+3. Create the custom config accordingly:
+
+    * For Docker:
+
+        ```nextflow
+        process {
+            withName: 'NEXTCLADE_DATASETGET|NEXTCLADE_RUN' {
+                container = 'quay.io/biocontainers/nextclade:1.9.0--h9ee0642_0'
+            }
+        }
+        ```
+
+    * For Singularity:
+
+        ```nextflow
+        process {
+            withName: 'NEXTCLADE_DATASETGET|NEXTCLADE_RUN' {
+                container = 'https://depot.galaxyproject.org/singularity/nextclade:1.9.0--h9ee0642_0'
+            }
+        }
+        ```
+
+    * For Conda:
+
+        ```nextflow
+        process {
+            withName: 'NEXTCLADE_DATASETGET|NEXTCLADE_RUN' {
+                conda = 'bioconda::nextclade=1.9.0'
+            }
+        }
+        ```
+
+##### Nextclade datasets
+
+A [`nextclade dataset`](https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html#nextclade-datasets) feature was introduced in [Nextclade CLI v1.3.0](https://github.com/nextstrain/nextclade/releases/tag/1.3.0) that fetches input genome files such as reference sequences and trees from a central dataset repository. We have uploaded Nextclade dataset [v2022-01-05](https://github.com/nextstrain/nextclade_data/releases/tag/2022-01-06--15-17-13--UTC) to [nf-core/test-datasets](https://github.com/nf-core/test-datasets/blob/viralrecon/genome/MN908947.3/nextclade_sars-cov-2_MN908947_2022-01-05T19_54_31Z.tar.gz), and for reproducibility, this will be used by default if you specify `--genome 'MN908947.3'` when running the pipeline. However, there are a number of ways you can use a more recent version of the dataset:
+
+* Supply your own by setting: `--nextclade_dataset <PATH_TO_DATASET>`
+* Let the pipeline create and use the latest version by setting: `--nextclade_dataset false --nextclade_dataset_tag false`
+* Let the pipeline create and use a specific, tagged version by setting: `--nextclade_dataset false --nextclade_dataset_tag <DATASET_TAG>`
+
+The Nextclade dataset releases can be found on their [Github page](https://github.com/nextstrain/nextclade_data/releases). Use the tag specified for each release e.g `2022-01-05T19:54:31Z` in the example below:
+
+![Nextclade tag example](images/nextclade_tag_example.png)
+
+If the `--save_reference` parameter is provided then the Nextclade dataset generated by the pipeline will also be saved in the `results/genome/` directory.
 
 > **NB:** If you wish to periodically update individual tool-specific results (e.g. Pangolin) generated by the pipeline then you must ensure to keep the `work/` directory otherwise the `-resume` ability of the pipeline will be compromised and it will restart from scratch.
 
