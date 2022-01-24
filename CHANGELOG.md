@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 |                               | `--nextclade_dataset_name`            |
 |                               | `--nextclade_dataset_reference`       |
 |                               | `--nextclade_dataset_tag`             |
+|                               | `--skip_consensus_plots`              |
+| `--callers`                   | `--variant_caller`                    |
+|                               | `--consensus_caller`                  |
 
 > **NB:** Parameter has been __updated__ if both old and new parameter information is present.
 > **NB:** Parameter has been __added__ if just the new parameter information is present.
