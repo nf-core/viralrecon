@@ -578,7 +578,7 @@ iVar outputs a tsv format, which is not compatible with downstream analysis such
 * `variants/<CALLER>/snpeff/bcftools_stats/`
     * `*.bcftools_stats.txt`: Statistics and counts obtained from VCF file.
 
-**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--variant_caller` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
 
 </details>
 
@@ -596,7 +596,7 @@ iVar outputs a tsv format, which is not compatible with downstream analysis such
 * `variants/<CALLER>/quast/`
     * `report.html`: Results report in HTML format. Also available in various other file formats i.e. `report.pdf`, `report.tex`, `report.tsv` and `report.txt`.
 
-**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--variant_caller` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
 
 </details>
 
@@ -610,7 +610,7 @@ iVar outputs a tsv format, which is not compatible with downstream analysis such
 * `variants/<CALLER>/pangolin/`
     * `*.pangolin.csv`: Lineage analysis results from Pangolin.
 
-**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--variant_caller` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
 
 </details>
 
@@ -624,7 +624,7 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 * `variants/<CALLER>/nextclade/`
     * `*.csv`: Analysis results from Nextlade containing genome clade assignment, mutation calling and sequence quality checks.
 
-**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--variant_caller` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
 
 </details>
 
@@ -638,7 +638,7 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 * `variants/<CALLER>/asciigenome/<SAMPLE>/`
     * `*.pdf`: Individual variant screenshots with annotation tracks in PDF format.
 
-**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--callers` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--variant_caller` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
 
 </details>
 

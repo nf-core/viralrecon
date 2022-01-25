@@ -5,10 +5,11 @@
 */
 
 def valid_params = [
-    protocols   : ['metagenomic', 'amplicon'],
-    callers     : ['ivar', 'bcftools'],
-    assemblers  : ['spades', 'unicycler', 'minia'],
-    spades_modes: ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
+    protocols         : ['metagenomic', 'amplicon'],
+    variant_callers   : ['ivar', 'bcftools'],
+    consensus_callers : ['ivar', 'bcftools'],
+    assemblers        : ['spades', 'unicycler', 'minia'],
+    spades_modes      : ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
 ]
 
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
@@ -28,8 +29,11 @@ if (params.input)      { ch_input      = file(params.input)      } else { exit 1
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = []                              }
 
 def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
-def callers    = params.callers    ? params.callers.split(',').collect{ it.trim().toLowerCase() }    : []
-if (!callers)  { callers = params.protocol == 'amplicon' ? ['ivar'] : ['bcftools'] }
+
+def variant_caller = params.variant_caller
+if (!variant_caller) { variant_caller = params.protocol == 'amplicon' ? 'ivar' : 'bcftools' }
+
+def consensus_caller = params.consensus_caller ?: 'bcftools'
 
 /*
 ========================================================================================
@@ -389,7 +393,7 @@ workflow ILLUMINA {
     ch_ivar_counts_multiqc = Channel.empty()
     ch_ivar_stats_multiqc  = Channel.empty()
     ch_ivar_snpeff_multiqc = Channel.empty()
-    if (!params.skip_variants && 'ivar' in callers) {
+    if (!params.skip_variants && variant_caller == 'ivar') {
         VARIANTS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
@@ -415,7 +419,7 @@ workflow ILLUMINA {
     ch_tbi                     = Channel.empty()
     ch_bcftools_stats_multiqc  = Channel.empty()
     ch_bcftools_snpeff_multiqc = Channel.empty()
-    if (!params.skip_variants && 'bcftools' in callers) {
+    if (!params.skip_variants && variant_caller == 'bcftools') {
         VARIANTS_BCFTOOLS (
             ch_bam,
             PREPARE_GENOME.out.fasta,
@@ -438,7 +442,7 @@ workflow ILLUMINA {
     ch_ivar_quast_multiqc     = Channel.empty()
     ch_ivar_pangolin_multiqc  = Channel.empty()
     ch_ivar_nextclade_multiqc = Channel.empty()
-    if (!params.skip_consensus && 'ivar' in callers) {
+    if (!params.skip_consensus && consensus_caller == 'ivar') {
         CONSENSUS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
@@ -474,7 +478,7 @@ workflow ILLUMINA {
     ch_bcftools_quast_multiqc     = Channel.empty()
     ch_bcftools_pangolin_multiqc  = Channel.empty()
     ch_bcftools_nextclade_multiqc = Channel.empty()
-    if (!params.skip_consensus && 'bcftools' in callers && callers) {
+    if (!params.skip_consensus && consensus_caller == 'bcftools' && variant_caller) {
         CONSENSUS_BCFTOOLS (
             ch_bam,
             ch_vcf,
