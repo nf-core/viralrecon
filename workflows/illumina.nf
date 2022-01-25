@@ -33,8 +33,6 @@ def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.tr
 def variant_caller = params.variant_caller
 if (!variant_caller) { variant_caller = params.protocol == 'amplicon' ? 'ivar' : 'bcftools' }
 
-def consensus_caller = params.consensus_caller ?: 'bcftools'
-
 /*
 ========================================================================================
     CONFIG FILES
@@ -442,7 +440,7 @@ workflow ILLUMINA {
     ch_ivar_quast_multiqc     = Channel.empty()
     ch_ivar_pangolin_multiqc  = Channel.empty()
     ch_ivar_nextclade_multiqc = Channel.empty()
-    if (!params.skip_consensus && consensus_caller == 'ivar') {
+    if (!params.skip_consensus && params.consensus_caller == 'ivar') {
         CONSENSUS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
@@ -478,7 +476,7 @@ workflow ILLUMINA {
     ch_bcftools_quast_multiqc     = Channel.empty()
     ch_bcftools_pangolin_multiqc  = Channel.empty()
     ch_bcftools_nextclade_multiqc = Channel.empty()
-    if (!params.skip_consensus && consensus_caller == 'bcftools' && variant_caller) {
+    if (!params.skip_consensus && params.consensus_caller == 'bcftools' && variant_caller) {
         CONSENSUS_BCFTOOLS (
             ch_bam,
             ch_vcf,
