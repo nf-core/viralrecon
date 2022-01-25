@@ -413,8 +413,6 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Call variants with BCFTools
     //
-    ch_vcf                     = Channel.empty()
-    ch_tbi                     = Channel.empty()
     ch_bcftools_stats_multiqc  = Channel.empty()
     ch_bcftools_snpeff_multiqc = Channel.empty()
     if (!params.skip_variants && variant_caller == 'bcftools') {
@@ -451,7 +449,7 @@ workflow ILLUMINA {
         ch_ivar_pangolin_multiqc = CONSENSUS_IVAR.out.pangolin_report
         ch_ivar_nextclade_report = CONSENSUS_IVAR.out.nextclade_report
         ch_versions              = ch_versions.mix(CONSENSUS_IVAR.out.versions)
-        
+
         //
         // MODULE: Get Nextclade clade information for MultiQC report
         //
@@ -470,7 +468,7 @@ workflow ILLUMINA {
         .set { ch_ivar_nextclade_multiqc }
     }
 
-    //    
+    //
     // SUBWORKFLOW: Call consensus with BCFTools
     //
     ch_bcftools_quast_multiqc     = Channel.empty()
