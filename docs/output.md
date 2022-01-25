@@ -553,6 +553,8 @@ iVar outputs a tsv format, which is not compatible with downstream analysis such
     * `*.N_density.pdf`: Plot showing density of N bases within the consensus sequence.
     * `*.N_run.tsv`: File containing start positions and width of N bases in consensus sequence.
 
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--variant_caller` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
+
 </details>
 
 [BCFtools](http://samtools.github.io/bcftools/bcftools.html) can be used to call variants directly from BAM alignment files. The functionality to call variants with BCFTools in this pipeline was inspired by work carried out by [Conor Walker](https://github.com/conorwalker/covid19/blob/3cb26ec399417bedb7e60487415c78a405f517d6/scripts/call_variants.sh).
