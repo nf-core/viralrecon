@@ -13,7 +13,7 @@ workflow CONSENSUS_QC {
     fasta        // channel: /path/to/genome.fasta
     gff          // channel: /path/to/genome.gff
     nextclade_db // channel: /path/to/nextclade_db/
-    
+
     main:
 
     ch_versions = Channel.empty()

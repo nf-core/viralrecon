@@ -40,7 +40,7 @@ workflow CONSENSUS_IVAR {
     emit:
     consensus        = IVAR_CONSENSUS.out.fasta          // channel: [ val(meta), [ fasta ] ]
     consensus_qual   = IVAR_CONSENSUS.out.qual           // channel: [ val(meta), [ qual.txt ] ]
-    
+
     quast_results    = CONSENSUS_QC.out.quast_results    // channel: [ val(meta), [ results ] ]
     quast_tsv        = CONSENSUS_QC.out.quast_tsv        // channel: [ val(meta), [ tsv ] ]
 

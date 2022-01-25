@@ -69,7 +69,7 @@ workflow CONSENSUS_BCFTOOLS {
 
     emit:
     consensus        = BCFTOOLS_CONSENSUS.out.fasta      // channel: [ val(meta), [ fasta ] ]
-    
+
     quast_results    = CONSENSUS_QC.out.quast_results    // channel: [ val(meta), [ results ] ]
     quast_tsv        = CONSENSUS_QC.out.quast_tsv        // channel: [ val(meta), [ tsv ] ]
 
