@@ -27,26 +27,9 @@ def find_indels_vcf(vcf_in):
                 var_pos = line[1]
                 ref = line[3]
                 alt = line[4]
-                if len(alt) > len(ref):
-                    indels_pos_len[var_pos] = len(alt)
-                elif len(ref) > len(alt):
+                if len(ref) != len(alt):
                     indels_pos_len[var_pos] = len(ref)
     return indels_pos_len
-
-
-def find_dels_vcf(vcf_in):
-    encoding = "utf-8"
-    dels_pos_len = {}
-    with gzip.open(vcf_in, "r") as f:
-        for line in f:
-            if "#" not in str(line, encoding):
-                line = re.split("\t", str(line, encoding))
-                var_pos = line[1]
-                ref = line[3]
-                alt = line[4]
-                if len(ref) > len(alt):
-                    dels_pos_len[var_pos] = len(ref)
-    return dels_pos_len
 
 
 def make_bed_mask(bed_in, bed_out, indels_pos_len):
@@ -66,7 +49,7 @@ def make_bed_mask(bed_in, bed_out, indels_pos_len):
             for position in indels_positions:
                 indel_init_pos = position
                 indel_whole_length = indels_pos_len[position]
-                indel_end_pos = int(indel_init_pos) + int(indel_whole_length)
+                indel_end_pos = int(indel_init_pos) + int(indel_whole_length)-1
                 if int(init_pos) in range(
                     int(indel_init_pos), int(indel_end_pos)
                 ) or int(end_pos) in range(int(indel_init_pos), int(indel_end_pos)):
@@ -75,12 +58,12 @@ def make_bed_mask(bed_in, bed_out, indels_pos_len):
                 else:
                     oline = ref_genome + "\t" + init_pos + "\t" + end_pos
             if test:
-                fout.write(oline)
+                fout.write(oline + "\n")
 
 
 def main(args=None):
     args = parse_args(args)
-    indels_pos_len = find_dels_vcf(args.VCF_IN)
+    indels_pos_len = find_indels_vcf(args.VCF_IN)
     make_bed_mask(args.BED_IN, args.BED_OUT, indels_pos_len)
 
 

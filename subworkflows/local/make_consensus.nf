@@ -2,7 +2,6 @@
 // Run various tools to generate a masked genome consensus sequence
 //
 
-include { BEDTOOLS_GENOMECOV } from '../../modules/nf-core/modules/bedtools/genomecov/main'
 include { BEDTOOLS_MERGE     } from '../../modules/nf-core/modules/bedtools/merge/main'
 include { BEDTOOLS_MASKFASTA } from '../../modules/nf-core/modules/bedtools/maskfasta/main'
 include { BCFTOOLS_CONSENSUS } from '../../modules/nf-core/modules/bcftools/consensus/main'
@@ -18,27 +17,21 @@ workflow MAKE_CONSENSUS {
 
     ch_versions = Channel.empty()
 
-    BEDTOOLS_GENOMECOV (
-        bam_vcf.map { meta, bam, vcf, tbi -> [ meta, bam, 1 ] },
-        [],
-        'bed',
-    )
-    ch_versions = ch_versions.mix(BEDTOOLS_GENOMECOV.out.versions.first())
-
-    BEDTOOLS_MERGE (
-        BEDTOOLS_GENOMECOV.out.genomecov
-    )
-    ch_versions = ch_versions.mix(BEDTOOLS_MERGE.out.versions.first())
-
     MAKE_BED_MASK (
-        bam_vcf.map { meta, bam, vcf, tbi -> [ meta, vcf ] }.join( BEDTOOLS_MERGE.out.bed, by: [0] ),
-        fasta
+        bam_vcf.map { meta, bam, vcf, tbi -> [ meta, bam, vcf ] },
+        fasta,
+        params.save_mpileup
     )
     ch_versions = ch_versions.mix(MAKE_BED_MASK.out.versions.first())
 
+    BEDTOOLS_MERGE (
+        MAKE_BED_MASK.out.bed
+    )
+    ch_versions = ch_versions.mix(BEDTOOLS_MERGE.out.versions.first())
+
     BEDTOOLS_MASKFASTA (
-        MAKE_BED_MASK.out.bed,
-        MAKE_BED_MASK.out.fasta.map{it[1]}
+        BEDTOOLS_MERGE.out.bed,
+        fasta
     )
     ch_versions = ch_versions.mix(BEDTOOLS_MASKFASTA.out.versions.first())
 

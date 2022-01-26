@@ -231,6 +231,26 @@
             "description": "Options common to both the Nanopore and Illumina workflows in the pipeline.",
             "default": "",
             "properties": {
+                "nextclade_dataset": {
+                    "type": "string",
+                    "description": "Full path to Nextclade dataset required for 'nextclade run' command.",
+                    "fa_icon": "fas fa-project-diagram"
+                },
+                "nextclade_dataset_name": {
+                    "type": "string",
+                    "description": "Name of Nextclade dataset to retrieve. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
+                    "fa_icon": "fas fa-project-diagram"
+                },
+                "nextclade_dataset_reference": {
+                    "type": "string",
+                    "description": "Accession id to download dataset based on a particular reference sequence. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
+                    "fa_icon": "fas fa-project-diagram"
+                },
+                "nextclade_dataset_tag": {
+                    "type": "string",
+                    "description": "Version tag of the dataset to download. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
+                    "fa_icon": "fas fa-project-diagram"
+                },
                 "asciigenome_read_depth": {
                     "type": "integer",
                     "default": 50,

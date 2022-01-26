@@ -80,6 +80,14 @@ class WorkflowMain {
             log.error "Invalid platform option: '${params.platform}'. Valid options: ${platformList.join(', ')}."
             System.exit(1)
         }
+
+        // Check Nextclade dataset parameters
+        if (!params.skip_consensus && !params.skip_nextclade) {
+            if (!params.nextclade_dataset && !params.nextclade_dataset_name) {
+                log.error "Nextclade dataset not specified with '--nextclade_dataset' or '--nextclade_dataset_name'. A list of available datasets can be obtained using the Nextclade 'nextclade dataset list' command."
+                System.exit(1)
+            }
+        }
     }
 
     //
@@ -134,6 +142,8 @@ class WorkflowMain {
             }
             if (genome_map.containsKey(attribute)) {
                 val = genome_map[ attribute ]
+            } else if (params.genomes[ params.genome ].containsKey(attribute)) {
+                val = params.genomes[ params.genome ][ attribute ]
             }
         }
         return val
