@@ -135,9 +135,7 @@ workflow NANOPORE {
         .primer_bed
         .map { WorkflowCommons.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }
 
-    //
     // Check whether the contigs in the primer BED file are present in the reference genome
-    //
     PREPARE_GENOME
         .out
         .primer_bed
