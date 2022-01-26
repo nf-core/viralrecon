@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [[#232](https://github.com/nf-core/viralrecon/issues/232)] - Remove duplicate variants called by ARTIC ONT pipeline
 * [[#235](https://github.com/nf-core/viralrecon/issues/235)] - Nextclade version bump
 * [[#244](https://github.com/nf-core/viralrecon/issues/244)] - Fix BCFtools consensus generation and masking
+* [[#245](https://github.com/nf-core/viralrecon/issues/245)] - Mpileup file as output
+* [[#247](https://github.com/nf-core/viralrecon/issues/247)] - Add strand-bias filtering option and codon fix in consecutive positions in ivar tsv conversion to vcf
 
 ### Parameters
 
@@ -23,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 |                               | `--nextclade_dataset_name`            |
 |                               | `--nextclade_dataset_reference`       |
 |                               | `--nextclade_dataset_tag`             |
+|                               | `--skip_consensus_plots`              |
+|                               | `--consensus_caller`                  |
+| `--callers`                   | `--variant_caller`                    |
 
 > **NB:** Parameter has been __updated__ if both old and new parameter information is present.
 > **NB:** Parameter has been __added__ if just the new parameter information is present.

@@ -383,10 +383,24 @@
             "description": "Various options for the variant calling branch of the Illumina workflow.",
             "default": "",
             "properties": {
-                "callers": {
+                "variant_caller": {
                     "type": "string",
-                    "description": "Specify which variant calling algorithms you would like to use. Available options are 'ivar' (default for '--protocol amplicon') and 'bcftools' (default for '--protocol metagenomic').",
-                    "fa_icon": "fas fa-phone-volume"
+                    "fa_icon": "fas fa-phone-volume",
+                    "description": "Specify which variant calling algorithm you would like to use. Available options are 'ivar' (default for '--protocol amplicon') and 'bcftools' (default for '--protocol metagenomic').",
+                    "enum": [
+                        "ivar",
+                        "bcftools"
+                    ]
+                },
+                "consensus_caller": {
+                    "type": "string",
+                    "default": "bcftools",
+                    "fa_icon": "fas fa-phone-volume",
+                    "description": "Specify which consensus calling algorithm you would like to use. Available options are 'bcftools' and 'ivar' (default: 'bcftools').",
+                    "enum": [
+                        "ivar",
+                        "bcftools"
+                    ]
                 },
                 "min_mapped_reads": {
                     "type": "integer",
@@ -440,6 +454,11 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip SnpEff and SnpSift annotation of variants."
+                },
+                "skip_consensus_plots": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip creation of consensus base density plots."
                 },
                 "skip_consensus": {
                     "type": "boolean",

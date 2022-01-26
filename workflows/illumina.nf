@@ -5,10 +5,11 @@
 */
 
 def valid_params = [
-    protocols   : ['metagenomic', 'amplicon'],
-    callers     : ['ivar', 'bcftools'],
-    assemblers  : ['spades', 'unicycler', 'minia'],
-    spades_modes: ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
+    protocols         : ['metagenomic', 'amplicon'],
+    variant_callers   : ['ivar', 'bcftools'],
+    consensus_callers : ['ivar', 'bcftools'],
+    assemblers        : ['spades', 'unicycler', 'minia'],
+    spades_modes      : ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
 ]
 
 def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
@@ -28,8 +29,9 @@ if (params.input)      { ch_input      = file(params.input)      } else { exit 1
 if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = []                              }
 
 def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
-def callers    = params.callers    ? params.callers.split(',').collect{ it.trim().toLowerCase() }    : []
-if (!callers)  { callers = params.protocol == 'amplicon' ? ['ivar'] : ['bcftools'] }
+
+def variant_caller = params.variant_caller
+if (!variant_caller) { variant_caller = params.protocol == 'amplicon' ? 'ivar' : 'bcftools' }
 
 /*
 ========================================================================================
@@ -53,9 +55,8 @@ ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_hea
 //
 // MODULE: Loaded from modules/local/
 //
-include { BCFTOOLS_ISEC } from '../modules/local/bcftools_isec'
-include { CUTADAPT      } from '../modules/local/cutadapt'
-include { MULTIQC       } from '../modules/local/multiqc_illumina'
+include { CUTADAPT } from '../modules/local/cutadapt'
+include { MULTIQC  } from '../modules/local/multiqc_illumina'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_READS         } from '../modules/local/multiqc_tsv_from_list'
@@ -70,6 +71,8 @@ include { INPUT_CHECK        } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome_illumina'
 include { VARIANTS_IVAR      } from '../subworkflows/local/variants_ivar'
 include { VARIANTS_BCFTOOLS  } from '../subworkflows/local/variants_bcftools'
+include { CONSENSUS_IVAR     } from '../subworkflows/local/consensus_ivar'
+include { CONSENSUS_BCFTOOLS } from '../subworkflows/local/consensus_bcftools'
 include { ASSEMBLY_SPADES    } from '../subworkflows/local/assembly_spades'
 include { ASSEMBLY_UNICYCLER } from '../subworkflows/local/assembly_unicycler'
 include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'
@@ -351,7 +354,6 @@ workflow ILLUMINA {
     ch_mosdepth_multiqc         = Channel.empty()
     ch_amplicon_heatmap_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_mosdepth) {
-
         MOSDEPTH_GENOME (
             ch_bam.join(ch_bai, by: [0]),
             [],
@@ -384,35 +386,69 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Call variants with IVar
     //
-    ch_ivar_vcf               = Channel.empty()
-    ch_ivar_tbi               = Channel.empty()
-    ch_ivar_counts_multiqc    = Channel.empty()
-    ch_ivar_stats_multiqc     = Channel.empty()
-    ch_ivar_snpeff_multiqc    = Channel.empty()
-    ch_ivar_quast_multiqc     = Channel.empty()
-    ch_ivar_pangolin_multiqc  = Channel.empty()
-    ch_ivar_nextclade_multiqc = Channel.empty()
-    if (!params.skip_variants && 'ivar' in callers) {
+    ch_vcf                 = Channel.empty()
+    ch_tbi                 = Channel.empty()
+    ch_ivar_counts_multiqc = Channel.empty()
+    ch_ivar_stats_multiqc  = Channel.empty()
+    ch_ivar_snpeff_multiqc = Channel.empty()
+    if (!params.skip_variants && variant_caller == 'ivar') {
         VARIANTS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.chrom_sizes,
             PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
-            PREPARE_GENOME.out.nextclade_db,
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config,
             ch_ivar_variants_header_mqc
         )
-        ch_ivar_vcf              = VARIANTS_IVAR.out.vcf
-        ch_ivar_tbi              = VARIANTS_IVAR.out.tbi
-        ch_ivar_counts_multiqc   = VARIANTS_IVAR.out.multiqc_tsv
-        ch_ivar_stats_multiqc    = VARIANTS_IVAR.out.stats
-        ch_ivar_snpeff_multiqc   = VARIANTS_IVAR.out.snpeff_csv
-        ch_ivar_quast_multiqc    = VARIANTS_IVAR.out.quast_tsv
-        ch_ivar_pangolin_multiqc = VARIANTS_IVAR.out.pangolin_report
-        ch_ivar_nextclade_report = VARIANTS_IVAR.out.nextclade_report
-        ch_versions              = ch_versions.mix(VARIANTS_IVAR.out.versions)
+        ch_vcf                 = VARIANTS_IVAR.out.vcf
+        ch_tbi                 = VARIANTS_IVAR.out.tbi
+        ch_ivar_counts_multiqc = VARIANTS_IVAR.out.multiqc_tsv
+        ch_ivar_stats_multiqc  = VARIANTS_IVAR.out.stats
+        ch_ivar_snpeff_multiqc = VARIANTS_IVAR.out.snpeff_csv
+        ch_versions            = ch_versions.mix(VARIANTS_IVAR.out.versions)
+    }
+
+    //
+    // SUBWORKFLOW: Call variants with BCFTools
+    //
+    ch_bcftools_stats_multiqc  = Channel.empty()
+    ch_bcftools_snpeff_multiqc = Channel.empty()
+    if (!params.skip_variants && variant_caller == 'bcftools') {
+        VARIANTS_BCFTOOLS (
+            ch_bam,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.chrom_sizes,
+            PREPARE_GENOME.out.gff,
+            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
+            PREPARE_GENOME.out.snpeff_db,
+            PREPARE_GENOME.out.snpeff_config
+        )
+        ch_vcf                     = VARIANTS_BCFTOOLS.out.vcf
+        ch_tbi                     = VARIANTS_BCFTOOLS.out.tbi
+        ch_bcftools_stats_multiqc  = VARIANTS_BCFTOOLS.out.stats
+        ch_bcftools_snpeff_multiqc = VARIANTS_BCFTOOLS.out.snpeff_csv
+        ch_versions                = ch_versions.mix(VARIANTS_BCFTOOLS.out.versions)
+    }
+
+    //
+    // SUBWORKFLOW: Call consensus with iVar and downstream QC
+    //
+    ch_ivar_quast_multiqc     = Channel.empty()
+    ch_ivar_pangolin_multiqc  = Channel.empty()
+    ch_ivar_nextclade_multiqc = Channel.empty()
+    if (!params.skip_consensus && params.consensus_caller == 'ivar') {
+        CONSENSUS_IVAR (
+            ch_bam,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.gff,
+            PREPARE_GENOME.out.nextclade_db
+        )
+        ch_ivar_quast_multiqc    = CONSENSUS_IVAR.out.quast_tsv
+        ch_ivar_pangolin_multiqc = CONSENSUS_IVAR.out.pangolin_report
+        ch_ivar_nextclade_report = CONSENSUS_IVAR.out.nextclade_report
+        ch_versions              = ch_versions.mix(CONSENSUS_IVAR.out.versions)
 
         //
         // MODULE: Get Nextclade clade information for MultiQC report
@@ -433,34 +469,24 @@ workflow ILLUMINA {
     }
 
     //
-    // SUBWORKFLOW: Call variants with BCFTools
+    // SUBWORKFLOW: Call consensus with BCFTools
     //
-    ch_bcftools_vcf               = Channel.empty()
-    ch_bcftools_tbi               = Channel.empty()
-    ch_bcftools_stats_multiqc     = Channel.empty()
-    ch_bcftools_snpeff_multiqc    = Channel.empty()
     ch_bcftools_quast_multiqc     = Channel.empty()
     ch_bcftools_pangolin_multiqc  = Channel.empty()
     ch_bcftools_nextclade_multiqc = Channel.empty()
-    if (!params.skip_variants && 'bcftools' in callers) {
-        VARIANTS_BCFTOOLS (
+    if (!params.skip_consensus && params.consensus_caller == 'bcftools' && variant_caller) {
+        CONSENSUS_BCFTOOLS (
             ch_bam,
+            ch_vcf,
+            ch_tbi,
             PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.chrom_sizes,
             PREPARE_GENOME.out.gff,
-            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
-            PREPARE_GENOME.out.nextclade_db,
-            PREPARE_GENOME.out.snpeff_db,
-            PREPARE_GENOME.out.snpeff_config
+            PREPARE_GENOME.out.nextclade_db
         )
-        ch_bcftools_vcf              = VARIANTS_BCFTOOLS.out.vcf
-        ch_bcftools_tbi              = VARIANTS_BCFTOOLS.out.tbi
-        ch_bcftools_stats_multiqc    = VARIANTS_BCFTOOLS.out.stats
-        ch_bcftools_snpeff_multiqc   = VARIANTS_BCFTOOLS.out.snpeff_csv
-        ch_bcftools_quast_multiqc    = VARIANTS_BCFTOOLS.out.quast_tsv
-        ch_bcftools_pangolin_multiqc = VARIANTS_BCFTOOLS.out.pangolin_report
-        ch_bcftools_nextclade_report = VARIANTS_BCFTOOLS.out.nextclade_report
-        ch_versions                  = ch_versions.mix(VARIANTS_BCFTOOLS.out.versions)
+        ch_bcftools_quast_multiqc    = CONSENSUS_BCFTOOLS.out.quast_tsv
+        ch_bcftools_pangolin_multiqc = CONSENSUS_BCFTOOLS.out.pangolin_report
+        ch_bcftools_nextclade_report = CONSENSUS_BCFTOOLS.out.nextclade_report
+        ch_versions                  = ch_versions.mix(CONSENSUS_BCFTOOLS.out.versions)
 
         //
         // MODULE: Get Nextclade clade information for MultiQC report
@@ -478,19 +504,6 @@ workflow ILLUMINA {
             'bcftools_nextclade_clade'
         )
         .set { ch_bcftools_nextclade_multiqc }
-    }
-
-    //
-    // MODULE: Intersect variants across callers
-    //
-    if (!params.skip_variants && callers.size() > 1) {
-        BCFTOOLS_ISEC (
-            ch_ivar_vcf
-                .join(ch_ivar_tbi, by: [0])
-                .join(ch_bcftools_vcf, by: [0])
-                .join(ch_bcftools_tbi, by: [0])
-        )
-        ch_versions = ch_versions.mix(BCFTOOLS_ISEC.out.versions)
     }
 
     //
