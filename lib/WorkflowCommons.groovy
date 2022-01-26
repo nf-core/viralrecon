@@ -102,8 +102,8 @@ class WorkflowCommons {
                 "  Contigs in primer BED file do not match those in the reference genome:\n\n" +
                 "  ${diff.join('\n  ')}\n\n" +
                 "  Please check:\n" +
-                "      - Primer BED file supplied with --primer_bed\n" +
-                "      - Genome FASTA file supplied with --fasta\n" +
+                "    - Primer BED file supplied with --primer_bed\n" +
+                "    - Genome FASTA file supplied with --fasta\n" +
                 "============================================================================="
             System.exit(1)
         }
