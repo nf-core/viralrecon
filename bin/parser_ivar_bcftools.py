@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from matplotlib import table
 import pandas as pd
 import sys
@@ -6,6 +8,7 @@ import re
 import argparse
 import glob, os
 import io
+
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
@@ -14,8 +17,9 @@ cwd = os.getcwd()
 os.chdir(cwd)
 
 #create SampleTables folder in the folder where the script is running
-sample_table_path = os.path.join(cwd, "SampleTables")
-os.mkdir(sample_table_path)
+if not os.path.isdir("SampleTables"):
+    sample_table_path = os.path.join(cwd, "SampleTables")
+    os.mkdir(sample_table_path)
 
 def parser_args(args=None):
     Description = 'Create long/wide tables fo ivar/bcftools'
@@ -30,17 +34,16 @@ def parser_args(args=None):
 
 
 def create_long(in_table,snp_table,pango_table,counter,software):
-
     if not in_table:
         intable_pathname = cwd
     else:
         intable_pathname = os.path.join(cwd, in_table)
+
     os.chdir(intable_pathname)
     table_list = []
     for file in glob.glob("*_norm.table"):
         table_list.append(file)
     table_list.sort()
-
 
     snp_pathname = os.path.join(cwd, snp_table)
     os.chdir(snp_pathname)
@@ -92,8 +95,6 @@ def create_long(in_table,snp_table,pango_table,counter,software):
         for j in range(3,8):
          snpsift_table_copy.iloc[i,j]= str(snpsift_table.iloc[i,j]).split(",")[0]
 
-
-
     #format of lineages
     pangolin_table = pd.read_csv(str(pango_pathname) +  '/' + pangolin_list[counter], sep=",", header = "infer")
     lineages = pangolin_table.loc[:,['taxon','lineage']]
@@ -108,8 +109,6 @@ def create_long(in_table,snp_table,pango_table,counter,software):
     tl_onesample["Lineage"] = lineages.iloc[0,1]
 
     return tl_onesample,snpsift_table_copy,counter
-
-
 
 def mergetables(sample_intable,snp_intable,path,counter):
 
@@ -132,12 +131,10 @@ def mergetables(sample_intable,snp_intable,path,counter):
     return(merged_table_long)
 
 def loop(path_in):
-
     if not path_in:
         in_pathname = cwd
     else:
         in_pathname = os.path.join(cwd, path_in)
-
 
     os.chdir(in_pathname)
     table_list = []
@@ -157,12 +154,10 @@ def concatenatetable(path_in_concat):
     else:
         concat_pathname = os.path.join(cwd,path_in_concat,'SampleTables')
 
-
     os.chdir(concat_pathname)
 
     extension = 'csv'
     all_filenames = [i for i in glob.glob('*.{}'.format(extension))]
-
 
     #combine all files in the list
     #combined_csv = pd.concat([pd.read_csv(f) for f in all_filenames ])
@@ -174,20 +169,11 @@ def concatenatetable(path_in_concat):
     merged_df.to_csv("final_long_table.csv", index=False, encoding='utf-8-sig')
     return merged_df
 
-
-
-
 def main(args=None):
-
-
-
     args = parser_args(args)
-
-
     length = loop(args.sample)
 
     for i in range(0,length):
-
         tl_onesample_out,snpsift_table_final,counter_it = create_long(args.sample,args.snpsift, args.pangolin,i,args.software)
         merged = mergetables(tl_onesample_out,snpsift_table_final,args.sample,counter_it)
 
