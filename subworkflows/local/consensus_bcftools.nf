@@ -2,6 +2,7 @@
 // Consensus calling with BCFTools and downstream processing QC
 //
 
+include { BCFTOOLS_FILTER    } from '../../modules/nf-core/modules/bcftools/filter/main'
 include { BEDTOOLS_MERGE     } from '../../modules/nf-core/modules/bedtools/merge/main'
 include { BEDTOOLS_MASKFASTA } from '../../modules/nf-core/modules/bedtools/maskfasta/main'
 include { BCFTOOLS_CONSENSUS } from '../../modules/nf-core/modules/bcftools/consensus/main'
