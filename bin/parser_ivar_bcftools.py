@@ -12,14 +12,6 @@ import io
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
-#Current working directory
-cwd = os.getcwd()
-os.chdir(cwd)
-
-#create SampleTables folder in the folder where the script is running
-if not os.path.isdir("SampleTables"):
-    sample_table_path = os.path.join(cwd, "SampleTables")
-    os.mkdir(sample_table_path)
 
 def parser_args(args=None):
     Description = 'Create long/wide tables fo ivar/bcftools'
@@ -83,50 +75,20 @@ def create_long(snp_file,snpsift_file,pangolin_file,software):
     tl_onesample["software"] = software
     tl_onesample["Lineage"] = lineages.iloc[0,1]
 
-    return tl_onesample,snpsift_table_copy
+    merged_table_long = pd.merge(tl_onesample,snpsift_table_copy,how = 'outer')
 
-def mergetables(sample_intable,snp_intable,path,counter):
-
-#     if not path:
-#         merge_pathname = cwd
-#     else:
-#         merge_pathname = os.path.join(cwd, path)
-
-    os.chdir(merge_pathname)
-    table_list = []
-    for file in glob.glob("*.table"):
-        table_list.append(file[0:6])
-    table_list.sort()
-
-    left = snp_intable
-    right = sample_intable
-    merged_table_long = pd.merge(left,right,how = 'outer')
-    merged_table_long.to_csv(str(merge_pathname) + '/SampleTables/'+ table_list[counter] + '.csv', header='infer', index=None, sep=' ', mode='a')
     return(merged_table_long)
 
 def same_len(list):
     return len(set(list)) == 1
 
-def concatenatetable(path_in_concat):
+def concatenatetable(path):
+    all_filenames = [file for file in glob.glob(path + '/*.csv')]
 
-    if not path_in_concat:
-        concat_pathname = os.path.join(cwd, 'SampleTables')
-    else:
-        concat_pathname = os.path.join(cwd,path_in_concat,'SampleTables')
-
-    os.chdir(concat_pathname)
-
-    extension = 'csv'
-    all_filenames = [i for i in glob.glob('*.{}'.format(extension))]
-
-    #combine all files in the list
-    #combined_csv = pd.concat([pd.read_csv(f) for f in all_filenames ])
-    list_of_dataframes = []
-    for i in all_filenames:
-        list_of_dataframes.append(pd.read_csv(i,sep=" "))
-
-    merged_df = pd.concat(list_of_dataframes)
-    merged_df.to_csv("final_long_table.csv", index=False, encoding='utf-8-sig')
+    dataframe_list = []
+    for file in all_filenames:
+        dataframe_list.append(pd.read_csv(file,sep=","))
+    merged_df = pd.concat(dataframe_list)
     return merged_df
 
 def main(args=None):
@@ -155,11 +117,19 @@ def main(args=None):
         exit()
 
     sample_names = [os.path.basename(filename).split("_norm.table")[0] for filename in table_list]
-    for table,snpsift,pangolin in zip(table_list,snpsift_list,pangolin_list):
-        tl_onesample_out,snpsift_table_final = create_long(table,snpsift,pangolin,args.software)
-        #merged = mergetables(tl_onesample_out,snpsift_table_final,args.sample,counter_it)
 
-#      merged_df= concatenatetable(args.sample)
+    #create SampleTables folder in the folder where the script is running
+    if os.path.exists("SampleTables"):
+        "SampleTables already exists from previous run, please delete or rename the folder."
+    else:
+        os.mkdir("SampleTables")
+
+    for sample_name,table,snpsift,pangolin in zip(sample_names,table_list,snpsift_list,pangolin_list):
+        long_table_sample = create_long(table,snpsift,pangolin,args.software)
+        long_table_sample.to_csv('./SampleTables/'+ sample_name + '.csv', header='infer', index=None, sep=',', mode='a')
+
+    merged_df= concatenatetable("./SampleTables")
+    merged_df.to_csv("final_long_table.csv", index=False, encoding='utf-8-sig')
 
 if __name__ == '__main__':
     sys.exit(main())
