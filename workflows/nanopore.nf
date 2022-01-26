@@ -50,8 +50,9 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 //
 // MODULE: Loaded from modules/local/
 //
-include { ASCIIGENOME } from '../modules/local/asciigenome'
-include { MULTIQC     } from '../modules/local/multiqc_nanopore'
+include { ASCIIGENOME          } from '../modules/local/asciigenome'
+include { MULTIQC              } from '../modules/local/multiqc_nanopore'
+include { BED_CONTIGS_IN_FASTA } from '../modules/local/bed_contigs_in_fasta'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NO_SAMPLE_NAME     } from '../modules/local/multiqc_tsv_from_list'
@@ -133,6 +134,23 @@ workflow NANOPORE {
         .out
         .primer_bed
         .map { WorkflowCommons.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }
+
+    //
+    // Check whether the contigs in the primer BED file are present in the reference genome
+    //
+    PREPARE_GENOME
+        .out
+        .primer_bed
+        .map { [ WorkflowCommons.getColFromFile(it, col=0, uniqify=true, sep='\t') ] }
+        .set { ch_bed_contigs }
+
+    PREPARE_GENOME
+        .out
+        .fai
+        .map { [ WorkflowCommons.getColFromFile(it, col=0, uniqify=true, sep='\t') ] }
+        .concat(ch_bed_contigs)
+        .collect()
+        .map { fai, bed -> WorkflowCommons.checkContigsInBED(fai, bed, log) }
 
     barcode_dirs       = file("${params.fastq_dir}/barcode*", type: 'dir' , maxdepth: 1)
     single_barcode_dir = file("${params.fastq_dir}/*.fastq" , type: 'file', maxdepth: 1)
