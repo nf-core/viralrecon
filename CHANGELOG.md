@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [[#235](https://github.com/nf-core/viralrecon/issues/235)] - Nextclade version bump
 * [[#244](https://github.com/nf-core/viralrecon/issues/244)] - Fix BCFtools consensus generation and masking
 * [[#245](https://github.com/nf-core/viralrecon/issues/245)] - Mpileup file as output
+* [[#246](https://github.com/nf-core/viralrecon/issues/246)] - Option to generate consensus with BCFTools / BEDTools using iVar variants
 * [[#247](https://github.com/nf-core/viralrecon/issues/247)] - Add strand-bias filtering option and codon fix in consecutive positions in ivar tsv conversion to vcf
 
 ### Parameters
