@@ -18,6 +18,9 @@
             "bcftools/consensus": {
                 "git_sha": "bb90e4fb78a977d469aad2a614c673b1981e7806"
             },
+            "bcftools/filter": {
+                "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
+            },
             "bcftools/mpileup": {
                 "git_sha": "bb90e4fb78a977d469aad2a614c673b1981e7806"
             },
