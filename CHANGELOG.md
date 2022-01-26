@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unpublished Version / DEV]
+## [[2.3](https://github.com/nf-core/viralrecon/releases/tag/2.3)] - 2022-01-28
 
 ### Enhancements & fixes
 
@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **NB:** Parameter has been __added__ if just the new parameter information is present.
 > **NB:** Parameter has been __removed__ if new parameter information isn't present.
 
-## [[2.2](https://github.com/nf-core/rnaseq/releases/tag/2.2)] - 2021-07-29
+## [[2.2](https://github.com/nf-core/viralrecon/releases/tag/2.2)] - 2021-07-29
 
 ### Enhancements & fixes
 
@@ -57,7 +57,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 > **NB:** Dependency has been __added__ if just the new version information is present.
 > **NB:** Dependency has been __removed__ if new version information isn't present.
 
-## [[2.1](https://github.com/nf-core/rnaseq/releases/tag/2.1)] - 2021-06-15
+## [[2.1](https://github.com/nf-core/viralrecon/releases/tag/2.1)] - 2021-06-15
 
 ### Enhancements & fixes
 
@@ -98,7 +98,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 > **NB:** Dependency has been __added__ if just the new version information is present.
 > **NB:** Dependency has been __removed__ if new version information isn't present.
 
-## [[2.0](https://github.com/nf-core/rnaseq/releases/tag/2.0)] - 2021-05-13
+## [[2.0](https://github.com/nf-core/viralrecon/releases/tag/2.0)] - 2021-05-13
 
 ### :warning: Major enhancements
 
@@ -251,7 +251,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 > **NB:** Dependency has been __added__ if just the new version information is present.
 > **NB:** Dependency has been __removed__ if new version information isn't present.
 
-## [[1.1.0](https://github.com/nf-core/rnaseq/releases/tag/1.1.0)] - 2020-06-23
+## [[1.1.0](https://github.com/nf-core/viralrecon/releases/tag/1.1.0)] - 2020-06-23
 
 ### Added
 
@@ -294,7 +294,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 * Update minia `3.2.3` -> `3.2.4`
 * Update plasmidid `1.5.2` -> `1.6.3`
 
-## [[1.0.0](https://github.com/nf-core/rnaseq/releases/tag/1.0.0)] - 2020-06-01
+## [[1.0.0](https://github.com/nf-core/viralrecon/releases/tag/1.0.0)] - 2020-06-01
 
 Initial release of nf-core/viralrecon, created with the [nf-core](http://nf-co.re/) template.
 
