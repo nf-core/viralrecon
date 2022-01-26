@@ -50,9 +50,8 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 //
 // MODULE: Loaded from modules/local/
 //
-include { ASCIIGENOME          } from '../modules/local/asciigenome'
-include { MULTIQC              } from '../modules/local/multiqc_nanopore'
-include { BED_CONTIGS_IN_FASTA } from '../modules/local/bed_contigs_in_fasta'
+include { ASCIIGENOME } from '../modules/local/asciigenome'
+include { MULTIQC     } from '../modules/local/multiqc_nanopore'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions'
 include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NO_SAMPLE_NAME     } from '../modules/local/multiqc_tsv_from_list'
