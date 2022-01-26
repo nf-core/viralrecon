@@ -22,11 +22,20 @@ workflow CONSENSUS_BCFTOOLS {
 
     ch_versions = Channel.empty()
 
+
+    //
+    // Filter variants by allele frequency
+    //
+    BCFTOOLS_FILTER(
+        vcf
+    )
+    ch_versions = ch_versions.mix(BCFTOOLS_FILTER.out.versions.first())
+
     //
     // Create BED file with consensus regions to mask
     //
     MAKE_BED_MASK (
-        bam.join(vcf, by: [0]),
+        bam.join(BCFTOOLS_FILTER.out.vcf, by: [0]),
         fasta,
         params.save_mpileup
     )
