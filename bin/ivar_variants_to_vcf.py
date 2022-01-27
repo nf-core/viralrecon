@@ -262,7 +262,7 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
                 )
                 param_list = [CHROM,POS,ID,REF,ALT,REF_DP,REF_RV,ALT_DP,ALT_RV,QUAL,REF_CODON,ALT_CODON,FILTER,INFO,FORMAT,SAMPLE]
 
-                if NotMergeCodon:
+                if NotMergeCodon or var_type != "SNP":
                     writeLine = True
                     oline = (CHROM+ "\t"+ POS+ "\t"+ ID+ "\t"+ REF+ "\t"+ ALT+ "\t"+ QUAL+ "\t"+ FILTER+ "\t"+ INFO+ "\t"+ FORMAT+ "\t"+ SAMPLE+ "\n" )
 
@@ -272,9 +272,9 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
 
                     ## Always fill dict_lines until size 2.
                     if len(dict_lines["POS"]) ==0 or len(dict_lines["POS"]) ==1  :
-                        for i,j in enumerate(dict_lines):
-                            dict_lines.setdefault(j, []).append(param_list[i])
-                        writeLine=False
+                            for i,j in enumerate(dict_lines):
+                                dict_lines.setdefault(j, []).append(param_list[i])
+                            writeLine=False
 
                     # If queue has size 2, we include the third line
                     elif  len(dict_lines["POS"]) == 2:
