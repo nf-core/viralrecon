@@ -22,9 +22,11 @@ process IVAR_VARIANTS_TO_VCF {
     """
     ivar_variants_to_vcf.py \\
         $tsv \\
-        ${prefix}.vcf \\
+        unsorted.txt \\
         $args \\
         > ${prefix}.variant_counts.log
+
+    head -1000 unsorted.txt | grep "^#" > ${prefix}.vcf; cat unsorted.txt | grep -v "^#" | sort -k1,1d -k2,2n >> ${prefix}.vcf
 
     cat $header ${prefix}.variant_counts.log > ${prefix}.variant_counts_mqc.tsv
 
