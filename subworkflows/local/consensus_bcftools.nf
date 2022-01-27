@@ -3,7 +3,6 @@
 //
 
 include { BCFTOOLS_FILTER    } from '../../modules/nf-core/modules/bcftools/filter/main'
-include { TABIX_TABIX        } from '../../modules/nf-core/modules/tabix/tabix/main'
 include { BEDTOOLS_MERGE     } from '../../modules/nf-core/modules/bedtools/merge/main'
 include { BEDTOOLS_MASKFASTA } from '../../modules/nf-core/modules/bedtools/maskfasta/main'
 include { BCFTOOLS_CONSENSUS } from '../../modules/nf-core/modules/bcftools/consensus/main'
@@ -25,17 +24,12 @@ workflow CONSENSUS_BCFTOOLS {
 
 
     //
-    // Filter variants by allele frequency, zip and index
+    // Filter variants by allele frequency
     //
     BCFTOOLS_FILTER(
         vcf
     )
     ch_versions = ch_versions.mix(BCFTOOLS_FILTER.out.versions.first())
-
-    TABIX_TABIX(
-        BCFTOOLS_FILTER.out.vcf
-    )
-    ch_versions = ch_versions.mix(TABIX_TABIX.out.versions.first())
 
     //
     // Create BED file with consensus regions to mask
@@ -68,7 +62,7 @@ workflow CONSENSUS_BCFTOOLS {
     // Call consensus sequence with BCFTools
     //
     BCFTOOLS_CONSENSUS (
-        BCFTOOLS_FILTER.out.vcf.join(TABIX_TABIX.out.tbi, by: [0]).join(BEDTOOLS_MASKFASTA.out.fasta, by: [0])
+        vcf.join(tbi, by: [0]).join(BEDTOOLS_MASKFASTA.out.fasta, by: [0])
     )
     ch_versions = ch_versions.mix(BCFTOOLS_CONSENSUS.out.versions.first())
 
