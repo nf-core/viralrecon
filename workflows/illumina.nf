@@ -136,7 +136,22 @@ workflow ILLUMINA {
             .primer_bed
             .map { WorkflowCommons.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }
 
-        // Check if the primer BED file supplied to the pipeline is from the SWIFT/SNAP protocol
+        // Check whether the contigs in the primer BED file are present in the reference genome
+        PREPARE_GENOME
+            .out
+            .primer_bed
+            .map { [ WorkflowCommons.getColFromFile(it, col=0, uniqify=true, sep='\t') ] }
+            .set { ch_bed_contigs }
+
+        PREPARE_GENOME
+            .out
+            .fai
+            .map { [ WorkflowCommons.getColFromFile(it, col=0, uniqify=true, sep='\t') ] }
+            .concat(ch_bed_contigs)
+            .collect()
+            .map { fai, bed -> WorkflowCommons.checkContigsInBED(fai, bed, log) }
+
+        // Check whether the primer BED file supplied to the pipeline is from the SWIFT/SNAP protocol
         if (!params.ivar_trim_offset) {
             PREPARE_GENOME
                 .out

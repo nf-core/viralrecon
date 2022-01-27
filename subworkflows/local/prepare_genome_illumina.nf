@@ -57,11 +57,13 @@ workflow PREPARE_GENOME {
     //
     // Create chromosome sizes file
     //
+    ch_fai         = Channel.empty()
     ch_chrom_sizes = Channel.empty()
-    if (!params.skip_asciigenome) {
+    if (params.protocol == 'amplicon' || !params.skip_asciigenome) {
         CUSTOM_GETCHROMSIZES (
             ch_fasta
         )
+        ch_fai         = CUSTOM_GETCHROMSIZES.out.fai
         ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes
         ch_versions    = ch_versions.mix(CUSTOM_GETCHROMSIZES.out.versions)
     }
@@ -235,6 +237,7 @@ workflow PREPARE_GENOME {
     emit:
     fasta                = ch_fasta                // path: genome.fasta
     gff                  = ch_gff                  // path: genome.gff
+    fai                  = ch_fai                  // path: genome.fai
     chrom_sizes          = ch_chrom_sizes          // path: genome.sizes
     bowtie2_index        = ch_bowtie2_index        // path: bowtie2/index/
     primer_bed           = ch_primer_bed           // path: primer.bed
