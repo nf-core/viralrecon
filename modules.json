@@ -24,6 +24,9 @@
             "bcftools/mpileup": {
                 "git_sha": "bb90e4fb78a977d469aad2a614c673b1981e7806"
             },
+            "bcftools/sort": {
+                "git_sha": "2d4b0f77873e15b79599cc77ff92acbb880f3ac2"
+            },
             "bcftools/stats": {
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
             },
