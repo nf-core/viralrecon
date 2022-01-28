@@ -24,6 +24,19 @@ def parser_args(args=None):
 
     return parser.parse_args(args)
 
+def aa_three_to_one_letter(hgvs_three):
+    three_syntax_dict= {'Ala': 'A', 'Arg': 'R', 'Asn': 'N', 'Asp': 'D', 'Cys': 'C',
+                        'Gln': 'Q', 'Glu': 'E', 'Gly': 'G', 'His': 'H', 'Ile': 'I',
+                        'Leu': 'L', 'Lys': 'K', 'Met': 'M', 'Phe': 'F', 'Pro': 'P',
+                        'Pyl': 'O', 'Ser': 'S', 'Sec': 'U', 'Thr': 'T', 'Trp': 'W',
+                        'Tyr': 'Y', 'Val': 'V', 'Asx': 'B', 'Glx': 'Z', 'Xaa': 'X',
+                        'Xle': 'J', 'Ter': '*'}
+    hgvs_one=hgvs_three
+    for key in three_syntax_dict:
+        if key in hgvs_one:
+            hgvs_one = hgvs_one.replace(str(key),str(three_syntax_dict[key]))
+
+    return hgvs_one
 
 def create_long(snp_file,snpsift_file,pangolin_file,software):
 
@@ -55,12 +68,18 @@ def create_long(snp_file,snpsift_file,pangolin_file,software):
     for i in range(len(colnames_snpsift)):
        snpsift_table.rename(columns = {snpsift_table.columns[i]:colnames_snpsift[i]}, inplace = True)
     snpsift_table =  snpsift_table.loc[:, ['CHROM','POS','REF','ALT','GENE','EFFECT','HGVS_C','HGVS_P']]
-
     snpsift_table_copy = snpsift_table.copy()
 
     for i in  range(len(snpsift_table_copy)):
         for j in range(3,8):
          snpsift_table_copy.iloc[i,j]= str(snpsift_table.iloc[i,j]).split(",")[0]
+
+    oneletter_s = []
+    for index,item in snpsift_table_copy["HGVS_P"].iteritems():
+        hgvs_p_oneletter = aa_three_to_one_letter(str(item))
+        oneletter_s.append(hgvs_p_oneletter)
+
+    snpsift_table_copy["HGVS_P_1Letter"] = pd.Series(oneletter_s)
 
     #format of lineages
     pangolin_table = pd.read_csv(pangolin_file, sep=",", header = "infer")
