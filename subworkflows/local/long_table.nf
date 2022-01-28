@@ -4,7 +4,7 @@
 include { BCFTOOLS_QUERY } from '../../modules/nf-core/modules/bcftools/query/main'
 include { CREATE_LONG_TABLE } from '../../modules/local/create_long_table'
 
-workflow VARIANTS_QC {
+workflow LONG_TABLE {
     take:
     vcf           // channel: [ val(meta), [ vcf ] ]
     tbi           // channel: [ val(meta), [ tbi ] ]
@@ -26,10 +26,11 @@ workflow VARIANTS_QC {
         ch_versions     = ch_versions.mix(BCFTOOLS_QUERY.out.versions)
 
         CREATE_LONG_TABLE (
-            ch_query_table.collect[it[1]],
-            snpsift,
-            pangolin
+            ch_query_table.collect{it[1]},
+            snpsift.collect{it[1]},
+            pangolin.collect{it[1]}
         )
+        ch_long_table = CREATE_LONG_TABLE.out.csv_variants
     }
 
     emit:

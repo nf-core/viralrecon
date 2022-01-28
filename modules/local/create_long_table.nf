@@ -12,7 +12,7 @@ process CREATE_LONG_TABLE {
     path ('pangolin/*')
 
     output:
-    path "variants_long_table.csv", optional:true, emit: csv_variants
+    path "*.csv", optional:true, emit: csv_variants
 
     script:
     def args = task.ext.args ?: ''
