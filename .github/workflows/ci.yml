@@ -53,6 +53,8 @@ jobs:
     strategy:
       matrix:
         parameters:
+          - "--consensus_caller ivar"
+          - "--variant_caller bcftools --consensus_caller ivar"
           - "--skip_fastp"
           - "--skip_variants"
           - "--skip_cutadapt"

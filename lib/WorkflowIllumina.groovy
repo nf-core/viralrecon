@@ -31,10 +31,19 @@ class WorkflowIllumina {
         }
 
         // Variant calling parameter validation
-        def callers = params.callers ? params.callers.split(',').collect{ it.trim().toLowerCase() } : []
-        if ((valid_params['callers'] + callers).unique().size() != valid_params['callers'].size()) {
-            log.error "Invalid option: ${params.callers}. Valid options for '--callers': ${valid_params['callers'].join(', ')}."
-            System.exit(1)
+        if (params.variant_caller) {
+            if (!valid_params['variant_callers'].contains(params.variant_caller)) {
+                log.error "Invalid option: ${params.variant_caller}. Valid options for '--variant_caller': ${valid_params['variant_callers'].join(', ')}."
+                System.exit(1)
+            }
+        }
+
+        // Consensus calling parameter validation
+        if (params.consensus_caller) {
+            if (!valid_params['consensus_callers'].contains(params.consensus_caller)) {
+                log.error "Invalid option: ${params.consensus_caller}. Valid options for '--consensus_caller': ${valid_params['consensus_callers'].join(', ')}."
+                System.exit(1)
+            }
         }
 
         if (params.protocol == 'amplicon' && !params.skip_variants && !params.primer_bed) {

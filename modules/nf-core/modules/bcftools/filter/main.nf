@@ -1,6 +1,6 @@
-process BCFTOOLS_ISEC {
+process BCFTOOLS_FILTER {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_medium'
 
     conda (params.enable_conda ? 'bioconda::bcftools=1.14' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -8,20 +8,20 @@ process BCFTOOLS_ISEC {
         'quay.io/biocontainers/bcftools:1.14--h88f3f91_0' }"
 
     input:
-    tuple val(meta), path('ivar/*'), path('ivar/*'), path('bcftools/*'), path('bcftools/*')
+    tuple val(meta), path(vcf)
 
     output:
-    tuple val(meta), path("${prefix}"), emit: results
-    path "versions.yml"               , emit: versions
+    tuple val(meta), path("*.gz"), emit: vcf
+    path  "versions.yml"         , emit: versions
 
     script:
     def args = task.ext.args ?: ''
-    prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    bcftools isec  \\
+    bcftools filter \\
+        --output ${prefix}.vcf.gz \\
         $args \\
-        -p $prefix \\
-        */*.vcf.gz
+        $vcf
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
