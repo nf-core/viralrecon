@@ -27,6 +27,9 @@
             "bcftools/norm": {
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
             },
+            "bcftools/query": {
+                "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
+            },
             "bcftools/stats": {
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
             },
