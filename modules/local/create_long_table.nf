@@ -14,10 +14,17 @@ process CREATE_LONG_TABLE {
     output:
     path "*.csv", optional:true, emit: csv_variants
 
-    script:
+    path "versions.yml"           , emit: versions
+
+    script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     def args = task.ext.args ?: ''
+
     """
     create_long_table.py --samples_path ./variants_table --snpsift_path ./snpsift --pangolin_path ./pangolin $args
 
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
     """
 }
