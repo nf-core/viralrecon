@@ -39,13 +39,17 @@ workflow VARIANTS_BCFTOOLS {
     )
     ch_versions = ch_versions.mix(BCFTOOLS_MPILEUP.out.versions.first())
 
+    VCF_BGZIP_TABIX_STATS (
+        BCFTOOLS_NORM.out.vcf
+    )
+    ch_versions = ch_versions.mix(VCF_BGZIP_TABIX_STATS.out.versions)
 
     //
     // Run downstream tools for variants QC
     //
     VARIANTS_QC (
         bam,
-        BCFTOOLS_NORM.out.vcf,
+        VCF_BGZIP_TABIX_STATS.out.vcf,
         BCFTOOLS_MPILEUP.out.stats,
         fasta,
         sizes,
@@ -58,10 +62,10 @@ workflow VARIANTS_BCFTOOLS {
 
     emit:
     vcf_orig        = BCFTOOLS_MPILEUP.out.vcf        // channel: [ val(meta), [ vcf ] ]
-    tbi             = BCFTOOLS_MPILEUP.out.tbi        // channel: [ val(meta), [ tbi ] ]
     stats           = BCFTOOLS_MPILEUP.out.stats      // channel: [ val(meta), [ txt ] ]
 
-    vcf             = BCFTOOLS_NORM.out.vcf           // channel: [ val(meta), [ vcf ] ]
+    vcf             = VCF_BGZIP_TABIX_STATS.out.vcf   // channel: [ val(meta), [ vcf ] ]
+    tbi             = VCF_BGZIP_TABIX_STATS.out.tbi   // channel: [ val(meta), [ vcf ] ]
 
     snpeff_vcf      = VARIANTS_QC.out.snpeff_vcf      // channel: [ val(meta), [ vcf.gz ] ]
     snpeff_tbi      = VARIANTS_QC.out.snpeff_tbi      // channel: [ val(meta), [ tbi ] ]
