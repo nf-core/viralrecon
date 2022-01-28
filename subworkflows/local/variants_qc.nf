@@ -1,7 +1,7 @@
 //
 // Variant calling QC
 //
-include { BCFTOOLS_NORM  } from '../../modules/nf-core/modules/bcftools/norm'
+include { BCFTOOLS_QUERY } from '../../modules/nf-core/modules/bcftools/query/main'
 include { ASCIIGENOME    } from '../../modules/local/asciigenome'
 include { SNPEFF_SNPSIFT } from './snpeff_snpsift'
 
@@ -20,10 +20,6 @@ workflow VARIANTS_QC {
     main:
 
     ch_versions = Channel.empty()
-
-    //
-    // Bcftools norm for multiallelic variants in different lines
-    //
 
     //
     // Annotate variants
