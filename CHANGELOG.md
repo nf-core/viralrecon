@@ -5,10 +5,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [[2.3](https://github.com/nf-core/viralrecon/releases/tag/2.3)] - 2022-01-28
 
+### :warning: Major enhancements
+
+* When using `--protocol amplicon`, in the previous release, iVar was used for both the variant calling and consensus sequence generation. The pipeline will now perform the variant calling and consensus sequence generation with iVar and BCFTools/BEDTools, respectively.
+* Bump minimum Nextflow version from `21.04.0` -> `21.10.3`
+
 ### Enhancements & fixes
 
 * Port pipeline to the updated Nextflow DSL2 syntax adopted on nf-core/modules
-* Bump minimum Nextflow version from `21.04.0` -> `21.10.3`
 * Updated pipeline template to [nf-core/tools 2.2](https://github.com/nf-core/tools/releases/tag/2.2)
 * [[#209](https://github.com/nf-core/viralrecon/issues/209)] - Check that contig in primer BED and genome fasta match
 * [[#218](https://github.com/nf-core/viralrecon/issues/218)] - Support for compressed FastQ files for Nanopore data
