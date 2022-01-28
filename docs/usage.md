@@ -352,7 +352,7 @@ You can use a similar approach to update the version of Nextclade used by the pi
         ```nextflow
         process {
             withName: 'NEXTCLADE_DATASETGET|NEXTCLADE_RUN' {
-                container = 'quay.io/biocontainers/nextclade:1.9.0--h9ee0642_0'
+                container = 'quay.io/biocontainers/nextclade:1.10.1--h9ee0642_0'
             }
         }
         ```
@@ -362,7 +362,7 @@ You can use a similar approach to update the version of Nextclade used by the pi
         ```nextflow
         process {
             withName: 'NEXTCLADE_DATASETGET|NEXTCLADE_RUN' {
-                container = 'https://depot.galaxyproject.org/singularity/nextclade:1.9.0--h9ee0642_0'
+                container = 'https://depot.galaxyproject.org/singularity/nextclade:1.10.1--h9ee0642_0'
             }
         }
         ```
@@ -372,20 +372,20 @@ You can use a similar approach to update the version of Nextclade used by the pi
         ```nextflow
         process {
             withName: 'NEXTCLADE_DATASETGET|NEXTCLADE_RUN' {
-                conda = 'bioconda::nextclade=1.9.0'
+                conda = 'bioconda::nextclade=1.10.1'
             }
         }
         ```
 
 ##### Nextclade datasets
 
-A [`nextclade dataset`](https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html#nextclade-datasets) feature was introduced in [Nextclade CLI v1.3.0](https://github.com/nextstrain/nextclade/releases/tag/1.3.0) that fetches input genome files such as reference sequences and trees from a central dataset repository. We have uploaded Nextclade dataset [v2022-01-05](https://github.com/nextstrain/nextclade_data/releases/tag/2022-01-06--15-17-13--UTC) to [nf-core/test-datasets](https://github.com/nf-core/test-datasets/blob/viralrecon/genome/MN908947.3/nextclade_sars-cov-2_MN908947_2022-01-05T19_54_31Z.tar.gz), and for reproducibility, this will be used by default if you specify `--genome 'MN908947.3'` when running the pipeline. However, there are a number of ways you can use a more recent version of the dataset:
+A [`nextclade dataset`](https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html#nextclade-datasets) feature was introduced in [Nextclade CLI v1.3.0](https://github.com/nextstrain/nextclade/releases/tag/1.3.0) that fetches input genome files such as reference sequences and trees from a central dataset repository. We have uploaded Nextclade dataset [v2022-01-18](https://github.com/nextstrain/nextclade_data/releases/tag/2022-01-24--21-27-29--UTC) to [nf-core/test-datasets](https://github.com/nf-core/test-datasets/blob/viralrecon/genome/MN908947.3/nextclade_sars-cov-2_MN908947_2022-01-18T12_00_00Z.tar.gz?raw=true), and for reproducibility, this will be used by default if you specify `--genome 'MN908947.3'` when running the pipeline. However, there are a number of ways you can use a more recent version of the dataset:
 
 * Supply your own by setting: `--nextclade_dataset <PATH_TO_DATASET>`
 * Let the pipeline create and use the latest version by setting: `--nextclade_dataset false --nextclade_dataset_tag false`
 * Let the pipeline create and use a specific, tagged version by setting: `--nextclade_dataset false --nextclade_dataset_tag <DATASET_TAG>`
 
-The Nextclade dataset releases can be found on their [Github page](https://github.com/nextstrain/nextclade_data/releases). Use the tag specified for each release e.g `2022-01-05T19:54:31Z` in the example below:
+The Nextclade dataset releases can be found on their [Github page](https://github.com/nextstrain/nextclade_data/releases). Use the tag specified for each release e.g `2022-01-18T12:00:00Z` in the example below:
 
 ![Nextclade tag example](images/nextclade_tag_example.png)
 
