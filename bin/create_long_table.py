@@ -17,10 +17,11 @@ def parser_args(args=None):
     Description = 'Create long/wide tables fo ivar/bcftools'
     Epilog = """Example usage: python parser_ivar_bcftools.py <sample> <snpsift> <pangolin> <software> """
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
-    parser.add_argument('-sample', help="Input sample table files path." )
-    parser.add_argument('-snpsift', help="Input snpsift txt files path.",required=True)
-    parser.add_argument('-pangolin', help="Input pangolin csv files path.",required=True)
-    parser.add_argument('-software', help="Input bcftools of ivar.",required=True)
+    parser.add_argument('--samples_path','-s',dest="sample", help="Input sample table files path.", required=True )
+    parser.add_argument('--snpsift_path','-a',dest="snpsift",help="Input snpsift txt files path.",required=True)
+    parser.add_argument('--pangolin_path','-l',dest="pangolin",help="Input pangolin csv files path.",required=True)
+    parser.add_argument('--software','-p',dest="software",help="Input bcftools of ivar.",required=True)
+    parser.add_argument('--output','-o',dest="output",help="Output filename",required=True)
 
     return parser.parse_args(args)
 
@@ -148,7 +149,7 @@ def main(args=None):
         long_table_sample.to_csv('./SampleTables/'+ sample_name + '.csv', header='infer', index=None, sep=',', mode='a')
 
     merged_df= concatenatetable("./SampleTables")
-    merged_df.to_csv("final_long_table.csv", index=False, encoding='utf-8-sig')
+    merged_df.to_csv(args.output, index=False, encoding='utf-8-sig')
 
 if __name__ == '__main__':
     sys.exit(main())
