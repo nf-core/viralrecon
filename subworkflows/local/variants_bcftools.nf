@@ -37,7 +37,7 @@ workflow VARIANTS_BCFTOOLS {
         BCFTOOLS_MPILEUP.out.vcf,
         fasta
     )
-    ch_versions = ch_versions.mix(BCFTOOLS_MPILEUP.out.versions.first())
+    ch_versions = ch_versions.mix(BCFTOOLS_NORM.out.versions.first())
 
 
     //
