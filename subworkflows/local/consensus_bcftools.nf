@@ -8,6 +8,7 @@ include { BEDTOOLS_MERGE     } from '../../modules/nf-core/modules/bedtools/merg
 include { BEDTOOLS_MASKFASTA } from '../../modules/nf-core/modules/bedtools/maskfasta/main'
 include { BCFTOOLS_CONSENSUS } from '../../modules/nf-core/modules/bcftools/consensus/main'
 include { MAKE_BED_MASK      } from '../../modules/local/make_bed_mask'
+include { RENAME_CONSENSUS   } from '../../modules/local/rename_consensus'
 include { CONSENSUS_QC       } from './consensus_qc'
 
 workflow CONSENSUS_BCFTOOLS {
@@ -73,10 +74,19 @@ workflow CONSENSUS_BCFTOOLS {
     ch_versions = ch_versions.mix(BCFTOOLS_CONSENSUS.out.versions.first())
 
     //
+    // Rename consensus header adding sample name
+    //
+    RENAME_CONSENSUS (
+        BCFTOOLS_CONSENSUS.out.fasta
+    )
+    //ch_versions = ch_versions.mix(RENAME_CONSENSUS.out.versions.first())
+
+
+    //
     // Consensus sequence QC
     //
     CONSENSUS_QC (
-        BCFTOOLS_CONSENSUS.out.fasta,
+        RENAME_CONSENSUS.out.consensus,
         fasta,
         gff,
         nextclade_db
@@ -84,7 +94,7 @@ workflow CONSENSUS_BCFTOOLS {
     ch_versions = ch_versions.mix(CONSENSUS_QC.out.versions.first())
 
     emit:
-    consensus        = BCFTOOLS_CONSENSUS.out.fasta      // channel: [ val(meta), [ fasta ] ]
+    consensus        = RENAME_CONSENSUS.out.consensus    // channel: [ val(meta), [ fasta ] ]
 
     quast_results    = CONSENSUS_QC.out.quast_results    // channel: [ val(meta), [ results ] ]
     quast_tsv        = CONSENSUS_QC.out.quast_tsv        // channel: [ val(meta), [ tsv ] ]
