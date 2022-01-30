@@ -3,6 +3,7 @@
 //
 
 include { BCFTOOLS_MPILEUP } from '../../modules/nf-core/modules/bcftools/mpileup/main'
+include { BCFTOOLS_NORM    } from '../../modules/nf-core/modules/bcftools/norm/main'
 include { VARIANTS_QC      } from './variants_qc'
 
 workflow VARIANTS_BCFTOOLS {
@@ -30,11 +31,21 @@ workflow VARIANTS_BCFTOOLS {
     ch_versions = ch_versions.mix(BCFTOOLS_MPILEUP.out.versions.first())
 
     //
+    // Split multiallelic positions
+    //
+    BCFTOOLS_NORM (
+        BCFTOOLS_MPILEUP.out.vcf,
+        fasta
+    )
+    ch_versions = ch_versions.mix(BCFTOOLS_NORM.out.versions.first())
+
+
+    //
     // Run downstream tools for variants QC
     //
     VARIANTS_QC (
         bam,
-        BCFTOOLS_MPILEUP.out.vcf,
+        BCFTOOLS_NORM.out.vcf,
         BCFTOOLS_MPILEUP.out.stats,
         fasta,
         sizes,
@@ -46,9 +57,11 @@ workflow VARIANTS_BCFTOOLS {
     ch_versions = ch_versions.mix(VARIANTS_QC.out.versions)
 
     emit:
-    vcf             = BCFTOOLS_MPILEUP.out.vcf        // channel: [ val(meta), [ vcf ] ]
+    vcf_orig        = BCFTOOLS_MPILEUP.out.vcf        // channel: [ val(meta), [ vcf ] ]
     tbi             = BCFTOOLS_MPILEUP.out.tbi        // channel: [ val(meta), [ tbi ] ]
     stats           = BCFTOOLS_MPILEUP.out.stats      // channel: [ val(meta), [ txt ] ]
+
+    vcf             = BCFTOOLS_NORM.out.vcf           // channel: [ val(meta), [ vcf ] ]
 
     snpeff_vcf      = VARIANTS_QC.out.snpeff_vcf      // channel: [ val(meta), [ vcf.gz ] ]
     snpeff_tbi      = VARIANTS_QC.out.snpeff_tbi      // channel: [ val(meta), [ tbi ] ]
