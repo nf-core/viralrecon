@@ -134,6 +134,21 @@ workflow NANOPORE {
         .primer_bed
         .map { WorkflowCommons.checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }
 
+    // Check whether the contigs in the primer BED file are present in the reference genome
+    PREPARE_GENOME
+        .out
+        .primer_bed
+        .map { [ WorkflowCommons.getColFromFile(it, col=0, uniqify=true, sep='\t') ] }
+        .set { ch_bed_contigs }
+
+    PREPARE_GENOME
+        .out
+        .fai
+        .map { [ WorkflowCommons.getColFromFile(it, col=0, uniqify=true, sep='\t') ] }
+        .concat(ch_bed_contigs)
+        .collect()
+        .map { fai, bed -> WorkflowCommons.checkContigsInBED(fai, bed, log) }
+
     barcode_dirs       = file("${params.fastq_dir}/barcode*", type: 'dir' , maxdepth: 1)
     single_barcode_dir = file("${params.fastq_dir}/*.fastq" , type: 'file', maxdepth: 1)
     ch_custom_no_sample_name_multiqc = Channel.empty()

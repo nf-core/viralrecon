@@ -49,14 +49,12 @@ workflow PREPARE_GENOME {
     //
     // Create chromosome sizes file
     //
-    ch_chrom_sizes = Channel.empty()
-    if (!params.skip_asciigenome) {
-        CUSTOM_GETCHROMSIZES (
-            ch_fasta
-        )
-        ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes
-        ch_versions    = ch_versions.mix(CUSTOM_GETCHROMSIZES.out.versions)
-    }
+    CUSTOM_GETCHROMSIZES (
+        ch_fasta
+    )
+    ch_fai         = CUSTOM_GETCHROMSIZES.out.fai
+    ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes
+    ch_versions    = ch_versions.mix(CUSTOM_GETCHROMSIZES.out.versions)
 
     //
     // Uncompress primer BED file
@@ -130,14 +128,15 @@ workflow PREPARE_GENOME {
     }
 
     emit:
-    fasta                = ch_fasta                 // path: genome.fasta
-    gff                  = ch_gff                   // path: genome.gff
-    chrom_sizes          = ch_chrom_sizes           // path: genome.sizes
-    primer_bed           = ch_primer_bed            // path: primer.bed
-    primer_collapsed_bed = ch_primer_collapsed_bed  // path: primer.collapsed.bed
-    nextclade_db         = ch_nextclade_db          // path: nextclade_db
-    snpeff_db            = ch_snpeff_db             // path: snpeff_db
-    snpeff_config        = ch_snpeff_config         // path: snpeff.config
+    fasta                = ch_fasta                // path: genome.fasta
+    gff                  = ch_gff                  // path: genome.gff
+    fai                  = ch_fai                  // path: genome.fai
+    chrom_sizes          = ch_chrom_sizes          // path: genome.sizes
+    primer_bed           = ch_primer_bed           // path: primer.bed
+    primer_collapsed_bed = ch_primer_collapsed_bed // path: primer.collapsed.bed
+    nextclade_db         = ch_nextclade_db         // path: nextclade_db
+    snpeff_db            = ch_snpeff_db            // path: snpeff_db
+    snpeff_config        = ch_snpeff_config        // path: snpeff.config
 
-    versions             = ch_versions              // channel: [ versions.yml ]
+    versions             = ch_versions             // channel: [ versions.yml ]
 }
