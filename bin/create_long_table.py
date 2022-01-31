@@ -67,13 +67,13 @@ def create_long(snp_file,snpsift_file,pangolin_file,software):
     colnames_snpsift = list(snpsift_table.columns)
     colnames_snpsift = [i.replace('ANN[*].', '') for i in colnames_snpsift]
     for i in range(len(colnames_snpsift)):
-       snpsift_table.rename(columns = {snpsift_table.columns[i]:colnames_snpsift[i]}, inplace = True)
+        snpsift_table.rename(columns = {snpsift_table.columns[i]:colnames_snpsift[i]}, inplace = True)
     snpsift_table =  snpsift_table.loc[:, ['CHROM','POS','REF','ALT','GENE','EFFECT','HGVS_C','HGVS_P']]
     snpsift_table_copy = snpsift_table.copy()
 
     for i in  range(len(snpsift_table_copy)):
         for j in range(3,8):
-         snpsift_table_copy.iloc[i,j]= str(snpsift_table.iloc[i,j]).split(",")[0]
+            snpsift_table_copy.iloc[i,j]= str(snpsift_table.iloc[i,j]).split(",")[0]
 
     oneletter_s = []
     for index,item in snpsift_table_copy["HGVS_P"].iteritems():
