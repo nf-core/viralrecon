@@ -1,5 +1,4 @@
 process CREATE_LONG_TABLE {
-    tag "$meta.id"
 
     conda (params.enable_conda ? "conda-forge::python=3.9.5 conda-forge::matplotlib=3.5.1 conda-forge::pandas=1.3.5 conda-forge::r-sys=3.4 conda-forge::regex=2021.11.10 conda-forge::scipy=1.7.3" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
