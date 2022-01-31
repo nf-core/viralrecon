@@ -2,14 +2,14 @@
 // Consensus calling with BCFTools and downstream processing QC
 //
 
-include { BCFTOOLS_FILTER    } from '../../modules/nf-core/modules/bcftools/filter/main'
-include { TABIX_TABIX        } from '../../modules/nf-core/modules/tabix/tabix/main'
-include { BEDTOOLS_MERGE     } from '../../modules/nf-core/modules/bedtools/merge/main'
-include { BEDTOOLS_MASKFASTA } from '../../modules/nf-core/modules/bedtools/maskfasta/main'
-include { BCFTOOLS_CONSENSUS } from '../../modules/nf-core/modules/bcftools/consensus/main'
-include { MAKE_BED_MASK      } from '../../modules/local/make_bed_mask'
-include { RENAME_CONSENSUS   } from '../../modules/local/rename_consensus'
-include { CONSENSUS_QC       } from './consensus_qc'
+include { BCFTOOLS_FILTER     } from '../../modules/nf-core/modules/bcftools/filter/main'
+include { TABIX_TABIX         } from '../../modules/nf-core/modules/tabix/tabix/main'
+include { BEDTOOLS_MERGE      } from '../../modules/nf-core/modules/bedtools/merge/main'
+include { BEDTOOLS_MASKFASTA  } from '../../modules/nf-core/modules/bedtools/maskfasta/main'
+include { BCFTOOLS_CONSENSUS  } from '../../modules/nf-core/modules/bcftools/consensus/main'
+include { MAKE_BED_MASK       } from '../../modules/local/make_bed_mask'
+include { RENAME_FASTA_HEADER } from '../../modules/local/rename_fasta_header'
+include { CONSENSUS_QC        } from './consensus_qc'
 
 workflow CONSENSUS_BCFTOOLS {
     take:
@@ -24,16 +24,15 @@ workflow CONSENSUS_BCFTOOLS {
 
     ch_versions = Channel.empty()
 
-
     //
     // Filter variants by allele frequency, zip and index
     //
-    BCFTOOLS_FILTER(
+    BCFTOOLS_FILTER (
         vcf
     )
     ch_versions = ch_versions.mix(BCFTOOLS_FILTER.out.versions.first())
 
-    TABIX_TABIX(
+    TABIX_TABIX (
         BCFTOOLS_FILTER.out.vcf
     )
     ch_versions = ch_versions.mix(TABIX_TABIX.out.versions.first())
@@ -76,17 +75,16 @@ workflow CONSENSUS_BCFTOOLS {
     //
     // Rename consensus header adding sample name
     //
-    RENAME_CONSENSUS (
+    RENAME_FASTA_HEADER (
         BCFTOOLS_CONSENSUS.out.fasta
     )
-    //ch_versions = ch_versions.mix(RENAME_CONSENSUS.out.versions.first())
-
+    ch_versions = ch_versions.mix(RENAME_FASTA_HEADER.out.versions.first())
 
     //
     // Consensus sequence QC
     //
     CONSENSUS_QC (
-        RENAME_CONSENSUS.out.consensus,
+        RENAME_FASTA_HEADER.out.fasta,
         fasta,
         gff,
         nextclade_db
@@ -94,7 +92,7 @@ workflow CONSENSUS_BCFTOOLS {
     ch_versions = ch_versions.mix(CONSENSUS_QC.out.versions.first())
 
     emit:
-    consensus        = RENAME_CONSENSUS.out.consensus    // channel: [ val(meta), [ fasta ] ]
+    consensus        = RENAME_FASTA_HEADER.out.fasta     // channel: [ val(meta), [ fasta ] ]
 
     quast_results    = CONSENSUS_QC.out.quast_results    // channel: [ val(meta), [ results ] ]
     quast_tsv        = CONSENSUS_QC.out.quast_tsv        // channel: [ val(meta), [ tsv ] ]

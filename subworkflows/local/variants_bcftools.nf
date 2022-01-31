@@ -4,6 +4,7 @@
 
 include { BCFTOOLS_MPILEUP } from '../../modules/nf-core/modules/bcftools/mpileup/main'
 include { BCFTOOLS_NORM    } from '../../modules/nf-core/modules/bcftools/norm/main'
+include { VCF_TABIX_STATS  } from '../nf-core/vcf_tabix_stats'
 include { VARIANTS_QC      } from './variants_qc'
 
 workflow VARIANTS_BCFTOOLS {
@@ -31,7 +32,7 @@ workflow VARIANTS_BCFTOOLS {
     ch_versions = ch_versions.mix(BCFTOOLS_MPILEUP.out.versions.first())
 
     //
-    // Split multiallelic positions
+    // Split multi-allelic positions
     //
     BCFTOOLS_NORM (
         BCFTOOLS_MPILEUP.out.vcf,
@@ -39,6 +40,10 @@ workflow VARIANTS_BCFTOOLS {
     )
     ch_versions = ch_versions.mix(BCFTOOLS_NORM.out.versions.first())
 
+    VCF_TABIX_STATS (
+        BCFTOOLS_NORM.out.vcf
+    )
+    ch_versions = ch_versions.mix(VCF_TABIX_STATS.out.versions)
 
     //
     // Run downstream tools for variants QC
@@ -46,7 +51,7 @@ workflow VARIANTS_BCFTOOLS {
     VARIANTS_QC (
         bam,
         BCFTOOLS_NORM.out.vcf,
-        BCFTOOLS_MPILEUP.out.stats,
+        VCF_TABIX_STATS.out.stats,
         fasta,
         sizes,
         gff,
@@ -58,10 +63,12 @@ workflow VARIANTS_BCFTOOLS {
 
     emit:
     vcf_orig        = BCFTOOLS_MPILEUP.out.vcf        // channel: [ val(meta), [ vcf ] ]
-    tbi             = BCFTOOLS_MPILEUP.out.tbi        // channel: [ val(meta), [ tbi ] ]
-    stats           = BCFTOOLS_MPILEUP.out.stats      // channel: [ val(meta), [ txt ] ]
+    tbi_orig        = BCFTOOLS_MPILEUP.out.tbi        // channel: [ val(meta), [ tbi ] ]
+    stats_orig      = BCFTOOLS_MPILEUP.out.stats      // channel: [ val(meta), [ txt ] ]
 
     vcf             = BCFTOOLS_NORM.out.vcf           // channel: [ val(meta), [ vcf ] ]
+    tbi             = VCF_TABIX_STATS.out.tbi         // channel: [ val(meta), [ tbi ] ]
+    stats           = VCF_TABIX_STATS.out.stats       // channel: [ val(meta), [ txt ] ]
 
     snpeff_vcf      = VARIANTS_QC.out.snpeff_vcf      // channel: [ val(meta), [ vcf.gz ] ]
     snpeff_tbi      = VARIANTS_QC.out.snpeff_tbi      // channel: [ val(meta), [ tbi ] ]

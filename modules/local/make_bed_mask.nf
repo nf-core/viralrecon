@@ -1,10 +1,10 @@
 process MAKE_BED_MASK {
     tag "$meta.id"
 
-    conda (params.enable_conda ? "conda-forge::python=3.9.5 conda-forge::gawk=5.1.0 bioconda::samtools=1.12" : null)
+    conda (params.enable_conda ? "conda-forge::python=3.9.5 bioconda::samtools=1.14" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/plasmidid:1.6.5--hdfd78af_0' :
-        'quay.io/biocontainers/plasmidid:1.6.5--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-1a35167f7a491c7086c13835aaa74b39f1f43979:6b5cffa1187cfccf2dc983ed3b5359d49b999eb0-0' :
+        'quay.io/biocontainers/mulled-v2-1a35167f7a491c7086c13835aaa74b39f1f43979:6b5cffa1187cfccf2dc983ed3b5359d49b999eb0-0' }"
 
     input:
     tuple val(meta), path(bam), path(vcf)
