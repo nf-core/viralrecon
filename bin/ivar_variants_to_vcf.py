@@ -271,10 +271,10 @@ def ivar_variants_to_vcf(FileIn, FileOut, passOnly=False, minAF=0,NotStrandBias=
                     # dict_lines has a maximum size of three.
 
                     ## Always fill dict_lines until size 2.
-                    if len(dict_lines["POS"]) ==0 or len(dict_lines["POS"]) ==1  :
-                            for i,j in enumerate(dict_lines):
-                                dict_lines.setdefault(j, []).append(param_list[i])
-                            writeLine=False
+                    if len(dict_lines["POS"]) ==0 or len(dict_lines["POS"]) == 1:
+                        for i,j in enumerate(dict_lines):
+                            dict_lines.setdefault(j, []).append(param_list[i])
+                        writeLine=False
 
                     # If queue has size 2, we include the third line
                     elif  len(dict_lines["POS"]) == 2:
