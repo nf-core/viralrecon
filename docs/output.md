@@ -625,7 +625,7 @@ As described in the [iVar variants](#ivar-variants) section, iVar can be used in
 
 </details>
 
- [BCFTools](http://samtools.github.io/bcftools/bcftools.html) is used in the variant calling and *de novo* assembly steps of this pipeline to obtain basic statistics from the VCF output. It can also used be used to generate a consensus sequence by integrating variant calls into the reference genome. In this pipeline, we use `samtools mpileup` to create a mask using low coverage positions, and `bedtools maskfasta` to mask the genome sequences based on these intervals. Finally, `bcftools consensus` is used to generate the consensus by projecting the high allele frequency variants onto the masked genome reference sequence.
+[BCFTools](http://samtools.github.io/bcftools/bcftools.html) is used in the variant calling and *de novo* assembly steps of this pipeline to obtain basic statistics from the VCF output. It can also used be used to generate a consensus sequence by integrating variant calls into the reference genome. In this pipeline, we use `samtools mpileup` to create a mask using low coverage positions, and `bedtools maskfasta` to mask the genome sequences based on these intervals. Finally, `bcftools consensus` is used to generate the consensus by projecting the high allele frequency variants onto the masked genome reference sequence.
 
 ### QUAST
 
