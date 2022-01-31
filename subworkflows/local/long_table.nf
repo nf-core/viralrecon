@@ -1,5 +1,5 @@
 //
-// Variant calling QC
+// LONG TABLE VARIANTS
 //
 include { BCFTOOLS_QUERY } from '../../modules/nf-core/modules/bcftools/query/main'
 include { CREATE_LONG_TABLE } from '../../modules/local/create_long_table'
@@ -18,9 +18,9 @@ workflow LONG_TABLE {
     if (!params.skip_long_table) {
         BCFTOOLS_QUERY (
             vcf.join(tbi, by: [0]),
-            "",
-            "",
-            ""
+            [],
+            [],
+            []
         )
         ch_query_table   = BCFTOOLS_QUERY.out.vcf
         ch_versions     = ch_versions.mix(BCFTOOLS_QUERY.out.versions)
