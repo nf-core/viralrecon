@@ -530,7 +530,7 @@ workflow ILLUMINA {
     // SUBWORKFLOW: Create variants long table report
     //
 
-    if (!params.skip_consensus && !params.skip_long_table && variant_caller) {
+    if (!params.skip_variants && !params.skip_consensus && !params.skip_long_table && variant_caller) {
         LONG_TABLE (
             ch_vcf,
             ch_tbi,
