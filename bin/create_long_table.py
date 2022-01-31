@@ -116,19 +116,19 @@ def main(args=None):
 
     # List vcf table files
     table_list = []
-    for file in glob.glob(args.sample + "/*_norm.table"):
+    for file in glob.glob(args.sample + "/*"):
         table_list.append(file)
     table_list.sort()
 
     #List snpsift files
     snpsift_list = []
-    for file in glob.glob(args.snpsift + "/*_norm.snpsift.txt"):
+    for file in glob.glob(args.snpsift + "/*"):
         snpsift_list.append(file)
     snpsift_list.sort()
 
     # List pangolin files
     pangolin_list = []
-    for file in glob.glob(args.pangolin + "/*.csv"):
+    for file in glob.glob(args.pangolin + "/*"):
         pangolin_list.append(file)
     pangolin_list.sort()
 
