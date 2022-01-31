@@ -8,8 +8,8 @@ workflow LONG_TABLE {
     take:
     vcf           // channel: [ val(meta), [ vcf ] ]
     tbi           // channel: [ val(meta), [ tbi ] ]
-    pangolin      // channel: [ val(meta), [ ] ]
-    snpsift       // channel: [ val(meta), [ ] ]
+    snpsift       // channel: [ val(meta), [ txt ] ]
+    pangolin      // channel: [ val(meta), [ csv ] ]
 
     main:
 

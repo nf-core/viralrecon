@@ -14,7 +14,7 @@ process BCFTOOLS_QUERY {
     path(samples)
 
     output:
-    tuple val(meta), path("*.gz") , emit: vcf
+    tuple val(meta), path("*.table") , emit: vcf
     path "versions.yml"           , emit: versions
 
     script:
