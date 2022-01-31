@@ -26,7 +26,7 @@ process BCFTOOLS_QUERY {
 
     """
     bcftools query \\
-        --output ${prefix}.vcf.gz \\
+        --output ${prefix}.table \\
         ${regions_file} \\
         ${targets_file} \\
         ${samples_file} \\
