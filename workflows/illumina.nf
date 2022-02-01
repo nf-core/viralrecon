@@ -440,7 +440,7 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config
         )
-        
+
         ch_vcf                    = VARIANTS_BCFTOOLS.out.vcf
         ch_tbi                    = VARIANTS_BCFTOOLS.out.tbi
         ch_bcftools_stats_multiqc = VARIANTS_BCFTOOLS.out.stats
