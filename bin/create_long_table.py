@@ -15,7 +15,7 @@ pd.set_option('display.max_rows', None)
 
 def parser_args(args=None):
     Description = 'Create long/wide tables fo ivar/bcftools'
-    Epilog = """Example usage: python parser_ivar_bcftools.py <sample> <snpsift> <pangolin> <software> """
+    Epilog = """Example usage: python create_long_table.py --samples_path <sample> --snpsift_path <snpsift> --pangolin_path <pangolin> --software <software> """
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
     parser.add_argument('--samples_path','-s',dest="sample", help="Input sample table files path.", required=True )
     parser.add_argument('--snpsift_path','-a',dest="snpsift",help="Input snpsift txt files path.",required=True)
