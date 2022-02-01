@@ -46,7 +46,7 @@ def create_long(snp_file,snpsift_file,pangolin_file,software):
     snp_table = snp_table.dropna(how = 'all', axis =1)
 
     if software=='bcftools':
-        snp_table.rename(columns={snp_table.columns[5]: "DP",snp_table.columns[6]: "AD"}, inplace=True)
+        snp_table.rename(columns={snp_table.columns[0]: "CHROM",snp_table.columns[1]: "POS",snp_table.columns[2]: "REF",snp_table.columns[3]: "ALT",snp_table.columns[4]: "FILTER", snp_table.columns[5]: "DP",snp_table.columns[6]: "AD"}, inplace=True)
         new_column = snp_table
         new_column[['REF_DP','ALT_DP']] = snp_table['AD'].str.split(',', expand=True)
         snp_table = pd.merge(snp_table,new_column,how = 'left')
@@ -89,12 +89,11 @@ def create_long(snp_file,snpsift_file,pangolin_file,software):
     #table long one sample
     tl_onesample = pd.DataFrame(data =snp_table)
     if software=='bcftools':
-        tl_onesample["Sample"] = lineages.iloc[0,0]
+        tl_onesample["Sample"] = lineages.iloc[0,0].split('_')[1].split('.')[0]
     elif software=='ivar':
         tl_onesample["Sample"] = lineages.iloc[0,0].split('_')[1].split('.')[0]
     tl_onesample["software"] = software
     tl_onesample["Lineage"] = lineages.iloc[0,1]
-
     merged_table_long = pd.merge(tl_onesample,snpsift_table_copy,how = 'outer')
 
     return(merged_table_long)
