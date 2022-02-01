@@ -2,10 +2,10 @@
 // Variant calling with BCFTools, downstream processing and QC
 //
 
-include { BCFTOOLS_MPILEUP } from '../../modules/nf-core/modules/bcftools/mpileup/main'
-include { BCFTOOLS_NORM    } from '../../modules/nf-core/modules/bcftools/norm/main'
-include { VCF_TABIX_STATS  } from '../nf-core/vcf_tabix_stats'
-include { VARIANTS_QC      } from './variants_qc'
+include { BCFTOOLS_MPILEUP }       from '../../modules/nf-core/modules/bcftools/mpileup/main'
+include { BCFTOOLS_NORM    }       from '../../modules/nf-core/modules/bcftools/norm/main'
+include { VCF_TABIX_STATS  }       from '../nf-core/vcf_tabix_stats'
+include { VARIANTS_QC      }       from './variants_qc'
 
 workflow VARIANTS_BCFTOOLS {
     take:
@@ -45,6 +45,7 @@ workflow VARIANTS_BCFTOOLS {
     )
     ch_versions = ch_versions.mix(VCF_TABIX_STATS.out.versions)
 
+
     //
     // Run downstream tools for variants QC
     //
@@ -63,11 +64,10 @@ workflow VARIANTS_BCFTOOLS {
 
     emit:
     vcf_orig        = BCFTOOLS_MPILEUP.out.vcf        // channel: [ val(meta), [ vcf ] ]
-    tbi_orig        = BCFTOOLS_MPILEUP.out.tbi        // channel: [ val(meta), [ tbi ] ]
     stats_orig      = BCFTOOLS_MPILEUP.out.stats      // channel: [ val(meta), [ txt ] ]
 
-    vcf             = BCFTOOLS_NORM.out.vcf           // channel: [ val(meta), [ vcf ] ]
-    tbi             = VCF_TABIX_STATS.out.tbi         // channel: [ val(meta), [ tbi ] ]
+    vcf             = BCFTOOLS_NORM.out.vcf         // channel: [ val(meta), [ vcf ] ]
+    tbi             = VCF_TABIX_STATS.out.tbi         // channel: [ val(meta), [ vcf ] ]
     stats           = VCF_TABIX_STATS.out.stats       // channel: [ val(meta), [ txt ] ]
 
     snpeff_vcf      = VARIANTS_QC.out.snpeff_vcf      // channel: [ val(meta), [ vcf.gz ] ]
