@@ -1,6 +1,7 @@
 //
 // Variant calling QC
 //
+
 include { ASCIIGENOME    } from '../../modules/local/asciigenome'
 include { SNPEFF_SNPSIFT } from './snpeff_snpsift'
 
@@ -47,6 +48,7 @@ workflow VARIANTS_QC {
         ch_versions     = ch_versions.mix(SNPEFF_SNPSIFT.out.versions)
     }
 
+    //
     // Variant screenshots with ASCIIGenome
     //
     ch_asciigenome_pdf = Channel.empty()

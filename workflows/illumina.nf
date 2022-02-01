@@ -66,16 +66,16 @@ include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NEXTCLADE          } from '../mod
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK        } from '../subworkflows/local/input_check'
-include { PREPARE_GENOME     } from '../subworkflows/local/prepare_genome_illumina'
-include { VARIANTS_IVAR      } from '../subworkflows/local/variants_ivar'
-include { VARIANTS_BCFTOOLS  } from '../subworkflows/local/variants_bcftools'
-include { CONSENSUS_IVAR     } from '../subworkflows/local/consensus_ivar'
-include { CONSENSUS_BCFTOOLS } from '../subworkflows/local/consensus_bcftools'
-include { LONG_TABLE         } from '../subworkflows/local/long_table'
-include { ASSEMBLY_SPADES    } from '../subworkflows/local/assembly_spades'
-include { ASSEMBLY_UNICYCLER } from '../subworkflows/local/assembly_unicycler'
-include { ASSEMBLY_MINIA     } from '../subworkflows/local/assembly_minia'
+include { INPUT_CHECK         } from '../subworkflows/local/input_check'
+include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome_illumina'
+include { VARIANTS_IVAR       } from '../subworkflows/local/variants_ivar'
+include { VARIANTS_BCFTOOLS   } from '../subworkflows/local/variants_bcftools'
+include { CONSENSUS_IVAR      } from '../subworkflows/local/consensus_ivar'
+include { CONSENSUS_BCFTOOLS  } from '../subworkflows/local/consensus_bcftools'
+include { VARIANTS_LONG_TABLE } from '../subworkflows/local/variants_long_table'
+include { ASSEMBLY_SPADES     } from '../subworkflows/local/assembly_spades'
+include { ASSEMBLY_UNICYCLER  } from '../subworkflows/local/assembly_unicycler'
+include { ASSEMBLY_MINIA      } from '../subworkflows/local/assembly_minia'
 
 /*
 ========================================================================================
@@ -405,6 +405,7 @@ workflow ILLUMINA {
     ch_tbi                    = Channel.empty()
     ch_ivar_counts_multiqc    = Channel.empty()
     ch_bcftools_stats_multiqc = Channel.empty()
+    ch_snpsift_txt            = Channel.empty()
     ch_snpeff_multiqc         = Channel.empty()
     if (!params.skip_variants && variant_caller == 'ivar') {
         VARIANTS_IVAR (
@@ -417,13 +418,12 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.snpeff_config,
             ch_ivar_variants_header_mqc
         )
-
         ch_vcf                    = VARIANTS_IVAR.out.vcf
         ch_tbi                    = VARIANTS_IVAR.out.tbi
         ch_ivar_counts_multiqc    = VARIANTS_IVAR.out.multiqc_tsv
         ch_bcftools_stats_multiqc = VARIANTS_IVAR.out.stats
-        ch_snpsift_ltable      = VARIANTS_IVAR.out.snpsift_txt
         ch_snpeff_multiqc         = VARIANTS_IVAR.out.snpeff_csv
+        ch_snpsift_txt            = VARIANTS_IVAR.out.snpsift_txt
         ch_versions               = ch_versions.mix(VARIANTS_IVAR.out.versions)
     }
 
@@ -440,12 +440,11 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config
         )
-
         ch_vcf                    = VARIANTS_BCFTOOLS.out.vcf
         ch_tbi                    = VARIANTS_BCFTOOLS.out.tbi
         ch_bcftools_stats_multiqc = VARIANTS_BCFTOOLS.out.stats
-        ch_snpsift_ltable          = VARIANTS_BCFTOOLS.out.snpsift_txt
         ch_snpeff_multiqc         = VARIANTS_BCFTOOLS.out.snpeff_csv
+        ch_snpsift_txt            = VARIANTS_BCFTOOLS.out.snpsift_txt
         ch_versions               = ch_versions.mix(VARIANTS_BCFTOOLS.out.versions)
     }
 
@@ -464,11 +463,9 @@ workflow ILLUMINA {
         )
 
         ch_quast_multiqc    = CONSENSUS_IVAR.out.quast_tsv
-        ch_pangolin_ltable       = CONSENSUS_IVAR.out.pangolin_report
         ch_pangolin_multiqc = CONSENSUS_IVAR.out.pangolin_report
         ch_nextclade_report = CONSENSUS_IVAR.out.nextclade_report
         ch_versions         = ch_versions.mix(CONSENSUS_IVAR.out.versions)
-
     }
 
     //
@@ -485,7 +482,6 @@ workflow ILLUMINA {
         )
 
         ch_quast_multiqc    = CONSENSUS_BCFTOOLS.out.quast_tsv
-        ch_pangolin_ltable           = CONSENSUS_BCFTOOLS.out.pangolin_report
         ch_pangolin_multiqc = CONSENSUS_BCFTOOLS.out.pangolin_report
         ch_nextclade_report = CONSENSUS_BCFTOOLS.out.nextclade_report
         ch_versions         = ch_versions.mix(CONSENSUS_BCFTOOLS.out.versions)
@@ -514,17 +510,15 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Create variants long table report
     //
-
-    if (!params.skip_variants && !params.skip_consensus && !params.skip_long_table && variant_caller) {
-        LONG_TABLE (
+    if (!params.skip_variants && !params.skip_variants_long_table) {
+        VARIANTS_LONG_TABLE (
             ch_vcf,
             ch_tbi,
-            ch_snpsift_ltable,
-            ch_pangolin_ltable
+            ch_snpsift_txt,
+            ch_pangolin_multiqc
         )
-        ch_versions = ch_versions.mix(LONG_TABLE.out.versions)
+        ch_versions = ch_versions.mix(VARIANTS_LONG_TABLE.out.versions)
     }
-
 
     //
     // MODULE: Primer trimming with Cutadapt
