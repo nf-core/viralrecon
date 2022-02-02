@@ -45,6 +45,7 @@ def make_dir(path):
 def get_file_dict(file_dir, file_suffix):
     files = glob.glob(os.path.join(file_dir, f'*{file_suffix}'))
     samples = [os.path.basename(x).rstrip(f'{file_suffix}') for x in files]
+
     return dict(zip(samples, files))
 
 
@@ -61,6 +62,7 @@ def three_letter_aa_to_one(hgvs_three):
     for key in aa_dict:
         if key in hgvs_one:
             hgvs_one = hgvs_one.replace(str(key),str(aa_dict[key]))
+
     return hgvs_one
 
 
@@ -74,9 +76,12 @@ def ivar_bcftools_query_to_table(bcftools_query_file):
     old_colnames = list(table.columns)
     new_colnames = [x.split(']')[-1].split(':')[-1] for x in old_colnames]
     table.rename(columns=dict(zip(old_colnames, new_colnames)), inplace=True)
-    table[["ALT_DP", "DP"]] = table[["ALT_DP", "DP"]].apply(pd.to_numeric)
-    table['AF'] = table['ALT_DP'] / table['DP']
-    table['AF'] = table['AF'].round(2)
+
+    if not table.empty:
+        table[["ALT_DP", "DP"]] = table[["ALT_DP", "DP"]].apply(pd.to_numeric)
+        table['AF'] = table['ALT_DP'] / table['DP']
+        table['AF'] = table['AF'].round(2)
+
     return table
 
 
@@ -90,11 +95,41 @@ def bcftools_bcftools_query_to_table(bcftools_query_file):
     old_colnames = list(table.columns)
     new_colnames = [x.split(']')[-1].split(':')[-1] for x in old_colnames]
     table.rename(columns=dict(zip(old_colnames, new_colnames)), inplace=True)
-    table[['REF_DP','ALT_DP']] = table['AD'].str.split(',', expand=True)
-    table[["ALT_DP", "DP"]] = table[["ALT_DP", "DP"]].apply(pd.to_numeric)
-    table['AF'] = table['ALT_DP'] / table['DP']
-    table['AF'] = table['AF'].round(2)
-    table.drop('AD', axis=1, inplace=True)
+
+    if not table.empty:
+        table[['REF_DP','ALT_DP']] = table['AD'].str.split(',', expand=True)
+        table[["ALT_DP", "DP"]] = table[["ALT_DP", "DP"]].apply(pd.to_numeric)
+        table['AF'] = table['ALT_DP'] / table['DP']
+        table['AF'] = table['AF'].round(2)
+        table.drop('AD', axis=1, inplace=True)
+
+    return table
+
+
+## Returns a pandas dataframe in the format:
+    #         CHROM   POS REF ALT FILTER  DP  REF_DP  ALT_DP    AF
+    # 0  MN908947.3   241   C   T   PASS  30       1      29  0.97
+    # 1  MN908947.3  1163   A   T   PASS  28       0      28  1.00
+def nanopolish_bcftools_query_to_table(bcftools_query_file):
+    table = pd.read_table(bcftools_query_file, header='infer')
+    table = table.dropna(how='all', axis=1)
+    old_colnames = list(table.columns)
+    new_colnames = [x.split(']')[-1].split(':')[-1] for x in old_colnames]
+    table.rename(columns=dict(zip(old_colnames, new_colnames)), inplace=True)
+
+    ## Split out ref/alt depths from StrandSupport column
+    if not table.empty:
+        table_cp = table.copy()
+        table_cp[['FORW_REF_DP','REV_REF_DP', 'FORW_ALT_DP','REV_ALT_DP']] = table_cp['StrandSupport'].str.split(',', expand=True)
+        table_cp[['FORW_REF_DP','REV_REF_DP', 'FORW_ALT_DP','REV_ALT_DP']] = table_cp[['FORW_REF_DP','REV_REF_DP', 'FORW_ALT_DP','REV_ALT_DP']].apply(pd.to_numeric)
+
+        table['DP'] = table_cp[['FORW_REF_DP','REV_REF_DP', 'FORW_ALT_DP','REV_ALT_DP']].sum(axis=1)
+        table['REF_DP'] = table_cp[['FORW_REF_DP','REV_REF_DP']].sum(axis=1)
+        table['ALT_DP'] = table_cp[['FORW_ALT_DP','REV_ALT_DP']].sum(axis=1)
+        table['AF'] = table['ALT_DP'] / table['DP']
+        table['AF'] = table['AF'].round(2)
+        table.drop('StrandSupport', axis=1, inplace=True)
+
     return table
 
 
@@ -122,6 +157,7 @@ def snpsift_to_table(snpsift_file):
         hgvs_p = three_letter_aa_to_one(str(item))
         aa.append(hgvs_p)
     table["HGVS_P_1LETTER"] = pd.Series(aa)
+
     return table
 
 
@@ -163,24 +199,29 @@ def main(args=None):
             bcftools_table = ivar_bcftools_query_to_table(bcftools_files[sample])
         elif args.variant_caller == 'bcftools':
             bcftools_table = bcftools_bcftools_query_to_table(bcftools_files[sample])
+        elif args.variant_caller == 'nanopolish':
+            bcftools_table = nanopolish_bcftools_query_to_table(bcftools_files[sample])
 
-        ## Read in SnpSift file
-        snpsift_table = snpsift_to_table(snpsift_files[sample])
+        if not bcftools_table.empty:
 
-        merged_table = pd.DataFrame(data = bcftools_table)
-        merged_table.insert(0,'SAMPLE', sample)
-        merged_table = pd.merge(merged_table, snpsift_table, how='outer')
-        merged_table['CALLER'] = args.variant_caller
+            ## Read in SnpSift file
+            snpsift_table = snpsift_to_table(snpsift_files[sample])
 
-        ## Read in Pangolin lineage file
-        if pangolin_files:
-            merged_table['LINEAGE'] = get_pangolin_lineage(pangolin_files[sample])
+            merged_table = pd.DataFrame(data = bcftools_table)
+            merged_table.insert(0,'SAMPLE', sample)
+            merged_table = pd.merge(merged_table, snpsift_table, how='outer')
+            merged_table['CALLER'] = args.variant_caller
 
-        sample_tables.append(merged_table)
+            ## Read in Pangolin lineage file
+            if pangolin_files:
+                merged_table['LINEAGE'] = get_pangolin_lineage(pangolin_files[sample])
+
+            sample_tables.append(merged_table)
 
     ## Merge table across samples
-    merged_tables = pd.concat(sample_tables)
-    merged_tables.to_csv(args.output_file, index=False, encoding='utf-8-sig')
+    if sample_tables:
+        merged_tables = pd.concat(sample_tables)
+        merged_tables.to_csv(args.output_file, index=False, encoding='utf-8-sig')
 
 
 if __name__ == '__main__':
