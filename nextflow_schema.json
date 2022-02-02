@@ -310,6 +310,11 @@
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip generation of QUAST aggregated report for consensus sequences."
                 },
+                "skip_variants_long_table": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip long table generation for reporting variants."
+                },
                 "skip_multiqc": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
@@ -469,11 +474,6 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Specify this parameter to skip all of the variant calling and mapping steps in the pipeline."
-                },
-                "skip_long_table": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Specify this parameter to skip variants long table report generation."
                 }
             },
             "fa_icon": "fas fa-dna"

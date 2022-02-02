@@ -386,8 +386,8 @@ workflow NANOPORE {
         PANGOLIN (
             ARTIC_MINION.out.fasta
         )
-        ch_pangolin_multiqc  = PANGOLIN.out.report
-        ch_versions          = ch_versions.mix(PANGOLIN.out.versions.first().ifEmpty(null))
+        ch_pangolin_multiqc = PANGOLIN.out.report
+        ch_versions         = ch_versions.mix(PANGOLIN.out.versions.first().ifEmpty(null))
     }
 
     //
@@ -441,6 +441,7 @@ workflow NANOPORE {
     // SUBWORKFLOW: Annotate variants with snpEff
     //
     ch_snpeff_multiqc = Channel.empty()
+    ch_snpsift_txt    = Channel.empty()
     if (params.gff && !params.skip_snpeff) {
         SNPEFF_SNPSIFT (
             VCFLIB_VCFUNIQ.out.vcf,
@@ -449,6 +450,7 @@ workflow NANOPORE {
             PREPARE_GENOME.out.fasta
         )
         ch_snpeff_multiqc = SNPEFF_SNPSIFT.out.csv
+        ch_snpsift_txt    = SNPEFF_SNPSIFT.out.snpsift_txt
         ch_versions       = ch_versions.mix(SNPEFF_SNPSIFT.out.versions)
     }
 

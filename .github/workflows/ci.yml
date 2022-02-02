@@ -55,9 +55,9 @@ jobs:
         parameters:
           - "--consensus_caller ivar"
           - "--variant_caller bcftools --consensus_caller ivar"
-          - "--skip_fastp"
+          - "--skip_fastp --skip_pangolin"
           - "--skip_variants"
-          - "--skip_cutadapt"
+          - "--skip_cutadapt --skip_snpeff"
           - "--skip_kraken2"
           - "--skip_assembly"
           - "--spades_mode corona"

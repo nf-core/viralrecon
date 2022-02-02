@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [[2.3](https://github.com/nf-core/viralrecon/releases/tag/2.3)] - 2022-01-28
+## [[2.3](https://github.com/nf-core/viralrecon/releases/tag/2.3)] - 2022-02-04
 
 ### :warning: Major enhancements
 
@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [[#245](https://github.com/nf-core/viralrecon/issues/245)] - Mpileup file as output
 * [[#246](https://github.com/nf-core/viralrecon/issues/246)] - Option to generate consensus with BCFTools / BEDTools using iVar variants
 * [[#247](https://github.com/nf-core/viralrecon/issues/247)] - Add strand-bias filtering option and codon fix in consecutive positions in ivar tsv conversion to vcf
+* [[#248](https://github.com/nf-core/viralrecon/issues/248)] - New variants reporting table
 
 ### Parameters
 
@@ -32,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 |                               | `--nextclade_dataset_reference`       |
 |                               | `--nextclade_dataset_tag`             |
 |                               | `--skip_consensus_plots`              |
+|                               | `--skip_variants_long_table`          |
 |                               | `--consensus_caller`                  |
 | `--callers`                   | `--variant_caller`                    |
 
