@@ -28,7 +28,7 @@
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
             },
             "bcftools/query": {
-                "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
+                "git_sha": "aa2eca69975dc3b53b0c2fbffcaf70b0112c08d8"
             },
             "bcftools/stats": {
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
@@ -94,13 +94,13 @@
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
             },
             "nextclade/datasetget": {
-                "git_sha": "d70526c80665d412404e50708998b19cfb0dee7d"
+                "git_sha": "aa2eca69975dc3b53b0c2fbffcaf70b0112c08d8"
             },
             "nextclade/run": {
-                "git_sha": "d70526c80665d412404e50708998b19cfb0dee7d"
+                "git_sha": "aa2eca69975dc3b53b0c2fbffcaf70b0112c08d8"
             },
             "pangolin": {
-                "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
+                "git_sha": "aa2eca69975dc3b53b0c2fbffcaf70b0112c08d8"
             },
             "picard/collectmultiplemetrics": {
                 "git_sha": "e751e5040af57e1b4e06ed4e0f3efe6de25c1683"
