@@ -128,6 +128,16 @@ def snpsift_to_table(snpsift_file):
 def main(args=None):
     args = parser_args(args)
 
+    ## Create output directory if it doesn't exist
+    out_dir = os.path.dirname(args.output_file)
+    make_dir(out_dir)
+
+    ## Check correct variant caller has been provided
+    variant_callers = ['ivar', 'bcftools', 'nanopolish', 'medaka']
+    if args.variant_caller not in variant_callers:
+        logger.error(f"Invalid option '--variant caller {args.variant_caller}'. Valid options: " + ', '.join(variant_callers))
+        sys.exit(1)
+
     ## Find files and create a dictionary {'sample': '/path/to/file'}
     bcftools_files = get_file_dict(args.bcftools_query_dir, args.bcftools_file_suffix)
     snpsift_files = get_file_dict(args.snpsift_dir, args.snpsift_file_suffix)
@@ -157,14 +167,15 @@ def main(args=None):
         ## Read in SnpSift file
         snpsift_table = snpsift_to_table(snpsift_files[sample])
 
-        ## Read in Pangolin lineage file
-        pangolin_lineage = get_pangolin_lineage(pangolin_files[sample])
-
         merged_table = pd.DataFrame(data = bcftools_table)
         merged_table.insert(0,'SAMPLE', sample)
         merged_table = pd.merge(merged_table, snpsift_table, how='outer')
-        merged_table['LINEAGE'] = pangolin_lineage
         merged_table['CALLER'] = args.variant_caller
+
+        ## Read in Pangolin lineage file
+        if pangolin_files:
+            merged_table['LINEAGE'] = get_pangolin_lineage(pangolin_files[sample])
+
         sample_tables.append(merged_table)
 
     ## Merge table across samples
