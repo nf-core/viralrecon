@@ -25,7 +25,7 @@ def parser_args(args=None):
     parser.add_argument("-bd", "--bcftools_query_dir"  , type=str, default="./bcftools_query"       , help="Directory containing output of BCFTools query for each sample (default: './bcftools_query').")
     parser.add_argument("-sd", "--snpsift_dir"         , type=str, default="./snpsift"              , help="Directory containing output of SnpSift for each sample (default: './snpsift').")
     parser.add_argument("-pd", "--pangolin_dir"        , type=str, default="./pangolin"             , help="Directory containing output of Pangolin for each sample (default: './pangolin').")
-    parser.add_argument("-bs", "--bcftools_file_suffix", type=str, default=".table"                 , help="Suffix to trim off BCFTools query file name to obtain sample name (default: '.table').")
+    parser.add_argument("-bs", "--bcftools_file_suffix", type=str, default=".bcftools_query.txt"    , help="Suffix to trim off BCFTools query file name to obtain sample name (default: '.bcftools_query.txt').")
     parser.add_argument("-ss", "--snpsift_file_suffix" , type=str, default=".snpsift.txt"           , help="Suffix to trim off SnpSift file name to obtain sample name (default: '.snpsift.txt').")
     parser.add_argument("-ps", "--pangolin_file_suffix", type=str, default=".pangolin.csv"          , help="Suffix to trim off Pangolin file name to obtain sample name (default: '.pangolin.csv').")
     parser.add_argument("-of", "--output_file"         , type=str, default="variants_long_table.csv", help="Full path to output file (default: 'variants_long_table.csv').")
