@@ -302,6 +302,7 @@ An example MultiQC report generated from a full-sized dataset can be viewed on t
         * [QUAST](#quast) - Consensus assessment report
         * [Pangolin](#pangolin) - Lineage analysis
         * [Nextclade](#nextclade) - Clade assignment, mutation calling and sequence quality checks
+    * [Variants long table](#variants-long-table) - Collate per-sample information for individual variants, functional effect prediction and lineage analysis
 * [De novo assembly](#illumina-de-novo-assembly)
     * [Cutadapt](#cutadapt) - Primer trimming for amplicon data
     * [SPAdes](#spades) *||* [Unicycler](#unicycler) *||* [minia](#minia) - Viral genome assembly
@@ -671,6 +672,30 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 </details>
 
 [Nextclade](https://github.com/nextstrain/nextclade) performs viral genome clade assignment, mutation calling and sequence quality checks for the consensus sequences generated in this pipeline. Similar to Pangolin, it has been used extensively during the COVID-19 pandemic. A [web application](https://clades.nextstrain.org/) also exists that allows users to upload genome sequences via a web browser.
+
+### Variants long table
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `variants/<VARIANT_CALLER>/`
+    * `variants_long_table.csv`: Long format table collating per-sample information for individual variants, functional effect prediction and lineage analysis.
+
+**NB:** The value of `<VARIANT_CALLER>` in the output directory name above is determined by the `--variant_caller` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
+
+</details>
+
+Create variants long format table collating per-sample information for individual variants ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html)), functional effect prediction ([`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html)) and lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin)).
+
+The more pertinent information is summarised in this table to make it easier for researchers to assess the impact of variants found amongst the sequenced sample(s). An example of the fields included in the table are shown below:
+
+```
+SAMPLE,CHROM,POS,REF,ALT,FILTER,DP,REF_DP,ALT_DP,AF,GENE,EFFECT,HGVS_C,HGVS_P,HGVS_P_1LETTER,CALLER,LINEAGE
+SAMPLE1_PE,MN908947.3,241,C,T,PASS,489,4,483,0.99,orf1ab,upstream_gene_variant,c.-25C>T,.,.,ivar,B.1
+SAMPLE1_PE,MN908947.3,1875,C,T,PASS,92,62,29,0.32,orf1ab,missense_variant,c.1610C>T,p.Ala537Val,p.A537V,ivar,B.1
+SAMPLE1_PE,MN908947.3,3037,C,T,PASS,213,0,213,1.0,orf1ab,synonymous_variant,c.2772C>T,p.Phe924Phe,p.F924F,ivar,B.1
+SAMPLE1_PE,MN908947.3,11719,G,A,PASS,195,9,186,0.95,orf1ab,synonymous_variant,c.11454G>A,p.Gln3818Gln,p.Q3818Q,ivar,B.1
+```
 
 ## Illumina: De novo assembly
 
