@@ -133,8 +133,30 @@ def nanopolish_bcftools_query_to_table(bcftools_query_file):
     return table
 
 
+## Returns a pandas dataframe in the format:
+    #         CHROM    POS REF ALT FILTER  DP REF_DP  ALT_DP    AF
+    # 0  MN908947.3    241   C   T   PASS  21      0      21  1.00
+    # 1  MN908947.3   3037   C   T   PASS  28      0      25  0.89
+def medaka_bcftools_query_to_table(bcftools_query_file):
+    table = pd.read_table(bcftools_query_file, header='infer')
+    table = table.dropna(how='all', axis=1)
+    old_colnames = list(table.columns)
+    new_colnames = [x.split(']')[-1].split(':')[-1] for x in old_colnames]
+    table.rename(columns=dict(zip(old_colnames, new_colnames)), inplace=True)
+
+    if not table.empty:
+        table[['REF_DP','ALT_DP']] = table['AC'].str.split(',', expand=True)
+        table[["ALT_DP", "DP"]] = table[["ALT_DP", "DP"]].apply(pd.to_numeric)
+        table['AF'] = table['ALT_DP'] / table['DP']
+        table['AF'] = table['AF'].round(2)
+        table.drop('AC', axis=1, inplace=True)
+
+    return table
+
+
 def get_pangolin_lineage(pangolin_file):
     table = pd.read_csv(pangolin_file, sep=",", header="infer")
+
     return table['lineage'][0]
 
 
@@ -201,6 +223,8 @@ def main(args=None):
             bcftools_table = bcftools_bcftools_query_to_table(bcftools_files[sample])
         elif args.variant_caller == 'nanopolish':
             bcftools_table = nanopolish_bcftools_query_to_table(bcftools_files[sample])
+        elif args.variant_caller == 'medaka':
+            bcftools_table = medaka_bcftools_query_to_table(bcftools_files[sample])
 
         if not bcftools_table.empty:
 
