@@ -310,6 +310,11 @@
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip generation of QUAST aggregated report for consensus sequences."
                 },
+                "skip_variants_long_table": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip long table generation for reporting variants."
+                },
                 "skip_multiqc": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
@@ -459,11 +464,6 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip creation of consensus base density plots."
-                },
-                "skip_variants_long_table": {
-                    "type": "boolean",
-                    "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip long table generation for reporting variants."
                 },
                 "skip_consensus": {
                     "type": "boolean",
