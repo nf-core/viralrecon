@@ -63,9 +63,10 @@ include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NEXTCLADE          } from '../mod
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK    } from '../subworkflows/local/input_check'
-include { PREPARE_GENOME } from '../subworkflows/local/prepare_genome_nanopore'
-include { SNPEFF_SNPSIFT } from '../subworkflows/local/snpeff_snpsift'
+include { INPUT_CHECK         } from '../subworkflows/local/input_check'
+include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome_nanopore'
+include { SNPEFF_SNPSIFT      } from '../subworkflows/local/snpeff_snpsift'
+include { VARIANTS_LONG_TABLE } from '../subworkflows/local/variants_long_table'
 
 /*
 ========================================================================================
@@ -480,6 +481,19 @@ workflow NANOPORE {
             params.asciigenome_read_depth
         )
         ch_versions = ch_versions.mix(ASCIIGENOME.out.versions.first().ifEmpty(null))
+    }
+
+    //
+    // SUBWORKFLOW: Create variants long table report
+    //
+    if (!params.skip_variants_long_table && params.gff && !params.skip_snpeff) {
+        VARIANTS_LONG_TABLE (
+            VCFLIB_VCFUNIQ.out.vcf,
+            TABIX_TABIX.out.tbi,
+            ch_snpsift_txt,
+            ch_pangolin_multiqc
+        )
+        ch_versions = ch_versions.mix(VARIANTS_LONG_TABLE.out.versions)
     }
 
     //

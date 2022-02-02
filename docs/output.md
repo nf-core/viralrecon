@@ -22,6 +22,7 @@ The directories listed below will be created in the results directory after the 
     * [Pangolin](#nanopore-pangolin) - Lineage analysis
     * [Nextclade](#nanopore-nextclade) - Clade assignment, mutation calling and sequence quality checks
     * [ASCIIGenome](#nanopore-asciigenome) - Individual variant screenshots with annotation tracks
+    * [Variants long table](#nanopore-variants-long-table) - Collate per-sample information for individual variants, functional effect prediction and lineage analysis
 * [Workflow reporting](#nanopore-workflow-reporting)
     * [MultiQC](#nanopore-multiqc) - Present QC, visualisation and custom reporting for sequencing, raw reads, alignment and variant calling results
 
@@ -256,6 +257,30 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 As described in the documentation, [ASCIIGenome](https://asciigenome.readthedocs.io/en/latest/) is a command-line genome browser that can be run from a terminal window and is solely based on ASCII characters. The closest program to ASCIIGenome is probably [samtools tview](http://www.htslib.org/doc/samtools-tview.html) but ASCIIGenome offers much more flexibility, similar to popular GUI viewers like the [IGV](https://software.broadinstitute.org/software/igv/) browser. We are using the batch processing mode of ASCIIGenome in this pipeline to generate individual screenshots for all of the variant sites reported for each sample in the VCF files. This is incredibly useful to be able to quickly QC the variants called by the pipeline without having to tediously load all of the relevant tracks into a conventional genome browser. Where possible, the BAM read alignments, VCF variant file, primer BED file and GFF annotation track will be represented in the screenshot for contextual purposes. The screenshot below shows a SNP called relative to the MN908947.3 SARS-CoV-2 reference genome that overlaps the ORF7a protein and the nCoV-2019_91_LEFT primer from the ARIC v3 protocol.
 
 <p align="center"><img src="images/asciigenome_screenshot.png" alt="ASCIIGenome screenshot"></p>
+
+### Nanopore: Variants long table
+
+<details markdown="1">
+<summary>Output files</summary>
+
+* `<CALLER>/`
+    * `variants_long_table.csv`: Long format table collating per-sample information for individual variants, functional effect prediction and lineage analysis.
+
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--artic_minion_caller` parameter (Default: 'nanopolish').
+
+</details>
+
+Create variants long format table collating per-sample information for individual variants ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html)), functional effect prediction ([`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html)) and lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin)).
+
+The more pertinent variant information is summarised in this table to make it easier for researchers to assess the impact of variants found amongst the sequenced sample(s). An example of the fields included in the table are shown below:
+
+```bash
+SAMPLE,CHROM,POS,REF,ALT,FILTER,DP,REF_DP,ALT_DP,AF,GENE,EFFECT,HGVS_C,HGVS_P,HGVS_P_1LETTER,CALLER,LINEAGE
+SAMPLE1_PE,MN908947.3,241,C,T,PASS,489,4,483,0.99,orf1ab,upstream_gene_variant,c.-25C>T,.,.,ivar,B.1
+SAMPLE1_PE,MN908947.3,1875,C,T,PASS,92,62,29,0.32,orf1ab,missense_variant,c.1610C>T,p.Ala537Val,p.A537V,ivar,B.1
+SAMPLE1_PE,MN908947.3,3037,C,T,PASS,213,0,213,1.0,orf1ab,synonymous_variant,c.2772C>T,p.Phe924Phe,p.F924F,ivar,B.1
+SAMPLE1_PE,MN908947.3,11719,G,A,PASS,195,9,186,0.95,orf1ab,synonymous_variant,c.11454G>A,p.Gln3818Gln,p.Q3818Q,ivar,B.1
+```
 
 ## Nanopore: Workflow reporting
 
