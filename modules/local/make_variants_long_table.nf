@@ -18,9 +18,9 @@ process MAKE_VARIANTS_LONG_TABLE {
     def args = task.ext.args ?: ''
     """
     make_variants_long_table.py \\
-        --samples_path ./bcftools_query \\
-        --snpsift_path ./snpsift \\
-        --pangolin_path ./pangolin \\
+        --bcftools_query_dir ./bcftools_query \\
+        --snpsift_dir ./snpsift \\
+        --pangolin_dir ./pangolin \\
         $args
 
     cat <<-END_VERSIONS > versions.yml

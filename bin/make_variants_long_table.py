@@ -1,154 +1,176 @@
 #!/usr/bin/env python
 
-from matplotlib import table
-import pandas as pd
+import os
 import sys
-import numpy as np
-import re
+import glob
+import errno
+import shutil
+import logging
 import argparse
-import glob, os
-import io
+import pandas as pd
+from matplotlib import table
+
+
+logger = logging.getLogger()
+
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
 
 def parser_args(args=None):
-    Description = 'Create long/wide tables for ivar/bcftools'
-    Epilog = """Example usage: python create_long_table.py --samples_path <sample> --snpsift_path <snpsift> --pangolin_path <pangolin> --software <software> """
+    Description = 'Create long/wide tables containing variant information.'
+    Epilog = """Example usage: python make_variants_long_table.py --bcftools_query_dir ./bcftools_query/ --snpsift_dir ./snpsift/ --pangolin_dir ./pangolin/"""
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
-    parser.add_argument('--samples_path','-s',dest="sample", help="Input sample table files path.", required=True )
-    parser.add_argument('--snpsift_path','-a',dest="snpsift",help="Input snpsift txt files path.",required=True)
-    parser.add_argument('--pangolin_path','-l',dest="pangolin",help="Input pangolin csv files path.",required=True)
-    parser.add_argument('--software','-p',dest="software",help="Input bcftools or ivar.",required=True)
-    parser.add_argument('--output','-o',dest="output",help="Output filename",required=True)
-
+    parser.add_argument("-bd", "--bcftools_query_dir"  , type=str, default="./bcftools_query"       , help="Directory containing output of BCFTools query for each sample (default: './bcftools_query').")
+    parser.add_argument("-sd", "--snpsift_dir"         , type=str, default="./snpsift"              , help="Directory containing output of SnpSift for each sample (default: './snpsift').")
+    parser.add_argument("-pd", "--pangolin_dir"        , type=str, default="./pangolin"             , help="Directory containing output of Pangolin for each sample (default: './pangolin').")
+    parser.add_argument("-bs", "--bcftools_file_suffix", type=str, default=".table"                 , help="Suffix to trim off BCFTools query file name to obtain sample name (default: '.table').")
+    parser.add_argument("-ss", "--snpsift_file_suffix" , type=str, default=".snpsift.txt"           , help="Suffix to trim off SnpSift file name to obtain sample name (default: '.snpsift.txt').")
+    parser.add_argument("-ps", "--pangolin_file_suffix", type=str, default=".pangolin.csv"          , help="Suffix to trim off Pangolin file name to obtain sample name (default: '.pangolin.csv').")
+    parser.add_argument("-of", "--output_file"         , type=str, default="variants_long_table.csv", help="Full path to output file (default: 'variants_long_table.csv').")
+    parser.add_argument("-vc", "--variant_caller"      , type=str, default="ivar"                   , help="Tool used to call the variants (default: 'ivar').")
     return parser.parse_args(args)
 
-def aa_three_to_one_letter(hgvs_three):
-    three_syntax_dict= {'Ala': 'A', 'Arg': 'R', 'Asn': 'N', 'Asp': 'D', 'Cys': 'C',
-                        'Gln': 'Q', 'Glu': 'E', 'Gly': 'G', 'His': 'H', 'Ile': 'I',
-                        'Leu': 'L', 'Lys': 'K', 'Met': 'M', 'Phe': 'F', 'Pro': 'P',
-                        'Pyl': 'O', 'Ser': 'S', 'Sec': 'U', 'Thr': 'T', 'Trp': 'W',
-                        'Tyr': 'Y', 'Val': 'V', 'Asx': 'B', 'Glx': 'Z', 'Xaa': 'X',
-                        'Xle': 'J', 'Ter': '*'}
-    hgvs_one=hgvs_three
-    for key in three_syntax_dict:
-        if key in hgvs_one:
-            hgvs_one = hgvs_one.replace(str(key),str(three_syntax_dict[key]))
 
+def make_dir(path):
+    if not len(path) == 0:
+        try:
+            os.makedirs(path)
+        except OSError as exception:
+            if exception.errno != errno.EEXIST:
+                raise
+
+
+def get_file_dict(file_dir, file_suffix):
+    files = glob.glob(os.path.join(file_dir, f'*{file_suffix}'))
+    samples = [os.path.basename(x).rstrip(f'{file_suffix}') for x in files]
+    return dict(zip(samples, files))
+
+
+def three_letter_aa_to_one(hgvs_three):
+    aa_dict= {
+        'Ala': 'A', 'Arg': 'R', 'Asn': 'N', 'Asp': 'D', 'Cys': 'C',
+        'Gln': 'Q', 'Glu': 'E', 'Gly': 'G', 'His': 'H', 'Ile': 'I',
+        'Leu': 'L', 'Lys': 'K', 'Met': 'M', 'Phe': 'F', 'Pro': 'P',
+        'Pyl': 'O', 'Ser': 'S', 'Sec': 'U', 'Thr': 'T', 'Trp': 'W',
+        'Tyr': 'Y', 'Val': 'V', 'Asx': 'B', 'Glx': 'Z', 'Xaa': 'X',
+        'Xle': 'J', 'Ter': '*'
+    }
+    hgvs_one = hgvs_three
+    for key in aa_dict:
+        if key in hgvs_one:
+            hgvs_one = hgvs_one.replace(str(key),str(aa_dict[key]))
     return hgvs_one
 
-def create_long(snp_file,snpsift_file,pangolin_file,software):
 
-    ### format of sample table
-    snp_table=pd.read_table(snp_file, header='infer')
-    snp_table = snp_table.dropna(how = 'all', axis =1)
+## Returns a pandas dataframe in the format:
+    #         CHROM   POS  REF  ALT FILTER   DP  REF_DP  ALT_DP    AF
+    # 0  MN908947.3   241    C    T   PASS  642     375     266  0.41
+    # 1  MN908947.3  1875    C    T   PASS   99      63      34  0.34
+def ivar_bcftools_query_to_table(bcftools_query_file):
+    table = pd.read_table(bcftools_query_file, header='infer')
+    table = table.dropna(how='all', axis=1)
+    old_colnames = list(table.columns)
+    new_colnames = [x.split(']')[-1].split(':')[-1] for x in old_colnames]
+    table.rename(columns=dict(zip(old_colnames, new_colnames)), inplace=True)
+    table[["ALT_DP", "DP"]] = table[["ALT_DP", "DP"]].apply(pd.to_numeric)
+    table['AF'] = table['ALT_DP'] / table['DP']
+    table['AF'] = table['AF'].round(2)
+    return table
 
-    if software=='bcftools':
-        snp_table.rename(columns={snp_table.columns[0]: "CHROM",snp_table.columns[1]: "POS",snp_table.columns[2]: "REF",snp_table.columns[3]: "ALT",snp_table.columns[4]: "FILTER", snp_table.columns[5]: "DP",snp_table.columns[6]: "AD"}, inplace=True)
-        new_column = snp_table
-        new_column[['REF_DP','ALT_DP']] = snp_table['AD'].str.split(',', expand=True)
-        snp_table = pd.merge(snp_table,new_column,how = 'left')
-        snp_table[["ALT_DP", "DP"]] = snp_table[["ALT_DP", "DP"]].apply(pd.to_numeric)
-        snp_table['AF']=snp_table['ALT_DP']/snp_table['DP']
-        snp_table['AF'] = snp_table['AF'].round(2)
-        snp_table = snp_table.loc[:, ~snp_table.columns.str.contains('AD')]
 
-    elif software=='ivar':
-        snp_table.rename(columns={snp_table.columns[0]: "CHROM",snp_table.columns[1]: "POS",snp_table.columns[2]: "REF",snp_table.columns[3]: "ALT",snp_table.columns[4]: "FILTER",snp_table.columns[5]: "DP",snp_table.columns[6]: "REF_DP", snp_table.columns[7]: "ALT_DP"}, inplace=True)
-        snp_table[["ALT_DP", "DP"]] = snp_table[["ALT_DP", "DP"]].apply(pd.to_numeric)
-        snp_table['AF']=snp_table['ALT_DP']/snp_table['DP']
-        snp_table['AF'] = snp_table['AF'].round(2)
+## Returns a pandas dataframe in the format:
+    #         CHROM    POS REF ALT FILTER  DP REF_DP  ALT_DP    AF
+    # 0  MN908947.3    241   C   T      .  24      8      16  0.67
+    # 1  MN908947.3   3037   C   T      .  17      5      12  0.71
+def bcftools_bcftools_query_to_table(bcftools_query_file):
+    table = pd.read_table(bcftools_query_file, header='infer')
+    table = table.dropna(how='all', axis=1)
+    old_colnames = list(table.columns)
+    new_colnames = [x.split(']')[-1].split(':')[-1] for x in old_colnames]
+    table.rename(columns=dict(zip(old_colnames, new_colnames)), inplace=True)
+    table[['REF_DP','ALT_DP']] = table['AD'].str.split(',', expand=True)
+    table[["ALT_DP", "DP"]] = table[["ALT_DP", "DP"]].apply(pd.to_numeric)
+    table['AF'] = table['ALT_DP'] / table['DP']
+    table['AF'] = table['AF'].round(2)
+    table.drop('AD', axis=1, inplace=True)
+    return table
 
-    ### format of snpsift table
-    snpsift_table = pd.read_csv(snpsift_file, sep="\t", header = "infer")
-    snpsift_table = snpsift_table.loc[:, ~snpsift_table.columns.str.contains('^Unnamed')]
-    colnames_snpsift = list(snpsift_table.columns)
-    colnames_snpsift = [i.replace('ANN[*].', '') for i in colnames_snpsift]
-    for i in range(len(colnames_snpsift)):
-        snpsift_table.rename(columns = {snpsift_table.columns[i]:colnames_snpsift[i]}, inplace = True)
-    snpsift_table =  snpsift_table.loc[:, ['CHROM','POS','REF','ALT','GENE','EFFECT','HGVS_C','HGVS_P']]
-    snpsift_table_copy = snpsift_table.copy()
 
-    for i in  range(len(snpsift_table_copy)):
+def get_pangolin_lineage(pangolin_file):
+    table = pd.read_csv(pangolin_file, sep=",", header="infer")
+    return table['lineage'][0]
+
+
+def snpsift_to_table(snpsift_file):
+    table = pd.read_table(snpsift_file, sep="\t", header='infer')
+    table = table.loc[:, ~table.columns.str.contains('^Unnamed')]
+    old_colnames = list(table.columns)
+    new_colnames = [x.replace('ANN[*].', '') for x in old_colnames]
+    table.rename(columns=dict(zip(old_colnames, new_colnames)), inplace=True)
+    table = table.loc[:, ['CHROM', 'POS', 'REF', 'ALT', 'GENE', 'EFFECT', 'HGVS_C', 'HGVS_P']]
+
+    ## Split by comma and get first value in cols = ['ALT','GENE','EFFECT','HGVS_C','HGVS_P']
+    for i in range(len(table)):
         for j in range(3,8):
-            snpsift_table_copy.iloc[i,j]= str(snpsift_table.iloc[i,j]).split(",")[0]
+            table.iloc[i,j] = str(table.iloc[i,j]).split(",")[0]
 
-    oneletter_s = []
-    for index,item in snpsift_table_copy["HGVS_P"].iteritems():
-        hgvs_p_oneletter = aa_three_to_one_letter(str(item))
-        oneletter_s.append(hgvs_p_oneletter)
+    ## Amino acid substitution
+    aa = []
+    for index,item in table["HGVS_P"].iteritems():
+        hgvs_p = three_letter_aa_to_one(str(item))
+        aa.append(hgvs_p)
+    table["HGVS_P_1LETTER"] = pd.Series(aa)
+    return table
 
-    snpsift_table_copy["HGVS_P_1Letter"] = pd.Series(oneletter_s)
-
-    #format of lineages
-    pangolin_table = pd.read_csv(pangolin_file, sep=",", header = "infer")
-    lineages = pangolin_table.loc[:,['taxon','lineage']]
-
-    #table long one sample
-    tl_onesample = pd.DataFrame(data =snp_table)
-    if software=='bcftools':
-        tl_onesample["Sample"] = lineages.iloc[0,0].split('_')[1].split('.')[0]
-    elif software=='ivar':
-        tl_onesample["Sample"] = lineages.iloc[0,0].split('_')[1].split('.')[0]
-    tl_onesample["software"] = software
-    tl_onesample["Lineage"] = lineages.iloc[0,1]
-    merged_table_long = pd.merge(tl_onesample,snpsift_table_copy,how = 'outer')
-
-    return(merged_table_long)
-
-def same_len(list):
-    return len(set(list)) == 1
-
-def concatenatetable(path):
-    all_filenames = [file for file in glob.glob(path + '/*.csv')]
-
-    dataframe_list = []
-    for file in all_filenames:
-        dataframe_list.append(pd.read_csv(file,sep=","))
-    merged_df = pd.concat(dataframe_list)
-    return merged_df
 
 def main(args=None):
     args = parser_args(args)
 
-    # List vcf table files
-    table_list = []
-    for file in glob.glob(args.sample + "/*"):
-        table_list.append(file)
-    table_list.sort()
+    ## Find files and create a dictionary {'sample': '/path/to/file'}
+    bcftools_files = get_file_dict(args.bcftools_query_dir, args.bcftools_file_suffix)
+    snpsift_files = get_file_dict(args.snpsift_dir, args.snpsift_file_suffix)
+    pangolin_files = get_file_dict(args.pangolin_dir, args.pangolin_file_suffix)
 
-    #List snpsift files
-    snpsift_list = []
-    for file in glob.glob(args.snpsift + "/*"):
-        snpsift_list.append(file)
-    snpsift_list.sort()
-
-    # List pangolin files
-    pangolin_list = []
-    for file in glob.glob(args.pangolin + "/*"):
-        pangolin_list.append(file)
-    pangolin_list.sort()
-
-    if not same_len([len(table_list),len(snpsift_list),len(pangolin_list)]):
-        print("not same number of files for variants, snpsift and pangolin results ")
-        exit()
-
-    sample_names = [os.path.basename(filename).split("_norm.table")[0] for filename in table_list]
-
-    #create SampleTables folder in the folder where the script is running
-    if os.path.exists("SampleTables"):
-        "SampleTables already exists from previous run, please delete or rename the folder."
+    ## Check all files are provided for each sample
+    if set(bcftools_files) != set(snpsift_files):
+        logger.error(f"Number of BCFTools ({len(bcftools_files)}) and SnpSift ({len(snpsift_files)}) files do not match!")
+        sys.exit(1)
     else:
-        os.mkdir("SampleTables")
+        if pangolin_files:
+            if set(bcftools_files) != set(pangolin_files):
+                logger.error(f"Number of BCFTools ({len(bcftools_files)}) and Pangolin ({len(pangolin_files)}) files do not match!")
+                sys.exit(1)
 
-    for sample_name,table,snpsift,pangolin in zip(sample_names,table_list,snpsift_list,pangolin_list):
-        long_table_sample = create_long(table,snpsift,pangolin,args.software)
-        long_table_sample.to_csv('./SampleTables/'+ sample_name + '.csv', header='infer', index=None, sep=',', mode='a')
+    ## Create per-sample table and write to file
+    sample_tables = []
+    for sample in sorted(bcftools_files):
 
-    merged_df= concatenatetable("./SampleTables")
-    merged_df.to_csv(args.output, index=False, encoding='utf-8-sig')
+        ## Read in BCFTools query file
+        bcftools_table = None
+        if args.variant_caller == 'ivar':
+            bcftools_table = ivar_bcftools_query_to_table(bcftools_files[sample])
+        elif args.variant_caller == 'bcftools':
+            bcftools_table = bcftools_bcftools_query_to_table(bcftools_files[sample])
+
+        ## Read in SnpSift file
+        snpsift_table = snpsift_to_table(snpsift_files[sample])
+
+        ## Read in Pangolin lineage file
+        pangolin_lineage = get_pangolin_lineage(pangolin_files[sample])
+
+        merged_table = pd.DataFrame(data = bcftools_table)
+        merged_table.insert(0,'SAMPLE', sample)
+        merged_table = pd.merge(merged_table, snpsift_table, how='outer')
+        merged_table['LINEAGE'] = pangolin_lineage
+        merged_table['CALLER'] = args.variant_caller
+        sample_tables.append(merged_table)
+
+    ## Merge table across samples
+    merged_tables = pd.concat(sample_tables)
+    merged_tables.to_csv(args.output_file, index=False, encoding='utf-8-sig')
+
 
 if __name__ == '__main__':
     sys.exit(main())
