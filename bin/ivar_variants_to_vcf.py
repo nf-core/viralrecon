@@ -189,11 +189,11 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
         '##FORMAT=<ID=ALT_FREQ,Number=1,Type=Float,Description="Frequency of alternate base">',
     ]
     header_cols = [
-         f"#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t{filename}"
+        f"#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t{filename}"
     ]
     if not ignore_strand_bias:
         header_info += [
-            '##INFO=<ID=SB,Number=1,Type=Float,Description="Strand-bias fisher-test p-value">'
+            '##INFO=<ID=SB_PV,Number=1,Type=Float,Description="Strand-bias fisher-test p-value">'
         ]
         header_filter += [
             '##FILTER=<ID=SB,Description="Strand-bias fisher-test p-value < 0.05">'
@@ -257,11 +257,11 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
                         FILTER = "SB"
                     elif pvalue > 0.05 and pass_test == "TRUE":
                         FILTER = "PASS"
-                    elif  pvalue <= 0.05 and pass_test == "FALSE":
-                        FILTER = "FAIL"
+                    elif pvalue <= 0.05 and pass_test == "FALSE":
+                        FILTER = "FAIL,SB"
                     else:
                         FILTER = "FAIL"
-                    INFO += f":SB={str(round(pvalue, 5))}"
+                    INFO += f":SB_PV={str(round(pvalue, 5))}"
 
                 FORMAT = "GT:REF_DP:REF_RV:REF_QUAL:ALT_DP:ALT_RV:ALT_QUAL:ALT_FREQ"
                 SAMPLE = f'1:{":".join(line[4:11])}'
