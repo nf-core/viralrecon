@@ -41,6 +41,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 > **NB:** Parameter has been __added__ if just the new parameter information is present.
 > **NB:** Parameter has been __removed__ if new parameter information isn't present.
 
+### Software dependencies
+
+Note, since the pipeline is now using Nextflow DSL2, each process will be run with its own [Biocontainer](https://biocontainers.pro/#/registry). This means that on occasion it is entirely possible for the pipeline to be using different versions of the same tool. However, the overall software dependency changes compared to the last release have been listed below for reference.
+
+| Dependency                    | Old version | New version |
+|-------------------------------|-------------|-------------|
+| `bcftools`                    | 1.11        | 1.14        |
+| `blast`                       | 2.10.1      | 2.12.0      |
+| `bowtie2`                     | 2.4.2       | 2.4.4       |
+| `cutadapt`                    | 3.2         | 3.5         |
+| `fastp`                       | 0.20.1      | 0.23.2      |
+| `kraken2`                     | 2.1.1       | 2.1.2       |
+| `minia`                       | 3.2.4       | 3.2.6       |
+| `mosdepth`                    | 0.3.1       | 0.3.2       |
+| `nanoplot`                    | 1.36.1      | 1.39.0      |
+| `nextclade`                   |             | 1.10.2      |
+| `pangolin`                    | 3.1.7       | 3.1.19      |
+| `picard`                      | 2.23.9      | 2.26.10     |
+| `python`                      | 3.8.3       | 3.9.5       |
+| `samtools`                    | 1.10        | 1.14        |
+| `spades`                      | 3.15.2      | 3.15.3      |
+| `tabix`                       | 0.2.6       | 1.11        |
+| `vcflib`                      |             | 1.0.2       |
+
+> **NB:** Dependency has been __updated__ if both old and new version information is present.
+> **NB:** Dependency has been __added__ if just the new version information is present.
+> **NB:** Dependency has been __removed__ if new version information isn't present.
+
 ## [[2.2](https://github.com/nf-core/viralrecon/releases/tag/2.2)] - 2021-07-29
 
 ### Enhancements & fixes
