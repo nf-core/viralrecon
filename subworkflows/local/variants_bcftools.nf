@@ -31,11 +31,32 @@ workflow VARIANTS_BCFTOOLS {
     )
     ch_versions = ch_versions.mix(BCFTOOLS_MPILEUP.out.versions.first())
 
+    // Filter out samples with 0 variants
+    BCFTOOLS_MPILEUP
+        .out
+        .vcf
+        .join(BCFTOOLS_MPILEUP.out.tbi)
+        .join(BCFTOOLS_MPILEUP.out.stats)
+        .filter { meta, vcf, tbi, stats -> WorkflowCommons.getNumVariantsFromBCFToolsStats(stats) > 0 }
+        .set { ch_vcf_tbi_stats }
+
+    ch_vcf_tbi_stats
+        .map { meta, vcf, tbi, stats -> [ meta, vcf ] }
+        .set { ch_vcf }
+
+    ch_vcf_tbi_stats
+        .map { meta, vcf, tbi, stats -> [ meta, tbi ] }
+        .set { ch_tbi }
+
+    ch_vcf_tbi_stats
+        .map { meta, vcf, tbi, stats -> [ meta, stats ] }
+        .set { ch_stats }
+
     //
     // Split multi-allelic positions
     //
     BCFTOOLS_NORM (
-        BCFTOOLS_MPILEUP.out.vcf,
+        ch_vcf,
         fasta
     )
     ch_versions = ch_versions.mix(BCFTOOLS_NORM.out.versions.first())
@@ -62,9 +83,9 @@ workflow VARIANTS_BCFTOOLS {
     ch_versions = ch_versions.mix(VARIANTS_QC.out.versions)
 
     emit:
-    vcf_orig        = BCFTOOLS_MPILEUP.out.vcf        // channel: [ val(meta), [ vcf ] ]
-    tbi_orig        = BCFTOOLS_MPILEUP.out.tbi        // channel: [ val(meta), [ tbi ] ]
-    stats_orig      = BCFTOOLS_MPILEUP.out.stats      // channel: [ val(meta), [ txt ] ]
+    vcf_orig        = ch_vcf                          // channel: [ val(meta), [ vcf ] ]
+    tbi_orig        = ch_tbi                          // channel: [ val(meta), [ tbi ] ]
+    stats_orig      = ch_stats                        // channel: [ val(meta), [ txt ] ]
 
     vcf             = BCFTOOLS_NORM.out.vcf           // channel: [ val(meta), [ vcf ] ]
     tbi             = VCF_TABIX_STATS.out.tbi         // channel: [ val(meta), [ tbi ] ]
