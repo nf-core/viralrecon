@@ -28,6 +28,8 @@ The pipeline has numerous options to allow you to run only specific aspects of t
 
 The SRA download functionality has been removed from the pipeline (`>=2.1`) and ported to an independent workflow called [nf-core/fetchngs](https://nf-co.re/fetchngs). You can provide `--nf_core_pipeline viralrecon` when running nf-core/fetchngs to download and auto-create a samplesheet containing publicly available samples that can be accepted directly by the Illumina processing mode of nf-core/viralrecon.
 
+A number of improvements were made to the pipeline recently, mainly with regard to the variant calling. Please see [Major updates in v2.3](https://github.com/nf-core/viralrecon/issues/271) for a more detailed description.
+
 ### Illumina
 
 1. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html))
