@@ -162,30 +162,43 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
         None
     '''
     ## Create output directory
+    filename = os.path.splitext(file_in)[0]
     out_dir = os.path.dirname(file_out)
     make_dir(out_dir)
 
     ## Define VCF header
-    filename = os.path.splitext(file_in)[0]
-    header = (
-        "##fileformat=VCFv4.2\n"
-        "##source=iVar\n"
-        '##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">\n'
-        '##FILTER=<ID=PASS,Description="Result of p-value <= 0.05">\n'
-        '##FILTER=<ID=FAIL,Description="Result of p-value > 0.05">\n'
-        '##FILTER=<ID=SB,Description="Strand-bias fisher-test p-value < 0.05">\n'
-        '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n'
-        '##FORMAT=<ID=REF_DP,Number=1,Type=Integer,Description="Depth of reference base">\n'
-        '##FORMAT=<ID=REF_RV,Number=1,Type=Integer,Description="Depth of reference base on reverse reads">\n'
-        '##FORMAT=<ID=REF_QUAL,Number=1,Type=Integer,Description="Mean quality of reference base">\n'
-        '##FORMAT=<ID=ALT_DP,Number=1,Type=Integer,Description="Depth of alternate base">\n'
-        '##FORMAT=<ID=ALT_RV,Number=1,Type=Integer,Description="Depth of alternate base on reverse reads">\n'
-        '##FORMAT=<ID=ALT_QUAL,Number=1,Type=String,Description="Mean quality of alternate base">\n'
-        '##FORMAT=<ID=ALT_FREQ,Number=1,Type=Float,Description="Frequency of alternate base">\n'
-    )
-    header += (
-        "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + filename + "\n"
-    )
+    header_source = [
+        "##fileformat=VCFv4.2",
+        "##source=iVar"
+    ]
+    header_info = [
+        '##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">'
+    ]
+    header_filter = [
+        '##FILTER=<ID=PASS,Description="Result of p-value <= 0.05">',
+        '##FILTER=<ID=FAIL,Description="Result of p-value > 0.05">'
+    ]
+    header_format = [
+        '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+        '##FORMAT=<ID=REF_DP,Number=1,Type=Integer,Description="Depth of reference base">',
+        '##FORMAT=<ID=REF_RV,Number=1,Type=Integer,Description="Depth of reference base on reverse reads">',
+        '##FORMAT=<ID=REF_QUAL,Number=1,Type=Integer,Description="Mean quality of reference base">',
+        '##FORMAT=<ID=ALT_DP,Number=1,Type=Integer,Description="Depth of alternate base">',
+        '##FORMAT=<ID=ALT_RV,Number=1,Type=Integer,Description="Depth of alternate base on reverse reads">',
+        '##FORMAT=<ID=ALT_QUAL,Number=1,Type=String,Description="Mean quality of alternate base">',
+        '##FORMAT=<ID=ALT_FREQ,Number=1,Type=Float,Description="Frequency of alternate base">',
+    ]
+    header_cols = [
+         f"#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t{filename}"
+    ]
+    if not ignore_strand_bias:
+        header_info += [
+            '##INFO=<ID=SB,Number=1,Type=Float,Description="Strand-bias fisher-test p-value">'
+        ]
+        header_filter += [
+            '##FILTER=<ID=SB,Description="Strand-bias fisher-test p-value < 0.05">'
+        ]
+    header = header_source + header_info + header_filter + header_format + header_cols
 
     ## Initialise variables
     var_list = []
@@ -193,7 +206,7 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
     dict_lines = {'CHROM':[], 'POS':[], 'ID':[], 'REF':[], 'ALT':[], 'REF_DP':[], 'REF_RV':[], 'ALT_DP':[], 'ALT_RV':[], 'QUAL':[], 'REF_CODON':[], 'ALT_CODON':[], 'FILTER': [], 'INFO':[], 'FORMAT':[], 'SAMPLE':[]}
     write_line = False
     fout = open(file_out, "w")
-    fout.write(header)
+    fout.write('\n'.join(header) + '\n')
     with open(file_in, 'r') as fin:
         for line in fin:
             if not re.match("REGION", line):
@@ -245,7 +258,7 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
                     elif pvalue > 0.05 and pass_test == "TRUE":
                         FILTER = "PASS"
                     elif  pvalue <= 0.05 and pass_test == "FALSE":
-                        FILTER = "SB,other"
+                        FILTER = "FAIL"
                     else:
                         FILTER = "FAIL"
                     INFO += f":SB={str(round(pvalue, 5))}"
