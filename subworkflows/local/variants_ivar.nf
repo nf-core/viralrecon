@@ -33,11 +33,18 @@ workflow VARIANTS_IVAR {
     )
     ch_versions = ch_versions.mix(IVAR_VARIANTS.out.versions.first())
 
+    // Filter out samples with 0 variants
+    IVAR_VARIANTS
+        .out
+        .tsv
+        .filter { meta, tsv -> WorkflowCommons.getNumLinesInFile(tsv) > 1 }
+        .set { ch_ivar_tsv }
+
     //
     // Convert original iVar output to VCF, zip and index
     //
     IVAR_VARIANTS_TO_VCF (
-        IVAR_VARIANTS.out.tsv,
+        ch_ivar_tsv,
         ivar_multiqc_header
     )
     ch_versions = ch_versions.mix(IVAR_VARIANTS_TO_VCF.out.versions.first())
@@ -64,7 +71,7 @@ workflow VARIANTS_IVAR {
     ch_versions = ch_versions.mix(VARIANTS_QC.out.versions)
 
     emit:
-    tsv             = IVAR_VARIANTS.out.tsv           // channel: [ val(meta), [ tsv ] ]
+    tsv             = ch_ivar_tsv                     // channel: [ val(meta), [ tsv ] ]
 
     vcf_orig        = IVAR_VARIANTS_TO_VCF.out.vcf    // channel: [ val(meta), [ vcf ] ]
     log_out         = IVAR_VARIANTS_TO_VCF.out.log    // channel: [ val(meta), [ log ] ]

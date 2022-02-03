@@ -92,6 +92,17 @@ class WorkflowCommons {
     }
 
     //
+    // Function that returns the number of lines in a file
+    //
+    public static Integer getNumLinesInFile(input_file) {
+        def num_lines = 0
+        input_file.eachLine { line ->
+            num_lines ++
+        }
+        return num_lines
+    }
+
+    //
     // Function to generate an error if contigs in BED file do not match those in reference genome
     //
     public static void checkContigsInBED(fai_contigs, bed_contigs, log) {
