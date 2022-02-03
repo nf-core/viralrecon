@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### :warning: Major enhancements
 
-* Please see [Major updates in v2.3](https://github.com/nf-core/viralrecon/issues/271) for a more verbose list of changes added in this version.
+* Please see [Major updates in v2.3](https://github.com/nf-core/viralrecon/issues/271) for a more detailed list of changes added in this version.
 * When using `--protocol amplicon`, in the previous release, iVar was used for both the variant calling and consensus sequence generation. The pipeline will now perform the variant calling and consensus sequence generation with iVar and BCFTools/BEDTools, respectively.
 * Bump minimum Nextflow version from `21.04.0` -> `21.10.3`
 
