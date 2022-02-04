@@ -175,8 +175,8 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
         '##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">'
     ]
     header_filter = [
-        '##FILTER=<ID=PASS,Description="Result of p-value <= 0.05">',
-        '##FILTER=<ID=FAIL,Description="Result of p-value > 0.05">'
+        '##FILTER=<ID=PASS,Description="All filters passed">',
+        '##FILTER=<ID=ft,Description="Fisher\'s exact test of variant frequency compared to mean error rate, p-value > 0.05">'
     ]
     header_format = [
         '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
@@ -185,7 +185,7 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
         '##FORMAT=<ID=REF_QUAL,Number=1,Type=Integer,Description="Mean quality of reference base">',
         '##FORMAT=<ID=ALT_DP,Number=1,Type=Integer,Description="Depth of alternate base">',
         '##FORMAT=<ID=ALT_RV,Number=1,Type=Integer,Description="Depth of alternate base on reverse reads">',
-        '##FORMAT=<ID=ALT_QUAL,Number=1,Type=String,Description="Mean quality of alternate base">',
+        '##FORMAT=<ID=ALT_QUAL,Number=1,Type=Integer,Description="Mean quality of alternate base">',
         '##FORMAT=<ID=ALT_FREQ,Number=1,Type=Float,Description="Frequency of alternate base">',
     ]
     header_cols = [
@@ -196,7 +196,7 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
             '##INFO=<ID=SB_PV,Number=1,Type=Float,Description="Strand-bias fisher-test p-value">'
         ]
         header_filter += [
-            '##FILTER=<ID=SB,Description="Strand-bias fisher-test p-value < 0.05">'
+            '##FILTER=<ID=sb,Description="Strand-bias fisher-test p-value < 0.05">'
         ]
     header = header_source + header_info + header_filter + header_format + header_cols
 
@@ -250,17 +250,17 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
                     if pass_test == "TRUE":
                         FILTER = "PASS"
                     else:
-                        FILTER = "FAIL"
+                        FILTER = "ft"
                 else:
                     ## Add SB in the FILTER field if strand-bias p-value is significant
                     if pvalue < 0.05 and pass_test == "TRUE":
-                        FILTER = "SB"
+                        FILTER = "sb"
                     elif pvalue > 0.05 and pass_test == "TRUE":
                         FILTER = "PASS"
                     elif pvalue <= 0.05 and pass_test == "FALSE":
-                        FILTER = "FAIL,SB"
+                        FILTER = "ft;sb"
                     else:
-                        FILTER = "FAIL"
+                        FILTER = "ft"
                     INFO += f":SB_PV={str(round(pvalue, 5))}"
 
                 FORMAT = "GT:REF_DP:REF_RV:REF_QUAL:ALT_DP:ALT_RV:ALT_QUAL:ALT_FREQ"
