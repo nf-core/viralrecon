@@ -221,48 +221,25 @@ def main(args=None):
             ],
         ),
         (
-            "multiqc_bcftools_stats_bcftools_ivar.yaml",
+            "multiqc_bcftools_stats.yaml",
             [
-                ("# SNPs (iVar)", ["number_of_SNPs"]),
-                ("# INDELs (iVar)", ["number_of_indels"]),
+                ("# SNPs", ["number_of_SNPs"]),
+                ("# INDELs", ["number_of_indels"]),
             ],
         ),
         (
-            "multiqc_snpeff_snpeff_ivar.yaml",
-            [("# Missense variants (iVar)", ["MISSENSE"])],
+            "multiqc_snpeff.yaml",
+            [("# Missense variants", ["MISSENSE"])],
         ),
         (
-            "multiqc_quast_quast_ivar.yaml",
-            [("# Ns per 100kb consensus (iVar)", ["# N's per 100 kbp"])],
+            "multiqc_quast_quast_variants.yaml",
+            [("# Ns per 100kb consensus", ["# N's per 100 kbp"])],
         ),
         (
-            "multiqc_pangolin_pangolin_ivar.yaml",
-            [("Pangolin lineage (iVar)", ["lineage"])],
+            "multiqc_pangolin.yaml",
+            [("Pangolin lineage", ["lineage"])],
         ),
-        ("multiqc_ivar_nextclade_clade.yaml", [("Nextclade clade (iVar)", ["clade"])]),
-        (
-            "multiqc_bcftools_stats_bcftools_bcftools.yaml",
-            [
-                ("# SNPs (BCFTools)", ["number_of_SNPs"]),
-                ("# INDELs (BCFTools)", ["number_of_indels"]),
-            ],
-        ),
-        (
-            "multiqc_snpeff_snpeff_bcftools.yaml",
-            [("# Missense variants (BCFTools)", ["MISSENSE"])],
-        ),
-        (
-            "multiqc_quast_quast_bcftools.yaml",
-            [("# Ns per 100kb consensus (BCFTools)", ["# N's per 100 kbp"])],
-        ),
-        (
-            "multiqc_pangolin_pangolin_bcftools.yaml",
-            [("Pangolin lineage (BCFTools)", ["lineage"])],
-        ),
-        (
-            "multiqc_bcftools_nextclade_clade.yaml",
-            [("Nextclade clade (BCFTools)", ["clade"])],
-        ),
+        ("multiqc_nextclade_clade.yaml", [("Nextclade clade", ["clade"])]),
     ]
 
     illumina_assembly_files = [

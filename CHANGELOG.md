@@ -3,7 +3,74 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [[2.2](https://github.com/nf-core/rnaseq/releases/tag/2.2)] - 2021-07-29
+## [[2.3](https://github.com/nf-core/viralrecon/releases/tag/2.3)] - 2022-02-04
+
+### :warning: Major enhancements
+
+* Please see [Major updates in v2.3](https://github.com/nf-core/viralrecon/issues/271) for a more detailed list of changes added in this version.
+* When using `--protocol amplicon`, in the previous release, iVar was used for both the variant calling and consensus sequence generation. The pipeline will now perform the variant calling and consensus sequence generation with iVar and BCFTools/BEDTools, respectively.
+* Bump minimum Nextflow version from `21.04.0` -> `21.10.3`
+
+### Enhancements & fixes
+
+* Port pipeline to the updated Nextflow DSL2 syntax adopted on nf-core/modules
+* Updated pipeline template to [nf-core/tools 2.2](https://github.com/nf-core/tools/releases/tag/2.2)
+* [[#209](https://github.com/nf-core/viralrecon/issues/209)] - Check that contig in primer BED and genome fasta match
+* [[#218](https://github.com/nf-core/viralrecon/issues/218)] - Support for compressed FastQ files for Nanopore data
+* [[#232](https://github.com/nf-core/viralrecon/issues/232)] - Remove duplicate variants called by ARTIC ONT pipeline
+* [[#235](https://github.com/nf-core/viralrecon/issues/235)] - Nextclade version bump
+* [[#244](https://github.com/nf-core/viralrecon/issues/244)] - Fix BCFtools consensus generation and masking
+* [[#245](https://github.com/nf-core/viralrecon/issues/245)] - Mpileup file as output
+* [[#246](https://github.com/nf-core/viralrecon/issues/246)] - Option to generate consensus with BCFTools / BEDTools using iVar variants
+* [[#247](https://github.com/nf-core/viralrecon/issues/247)] - Add strand-bias filtering option and codon fix in consecutive positions in ivar tsv conversion to vcf
+* [[#248](https://github.com/nf-core/viralrecon/issues/248)] - New variants reporting table
+
+### Parameters
+
+| Old parameter                 | New parameter                         |
+|-------------------------------|---------------------------------------|
+|                               | `--nextclade_dataset`                 |
+|                               | `--nextclade_dataset_name`            |
+|                               | `--nextclade_dataset_reference`       |
+|                               | `--nextclade_dataset_tag`             |
+|                               | `--skip_consensus_plots`              |
+|                               | `--skip_variants_long_table`          |
+|                               | `--consensus_caller`                  |
+| `--callers`                   | `--variant_caller`                    |
+
+> **NB:** Parameter has been __updated__ if both old and new parameter information is present.
+> **NB:** Parameter has been __added__ if just the new parameter information is present.
+> **NB:** Parameter has been __removed__ if new parameter information isn't present.
+
+### Software dependencies
+
+Note, since the pipeline is now using Nextflow DSL2, each process will be run with its own [Biocontainer](https://biocontainers.pro/#/registry). This means that on occasion it is entirely possible for the pipeline to be using different versions of the same tool. However, the overall software dependency changes compared to the last release have been listed below for reference.
+
+| Dependency                    | Old version | New version |
+|-------------------------------|-------------|-------------|
+| `bcftools`                    | 1.11        | 1.14        |
+| `blast`                       | 2.10.1      | 2.12.0      |
+| `bowtie2`                     | 2.4.2       | 2.4.4       |
+| `cutadapt`                    | 3.2         | 3.5         |
+| `fastp`                       | 0.20.1      | 0.23.2      |
+| `kraken2`                     | 2.1.1       | 2.1.2       |
+| `minia`                       | 3.2.4       | 3.2.6       |
+| `mosdepth`                    | 0.3.1       | 0.3.2       |
+| `nanoplot`                    | 1.36.1      | 1.39.0      |
+| `nextclade`                   |             | 1.10.2      |
+| `pangolin`                    | 3.1.7       | 3.1.19      |
+| `picard`                      | 2.23.9      | 2.26.10     |
+| `python`                      | 3.8.3       | 3.9.5       |
+| `samtools`                    | 1.10        | 1.14        |
+| `spades`                      | 3.15.2      | 3.15.3      |
+| `tabix`                       | 0.2.6       | 1.11        |
+| `vcflib`                      |             | 1.0.2       |
+
+> **NB:** Dependency has been __updated__ if both old and new version information is present.
+> **NB:** Dependency has been __added__ if just the new version information is present.
+> **NB:** Dependency has been __removed__ if new version information isn't present.
+
+## [[2.2](https://github.com/nf-core/viralrecon/releases/tag/2.2)] - 2021-07-29
 
 ### Enhancements & fixes
 
@@ -26,7 +93,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 > **NB:** Dependency has been __added__ if just the new version information is present.
 > **NB:** Dependency has been __removed__ if new version information isn't present.
 
-## [[2.1](https://github.com/nf-core/rnaseq/releases/tag/2.1)] - 2021-06-15
+## [[2.1](https://github.com/nf-core/viralrecon/releases/tag/2.1)] - 2021-06-15
 
 ### Enhancements & fixes
 
@@ -67,7 +134,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 > **NB:** Dependency has been __added__ if just the new version information is present.
 > **NB:** Dependency has been __removed__ if new version information isn't present.
 
-## [[2.0](https://github.com/nf-core/rnaseq/releases/tag/2.0)] - 2021-05-13
+## [[2.0](https://github.com/nf-core/viralrecon/releases/tag/2.0)] - 2021-05-13
 
 ### :warning: Major enhancements
 
@@ -220,7 +287,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 > **NB:** Dependency has been __added__ if just the new version information is present.
 > **NB:** Dependency has been __removed__ if new version information isn't present.
 
-## [[1.1.0](https://github.com/nf-core/rnaseq/releases/tag/1.1.0)] - 2020-06-23
+## [[1.1.0](https://github.com/nf-core/viralrecon/releases/tag/1.1.0)] - 2020-06-23
 
 ### Added
 
@@ -263,7 +330,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 * Update minia `3.2.3` -> `3.2.4`
 * Update plasmidid `1.5.2` -> `1.6.3`
 
-## [[1.0.0](https://github.com/nf-core/rnaseq/releases/tag/1.0.0)] - 2020-06-01
+## [[1.0.0](https://github.com/nf-core/viralrecon/releases/tag/1.0.0)] - 2020-06-01
 
 Initial release of nf-core/viralrecon, created with the [nf-core](http://nf-co.re/) template.
 

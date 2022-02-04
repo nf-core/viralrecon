@@ -60,6 +60,9 @@ class WorkflowMain {
         // Print parameter summary log to screen
         log.info paramsSummaryLog(workflow, params, log)
 
+        // Check that a -profile or Nextflow config has been provided to run the pipeline
+        NfcoreTemplate.checkConfigProvided(workflow, log)
+
         // Check that conda channels are set-up correctly
         if (params.enable_conda) {
             Utils.checkCondaChannels(log)
@@ -67,9 +70,6 @@ class WorkflowMain {
 
         // Check AWS batch settings
         NfcoreTemplate.awsBatch(workflow, params)
-
-        // Check the hostnames against configured profiles
-        NfcoreTemplate.hostName(workflow, params, log)
 
         // Check sequencing platform
         def platformList = ['illumina', 'nanopore']
@@ -79,6 +79,14 @@ class WorkflowMain {
         } else if (!platformList.contains(params.platform)) {
             log.error "Invalid platform option: '${params.platform}'. Valid options: ${platformList.join(', ')}."
             System.exit(1)
+        }
+
+        // Check Nextclade dataset parameters
+        if (!params.skip_consensus && !params.skip_nextclade) {
+            if (!params.nextclade_dataset && !params.nextclade_dataset_name) {
+                log.error "Nextclade dataset not specified with '--nextclade_dataset' or '--nextclade_dataset_name'. A list of available datasets can be obtained using the Nextclade 'nextclade dataset list' command."
+                System.exit(1)
+            }
         }
     }
 
@@ -134,6 +142,8 @@ class WorkflowMain {
             }
             if (genome_map.containsKey(attribute)) {
                 val = genome_map[ attribute ]
+            } else if (params.genomes[ params.genome ].containsKey(attribute)) {
+                val = params.genomes[ params.genome ][ attribute ]
             }
         }
         return val

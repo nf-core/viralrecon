@@ -24,12 +24,20 @@
                 "platform": {
                     "type": "string",
                     "fa_icon": "fas fa-hdd",
-                    "description": "NGS platform used to sequence the samples"
+                    "description": "NGS platform used to sequence the samples.",
+                    "enum": [
+                        "illumina",
+                        "nanopore"
+                    ]
                 },
                 "protocol": {
                     "type": "string",
-                    "description": "Specifies the type of protocol used for sequencing i.e. 'metagenomic' or 'amplicon'.",
-                    "fa_icon": "fas fa-vials"
+                    "description": "Specifies the type of protocol used for sequencing.",
+                    "fa_icon": "fas fa-vials",
+                    "enum": [
+                        "metagenomic",
+                        "amplicon"
+                    ]
                 },
                 "outdir": {
                     "type": "string",
@@ -176,14 +184,22 @@
                 "artic_minion_caller": {
                     "type": "string",
                     "default": "nanopolish",
-                    "description": "Variant caller used when running artic minion. Available options are 'medaka' and 'nanopolish' (default).",
-                    "fa_icon": "fas fa-phone-volume"
+                    "description": "Variant caller used when running artic minion (default: 'nanopolish').",
+                    "fa_icon": "fas fa-phone-volume",
+                    "enum": [
+                        "nanopolish",
+                        "medaka"
+                    ]
                 },
                 "artic_minion_aligner": {
                     "type": "string",
                     "default": "minimap2",
-                    "description": "Aligner used when running artic minion. Available options are 'bwa' and 'minimap2' (default).",
-                    "fa_icon": "fas fa-map-signs"
+                    "description": "Aligner used when running artic minion (default: 'minimap2').",
+                    "fa_icon": "fas fa-map-signs",
+                    "enum": [
+                        "minimap2",
+                        "bwa"
+                    ]
                 },
                 "artic_scheme": {
                     "type": "string",
@@ -215,6 +231,26 @@
             "description": "Options common to both the Nanopore and Illumina workflows in the pipeline.",
             "default": "",
             "properties": {
+                "nextclade_dataset": {
+                    "type": "string",
+                    "description": "Full path to Nextclade dataset required for 'nextclade run' command.",
+                    "fa_icon": "fas fa-project-diagram"
+                },
+                "nextclade_dataset_name": {
+                    "type": "string",
+                    "description": "Name of Nextclade dataset to retrieve. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
+                    "fa_icon": "fas fa-project-diagram"
+                },
+                "nextclade_dataset_reference": {
+                    "type": "string",
+                    "description": "Accession id to download dataset based on a particular reference sequence. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
+                    "fa_icon": "fas fa-project-diagram"
+                },
+                "nextclade_dataset_tag": {
+                    "type": "string",
+                    "description": "Version tag of the dataset to download. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
+                    "fa_icon": "fas fa-project-diagram"
+                },
                 "asciigenome_read_depth": {
                     "type": "integer",
                     "default": 50,
@@ -273,6 +309,11 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip generation of QUAST aggregated report for consensus sequences."
+                },
+                "skip_variants_long_table": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip long table generation for reporting variants."
                 },
                 "skip_multiqc": {
                     "type": "boolean",
@@ -347,10 +388,24 @@
             "description": "Various options for the variant calling branch of the Illumina workflow.",
             "default": "",
             "properties": {
-                "callers": {
+                "variant_caller": {
                     "type": "string",
-                    "description": "Specify which variant calling algorithms you would like to use. Available options are 'ivar' (default for '--protocol amplicon') and 'bcftools' (default for '--protocol metagenomic').",
-                    "fa_icon": "fas fa-phone-volume"
+                    "fa_icon": "fas fa-phone-volume",
+                    "description": "Specify which variant calling algorithm you would like to use. Available options are 'ivar' (default for '--protocol amplicon') and 'bcftools' (default for '--protocol metagenomic').",
+                    "enum": [
+                        "ivar",
+                        "bcftools"
+                    ]
+                },
+                "consensus_caller": {
+                    "type": "string",
+                    "default": "bcftools",
+                    "fa_icon": "fas fa-phone-volume",
+                    "description": "Specify which consensus calling algorithm you would like to use. Available options are 'bcftools' and 'ivar' (default: 'bcftools').",
+                    "enum": [
+                        "ivar",
+                        "bcftools"
+                    ]
                 },
                 "min_mapped_reads": {
                     "type": "integer",
@@ -405,6 +460,11 @@
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Skip SnpEff and SnpSift annotation of variants."
                 },
+                "skip_consensus_plots": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Skip creation of consensus base density plots."
+                },
                 "skip_consensus": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
@@ -434,7 +494,18 @@
                     "type": "string",
                     "default": "rnaviral",
                     "fa_icon": "fab fa-digg",
-                    "description": "Specify the SPAdes mode you would like to run. Supported options are 'rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio'."
+                    "description": "Specify the SPAdes mode you would like to run (default: 'rnaviral').",
+                    "enum": [
+                        "rnaviral",
+                        "corona",
+                        "metaviral",
+                        "meta",
+                        "metaplasmid",
+                        "plasmid",
+                        "isolate",
+                        "rna",
+                        "bio"
+                    ]
                 },
                 "spades_hmm": {
                     "type": "string",
@@ -494,22 +565,6 @@
                     "hidden": true,
                     "fa_icon": "fas fa-question-circle"
                 },
-                "publish_dir_mode": {
-                    "type": "string",
-                    "default": "copy",
-                    "hidden": true,
-                    "description": "Method used to save pipeline results to output directory.",
-                    "help_text": "The Nextflow `publishDir` option specifies which intermediate files should be saved to the output directory. This option tells the pipeline what method should be used to move these files. See [Nextflow docs](https://www.nextflow.io/docs/latest/process.html#publishdir) for details.",
-                    "fa_icon": "fas fa-copy",
-                    "enum": [
-                        "symlink",
-                        "rellink",
-                        "link",
-                        "copy",
-                        "copyNoFollow",
-                        "move"
-                    ]
-                },
                 "email_on_fail": {
                     "type": "string",
                     "description": "Email address for completion summary, only when pipeline fails.",
@@ -545,13 +600,6 @@
                     "hidden": true,
                     "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
                     "fa_icon": "fas fa-bacon"
-                },
-                "singularity_pull_docker_container": {
-                    "type": "boolean",
-                    "hidden": true,
-                    "description": "Instead of directly downloading Singularity images for use with Singularity, force the workflow to pull and convert Docker containers instead.",
-                    "fa_icon": "fas fa-toolbox",
-                    "help_text": "This may be useful for example if you are unable to directly pull Singularity containers to run the pipeline due to http/https proxy issues."
                 },
                 "validate_params": {
                     "type": "boolean",
@@ -626,12 +674,6 @@
                     "default": "https://raw.githubusercontent.com/nf-core/configs/master",
                     "hidden": true,
                     "help_text": "If you're running offline, nextflow will not be able to fetch the institutional config files from the internet. If you don't need them, then this is not a problem. If you do need them, you should download the files from the repo and tell nextflow where to find them with the `custom_config_base` option. For example:\n\n```bash\n## Download and unzip the config files\ncd /path/to/my/configs\nwget https://github.com/nf-core/configs/archive/master.zip\nunzip master.zip\n\n## Run the pipeline\ncd /path/to/my/data\nnextflow run /path/to/pipeline/ --custom_config_base /path/to/my/configs/configs-master/\n```\n\n> Note that the nf-core/tools helper package has a `download` command to download all required pipeline files + singularity containers + institutional configs in one go for you, to make this process easier.",
-                    "fa_icon": "fas fa-users-cog"
-                },
-                "hostnames": {
-                    "type": "string",
-                    "description": "Institutional configs hostname.",
-                    "hidden": true,
                     "fa_icon": "fas fa-users-cog"
                 },
                 "config_profile_name": {

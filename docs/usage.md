@@ -64,7 +64,7 @@ For Nanopore data the pipeline only supports amplicon-based analysis obtained fr
 
 ### Nanopolish
 
-The default variant caller used by artic minion is [Nanopolish](https://github.com/jts/nanopolish) and this requires that you provide `*.fastq`, `*.fast5` and `sequencing_summary.txt` files as input to the pipeline. These files can typically be obtained after demultiplexing and basecalling the sequencing data using [Guppy](https://nanoporetech.com/nanopore-sequencing-data-analysis) (see [ARTIC SOP docs](https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html)). This pipeline requires that the files are organised in the format outlined below:
+The default variant caller used by artic minion is [Nanopolish](https://github.com/jts/nanopolish) and this requires that you provide `*.fastq`, `*.fast5` and `sequencing_summary.txt` files as input to the pipeline. These files can typically be obtained after demultiplexing and basecalling the sequencing data using [Guppy](https://nanoporetech.com/nanopore-sequencing-data-analysis) (see [ARTIC SOP docs](https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html)). This pipeline requires that the files are organised in the format outlined below and gzip compressed files are also accepted:
 
 ```console
 .
@@ -297,45 +297,13 @@ process {
 
 > **NB:** We specify just the process name i.e. `STAR_ALIGN` in the config file and not the full task name string that is printed to screen in the error message or on the terminal whilst the pipeline is running i.e. `RNASEQ:ALIGN_STAR:STAR_ALIGN`. You may get a warning suggesting that the process selector isn't recognised but you can ignore that if the process name has been specified correctly. This is something that needs to be fixed upstream in core Nextflow.
 
-### Tool-specific options
-
-For the ultimate flexibility, we have implemented and are using Nextflow DSL2 modules in a way where it is possible for both developers and users to change tool-specific command-line arguments (e.g. providing an additional command-line argument to the `STAR_ALIGN` process) as well as publishing options (e.g. saving files produced by the `STAR_ALIGN` process that aren't saved by default by the pipeline). In the majority of instances, as a user you won't have to change the default options set by the pipeline developer(s), however, there may be edge cases where creating a simple custom config file can improve the behaviour of the pipeline if for example it is failing due to a weird error that requires setting a tool-specific parameter to deal with smaller / larger genomes.
-
-The command-line arguments passed to STAR in the `STAR_ALIGN` module are a combination of:
-
-* Mandatory arguments or those that need to be evaluated within the scope of the module, as supplied in the [`script`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/modules/nf-core/software/star/align/main.nf#L49-L55) section of the module file.
-
-* An [`options.args`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/modules/nf-core/software/star/align/main.nf#L56) string of non-mandatory parameters that is set to be empty by default in the module but can be overwritten when including the module in the sub-workflow / workflow context via the `addParams` Nextflow option.
-
-The nf-core/rnaseq pipeline has a sub-workflow (see [terminology](https://github.com/nf-core/modules#terminology)) specifically to align reads with STAR and to sort, index and generate some basic stats on the resulting BAM files using SAMtools. At the top of this file we import the `STAR_ALIGN` module via the Nextflow [`include`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/subworkflows/nf-core/align_star.nf#L10) keyword and by default the options passed to the module via the `addParams` option are set as an empty Groovy map [here](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/subworkflows/nf-core/align_star.nf#L5); this in turn means `options.args` will be set to empty by default in the module file too. This is an intentional design choice and allows us to implement well-written sub-workflows composed of a chain of tools that by default run with the bare minimum parameter set for any given tool in order to make it much easier to share across pipelines and to provide the flexibility for users and developers to customise any non-mandatory arguments.
-
-When including the sub-workflow above in the main pipeline workflow we use the same `include` statement, however, we now have the ability to overwrite options for each of the tools in the sub-workflow including the [`align_options`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/workflows/rnaseq.nf#L225) variable that will be used specifically to overwrite the optional arguments passed to the `STAR_ALIGN` module. In this case, the options to be provided to `STAR_ALIGN` have been assigned sensible defaults by the developer(s) in the pipeline's [`modules.config`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/modules.config#L70-L74) and can be accessed and customised in the [workflow context](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/workflows/rnaseq.nf#L201-L204) too before eventually passing them to the sub-workflow as a Groovy map called `star_align_options`. These options will then be propagated from `workflow -> sub-workflow -> module`.
-
-As mentioned at the beginning of this section it may also be necessary for users to overwrite the options passed to modules to be able to customise specific aspects of the way in which a particular tool is executed by the pipeline. Given that all of the default module options are stored in the pipeline's `modules.config` as a [`params` variable](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/modules.config#L24-L25) it is also possible to overwrite any of these options via a custom config file.
-
-Say for example we want to append an additional, non-mandatory parameter (i.e. `--outFilterMismatchNmax 16`) to the arguments passed to the `STAR_ALIGN` module. Firstly, we need to copy across the default `args` specified in the [`modules.config`](https://github.com/nf-core/rnaseq/blob/4c27ef5610c87db00c3c5a3eed10b1d161abf575/conf/modules.config#L71) and create a custom config file that is a composite of the default `args` as well as the additional options you would like to provide. This is very important because Nextflow will overwrite the default value of `args` that you provide via the custom config.
-
-As you will see in the example below, we have:
-
-* appended `--outFilterMismatchNmax 16` to the default `args` used by the module.
-* changed the default `publish_dir` value to where the files will eventually be published in the main results directory.
-* appended `'bam':''` to the default value of `publish_files` so that the BAM files generated by the process will also be saved in the top-level results directory for the module. Note: `'out':'log'` means any file/directory ending in `out` will now be saved in a separate directory called `my_star_directory/log/`.
-
-```nextflow
-params {
-    modules {
-        'star_align' {
-            args          = "--quantMode TranscriptomeSAM --twopassMode Basic --outSAMtype BAM Unsorted --readFilesCommand zcat --runRNGseed 0 --outFilterMultimapNmax 20 --alignSJDBoverhangMin 1 --outSAMattributes NH HI AS NM MD --quantTranscriptomeBan Singleend --outFilterMismatchNmax 16"
-            publish_dir   = "my_star_directory"
-            publish_files = ['out':'log', 'tab':'log', 'bam':'']
-        }
-    }
-}
-```
-
 ### Updating containers
 
-The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. If for some reason you need to use a different version of a particular tool with the pipeline then you just need to identify the `process` name and override the Nextflow `container` definition for that process using the `withName` declaration. For example, in the [nf-core/viralrecon](https://nf-co.re/viralrecon) pipeline a tool called [Pangolin](https://github.com/cov-lineages/pangolin) has been used during the COVID-19 pandemic to assign lineages to SARS-CoV-2 genome sequenced samples. Given that the lineage assignments change quite frequently it doesn't make sense to re-release the nf-core/viralrecon everytime a new version of Pangolin has been released. However, you can override the default container used by the pipeline by creating a custom config file and passing it as a command-line argument via `-c custom.config`.
+The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. If for some reason you need to use a different version of a particular tool with the pipeline then you just need to identify the `process` name and override the Nextflow `container` definition for that process using the `withName` declaration.
+
+#### Pangolin
+
+For example, in the [nf-core/viralrecon](https://nf-co.re/viralrecon) pipeline a tool called [Pangolin](https://github.com/cov-lineages/pangolin) has been used during the COVID-19 pandemic to assign lineages to SARS-CoV-2 genome sequenced samples. Given that the lineage assignments change quite frequently it doesn't make sense to re-release the nf-core/viralrecon everytime a new version of Pangolin has been released. However, you can override the default container used by the pipeline by creating a custom config file and passing it as a command-line argument via `-c custom.config`.
 
 1. Check the default version used by the pipeline in the module file for [Pangolin](https://github.com/nf-core/viralrecon/blob/a85d5969f9025409e3618d6c280ef15ce417df65/modules/nf-core/software/pangolin/main.nf#L14-L19)
 2. Find the latest version of the Biocontainer available on [Quay.io](https://quay.io/repository/biocontainers/pangolin?tag=latest&tab=tags)
@@ -346,7 +314,7 @@ The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementatio
         ```nextflow
         process {
             withName: PANGOLIN {
-                container = 'quay.io/biocontainers/pangolin:3.0.5--pyhdfd78af_0'
+                container = 'quay.io/biocontainers/pangolin:3.1.17--pyhdfd78af_1'
             }
         }
         ```
@@ -356,7 +324,7 @@ The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementatio
         ```nextflow
         process {
             withName: PANGOLIN {
-                container = 'https://depot.galaxyproject.org/singularity/pangolin:3.0.5--pyhdfd78af_0'
+                container = 'https://depot.galaxyproject.org/singularity/pangolin:3.1.17--pyhdfd78af_1'
             }
         }
         ```
@@ -366,10 +334,62 @@ The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementatio
         ```nextflow
         process {
             withName: PANGOLIN {
-                conda = 'bioconda::pangolin=3.0.5'
+                conda = 'bioconda::pangolin=3.1.17'
             }
         }
         ```
+
+#### Nextclade
+
+You can use a similar approach to update the version of Nextclade used by the pipeline:
+
+1. Check the default version used by the pipeline in the module file for [Nextclade](https://github.com/nf-core/viralrecon/blob/e582db9c70721aae530703ec9a2ab8b219c96a99/modules/nf-core/modules/nextclade/run/main.nf#L5-L8)
+2. Find the latest version of the Biocontainer available on [Quay.io](https://quay.io/repository/biocontainers/nextclade?tag=latest&tab=tags)
+3. Create the custom config accordingly:
+
+    * For Docker:
+
+        ```nextflow
+        process {
+            withName: 'NEXTCLADE_DATASETGET|NEXTCLADE_RUN' {
+                container = 'quay.io/biocontainers/nextclade:1.10.1--h9ee0642_0'
+            }
+        }
+        ```
+
+    * For Singularity:
+
+        ```nextflow
+        process {
+            withName: 'NEXTCLADE_DATASETGET|NEXTCLADE_RUN' {
+                container = 'https://depot.galaxyproject.org/singularity/nextclade:1.10.1--h9ee0642_0'
+            }
+        }
+        ```
+
+    * For Conda:
+
+        ```nextflow
+        process {
+            withName: 'NEXTCLADE_DATASETGET|NEXTCLADE_RUN' {
+                conda = 'bioconda::nextclade=1.10.1'
+            }
+        }
+        ```
+
+##### Nextclade datasets
+
+A [`nextclade dataset`](https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html#nextclade-datasets) feature was introduced in [Nextclade CLI v1.3.0](https://github.com/nextstrain/nextclade/releases/tag/1.3.0) that fetches input genome files such as reference sequences and trees from a central dataset repository. We have uploaded Nextclade dataset [v2022-01-18](https://github.com/nextstrain/nextclade_data/releases/tag/2022-01-24--21-27-29--UTC) to [nf-core/test-datasets](https://github.com/nf-core/test-datasets/blob/viralrecon/genome/MN908947.3/nextclade_sars-cov-2_MN908947_2022-01-18T12_00_00Z.tar.gz?raw=true), and for reproducibility, this will be used by default if you specify `--genome 'MN908947.3'` when running the pipeline. However, there are a number of ways you can use a more recent version of the dataset:
+
+* Supply your own by setting: `--nextclade_dataset <PATH_TO_DATASET>`
+* Let the pipeline create and use the latest version by setting: `--nextclade_dataset false --nextclade_dataset_tag false`
+* Let the pipeline create and use a specific, tagged version by setting: `--nextclade_dataset false --nextclade_dataset_tag <DATASET_TAG>`
+
+The Nextclade dataset releases can be found on their [Github page](https://github.com/nextstrain/nextclade_data/releases). Use the tag specified for each release e.g `2022-01-18T12:00:00Z` in the example below:
+
+![Nextclade tag example](images/nextclade_tag_example.png)
+
+If the `--save_reference` parameter is provided then the Nextclade dataset generated by the pipeline will also be saved in the `results/genome/` directory.
 
 > **NB:** If you wish to periodically update individual tool-specific results (e.g. Pangolin) generated by the pipeline then you must ensure to keep the `work/` directory otherwise the `-resume` ability of the pipeline will be compromised and it will restart from scratch.
 

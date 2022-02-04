@@ -2,9 +2,7 @@
 // Check input samplesheet and get read channels
 //
 
-params.options = [:]
-
-include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check' addParams( options: params.options )
+include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
 
 workflow INPUT_CHECK {
     take:
@@ -12,31 +10,38 @@ workflow INPUT_CHECK {
     platform    // string: sequencing platform. Accepted values: 'illumina', 'nanopore'
 
     main:
-    SAMPLESHEET_CHECK ( samplesheet, platform )
+
+    SAMPLESHEET_CHECK (
+        samplesheet,
+        platform
+    )
 
     if (platform == 'illumina') {
         SAMPLESHEET_CHECK
             .out
+            .csv
             .splitCsv ( header:true, sep:',' )
             .map { create_fastq_channels(it) }
             .set { sample_info }
     } else if (platform == 'nanopore') {
         SAMPLESHEET_CHECK
             .out
+            .csv
             .splitCsv ( header:true, sep:',' )
             .map { row -> [ row.barcode, row.sample ] }
             .set { sample_info }
     }
 
     emit:
-    sample_info // channel: [ val(meta), [ reads ] ]
+    sample_info                               // channel: [ val(meta), [ reads ] ]
+    versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
 // Function to get list of [ meta, [ fastq_1, fastq_2 ] ]
 def create_fastq_channels(LinkedHashMap row) {
     def meta = [:]
-    meta.id           = row.sample
-    meta.single_end   = row.single_end.toBoolean()
+    meta.id         = row.sample
+    meta.single_end = row.single_end.toBoolean()
 
     def array = []
     if (!file(row.fastq_1).exists()) {
