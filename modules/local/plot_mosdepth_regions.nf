@@ -16,6 +16,9 @@ process PLOT_MOSDEPTH_REGIONS {
     path '*heatmap.tsv' , optional:true, emit: heatmap_tsv
     path "versions.yml" , emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script: // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "mosdepth"

@@ -13,6 +13,9 @@ process RENAME_FASTA_HEADER {
     tuple val(meta), path("*.fa"), emit: fasta
     path "versions.yml"          , emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """

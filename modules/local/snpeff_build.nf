@@ -16,6 +16,9 @@ process SNPEFF_BUILD {
     path '*.config'    , emit: config
     path "versions.yml", emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:
     def basename = fasta.baseName
 
