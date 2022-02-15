@@ -3,11 +3,17 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unpublished Version / DEV]
+## [[2.3.1](https://github.com/nf-core/viralrecon/releases/tag/2.3.1)] - 2022-02-15
 
 ### Enhancements & fixes
 
-### Parameters
+* [[#277](https://github.com/nf-core/viralrecon/issues/277)] - Misuse of rstrip in make_variants_long_table.py script
+
+### Software dependencies
+
+| Dependency                    | Old version | New version |
+|-------------------------------|-------------|-------------|
+| `pangolin`                    | 3.1.19      | 3.1.20      |
 
 ## [[2.3](https://github.com/nf-core/viralrecon/releases/tag/2.3)] - 2022-02-04
 
