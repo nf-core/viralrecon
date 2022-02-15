@@ -16,6 +16,9 @@ process IVAR_VARIANTS_TO_VCF {
     tuple val(meta), path("*.tsv"), emit: tsv
     path "versions.yml"           , emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"

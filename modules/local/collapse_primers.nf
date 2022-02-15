@@ -16,6 +16,9 @@ process COLLAPSE_PRIMERS {
     path '*.bed'       , emit: bed
     path "versions.yml", emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script: // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     """
     collapse_primer_bed.py \\

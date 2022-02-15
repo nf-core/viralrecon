@@ -4,3 +4,8 @@ lint:
     - assets/email_template.html
     - assets/email_template.txt
     - lib/NfcoreTemplate.groovy
+    - .github/ISSUE_TEMPLATE/bug_report.yml
+    - .github/workflows/branch.yml
+    - .github/workflows/linting_comment.yml
+    - .github/workflows/linting.yml
+    - lib/NfcoreSchema.groovy

@@ -16,6 +16,9 @@ process MAKE_BED_MASK {
     tuple val(meta), path("*.mpileup"), optional:true, emit: mpileup
     path "versions.yml"               , emit: versions
 
+    when:
+    task.ext.when == null || task.ext.when
+
     script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     def args = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: 10
