@@ -50,9 +50,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 |                               | `--consensus_caller`                  |
 | `--callers`                   | `--variant_caller`                    |
 
-> **NB:** Parameter has been __updated__ if both old and new parameter information is present.
-> **NB:** Parameter has been __added__ if just the new parameter information is present.
-> **NB:** Parameter has been __removed__ if new parameter information isn't present.
+> **NB:** Parameter has been **updated** if both old and new parameter information is present.
+>
+> **NB:** Parameter has been **added** if just the new parameter information is present.
+>
+> **NB:** Parameter has been **removed** if new parameter information isn't present.
 
 ### Software dependencies
 
@@ -78,9 +80,11 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `tabix`                       | 0.2.6       | 1.11        |
 | `vcflib`                      |             | 1.0.2       |
 
-> **NB:** Dependency has been __updated__ if both old and new version information is present.
-> **NB:** Dependency has been __added__ if just the new version information is present.
-> **NB:** Dependency has been __removed__ if new version information isn't present.
+> **NB:** Dependency has been **updated** if both old and new version information is present.
+>
+> **NB:** Dependency has been **added** if just the new version information is present.
+>
+> **NB:** Dependency has been **removed** if new version information isn't present.
 
 ## [[2.2](https://github.com/nf-core/viralrecon/releases/tag/2.2)] - 2021-07-29
 
@@ -101,9 +105,11 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `pangolin`                    | 3.0.5       | 3.1.7       |
 | `samtools`                    | 1.10        | 1.12        |
 
-> **NB:** Dependency has been __updated__ if both old and new version information is present.
-> **NB:** Dependency has been __added__ if just the new version information is present.
-> **NB:** Dependency has been __removed__ if new version information isn't present.
+> **NB:** Dependency has been **updated** if both old and new version information is present.
+>
+> **NB:** Dependency has been **added** if just the new version information is present.
+>
+> **NB:** Dependency has been **removed** if new version information isn't present.
 
 ## [[2.1](https://github.com/nf-core/viralrecon/releases/tag/2.1)] - 2021-06-15
 
@@ -129,9 +135,11 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `--public_data_ids`           |                                       |
 | `--skip_sra_fastq_download`   |                                       |
 
-> **NB:** Parameter has been __updated__ if both old and new parameter information is present.
-> **NB:** Parameter has been __added__ if just the new parameter information is present.
-> **NB:** Parameter has been __removed__ if new parameter information isn't present.
+> **NB:** Parameter has been **updated** if both old and new parameter information is present.
+>
+> **NB:** Parameter has been **added** if just the new parameter information is present.
+>
+> **NB:** Parameter has been **removed** if new parameter information isn't present.
 
 ### Software dependencies
 
@@ -142,9 +150,11 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `nextclade_js`                | 0.14.2      | 0.14.4      |
 | `pangolin`                    | 2.4.2       | 3.0.5       |
 
-> **NB:** Dependency has been __updated__ if both old and new version information is present.
-> **NB:** Dependency has been __added__ if just the new version information is present.
-> **NB:** Dependency has been __removed__ if new version information isn't present.
+> **NB:** Dependency has been **updated** if both old and new version information is present.
+>
+> **NB:** Dependency has been **added** if just the new version information is present.
+>
+> **NB:** Dependency has been **removed** if new version information isn't present.
 
 ## [[2.0](https://github.com/nf-core/viralrecon/releases/tag/2.0)] - 2021-05-13
 
@@ -244,9 +254,11 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `--unqualified_percent_limit` |                                       |
 | `--varscan2_strand_filter`    |                                       |
 
-> **NB:** Parameter has been __updated__ if both old and new parameter information is present.
-> **NB:** Parameter has been __added__ if just the new parameter information is present.
-> **NB:** Parameter has been __removed__ if new parameter information isn't present.
+> **NB:** Parameter has been **updated** if both old and new parameter information is present.
+>
+> **NB:** Parameter has been **added** if just the new parameter information is present.
+>
+> **NB:** Parameter has been **removed** if new parameter information isn't present.
 
 ### Software dependencies
 
@@ -295,9 +307,11 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `varscan`                     | 2.4.4       |             |
 | `vg`                          | 1.24.0      |             |
 
-> **NB:** Dependency has been __updated__ if both old and new version information is present.
-> **NB:** Dependency has been __added__ if just the new version information is present.
-> **NB:** Dependency has been __removed__ if new version information isn't present.
+> **NB:** Dependency has been **updated** if both old and new version information is present.
+>
+> **NB:** Dependency has been **added** if just the new version information is present.
+>
+> **NB:** Dependency has been **removed** if new version information isn't present.
 
 ## [[1.1.0](https://github.com/nf-core/viralrecon/releases/tag/1.1.0)] - 2020-06-23
 
@@ -350,23 +364,23 @@ This pipeline is a re-implementation of the [SARS_Cov2_consensus-nf](https://git
 
 ### Pipeline summary
 
-1. Download samples via SRA, ENA or GEO ids ([`ENA FTP`](https://ena-docs.readthedocs.io/en/latest/retrieval/file-download.html), [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump); *if required*)
-2. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html); *if required*)
+1. Download samples via SRA, ENA or GEO ids ([`ENA FTP`](https://ena-docs.readthedocs.io/en/latest/retrieval/file-download.html), [`parallel-fastq-dump`](https://github.com/rvalieris/parallel-fastq-dump); _if required_)
+2. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html); _if required_)
 3. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 4. Adapter trimming ([`fastp`](https://github.com/OpenGene/fastp))
 5. Variant calling
     1. Read alignment ([`Bowtie 2`](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml))
     2. Sort and index alignments ([`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
-    3. Primer sequence removal ([`iVar`](https://github.com/andersen-lab/ivar); *amplicon data only*)
-    4. Duplicate read marking ([`picard`](https://broadinstitute.github.io/picard/); *removal optional*)
+    3. Primer sequence removal ([`iVar`](https://github.com/andersen-lab/ivar); _amplicon data only_)
+    4. Duplicate read marking ([`picard`](https://broadinstitute.github.io/picard/); _removal optional_)
     5. Alignment-level QC ([`picard`](https://broadinstitute.github.io/picard/), [`SAMtools`](https://sourceforge.net/projects/samtools/files/samtools/))
-    6. Choice of multiple variant calling and consensus sequence generation routes ([`VarScan 2`](http://dkoboldt.github.io/varscan/), [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/) *||* [`iVar variants and consensus`](https://github.com/andersen-lab/ivar) *||* [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
+    6. Choice of multiple variant calling and consensus sequence generation routes ([`VarScan 2`](http://dkoboldt.github.io/varscan/), [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/) _||_ [`iVar variants and consensus`](https://github.com/andersen-lab/ivar) _||_ [`BCFTools`](http://samtools.github.io/bcftools/bcftools.html), [`BEDTools`](https://github.com/arq5x/bedtools2/))
         * Variant annotation ([`SnpEff`](http://snpeff.sourceforge.net/SnpEff.html), [`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html))
         * Consensus assessment report ([`QUAST`](http://quast.sourceforge.net/quast))
 6. _De novo_ assembly
-    1. Primer trimming ([`Cutadapt`](https://cutadapt.readthedocs.io/en/stable/guide.html); *amplicon data only*)
+    1. Primer trimming ([`Cutadapt`](https://cutadapt.readthedocs.io/en/stable/guide.html); _amplicon data only_)
     2. Removal of host reads ([`Kraken 2`](http://ccb.jhu.edu/software/kraken2/))
-    3. Choice of multiple assembly tools ([`SPAdes`](http://cab.spbu.ru/software/spades/) *||* [`metaSPAdes`](http://cab.spbu.ru/software/meta-spades/) *||* [`Unicycler`](https://github.com/rrwick/Unicycler) *||* [`minia`](https://github.com/GATB/minia))
+    3. Choice of multiple assembly tools ([`SPAdes`](http://cab.spbu.ru/software/spades/) _||_ [`metaSPAdes`](http://cab.spbu.ru/software/meta-spades/) _||_ [`Unicycler`](https://github.com/rrwick/Unicycler) _||_ [`minia`](https://github.com/GATB/minia))
         * Blast to reference genome ([`blastn`](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch))
         * Contiguate assembly ([`ABACAS`](https://www.sanger.ac.uk/science/tools/pagit))
         * Assembly report ([`PlasmidID`](https://github.com/BU-ISCIII/plasmidID))
