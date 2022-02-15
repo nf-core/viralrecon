@@ -32,3 +32,6 @@ jobs:
               "outdir": "s3://${{ secrets.AWS_S3_BUCKET }}/viralrecon/results-${{ github.sha }}/platform_${{ matrix.platform }}"
             }
           profiles: test_full_${{ matrix.platform }},aws_tower
+          nextflow_config: |
+            process.errorStrategy = 'retry'
+            process.maxRetries = 3
