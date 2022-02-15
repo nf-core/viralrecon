@@ -44,7 +44,7 @@ def make_dir(path):
 
 def get_file_dict(file_dir, file_suffix):
     files = glob.glob(os.path.join(file_dir, f'*{file_suffix}'))
-    samples = [os.path.basename(x).rstrip(f'{file_suffix}') for x in files]
+    samples = [os.path.basename(x).removesuffix(f'{file_suffix}') for x in files]
 
     return dict(zip(samples, files))
 
