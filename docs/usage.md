@@ -97,6 +97,7 @@ The command to run the pipeline would then be:
 ```console
 nextflow run nf-core/viralrecon \
     --input samplesheet.csv \
+    --outdir <OUTDIR> \
     --platform nanopore \
     --genome 'MN908947.3' \
     --primer_set_version 3 \
@@ -115,6 +116,7 @@ The command to run the pipeline would then be:
 ```console
 nextflow run nf-core/viralrecon \
     --input samplesheet.csv \
+    --outdir <OUTDIR> \
     --platform nanopore \
     --genome 'MN908947.3' \
     --primer_set_version 3 \
@@ -139,6 +141,7 @@ An example command using v3 ARTIC primers with "MN908947.3":
 ```console
 nextflow run nf-core/viralrecon \
     --input samplesheet.csv \
+    --outdir <OUTDIR> \
     --platform illumina \
     --protocol amplicon \
     --genome 'MN908947.3' \
@@ -157,6 +160,7 @@ An example command using SWIFT primers with "MN908947.3":
 ```console
 nextflow run nf-core/viralrecon \
     --input samplesheet.csv \
+    --outdir <OUTDIR> \
     --platform illumina \
     --protocol amplicon \
     --genome 'MN908947.3' \
@@ -173,7 +177,7 @@ nextflow run nf-core/viralrecon \
 The typical command for running the pipeline is as follows:
 
 ```console
-nextflow run nf-core/viralrecon --input samplesheet.csv --genome 'MN908947.3' -profile docker
+nextflow run nf-core/viralrecon --input samplesheet.csv --outdir <OUTDIR> --genome 'MN908947.3' -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
