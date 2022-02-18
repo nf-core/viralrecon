@@ -110,6 +110,7 @@ jobs:
           - "--min_barcode_reads 10000"
           - "--min_guppyplex_reads 10000"
           - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false"
+          - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false --artic_minion_medaka_model r941_min_high_g360"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
