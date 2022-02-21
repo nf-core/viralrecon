@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * [nf-core/tools#1415](https://github.com/nf-core/tools/issues/1415) - Make `--outdir` a mandatory parameter
 * [[#281](https://github.com/nf-core/viralrecon/issues/281)] - Nanopore medaka processing fails with error if model name, not model file, provided
+* [[#286](https://github.com/nf-core/viralrecon/issues/286)] - IVAR_VARIANTS silently failing when FAI index is missing
 
 ### Parameters
 
