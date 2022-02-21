@@ -104,7 +104,7 @@ A number of improvements were made to the pipeline recently, mainly with regard 
         ```bash
         nextflow run nf-core/viralrecon \
             --input samplesheet.csv \
-            --outdir <OUTDIR>
+            --outdir <OUTDIR> \
             --platform illumina \
             --protocol metagenomic \
             --genome 'MN908947.3' \
@@ -116,7 +116,7 @@ A number of improvements were made to the pipeline recently, mainly with regard 
         ```bash
         nextflow run nf-core/viralrecon \
             --input samplesheet.csv \
-            --outdir <OUTDIR>
+            --outdir <OUTDIR> \
             --platform illumina \
             --protocol amplicon \
             --genome 'MN908947.3' \
@@ -131,7 +131,7 @@ A number of improvements were made to the pipeline recently, mainly with regard 
         ```bash
         nextflow run nf-core/viralrecon \
             --input samplesheet.csv \
-            --outdir <OUTDIR>
+            --outdir <OUTDIR> \
             --platform nanopore \
             --genome 'MN908947.3' \
             --primer_set_version 3 \
