@@ -87,7 +87,7 @@ A number of improvements were made to the pipeline recently, mainly with regard 
 3. Download the pipeline and test it on a minimal dataset with a single command:
 
     ```console
-    nextflow run nf-core/viralrecon -profile test,YOURPROFILE
+    nextflow run nf-core/viralrecon -profile test,YOURPROFILE --outdir <OUTDIR>
     ```
 
     Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`YOURPROFILE` in the example command above). You can chain multiple config profiles in a comma-separated string.
@@ -104,6 +104,7 @@ A number of improvements were made to the pipeline recently, mainly with regard 
         ```bash
         nextflow run nf-core/viralrecon \
             --input samplesheet.csv \
+            --outdir <OUTDIR> \
             --platform illumina \
             --protocol metagenomic \
             --genome 'MN908947.3' \
@@ -115,6 +116,7 @@ A number of improvements were made to the pipeline recently, mainly with regard 
         ```bash
         nextflow run nf-core/viralrecon \
             --input samplesheet.csv \
+            --outdir <OUTDIR> \
             --platform illumina \
             --protocol amplicon \
             --genome 'MN908947.3' \
@@ -129,6 +131,7 @@ A number of improvements were made to the pipeline recently, mainly with regard 
         ```bash
         nextflow run nf-core/viralrecon \
             --input samplesheet.csv \
+            --outdir <OUTDIR> \
             --platform nanopore \
             --genome 'MN908947.3' \
             --primer_set_version 3 \

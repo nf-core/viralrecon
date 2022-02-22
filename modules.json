@@ -10,7 +10,7 @@
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
             "artic/minion": {
-                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+                "git_sha": "cab399507bea60d90de6d7b296163210c371b693"
             },
             "bandage/image": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
@@ -79,7 +79,7 @@
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
             },
             "ivar/variants": {
-                "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"
+                "git_sha": "cab399507bea60d90de6d7b296163210c371b693"
             },
             "kraken2/kraken2": {
                 "git_sha": "e745e167c1020928ef20ea1397b6b4d230681b4d"

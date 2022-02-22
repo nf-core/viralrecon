@@ -11,6 +11,7 @@ workflow VARIANTS_IVAR {
     take:
     bam                 // channel: [ val(meta), [ bam ] ]
     fasta               // channel: /path/to/genome.fasta
+    fai                 // channel: /path/to/genome.fai
     sizes               // channel: /path/to/genome.sizes
     gff                 // channel: /path/to/genome.gff
     bed                 // channel: /path/to/primers.bed
@@ -28,6 +29,7 @@ workflow VARIANTS_IVAR {
     IVAR_VARIANTS (
         bam,
         fasta,
+        fai,
         gff,
         params.save_mpileup
     )

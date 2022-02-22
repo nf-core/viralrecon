@@ -44,7 +44,7 @@ jobs:
 
       - name: Run pipeline with test data
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --outdir ./results
 
   parameters:
     name: Test workflow parameters
@@ -74,7 +74,7 @@ jobs:
 
       - name: Run pipeline with various parameters
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }}
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }} --outdir ./results
 
   test_sispa:
     name: Test SISPA workflow
@@ -96,7 +96,7 @@ jobs:
 
       - name: Run pipeline with minimal SISPA data and various options
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }}
+          nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }} --outdir ./results
 
   test_nanopore:
     name: Test Nanopore workflow
@@ -110,6 +110,7 @@ jobs:
           - "--min_barcode_reads 10000"
           - "--min_guppyplex_reads 10000"
           - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false"
+          - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false --artic_minion_medaka_model r941_min_high_g360"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -121,4 +122,4 @@ jobs:
 
       - name: Run pipeline with minimal Nanopore data and various options
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker ${{ matrix.parameters }}
+          nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker ${{ matrix.parameters }} --outdir ./results

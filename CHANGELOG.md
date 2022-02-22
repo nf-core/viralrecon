@@ -3,6 +3,26 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[2.4](https://github.com/nf-core/viralrecon/releases/tag/2.4)] - 2022-02-22
+
+### Enhancements & fixes
+
+* [nf-core/tools#1415](https://github.com/nf-core/tools/issues/1415) - Make `--outdir` a mandatory parameter
+* [[#281](https://github.com/nf-core/viralrecon/issues/281)] - Nanopore medaka processing fails with error if model name, not model file, provided
+* [[#286](https://github.com/nf-core/viralrecon/issues/286)] - IVAR_VARIANTS silently failing when FAI index is missing
+
+### Parameters
+
+| Old parameter                 | New parameter                         |
+|-------------------------------|---------------------------------------|
+|                               | `--publish_dir_mode`                  |
+
+> **NB:** Parameter has been **updated** if both old and new parameter information is present.
+>
+> **NB:** Parameter has been **added** if just the new parameter information is present.
+>
+> **NB:** Parameter has been **removed** if new parameter information isn't present.
+
 ## [[2.3.1](https://github.com/nf-core/viralrecon/releases/tag/2.3.1)] - 2022-02-15
 
 ### Enhancements & fixes
