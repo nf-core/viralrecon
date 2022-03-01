@@ -3,6 +3,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [[2.4.1](https://github.com/nf-core/viralrecon/releases/tag/2.4.1)] - 2022-03-01
+
+### Enhancements & fixes
+
+* [[#288](https://github.com/nf-core/viralrecon/issues/288)] - `--primer_set_version` only accepts Integers (incompatible with "4.1" Artic primers set)
+
 ## [[2.4](https://github.com/nf-core/viralrecon/releases/tag/2.4)] - 2022-02-22
 
 ### Enhancements & fixes
