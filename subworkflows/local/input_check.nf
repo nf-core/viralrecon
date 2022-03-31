@@ -21,7 +21,7 @@ workflow INPUT_CHECK {
             .out
             .csv
             .splitCsv ( header:true, sep:',' )
-            .map { create_fastq_channels(it) }
+            .map { create_fastq_channel(it) }
             .set { sample_info }
     } else if (platform == 'nanopore') {
         SAMPLESHEET_CHECK
