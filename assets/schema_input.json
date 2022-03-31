@@ -36,8 +36,6 @@
                 "errorMessage": "Barcode must be provided and must be an integer"
             }
         },
-        "required": [
-            "sample"
-        ]
+        "required": ["sample"]
     }
 }

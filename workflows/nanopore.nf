@@ -38,7 +38,7 @@ if (params.artic_minion_caller == 'medaka') {
 ========================================================================================
 */
 
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yaml", checkIfExists: true)
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config_nanopore.yml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 /*

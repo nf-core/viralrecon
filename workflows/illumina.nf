@@ -39,7 +39,7 @@ if (!variant_caller) { variant_caller = params.protocol == 'amplicon' ? 'ivar' :
 ========================================================================================
 */
 
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yaml", checkIfExists: true)
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 // Header files
