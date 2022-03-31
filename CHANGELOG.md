@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Enhancements & fixes
 
+- Updated pipeline template to [nf-core/tools 2.3.2](https://github.com/nf-core/tools/releases/tag/2.3.2)
+
 ### Parameters
 
 ## [[2.4.1](https://github.com/nf-core/viralrecon/releases/tag/2.4.1)] - 2022-03-01
