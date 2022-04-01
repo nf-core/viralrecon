@@ -99,11 +99,64 @@ A number of improvements were made to the pipeline recently, mainly with regard 
 
 4. Start running your own analysis!
 
-   <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
+   - Typical command for Illumina shotgun analysis:
 
-   ```console
-   nextflow run nf-core/viralrecon --input samplesheet.csv --outdir <OUTDIR> --genome GRCh37 -profile <docker/singularity/podman/shifter/charliecloud/conda/institute>
-   ```
+     ```bash
+     nextflow run nf-core/viralrecon \
+         --input samplesheet.csv \
+         --outdir <OUTDIR> \
+         --platform illumina \
+         --protocol metagenomic \
+         --genome 'MN908947.3' \
+         -profile <docker/singularity/podman/conda/institute>
+     ```
+
+   - Typical command for Illumina amplicon analysis:
+
+     ```bash
+     nextflow run nf-core/viralrecon \
+         --input samplesheet.csv \
+         --outdir <OUTDIR> \
+         --platform illumina \
+         --protocol amplicon \
+         --genome 'MN908947.3' \
+         --primer_set artic \
+         --primer_set_version 3 \
+         --skip_assembly \
+         -profile <docker/singularity/podman/conda/institute>
+     ```
+
+   - Typical command for Nanopore amplicon analysis:
+
+     ```bash
+     nextflow run nf-core/viralrecon \
+         --input samplesheet.csv \
+         --outdir <OUTDIR> \
+         --platform nanopore \
+         --genome 'MN908947.3' \
+         --primer_set_version 3 \
+         --fastq_dir fastq_pass/ \
+         --fast5_dir fast5_pass/ \
+         --sequencing_summary sequencing_summary.txt \
+         -profile <docker/singularity/podman/conda/institute>
+     ```
+
+   - An executable Python script called [`fastq_dir_to_samplesheet.py`](https://github.com/nf-core/viralrecon/blob/master/bin/fastq_dir_to_samplesheet.py) has been provided if you are using `--platform illumina` and would like to auto-create an input samplesheet based on a directory containing FastQ files **before** you run the pipeline (requires Python 3 installed locally) e.g.
+
+     ```console
+     wget -L https://raw.githubusercontent.com/nf-core/viralrecon/master/bin/fastq_dir_to_samplesheet.py
+     ./fastq_dir_to_samplesheet.py <FASTQ_DIR> samplesheet.csv
+     ```
+
+   - You can find the default keys used to specify `--genome` in the [genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config). This provides default options for
+
+     - Reference genomes (including SARS-CoV-2)
+     - Genome associates primer sets
+     - [Nextclade datasets](https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html)
+
+       The Pangolin and Nextclade lineage and clade definitions change regularly as new SARS-CoV-2 lineages are discovered. For instructions to use more recent versions of lineage analysis tools like Pangolin and Nextclade please refer to the [updating containers](https://nf-co.re/viralrecon/usage#updating-containers) section in the usage docs.
+
+     Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard keys; see [usage docs](https://nf-co.re/viralrecon/usage#illumina-primer-sets).
 
 ## Documentation
 
