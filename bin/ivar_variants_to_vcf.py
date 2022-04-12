@@ -5,9 +5,11 @@ import sys
 import re
 import errno
 import argparse
+import queue
+from collections import OrderedDict
+
 import numpy as np
 from scipy.stats import fisher_exact
-
 
 def parse_args(args=None):
     Description = "Convert iVar variants TSV file to VCF format."
@@ -91,114 +93,65 @@ def get_diff_position(seq1,seq2):
     else:
         return ind_diff[0]
 
-def merge_codons(lines_queue):
-    ## Always fill lines_queue until size 2.
-    if len(lines_queue["POS"]) == 0 or len(lines_queue["POS"]) == 1:
-        for i,j in enumerate(lines_queue):
-            lines_queue.setdefault(j, []).append(param_list[i])
-        write_line=False
+def check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt):
+    # Are two positions in the dict consecutive?
+    if check_consecutive(list(q_pos)) == 2:
+        ## If the first position is not on the third position of the codon they are in the same codon.
+        if codon_position(fe_codon_ref,fe_codon_alt) != 2:
+            num_collapse = 2
+        else:
+            num_collapse = 1
+    # Are the three positions in the dict consecutive?
+    elif check_consecutive(list(q_pos)) == 3:
+        ## we check the first position in which codon position is to process it acordingly.
+        # If first position is in the first codon position all three positions belong to the same codon.
+        if codon_position(fe_codon_ref,fe_codon_alt) == 0:
+            num_collapse = 3
+        # If first position is in the second codon position, we have the two first positions belonging to the same codon and the last one independent.
+        elif codon_position(fe_codon_ref,fe_codon_alt) == 1:
+            num_collapse = 2
+        ## Finally if we have the first position in the last codon position, we write first position and left the remaining two to be evaluated in the next iteration.
+        elif codon_position(fe_codon_ref,fe_codon_alt) == 2:
+            num_collapse = 1
 
-    # If queue has size 2, we include the third line
-    elif len(lines_queue["POS"]) == 2:
-        for i,j in enumerate(lines_queue):
-            lines_queue.setdefault(j, []).append(param_list[i])
-        # Are two positions in the dict consecutive?
-        if check_consecutive(lines_queue["POS"]) == 2:
-            ## If the first position is not on the third position of the codon they are in the same codon.
-            if codon_position(lines_queue["REF_CODON"][0],lines_queue["ALT_CODON"][0]) != 2:
-                write_line = True
-                num_collapse = "2"
-                CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, SAMPLE = rename_vars(lines_queue, num_collapse)
-                oline = (CHROM + "\t" + POS + "\t" + ID + "\t" + REF + "\t" + ALT + "\t" + QUAL + "\t" + FILTER + "\t" + INFO + "\t" + FORMAT + "\t" + SAMPLE + "\n")
-                ## We removed the first two items in lines_queue with have been just processed.
-                for i,j in enumerate(lines_queue):
-                    lines_queue[list(lines_queue.keys())[i]].pop(0)
-                    lines_queue[list(lines_queue.keys())[i]].pop(0)
-            else:
-                write_line = True
-                oline =(lines_queue["CHROM"][0] + "\t" + lines_queue["POS"][0] + "\t" + lines_queue["ID"][0] + "\t" + lines_queue["REF"][0] + "\t" + lines_queue["ALT"][0] + "\t" + lines_queue["QUAL"][0] + "\t" + lines_queue["FILTER"][0] + "\t" + lines_queue["INFO"][0] + "\t" + lines_queue["FORMAT"][0] + "\t" + lines_queue["SAMPLE"][0] + "\n")
-                for i,j in enumerate(lines_queue):
-                    lines_queue[list(lines_queue.keys())[i]].pop(0)
+    elif check_consecutive(list(q_pos)) == False:
+        num_collapse = 1
 
-        # Are the three positions in the dict consecutive?
-        elif check_consecutive(lines_queue["POS"]) == 3:
-            ## we check the first position in which codon position is to process it acordingly.
-            # If first position is in the first codon position all three positions belong to the same codon.
-            if codon_position(lines_queue["REF_CODON"][0], lines_queue["ALT_CODON"][0]) == 0:
-                write_line = True
-                num_collapse = 3
-                CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, SAMPLE = rename_vars(lines_queue, num_collapse)
-                oline = (CHROM + "\t" + POS + "\t" + ID + "\t" + REF + "\t" + ALT + "\t" + QUAL + "\t" + FILTER + "\t" + INFO + "\t" + FORMAT + "\t" + SAMPLE + "\n")
-                for i,j in enumerate(lines_queue):
-                    lines_queue[list(lines_queue.keys())[i]].pop(0)
-                    lines_queue[list(lines_queue.keys())[i]].pop(0)
-                # we empty the lines_queue
-                lines_queue = {'CHROM':[], 'POS':[], 'ID':[], 'REF':[], 'ALT':[], 'REF_DP':[], 'REF_RV':[], 'ALT_DP':[], 'ALT_RV':[], 'QUAL':[], 'REF_CODON':[], 'ALT_CODON':[], 'FILTER':[], 'INFO':[], 'FORMAT':[], 'SAMPLE':[]}
-            # If first position is in the second codon position, we have the two first positions belonging to the same codon and the last one independent.
-            elif codon_position(lines_queue["REF_CODON"][0], lines_queue["ALT_CODON"][0]) == 1:
-                write_line = True
-                num_collapse = 2
-                CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, SAMPLE = rename_vars(lines_queue, num_collapse)
-                oline = (CHROM + "\t" + POS + "\t" + ID + "\t" + REF + "\t" + ALT + "\t" + QUAL + "\t" + FILTER + "\t" + INFO + "\t" + FORMAT + "\t" + SAMPLE + "\n")
-                for i,j in enumerate(lines_queue):
-                    lines_queue[list(lines_queue.keys())[i]].pop(0)
-                    lines_queue[list(lines_queue.keys())[i]].pop(0)
-            ## Finally if we have the first position in the last codon position, we write first position and left the remaining two to be evaluated in the next iteration.
-            elif codon_position(lines_queue["REF_CODON"][0], lines_queue["ALT_CODON"][0]) == 2:
-                write_line = True
-                oline =(lines_queue["CHROM"][0] + "\t" + lines_queue["POS"][0] + "\t" + lines_queue["ID"][0] + "\t" + lines_queue["REF"][0] + "\t" + lines_queue["ALT"][0] + "\t" + lines_queue["QUAL"][0] + "\t" + lines_queue["FILTER"][0] + "\t" + lines_queue["INFO"][0] + "\t" + lines_queue["FORMAT"][0] + "\t" + lines_queue["SAMPLE"][0] + "\n")
-                for i,j in enumerate(lines_queue):
-                    lines_queue[list(lines_queue.keys())[i]].pop(0)
+    return num_collapse
 
-        elif check_consecutive(lines_queue["POS"]) == False:
-            write_line = True
-            oline =(lines_queue["CHROM"][0] + "\t" + lines_queue["POS"][0] + "\t" + lines_queue["ID"][0] + "\t" + lines_queue["REF"][0] + "\t" + lines_queue["ALT"][0] + "\t" + lines_queue["QUAL"][0] + "\t" + lines_queue["FILTER"][0] + "\t" + lines_queue["INFO"][0] + "\t" + lines_queue["FORMAT"][0] + "\t" + lines_queue["SAMPLE"][0] + "\n")
-            for i,j in enumerate(lines_queue):
-                lines_queue[list(lines_queue.keys())[i]].pop(0)
-    else:
-        print("Something went terribly wrong!!" + str(len(lines_queue["POS"])))
-
-
-def get_lines_info(dict_lines,num_collapse):
+def process_variants(variants,num_collapse):
     '''
     Description:
         The function set the vars acordingly to the lines to collapse do to consecutive variants.
     Input:
-        dict_lines - Dict with var lines.
+        variants - Dict with var lines.
         num_collapse - number of lines to collapse [2,3]
     Returns::
         Vars fixed.
     '''
-    CHROM = dict_lines["CHROM"][0]
-    POS = dict_lines["POS"][0]
-    ID = dict_lines["ID"][0]
-    # If no consecutive, process one line
-    if int(num_collapse) == 1:
-        REF = str(dict_lines["REF"][0])
-        ALT = str(dict_lines["ALT"][0])
-    # If two consecutive process two lines and write one.
-    elif int(num_collapse) == 2:
-        REF = str(dict_lines["REF"][0]) + str(dict_lines["REF"][1])
-        ALT = str(dict_lines["ALT"][0]) + str(dict_lines["ALT"][1])
-    # If three consecutive process three lines and write one
-    elif int(num_collapse) == 3:
-        REF = str(dict_lines["REF"][0]) + str(dict_lines["REF"][1]) + str(dict_lines["REF"][2])
-        ALT = str(dict_lines["ALT"][0]) + str(dict_lines["ALT"][1]) + str(dict_lines["ALT"][2])
-    ## TODO Check how much differences we found among DPs in the three positions of a codon.
-    REF_DP = dict_lines["REF_DP"][0]
-    REF_RV = dict_lines["REF_RV"][0]
-    ALT_DP = dict_lines["ALT_DP"][0]
-    ALT_RV = dict_lines["ALT_RV"][0]
-    QUAL = dict_lines["QUAL"][0]
-    REF_CODON = REF
-    ALT_CODON = ALT
-    FILTER =dict_lines["FILTER"][0]
-    # INFO DP depends on the decision in the todo above. SB is left with the first one.
-    INFO = dict_lines["INFO"][0]
-    FORMAT = dict_lines["FORMAT"][0]
-    # sample depends on the decision in the todo above.
-    SAMPLE = dict_lines["SAMPLE"][0]
-    return CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO,FORMAT,SAMPLE
+    key_list = ["chrom", "pos", "id", "qual", "info", "format"]
+    chrom, pos, id, qual, filter, info, format = x for key in key_list next(iter(variants))[key]
+    # chrom = next(iter(variants))["chrom"]
+    # pos = next(iter(variants))["pos"]
+    # id = next(iter(variants))["id"]
+    # ref_dp = next(iter(variants))["ref_dp"]
+    # ref_rv = next(iter(variants))["ref_rv"]
+    # alt_dp = next(iter(variants))["alt_dp"]
+    # alt_rv = next(iter(variants))["alt_rv"]
+    # qual = next(iter(variants))["qual"]
+    # filter = next(iter(variants))["filter"]
+    # # INFO DP depends on the decision in the todo above. SB is left with the first one.
+    # info = next(iter(variants))["info"]
+    # format = next(iter(variants))["format"]
+
+    # If no consecutive, process one variant line
+    # If two consecutive, process two variant lines into one
+    # If three consecutive process three variant lines and write one
+    for i in range(num_collapse):
+        ref += next(iter(variants))["ref"]
+        alt += next(iter(variants))["alt"]
+
+    return chrom, pos, id, ref, alt, qual, filter, info, format, sample
 
 
 def make_dir(path):
@@ -217,22 +170,49 @@ def make_dir(path):
             if exception.errno != errno.EEXIST:
                 raise
 
+def parse_ivar_line(line):
+    if not re.match("REGION", line):
+        line = re.split("\t", line)
 
-def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequency=0, ignore_strand_bias=False, ignore_merge_codons=False):
-    '''
-    Description:
-        Main function to convert iVar variants TSV to VCF.
-    Input:
-        file_in             : iVar variants TSV file
-        file_out            : VCF output file
-        pass_only           : Only keep variants that PASS filter [True, False]
-        min_allele_freq     : Minimum allele frequency to keep a variant [0]
-        ignore_strand_bias  : Do not apply strand-bias filter [True, False]
-        ignore_merge_codons : Do not take into account consecutive positions belong to the same codon.
-    Returns:
-        None
-    '''
+        ## Assign intial fields to variables
+        CHROM = line[0]
+        POS = line[1]
+        ID = "."
+        REF = line[2]
+        ALT = line[3]
 
+        ## REF/ALF depths
+        REF_DP = int(line[4])
+        REF_RV = int(line[5])
+        REF_FW = REF_DP - REF_RV
+        ALT_RV = int(line[8])
+        ALT_DP = int(line[7])
+        ALT_FW = ALT_DP - ALT_RV
+        FORMAT= [REF_DP, REF_RV, REF_FW, ALT_DP, ALT_RV, ALT_FW]
+
+        ## Codon annotation
+        REF_CODON = line[15]
+        ALT_CODON = line[17]
+
+        ## Determine variant type
+        var_type = "SNP"
+        if ALT[0] == "+":
+            ALT = REF + ALT[1:]
+            var_type = "INS"
+        elif ALT[0] == "-":
+            REF += ALT[1:]
+            ALT = line[2]
+            var_type = "DEL"
+
+        QUAL = "."
+
+        ## Determine FILTER field
+        INFO = f"DP={line[11]}"
+        pass_test = line[13]
+
+        return CHROM, POS, ID, REF, ALT, QUAL, INFO, FORMAT, REF_CODON, ALT_CODON, pass_test, var_type
+
+def write_vcf_header(ref_len,ignore_strand_bias):
     ## Define VCF header
     header_source = [
         "##fileformat=VCFv4.2",
@@ -266,139 +246,128 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
             '##FILTER=<ID=sb,Description="Strand-bias fisher-test p-value < 0.05">'
         ]
     header = header_source + header_info + header_filter + header_format + header_cols
-
-    ## Initialise variables
-    var_list = []
-    var_count_dict = {"SNP": 0, "INS": 0, "DEL": 0}
-    dict_lines = {'CHROM':[], 'POS':[], 'ID':[], 'REF':[], 'ALT':[], 'REF_DP':[], 'REF_RV':[], 'ALT_DP':[], 'ALT_RV':[], 'QUAL':[], 'REF_CODON':[], 'ALT_CODON':[], 'FILTER': [], 'INFO':[], 'FORMAT':[], 'SAMPLE':[]}
-    write_line = False
     fout = open(file_out, "w")
     fout.write('\n'.join(header) + '\n')
+    fout.close()
+
+def write_vcf_line(chrom, pos, id , ref, alt, filter, qual, info, format):
+    FORMAT = "GT:REF_DP:REF_RV:REF_QUAL:ALT_DP:ALT_RV:ALT_QUAL:ALT_FREQ"
+    SAMPLE = f'1:{":".join(format)}'
+    oline= chrom + "\t" + pos + "\t" + id + "\t" + ref + "\t" + alt + "\t" + qual + "\t" + filter + "\t" + info + "\t" + format + "\t" + sample + "\n"
+    fout = open(file_out, "a")
+    fout.write(oline)
+
+def ivar_filter(pass_test):
+    if pass_test:
+        return False
+    else:
+        return "ft"
+
+def strand_bias_filter(format):
+    # format=[REF_DP, REF_RV, REF_FW, ALT_DP, ALT_RV, ALT_FW]
+    # table:
+    ##  REF_FW  REF_RV
+    ##  ALT_FW  ALT_RV
+    table = np.array([[format[2], format[1]], [format[5], format[4]]])
+    oddsr, pvalue = fisher_exact(table, alternative='greater')
+
+    # h0: both strands are equally represented. If test is significant h0 is refused so there is an strand bias.
+    if pvalue < 0.05:
+        return "sb"
+    else:
+        return False
+
+def main(args=None):
+    args = parse_args(args)
+
+    filename = os.path.splitext(file_in)[0]
+    out_dir = os.path.dirname(file_out)
+
+    ## Create output directory
+    make_dir(out_dir)
+
+    # Initialize vars
+    var_list = []
+    var_count_dict = {"SNP": 0, "INS": 0, "DEL": 0}
+    variants = OrderedDict()
+    q_pos = queue.Queue(maxsize=3)
+
     with open(file_in, 'r') as fin:
         for line in fin:
-            if not re.match("REGION", line):
-                line = re.split("\t", line)
+            # Parse line
+            ## format=[REF_DP, REF_RV, REF_FW, ALT_DP, ALT_RV, ALT_FW]
+            write_line = True
+            chrom, pos, id, ref, alt, qual, format, info, ref_codon, alt_codon, pass_test, var_type = parse_ivar_line(line)
 
-                ## Assign intial fields to variables
-                CHROM = line[0]
-                POS = line[1]
-                ID = "."
-                REF = line[2]
-                ALT = line[3]
+            # Process filters
+            ## ivar fisher test
+            filter = ivar_filter(pass_test)
+            ## strand-bias fisher test
+            if not ignore_strand_bias:
+                filter += ",".join(strand_bias_filter(FORMAT))
 
-                ## REF/ALF depths
-                REF_DP = int(line[4])
-                REF_RV = int(line[5])
-                REF_FW = REF_DP - REF_RV
-                ALT_RV = int(line[8])
-                ALT_DP = int(line[7])
-                ALT_FW = ALT_DP - ALT_RV
+            if not filter:
+                filter = "PASS"
 
-                ## Perform a fisher_exact test for strand bias detection
-                table = np.array([[REF_FW, REF_RV], [ALT_FW, ALT_RV]])
-                oddsr, pvalue = fisher_exact(table, alternative='greater')
+            ## Write output to vcf file
+            ### Filter variants
+            if pass_only and filter != "PASS":
+                write_line = False
+            ### AF filtering. ALT_DP/(ALT_DP+REF_DP)
+            if float(format[3]/(format[0]+format[3])) < min_allele_frequency:
+                write_line = False
+            ### Duplication filter
+            if (CHROM, POS, REF, ALT) in var_list:
+                write_line = False
+            else:
+                var_list.append((CHROM, POS, REF, ALT))
 
-                ## Determine variant type
-                var_type = "SNP"
-                if ALT[0] == "+":
-                    ALT = REF + ALT[1:]
-                    var_type = "INS"
-                elif ALT[0] == "-":
-                    REF += ALT[1:]
-                    ALT = line[2]
-                    var_type = "DEL"
+            ## Merge consecutive variants belonging to the same codon
+            if not ignore_merge_codons and var_type == "SNP":
+                if q_pos.full():
+                    fe_codon_ref = next(iter(variants))["ref_codon"]
+                    fe_codon_alt = next(iter(variants))["alt_codon"]
+                    num_collapse = check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt)
+                    chrom, pos, id, ref, alt, qual, format, info, ref_codon, alt_codon, pass_test, var_type = process_variants(variants,num_collapse)
 
-                QUAL = "."
-
-                ## Determine FILTER field
-                INFO = f"DP={line[11]}"
-                pass_test = line[13]
-                if ignore_strand_bias:
-                    if pass_test == "TRUE":
-                        FILTER = "PASS"
-                    else:
-                        FILTER = "ft"
+                    ## Empty variants dict and queue accordingly
+                    for i in range(num_collapse):
+                        variants.popitem()
+                        q_pos.get()
                 else:
-                    ## Add SB in the FILTER field if strand-bias p-value is significant
-                    if pvalue < 0.05 and pass_test == "TRUE":
-                        FILTER = "sb"
-                    elif pvalue > 0.05 and pass_test == "TRUE":
-                        FILTER = "PASS"
-                    elif pvalue <= 0.05 and pass_test == "FALSE":
-                        FILTER = "ft;sb"
-                    else:
-                        FILTER = "ft"
-                    INFO += f":SB_PV={str(round(pvalue, 5))}"
-
-                FORMAT = "GT:REF_DP:REF_RV:REF_QUAL:ALT_DP:ALT_RV:ALT_QUAL:ALT_FREQ"
-                SAMPLE = f'1:{":".join(line[4:11])}'
-
-                REF_CODON = line[15]
-                ALT_CODON = line[17]
-                param_list = [CHROM, POS, ID, REF, ALT, REF_DP, REF_RV, ALT_DP, ALT_RV, QUAL, REF_CODON, ALT_CODON, FILTER, INFO, FORMAT, SAMPLE]
-
-                if ignore_merge_codons or var_type != "SNP":
-                    write_line = True
-                    oline = (CHROM + "\t" + POS + "\t" + ID + "\t" + REF + "\t" + ALT + "\t" + QUAL + "\t" + FILTER + "\t" + INFO + "\t" + FORMAT + "\t" + SAMPLE + "\n")
-
-                else:
-                ## Determine whether to output variant
-                if pass_only and FILTER != "PASS":
                     write_line = False
-                if float(line[10]) < min_allele_frequency:
-                    write_line = False
-                if (CHROM, POS, REF, ALT) in var_list:
-                    write_line = False
-                else:
-                    var_list.append((CHROM, POS, REF, ALT))
+                    q_pos = q_pos.put(pos)
+                    variants[(chrom, pos, ref, alt)] = {"chrom": chrom,
+                                                        "pos": pos,
+                                                        "id": id,
+                                                        "ref": ref,
+                                                        "alt": alt,
+                                                        "qual": qual,
+                                                        "format": format,
+                                                        "info": info,
+                                                        "ref_codon": ref_codon,
+                                                        "alt_codon": alt_codon,
+                                                        "pass_test": pass_test,
+                                                        "var_type": var_type
+                                                        }
 
-                ## Write to file
-                if write_line:
-                    var_count_dict[var_type] += 1
-                    fout.write(oline)
+
+
+            ## Write to file
+            write_vcf_header(ignore_strand_bias)
+            if write_line:
+                var_count_dict[var_type] += 1
+                write_vcf_line(chrom, pos, id, ref, alt, filter, qual, format, info)
+
+    if not ignore_merge_codons:
+        ## handle last lines
+        while not q_pos.empty():
+
 
     ## Print variant counts to pass to MultiQC
     var_count_list = [(k, str(v)) for k, v in sorted(var_count_dict.items())]
     print("\t".join(["sample"] + [x[0] for x in var_count_list]))
     print("\t".join([filename] + [x[1] for x in var_count_list]))
-
-    ## Handle last 3 lines.
-    if  len(dict_lines["POS"]) == 2:
-        if check_consecutive(dict_lines["POS"]) == 2:
-            if codon_position(dict_lines["REF_CODON"][0],dict_lines["ALT_CODON"][0]) != 2:
-                write_line = True
-                num_collapse = 2
-                CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, SAMPLE = rename_vars(dict_lines, num_collapse)
-                oline = (CHROM + "\t" + POS + "\t" + ID + "\t" + REF + "\t" + ALT + "\t" + QUAL + "\t" + FILTER + "\t" + INFO + "\t" + FORMAT + "\t" + SAMPLE + "\n")
-                fout.write(oline)
-        else:
-            oline = (dict_lines["CHROM"][0] + "\t" + dict_lines["POS"][0] + "\t" + dict_lines["ID"][0] + "\t" + dict_lines["REF"][0] + "\t" + dict_lines["ALT"][0] + "\t" + dict_lines["QUAL"][0] + "\t" + dict_lines["FILTER"][0] + "\t" + dict_lines["INFO"][0] + "\t" + dict_lines["FORMAT"][0] + "\t" + dict_lines["SAMPLE"][0] + "\n")
-            oline1 = (dict_lines["CHROM"][1] + "\t" + dict_lines["POS"][1] + "\t" + dict_lines["ID"][1] + "\t" + dict_lines["REF"][1] + "\t" + dict_lines["ALT"][1] + "\t" + dict_lines["QUAL"][1] + "\t" + dict_lines["FILTER"][1] + "\t" + dict_lines["INFO"][1] + "\t" + dict_lines["FORMAT"][1] + "\t" + dict_lines["SAMPLE"][1] + "\n")
-            fout.write(oline)
-            fout.write(oline1)
-    elif len(dict_lines["POS"]) == 1:
-        oline =(dict_lines["CHROM"][0] + "\t" + dict_lines["POS"][0] + "\t" + dict_lines["ID"][0] + "\t" + dict_lines["REF"][0] + "\t" + dict_lines["ALT"][0] + "\t" + dict_lines["QUAL"][0] + "\t" + dict_lines["FILTER"][0] + "\t" + dict_lines["INFO"][0] + "\t" + dict_lines["FORMAT"][0] + "\t" + dict_lines["SAMPLE"][0] + "\n")
-        fout.write(oline)
-    fout.close()
-
-
-def main(args=None):
-    args = parse_args(args)
-
-    ## Create output directory
-    filename = os.path.splitext(file_in)[0]
-    out_dir = os.path.dirname(file_out)
-    make_dir(out_dir)
-
-    ivar_variants_to_vcf(
-        args.file_in,
-        args.file_out,
-        args.pass_only,
-        args.allele_freq_threshold,
-        args.ignore_strand_bias,
-        args.ignore_merge_codons,
-    )
-
 
 if __name__ == "__main__":
     sys.exit(main())
