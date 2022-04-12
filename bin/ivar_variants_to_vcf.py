@@ -71,13 +71,13 @@ def check_consecutive(mylist):
         return False
 
 
-def codon_position(seq1,seq2):
+def get_diff_position(seq1,seq2):
     '''
     Description:
         Function to compare two codon nucleotide sequences (size 3) and retuns the position where it differs.
     Input:
-        seq1 - list size 3 [A,T,C,G]
-        seq2 - list size 3 [A,T,C,G]
+        seq1 - string size 3 [A,T,C,G]. Ex. "ATC"
+        seq2 - string size 3 [A,T,C,G]. Ex. "ACC"
     Returns:
         Returns position where seq1 != seq2
     '''
@@ -91,8 +91,75 @@ def codon_position(seq1,seq2):
     else:
         return ind_diff[0]
 
+def merge_codons(lines_queue):
+    ## Always fill lines_queue until size 2.
+    if len(lines_queue["POS"]) == 0 or len(lines_queue["POS"]) == 1:
+        for i,j in enumerate(lines_queue):
+            lines_queue.setdefault(j, []).append(param_list[i])
+        write_line=False
 
-def rename_vars(dict_lines,num_collapse):
+    # If queue has size 2, we include the third line
+    elif len(lines_queue["POS"]) == 2:
+        for i,j in enumerate(lines_queue):
+            lines_queue.setdefault(j, []).append(param_list[i])
+        # Are two positions in the dict consecutive?
+        if check_consecutive(lines_queue["POS"]) == 2:
+            ## If the first position is not on the third position of the codon they are in the same codon.
+            if codon_position(lines_queue["REF_CODON"][0],lines_queue["ALT_CODON"][0]) != 2:
+                write_line = True
+                num_collapse = "2"
+                CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, SAMPLE = rename_vars(lines_queue, num_collapse)
+                oline = (CHROM + "\t" + POS + "\t" + ID + "\t" + REF + "\t" + ALT + "\t" + QUAL + "\t" + FILTER + "\t" + INFO + "\t" + FORMAT + "\t" + SAMPLE + "\n")
+                ## We removed the first two items in lines_queue with have been just processed.
+                for i,j in enumerate(lines_queue):
+                    lines_queue[list(lines_queue.keys())[i]].pop(0)
+                    lines_queue[list(lines_queue.keys())[i]].pop(0)
+            else:
+                write_line = True
+                oline =(lines_queue["CHROM"][0] + "\t" + lines_queue["POS"][0] + "\t" + lines_queue["ID"][0] + "\t" + lines_queue["REF"][0] + "\t" + lines_queue["ALT"][0] + "\t" + lines_queue["QUAL"][0] + "\t" + lines_queue["FILTER"][0] + "\t" + lines_queue["INFO"][0] + "\t" + lines_queue["FORMAT"][0] + "\t" + lines_queue["SAMPLE"][0] + "\n")
+                for i,j in enumerate(lines_queue):
+                    lines_queue[list(lines_queue.keys())[i]].pop(0)
+
+        # Are the three positions in the dict consecutive?
+        elif check_consecutive(lines_queue["POS"]) == 3:
+            ## we check the first position in which codon position is to process it acordingly.
+            # If first position is in the first codon position all three positions belong to the same codon.
+            if codon_position(lines_queue["REF_CODON"][0], lines_queue["ALT_CODON"][0]) == 0:
+                write_line = True
+                num_collapse = 3
+                CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, SAMPLE = rename_vars(lines_queue, num_collapse)
+                oline = (CHROM + "\t" + POS + "\t" + ID + "\t" + REF + "\t" + ALT + "\t" + QUAL + "\t" + FILTER + "\t" + INFO + "\t" + FORMAT + "\t" + SAMPLE + "\n")
+                for i,j in enumerate(lines_queue):
+                    lines_queue[list(lines_queue.keys())[i]].pop(0)
+                    lines_queue[list(lines_queue.keys())[i]].pop(0)
+                # we empty the lines_queue
+                lines_queue = {'CHROM':[], 'POS':[], 'ID':[], 'REF':[], 'ALT':[], 'REF_DP':[], 'REF_RV':[], 'ALT_DP':[], 'ALT_RV':[], 'QUAL':[], 'REF_CODON':[], 'ALT_CODON':[], 'FILTER':[], 'INFO':[], 'FORMAT':[], 'SAMPLE':[]}
+            # If first position is in the second codon position, we have the two first positions belonging to the same codon and the last one independent.
+            elif codon_position(lines_queue["REF_CODON"][0], lines_queue["ALT_CODON"][0]) == 1:
+                write_line = True
+                num_collapse = 2
+                CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, SAMPLE = rename_vars(lines_queue, num_collapse)
+                oline = (CHROM + "\t" + POS + "\t" + ID + "\t" + REF + "\t" + ALT + "\t" + QUAL + "\t" + FILTER + "\t" + INFO + "\t" + FORMAT + "\t" + SAMPLE + "\n")
+                for i,j in enumerate(lines_queue):
+                    lines_queue[list(lines_queue.keys())[i]].pop(0)
+                    lines_queue[list(lines_queue.keys())[i]].pop(0)
+            ## Finally if we have the first position in the last codon position, we write first position and left the remaining two to be evaluated in the next iteration.
+            elif codon_position(lines_queue["REF_CODON"][0], lines_queue["ALT_CODON"][0]) == 2:
+                write_line = True
+                oline =(lines_queue["CHROM"][0] + "\t" + lines_queue["POS"][0] + "\t" + lines_queue["ID"][0] + "\t" + lines_queue["REF"][0] + "\t" + lines_queue["ALT"][0] + "\t" + lines_queue["QUAL"][0] + "\t" + lines_queue["FILTER"][0] + "\t" + lines_queue["INFO"][0] + "\t" + lines_queue["FORMAT"][0] + "\t" + lines_queue["SAMPLE"][0] + "\n")
+                for i,j in enumerate(lines_queue):
+                    lines_queue[list(lines_queue.keys())[i]].pop(0)
+
+        elif check_consecutive(lines_queue["POS"]) == False:
+            write_line = True
+            oline =(lines_queue["CHROM"][0] + "\t" + lines_queue["POS"][0] + "\t" + lines_queue["ID"][0] + "\t" + lines_queue["REF"][0] + "\t" + lines_queue["ALT"][0] + "\t" + lines_queue["QUAL"][0] + "\t" + lines_queue["FILTER"][0] + "\t" + lines_queue["INFO"][0] + "\t" + lines_queue["FORMAT"][0] + "\t" + lines_queue["SAMPLE"][0] + "\n")
+            for i,j in enumerate(lines_queue):
+                lines_queue[list(lines_queue.keys())[i]].pop(0)
+    else:
+        print("Something went terribly wrong!!" + str(len(lines_queue["POS"])))
+
+
+def get_lines_info(dict_lines,num_collapse):
     '''
     Description:
         The function set the vars acordingly to the lines to collapse do to consecutive variants.
@@ -105,11 +172,15 @@ def rename_vars(dict_lines,num_collapse):
     CHROM = dict_lines["CHROM"][0]
     POS = dict_lines["POS"][0]
     ID = dict_lines["ID"][0]
-    # If two consecutive collapse 2 lines into one.
-    if int(num_collapse) == 2:
+    # If no consecutive, process one line
+    if int(num_collapse) == 1:
+        REF = str(dict_lines["REF"][0])
+        ALT = str(dict_lines["ALT"][0])
+    # If two consecutive process two lines and write one.
+    elif int(num_collapse) == 2:
         REF = str(dict_lines["REF"][0]) + str(dict_lines["REF"][1])
         ALT = str(dict_lines["ALT"][0]) + str(dict_lines["ALT"][1])
-    # If three consecutive collapse 3 lines into one.
+    # If three consecutive process three lines and write one
     elif int(num_collapse) == 3:
         REF = str(dict_lines["REF"][0]) + str(dict_lines["REF"][1]) + str(dict_lines["REF"][2])
         ALT = str(dict_lines["ALT"][0]) + str(dict_lines["ALT"][1]) + str(dict_lines["ALT"][2])
@@ -161,10 +232,6 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
     Returns:
         None
     '''
-    ## Create output directory
-    filename = os.path.splitext(file_in)[0]
-    out_dir = os.path.dirname(file_out)
-    make_dir(out_dir)
 
     ## Define VCF header
     header_source = [
@@ -275,75 +342,6 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
                     oline = (CHROM + "\t" + POS + "\t" + ID + "\t" + REF + "\t" + ALT + "\t" + QUAL + "\t" + FILTER + "\t" + INFO + "\t" + FORMAT + "\t" + SAMPLE + "\n")
 
                 else:
-                    ## dict_lines contains all the informative fields for 3 positions in the vcf.
-                    # dict_lines has a maximum size of three.
-
-                    ## Always fill dict_lines until size 2.
-                    if len(dict_lines["POS"]) == 0 or len(dict_lines["POS"]) == 1:
-                        for i,j in enumerate(dict_lines):
-                            dict_lines.setdefault(j, []).append(param_list[i])
-                        write_line=False
-
-                    # If queue has size 2, we include the third line
-                    elif len(dict_lines["POS"]) == 2:
-                        for i,j in enumerate(dict_lines):
-                            dict_lines.setdefault(j, []).append(param_list[i])
-                        # Are two positions in the dict consecutive?
-                        if check_consecutive(dict_lines["POS"]) == 2:
-                            ## If the first position is not on the third position of the codon they are in the same codon.
-                            if codon_position(dict_lines["REF_CODON"][0],dict_lines["ALT_CODON"][0]) != 2:
-                                write_line = True
-                                num_collapse = "2"
-                                CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, SAMPLE = rename_vars(dict_lines, num_collapse)
-                                oline = (CHROM + "\t" + POS + "\t" + ID + "\t" + REF + "\t" + ALT + "\t" + QUAL + "\t" + FILTER + "\t" + INFO + "\t" + FORMAT + "\t" + SAMPLE + "\n")
-                                ## We removed the first two items in dict_lines with have been just processed.
-                                for i,j in enumerate(dict_lines):
-                                    dict_lines[list(dict_lines.keys())[i]].pop(0)
-                                    dict_lines[list(dict_lines.keys())[i]].pop(0)
-                            else:
-                                write_line = True
-                                oline =(dict_lines["CHROM"][0] + "\t" + dict_lines["POS"][0] + "\t" + dict_lines["ID"][0] + "\t" + dict_lines["REF"][0] + "\t" + dict_lines["ALT"][0] + "\t" + dict_lines["QUAL"][0] + "\t" + dict_lines["FILTER"][0] + "\t" + dict_lines["INFO"][0] + "\t" + dict_lines["FORMAT"][0] + "\t" + dict_lines["SAMPLE"][0] + "\n")
-                                for i,j in enumerate(dict_lines):
-                                    dict_lines[list(dict_lines.keys())[i]].pop(0)
-
-                        # Are the three positions in the dict consecutive?
-                        elif check_consecutive(dict_lines["POS"]) == 3:
-                            ## we check the first position in which codon position is to process it acordingly.
-                            # If first position is in the first codon position all three positions belong to the same codon.
-                            if codon_position(dict_lines["REF_CODON"][0], dict_lines["ALT_CODON"][0]) == 0:
-                                write_line = True
-                                num_collapse = 3
-                                CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, SAMPLE = rename_vars(dict_lines, num_collapse)
-                                oline = (CHROM + "\t" + POS + "\t" + ID + "\t" + REF + "\t" + ALT + "\t" + QUAL + "\t" + FILTER + "\t" + INFO + "\t" + FORMAT + "\t" + SAMPLE + "\n")
-                                for i,j in enumerate(dict_lines):
-                                    dict_lines[list(dict_lines.keys())[i]].pop(0)
-                                    dict_lines[list(dict_lines.keys())[i]].pop(0)
-                                # we empty the dict_lines
-                                dict_lines = {'CHROM':[], 'POS':[], 'ID':[], 'REF':[], 'ALT':[], 'REF_DP':[], 'REF_RV':[], 'ALT_DP':[], 'ALT_RV':[], 'QUAL':[], 'REF_CODON':[], 'ALT_CODON':[], 'FILTER':[], 'INFO':[], 'FORMAT':[], 'SAMPLE':[]}
-                            # If first position is in the second codon position, we have the two first positions belonging to the same codon and the last one independent.
-                            elif codon_position(dict_lines["REF_CODON"][0], dict_lines["ALT_CODON"][0]) == 1:
-                                write_line = True
-                                num_collapse = 2
-                                CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT, SAMPLE = rename_vars(dict_lines, num_collapse)
-                                oline = (CHROM + "\t" + POS + "\t" + ID + "\t" + REF + "\t" + ALT + "\t" + QUAL + "\t" + FILTER + "\t" + INFO + "\t" + FORMAT + "\t" + SAMPLE + "\n")
-                                for i,j in enumerate(dict_lines):
-                                    dict_lines[list(dict_lines.keys())[i]].pop(0)
-                                    dict_lines[list(dict_lines.keys())[i]].pop(0)
-                            ## Finally if we have the first position in the last codon position, we write first position and left the remaining two to be evaluated in the next iteration.
-                            elif codon_position(dict_lines["REF_CODON"][0], dict_lines["ALT_CODON"][0]) == 2:
-                                write_line = True
-                                oline =(dict_lines["CHROM"][0] + "\t" + dict_lines["POS"][0] + "\t" + dict_lines["ID"][0] + "\t" + dict_lines["REF"][0] + "\t" + dict_lines["ALT"][0] + "\t" + dict_lines["QUAL"][0] + "\t" + dict_lines["FILTER"][0] + "\t" + dict_lines["INFO"][0] + "\t" + dict_lines["FORMAT"][0] + "\t" + dict_lines["SAMPLE"][0] + "\n")
-                                for i,j in enumerate(dict_lines):
-                                    dict_lines[list(dict_lines.keys())[i]].pop(0)
-
-                        elif check_consecutive(dict_lines["POS"]) == False:
-                            write_line = True
-                            oline =(dict_lines["CHROM"][0] + "\t" + dict_lines["POS"][0] + "\t" + dict_lines["ID"][0] + "\t" + dict_lines["REF"][0] + "\t" + dict_lines["ALT"][0] + "\t" + dict_lines["QUAL"][0] + "\t" + dict_lines["FILTER"][0] + "\t" + dict_lines["INFO"][0] + "\t" + dict_lines["FORMAT"][0] + "\t" + dict_lines["SAMPLE"][0] + "\n")
-                            for i,j in enumerate(dict_lines):
-                                dict_lines[list(dict_lines.keys())[i]].pop(0)
-                    else:
-                        print("Something went terribly wrong!!" + str(len(dict_lines["POS"])))
-
                 ## Determine whether to output variant
                 if pass_only and FILTER != "PASS":
                     write_line = False
@@ -386,6 +384,12 @@ def ivar_variants_to_vcf(file_in, file_out, pass_only=False, min_allele_frequenc
 
 def main(args=None):
     args = parse_args(args)
+
+    ## Create output directory
+    filename = os.path.splitext(file_in)[0]
+    out_dir = os.path.dirname(file_out)
+    make_dir(out_dir)
+
     ivar_variants_to_vcf(
         args.file_in,
         args.file_out,
