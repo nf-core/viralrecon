@@ -5,8 +5,9 @@ import sys
 import re
 import errno
 import argparse
-import queue
+#import queue
 from collections import OrderedDict
+from collections import deque
 
 import numpy as np
 from scipy.stats import fisher_exact
@@ -59,13 +60,18 @@ def check_consecutive(mylist):
         Number of items consecutive in the list - [False, 1, 2]
     """
     my_list = list(map(int, mylist))
-
+    print("LIST INSIDE CHECKCONSECUTIVE: ")
+    print(my_list)
     ## Check if the list contains consecutive numbers
-    if sorted(my_list) == list(range(min(my_list), max(my_list) + 1)):
+    if len(my_list) == 1:
+        return False
+    elif sorted(my_list) == list(range(min(my_list), max(my_list) + 1)):
+        print(my_list)
         return len(my_list)
     else:
         ## If not, and the list is > 1, remove the last item and reevaluate.
-        if len(my_list) > 1:
+        if len(my_list) > 2:
+            print(my_list)
             my_list.pop()
             if sorted(my_list) == list(range(min(my_list), max(my_list) + 1)):
                 return len(my_list)
@@ -97,9 +103,11 @@ def get_diff_position(seq1, seq2):
 
 def check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt):
     # Are two positions in the dict consecutive?
+    print("CHECK CONSECUTIVE: " + str(check_consecutive(list(q_pos))))
     if check_consecutive(list(q_pos)) == 2:
+        print("GETDIFFPOS WHEN TWO CONSECUTIVE " + str(get_diff_position(fe_codon_ref, fe_codon_alt)))
         ## If the first position is not on the third position of the codon they are in the same codon.
-        if codon_position(fe_codon_ref, fe_codon_alt) != 2:
+        if get_diff_position(fe_codon_ref, fe_codon_alt) != 2:
             num_collapse = 2
         else:
             num_collapse = 1
@@ -107,13 +115,14 @@ def check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt):
     elif check_consecutive(list(q_pos)) == 3:
         ## we check the first position in which codon position is to process it acordingly.
         # If first position is in the first codon position all three positions belong to the same codon.
-        if codon_position(fe_codon_ref, fe_codon_alt) == 0:
+        print("GETDIFFPOS WHEN THREE CONSECUTIVE " + str(get_diff_position(fe_codon_ref, fe_codon_alt)))
+        if get_diff_position(fe_codon_ref, fe_codon_alt) == 0:
             num_collapse = 3
         # If first position is in the second codon position, we have the two first positions belonging to the same codon and the last one independent.
-        elif codon_position(fe_codon_ref, fe_codon_alt) == 1:
+        elif get_diff_position(fe_codon_ref, fe_codon_alt) == 1:
             num_collapse = 2
         ## Finally if we have the first position in the last codon position, we write first position and left the remaining two to be evaluated in the next iteration.
-        elif codon_position(fe_codon_ref, fe_codon_alt) == 2:
+        elif get_diff_position(fe_codon_ref, fe_codon_alt) == 2:
             num_collapse = 1
     # If no consecutive process only one line.
     elif check_consecutive(list(q_pos)) == False:
@@ -132,9 +141,9 @@ def process_variants(variants, num_collapse):
     Returns::
         Vars fixed.
     """
-    key_list = ["chrom", "pos", "id", "qual", "info", "format"]
+    key_list = ["chrom", "pos", "id", "qual", "filter", "info", "format"]
     chrom, pos, id, qual, filter, info, format = [
-        next(iter(variants))[key] for key in key_list
+        variants[next(iter(variants))][key] for key in key_list
     ]
     # chrom = next(iter(variants))["chrom"]
     # pos = next(iter(variants))["pos"]
@@ -152,11 +161,13 @@ def process_variants(variants, num_collapse):
     # If no consecutive, process one variant line
     # If two consecutive, process two variant lines into one
     # If three consecutive process three variant lines and write one
+    ref = ""
+    alt = ""
     for i in range(num_collapse):
-        ref += next(iter(variants))["ref"]
-        alt += next(iter(variants))["alt"]
+        ref += variants[next(iter(variants))]["ref"]
+        alt += variants[next(iter(variants))]["alt"]
 
-    return chrom, pos, id, ref, alt, qual, filter, info, format, sample
+    return chrom, pos, id, ref, alt, qual, filter, info, format
 
 
 def make_dir(path):
@@ -328,7 +339,7 @@ def main(args=None):
     var_list = []
     var_count_dict = {"SNP": 0, "INS": 0, "DEL": 0}
     variants = OrderedDict()
-    q_pos = queue.Queue(maxsize=3)
+    q_pos = deque([],maxlen=3)
 
     ## Write header to file
     write_vcf_header(29990,args.ignore_strand_bias,args.file_out,filename)
@@ -385,9 +396,29 @@ def main(args=None):
 
                 ## Merge consecutive variants belonging to the same codon
                 if not args.ignore_merge_codons and var_type == "SNP":
-                    if q_pos.full():
-                        fe_codon_ref = next(iter(variants))["ref_codon"]
-                        fe_codon_alt = next(iter(variants))["alt_codon"]
+
+                    ## re-fill queue accordingly
+                    q_pos.append(pos)
+                    variants[(chrom, pos, ref, alt)] = {
+                        "chrom": chrom,
+                        "pos": pos,
+                        "id": id,
+                        "ref": ref,
+                        "alt": alt,
+                        "qual": qual,
+                        "filter": filter,
+                        "info": info,
+                        "format": format,
+                        "ref_codon": ref_codon,
+                        "alt_codon": alt_codon
+                    }
+
+                    if len(q_pos) == q_pos.maxlen :
+                        print(q_pos)
+                        print(variants)
+                        print("longitud cola:" + str(len(q_pos)))
+                        fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
+                        fe_codon_alt = variants[next(iter(variants))]["alt_codon"]
                         num_collapse = check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt)
                         (
                             chrom,
@@ -396,37 +427,17 @@ def main(args=None):
                             ref,
                             alt,
                             qual,
-                            format,
+                            filter,
                             info,
-                            ref_codon,
-                            alt_codon,
-                            pass_test,
-                            var_type,
+                            format
                         ) = process_variants(variants, num_collapse)
 
                         ## Empty variants dict and queue accordingly
                         for i in range(num_collapse):
-                            variants.popitem()
-                            q_pos.get()
+                            variants.popitem(last=False)
+                            q_pos.popleft()
                     else:
                         write_line = False
-
-                    ## re-fill queue accordingly
-                    q_pos = q_pos.put(pos)
-                    variants[(chrom, pos, ref, alt)] = {
-                        "chrom": chrom,
-                        "pos": pos,
-                        "id": id,
-                        "ref": ref,
-                        "alt": alt,
-                        "qual": qual,
-                        "format": format,
-                        "info": info,
-                        "ref_codon": ref_codon,
-                        "alt_codon": alt_codon,
-                        "pass_test": pass_test,
-                        "var_type": var_type,
-                    }
 
                 ## Write output to vcf file
                 if write_line:
@@ -435,9 +446,9 @@ def main(args=None):
 
     if not args.ignore_merge_codons:
         ## handle last lines
-        while not q_pos.empty():
-            fe_codon_ref = next(iter(variants))["ref_codon"]
-            fe_codon_alt = next(iter(variants))["alt_codon"]
+        while len(q_pos) > 0:
+            fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
+            fe_codon_alt = variants[next(iter(variants))]["alt_codon"]
             num_collapse = check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt)
             (
                 chrom,
@@ -446,19 +457,17 @@ def main(args=None):
                 ref,
                 alt,
                 qual,
-                format,
+                filter,
                 info,
-                ref_codon,
-                alt_codon,
-                pass_test,
-                var_type,
+                format
             ) = process_variants(variants, num_collapse)
+
             var_count_dict[var_type] += 1
-            write_vcf_line(chrom, pos, id, ref, alt, filter, qual, info, format)
+            write_vcf_line(chrom, pos, id, ref, alt, filter, qual, info, format, args.file_out)
             ## Empty variants dict and queue accordingly
             for i in range(num_collapse):
                 variants.popitem()
-                q_pos.get()
+                q_pos.pop()
 
     ## Print variant counts to pass to MultiQC
     var_count_list = [(k, str(v)) for k, v in sorted(var_count_dict.items())]
