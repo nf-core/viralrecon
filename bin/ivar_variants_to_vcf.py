@@ -84,14 +84,17 @@ def parse_ivar_line(line):
     REF = line[2]
     ALT = line[3]
 
-    ## REF/ALF depths
+    ## REF/ALF depths and quals
     REF_DP = int(line[4])
     REF_RV = int(line[5])
     REF_FW = REF_DP - REF_RV
+    REF_QUAL = int(line[6])
     ALT_RV = int(line[8])
     ALT_DP = int(line[7])
     ALT_FW = ALT_DP - ALT_RV
-    FORMAT = [REF_DP, REF_RV, REF_FW, ALT_DP, ALT_RV, ALT_FW]
+    ALT_QUAL = int(line[9])
+    ALT_FREQ = float(line[10])
+    FORMAT = [REF_DP, REF_RV, REF_QUAL, ALT_DP, ALT_RV, ALT_QUAL, ALT_FREQ]
 
     ## Codon annotation
     REF_CODON = line[15]
@@ -143,7 +146,7 @@ def ivar_filter(pass_test):
     return:
         Whether it passes the filter or not. [False, "ft"]
     """
-    if pass_test:
+    if pass_test == "TRUE":
         return False
     else:
         return "ft"
@@ -158,11 +161,11 @@ def strand_bias_filter(format):
     return:
         Whether it passes the filter or not. [False, "sb"]
     """
-    # format=[REF_DP, REF_RV, REF_FW, ALT_DP, ALT_RV, ALT_FW]
+    # format=[REF_DP, REF_RV, REF_QUAL, ALT_DP, ALT_RV, ALT_QUAL, ALT_FREQ]
     # table:
     ##  REF_FW  REF_RV
     ##  ALT_FW  ALT_RV
-    table = np.array([[format[2], format[1]], [format[5], format[4]]])
+    table = np.array([[format[0] - format[1], format[1]], [format[3] - format [4], format[4]]])
     oddsr, pvalue = fisher_exact(table, alternative="greater")
 
     # h0: both strands are equally represented.
@@ -394,9 +397,9 @@ def main(args=None):
     # Create output directory
     make_dir(out_dir)
 
-    ##########################
-    ## Write header to file ##
-    ##########################
+    ##############################
+    ## Write vcf header to file ##
+    ##############################
     write_vcf_header(29990, args.ignore_strand_bias, args.file_out, filename)
 
     #################################
@@ -409,7 +412,8 @@ def main(args=None):
                 ################
                 ## Parse line ##
                 ################
-                ## format=[REF_DP, REF_RV, REF_FW, ALT_DP, ALT_RV, ALT_FW]
+                ## format=
+                # [REF_DP, REF_RV, REF_QUAL, ALT_DP, ALT_RV, ALT_QUAL, ALT_FREQ]
                 write_line = True
                 (
                     chrom,
@@ -425,7 +429,6 @@ def main(args=None):
                     pass_test,
                     var_type,
                 ) = parse_ivar_line(line)
-
                 #####################
                 ## Process filters ##
                 #####################
@@ -433,7 +436,6 @@ def main(args=None):
                 filter = ""
                 if ivar_filter(pass_test):
                     filter = ivar_filter(pass_test)
-                    print(filter)
                 ## strand-bias fisher test
                 if not args.ignore_strand_bias:
                     if strand_bias_filter(format):
@@ -544,8 +546,8 @@ def main(args=None):
             )
             ## Empty variants dict and queue accordingly
             for i in range(num_collapse):
-                variants.popitem()
-                q_pos.pop()
+                variants.popitem(last=False)
+                q_pos.popleft()
 
     #############################################
     ##  variant counts to pass to MultiQC ##
