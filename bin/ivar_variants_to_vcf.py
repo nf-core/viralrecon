@@ -359,6 +359,7 @@ def process_variants(variants, num_collapse):
     Returns::
         Vars fixed: chrom, pos, id, ref, alt, qual, filter, info, format
     """
+    # Collapsed variant parameters equal to first variant
     key_list = ["chrom", "pos", "id", "qual", "filter", "info", "format"]
     chrom, pos, id, qual, filter, info, format = [
         variants[next(iter(variants))][key] for key in key_list
@@ -369,9 +370,11 @@ def process_variants(variants, num_collapse):
     # If three consecutive process three variant lines and write one
     ref = ""
     alt = ""
+    iter_variants = iter(variants)
     for i in range(num_collapse):
-        ref += variants[next(iter(variants))]["ref"]
-        alt += variants[next(iter(variants))]["alt"]
+        var = next(iter_variants)
+        ref += variants[var]["ref"]
+        alt += variants[var]["alt"]
 
     return chrom, pos, id, ref, alt, qual, filter, info, format
 
