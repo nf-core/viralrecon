@@ -550,7 +550,7 @@ def main(args=None):
                 q_pos.popleft()
 
     #############################################
-    ##  variant counts to pass to MultiQC ##
+    ##  variant counts to pass to MultiQC      ##
     #############################################
     var_count_list = [(k, str(v)) for k, v in sorted(var_count_dict.items())]
     ("\t".join(["sample"] + [x[0] for x in var_count_list]))
