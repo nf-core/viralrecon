@@ -5,7 +5,8 @@ import sys
 import re
 import errno
 import argparse
-#import queue
+
+# import queue
 from collections import OrderedDict
 from collections import deque
 
@@ -105,7 +106,10 @@ def check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt):
     # Are two positions in the dict consecutive?
     print("CHECK CONSECUTIVE: " + str(check_consecutive(list(q_pos))))
     if check_consecutive(list(q_pos)) == 2:
-        print("GETDIFFPOS WHEN TWO CONSECUTIVE " + str(get_diff_position(fe_codon_ref, fe_codon_alt)))
+        print(
+            "GETDIFFPOS WHEN TWO CONSECUTIVE "
+            + str(get_diff_position(fe_codon_ref, fe_codon_alt))
+        )
         ## If the first position is not on the third position of the codon they are in the same codon.
         if get_diff_position(fe_codon_ref, fe_codon_alt) != 2:
             num_collapse = 2
@@ -115,7 +119,10 @@ def check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt):
     elif check_consecutive(list(q_pos)) == 3:
         ## we check the first position in which codon position is to process it acordingly.
         # If first position is in the first codon position all three positions belong to the same codon.
-        print("GETDIFFPOS WHEN THREE CONSECUTIVE " + str(get_diff_position(fe_codon_ref, fe_codon_alt)))
+        print(
+            "GETDIFFPOS WHEN THREE CONSECUTIVE "
+            + str(get_diff_position(fe_codon_ref, fe_codon_alt))
+        )
         if get_diff_position(fe_codon_ref, fe_codon_alt) == 0:
             num_collapse = 3
         # If first position is in the second codon position, we have the two first positions belonging to the same codon and the last one independent.
@@ -188,58 +195,58 @@ def make_dir(path):
 
 
 def parse_ivar_line(line):
-        line = re.split("\t", line)
+    line = re.split("\t", line)
 
-        ## Assign intial fields to variables
-        CHROM = line[0]
-        POS = line[1]
-        ID = "."
-        REF = line[2]
-        ALT = line[3]
+    ## Assign intial fields to variables
+    CHROM = line[0]
+    POS = line[1]
+    ID = "."
+    REF = line[2]
+    ALT = line[3]
 
-        ## REF/ALF depths
-        REF_DP = int(line[4])
-        REF_RV = int(line[5])
-        REF_FW = REF_DP - REF_RV
-        ALT_RV = int(line[8])
-        ALT_DP = int(line[7])
-        ALT_FW = ALT_DP - ALT_RV
-        FORMAT = [REF_DP, REF_RV, REF_FW, ALT_DP, ALT_RV, ALT_FW]
+    ## REF/ALF depths
+    REF_DP = int(line[4])
+    REF_RV = int(line[5])
+    REF_FW = REF_DP - REF_RV
+    ALT_RV = int(line[8])
+    ALT_DP = int(line[7])
+    ALT_FW = ALT_DP - ALT_RV
+    FORMAT = [REF_DP, REF_RV, REF_FW, ALT_DP, ALT_RV, ALT_FW]
 
-        ## Codon annotation
-        REF_CODON = line[15]
-        ALT_CODON = line[17]
+    ## Codon annotation
+    REF_CODON = line[15]
+    ALT_CODON = line[17]
 
-        ## Determine variant type
-        var_type = "SNP"
-        if ALT[0] == "+":
-            ALT = REF + ALT[1:]
-            var_type = "INS"
-        elif ALT[0] == "-":
-            REF += ALT[1:]
-            ALT = line[2]
-            var_type = "DEL"
+    ## Determine variant type
+    var_type = "SNP"
+    if ALT[0] == "+":
+        ALT = REF + ALT[1:]
+        var_type = "INS"
+    elif ALT[0] == "-":
+        REF += ALT[1:]
+        ALT = line[2]
+        var_type = "DEL"
 
-        QUAL = "."
+    QUAL = "."
 
-        ## Determine FILTER field
-        INFO = f"DP={line[11]}"
-        pass_test = line[13]
+    ## Determine FILTER field
+    INFO = f"DP={line[11]}"
+    pass_test = line[13]
 
-        return (
-            CHROM,
-            POS,
-            ID,
-            REF,
-            ALT,
-            QUAL,
-            INFO,
-            FORMAT,
-            REF_CODON,
-            ALT_CODON,
-            pass_test,
-            var_type
-        )
+    return (
+        CHROM,
+        POS,
+        ID,
+        REF,
+        ALT,
+        QUAL,
+        INFO,
+        FORMAT,
+        REF_CODON,
+        ALT_CODON,
+        pass_test,
+        var_type,
+    )
 
 
 def write_vcf_header(ref_len, ignore_strand_bias, file_out, filename):
@@ -304,6 +311,7 @@ def write_vcf_line(chrom, pos, id, ref, alt, filter, qual, info, format, file_ou
     fout.write(oline)
     fout.close()
 
+
 def ivar_filter(pass_test):
     if pass_test:
         return False
@@ -316,7 +324,7 @@ def strand_bias_filter(format):
     # table:
     ##  REF_FW  REF_RV
     ##  ALT_FW  ALT_RV
-    table = np.array([ [format[2], format[1]], [format[5], format[4]] ])
+    table = np.array([[format[2], format[1]], [format[5], format[4]]])
     oddsr, pvalue = fisher_exact(table, alternative="greater")
 
     # h0: both strands are equally represented. If test is significant h0 is refused so there is an strand bias.
@@ -339,10 +347,10 @@ def main(args=None):
     var_list = []
     var_count_dict = {"SNP": 0, "INS": 0, "DEL": 0}
     variants = OrderedDict()
-    q_pos = deque([],maxlen=3)
+    q_pos = deque([], maxlen=3)
 
     ## Write header to file
-    write_vcf_header(29990,args.ignore_strand_bias,args.file_out,filename)
+    write_vcf_header(29990, args.ignore_strand_bias, args.file_out, filename)
 
     with open(args.file_in, "r") as fin:
         for line in fin:
@@ -368,7 +376,7 @@ def main(args=None):
                 # Process filters
                 ## ivar fisher test
                 filter = ""
-                if  ivar_filter(pass_test):
+                if ivar_filter(pass_test):
                     filter = ivar_filter(pass_test)
                     print(filter)
                 ## strand-bias fisher test
@@ -386,7 +394,10 @@ def main(args=None):
                 if args.pass_only and filter != "PASS":
                     write_line = False
                 ### AF filtering. ALT_DP/(ALT_DP+REF_DP)
-                if float(format[3] / (format[0] + format[3])) < args.allele_freq_threshold:
+                if (
+                    float(format[3] / (format[0] + format[3]))
+                    < args.allele_freq_threshold
+                ):
                     write_line = False
                 ### Duplication filter
                 if (chrom, pos, ref, alt) in var_list:
@@ -410,16 +421,18 @@ def main(args=None):
                         "info": info,
                         "format": format,
                         "ref_codon": ref_codon,
-                        "alt_codon": alt_codon
+                        "alt_codon": alt_codon,
                     }
 
-                    if len(q_pos) == q_pos.maxlen :
+                    if len(q_pos) == q_pos.maxlen:
                         print(q_pos)
                         print(variants)
                         print("longitud cola:" + str(len(q_pos)))
                         fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
                         fe_codon_alt = variants[next(iter(variants))]["alt_codon"]
-                        num_collapse = check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt)
+                        num_collapse = check_merge_codons(
+                            q_pos, fe_codon_ref, fe_codon_alt
+                        )
                         (
                             chrom,
                             pos,
@@ -429,7 +442,7 @@ def main(args=None):
                             qual,
                             filter,
                             info,
-                            format
+                            format,
                         ) = process_variants(variants, num_collapse)
 
                         ## Empty variants dict and queue accordingly
@@ -442,7 +455,18 @@ def main(args=None):
                 ## Write output to vcf file
                 if write_line:
                     var_count_dict[var_type] += 1
-                    write_vcf_line(chrom, pos, id, ref, alt, filter, qual, info, format, args.file_out)
+                    write_vcf_line(
+                        chrom,
+                        pos,
+                        id,
+                        ref,
+                        alt,
+                        filter,
+                        qual,
+                        info,
+                        format,
+                        args.file_out,
+                    )
 
     if not args.ignore_merge_codons:
         ## handle last lines
@@ -450,20 +474,14 @@ def main(args=None):
             fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
             fe_codon_alt = variants[next(iter(variants))]["alt_codon"]
             num_collapse = check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt)
-            (
-                chrom,
-                pos,
-                id,
-                ref,
-                alt,
-                qual,
-                filter,
-                info,
-                format
-            ) = process_variants(variants, num_collapse)
+            (chrom, pos, id, ref, alt, qual, filter, info, format) = process_variants(
+                variants, num_collapse
+            )
 
             var_count_dict[var_type] += 1
-            write_vcf_line(chrom, pos, id, ref, alt, filter, qual, info, format, args.file_out)
+            write_vcf_line(
+                chrom, pos, id, ref, alt, filter, qual, info, format, args.file_out
+            )
             ## Empty variants dict and queue accordingly
             for i in range(num_collapse):
                 variants.popitem()
