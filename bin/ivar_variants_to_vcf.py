@@ -5,8 +5,6 @@ import sys
 import re
 import errno
 import argparse
-
-# import queue
 from collections import OrderedDict
 from collections import deque
 
@@ -51,132 +49,6 @@ def parse_args(args=None):
     return parser.parse_args(args)
 
 
-def check_consecutive(mylist):
-    """
-    Description:
-        This function checks if a list of three or two  numbers are consecutive and returns how many items are consecutive.
-    input:
-        my_list - A list of integers
-    return:
-        Number of items consecutive in the list - [False, 1, 2]
-    """
-    my_list = list(map(int, mylist))
-    print("LIST INSIDE CHECKCONSECUTIVE: ")
-    print(my_list)
-    ## Check if the list contains consecutive numbers
-    if len(my_list) == 1:
-        return False
-    elif sorted(my_list) == list(range(min(my_list), max(my_list) + 1)):
-        print(my_list)
-        return len(my_list)
-    else:
-        ## If not, and the list is > 1, remove the last item and reevaluate.
-        if len(my_list) > 2:
-            print(my_list)
-            my_list.pop()
-            if sorted(my_list) == list(range(min(my_list), max(my_list) + 1)):
-                return len(my_list)
-        else:
-            return False
-        return False
-
-
-def get_diff_position(seq1, seq2):
-    """
-    Description:
-        Function to compare two codon nucleotide sequences (size 3) and retuns the position where it differs.
-    Input:
-        seq1 - string size 3 [A,T,C,G]. Ex. "ATC"
-        seq2 - string size 3 [A,T,C,G]. Ex. "ACC"
-    Returns:
-        Returns position where seq1 != seq2
-    """
-    if seq1 == "NA":
-        return False
-
-    ind_diff = [i for i in range(len(seq1)) if seq1[i] != seq2[i]]
-    if len(ind_diff) > 1:
-        print("There has been an issue, more than one difference between the seqs.")
-        return False
-    else:
-        return ind_diff[0]
-
-
-def check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt):
-    # Are two positions in the dict consecutive?
-    print("CHECK CONSECUTIVE: " + str(check_consecutive(list(q_pos))))
-    if check_consecutive(list(q_pos)) == 2:
-        print(
-            "GETDIFFPOS WHEN TWO CONSECUTIVE "
-            + str(get_diff_position(fe_codon_ref, fe_codon_alt))
-        )
-        ## If the first position is not on the third position of the codon they are in the same codon.
-        if get_diff_position(fe_codon_ref, fe_codon_alt) != 2:
-            num_collapse = 2
-        else:
-            num_collapse = 1
-    # Are the three positions in the dict consecutive?
-    elif check_consecutive(list(q_pos)) == 3:
-        ## we check the first position in which codon position is to process it acordingly.
-        # If first position is in the first codon position all three positions belong to the same codon.
-        print(
-            "GETDIFFPOS WHEN THREE CONSECUTIVE "
-            + str(get_diff_position(fe_codon_ref, fe_codon_alt))
-        )
-        if get_diff_position(fe_codon_ref, fe_codon_alt) == 0:
-            num_collapse = 3
-        # If first position is in the second codon position, we have the two first positions belonging to the same codon and the last one independent.
-        elif get_diff_position(fe_codon_ref, fe_codon_alt) == 1:
-            num_collapse = 2
-        ## Finally if we have the first position in the last codon position, we write first position and left the remaining two to be evaluated in the next iteration.
-        elif get_diff_position(fe_codon_ref, fe_codon_alt) == 2:
-            num_collapse = 1
-    # If no consecutive process only one line.
-    elif check_consecutive(list(q_pos)) == False:
-        num_collapse = 1
-
-    return num_collapse
-
-
-def process_variants(variants, num_collapse):
-    """
-    Description:
-        The function set the vars acordingly to the lines to collapse do to consecutive variants.
-    Input:
-        variants - Dict with var lines.
-        num_collapse - number of lines to collapse [2,3]
-    Returns::
-        Vars fixed.
-    """
-    key_list = ["chrom", "pos", "id", "qual", "filter", "info", "format"]
-    chrom, pos, id, qual, filter, info, format = [
-        variants[next(iter(variants))][key] for key in key_list
-    ]
-    # chrom = next(iter(variants))["chrom"]
-    # pos = next(iter(variants))["pos"]
-    # id = next(iter(variants))["id"]
-    # ref_dp = next(iter(variants))["ref_dp"]
-    # ref_rv = next(iter(variants))["ref_rv"]
-    # alt_dp = next(iter(variants))["alt_dp"]
-    # alt_rv = next(iter(variants))["alt_rv"]
-    # qual = next(iter(variants))["qual"]
-    # filter = next(iter(variants))["filter"]
-    # # INFO DP depends on the decision in the todo above. SB is left with the first one.
-    # info = next(iter(variants))["info"]
-    # format = next(iter(variants))["format"]
-
-    # If no consecutive, process one variant line
-    # If two consecutive, process two variant lines into one
-    # If three consecutive process three variant lines and write one
-    ref = ""
-    alt = ""
-    for i in range(num_collapse):
-        ref += variants[next(iter(variants))]["ref"]
-        alt += variants[next(iter(variants))]["alt"]
-
-    return chrom, pos, id, ref, alt, qual, filter, info, format
-
-
 def make_dir(path):
     """
     Description:
@@ -195,6 +67,14 @@ def make_dir(path):
 
 
 def parse_ivar_line(line):
+    """
+    Description:
+        Parse ivar line to get needed variables for vcf format.
+    input:
+        line - ivar tsv line
+    return:
+        CHROM, POS, ID, REF, ALT, QUAL, INFO, FORMAT, REF_CODON, ALT_CODON, pass_test, var_type
+    """
     line = re.split("\t", line)
 
     ## Assign intial fields to variables
@@ -249,7 +129,62 @@ def parse_ivar_line(line):
     )
 
 
-def write_vcf_header(ref_len, ignore_strand_bias, file_out, filename):
+######################
+## FILTER FUNCTIONS ##
+######################
+
+
+def ivar_filter(pass_test):
+    """
+    Description:
+        process ivar filter into vcf filter format.
+    input:
+        pass_test - ivar fisher exact test [ True, False ]
+    return:
+        Whether it passes the filter or not. [False, "ft"]
+    """
+    if pass_test:
+        return False
+    else:
+        return "ft"
+
+
+def strand_bias_filter(format):
+    """
+    Description:
+        Calculate strand-bias fisher test.
+    input:
+        format - format variables
+    return:
+        Whether it passes the filter or not. [False, "sb"]
+    """
+    # format=[REF_DP, REF_RV, REF_FW, ALT_DP, ALT_RV, ALT_FW]
+    # table:
+    ##  REF_FW  REF_RV
+    ##  ALT_FW  ALT_RV
+    table = np.array([[format[2], format[1]], [format[5], format[4]]])
+    oddsr, pvalue = fisher_exact(table, alternative="greater")
+
+    # h0: both strands are equally represented.
+    # If test is significant h0 is refused so there is an strand bias.
+    if pvalue < 0.05:
+        return "sb"
+    else:
+        return False
+
+
+def write_vcf_header(ref, ignore_strand_bias, file_out, filename):
+    """
+    Description:
+        Write vcf header for VCFv4.2
+    input:
+        ref - (optional), ref in fasta format
+        ignore_strand_bias - if no strand-bias is calculated [True, False]
+        file_out - output file_in
+        filename - name of the output file
+    return:
+        Nothing.
+    """
     ## Define VCF header
     header_source = ["##fileformat=VCFv4.2", "##source=iVar"]
     header_info = ['##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">']
@@ -282,6 +217,15 @@ def write_vcf_header(ref_len, ignore_strand_bias, file_out, filename):
 
 
 def write_vcf_line(chrom, pos, id, ref, alt, filter, qual, info, format, file_out):
+    """
+    Description:
+        Format variables into vcf line format and write line to file.
+    input:
+        chrom, pos, id, ref, alt, filter, qual, info, format - vcf variables
+        file_out                                             - file output
+    return:
+        Nothing.
+    """
     sample = f'1:{":".join(str(x) for x in format)}'
     format = "GT:REF_DP:REF_RV:REF_QUAL:ALT_DP:ALT_RV:ALT_QUAL:ALT_FREQ"
 
@@ -312,50 +256,156 @@ def write_vcf_line(chrom, pos, id, ref, alt, filter, qual, info, format, file_ou
     fout.close()
 
 
-def ivar_filter(pass_test):
-    if pass_test:
+############################
+## MERGE CODONS FUNCTIONS ##
+############################
+
+
+def check_consecutive(mylist):
+    """
+    Description:
+        This function checks a list of  numbers and returns how many items are consecutive.
+    input:
+        my_list - A list of integers
+    return:
+        Number of items consecutive in the list - [False, 2, 3,..]
+    """
+    my_list = list(map(int, mylist))
+    ## Check if the list contains consecutive numbers
+    if len(my_list) == 1:
+        return False
+    elif sorted(my_list) == list(range(min(my_list), max(my_list) + 1)):
+        return len(my_list)
+    else:
+        ## If not, and the list is > 1, remove the last item and reevaluate.
+        if len(my_list) > 2:
+            my_list.pop()
+            if sorted(my_list) == list(range(min(my_list), max(my_list) + 1)):
+                return len(my_list)
+        else:
+            return False
+        return False
+
+
+def get_diff_position(seq1, seq2):
+    """
+    Description:
+        Function to compare two codon nucleotide sequences (size 3) and retuns the position where it differs.
+    Input:
+        seq1 - string size 3 [A,T,C,G]. Ex. "ATC"
+        seq2 - string size 3 [A,T,C,G]. Ex. "ACC"
+    Returns:
+        Returns position where seq1 != seq2
+    """
+    if seq1 == "NA":
+        return False
+
+    ind_diff = [i for i in range(len(seq1)) if seq1[i] != seq2[i]]
+    if len(ind_diff) > 1:
+        print("There has been an issue, more than one difference between the seqs.")
         return False
     else:
-        return "ft"
+        return ind_diff[0]
 
 
-def strand_bias_filter(format):
-    # format=[REF_DP, REF_RV, REF_FW, ALT_DP, ALT_RV, ALT_FW]
-    # table:
-    ##  REF_FW  REF_RV
-    ##  ALT_FW  ALT_RV
-    table = np.array([[format[2], format[1]], [format[5], format[4]]])
-    oddsr, pvalue = fisher_exact(table, alternative="greater")
+def check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt):
+    """
+    Description:
+        Logic for determine if variant lines need to be collapsed into one determining
+        if they are consecutive and belong to the same codon.
+    Input:
+        qpos         - list of positions. Ex. [4441, 4442, 4443]
+        fe_codon_ref - first position codon annotation for ref. Ex. "ATG"
+        fe_codon_alt - first position codon annotation for alt. Ex. "AGG"
+    Returns:
+        Returns num_collapse. Number of lines that need to be collapsed into one.
+    """
+    # Are two positions in the queue consecutive?
+    # q_pos = [4441, 4442, 5067]
+    num_collapse = 0
+    if check_consecutive(list(q_pos)) == 2:
+        ## If the first position is not on the third position of the codon they are in the same codon.
+        if get_diff_position(fe_codon_ref, fe_codon_alt) != 2:
+            num_collapse = 2
+        else:
+            num_collapse = 1
+    # Are the three positions in the queue consecutive?
+    # q_pos = [4441, 4442, 4443]
+    elif check_consecutive(list(q_pos)) == 3:
+        ## we check the first position in which codon position is to process it acordingly.
+        # If first position is in the first codon position all three positions belong to the same codon.
+        if get_diff_position(fe_codon_ref, fe_codon_alt) == 0:
+            num_collapse = 3
+        # If first position is in the second codon position, we have the two first positions belonging to the same codon and the last one independent.
+        elif get_diff_position(fe_codon_ref, fe_codon_alt) == 1:
+            num_collapse = 2
+        ## Finally if we have the first position in the last codon position, we write first position and left the remaining two to be evaluated in the next iteration.
+        elif get_diff_position(fe_codon_ref, fe_codon_alt) == 2:
+            num_collapse = 1
+    # If no consecutive process only one line.
+    elif check_consecutive(list(q_pos)) == False:
+        num_collapse = 1
 
-    # h0: both strands are equally represented. If test is significant h0 is refused so there is an strand bias.
-    if pvalue < 0.05:
-        return "sb"
-    else:
-        return False
+    return num_collapse
+
+
+def process_variants(variants, num_collapse):
+    """
+    Description:
+        The function set the variables acordingly to the lines to collapse do to consecutive variants.
+    Input:
+        variants - Dict with var lines.
+        num_collapse - number of lines to collapse [2,3]
+    Returns::
+        Vars fixed: chrom, pos, id, ref, alt, qual, filter, info, format
+    """
+    key_list = ["chrom", "pos", "id", "qual", "filter", "info", "format"]
+    chrom, pos, id, qual, filter, info, format = [
+        variants[next(iter(variants))][key] for key in key_list
+    ]
+
+    # If no consecutive, process one variant line
+    # If two consecutive, process two variant lines into one
+    # If three consecutive process three variant lines and write one
+    ref = ""
+    alt = ""
+    for i in range(num_collapse):
+        ref += variants[next(iter(variants))]["ref"]
+        alt += variants[next(iter(variants))]["alt"]
+
+    return chrom, pos, id, ref, alt, qual, filter, info, format
 
 
 def main(args=None):
+    # Process args
     args = parse_args(args)
 
+    # Initialize vars
     filename = os.path.splitext(args.file_in)[0]
     out_dir = os.path.dirname(args.file_out)
+    var_list = []  # store variants
+    var_count_dict = {"SNP": 0, "INS": 0, "DEL": 0}  # variant counts
+    variants = OrderedDict()  # variant dict (merge codon)
+    q_pos = deque([], maxlen=3)  # pos fifo queue (merge codon)
 
-    ## Create output directory
+    # Create output directory
     make_dir(out_dir)
 
-    # Initialize vars
-    var_list = []
-    var_count_dict = {"SNP": 0, "INS": 0, "DEL": 0}
-    variants = OrderedDict()
-    q_pos = deque([], maxlen=3)
-
-    ## Write header to file
+    ##########################
+    ## Write header to file ##
+    ##########################
     write_vcf_header(29990, args.ignore_strand_bias, args.file_out, filename)
 
+    #################################
+    ## Read and process input file ##
+    #################################
     with open(args.file_in, "r") as fin:
         for line in fin:
             if not re.match("REGION", line):
-                # Parse line
+
+                ################
+                ## Parse line ##
+                ################
                 ## format=[REF_DP, REF_RV, REF_FW, ALT_DP, ALT_RV, ALT_FW]
                 write_line = True
                 (
@@ -373,7 +423,9 @@ def main(args=None):
                     var_type,
                 ) = parse_ivar_line(line)
 
-                # Process filters
+                #####################
+                ## Process filters ##
+                #####################
                 ## ivar fisher test
                 filter = ""
                 if ivar_filter(pass_test):
@@ -390,7 +442,9 @@ def main(args=None):
                 if not filter:
                     filter = "PASS"
 
-                ### Filter variants
+                #####################
+                ## Filter variants ##
+                #####################
                 if args.pass_only and filter != "PASS":
                     write_line = False
                 ### AF filtering. ALT_DP/(ALT_DP+REF_DP)
@@ -405,10 +459,12 @@ def main(args=None):
                 else:
                     var_list.append((chrom, pos, ref, alt))
 
-                ## Merge consecutive variants belonging to the same codon
+                ############################################################
+                ##                MERGE_CODONS                            ##
+                ## Merge consecutive variants belonging to the same codon ##
+                ############################################################
                 if not args.ignore_merge_codons and var_type == "SNP":
-
-                    ## re-fill queue accordingly
+                    ## re-fill queue and dict accordingly
                     q_pos.append(pos)
                     variants[(chrom, pos, ref, alt)] = {
                         "chrom": chrom,
@@ -425,9 +481,6 @@ def main(args=None):
                     }
 
                     if len(q_pos) == q_pos.maxlen:
-                        print(q_pos)
-                        print(variants)
-                        print("longitud cola:" + str(len(q_pos)))
                         fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
                         fe_codon_alt = variants[next(iter(variants))]["alt_codon"]
                         num_collapse = check_merge_codons(
@@ -452,7 +505,9 @@ def main(args=None):
                     else:
                         write_line = False
 
-                ## Write output to vcf file
+                ##############################
+                ## Write output to vcf file ##
+                ##############################
                 if write_line:
                     var_count_dict[var_type] += 1
                     write_vcf_line(
@@ -469,7 +524,9 @@ def main(args=None):
                     )
 
     if not args.ignore_merge_codons:
-        ## handle last lines
+        #######################
+        ## handle last lines ##
+        #######################
         while len(q_pos) > 0:
             fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
             fe_codon_alt = variants[next(iter(variants))]["alt_codon"]
@@ -487,10 +544,12 @@ def main(args=None):
                 variants.popitem()
                 q_pos.pop()
 
-    ## Print variant counts to pass to MultiQC
+    #############################################
+    ##  variant counts to pass to MultiQC ##
+    #############################################
     var_count_list = [(k, str(v)) for k, v in sorted(var_count_dict.items())]
-    print("\t".join(["sample"] + [x[0] for x in var_count_list]))
-    print("\t".join([filename] + [x[1] for x in var_count_list]))
+    ("\t".join(["sample"] + [x[0] for x in var_count_list]))
+    ("\t".join([filename] + [x[1] for x in var_count_list]))
 
 
 if __name__ == "__main__":
