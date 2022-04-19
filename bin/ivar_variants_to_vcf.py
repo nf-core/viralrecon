@@ -13,7 +13,6 @@ from Bio import SeqIO
 from scipy.stats import fisher_exact
 
 
-
 def parse_args(args=None):
     Description = "Convert iVar variants TSV file to VCF format."
     Epilog = """Example usage: python ivar_variants_to_vcf.py <file_in> <file_out>"""
@@ -173,7 +172,9 @@ def strand_bias_filter(format):
     # table:
     ##  REF_FW  REF_RV
     ##  ALT_FW  ALT_RV
-    table = np.array([[format[0] - format[1], format[1]], [format[3] - format [4], format[4]]])
+    table = np.array(
+        [[format[0] - format[1], format[1]], [format[3] - format[4], format[4]]]
+    )
     oddsr, pvalue = fisher_exact(table, alternative="greater")
 
     # h0: both strands are equally represented.
@@ -201,7 +202,9 @@ def write_vcf_header(ref, ignore_strand_bias, file_out, filename):
     if ref:
         header_contig = []
         for record in SeqIO.parse(ref, "fasta"):
-            header_contig += ["##contig=<ID=" + record.id + ",length=" + str(len(record.seq)) + ">"]
+            header_contig += [
+                "##contig=<ID=" + record.id + ",length=" + str(len(record.seq)) + ">"
+            ]
 
         header_source += header_contig
 
