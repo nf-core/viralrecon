@@ -48,6 +48,7 @@ workflow VARIANTS_IVAR {
     //
     IVAR_VARIANTS_TO_VCF (
         ch_ivar_tsv,
+        fasta,
         ivar_multiqc_header
     )
     ch_versions = ch_versions.mix(IVAR_VARIANTS_TO_VCF.out.versions.first())

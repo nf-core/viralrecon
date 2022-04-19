@@ -8,6 +8,7 @@ process IVAR_VARIANTS_TO_VCF {
 
     input:
     tuple val(meta), path(tsv)
+    path fasta
     path  header
 
     output:
@@ -25,7 +26,8 @@ process IVAR_VARIANTS_TO_VCF {
     """
     ivar_variants_to_vcf.py \\
         $tsv \\
-        unsorted.txt \\
+        ${prefix}.vcf \\
+        $fasta \\
         $args \\
         > ${prefix}.variant_counts.log
 
