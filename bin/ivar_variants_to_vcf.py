@@ -9,7 +9,9 @@ from collections import OrderedDict
 from collections import deque
 
 import numpy as np
+from Bio import SeqIO
 from scipy.stats import fisher_exact
+
 
 
 def parse_args(args=None):
@@ -45,7 +47,13 @@ def parse_args(args=None):
         help="Output variants without taking into account if consecutive positions belong to the same codon.",
         action="store_true",
     )
-
+    parser.add_argument(
+        "-f",
+        "--fasta",
+        type=str,
+        default=None,
+        help="Fasta file used in mapping and variant calling for vcf header reference genome lenght info.",
+    )
     return parser.parse_args(args)
 
 
@@ -190,6 +198,13 @@ def write_vcf_header(ref, ignore_strand_bias, file_out, filename):
     """
     ## Define VCF header
     header_source = ["##fileformat=VCFv4.2", "##source=iVar"]
+    if ref:
+        header_contig = []
+        for record in SeqIO.parse(ref, "fasta"):
+            header_contig += ["##contig=<ID=" + record.id + ",length=" + str(len(record.seq)) + ">"]
+
+        header_source += header_contig
+
     header_info = ['##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">']
     header_filter = [
         '##FILTER=<ID=PASS,Description="All filters passed">',
@@ -213,6 +228,7 @@ def write_vcf_header(ref, ignore_strand_bias, file_out, filename):
         header_filter += [
             '##FILTER=<ID=sb,Description="Strand-bias fisher-test p-value < 0.05">'
         ]
+
     header = header_source + header_info + header_filter + header_format + header_cols
     fout = open(file_out, "w")
     fout.write("\n".join(header) + "\n")
@@ -400,7 +416,7 @@ def main(args=None):
     ##############################
     ## Write vcf header to file ##
     ##############################
-    write_vcf_header(29990, args.ignore_strand_bias, args.file_out, filename)
+    write_vcf_header(args.fasta, args.ignore_strand_bias, args.file_out, filename)
 
     #################################
     ## Read and process input file ##
