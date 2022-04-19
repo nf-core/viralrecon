@@ -29,9 +29,6 @@ process IVAR_VARIANTS_TO_VCF {
         $args \\
         > ${prefix}.variant_counts.log
 
-    ## Order vcf by coordinates
-    cat unsorted.txt | grep "^#" > ${prefix}.vcf; cat unsorted.txt | grep -v "^#" | sort -k1,1d -k2,2n >> ${prefix}.vcf
-
     cat $header ${prefix}.variant_counts.log > ${prefix}.variant_counts_mqc.tsv
 
     cat <<-END_VERSIONS > versions.yml
