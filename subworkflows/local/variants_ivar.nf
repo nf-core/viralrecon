@@ -4,6 +4,7 @@
 
 include { IVAR_VARIANTS         } from '../../modules/nf-core/modules/ivar/variants/main'
 include { IVAR_VARIANTS_TO_VCF  } from '../../modules/local/ivar_variants_to_vcf'
+include { BCFTOOLS_SORT         } from '../nf-core/bcftools/sort/main'
 include { VCF_BGZIP_TABIX_STATS } from '../nf-core/vcf_bgzip_tabix_stats'
 include { VARIANTS_QC           } from './variants_qc'
 
@@ -51,8 +52,13 @@ workflow VARIANTS_IVAR {
     )
     ch_versions = ch_versions.mix(IVAR_VARIANTS_TO_VCF.out.versions.first())
 
-    VCF_BGZIP_TABIX_STATS (
+    BCFTOOLS_SORT (
         IVAR_VARIANTS_TO_VCF.out.vcf
+    )
+    ch_versions = ch_versions.mix(BCFTOOLS_SORT.out.versions.first())
+
+    VCF_BGZIP_TABIX_STATS (
+        BCFTOOLS_SORT.out.vcf
     )
     ch_versions = ch_versions.mix(VCF_BGZIP_TABIX_STATS.out.versions)
 
