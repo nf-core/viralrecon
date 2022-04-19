@@ -222,9 +222,6 @@ def write_vcf_header(ref, ignore_strand_bias, file_out, filename):
     ]
     header_cols = [f"#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t{filename}"]
     if not ignore_strand_bias:
-        header_info += [
-            '##INFO=<ID=SB_PV,Number=1,Type=Float,Description="Strand-bias fisher-test p-value">'
-        ]
         header_filter += [
             '##FILTER=<ID=sb,Description="Strand-bias fisher-test p-value < 0.05">'
         ]
@@ -456,7 +453,7 @@ def main(args=None):
                 if not args.ignore_strand_bias:
                     if strand_bias_filter(format):
                         if filter:
-                            filter += "," + strand_bias_filter(format)
+                            filter += ";" + strand_bias_filter(format)
                         else:
                             filter = strand_bias_filter(format)
 
