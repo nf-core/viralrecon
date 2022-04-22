@@ -27,7 +27,7 @@ process IVAR_VARIANTS_TO_VCF {
     ivar_variants_to_vcf.py \\
         $tsv \\
         ${prefix}.vcf \\
-        $fasta \\
+        --fasta $fasta \\
         $args \\
         > ${prefix}.variant_counts.log
 
