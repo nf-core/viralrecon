@@ -94,9 +94,9 @@ workflow PREPARE_GENOME {
         if (params.nextclade_dataset) {
             if (params.nextclade_dataset.endsWith('.tar.gz')) {
                 UNTAR (
-                    params.nextclade_dataset
+                    [ [:], params.nextclade_dataset ]
                 )
-                ch_nextclade_db = UNTAR.out.untar
+                ch_nextclade_db = UNTAR.out.untar.map { it[1] }
                 ch_versions     = ch_versions.mix(UNTAR.out.versions)
             } else {
                 ch_nextclade_db = file(params.nextclade_dataset)
