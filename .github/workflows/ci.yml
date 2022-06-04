@@ -123,5 +123,3 @@ jobs:
       - name: Run pipeline with minimal Nanopore data and various options
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker ${{ matrix.parameters }} --outdir ./results
-
-#
