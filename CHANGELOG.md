@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[nf-core/rnaseq#764](https://github.com/nf-core/rnaseq/issues/764)] - Test fails when using GCP due to missing tools in the basic biocontainer
 - Updated pipeline template to [nf-core/tools 2.4.1](https://github.com/nf-core/tools/releases/tag/2.4.1)
 - Re-factor code of `ivar_variants_to_vcf` script.
+- Add `muscle=3.8` to `artic minion` conda environment, which fixes a [known bug](https://github.com/artic-network/fieldbioinformatics/issues/105) in the Conda recipe for Artic 1.2.1.
 
 ### Parameters
 
