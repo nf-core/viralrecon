@@ -9,7 +9,7 @@ process IVAR_VARIANTS_TO_VCF {
     input:
     tuple val(meta), path(tsv)
     path fasta
-    path  header
+    path header
 
     output:
     tuple val(meta), path("*.vcf"), emit: vcf
