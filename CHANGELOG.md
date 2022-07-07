@@ -8,8 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Enhancements & fixes
 
 - [[nf-core/rnaseq#764](https://github.com/nf-core/rnaseq/issues/764)] - Test fails when using GCP due to missing tools in the basic biocontainer
-- Updated pipeline template to [nf-core/tools 2.4.1](https://github.com/nf-core/tools/releases/tag/2.4.1)
-- Re-factor code of `ivar_variants_to_vcf` script.
+- Updated pipeline template to [nf-core/tools 2.3.2](https://github.com/nf-core/tools/releases/tag/2.3.2)
+- [[#304](https://github.com/nf-core/viralrecon/pull/304)] Re-factor code of `ivar_variants_to_vcf` script.
+- [[#308](https://github.com/nf-core/viralrecon/pull/304)] Added contig tag to vcf in `ivar_variants_to_vcf` script and bcftools sort module for vcf sorting.
 
 ### Parameters
 

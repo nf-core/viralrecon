@@ -9,6 +9,7 @@ from collections import OrderedDict
 from collections import deque
 
 import numpy as np
+from Bio import SeqIO
 from scipy.stats import fisher_exact
 
 
@@ -45,7 +46,13 @@ def parse_args(args=None):
         help="Output variants without taking into account if consecutive positions belong to the same codon.",
         action="store_true",
     )
-
+    parser.add_argument(
+        "-f",
+        "--fasta",
+        type=str,
+        default=None,
+        help="Fasta file used in mapping and variant calling for vcf header reference genome lenght info.",
+    )
     return parser.parse_args(args)
 
 
@@ -165,7 +172,9 @@ def strand_bias_filter(format):
     # table:
     ##  REF_FW  REF_RV
     ##  ALT_FW  ALT_RV
-    table = np.array([[format[0] - format[1], format[1]], [format[3] - format [4], format[4]]])
+    table = np.array(
+        [[format[0] - format[1], format[1]], [format[3] - format[4], format[4]]]
+    )
     oddsr, pvalue = fisher_exact(table, alternative="greater")
 
     # h0: both strands are equally represented.
@@ -190,6 +199,15 @@ def write_vcf_header(ref, ignore_strand_bias, file_out, filename):
     """
     ## Define VCF header
     header_source = ["##fileformat=VCFv4.2", "##source=iVar"]
+    if ref:
+        header_contig = []
+        for record in SeqIO.parse(ref, "fasta"):
+            header_contig += [
+                "##contig=<ID=" + record.id + ",length=" + str(len(record.seq)) + ">"
+            ]
+
+        header_source += header_contig
+
     header_info = ['##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">']
     header_filter = [
         '##FILTER=<ID=PASS,Description="All filters passed">',
@@ -207,12 +225,10 @@ def write_vcf_header(ref, ignore_strand_bias, file_out, filename):
     ]
     header_cols = [f"#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t{filename}"]
     if not ignore_strand_bias:
-        header_info += [
-            '##INFO=<ID=SB_PV,Number=1,Type=Float,Description="Strand-bias fisher-test p-value">'
-        ]
         header_filter += [
             '##FILTER=<ID=sb,Description="Strand-bias fisher-test p-value < 0.05">'
         ]
+
     header = header_source + header_info + header_filter + header_format + header_cols
     fout = open(file_out, "w")
     fout.write("\n".join(header) + "\n")
@@ -400,7 +416,7 @@ def main(args=None):
     ##############################
     ## Write vcf header to file ##
     ##############################
-    write_vcf_header(29990, args.ignore_strand_bias, args.file_out, filename)
+    write_vcf_header(args.fasta, args.ignore_strand_bias, args.file_out, filename)
 
     #################################
     ## Read and process input file ##
@@ -440,7 +456,7 @@ def main(args=None):
                 if not args.ignore_strand_bias:
                     if strand_bias_filter(format):
                         if filter:
-                            filter += "," + strand_bias_filter(format)
+                            filter += ";" + strand_bias_filter(format)
                         else:
                             filter = strand_bias_filter(format)
 
