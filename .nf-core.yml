@@ -4,3 +4,7 @@ lint:
     - assets/email_template.html
     - assets/email_template.txt
     - lib/NfcoreTemplate.groovy
+  files_exist:
+    - assets/multiqc_config.yml
+    - conf/igenomes.config
+    - lib/WorkflowViralrecon.groovy
