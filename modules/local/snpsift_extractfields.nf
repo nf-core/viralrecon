@@ -2,10 +2,10 @@ process SNPSIFT_EXTRACTFIELDS {
     tag "$meta.id"
     label 'process_medium'
 
-    conda (params.enable_conda ? "bioconda::snpsift=5.1" : null)
+    conda (params.enable_conda ? "bioconda::snpsift=4.3.1t" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/snpsift:5.1--hdfd78af_0' :
-        'quay.io/biocontainers/snpsift:5.1--hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/snpsift:4.3.1t--hdfd78af_3' :
+        'quay.io/biocontainers/snpsift:4.3.1t--hdfd78af_3' }"
 
     input:
     tuple val(meta), path(vcf)
