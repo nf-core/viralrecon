@@ -66,7 +66,7 @@ workflow FASTQC_FASTP {
             .join(trim_json)
             .map {
                 meta, reads, json ->
-                    if (getFastpReadsAfterFiltering(json) > 400000) {
+                    if (getFastpReadsAfterFiltering(json) > 0) {
                         [ meta, reads ]
                     }
             }
