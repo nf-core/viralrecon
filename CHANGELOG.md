@@ -12,6 +12,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[nf-core/rnaseq#764](https://github.com/nf-core/rnaseq/issues/764)] - Test fails when using GCP due to missing tools in the basic biocontainer
 - Updated pipeline template to [nf-core/tools 2.4.1](https://github.com/nf-core/tools/releases/tag/2.4.1)
 
+### Software dependencies
+
+Note, since the pipeline is now using Nextflow DSL2, each process will be run with its own [Biocontainer](https://biocontainers.pro/#/registry). This means that on occasion it is entirely possible for the pipeline to be using different versions of the same tool. However, the overall software dependency changes compared to the last release have been listed below for reference.
+
+| Dependency  | Old version | New version |
+| ----------- | ----------- | ----------- |
+| `artic`     | 1.2.1       | 1.2.2       |
+| `bcftools`  | 1.14        | 1.15.1      |
+| `multiqc`   | 1.11        | 1.13a       |
+| `nanoplot`  | 1.39.0      | 1.40.0      |
+| `nextclade` | 1.10.2      | 2.2.0       |
+| `pangolin`  | 3.1.20      | 4.1.1       |
+| `picard`    | 2.26.10     | 2.27.4      |
+| `quast`     | 5.0.2       | 5.2.0       |
+| `samtools`  | 1.14        | 1.15.1      |
+| `spades`    | 3.15.3      | 3.15.4      |
+| `vcflib`    | 1.0.2       | 1.0.3       |
+
+> **NB:** Dependency has been **updated** if both old and new version information is present.
+>
+> **NB:** Dependency has been **added** if just the new version information is present.
+>
+> **NB:** Dependency has been **removed** if new version information isn't present.
+
 ### Parameters
 
 ## [[2.4.1](https://github.com/nf-core/viralrecon/releases/tag/2.4.1)] - 2022-03-01
