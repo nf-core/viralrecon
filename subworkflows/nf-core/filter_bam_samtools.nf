@@ -8,7 +8,8 @@ include { BAM_STATS_SAMTOOLS } from './bam_stats_samtools'
 
 workflow FILTER_BAM_SAMTOOLS {
     take:
-    bam // channel: [ val(meta), [ bam ] ]
+    bam_bai // channel: [ val(meta), [ bam ], [ bai ] ]
+    fasta   // path   : fasta
 
     main:
 
@@ -18,8 +19,8 @@ workflow FILTER_BAM_SAMTOOLS {
     // Filter BAM using Samtools view
     //
     SAMTOOLS_VIEW (
-        bam,
-        []
+        bam_bai,
+        fasta
     )
     ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())
 
