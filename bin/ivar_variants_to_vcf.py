@@ -569,8 +569,8 @@ def main(args=None):
     ##  variant counts to pass to MultiQC      ##
     #############################################
     var_count_list = [(k, str(v)) for k, v in sorted(var_count_dict.items())]
-    ("\t".join(["sample"] + [x[0] for x in var_count_list]))
-    ("\t".join([filename] + [x[1] for x in var_count_list]))
+    print("\t".join(["sample"] + [x[0] for x in var_count_list]))
+    print("\t".join([filename] + [x[1] for x in var_count_list]))
 
 
 if __name__ == "__main__":
