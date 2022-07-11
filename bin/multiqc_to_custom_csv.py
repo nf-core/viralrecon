@@ -239,7 +239,7 @@ def main(args=None):
             "multiqc_pangolin.yaml",
             [("Pangolin lineage", ["lineage"])],
         ),
-        ("multiqc_nextclade_clade.yaml", [("Nextclade clade", ["clade"])]),
+        ("multiqc_nextclade_clade-plot.yaml", [("Nextclade clade", ["clade"])]),
     ]
 
     illumina_assembly_files = [
@@ -308,7 +308,7 @@ def main(args=None):
         ("multiqc_snpeff.yaml", [("# Missense variants", ["MISSENSE"])]),
         ("multiqc_quast.yaml", [("# Ns per 100kb consensus", ["# N's per 100 kbp"])]),
         ("multiqc_pangolin.yaml", [("Pangolin lineage", ["lineage"])]),
-        ("multiqc_nextclade_clade.yaml", [("Nextclade clade", ["clade"])]),
+        ("multiqc_nextclade_clade-plot.yaml", [("Nextclade clade", ["clade"])]),
     ]
 
     if args.PLATFORM == "illumina":
