@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Enhancements & fixes
 
+- [[#234](https://github.com/nf-core/viralrecon/issues/234)] - Remove replacement of dashes in sample name with underscores
 - [[#292](https://github.com/nf-core/viralrecon/issues/292)] - Filter empty FastQ files after adapter trimming
+- [[#303](https://github.com/nf-core/viralrecon/pull/303)] - New pangolin dbs (4.0.x) not assigning lineages to Sars-CoV-2 samples in MultiQC report correctly
 - [[#304](https://github.com/nf-core/viralrecon/pull/304)] - Re-factor code of `ivar_variants_to_vcf` script
 - [[#306](https://github.com/nf-core/viralrecon/issues/306)] - Add contig field information in vcf header in ivar_variants_to_vcf and use bcftools sort
+- [[#311](https://github.com/nf-core/viralrecon/issues/311)] - Invalid declaration val medaka_model_string
 - [[nf-core/rnaseq#764](https://github.com/nf-core/rnaseq/issues/764)] - Test fails when using GCP due to missing tools in the basic biocontainer
 - Updated pipeline template to [nf-core/tools 2.4.1](https://github.com/nf-core/tools/releases/tag/2.4.1)
 
