@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Enhancements & fixes
 
+- Default Nextclade dataset shipped with the pipeline has been bumped from `2022-01-18T12:00:00Z` -> `2022-06-14T12:00:00Z`
 - [[#234](https://github.com/nf-core/viralrecon/issues/234)] - Remove replacement of dashes in sample name with underscores
 - [[#292](https://github.com/nf-core/viralrecon/issues/292)] - Filter empty FastQ files after adapter trimming
 - [[#303](https://github.com/nf-core/viralrecon/pull/303)] - New pangolin dbs (4.0.x) not assigning lineages to Sars-CoV-2 samples in MultiQC report correctly
