@@ -56,7 +56,7 @@ workflow VARIANTS_BCFTOOLS {
     // Split multi-allelic positions
     //
     BCFTOOLS_NORM (
-        ch_vcf,
+        ch_vcf.join(ch_tbi, by: [0]),
         fasta
     )
     ch_versions = ch_versions.mix(BCFTOOLS_NORM.out.versions.first())

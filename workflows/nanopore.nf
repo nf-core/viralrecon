@@ -308,7 +308,7 @@ workflow NANOPORE {
         PREPARE_GENOME.out.fasta,
         PREPARE_GENOME.out.primer_bed,
         ch_medaka_model.collect().ifEmpty([]),
-        params.artic_minion_medaka_model,
+        params.artic_minion_medaka_model ?: '',
         params.artic_scheme,
         params.primer_set_version
     )
@@ -342,7 +342,8 @@ workflow NANOPORE {
     // SUBWORKFLOW: Filter unmapped reads from BAM
     //
     FILTER_BAM_SAMTOOLS (
-        ARTIC_MINION.out.bam
+        ARTIC_MINION.out.bam.join(ARTIC_MINION.out.bai, by: [0]),
+        []
     )
     ch_versions = ch_versions.mix(FILTER_BAM_SAMTOOLS.out.versions)
 
@@ -356,7 +357,7 @@ workflow NANOPORE {
         MOSDEPTH_GENOME (
             ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
             [],
-            200
+            []
         )
         ch_mosdepth_multiqc  = MOSDEPTH_GENOME.out.global_txt
         ch_versions          = ch_versions.mix(MOSDEPTH_GENOME.out.versions.first().ifEmpty(null))
@@ -369,7 +370,7 @@ workflow NANOPORE {
         MOSDEPTH_AMPLICON (
             ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
             PREPARE_GENOME.out.primer_collapsed_bed,
-            0
+            []
         )
         ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
 

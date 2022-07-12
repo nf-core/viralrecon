@@ -6,6 +6,16 @@ include { FASTQC as FASTQC_RAW  } from '../../modules/nf-core/modules/fastqc/mai
 include { FASTQC as FASTQC_TRIM } from '../../modules/nf-core/modules/fastqc/main'
 include { FASTP                 } from '../../modules/nf-core/modules/fastp/main'
 
+//
+// Function that parses fastp json output file to get total number of reads after trimming
+//
+import groovy.json.JsonSlurper
+
+def getFastpReadsAfterFiltering(json_file) {
+    def Map json = (Map) new JsonSlurper().parseText(json_file.text).get('summary')
+    return json['after_filtering']['total_reads'].toInteger()
+}
+
 workflow FASTQC_FASTP {
     take:
     reads             // channel: [ val(meta), [ reads ] ]
@@ -48,6 +58,19 @@ workflow FASTQC_FASTP {
         trim_reads_fail   = FASTP.out.reads_fail
         trim_reads_merged = FASTP.out.reads_merged
         ch_versions       = ch_versions.mix(FASTP.out.versions.first())
+
+        //
+        // Filter empty FastQ files after adapter trimming so FastQC doesn't fail
+        //
+        trim_reads
+            .join(trim_json)
+            .map {
+                meta, reads, json ->
+                    if (getFastpReadsAfterFiltering(json) > 0) {
+                        [ meta, reads ]
+                    }
+            }
+            .set { trim_reads }
 
         if (!params.skip_fastqc) {
             FASTQC_TRIM (

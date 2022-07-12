@@ -10,6 +10,7 @@ workflow ALIGN_BOWTIE2 {
     reads          // channel: [ val(meta), [ reads ] ]
     index          // channel: /path/to/bowtie2/index/
     save_unaligned //   value: boolean
+    sort_bam       //   value: boolean
 
     main:
 
@@ -21,7 +22,8 @@ workflow ALIGN_BOWTIE2 {
     BOWTIE2_ALIGN (
         reads,
         index,
-        save_unaligned
+        save_unaligned,
+        sort_bam
     )
     ch_versions = ch_versions.mix(BOWTIE2_ALIGN.out.versions.first())
 

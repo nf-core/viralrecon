@@ -99,11 +99,6 @@ def check_illumina_samplesheet(file_in, file_out):
                     f"WARNING: Spaces have been replaced by underscores for sample: {sample}"
                 )
                 sample = sample.replace(" ", "_")
-            if sample.find("-") != -1:
-                print(
-                    f"WARNING: Dashes have been replaced by underscores for sample: {sample}"
-                )
-                sample = sample.replace("-", "_")
             if not sample:
                 print_error("Sample entry has not been specified!", "Line", line)
 
