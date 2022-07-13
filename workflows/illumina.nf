@@ -39,7 +39,7 @@ if (!variant_caller) { variant_caller = params.protocol == 'amplicon' ? 'ivar' :
 ========================================================================================
 */
 
-ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yaml", checkIfExists: true)
+ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yml", checkIfExists: true)
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 // Header files
@@ -251,17 +251,19 @@ workflow ILLUMINA {
     if (!params.skip_kraken2) {
         KRAKEN2_KRAKEN2 (
             ch_variants_fastq,
-            PREPARE_GENOME.out.kraken2_db
+            PREPARE_GENOME.out.kraken2_db,
+            params.kraken2_variants_host_filter || params.kraken2_assembly_host_filter,
+            params.kraken2_variants_host_filter || params.kraken2_assembly_host_filter
         )
-        ch_kraken2_multiqc = KRAKEN2_KRAKEN2.out.txt
+        ch_kraken2_multiqc = KRAKEN2_KRAKEN2.out.report
         ch_versions        = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first().ifEmpty(null))
 
         if (params.kraken2_variants_host_filter) {
-            ch_variants_fastq = KRAKEN2_KRAKEN2.out.unclassified
+            ch_variants_fastq = KRAKEN2_KRAKEN2.out.unclassified_reads_fastq
         }
 
         if (params.kraken2_assembly_host_filter) {
-            ch_assembly_fastq = KRAKEN2_KRAKEN2.out.unclassified
+            ch_assembly_fastq = KRAKEN2_KRAKEN2.out.unclassified_reads_fastq
         }
     }
 
@@ -276,7 +278,8 @@ workflow ILLUMINA {
         ALIGN_BOWTIE2 (
             ch_variants_fastq,
             PREPARE_GENOME.out.bowtie2_index,
-            params.save_unaligned
+            params.save_unaligned,
+            false
         )
         ch_bam                      = ALIGN_BOWTIE2.out.bam
         ch_bai                      = ALIGN_BOWTIE2.out.bai
@@ -358,7 +361,8 @@ workflow ILLUMINA {
     if (!params.skip_variants && !params.skip_picard_metrics) {
         PICARD_COLLECTMULTIPLEMETRICS (
             ch_bam,
-            PREPARE_GENOME.out.fasta
+            PREPARE_GENOME.out.fasta,
+            []
         )
         ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first().ifEmpty(null))
     }
@@ -372,7 +376,7 @@ workflow ILLUMINA {
         MOSDEPTH_GENOME (
             ch_bam.join(ch_bai, by: [0]),
             [],
-            200
+            []
         )
         ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
         ch_versions         = ch_versions.mix(MOSDEPTH_GENOME.out.versions.first().ifEmpty(null))
@@ -386,7 +390,7 @@ workflow ILLUMINA {
             MOSDEPTH_AMPLICON (
                 ch_bam.join(ch_bai, by: [0]),
                 PREPARE_GENOME.out.primer_collapsed_bed,
-                0
+                []
             )
             ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
 
@@ -411,8 +415,8 @@ workflow ILLUMINA {
         VARIANTS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.fai,
-            PREPARE_GENOME.out.chrom_sizes,
+            (params.protocol == 'amplicon' || !params.skip_asciigenome) ? PREPARE_GENOME.out.fai : [],
+            (params.protocol == 'amplicon' || !params.skip_asciigenome) ? PREPARE_GENOME.out.chrom_sizes : [],
             PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
@@ -435,7 +439,7 @@ workflow ILLUMINA {
         VARIANTS_BCFTOOLS (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.chrom_sizes,
+            (params.protocol == 'amplicon' || !params.skip_asciigenome) ? PREPARE_GENOME.out.chrom_sizes : [],
             PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,

@@ -12,27 +12,124 @@
 
 <img src="cid:nfcorepipelinelogo">
 
-<h1>nf-core/viralrecon v${version}</h1>
-<h2>Run Name: $runName</h2>
+      <h1>nf-core/viralrecon v${version}</h1>
+      <h2>Run Name: $runName</h2>
 
-<% if (!success) {
-    out << """
-    <div style="color: #a94442; background-color: #f2dede; border-color: #ebccd1; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
-        <h4 style="margin-top:0; color: inherit;">nf-core/viralrecon execution completed unsuccessfully!</h4>
+      <% if (!success) { out << """
+      <div
+        style="
+          color: #a94442;
+          background-color: #f2dede;
+          border-color: #ebccd1;
+          padding: 15px;
+          margin-bottom: 20px;
+          border: 1px solid transparent;
+          border-radius: 4px;
+        "
+      >
+        <h4 style="margin-top: 0; color: inherit">nf-core/viralrecon execution completed unsuccessfully!</h4>
         <p>The exit status of the task that caused the workflow execution to fail was: <code>$exitStatus</code>.</p>
         <p>The full error message was:</p>
-        <pre style="white-space: pre-wrap; overflow: visible; margin-bottom: 0;">${errorReport}</pre>
-    </div>
-    """
-} else if (fail_mapped_reads.size() > 0) {
-    out << """
-    <div style="color: #856404; background-color: #fff3cd; border-color: #ffeeba; padding: 15px; margin-bottom: 20px; border: 1px solid transparent; border-radius: 4px;">
-        <h4 style="margin-top:0; color: inherit;">nf-core/viralrecon execution completed with warnings!</h4>
-        <p>The pipeline finished successfully, but the following samples were skipped due to failing the minimum mapped read threshold (&lt; ${min_mapped_reads}):</p>
-        <ul>
-            <li><code>${fail_mapped_reads.sort().join('</code></li><li><code>')}</code></li>
-        </ul>
+        <pre style="white-space: pre-wrap; overflow: visible; margin-bottom: 0">${errorReport}</pre>
+      </div>
+      """ } else if (fail_mapped_reads.size() > 0) { out << """
+      <div
+        style="
+          color: #856404;
+          background-color: #fff3cd;
+          border-color: #ffeeba;
+          padding: 15px;
+          margin-bottom: 20px;
+          border: 1px solid transparent;
+          border-radius: 4px;
+        "
+      >
+        <h4 style="margin-top: 0; color: inherit">nf-core/viralrecon execution completed with warnings!</h4>
         <p>
+          The pipeline finished successfully, but the following samples were skipped due to failing the minimum mapped
+          read threshold (&lt; ${min_mapped_reads}):
+        </p>
+        <ul>
+          <li><code>${fail_mapped_reads.sort().join('</code></li>
+          <li><code>')}</code></li>
+        </ul>
+        <p></p>
+      </div>
+
+      """ } else { out << """
+      <div
+        style="
+          color: #3c763d;
+          background-color: #dff0d8;
+          border-color: #d6e9c6;
+          padding: 15px;
+          margin-bottom: 20px;
+          border: 1px solid transparent;
+          border-radius: 4px;
+        "
+      >
+        nf-core/viralrecon execution completed successfully!
+      </div>
+      """ } %>
+
+      <p>The workflow was completed at <strong>$dateComplete</strong> (duration: <strong>$duration</strong>)</p>
+      <p>The command used to launch the workflow was as follows:</p>
+      <pre
+        style="
+          white-space: pre-wrap;
+          overflow: visible;
+          background-color: #ededed;
+          padding: 15px;
+          border-radius: 4px;
+          margin-bottom: 30px;
+        "
+      >
+$commandLine</pre
+      >
+
+      <h3>Pipeline Configuration:</h3>
+      <table
+        style="
+          width: 100%;
+          max-width: 100%;
+          border-spacing: 0;
+          border-collapse: collapse;
+          border: 0;
+          margin-bottom: 30px;
+        "
+      >
+        <tbody style="border-bottom: 1px solid #ddd">
+          <% out << summary.collect{ k,v -> "
+          <tr>
+            <th
+              style="
+                text-align: left;
+                padding: 8px 0;
+                line-height: 1.42857143;
+                vertical-align: top;
+                border-top: 1px solid #ddd;
+              "
+            >
+              $k
+            </th>
+            <td
+              style="
+                text-align: left;
+                padding: 8px;
+                line-height: 1.42857143;
+                vertical-align: top;
+                border-top: 1px solid #ddd;
+              "
+            >
+              <pre style="white-space: pre-wrap; overflow: visible">$v</pre>
+            </td>
+          </tr>
+          " }.join("\n") %>
+        </tbody>
+      </table>
+
+      <p>nf-core/viralrecon</p>
+      <p><a href="https://github.com/nf-core/viralrecon">https://github.com/nf-core/viralrecon</a></p>
     </div>
     """
 } else {

@@ -283,6 +283,7 @@ extra_fn_clean_exts:
   - ".markduplicates"
   - ".unclassified"
   - "_MN908947.3"
+  - " MN908947.3"
 
 extra_fn_clean_trim:
   - "Consensus_"

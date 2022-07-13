@@ -3,12 +3,13 @@ process IVAR_VARIANTS_TO_VCF {
 
     conda (params.enable_conda ? "conda-forge::python=3.9.5 conda-forge::matplotlib=3.5.1 conda-forge::pandas=1.3.5 conda-forge::r-sys=3.4 conda-forge::regex=2021.11.10 conda-forge::scipy=1.7.3" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/mulled-v2-77320db00eefbbf8c599692102c3d387a37ef02a:08144a66f00dc7684fad061f1466033c0176e7ad-0' :
-        'quay.io/biocontainers/mulled-v2-77320db00eefbbf8c599692102c3d387a37ef02a:08144a66f00dc7684fad061f1466033c0176e7ad-0' }"
+        'https://depot.galaxyproject.org/singularity/mulled-v2-ff46c3f421ca930fcc54e67ab61c8e1bcbddfe22:1ad3da14f705eb0cdff6b5a44fea4909307524b4-0' :
+        'quay.io/biocontainers/mulled-v2-ff46c3f421ca930fcc54e67ab61c8e1bcbddfe22:1ad3da14f705eb0cdff6b5a44fea4909307524b4-0' }"
 
     input:
     tuple val(meta), path(tsv)
-    path  header
+    path fasta
+    path header
 
     output:
     tuple val(meta), path("*.vcf"), emit: vcf
@@ -25,12 +26,10 @@ process IVAR_VARIANTS_TO_VCF {
     """
     ivar_variants_to_vcf.py \\
         $tsv \\
-        unsorted.txt \\
+        ${prefix}.vcf \\
+        --fasta $fasta \\
         $args \\
         > ${prefix}.variant_counts.log
-
-    ## Order vcf by coordinates
-    cat unsorted.txt | grep "^#" > ${prefix}.vcf; cat unsorted.txt | grep -v "^#" | sort -k1,1d -k2,2n >> ${prefix}.vcf
 
     cat $header ${prefix}.variant_counts.log > ${prefix}.variant_counts_mqc.tsv
 

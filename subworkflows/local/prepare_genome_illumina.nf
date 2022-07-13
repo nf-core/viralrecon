@@ -76,9 +76,9 @@ workflow PREPARE_GENOME {
         if (params.kraken2_db) {
             if (params.kraken2_db.endsWith('.tar.gz')) {
                 UNTAR_KRAKEN2_DB (
-                    params.kraken2_db
+                    [ [:], params.kraken2_db ]
                 )
-                ch_kraken2_db = UNTAR_KRAKEN2_DB.out.untar
+                ch_kraken2_db = UNTAR_KRAKEN2_DB.out.untar.map { it[1] }
                 ch_versions   = ch_versions.mix(UNTAR_KRAKEN2_DB.out.versions)
             } else {
                 ch_kraken2_db = file(params.kraken2_db)
@@ -151,9 +151,9 @@ workflow PREPARE_GENOME {
         if (params.bowtie2_index) {
             if (params.bowtie2_index.endsWith('.tar.gz')) {
                 UNTAR_BOWTIE2_INDEX (
-                    params.bowtie2_index
+                    [ [:], params.bowtie2_index ]
                 )
-                ch_bowtie2_index = UNTAR_BOWTIE2_INDEX.out.untar
+                ch_bowtie2_index = UNTAR_BOWTIE2_INDEX.out.untar.map { it[1] }
                 ch_versions      = ch_versions.mix(UNTAR_BOWTIE2_INDEX.out.versions)
             } else {
                 ch_bowtie2_index = file(params.bowtie2_index)
@@ -175,9 +175,9 @@ workflow PREPARE_GENOME {
         if (params.nextclade_dataset) {
             if (params.nextclade_dataset.endsWith('.tar.gz')) {
                 UNTAR_NEXTCLADE_DB (
-                    params.nextclade_dataset
+                    [ [:], params.nextclade_dataset ]
                 )
-                ch_nextclade_db = UNTAR_NEXTCLADE_DB.out.untar
+                ch_nextclade_db = UNTAR_NEXTCLADE_DB.out.untar.map { it[1] }
                 ch_versions     = ch_versions.mix(UNTAR_NEXTCLADE_DB.out.versions)
             } else {
                 ch_nextclade_db = file(params.nextclade_dataset)
@@ -202,9 +202,9 @@ workflow PREPARE_GENOME {
             if (params.blast_db) {
                 if (params.blast_db.endsWith('.tar.gz')) {
                     UNTAR_BLAST_DB (
-                        params.blast_db
+                        [ [:], params.blast_db ]
                     )
-                    ch_blast_db = UNTAR_BLAST_DB.out.untar
+                    ch_blast_db = UNTAR_BLAST_DB.out.untar.map { it[1] }
                     ch_versions = ch_versions.mix(UNTAR_BLAST_DB.out.versions)
                 } else {
                     ch_blast_db = file(params.blast_db)

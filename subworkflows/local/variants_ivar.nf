@@ -4,7 +4,8 @@
 
 include { IVAR_VARIANTS         } from '../../modules/nf-core/modules/ivar/variants/main'
 include { IVAR_VARIANTS_TO_VCF  } from '../../modules/local/ivar_variants_to_vcf'
-include { VCF_BGZIP_TABIX_STATS } from '../nf-core/vcf_bgzip_tabix_stats'
+include { BCFTOOLS_SORT         } from '../../modules/nf-core/modules/bcftools/sort/main'
+include { VCF_TABIX_STATS       } from '../nf-core/vcf_tabix_stats'
 include { VARIANTS_QC           } from './variants_qc'
 
 workflow VARIANTS_IVAR {
@@ -47,22 +48,28 @@ workflow VARIANTS_IVAR {
     //
     IVAR_VARIANTS_TO_VCF (
         ch_ivar_tsv,
+        fasta,
         ivar_multiqc_header
     )
     ch_versions = ch_versions.mix(IVAR_VARIANTS_TO_VCF.out.versions.first())
 
-    VCF_BGZIP_TABIX_STATS (
+    BCFTOOLS_SORT (
         IVAR_VARIANTS_TO_VCF.out.vcf
     )
-    ch_versions = ch_versions.mix(VCF_BGZIP_TABIX_STATS.out.versions)
+    ch_versions = ch_versions.mix(BCFTOOLS_SORT.out.versions.first())
+
+    VCF_TABIX_STATS (
+        BCFTOOLS_SORT.out.vcf
+    )
+    ch_versions = ch_versions.mix(VCF_TABIX_STATS.out.versions)
 
     //
     // Run downstream tools for variants QC
     //
     VARIANTS_QC (
         bam,
-        VCF_BGZIP_TABIX_STATS.out.vcf,
-        VCF_BGZIP_TABIX_STATS.out.stats,
+        BCFTOOLS_SORT.out.vcf,
+        VCF_TABIX_STATS.out.stats,
         fasta,
         sizes,
         gff,
@@ -79,9 +86,9 @@ workflow VARIANTS_IVAR {
     log_out         = IVAR_VARIANTS_TO_VCF.out.log    // channel: [ val(meta), [ log ] ]
     multiqc_tsv     = IVAR_VARIANTS_TO_VCF.out.tsv    // channel: [ val(meta), [ tsv ] ]
 
-    vcf             = VCF_BGZIP_TABIX_STATS.out.vcf   // channel: [ val(meta), [ vcf ] ]
-    tbi             = VCF_BGZIP_TABIX_STATS.out.tbi   // channel: [ val(meta), [ tbi ] ]
-    stats           = VCF_BGZIP_TABIX_STATS.out.stats // channel: [ val(meta), [ txt ] ]
+    vcf             = BCFTOOLS_SORT.out.vcf           // channel: [ val(meta), [ vcf ] ]
+    tbi             = VCF_TABIX_STATS.out.tbi         // channel: [ val(meta), [ tbi ] ]
+    stats           = VCF_TABIX_STATS.out.stats       // channel: [ val(meta), [ txt ] ]
 
     snpeff_vcf      = VARIANTS_QC.out.snpeff_vcf      // channel: [ val(meta), [ vcf.gz ] ]
     snpeff_tbi      = VARIANTS_QC.out.snpeff_tbi      // channel: [ val(meta), [ tbi ] ]
