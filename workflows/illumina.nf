@@ -415,8 +415,8 @@ workflow ILLUMINA {
         VARIANTS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.fai,
-            PREPARE_GENOME.out.chrom_sizes,
+            (params.protocol == 'amplicon' || !params.skip_asciigenome) ? PREPARE_GENOME.out.fai : [],
+            (params.protocol == 'amplicon' || !params.skip_asciigenome) ? PREPARE_GENOME.out.chrom_sizes : [],
             PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
@@ -439,7 +439,7 @@ workflow ILLUMINA {
         VARIANTS_BCFTOOLS (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.chrom_sizes,
+            (params.protocol == 'amplicon' || !params.skip_asciigenome) ? PREPARE_GENOME.out.chrom_sizes : [],
             PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
