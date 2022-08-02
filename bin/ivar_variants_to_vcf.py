@@ -316,8 +316,9 @@ def get_diff_position(seq1, seq2):
     Returns:
         Returns position where seq1 != seq2
     """
+    # If codon is NA treat as not same codon
     if seq1 == "NA":
-        return False
+        return 2
 
     ind_diff = [i for i in range(len(seq1)) if seq1[i] != seq2[i]]
     if len(ind_diff) > 1:
@@ -409,6 +410,7 @@ def main(args=None):
     var_count_dict = {"SNP": 0, "INS": 0, "DEL": 0}  # variant counts
     variants = OrderedDict()  # variant dict (merge codon)
     q_pos = deque([], maxlen=3)  # pos fifo queue (merge codon)
+    last_pos = ""
 
     # Create output directory
     make_dir(out_dir)
@@ -445,6 +447,12 @@ def main(args=None):
                     pass_test,
                     var_type,
                 ) = parse_ivar_line(line)
+
+                ## If pos is duplicated due to annotation skip lines
+                if pos == last_pos:
+                    continue
+
+                last_pos = pos
                 #####################
                 ## Process filters ##
                 #####################
