@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from email.charset import QP
 import os
 import sys
 import re
@@ -82,7 +83,7 @@ def parse_ivar_line(line):
     return:
         CHROM, POS, ID, REF, ALT, QUAL, INFO, FORMAT, REF_CODON, ALT_CODON, pass_test, var_type
     """
-    
+  
     line = line.strip("\n").split("\t")
     ## Assign intial fields to variables
     CHROM = line[0]
@@ -294,7 +295,8 @@ def check_consecutive(mylist):
     return:
         Number of items consecutive in the list - [False, 2, 3,..]
     """
-    my_list = list(map(int, mylist))
+    # getting first index of tuple for consecutive checking
+    my_list = list(map(int, [i[0] for i in mylist]))
     ## Check if the list contains consecutive numbers
     if len(my_list) == 1:
         return False
@@ -491,7 +493,7 @@ def main(args=None):
                 ############################################################
                 if not args.ignore_merge_codons and var_type == "SNP":
                     ## re-fill queue and dict accordingly
-                    q_pos.append(pos)
+                    q_pos.append((pos, var_type)) # adding type information
                     variants[(chrom, pos, ref, alt)] = {
                         "chrom": chrom,
                         "pos": pos,
@@ -525,7 +527,7 @@ def main(args=None):
                         ) = process_variants(variants, num_collapse)
 
                         ## Empty variants dict and queue accordingly
-                        for i in range(num_collapse):
+                        for _ in range(num_collapse):
                             variants.popitem(last=False)
                             q_pos.popleft()
                     else:
@@ -553,26 +555,27 @@ def main(args=None):
         #######################
         ## handle last lines ##
         #######################
-            while len(q_pos) > 0:  
-                try:
-                    fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
-                    fe_codon_alt = variants[next(iter(variants))]["alt_codon"]
-                except StopIteration:
-                    break
-                else:
-                    num_collapse = check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt)
-                    (chrom, pos, id, ref, alt, qual, filter, info, format) = process_variants(
-                        variants, num_collapse
-                    )
+        while len(q_pos) > 0:  
+            try:
 
-                    var_count_dict[var_type] += 1
-                    write_vcf_line(
-                        chrom, pos, id, ref, alt, filter, qual, info, format, args.file_out
-                    )
-                    ## Empty variants dict and queue accordingly
-                    for _ in range(num_collapse):
-                        variants.popitem(last=False)
-                        q_pos.popleft()
+                fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
+                fe_codon_alt = variants[next(iter(variants))]["alt_codon"]
+            except StopIteration:
+                break
+            else:
+                num_collapse = check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt)
+                (chrom, pos, id, ref, alt, qual, filter, info, format) = process_variants(
+                    variants, num_collapse
+                )
+
+                var_count_dict[q_pos[0][1]] += 1
+                write_vcf_line(
+                    chrom, pos, id, ref, alt, filter, qual, info, format, args.file_out
+                )
+                ## Empty variants dict and queue accordingly
+                for _ in range(num_collapse):
+                    variants.popitem(last=False)
+                    q_pos.popleft()
 
 
 
