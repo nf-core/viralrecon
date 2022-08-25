@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from email.charset import QP
 import os
 import sys
 import re
@@ -82,8 +83,8 @@ def parse_ivar_line(line):
     return:
         CHROM, POS, ID, REF, ALT, QUAL, INFO, FORMAT, REF_CODON, ALT_CODON, pass_test, var_type
     """
-    line = re.split("\t", line)
-
+  
+    line = line.strip("\n").split("\t")
     ## Assign intial fields to variables
     CHROM = line[0]
     POS = line[1]
@@ -92,7 +93,12 @@ def parse_ivar_line(line):
     ALT = line[3]
 
     ## REF/ALF depths and quals
-    REF_DP = int(line[4])
+    try:
+        REF_DP = int(line[4])
+    except ValueError:
+        print(line)
+        print(line[4])
+        exit(-1)
     REF_RV = int(line[5])
     REF_FW = REF_DP - REF_RV
     REF_QUAL = int(line[6])
@@ -289,7 +295,8 @@ def check_consecutive(mylist):
     return:
         Number of items consecutive in the list - [False, 2, 3,..]
     """
-    my_list = list(map(int, mylist))
+    # getting first index of tuple for consecutive checking
+    my_list = list(map(int, [i[0] for i in mylist]))
     ## Check if the list contains consecutive numbers
     if len(my_list) == 1:
         return False
@@ -391,7 +398,7 @@ def process_variants(variants, num_collapse):
     ref = ""
     alt = ""
     iter_variants = iter(variants)
-    for i in range(num_collapse):
+    for _ in range(num_collapse): # fixed notation
         var = next(iter_variants)
         ref += variants[var]["ref"]
         alt += variants[var]["alt"]
@@ -425,7 +432,7 @@ def main(args=None):
     #################################
     with open(args.file_in, "r") as fin:
         for line in fin:
-            if not re.match("REGION", line):
+            if "REGION" not in line:
 
                 ################
                 ## Parse line ##
@@ -494,7 +501,7 @@ def main(args=None):
                 ############################################################
                 if not args.ignore_merge_codons and var_type == "SNP":
                     ## re-fill queue and dict accordingly
-                    q_pos.append(pos)
+                    q_pos.append((pos, var_type)) # adding type information
                     variants[(chrom, pos, ref, alt)] = {
                         "chrom": chrom,
                         "pos": pos,
@@ -528,7 +535,7 @@ def main(args=None):
                         ) = process_variants(variants, num_collapse)
 
                         ## Empty variants dict and queue accordingly
-                        for i in range(num_collapse):
+                        for _ in range(num_collapse):
                             variants.popitem(last=False)
                             q_pos.popleft()
                     else:
@@ -556,30 +563,51 @@ def main(args=None):
         #######################
         ## handle last lines ##
         #######################
-        while len(q_pos) > 0:
-            fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
-            fe_codon_alt = variants[next(iter(variants))]["alt_codon"]
-            num_collapse = check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt)
-            (chrom, pos, id, ref, alt, qual, filter, info, format) = process_variants(
-                variants, num_collapse
-            )
+        while len(q_pos) > 0:  
+            try:
 
-            var_count_dict[var_type] += 1
-            write_vcf_line(
-                chrom, pos, id, ref, alt, filter, qual, info, format, args.file_out
-            )
-            ## Empty variants dict and queue accordingly
-            for i in range(num_collapse):
-                variants.popitem(last=False)
-                q_pos.popleft()
+                fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
+                fe_codon_alt = variants[next(iter(variants))]["alt_codon"]
+            except StopIteration:
+                break
+            else:
+                num_collapse = check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt)
+                (chrom, pos, id, ref, alt, qual, filter, info, format) = process_variants(
+                    variants, num_collapse
+                )
+
+                var_count_dict[q_pos[0][1]] += 1
+                write_vcf_line(
+                    chrom, pos, id, ref, alt, filter, qual, info, format, args.file_out
+                )
+                ## Empty variants dict and queue accordingly
+                for _ in range(num_collapse):
+                    variants.popitem(last=False)
+                    q_pos.popleft()
+
+
 
     #############################################
     ##  variant counts to pass to MultiQC      ##
     #############################################
     var_count_list = [(k, str(v)) for k, v in sorted(var_count_dict.items())]
-    print("\t".join(["sample"] + [x[0] for x in var_count_list]))
-    print("\t".join([filename] + [x[1] for x in var_count_list]))
+    
+    # format output table a little more cleanly
+    #row_spacing = len(filename)
+ 
+    row = create_f_string(30, "<") # an arbitraily long value to fit most sample names
+    row += create_f_string(10) * len(var_count_list) # A spacing of ten looks pretty
 
+    headers = ["sample"]
+    headers.extend([x[0] for x in var_count_list])
+    data = [filename]
+    data.extend([x[1] for x in var_count_list])
+    print(row.format(*headers))
+    print(row.format(*data))
+
+def create_f_string(str_size, placement="^"):
+    row_size = "{: " + placement + str(str_size) + "}"
+    return row_size
 
 if __name__ == "__main__":
     sys.exit(main())
