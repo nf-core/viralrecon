@@ -2,6 +2,7 @@ process UNICYCLER {
     tag "$meta.id"
     label 'process_high'
 
+//TODO update containers
     conda (params.enable_conda ? 'bioconda::unicycler=0.4.8' : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/unicycler:0.4.8--py38h8162308_3' :
