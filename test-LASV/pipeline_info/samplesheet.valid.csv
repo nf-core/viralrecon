@@ -1,0 +1,5 @@
+sample,single_end,fastq_1,fastq_2
+20IRR0007-Mseq_T1,0,../NGS-pipeline/data/20IRR0007-Mseq_R1.fastq.gz,../NGS-pipeline/data/20IRR0007-Mseq_R2.fastq.gz
+20IRR0007-Nseq_T1,0,../NGS-pipeline/data/20IRR0007-Nseq_R1.fastq.gz,../NGS-pipeline/data/20IRR0007-Nseq_R2.fastq.gz
+20IRR0008-Mseq_T1,0,../NGS-pipeline/data/20IRR0008-Mseq_R1.fastq.gz,../NGS-pipeline/data/20IRR0008-Mseq_R2.fastq.gz
+20IRR0008-Nseq_T1,0,../NGS-pipeline/data/20IRR0008-Nseq_R1.fastq.gz,../NGS-pipeline/data/20IRR0008-Nseq_R2.fastq.gz

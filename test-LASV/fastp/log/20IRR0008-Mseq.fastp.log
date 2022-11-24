@@ -1,0 +1,49 @@
+Detecting adapter sequence for read1...
+No adapter detected for read1
+
+Detecting adapter sequence for read2...
+No adapter detected for read2
+
+Read1 before filtering:
+total reads: 2286851
+total bases: 562322810
+Q20 bases: 538891753(95.8332%)
+Q30 bases: 507498624(90.2504%)
+
+Read2 before filtering:
+total reads: 2286851
+total bases: 615667226
+Q20 bases: 382360449(62.1051%)
+Q30 bases: 291692941(47.3783%)
+
+Read1 after filtering:
+total reads: 444461
+total bases: 78172525
+Q20 bases: 78037725(99.8276%)
+Q30 bases: 77432513(99.0534%)
+
+Read2 after filtering:
+total reads: 444461
+total bases: 65789110
+Q20 bases: 65231229(99.152%)
+Q30 bases: 62571306(95.1089%)
+
+Filtering result:
+reads passed filter: 888922
+reads failed due to low quality: 3647770
+reads failed due to too many N: 0
+reads failed due to too short: 37010
+reads with adapter trimmed: 159260
+bases trimmed due to adapters: 9876952
+reads with polyX in 3' end: 48960
+bases trimmed in polyX tail: 1003218
+
+Duplication rate: 2.20557%
+
+Insert size peak (evaluated by paired-end reads): 301
+
+JSON report: 20IRR0008-Mseq.fastp.json
+HTML report: 20IRR0008-Mseq.fastp.html
+
+fastp --in1 20IRR0008-Mseq_1.fastq.gz --in2 20IRR0008-Mseq_2.fastq.gz --out1 20IRR0008-Mseq_1.fastp.fastq.gz --out2 20IRR0008-Mseq_2.fastp.fastq.gz --json 20IRR0008-Mseq.fastp.json --html 20IRR0008-Mseq.fastp.html --thread 6 --detect_adapter_for_pe --cut_front --cut_tail --trim_poly_x --cut_mean_quality 30 --qualified_quality_phred 30 --unqualified_percent_limit 10 --length_required 50 
+fastp v0.23.2, time used: 228 seconds

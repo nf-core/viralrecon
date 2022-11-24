@@ -2,7 +2,7 @@
 // iVar trim, sort, index BAM file and run samtools stats, flagstat and idxstats
 //
 
-include { IVAR_TRIM         } from '../../modules/nf-core/modules/ivar/trim/main'
+include { IVAR_TRIM         } from '../../modules/nf-core/ivar/trim/main'
 include { BAM_SORT_SAMTOOLS } from './bam_sort_samtools'
 
 workflow PRIMER_TRIM_IVAR {

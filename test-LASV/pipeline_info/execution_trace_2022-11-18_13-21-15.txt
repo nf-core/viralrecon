@@ -1,0 +1,2 @@
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+3	e9/80b174	-	NFCORE_VIRALRECON:ILLUMINA:PREPARE_GENOME:BOWTIE2_BUILD (KM821911.1.fa)	FAILED	-	-	-	-	-	-	-	-	-

@@ -1,0 +1,5 @@
+FROM ubuntu:18.04
+
+LABEL maintainer="Joon Klaps <joon.klaps@kuleuven.be>"
+
+RUN apt-get update --fix-missing && (apt-get install -t buster-backports -y abacas || apt-get install -y abacas) && apt-get clean && apt-get purge && rm -rf /var/lib/apt/lists/* /tmp/* && ln -s /usr/bin/abacas /usr/bin/abacas.pl

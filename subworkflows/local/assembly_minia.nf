@@ -2,7 +2,7 @@
 // Assembly and downstream processing for minia scaffolds
 //
 
-include { MINIA       } from '../../modules/nf-core/modules/minia/main'
+include { MINIA       } from '../../modules/local/minia/main'
 
 include { ASSEMBLY_QC } from './assembly_qc'
 
