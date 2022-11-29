@@ -49,10 +49,10 @@ def make_bed_mask(bed_in, bed_out, indels_pos_len):
             for position in indels_positions:
                 indel_init_pos = position
                 indel_whole_length = indels_pos_len[position]
-                indel_end_pos = int(indel_init_pos) + int(indel_whole_length)-1
-                if int(init_pos) in range(
+                indel_end_pos = int(indel_init_pos) + int(indel_whole_length) - 1
+                if int(init_pos) in range(int(indel_init_pos), int(indel_end_pos)) or int(end_pos) in range(
                     int(indel_init_pos), int(indel_end_pos)
-                ) or int(end_pos) in range(int(indel_init_pos), int(indel_end_pos)):
+                ):
                     test = False
                     break
                 else:

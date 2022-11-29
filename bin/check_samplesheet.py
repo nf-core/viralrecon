@@ -64,11 +64,7 @@ def check_illumina_samplesheet(file_in, file_out):
         HEADER = ["sample", "fastq_1", "fastq_2"]
         header = [x.strip('"') for x in fin.readline().strip().split(",")]
         if header[: len(HEADER)] != HEADER:
-            print(
-                "ERROR: Please check samplesheet header -> {} != {}".format(
-                    ",".join(header), ",".join(HEADER)
-                )
-            )
+            print("ERROR: Please check samplesheet header -> {} != {}".format(",".join(header), ",".join(HEADER)))
             sys.exit(1)
 
         ## Check sample entries
@@ -85,9 +81,7 @@ def check_illumina_samplesheet(file_in, file_out):
             num_cols = len([x for x in lspl if x])
             if num_cols < MIN_COLS:
                 print_error(
-                    "Invalid number of populated columns (minimum = {})!".format(
-                        MIN_COLS
-                    ),
+                    "Invalid number of populated columns (minimum = {})!".format(MIN_COLS),
                     "Line",
                     line,
                 )
@@ -95,9 +89,7 @@ def check_illumina_samplesheet(file_in, file_out):
             ## Check sample name entries
             sample, fastq_1, fastq_2 = lspl[: len(HEADER)]
             if sample.find(" ") != -1:
-                print(
-                    f"WARNING: Spaces have been replaced by underscores for sample: {sample}"
-                )
+                print(f"WARNING: Spaces have been replaced by underscores for sample: {sample}")
                 sample = sample.replace(" ", "_")
             if not sample:
                 print_error("Sample entry has not been specified!", "Line", line)
@@ -141,19 +133,14 @@ def check_illumina_samplesheet(file_in, file_out):
             for sample in sorted(sample_mapping_dict.keys()):
 
                 ## Check that multiple runs of the same sample are of the same datatype
-                if not all(
-                    x[0] == sample_mapping_dict[sample][0][0]
-                    for x in sample_mapping_dict[sample]
-                ):
+                if not all(x[0] == sample_mapping_dict[sample][0][0] for x in sample_mapping_dict[sample]):
                     print_error(
                         "Multiple runs of a sample must be of the same datatype!",
                         "Sample: {}".format(sample),
                     )
 
                 for idx, val in enumerate(sample_mapping_dict[sample]):
-                    fout.write(
-                        ",".join(["{}_T{}".format(sample, idx + 1)] + val) + "\n"
-                    )
+                    fout.write(",".join(["{}_T{}".format(sample, idx + 1)] + val) + "\n")
     else:
         print_error("No entries to process!", "Samplesheet: {}".format(file_in))
 
@@ -179,11 +166,7 @@ def check_nanopore_samplesheet(file_in, file_out):
         HEADER = ["sample", "barcode"]
         header = [x.strip('"') for x in fin.readline().strip().split(",")]
         if header[: len(HEADER)] != HEADER:
-            print(
-                "ERROR: Please check samplesheet header -> {} != {}".format(
-                    ",".join(header), ",".join(HEADER)
-                )
-            )
+            print("ERROR: Please check samplesheet header -> {} != {}".format(",".join(header), ",".join(HEADER)))
             sys.exit(1)
 
         ## Check sample entries
@@ -200,9 +183,7 @@ def check_nanopore_samplesheet(file_in, file_out):
             num_cols = len([x for x in lspl if x])
             if num_cols < MIN_COLS:
                 print_error(
-                    "Invalid number of populated columns (minimum = {})!".format(
-                        MIN_COLS
-                    ),
+                    "Invalid number of populated columns (minimum = {})!".format(MIN_COLS),
                     "Line",
                     line,
                 )
@@ -210,14 +191,10 @@ def check_nanopore_samplesheet(file_in, file_out):
             ## Check sample entry
             sample, barcode = lspl[: len(HEADER)]
             if sample.find(" ") != -1:
-                print(
-                    f"WARNING: Spaces have been replaced by underscores for sample: {sample}"
-                )
+                print(f"WARNING: Spaces have been replaced by underscores for sample: {sample}")
                 sample = sample.replace(" ", "_")
             if sample.find("-") != -1:
-                print(
-                    f"WARNING: Dashes have been replaced by underscores for sample: {sample}"
-                )
+                print(f"WARNING: Dashes have been replaced by underscores for sample: {sample}")
                 sample = sample.replace("-", "_")
             if not sample:
                 print_error("Sample entry has not been specified!", "Line", line)

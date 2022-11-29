@@ -56,9 +56,7 @@ def collapse_primer_bed(file_in, file_out, left_primer_suffix, right_primer_suff
         line = fin.readline()
         if line:
             chrom, start, end, name, score, strand = line.strip().split("\t")
-            primer = re.sub(
-                r"(?:{}|{}).*".format(left_primer_suffix, right_primer_suffix), "", name
-            )
+            primer = re.sub(r"(?:{}|{}).*".format(left_primer_suffix, right_primer_suffix), "", name)
             if primer not in interval_dict:
                 interval_dict[primer] = []
             interval_dict[primer].append((chrom, int(start), int(end), score))
@@ -81,9 +79,7 @@ def collapse_primer_bed(file_in, file_out, left_primer_suffix, right_primer_suff
 
 def main(args=None):
     args = parse_args(args)
-    collapse_primer_bed(
-        args.FILE_IN, args.FILE_OUT, args.LEFT_PRIMER_SUFFIX, args.RIGHT_PRIMER_SUFFIX
-    )
+    collapse_primer_bed(args.FILE_IN, args.FILE_OUT, args.LEFT_PRIMER_SUFFIX, args.RIGHT_PRIMER_SUFFIX)
 
 
 if __name__ == "__main__":

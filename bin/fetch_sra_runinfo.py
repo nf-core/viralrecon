@@ -30,9 +30,7 @@ ENA_IDS = [
 ]
 GEO_IDS = ["GSE18729", "GSM465244"]
 ID_REGEX = r"^[A-Z]+"
-PREFIX_LIST = sorted(
-    list(set([re.search(ID_REGEX, x).group() for x in SRA_IDS + ENA_IDS + GEO_IDS]))
-)
+PREFIX_LIST = sorted(list(set([re.search(ID_REGEX, x).group() for x in SRA_IDS + ENA_IDS + GEO_IDS])))
 
 
 def parse_args(args=None):
@@ -40,9 +38,7 @@ def parse_args(args=None):
     Epilog = """Example usage: python fetch_sra_runinfo.py <FILE_IN> <FILE_OUT>"""
 
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
-    parser.add_argument(
-        "FILE_IN", help="File containing database identifiers, one per line."
-    )
+    parser.add_argument("FILE_IN", help="File containing database identifiers, one per line.")
     parser.add_argument("FILE_OUT", help="Output file in tab-delimited format.")
     parser.add_argument(
         "-pl",
@@ -102,9 +98,7 @@ def fetch_url(url, encoding="utf-8"):
 
 def id_to_srx(db_id):
     ids = []
-    url = "https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term={}".format(
-        db_id
-    )
+    url = "https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term={}".format(db_id)
     for row in csv.DictReader(fetch_url(url), delimiter=","):
         ids.append(row["Experiment"])
     return ids
@@ -123,9 +117,7 @@ def id_to_erx(db_id):
 
 def gse_to_srx(db_id):
     ids = []
-    url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={}&targ=gsm&view=data&form=text".format(
-        db_id
-    )
+    url = "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={}&targ=gsm&view=data&form=text".format(db_id)
     gsm_ids = [x.split("=")[1].strip() for x in fetch_url(url) if x.find("GSM") != -1]
     for gsm_id in gsm_ids:
         ids += id_to_srx(gsm_id)
@@ -184,24 +176,16 @@ def fetch_sra_runinfo(FileIn, FileOut, platformList=[], libraryLayoutList=[]):
 
                                     writeID = True
                                     if platformList:
-                                        if (
-                                            row["instrument_platform"]
-                                            not in platformList
-                                        ):
+                                        if row["instrument_platform"] not in platformList:
                                             writeID = False
                                     if libraryLayoutList:
-                                        if (
-                                            row["library_layout"]
-                                            not in libraryLayoutList
-                                        ):
+                                        if row["library_layout"] not in libraryLayoutList:
                                             writeID = False
 
                                     if writeID:
                                         if total_out == 0:
                                             header = sorted(row.keys())
-                                            fout.write(
-                                                "{}\n".format("\t".join(sorted(header)))
-                                            )
+                                            fout.write("{}\n".format("\t".join(sorted(header))))
                                         else:
                                             if header != sorted(row.keys()):
                                                 print(
@@ -210,11 +194,7 @@ def fetch_sra_runinfo(FileIn, FileOut, platformList=[], libraryLayoutList=[]):
                                                     )
                                                 )
                                                 sys.exit(1)
-                                        fout.write(
-                                            "{}\n".format(
-                                                "\t".join([row[x] for x in header])
-                                            )
-                                        )
+                                        fout.write("{}\n".format("\t".join([row[x] for x in header])))
                                         total_out += 1
                                     run_ids.append(run_id)
                         seen_ids.append(db_id)
