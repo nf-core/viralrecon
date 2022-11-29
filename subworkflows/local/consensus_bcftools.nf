@@ -2,11 +2,11 @@
 // Consensus calling with BCFTools and downstream processing QC
 //
 
-include { BCFTOOLS_FILTER     } from '../../modules/nf-core/modules/bcftools/filter/main'
-include { TABIX_TABIX         } from '../../modules/nf-core/modules/tabix/tabix/main'
-include { BEDTOOLS_MERGE      } from '../../modules/nf-core/modules/bedtools/merge/main'
-include { BEDTOOLS_MASKFASTA  } from '../../modules/nf-core/modules/bedtools/maskfasta/main'
-include { BCFTOOLS_CONSENSUS  } from '../../modules/nf-core/modules/bcftools/consensus/main'
+include { BCFTOOLS_FILTER     } from '../../modules/nf-core/bcftools/filter/main'
+include { TABIX_TABIX         } from '../../modules/nf-core/tabix/tabix/main'
+include { BEDTOOLS_MERGE      } from '../../modules/nf-core/bedtools/merge/main'
+include { BEDTOOLS_MASKFASTA  } from '../../modules/nf-core/bedtools/maskfasta/main'
+include { BCFTOOLS_CONSENSUS  } from '../../modules/nf-core/bcftools/consensus/main'
 include { MAKE_BED_MASK       } from '../../modules/local/make_bed_mask'
 include { RENAME_FASTA_HEADER } from '../../modules/local/rename_fasta_header'
 include { CONSENSUS_QC        } from './consensus_qc'

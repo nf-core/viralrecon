@@ -2,7 +2,7 @@
 // Run BCFTools bgzip, tabix and stats commands
 //
 
-include { TABIX_BGZIP     } from '../../modules/nf-core/modules/tabix/bgzip/main'
+include { TABIX_BGZIP     } from '../../modules/nf-core/tabix/bgzip/main'
 include { VCF_TABIX_STATS } from './vcf_tabix_stats'
 
 workflow VCF_BGZIP_TABIX_STATS {
