@@ -86,13 +86,13 @@ include { ASSEMBLY_MINIA      } from '../subworkflows/local/assembly_minia'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { CAT_FASTQ                     } from '../modules/nf-core/modules/cat/fastq/main'
-include { FASTQC                        } from '../modules/nf-core/modules/fastqc/main'
-include { KRAKEN2_KRAKEN2               } from '../modules/nf-core/modules/kraken2/kraken2/main'
-include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/modules/picard/collectmultiplemetrics/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
-include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/modules/mosdepth/main'
-include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/modules/mosdepth/main'
+include { CAT_FASTQ                     } from '../modules/nf-core/cat/fastq/main'
+include { FASTQC                        } from '../modules/nf-core/fastqc/main'
+include { KRAKEN2_KRAKEN2               } from '../modules/nf-core/kraken2/kraken2/main'
+include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/picard/collectmultiplemetrics/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/mosdepth/main'
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main'
 
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
