@@ -2,12 +2,12 @@
 // Uncompress and prepare reference genome files
 //
 
-include { GUNZIP as GUNZIP_FASTA      } from '../../modules/nf-core/modules/gunzip/main'
-include { GUNZIP as GUNZIP_GFF        } from '../../modules/nf-core/modules/gunzip/main'
-include { GUNZIP as GUNZIP_PRIMER_BED } from '../../modules/nf-core/modules/gunzip/main'
-include { UNTAR                       } from '../../modules/nf-core/modules/untar/main'
-include { CUSTOM_GETCHROMSIZES        } from '../../modules/nf-core/modules/custom/getchromsizes/main'
-include { NEXTCLADE_DATASETGET        } from '../../modules/nf-core/modules/nextclade/datasetget/main'
+include { GUNZIP as GUNZIP_FASTA      } from '../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_GFF        } from '../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_PRIMER_BED } from '../../modules/nf-core/gunzip/main'
+include { UNTAR                       } from '../../modules/nf-core/untar/main'
+include { CUSTOM_GETCHROMSIZES        } from '../../modules/nf-core/custom/getchromsizes/main'
+include { NEXTCLADE_DATASETGET        } from '../../modules/nf-core/nextclade/datasetget/main'
 include { COLLAPSE_PRIMERS            } from '../../modules/local/collapse_primers'
 include { SNPEFF_BUILD                } from '../../modules/local/snpeff_build'
 

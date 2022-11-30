@@ -83,7 +83,7 @@ def parse_ivar_line(line):
     return:
         CHROM, POS, ID, REF, ALT, QUAL, INFO, FORMAT, REF_CODON, ALT_CODON, pass_test, var_type
     """
-  
+
     line = line.strip("\n").split("\t")
     ## Assign intial fields to variables
     CHROM = line[0]
@@ -178,9 +178,7 @@ def strand_bias_filter(format):
     # table:
     ##  REF_FW  REF_RV
     ##  ALT_FW  ALT_RV
-    table = np.array(
-        [[format[0] - format[1], format[1]], [format[3] - format[4], format[4]]]
-    )
+    table = np.array([[format[0] - format[1], format[1]], [format[3] - format[4], format[4]]])
     oddsr, pvalue = fisher_exact(table, alternative="greater")
 
     # h0: both strands are equally represented.
@@ -208,9 +206,7 @@ def write_vcf_header(ref, ignore_strand_bias, file_out, filename):
     if ref:
         header_contig = []
         for record in SeqIO.parse(ref, "fasta"):
-            header_contig += [
-                "##contig=<ID=" + record.id + ",length=" + str(len(record.seq)) + ">"
-            ]
+            header_contig += ["##contig=<ID=" + record.id + ",length=" + str(len(record.seq)) + ">"]
 
         header_source += header_contig
 
@@ -231,9 +227,7 @@ def write_vcf_header(ref, ignore_strand_bias, file_out, filename):
     ]
     header_cols = [f"#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t{filename}"]
     if not ignore_strand_bias:
-        header_filter += [
-            '##FILTER=<ID=sb,Description="Strand-bias fisher-test p-value < 0.05">'
-        ]
+        header_filter += ['##FILTER=<ID=sb,Description="Strand-bias fisher-test p-value < 0.05">']
 
     header = header_source + header_info + header_filter + header_format + header_cols
     fout = open(file_out, "w")
@@ -388,9 +382,7 @@ def process_variants(variants, num_collapse):
     """
     # Collapsed variant parameters equal to first variant
     key_list = ["chrom", "pos", "id", "qual", "filter", "info", "format"]
-    chrom, pos, id, qual, filter, info, format = [
-        variants[next(iter(variants))][key] for key in key_list
-    ]
+    chrom, pos, id, qual, filter, info, format = [variants[next(iter(variants))][key] for key in key_list]
 
     # If no consecutive, process one variant line
     # If two consecutive, process two variant lines into one
@@ -398,7 +390,7 @@ def process_variants(variants, num_collapse):
     ref = ""
     alt = ""
     iter_variants = iter(variants)
-    for _ in range(num_collapse): # fixed notation
+    for _ in range(num_collapse):  # fixed notation
         var = next(iter_variants)
         ref += variants[var]["ref"]
         alt += variants[var]["alt"]
@@ -484,10 +476,7 @@ def main(args=None):
                 if args.pass_only and filter != "PASS":
                     write_line = False
                 ### AF filtering. ALT_DP/(ALT_DP+REF_DP)
-                if (
-                    float(format[3] / (format[0] + format[3]))
-                    < args.allele_freq_threshold
-                ):
+                if float(format[3] / (format[0] + format[3])) < args.allele_freq_threshold:
                     write_line = False
                 ### Duplication filter
                 if (chrom, pos, ref, alt) in var_list:
@@ -501,7 +490,7 @@ def main(args=None):
                 ############################################################
                 if not args.ignore_merge_codons and var_type == "SNP":
                     ## re-fill queue and dict accordingly
-                    q_pos.append((pos, var_type)) # adding type information
+                    q_pos.append((pos, var_type))  # adding type information
                     variants[(chrom, pos, ref, alt)] = {
                         "chrom": chrom,
                         "pos": pos,
@@ -519,9 +508,7 @@ def main(args=None):
                     if len(q_pos) == q_pos.maxlen:
                         fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
                         fe_codon_alt = variants[next(iter(variants))]["alt_codon"]
-                        num_collapse = check_merge_codons(
-                            q_pos, fe_codon_ref, fe_codon_alt
-                        )
+                        num_collapse = check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt)
                         (
                             chrom,
                             pos,
@@ -563,7 +550,7 @@ def main(args=None):
         #######################
         ## handle last lines ##
         #######################
-        while len(q_pos) > 0:  
+        while len(q_pos) > 0:
             try:
 
                 fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
@@ -572,31 +559,25 @@ def main(args=None):
                 break
             else:
                 num_collapse = check_merge_codons(q_pos, fe_codon_ref, fe_codon_alt)
-                (chrom, pos, id, ref, alt, qual, filter, info, format) = process_variants(
-                    variants, num_collapse
-                )
+                (chrom, pos, id, ref, alt, qual, filter, info, format) = process_variants(variants, num_collapse)
 
                 var_count_dict[q_pos[0][1]] += 1
-                write_vcf_line(
-                    chrom, pos, id, ref, alt, filter, qual, info, format, args.file_out
-                )
+                write_vcf_line(chrom, pos, id, ref, alt, filter, qual, info, format, args.file_out)
                 ## Empty variants dict and queue accordingly
                 for _ in range(num_collapse):
                     variants.popitem(last=False)
                     q_pos.popleft()
 
-
-
     #############################################
     ##  variant counts to pass to MultiQC      ##
     #############################################
     var_count_list = [(k, str(v)) for k, v in sorted(var_count_dict.items())]
-    
+
     # format output table a little more cleanly
-    #row_spacing = len(filename)
- 
-    row = create_f_string(30, "<") # an arbitraily long value to fit most sample names
-    row += create_f_string(10) * len(var_count_list) # A spacing of ten looks pretty
+    # row_spacing = len(filename)
+
+    row = create_f_string(30, "<")  # an arbitraily long value to fit most sample names
+    row += create_f_string(10) * len(var_count_list)  # A spacing of ten looks pretty
 
     headers = ["sample"]
     headers.extend([x[0] for x in var_count_list])
@@ -605,9 +586,11 @@ def main(args=None):
     print(row.format(*headers))
     print(row.format(*data))
 
+
 def create_f_string(str_size, placement="^"):
     row_size = "{: " + placement + str(str_size) + "}"
     return row_size
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -4,6 +4,7 @@
     nf-core/viralrecon
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Github : https://github.com/nf-core/viralrecon
+
     Website: https://nf-co.re/viralrecon
     Slack  : https://nfcore.slack.com/channels/viralrecon
 ----------------------------------------------------------------------------------------

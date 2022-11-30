@@ -3,10 +3,10 @@
 //
 
 include { FILTER_BLASTN } from '../../modules/local/filter_blastn'
-include { ABACAS        } from '../../modules/nf-core/modules/abacas/main'
-include { BLAST_BLASTN  } from '../../modules/nf-core/modules/blast/blastn/main'
-include { PLASMIDID     } from '../../modules/nf-core/modules/plasmidid/main'
-include { QUAST         } from '../../modules/nf-core/modules/quast/main'
+include { ABACAS        } from '../../modules/nf-core/abacas/main'
+include { BLAST_BLASTN  } from '../../modules/nf-core/blast/blastn/main'
+include { PLASMIDID     } from '../../modules/nf-core/plasmidid/main'
+include { QUAST         } from '../../modules/nf-core/quast/main'
 
 workflow ASSEMBLY_QC {
     take:
