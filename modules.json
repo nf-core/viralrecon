@@ -11,11 +11,11 @@
                     },
                     "artic/guppyplex": {
                         "branch": "master",
-                        "git_sha": "589f39c39e05fdd9493e765b1d2b4385d3b68fde"
+                        "git_sha": "5894f731dc744719b87fb4ac728493e941a1655e"
                     },
                     "artic/minion": {
                         "branch": "master",
-                        "git_sha": "589f39c39e05fdd9493e765b1d2b4385d3b68fde"
+                        "git_sha": "5894f731dc744719b87fb4ac728493e941a1655e"
                     },
                     "bandage/image": {
                         "branch": "master",
