@@ -4,12 +4,12 @@
 
 include { SAMTOOLS_VIEW      } from '../../modules/nf-core/samtools/view/main'
 include { SAMTOOLS_INDEX     } from '../../modules/nf-core/samtools/index/main'
-include { BAM_STATS_SAMTOOLS } from './bam_stats_samtools'
+include { BAM_STATS_SAMTOOLS } from './bam_stats_samtools/main'
 
 workflow FILTER_BAM_SAMTOOLS {
     take:
-    bam_bai // channel: [ val(meta), [ bam ], [ bai ] ]
-    fasta   // path   : fasta
+    ch_bam_bai // channel: [ val(meta), [ bam ], [ bai ] ]
+    ch_fasta   // path   : fasta
 
     main:
 
@@ -18,23 +18,21 @@ workflow FILTER_BAM_SAMTOOLS {
     //
     // Filter BAM using Samtools view
     //
-    SAMTOOLS_VIEW (
-        bam_bai,
-        fasta
-    )
+    SAMTOOLS_VIEW ( ch_bam_bai, ch_fasta )
     ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())
 
     //
     // Index BAM file and run samtools stats, flagstat and idxstats
     //
-    SAMTOOLS_INDEX (
-        SAMTOOLS_VIEW.out.bam
-    )
+    SAMTOOLS_INDEX ( SAMTOOLS_VIEW.out.bam )
     ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.first())
 
-    BAM_STATS_SAMTOOLS (
-        SAMTOOLS_VIEW.out.bam.join(SAMTOOLS_INDEX.out.bai, by: [0])
-    )
+    SAMTOOLS_VIEW.out.bam
+        .join(SAMTOOLS_INDEX.out.bai, by: [0], remainder: true)
+        .set { ch_bam_bai }
+
+    BAM_STATS_SAMTOOLS ( ch_bam_bai, ch_fasta )
+
     ch_versions = ch_versions.mix(BAM_STATS_SAMTOOLS.out.versions)
 
     emit:
