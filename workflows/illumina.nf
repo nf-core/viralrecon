@@ -279,7 +279,8 @@ workflow ILLUMINA {
             ch_variants_fastq,
             PREPARE_GENOME.out.bowtie2_index,
             params.save_unaligned,
-            false
+            false,
+            PREPARE_GENOME.out.fasta
         )
         ch_bam                      = FASTQ_ALIGN_BOWTIE2.out.bam
         ch_bai                      = FASTQ_ALIGN_BOWTIE2.out.bai
@@ -333,6 +334,7 @@ workflow ILLUMINA {
     if (!params.skip_variants && !params.skip_ivar_trim && params.protocol == 'amplicon') {
         PRIMER_TRIM_IVAR (
             ch_bam.join(ch_bai, by: [0]),
+            PREPARE_GENOME.out.fasta,
             PREPARE_GENOME.out.primer_bed
         )
         ch_bam                        = PRIMER_TRIM_IVAR.out.bam
