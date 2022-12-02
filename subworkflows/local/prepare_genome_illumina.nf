@@ -156,7 +156,7 @@ workflow PREPARE_GENOME {
                 ch_bowtie2_index = [ [:], file(params.bowtie2_index) ]
             }
         } else {
-            ch_bowtie2_index = BOWTIE2_BUILD ( [ [:], ch_fasta ] ).index
+            ch_bowtie2_index = BOWTIE2_BUILD ( ch_fasta.map{ it -> [[id:it[0].baseName], it] } ).index
             ch_versions      = ch_versions.mix(BOWTIE2_BUILD.out.versions)
         }
     }
