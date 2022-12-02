@@ -98,7 +98,7 @@ include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
 //
 include { FASTQC_FASTP           } from '../subworkflows/nf-core/fastqc_fastp'
-include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'
+include { FASTQ_ALIGN_BOWTIE2    } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
 include { PRIMER_TRIM_IVAR       } from '../subworkflows/nf-core/primer_trim_ivar'
 include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard'
 
@@ -275,17 +275,17 @@ workflow ILLUMINA {
     ch_bowtie2_multiqc          = Channel.empty()
     ch_bowtie2_flagstat_multiqc = Channel.empty()
     if (!params.skip_variants) {
-        ALIGN_BOWTIE2 (
+        FASTQ_ALIGN_BOWTIE2 (
             ch_variants_fastq,
             PREPARE_GENOME.out.bowtie2_index,
             params.save_unaligned,
             false
         )
-        ch_bam                      = ALIGN_BOWTIE2.out.bam
-        ch_bai                      = ALIGN_BOWTIE2.out.bai
-        ch_bowtie2_multiqc          = ALIGN_BOWTIE2.out.log_out
-        ch_bowtie2_flagstat_multiqc = ALIGN_BOWTIE2.out.flagstat
-        ch_versions                 = ch_versions.mix(ALIGN_BOWTIE2.out.versions)
+        ch_bam                      = FASTQ_ALIGN_BOWTIE2.out.bam
+        ch_bai                      = FASTQ_ALIGN_BOWTIE2.out.bai
+        ch_bowtie2_multiqc          = FASTQ_ALIGN_BOWTIE2.out.log_out
+        ch_bowtie2_flagstat_multiqc = FASTQ_ALIGN_BOWTIE2.out.flagstat
+        ch_versions                 = ch_versions.mix(FASTQ_ALIGN_BOWTIE2.out.versions)
     }
 
     //
