@@ -122,7 +122,7 @@
                     },
                     "gunzip": {
                         "branch": "master",
-                        "git_sha": "fa37e0662690c4ec4260dae282fbce08777503e6",
+                        "git_sha": "5e34754d42cd2d5d248ca8673c0a53cdf5624905",
                         "installed_by": ["modules"]
                     },
                     "ivar/consensus": {
