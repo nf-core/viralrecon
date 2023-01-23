@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [[#321](https://github.com/nf-core/viralrecon/issues/321)] `ivar_variants_to_vcf` script: Duplicated positions in tsv file due to overlapping annotations.
 - [[#317](https://github.com/nf-core/viralrecon/issues/317)] `ivar_variants_to_vcf`: Ignore lines without annotation in ivar tsv file
+- [[[#351](https://github.com/nf-core/viralrecon/issues/351)]] - Updated modules/nf-core folder structure modules are stored in modules/nf-core instead of modules/nf-core/modules/
 
 ### Parameters
 
