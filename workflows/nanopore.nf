@@ -77,19 +77,19 @@ include { VARIANTS_LONG_TABLE } from '../subworkflows/local/variants_long_table'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { PYCOQC                        } from '../modules/nf-core/modules/pycoqc/main'
-include { NANOPLOT                      } from '../modules/nf-core/modules/nanoplot/main'
-include { ARTIC_GUPPYPLEX               } from '../modules/nf-core/modules/artic/guppyplex/main'
-include { ARTIC_MINION                  } from '../modules/nf-core/modules/artic/minion/main'
-include { VCFLIB_VCFUNIQ                } from '../modules/nf-core/modules/vcflib/vcfuniq/main'
-include { TABIX_TABIX                   } from '../modules/nf-core/modules/tabix/tabix/main'
-include { BCFTOOLS_STATS                } from '../modules/nf-core/modules/bcftools/stats/main'
-include { QUAST                         } from '../modules/nf-core/modules/quast/main'
-include { PANGOLIN                      } from '../modules/nf-core/modules/pangolin/main'
-include { NEXTCLADE_RUN                 } from '../modules/nf-core/modules/nextclade/run/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
-include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/modules/mosdepth/main'
-include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/modules/mosdepth/main'
+include { PYCOQC                        } from '../modules/nf-core/pycoqc/main'
+include { NANOPLOT                      } from '../modules/nf-core/nanoplot/main'
+include { ARTIC_GUPPYPLEX               } from '../modules/nf-core/artic/guppyplex/main'
+include { ARTIC_MINION                  } from '../modules/nf-core/artic/minion/main'
+include { VCFLIB_VCFUNIQ                } from '../modules/nf-core/vcflib/vcfuniq/main'
+include { TABIX_TABIX                   } from '../modules/nf-core/tabix/tabix/main'
+include { BCFTOOLS_STATS                } from '../modules/nf-core/bcftools/stats/main'
+include { QUAST                         } from '../modules/nf-core/quast/main'
+include { PANGOLIN                      } from '../modules/nf-core/pangolin/main'
+include { NEXTCLADE_RUN                 } from '../modules/nf-core/nextclade/run/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/mosdepth/main'
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main'
 
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
