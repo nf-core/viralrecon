@@ -107,7 +107,7 @@
                     },
                     "custom/getchromsizes": {
                         "branch": "master",
-                        "git_sha": "213403187932dbbdd936a04474cc8cd8abae7a08",
+                        "git_sha": "cf5b9c30a2adacc581793afb79fae5f5b50bed01",
                         "installed_by": ["modules"]
                     },
                     "fastp": {

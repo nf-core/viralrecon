@@ -127,7 +127,7 @@ workflow ILLUMINA {
     PREPARE_GENOME
         .out
         .fasta
-        .map { WorkflowIllumina.isMultiFasta(it, log) }
+        .map { WorkflowIllumina.isMultiFasta(meta, fasta, log) }
 
     if (params.protocol == 'amplicon' && !params.skip_variants) {
         // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix

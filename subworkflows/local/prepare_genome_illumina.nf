@@ -21,20 +21,18 @@ include { SNPEFF_BUILD                  } from '../../modules/local/snpeff_build
 
 workflow PREPARE_GENOME {
     main:
-
     ch_versions = Channel.empty()
 
     //
     // Uncompress genome fasta file if required
     //
+    ch_fasta = Channel.empty()
     if (params.fasta.endsWith('.gz')) {
-        GUNZIP_FASTA (
-            [ [:], params.fasta ]
-        )
-        ch_fasta    = GUNZIP_FASTA.out.gunzip.map { it[1] }
+        GUNZIP_FASTA ( [ [:], params.fasta ] )
+        ch_fasta    = GUNZIP_FASTA.out.gunzip
         ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
     } else {
-        ch_fasta = file(params.fasta)
+        ch_fasta    = Channel.fromPath(params.fasta).collect().map{ fasta -> [ [:], fasta ] }
     }
 
     //
@@ -42,10 +40,7 @@ workflow PREPARE_GENOME {
     //
     if (params.gff) {
         if (params.gff.endsWith('.gz')) {
-            GUNZIP_GFF (
-                [ [:], params.gff ]
-            )
-            ch_gff      = GUNZIP_GFF.out.gunzip.map { it[1] }
+            ch_gff      = GUNZIP_GFF ( [ [:], params.gff ] ).gunzip.map{ meta, gff -> [gff] }
             ch_versions = ch_versions.mix(GUNZIP_GFF.out.versions)
         } else {
             ch_gff = file(params.gff)
@@ -60,11 +55,9 @@ workflow PREPARE_GENOME {
     ch_fai         = Channel.empty()
     ch_chrom_sizes = Channel.empty()
     if (params.protocol == 'amplicon' || !params.skip_asciigenome) {
-        CUSTOM_GETCHROMSIZES (
-            ch_fasta
-        )
-        ch_fai         = CUSTOM_GETCHROMSIZES.out.fai
-        ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes
+        CUSTOM_GETCHROMSIZES ( ch_fasta )
+        ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes.map{ it[1] }
+        ch_fai         = CUSTOM_GETCHROMSIZES.out.fai.map{ it[1] }
         ch_versions    = ch_versions.mix(CUSTOM_GETCHROMSIZES.out.versions)
     }
 
@@ -156,7 +149,7 @@ workflow PREPARE_GENOME {
                 ch_bowtie2_index = [ [:], file(params.bowtie2_index) ]
             }
         } else {
-            ch_bowtie2_index = BOWTIE2_BUILD ( ch_fasta.map{ it -> [[id:it[0].baseName], it] } ).index
+                ch_bowtie2_index = BOWTIE2_BUILD ( [ [:], ch_fasta ] ).index
             ch_versions      = ch_versions.mix(BOWTIE2_BUILD.out.versions)
         }
     }
@@ -204,9 +197,7 @@ workflow PREPARE_GENOME {
                     ch_blast_db = file(params.blast_db)
                 }
             } else {
-                BLAST_MAKEBLASTDB (
-                    ch_fasta
-                )
+                BLAST_MAKEBLASTDB ( ch_fasta )
                 ch_blast_db = BLAST_MAKEBLASTDB.out.db
                 ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
             }
