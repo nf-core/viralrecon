@@ -58,7 +58,6 @@ def check_illumina_samplesheet(file_in, file_out):
 
     sample_mapping_dict = {}
     with open(file_in, "r") as fin:
-
         ## Check header
         MIN_COLS = 2
         HEADER = ["sample", "fastq_1", "fastq_2"]
@@ -131,7 +130,6 @@ def check_illumina_samplesheet(file_in, file_out):
         with open(file_out, "w") as fout:
             fout.write(",".join(["sample", "single_end", "fastq_1", "fastq_2"]) + "\n")
             for sample in sorted(sample_mapping_dict.keys()):
-
                 ## Check that multiple runs of the same sample are of the same datatype
                 if not all(x[0] == sample_mapping_dict[sample][0][0] for x in sample_mapping_dict[sample]):
                     print_error(
@@ -160,7 +158,6 @@ def check_nanopore_samplesheet(file_in, file_out):
 
     sample_mapping_dict = {}
     with open(file_in, "r") as fin:
-
         ## Check header
         MIN_COLS = 2
         HEADER = ["sample", "barcode"]

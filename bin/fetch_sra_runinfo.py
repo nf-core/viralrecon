@@ -150,7 +150,6 @@ def fetch_sra_runinfo(FileIn, FileOut, platformList=[], libraryLayoutList=[]):
                 prefix = match.group()
                 if prefix in PREFIX_LIST:
                     if not db_id in seen_ids:
-
                         ids = [db_id]
                         ## Resolve/expand these ids against GEO URL
                         if prefix in ["GSE"]:
@@ -173,7 +172,6 @@ def fetch_sra_runinfo(FileIn, FileOut, platformList=[], libraryLayoutList=[]):
                             for row in csv_dict:
                                 run_id = row["run_accession"]
                                 if not run_id in run_ids:
-
                                     writeID = True
                                     if platformList:
                                         if row["instrument_platform"] not in platformList:

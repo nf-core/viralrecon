@@ -425,7 +425,6 @@ def main(args=None):
     with open(args.file_in, "r") as fin:
         for line in fin:
             if "REGION" not in line:
-
                 ################
                 ## Parse line ##
                 ################
@@ -552,7 +551,6 @@ def main(args=None):
         #######################
         while len(q_pos) > 0:
             try:
-
                 fe_codon_ref = variants[next(iter(variants))]["ref_codon"]
                 fe_codon_alt = variants[next(iter(variants))]["alt_codon"]
             except StopIteration:

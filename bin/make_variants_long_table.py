@@ -289,7 +289,6 @@ def main(args=None):
     ## Create per-sample table and write to file
     sample_tables = []
     for sample in sorted(bcftools_files):
-
         ## Read in BCFTools query file
         bcftools_table = None
         if args.variant_caller == "ivar":
@@ -302,7 +301,6 @@ def main(args=None):
             bcftools_table = medaka_bcftools_query_to_table(bcftools_files[sample])
 
         if not bcftools_table.empty:
-
             ## Read in SnpSift file
             snpsift_table = snpsift_to_table(snpsift_files[sample])
 
