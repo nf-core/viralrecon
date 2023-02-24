@@ -158,7 +158,6 @@ def check_nanopore_samplesheet(file_in, file_out):
 
     sample_mapping_dict = {}
     with open(file_in, "r") as fin:
-
         ## Check header
         MIN_COLS = 2
         HEADER = ["sample", "barcode"]
