@@ -76,7 +76,7 @@ workflow PREPARE_GENOME {
         if (params.kraken2_db) {
             if (params.kraken2_db.endsWith('.tar.gz')) {
                 UNTAR_KRAKEN2_DB (
-                    [ [:], params.kraken2_db ]
+                    [ [:], file(params.kraken2_db) ]
                 )
                 ch_kraken2_db = UNTAR_KRAKEN2_DB.out.untar.map { it[1] }
                 ch_versions   = ch_versions.mix(UNTAR_KRAKEN2_DB.out.versions)
