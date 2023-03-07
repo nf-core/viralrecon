@@ -59,12 +59,12 @@ workflow PREPARE_GENOME {
     //
     ch_fai         = Channel.empty()
     ch_chrom_sizes = Channel.empty()
-    if (params.protocol == 'amplicon' || !params.skip_asciigenome) {
+    if (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) {
         CUSTOM_GETCHROMSIZES (
-            ch_fasta
+            [ [:], ch_fasta ]
         )
-        ch_fai         = CUSTOM_GETCHROMSIZES.out.fai
-        ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes
+        ch_fai         = CUSTOM_GETCHROMSIZES.out.fai.map{ it[1] }
+        ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes.map{ it[1] }
         ch_versions    = ch_versions.mix(CUSTOM_GETCHROMSIZES.out.versions)
     }
 
@@ -160,7 +160,7 @@ workflow PREPARE_GENOME {
             }
         } else {
             BOWTIE2_BUILD (
-                ch_fasta
+                [ [:], ch_fasta ]
             )
             ch_bowtie2_index = BOWTIE2_BUILD.out.index
             ch_versions      = ch_versions.mix(BOWTIE2_BUILD.out.versions)

@@ -16,9 +16,10 @@ def getFastpReadsAfterFiltering(json_file) {
     return json['after_filtering']['total_reads'].toInteger()
 }
 
-workflow FASTQC_FASTP {
+workflow FASTQ_TRIM_FASTP_FASTQC {
     take:
     reads             // channel: [ val(meta), [ reads ] ]
+    adapter_fasta     //    file: adapter.fasta
     save_trimmed_fail //   value: boolean
     save_merged       //   value: boolean
 
@@ -48,6 +49,7 @@ workflow FASTQC_FASTP {
     if (!params.skip_fastp) {
         FASTP (
             reads,
+            adapter_fasta,
             save_trimmed_fail,
             save_merged
         )

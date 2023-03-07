@@ -50,10 +50,10 @@ workflow PREPARE_GENOME {
     // Create chromosome sizes file
     //
     CUSTOM_GETCHROMSIZES (
-        ch_fasta
+        [ [:], ch_fasta ]
     )
-    ch_fai         = CUSTOM_GETCHROMSIZES.out.fai
-    ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes
+    ch_fai         = CUSTOM_GETCHROMSIZES.out.fai.map{ it[1] }
+    ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes.map{ it[1] }
     ch_versions    = ch_versions.mix(CUSTOM_GETCHROMSIZES.out.versions)
 
     //

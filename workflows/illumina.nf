@@ -97,10 +97,10 @@ include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
 //
-include { FASTQC_FASTP           } from '../subworkflows/nf-core/fastqc_fastp'
-include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'
-include { PRIMER_TRIM_IVAR       } from '../subworkflows/nf-core/primer_trim_ivar'
-include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard'
+include { FASTQ_TRIM_FASTP_FASTQC   } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc'
+include { FASTQ_ALIGN_BOWTIE2       } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
+include { BAM_TRIM_PRIMERS_IVAR     } from '../subworkflows/nf-core/bam_trim_primers_ivar'
+include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard'
 
 /*
 ========================================================================================
@@ -198,13 +198,14 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Read QC and trim adapters
     //
-    FASTQC_FASTP (
+    FASTQ_TRIM_FASTP_FASTQC (
         ch_cat_fastq,
+        [],
         params.save_trimmed_fail,
         false
     )
-    ch_variants_fastq = FASTQC_FASTP.out.reads
-    ch_versions = ch_versions.mix(FASTQC_FASTP.out.versions)
+    ch_variants_fastq = FASTQ_TRIM_FASTP_FASTQC.out.reads
+    ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions)
 
     //
     // Filter empty FastQ files after adapter trimming
@@ -212,7 +213,7 @@ workflow ILLUMINA {
     ch_fail_reads_multiqc = Channel.empty()
     if (!params.skip_fastp) {
         ch_variants_fastq
-            .join(FASTQC_FASTP.out.trim_json)
+            .join(FASTQ_TRIM_FASTP_FASTQC.out.trim_json)
             .map {
                 meta, reads, json ->
                     pass = WorkflowIllumina.getFastpReadsAfterFiltering(json) > 0
@@ -275,17 +276,18 @@ workflow ILLUMINA {
     ch_bowtie2_multiqc          = Channel.empty()
     ch_bowtie2_flagstat_multiqc = Channel.empty()
     if (!params.skip_variants) {
-        ALIGN_BOWTIE2 (
+        FASTQ_ALIGN_BOWTIE2 (
             ch_variants_fastq,
             PREPARE_GENOME.out.bowtie2_index,
             params.save_unaligned,
-            false
+            false,
+            PREPARE_GENOME.out.fasta
         )
-        ch_bam                      = ALIGN_BOWTIE2.out.bam
-        ch_bai                      = ALIGN_BOWTIE2.out.bai
-        ch_bowtie2_multiqc          = ALIGN_BOWTIE2.out.log_out
-        ch_bowtie2_flagstat_multiqc = ALIGN_BOWTIE2.out.flagstat
-        ch_versions                 = ch_versions.mix(ALIGN_BOWTIE2.out.versions)
+        ch_bam                      = FASTQ_ALIGN_BOWTIE2.out.bam
+        ch_bai                      = FASTQ_ALIGN_BOWTIE2.out.bai
+        ch_bowtie2_multiqc          = FASTQ_ALIGN_BOWTIE2.out.log_out
+        ch_bowtie2_flagstat_multiqc = FASTQ_ALIGN_BOWTIE2.out.flagstat
+        ch_versions                 = ch_versions.mix(FASTQ_ALIGN_BOWTIE2.out.versions)
     }
 
     //
@@ -331,14 +333,15 @@ workflow ILLUMINA {
     //
     ch_ivar_trim_flagstat_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_ivar_trim && params.protocol == 'amplicon') {
-        PRIMER_TRIM_IVAR (
+        BAM_TRIM_PRIMERS_IVAR (
             ch_bam.join(ch_bai, by: [0]),
-            PREPARE_GENOME.out.primer_bed
+            PREPARE_GENOME.out.primer_bed,
+            PREPARE_GENOME.out.fasta
         )
-        ch_bam                        = PRIMER_TRIM_IVAR.out.bam
-        ch_bai                        = PRIMER_TRIM_IVAR.out.bai
-        ch_ivar_trim_flagstat_multiqc = PRIMER_TRIM_IVAR.out.flagstat
-        ch_versions                   = ch_versions.mix(PRIMER_TRIM_IVAR.out.versions)
+        ch_bam                        = BAM_TRIM_PRIMERS_IVAR.out.bam
+        ch_bai                        = BAM_TRIM_PRIMERS_IVAR.out.bai
+        ch_ivar_trim_flagstat_multiqc = BAM_TRIM_PRIMERS_IVAR.out.flagstat
+        ch_versions                   = ch_versions.mix(BAM_TRIM_PRIMERS_IVAR.out.versions)
     }
 
     //
@@ -346,13 +349,15 @@ workflow ILLUMINA {
     //
     ch_markduplicates_flagstat_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_markduplicates) {
-        MARK_DUPLICATES_PICARD (
-            ch_bam
+        BAM_MARKDUPLICATES_PICARD (
+            ch_bam,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fai
         )
-        ch_bam                             = MARK_DUPLICATES_PICARD.out.bam
-        ch_bai                             = MARK_DUPLICATES_PICARD.out.bai
-        ch_markduplicates_flagstat_multiqc = MARK_DUPLICATES_PICARD.out.flagstat
-        ch_versions                        = ch_versions.mix(MARK_DUPLICATES_PICARD.out.versions)
+        ch_bam                             = BAM_MARKDUPLICATES_PICARD.out.bam
+        ch_bai                             = BAM_MARKDUPLICATES_PICARD.out.bai
+        ch_markduplicates_flagstat_multiqc = BAM_MARKDUPLICATES_PICARD.out.flagstat
+        ch_versions                        = ch_versions.mix(BAM_MARKDUPLICATES_PICARD.out.versions)
     }
 
     //
@@ -360,9 +365,9 @@ workflow ILLUMINA {
     //
     if (!params.skip_variants && !params.skip_picard_metrics) {
         PICARD_COLLECTMULTIPLEMETRICS (
-            ch_bam,
-            PREPARE_GENOME.out.fasta,
-            []
+            ch_bam.join(ch_bai, by: [0]),
+            PREPARE_GENOME.out.fasta.map{ [ [:], it ] },
+            [ [:], [] ]
         )
         ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first().ifEmpty(null))
     }
@@ -375,8 +380,8 @@ workflow ILLUMINA {
     if (!params.skip_variants && !params.skip_mosdepth) {
         MOSDEPTH_GENOME (
             ch_bam.join(ch_bai, by: [0]),
-            [],
-            []
+            [ [:], [] ],
+            [ [:], [] ]
         )
         ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
         ch_versions         = ch_versions.mix(MOSDEPTH_GENOME.out.versions.first().ifEmpty(null))
@@ -389,8 +394,8 @@ workflow ILLUMINA {
         if (params.protocol == 'amplicon') {
             MOSDEPTH_AMPLICON (
                 ch_bam.join(ch_bai, by: [0]),
-                PREPARE_GENOME.out.primer_collapsed_bed,
-                []
+                PREPARE_GENOME.out.primer_collapsed_bed.map{ [ [:], it ] },
+                [ [:], [] ]
             )
             ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
 
@@ -415,8 +420,8 @@ workflow ILLUMINA {
         VARIANTS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            (params.protocol == 'amplicon' || !params.skip_asciigenome) ? PREPARE_GENOME.out.fai : [],
-            (params.protocol == 'amplicon' || !params.skip_asciigenome) ? PREPARE_GENOME.out.chrom_sizes : [],
+            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.fai : [],
+            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
             PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
@@ -439,7 +444,7 @@ workflow ILLUMINA {
         VARIANTS_BCFTOOLS (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            (params.protocol == 'amplicon' || !params.skip_asciigenome) ? PREPARE_GENOME.out.chrom_sizes : [],
+            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
             PREPARE_GENOME.out.gff,
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
@@ -618,8 +623,8 @@ workflow ILLUMINA {
             ch_fail_reads_multiqc.ifEmpty([]),
             ch_fail_mapping_multiqc.ifEmpty([]),
             ch_amplicon_heatmap_multiqc.ifEmpty([]),
-            FASTQC_FASTP.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
-            FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
+            FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
+            FASTQ_TRIM_FASTP_FASTQC.out.trim_json.collect{it[1]}.ifEmpty([]),
             ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bowtie2_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bowtie2_multiqc.collect{it[1]}.ifEmpty([]),
