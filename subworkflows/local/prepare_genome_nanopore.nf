@@ -26,7 +26,7 @@ workflow PREPARE_GENOME {
         ch_fasta    = GUNZIP_FASTA.out.gunzip.map { it[1] }
         ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
     } else {
-        ch_fasta = file(params.fasta)
+        ch_fasta = Channel.of(file(params.fasta))
     }
 
     //
@@ -40,7 +40,7 @@ workflow PREPARE_GENOME {
             ch_gff      = GUNZIP_GFF.out.gunzip.map { it[1] }
             ch_versions = ch_versions.mix(GUNZIP_GFF.out.versions)
         } else {
-            ch_gff = file(params.gff)
+            ch_gff = Channel.of(file(params.gff))
         }
     } else {
         ch_gff = []
@@ -50,7 +50,7 @@ workflow PREPARE_GENOME {
     // Create chromosome sizes file
     //
     CUSTOM_GETCHROMSIZES (
-        [ [:], ch_fasta ]
+        ch_fasta.map { [ [:], it ] }
     )
     ch_fai         = CUSTOM_GETCHROMSIZES.out.fai.map{ it[1] }
     ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes.map{ it[1] }
@@ -68,7 +68,7 @@ workflow PREPARE_GENOME {
             ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { it[1] }
             ch_versions   = ch_versions.mix(GUNZIP_PRIMER_BED.out.versions)
         } else {
-            ch_primer_bed = file(params.primer_bed)
+            ch_primer_bed = Channel.of(file(params.primer_bed))
         }
     }
 
@@ -99,7 +99,7 @@ workflow PREPARE_GENOME {
                 ch_nextclade_db = UNTAR.out.untar.map { it[1] }
                 ch_versions     = ch_versions.mix(UNTAR.out.versions)
             } else {
-                ch_nextclade_db = file(params.nextclade_dataset)
+                ch_nextclade_db = Channel.of(file(params.nextclade_dataset))
             }
         } else if (params.nextclade_dataset_name) {
             NEXTCLADE_DATASETGET (

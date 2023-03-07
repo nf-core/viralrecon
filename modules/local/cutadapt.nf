@@ -2,10 +2,10 @@ process CUTADAPT {
     tag "$meta.id"
     label 'process_medium'
 
-    conda "bioconda::cutadapt=3.5"
+    conda "bioconda::cutadapt=4.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/cutadapt:3.5--py39h38f01e4_0' :
-        'quay.io/biocontainers/cutadapt:3.5--py39h38f01e4_0' }"
+        'https://depot.galaxyproject.org/singularity/cutadapt:4.2--py39hbf8eff0_0' :
+        'quay.io/biocontainers/cutadapt:4.2--py39hbf8eff0_0' }"
 
     input:
     tuple val(meta), path(reads)
