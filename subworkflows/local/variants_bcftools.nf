@@ -25,7 +25,7 @@ workflow VARIANTS_BCFTOOLS {
     // Call variants
     //
     BCFTOOLS_MPILEUP (
-        bam,
+        bam.map{ meta, bam_file -> [ meta, bam_file, [] ] },
         fasta,
         params.save_mpileup
     )
@@ -62,7 +62,10 @@ workflow VARIANTS_BCFTOOLS {
     ch_versions = ch_versions.mix(BCFTOOLS_NORM.out.versions.first())
 
     VCF_TABIX_STATS (
-        BCFTOOLS_NORM.out.vcf
+        BCFTOOLS_NORM.out.vcf,
+        [],
+        [],
+        []
     )
     ch_versions = ch_versions.mix(VCF_TABIX_STATS.out.versions)
 
@@ -89,6 +92,7 @@ workflow VARIANTS_BCFTOOLS {
 
     vcf             = BCFTOOLS_NORM.out.vcf           // channel: [ val(meta), [ vcf ] ]
     tbi             = VCF_TABIX_STATS.out.tbi         // channel: [ val(meta), [ tbi ] ]
+    csi             = VCF_TABIX_STATS.out.csi         // channel: [ val(meta), [ csi ] ]
     stats           = VCF_TABIX_STATS.out.stats       // channel: [ val(meta), [ txt ] ]
 
     snpeff_vcf      = VARIANTS_QC.out.snpeff_vcf      // channel: [ val(meta), [ vcf.gz ] ]

@@ -34,7 +34,7 @@ workflow PREPARE_GENOME {
         ch_fasta    = GUNZIP_FASTA.out.gunzip.map { it[1] }
         ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
     } else {
-        ch_fasta = file(params.fasta)
+        ch_fasta = Channel.of(file(params.fasta))
     }
 
     //
@@ -48,7 +48,7 @@ workflow PREPARE_GENOME {
             ch_gff      = GUNZIP_GFF.out.gunzip.map { it[1] }
             ch_versions = ch_versions.mix(GUNZIP_GFF.out.versions)
         } else {
-            ch_gff = file(params.gff)
+            ch_gff = Channel.of(file(params.gff))
         }
     } else {
         ch_gff = []
@@ -59,12 +59,12 @@ workflow PREPARE_GENOME {
     //
     ch_fai         = Channel.empty()
     ch_chrom_sizes = Channel.empty()
-    if (params.protocol == 'amplicon' || !params.skip_asciigenome) {
+    if (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) {
         CUSTOM_GETCHROMSIZES (
-            ch_fasta
+            ch_fasta.map { [ [:], it ] }
         )
-        ch_fai         = CUSTOM_GETCHROMSIZES.out.fai
-        ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes
+        ch_fai         = CUSTOM_GETCHROMSIZES.out.fai.map { it[1] }
+        ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes.map { it[1] }
         ch_versions    = ch_versions.mix(CUSTOM_GETCHROMSIZES.out.versions)
     }
 
@@ -81,7 +81,7 @@ workflow PREPARE_GENOME {
                 ch_kraken2_db = UNTAR_KRAKEN2_DB.out.untar.map { it[1] }
                 ch_versions   = ch_versions.mix(UNTAR_KRAKEN2_DB.out.versions)
             } else {
-                ch_kraken2_db = file(params.kraken2_db)
+                ch_kraken2_db = Channel.of(file(params.kraken2_db))
             }
         } else {
             KRAKEN2_BUILD (
@@ -107,7 +107,7 @@ workflow PREPARE_GENOME {
                 ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { it[1] }
                 ch_versions   = ch_versions.mix(GUNZIP_PRIMER_BED.out.versions)
             } else {
-                ch_primer_bed = file(params.primer_bed)
+                ch_primer_bed = Channel.of(file(params.primer_bed))
             }
         }
 
@@ -130,7 +130,7 @@ workflow PREPARE_GENOME {
                     ch_primer_fasta = GUNZIP_PRIMER_FASTA.out.gunzip.map { it[1] }
                     ch_versions     = ch_versions.mix(GUNZIP_PRIMER_FASTA.out.versions)
                 } else {
-                    ch_primer_fasta = file(params.primer_fasta)
+                    ch_primer_fasta = Channel.of(file(params.primer_fasta))
                 }
             } else {
                 BEDTOOLS_GETFASTA (
@@ -156,11 +156,11 @@ workflow PREPARE_GENOME {
                 ch_bowtie2_index = UNTAR_BOWTIE2_INDEX.out.untar.map { it[1] }
                 ch_versions      = ch_versions.mix(UNTAR_BOWTIE2_INDEX.out.versions)
             } else {
-                ch_bowtie2_index = file(params.bowtie2_index)
+                ch_bowtie2_index = Channel.of(file(params.bowtie2_index))
             }
         } else {
             BOWTIE2_BUILD (
-                ch_fasta
+                ch_fasta.map { [ [:], it ] }
             )
             ch_bowtie2_index = BOWTIE2_BUILD.out.index
             ch_versions      = ch_versions.mix(BOWTIE2_BUILD.out.versions)
@@ -180,7 +180,7 @@ workflow PREPARE_GENOME {
                 ch_nextclade_db = UNTAR_NEXTCLADE_DB.out.untar.map { it[1] }
                 ch_versions     = ch_versions.mix(UNTAR_NEXTCLADE_DB.out.versions)
             } else {
-                ch_nextclade_db = file(params.nextclade_dataset)
+                ch_nextclade_db = Channel.of(file(params.nextclade_dataset))
             }
         } else if (params.nextclade_dataset_name) {
             NEXTCLADE_DATASETGET (
@@ -207,7 +207,7 @@ workflow PREPARE_GENOME {
                     ch_blast_db = UNTAR_BLAST_DB.out.untar.map { it[1] }
                     ch_versions = ch_versions.mix(UNTAR_BLAST_DB.out.versions)
                 } else {
-                    ch_blast_db = file(params.blast_db)
+                    ch_blast_db = Channel.of(file(params.blast_db))
                 }
             } else {
                 BLAST_MAKEBLASTDB (

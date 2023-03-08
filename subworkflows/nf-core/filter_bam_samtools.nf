@@ -20,7 +20,8 @@ workflow FILTER_BAM_SAMTOOLS {
     //
     SAMTOOLS_VIEW (
         bam_bai,
-        fasta
+        fasta,
+        []
     )
     ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())
 
@@ -33,7 +34,8 @@ workflow FILTER_BAM_SAMTOOLS {
     ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.first())
 
     BAM_STATS_SAMTOOLS (
-        SAMTOOLS_VIEW.out.bam.join(SAMTOOLS_INDEX.out.bai, by: [0])
+        SAMTOOLS_VIEW.out.bam.join(SAMTOOLS_INDEX.out.bai, by: [0]),
+        fasta
     )
     ch_versions = ch_versions.mix(BAM_STATS_SAMTOOLS.out.versions)
 

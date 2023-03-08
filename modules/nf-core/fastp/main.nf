@@ -2,13 +2,14 @@ process FASTP {
     tag "$meta.id"
     label 'process_medium'
 
-    conda (params.enable_conda ? 'bioconda::fastp=0.23.2' : null)
+    conda "bioconda::fastp=0.23.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/fastp:0.23.2--h79da9fb_0' :
         'quay.io/biocontainers/fastp:0.23.2--h79da9fb_0' }"
 
     input:
     tuple val(meta), path(reads)
+    path  adapter_fasta
     val   save_trimmed_fail
     val   save_merged
 
@@ -26,28 +27,54 @@ process FASTP {
 
     script:
     def args = task.ext.args ?: ''
-    // Added soft-links to original fastqs for consistent naming in MultiQC
     def prefix = task.ext.prefix ?: "${meta.id}"
-    if (meta.single_end) {
-        def fail_fastq = save_trimmed_fail ? "--failed_out ${prefix}.fail.fastq.gz" : ''
+    def adapter_list = adapter_fasta ? "--adapter_fasta ${adapter_fasta}" : ""
+    def fail_fastq = save_trimmed_fail && meta.single_end ? "--failed_out ${prefix}.fail.fastq.gz" : save_trimmed_fail && !meta.single_end ? "--unpaired1 ${prefix}_1.fail.fastq.gz --unpaired2 ${prefix}_2.fail.fastq.gz" : ''
+    // Added soft-links to original fastqs for consistent naming in MultiQC
+    // Use single ended for interleaved. Add --interleaved_in in config.
+    if ( task.ext.args?.contains('--interleaved_in') ) {
         """
         [ ! -f  ${prefix}.fastq.gz ] && ln -sf $reads ${prefix}.fastq.gz
+
         fastp \\
+            --stdout \\
             --in1 ${prefix}.fastq.gz \\
-            --out1 ${prefix}.fastp.fastq.gz \\
             --thread $task.cpus \\
             --json ${prefix}.fastp.json \\
             --html ${prefix}.fastp.html \\
+            $adapter_list \\
+            $fail_fastq \\
+            $args \\
+            2> ${prefix}.fastp.log \\
+        | gzip -c > ${prefix}.fastp.fastq.gz
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            fastp: \$(fastp --version 2>&1 | sed -e "s/fastp //g")
+        END_VERSIONS
+        """
+    } else if (meta.single_end) {
+        """
+        [ ! -f  ${prefix}.fastq.gz ] && ln -sf $reads ${prefix}.fastq.gz
+
+        fastp \\
+            --stdout \\
+            --in1 ${prefix}.fastq.gz \\
+            --out1  ${prefix}.fastp.fastq.gz \\
+            --thread $task.cpus \\
+            --json ${prefix}.fastp.json \\
+            --html ${prefix}.fastp.html \\
+            $adapter_list \\
             $fail_fastq \\
             $args \\
             2> ${prefix}.fastp.log
+
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
             fastp: \$(fastp --version 2>&1 | sed -e "s/fastp //g")
         END_VERSIONS
         """
     } else {
-        def fail_fastq  = save_trimmed_fail ? "--unpaired1 ${prefix}_1.fail.fastq.gz --unpaired2 ${prefix}_2.fail.fastq.gz" : ''
         def merge_fastq = save_merged ? "-m --merged_out ${prefix}.merged.fastq.gz" : ''
         """
         [ ! -f  ${prefix}_1.fastq.gz ] && ln -sf ${reads[0]} ${prefix}_1.fastq.gz
@@ -59,6 +86,7 @@ process FASTP {
             --out2 ${prefix}_2.fastp.fastq.gz \\
             --json ${prefix}.fastp.json \\
             --html ${prefix}.fastp.html \\
+            $adapter_list \\
             $fail_fastq \\
             $merge_fastq \\
             --thread $task.cpus \\

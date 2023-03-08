@@ -117,7 +117,7 @@ workflow NANOPORE {
     ch_pycoqc_multiqc = Channel.empty()
     if (params.sequencing_summary && !params.skip_pycoqc) {
         PYCOQC (
-            ch_sequencing_summary
+            Channel.of(ch_sequencing_summary).map{ [ [:], it ] }
         )
         ch_pycoqc_multiqc = PYCOQC.out.json
         ch_versions       = ch_versions.mix(PYCOQC.out.versions)
@@ -334,7 +334,10 @@ workflow NANOPORE {
     // MODULE: VCF stats with bcftools stats
     //
     BCFTOOLS_STATS (
-        VCFLIB_VCFUNIQ.out.vcf
+        VCFLIB_VCFUNIQ.out.vcf.join(TABIX_TABIX.out.tbi, by: [0]),
+        [],
+        [],
+        []
     )
     ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions.first().ifEmpty(null))
 
@@ -356,8 +359,8 @@ workflow NANOPORE {
 
         MOSDEPTH_GENOME (
             ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
-            [],
-            []
+            [ [:], [] ],
+            [ [:], [] ]
         )
         ch_mosdepth_multiqc  = MOSDEPTH_GENOME.out.global_txt
         ch_versions          = ch_versions.mix(MOSDEPTH_GENOME.out.versions.first().ifEmpty(null))
@@ -369,8 +372,8 @@ workflow NANOPORE {
 
         MOSDEPTH_AMPLICON (
             ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
-            PREPARE_GENOME.out.primer_collapsed_bed,
-            []
+            PREPARE_GENOME.out.primer_collapsed_bed.map{ [ [:], it ] },
+            [ [:], [] ]
         )
         ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
 
@@ -522,7 +525,7 @@ workflow NANOPORE {
             MULTIQC_TSV_BARCODE_COUNT.out.ifEmpty([]),
             MULTIQC_TSV_GUPPYPLEX_COUNT.out.ifEmpty([]),
             ch_amplicon_heatmap_multiqc.ifEmpty([]),
-            ch_pycoqc_multiqc.collect().ifEmpty([]),
+            ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]),
             ARTIC_MINION.out.json.collect{it[1]}.ifEmpty([]),
             FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]),
             BCFTOOLS_STATS.out.stats.collect{it[1]}.ifEmpty([]),

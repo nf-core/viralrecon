@@ -38,6 +38,7 @@ workflow ASSEMBLY_SPADES {
     //
     SPADES (
         ch_reads,
+        [],
         hmm
     )
     ch_versions = ch_versions.mix(SPADES.out.versions.first())
