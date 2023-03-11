@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Enhancements & fixes
 
-- [[#321](https://github.com/nf-core/viralrecon/issues/321)] `ivar_variants_to_vcf` script: Duplicated positions in tsv file due to overlapping annotations.
-- [[#317](https://github.com/nf-core/viralrecon/issues/317)] `ivar_variants_to_vcf`: Ignore lines without annotation in ivar tsv file
-- [[#341](https://github.com/nf-core/viralrecon/issues/341)] `artic/minion` and `artic/guppyplex`: Update module version 1.2.2 --> 1.2.3.
+- [[#321](https://github.com/nf-core/viralrecon/issues/321)] - `ivar_variants_to_vcf` script: Duplicated positions in tsv file due to overlapping annotations.
+- [[#317](https://github.com/nf-core/viralrecon/issues/317)] - `ivar_variants_to_vcf`: Ignore lines without annotation in ivar tsv file
+- [[#341](https://github.com/nf-core/viralrecon/issues/341)] - `artic/minion` and `artic/guppyplex`: Update module version 1.2.2 -> 1.2.3
+- [[#349](https://github.com/nf-core/viralrecon/issues/349)] - ERROR in Script plasmidID
 - Updated pipeline template to [nf-core/tools 2.7.2](https://github.com/nf-core/tools/releases/tag/2.7.2)
 - Add `tower.yml` for Report rendering in Nextflow Tower
+- Use `--skip_plasmidid` by default
 
 ### Parameters
 

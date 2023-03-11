@@ -519,7 +519,8 @@
                 "skip_plasmidid": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip assembly report generation by PlasmidID."
+                    "description": "Skip assembly report generation by PlasmidID.",
+                    "default": true
                 },
                 "skip_assembly_quast": {
                     "type": "boolean",
