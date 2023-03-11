@@ -117,7 +117,7 @@ workflow NANOPORE {
     ch_pycoqc_multiqc = Channel.empty()
     if (params.sequencing_summary && !params.skip_pycoqc) {
         PYCOQC (
-            Channel.of(ch_sequencing_summary).map{ [ [:], it ] }
+            Channel.of(ch_sequencing_summary).map { [ [:], it ] }
         )
         ch_pycoqc_multiqc = PYCOQC.out.json
         ch_versions       = ch_versions.mix(PYCOQC.out.versions)
@@ -305,8 +305,8 @@ workflow NANOPORE {
         ARTIC_GUPPYPLEX.out.fastq.filter { it[-1].countFastq() > params.min_guppyplex_reads },
         ch_fast5_dir,
         ch_sequencing_summary,
-        PREPARE_GENOME.out.fasta,
-        PREPARE_GENOME.out.primer_bed,
+        PREPARE_GENOME.out.fasta.collect(),
+        PREPARE_GENOME.out.primer_bed.collect(),
         ch_medaka_model.collect().ifEmpty([]),
         params.artic_minion_medaka_model ?: '',
         params.artic_scheme,
@@ -372,7 +372,7 @@ workflow NANOPORE {
 
         MOSDEPTH_AMPLICON (
             ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
-            PREPARE_GENOME.out.primer_collapsed_bed.map{ [ [:], it ] },
+            PREPARE_GENOME.out.primer_collapsed_bed.map { [ [:], it ] }.collect(),
             [ [:], [] ]
         )
         ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
@@ -451,9 +451,9 @@ workflow NANOPORE {
     if (params.gff && !params.skip_snpeff) {
         SNPEFF_SNPSIFT (
             VCFLIB_VCFUNIQ.out.vcf,
-            PREPARE_GENOME.out.snpeff_db,
-            PREPARE_GENOME.out.snpeff_config,
-            PREPARE_GENOME.out.fasta
+            PREPARE_GENOME.out.snpeff_db.collect(),
+            PREPARE_GENOME.out.snpeff_config.collect(),
+            PREPARE_GENOME.out.fasta.collect()
         )
         ch_snpeff_multiqc = SNPEFF_SNPSIFT.out.csv
         ch_snpsift_txt    = SNPEFF_SNPSIFT.out.snpsift_txt
@@ -478,10 +478,10 @@ workflow NANOPORE {
 
         ASCIIGENOME (
             ch_asciigenome,
-            PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.chrom_sizes,
+            PREPARE_GENOME.out.fasta.collect(),
+            PREPARE_GENOME.out.chrom_sizes.collect(),
             PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.primer_bed,
+            PREPARE_GENOME.out.primer_bed.collect(),
             params.asciigenome_window_size,
             params.asciigenome_read_depth
         )
