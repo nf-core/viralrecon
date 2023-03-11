@@ -278,7 +278,7 @@ workflow ILLUMINA {
     if (!params.skip_variants) {
         FASTQ_ALIGN_BOWTIE2 (
             ch_variants_fastq,
-            PREPARE_GENOME.out.bowtie2_index,
+            PREPARE_GENOME.out.bowtie2_index.collect(),
             params.save_unaligned,
             false,
             PREPARE_GENOME.out.fasta
@@ -335,7 +335,7 @@ workflow ILLUMINA {
     if (!params.skip_variants && !params.skip_ivar_trim && params.protocol == 'amplicon') {
         BAM_TRIM_PRIMERS_IVAR (
             ch_bam.join(ch_bai, by: [0]),
-            PREPARE_GENOME.out.primer_bed,
+            PREPARE_GENOME.out.primer_bed.collect(),
             PREPARE_GENOME.out.fasta
         )
         ch_bam                        = BAM_TRIM_PRIMERS_IVAR.out.bam
@@ -394,7 +394,7 @@ workflow ILLUMINA {
         if (params.protocol == 'amplicon') {
             MOSDEPTH_AMPLICON (
                 ch_bam.join(ch_bai, by: [0]),
-                PREPARE_GENOME.out.primer_collapsed_bed.map{ [ [:], it ] },
+                PREPARE_GENOME.out.primer_collapsed_bed.map { [ [:], it ] }.collect(),
                 [ [:], [] ]
             )
             ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
@@ -423,7 +423,7 @@ workflow ILLUMINA {
             (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.fai : [],
             (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
             PREPARE_GENOME.out.gff,
-            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
+            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed.collect() : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config,
             ch_ivar_variants_header_mqc
@@ -446,7 +446,7 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.fasta,
             (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
             PREPARE_GENOME.out.gff,
-            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
+            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed.collect() : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config
         )
@@ -537,7 +537,7 @@ workflow ILLUMINA {
     if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
         CUTADAPT (
             ch_assembly_fastq,
-            PREPARE_GENOME.out.primer_fasta
+            PREPARE_GENOME.out.primer_fasta.collect()
         )
         ch_assembly_fastq   = CUTADAPT.out.reads
         ch_cutadapt_multiqc = CUTADAPT.out.log
