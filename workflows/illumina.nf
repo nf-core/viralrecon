@@ -366,7 +366,7 @@ workflow ILLUMINA {
     if (!params.skip_variants && !params.skip_picard_metrics) {
         PICARD_COLLECTMULTIPLEMETRICS (
             ch_bam.join(ch_bai, by: [0]),
-            PREPARE_GENOME.out.fasta.map{ [ [:], it ] },
+            PREPARE_GENOME.out.fasta.map { [ [:], it ] },
             [ [:], [] ]
         )
         ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first().ifEmpty(null))
