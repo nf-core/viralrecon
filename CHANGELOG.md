@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[#317](https://github.com/nf-core/viralrecon/issues/317)] `ivar_variants_to_vcf`: Ignore lines without annotation in ivar tsv file
 - [[#341](https://github.com/nf-core/viralrecon/issues/341)] `artic/minion` and `artic/guppyplex`: Update module version 1.2.2 --> 1.2.3.
 - Updated pipeline template to [nf-core/tools 2.7.2](https://github.com/nf-core/tools/releases/tag/2.7.2)
+- Add `tower.yml` for Report rendering in Nextflow Tower
 
 ### Parameters
 
