@@ -403,7 +403,7 @@ workflow NANOPORE {
     if (!params.skip_nextclade) {
         NEXTCLADE_RUN (
             ARTIC_MINION.out.fasta,
-            PREPARE_GENOME.out.nextclade_db
+            PREPARE_GENOME.out.nextclade_db.collect()
         )
         ch_versions = ch_versions.mix(NEXTCLADE_RUN.out.versions.first().ifEmpty(null))
 
@@ -434,7 +434,7 @@ workflow NANOPORE {
     if (!params.skip_variants_quast) {
         QUAST (
             ARTIC_MINION.out.fasta.collect{ it[1] },
-            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fasta.collect(),
             PREPARE_GENOME.out.gff,
             true,
             params.gff
