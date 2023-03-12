@@ -1,0 +1,17 @@
+reports:
+  multiqc_report.html:
+    display: "MultiQC HTML report"
+  summary_variants_metrics_mqc.csv:
+    display: "Summary variant calling metrics CSV file"
+  summary_assembly_metrics_mqc.csv:
+    display: "Summary assembly metrics CSV file"
+  variants_long_table.csv:
+    display: "Variants long table with functional effect prediction and lineage analysis"
+  all_samples.mosdepth.heatmap.pdf:
+    display: "All samples amplicon coverage heatmap PDF file"
+  report.pdf:
+    display: "QUAST PDF report"
+  "*.mosdepth.coverage.pdf":
+    display: "Per-sample amplicon coverage PDF file"
+  "**/bandage/*.png":
+    display: "Assembly BANDAGE image"

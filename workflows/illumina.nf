@@ -252,7 +252,7 @@ workflow ILLUMINA {
     if (!params.skip_kraken2) {
         KRAKEN2_KRAKEN2 (
             ch_variants_fastq,
-            PREPARE_GENOME.out.kraken2_db,
+            PREPARE_GENOME.out.kraken2_db.collect(),
             params.kraken2_variants_host_filter || params.kraken2_assembly_host_filter,
             params.kraken2_variants_host_filter || params.kraken2_assembly_host_filter
         )
@@ -278,10 +278,10 @@ workflow ILLUMINA {
     if (!params.skip_variants) {
         FASTQ_ALIGN_BOWTIE2 (
             ch_variants_fastq,
-            PREPARE_GENOME.out.bowtie2_index,
+            PREPARE_GENOME.out.bowtie2_index.collect(),
             params.save_unaligned,
             false,
-            PREPARE_GENOME.out.fasta
+            PREPARE_GENOME.out.fasta.collect()
         )
         ch_bam                      = FASTQ_ALIGN_BOWTIE2.out.bam
         ch_bai                      = FASTQ_ALIGN_BOWTIE2.out.bai
@@ -335,8 +335,8 @@ workflow ILLUMINA {
     if (!params.skip_variants && !params.skip_ivar_trim && params.protocol == 'amplicon') {
         BAM_TRIM_PRIMERS_IVAR (
             ch_bam.join(ch_bai, by: [0]),
-            PREPARE_GENOME.out.primer_bed,
-            PREPARE_GENOME.out.fasta
+            PREPARE_GENOME.out.primer_bed.collect(),
+            PREPARE_GENOME.out.fasta.collect()
         )
         ch_bam                        = BAM_TRIM_PRIMERS_IVAR.out.bam
         ch_bai                        = BAM_TRIM_PRIMERS_IVAR.out.bai
@@ -351,8 +351,8 @@ workflow ILLUMINA {
     if (!params.skip_variants && !params.skip_markduplicates) {
         BAM_MARKDUPLICATES_PICARD (
             ch_bam,
-            PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.fai
+            PREPARE_GENOME.out.fasta.collect(),
+            PREPARE_GENOME.out.fai.collect()
         )
         ch_bam                             = BAM_MARKDUPLICATES_PICARD.out.bam
         ch_bai                             = BAM_MARKDUPLICATES_PICARD.out.bai
@@ -366,7 +366,7 @@ workflow ILLUMINA {
     if (!params.skip_variants && !params.skip_picard_metrics) {
         PICARD_COLLECTMULTIPLEMETRICS (
             ch_bam.join(ch_bai, by: [0]),
-            PREPARE_GENOME.out.fasta.map{ [ [:], it ] },
+            PREPARE_GENOME.out.fasta.map { [ [:], it ] }.collect(),
             [ [:], [] ]
         )
         ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first().ifEmpty(null))
@@ -394,7 +394,7 @@ workflow ILLUMINA {
         if (params.protocol == 'amplicon') {
             MOSDEPTH_AMPLICON (
                 ch_bam.join(ch_bai, by: [0]),
-                PREPARE_GENOME.out.primer_collapsed_bed.map{ [ [:], it ] },
+                PREPARE_GENOME.out.primer_collapsed_bed.map { [ [:], it ] }.collect(),
                 [ [:], [] ]
             )
             ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
@@ -419,13 +419,13 @@ workflow ILLUMINA {
     if (!params.skip_variants && variant_caller == 'ivar') {
         VARIANTS_IVAR (
             ch_bam,
-            PREPARE_GENOME.out.fasta,
-            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.fai : [],
-            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
+            PREPARE_GENOME.out.fasta.collect(),
+            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.fai.collect() : [],
+            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes.collect() : [],
             PREPARE_GENOME.out.gff,
-            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
-            PREPARE_GENOME.out.snpeff_db,
-            PREPARE_GENOME.out.snpeff_config,
+            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed.collect() : [],
+            PREPARE_GENOME.out.snpeff_db.collect(),
+            PREPARE_GENOME.out.snpeff_config.collect(),
             ch_ivar_variants_header_mqc
         )
         ch_vcf                    = VARIANTS_IVAR.out.vcf
@@ -443,12 +443,12 @@ workflow ILLUMINA {
     if (!params.skip_variants && variant_caller == 'bcftools') {
         VARIANTS_BCFTOOLS (
             ch_bam,
-            PREPARE_GENOME.out.fasta,
-            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
+            PREPARE_GENOME.out.fasta.collect(),
+            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes.collect() : [],
             PREPARE_GENOME.out.gff,
-            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
-            PREPARE_GENOME.out.snpeff_db,
-            PREPARE_GENOME.out.snpeff_config
+            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed.collect() : [],
+            PREPARE_GENOME.out.snpeff_db.collect(),
+            PREPARE_GENOME.out.snpeff_config.collect()
         )
         ch_vcf                    = VARIANTS_BCFTOOLS.out.vcf
         ch_tbi                    = VARIANTS_BCFTOOLS.out.tbi
@@ -467,9 +467,9 @@ workflow ILLUMINA {
     if (!params.skip_consensus && params.consensus_caller == 'ivar') {
         CONSENSUS_IVAR (
             ch_bam,
-            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fasta.collect(),
             PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.nextclade_db
+            PREPARE_GENOME.out.nextclade_db.collect()
         )
 
         ch_quast_multiqc    = CONSENSUS_IVAR.out.quast_tsv
@@ -486,9 +486,9 @@ workflow ILLUMINA {
             ch_bam,
             ch_vcf,
             ch_tbi,
-            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fasta.collect(),
             PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.nextclade_db
+            PREPARE_GENOME.out.nextclade_db.collect()
         )
 
         ch_quast_multiqc    = CONSENSUS_BCFTOOLS.out.quast_tsv
@@ -537,7 +537,7 @@ workflow ILLUMINA {
     if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
         CUTADAPT (
             ch_assembly_fastq,
-            PREPARE_GENOME.out.primer_fasta
+            PREPARE_GENOME.out.primer_fasta.collect()
         )
         ch_assembly_fastq   = CUTADAPT.out.reads
         ch_cutadapt_multiqc = CUTADAPT.out.log
@@ -560,9 +560,9 @@ workflow ILLUMINA {
             ch_assembly_fastq.map { meta, fastq -> [ meta, fastq, [], [] ] },
             params.spades_mode,
             ch_spades_hmm,
-            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fasta.collect(),
             PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.blast_db,
+            PREPARE_GENOME.out.blast_db.collect(),
             ch_blast_outfmt6_header
         )
         ch_spades_quast_multiqc = ASSEMBLY_SPADES.out.quast_tsv
@@ -576,9 +576,9 @@ workflow ILLUMINA {
     if (!params.skip_assembly && 'unicycler' in assemblers) {
         ASSEMBLY_UNICYCLER (
             ch_assembly_fastq.map { meta, fastq -> [ meta, fastq, [] ] },
-            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fasta.collect(),
             PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.blast_db,
+            PREPARE_GENOME.out.blast_db.collect(),
             ch_blast_outfmt6_header
         )
         ch_unicycler_quast_multiqc = ASSEMBLY_UNICYCLER.out.quast_tsv
@@ -592,9 +592,9 @@ workflow ILLUMINA {
     if (!params.skip_assembly && 'minia' in assemblers) {
         ASSEMBLY_MINIA (
             ch_assembly_fastq,
-            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fasta.collect(),
             PREPARE_GENOME.out.gff,
-            PREPARE_GENOME.out.blast_db,
+            PREPARE_GENOME.out.blast_db.collect(),
             ch_blast_outfmt6_header
         )
         ch_minia_quast_multiqc = ASSEMBLY_MINIA.out.quast_tsv
