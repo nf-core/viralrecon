@@ -34,12 +34,13 @@ workflow PREPARE_GENOME {
         ch_fasta    = GUNZIP_FASTA.out.gunzip.map { it[1] }
         ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
     } else {
-        ch_fasta = Channel.of(file(params.fasta))
+        ch_fasta = Channel.value(file(params.fasta))
     }
 
     //
     // Uncompress GFF annotation file
     //
+    ch_gff = Channel.empty()
     if (params.gff) {
         if (params.gff.endsWith('.gz')) {
             GUNZIP_GFF (
@@ -48,10 +49,8 @@ workflow PREPARE_GENOME {
             ch_gff      = GUNZIP_GFF.out.gunzip.map { it[1] }
             ch_versions = ch_versions.mix(GUNZIP_GFF.out.versions)
         } else {
-            ch_gff = Channel.of(file(params.gff))
+            ch_gff = Channel.value(file(params.gff))
         }
-    } else {
-        ch_gff = []
     }
 
     //
@@ -77,13 +76,13 @@ workflow PREPARE_GENOME {
                 ch_kraken2_db = UNTAR_KRAKEN2_DB.out.untar.map { it[1] }
                 ch_versions   = ch_versions.mix(UNTAR_KRAKEN2_DB.out.versions)
             } else {
-                ch_kraken2_db = Channel.of(file(params.kraken2_db))
+                ch_kraken2_db = Channel.value(file(params.kraken2_db))
             }
         } else {
             KRAKEN2_BUILD (
                 params.kraken2_db_name
             )
-            ch_kraken2_db = KRAKEN2_BUILD.out.db
+            ch_kraken2_db = KRAKEN2_BUILD.out.db.first()
             ch_versions   = ch_versions.mix(KRAKEN2_BUILD.out.versions)
         }
     }
@@ -103,7 +102,7 @@ workflow PREPARE_GENOME {
                 ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { it[1] }
                 ch_versions   = ch_versions.mix(GUNZIP_PRIMER_BED.out.versions)
             } else {
-                ch_primer_bed = Channel.of(file(params.primer_bed))
+                ch_primer_bed = Channel.value(file(params.primer_bed))
             }
         }
 
@@ -126,7 +125,7 @@ workflow PREPARE_GENOME {
                     ch_primer_fasta = GUNZIP_PRIMER_FASTA.out.gunzip.map { it[1] }
                     ch_versions     = ch_versions.mix(GUNZIP_PRIMER_FASTA.out.versions)
                 } else {
-                    ch_primer_fasta = Channel.of(file(params.primer_fasta))
+                    ch_primer_fasta = Channel.value(file(params.primer_fasta))
                 }
             } else {
                 BEDTOOLS_GETFASTA (
@@ -152,7 +151,7 @@ workflow PREPARE_GENOME {
                 ch_bowtie2_index = UNTAR_BOWTIE2_INDEX.out.untar.map { it[1] }
                 ch_versions      = ch_versions.mix(UNTAR_BOWTIE2_INDEX.out.versions)
             } else {
-                ch_bowtie2_index = Channel.of(file(params.bowtie2_index))
+                ch_bowtie2_index = Channel.value(file(params.bowtie2_index))
             }
         } else {
             BOWTIE2_BUILD (
@@ -176,7 +175,7 @@ workflow PREPARE_GENOME {
                 ch_nextclade_db = UNTAR_NEXTCLADE_DB.out.untar.map { it[1] }
                 ch_versions     = ch_versions.mix(UNTAR_NEXTCLADE_DB.out.versions)
             } else {
-                ch_nextclade_db = Channel.of(file(params.nextclade_dataset))
+                ch_nextclade_db = Channel.value(file(params.nextclade_dataset))
             }
         } else if (params.nextclade_dataset_name) {
             NEXTCLADE_DATASETGET (
@@ -203,7 +202,7 @@ workflow PREPARE_GENOME {
                     ch_blast_db = UNTAR_BLAST_DB.out.untar.map { it[1] }
                     ch_versions = ch_versions.mix(UNTAR_BLAST_DB.out.versions)
                 } else {
-                    ch_blast_db = Channel.of(file(params.blast_db))
+                    ch_blast_db = Channel.value(file(params.blast_db))
                 }
             } else {
                 BLAST_MAKEBLASTDB (
