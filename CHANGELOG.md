@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[#321](https://github.com/nf-core/viralrecon/issues/321)] - `ivar_variants_to_vcf` script: Duplicated positions in tsv file due to overlapping annotations
 - [[#334](https://github.com/nf-core/viralrecon/issues/334)] - Longshot thread 'main' panicked at 'assertion failed: p <= 0.0' error
 - [[#341](https://github.com/nf-core/viralrecon/issues/341)] - `artic/minion` and `artic/guppyplex`: Update module version 1.2.2 -> 1.2.3
+- [[#348](https://github.com/nf-core/viralrecon/issues/348)] - Document full parameters of iVar consensus
 - [[#349](https://github.com/nf-core/viralrecon/issues/349)] - ERROR in Script plasmidID
 - [[#356](https://github.com/nf-core/viralrecon/issues/356)] - Add NEB SARS-CoV-2 primers
 - Updated pipeline template to [nf-core/tools 2.7.2](https://github.com/nf-core/tools/releases/tag/2.7.2)
