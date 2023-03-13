@@ -26,12 +26,13 @@ workflow PREPARE_GENOME {
         ch_fasta    = GUNZIP_FASTA.out.gunzip.map { it[1] }
         ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
     } else {
-        ch_fasta = Channel.of(file(params.fasta))
+        ch_fasta = Channel.value(file(params.fasta))
     }
 
     //
     // Uncompress GFF annotation file
     //
+    ch_gff = Channel.empty()
     if (params.gff) {
         if (params.gff.endsWith('.gz')) {
             GUNZIP_GFF (
@@ -40,10 +41,8 @@ workflow PREPARE_GENOME {
             ch_gff      = GUNZIP_GFF.out.gunzip.map { it[1] }
             ch_versions = ch_versions.mix(GUNZIP_GFF.out.versions)
         } else {
-            ch_gff = Channel.of(file(params.gff))
+            ch_gff = Channel.value(file(params.gff))
         }
-    } else {
-        ch_gff = []
     }
 
     //
@@ -52,8 +51,8 @@ workflow PREPARE_GENOME {
     CUSTOM_GETCHROMSIZES (
         ch_fasta.map { [ [:], it ] }
     )
-    ch_fai         = CUSTOM_GETCHROMSIZES.out.fai.map{ it[1] }
-    ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes.map{ it[1] }
+    ch_fai         = CUSTOM_GETCHROMSIZES.out.fai.map { it[1] }
+    ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes.map { it[1] }
     ch_versions    = ch_versions.mix(CUSTOM_GETCHROMSIZES.out.versions)
 
     //
@@ -68,7 +67,7 @@ workflow PREPARE_GENOME {
             ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { it[1] }
             ch_versions   = ch_versions.mix(GUNZIP_PRIMER_BED.out.versions)
         } else {
-            ch_primer_bed = Channel.of(file(params.primer_bed))
+            ch_primer_bed = Channel.value(file(params.primer_bed))
         }
     }
 
@@ -99,7 +98,7 @@ workflow PREPARE_GENOME {
                 ch_nextclade_db = UNTAR.out.untar.map { it[1] }
                 ch_versions     = ch_versions.mix(UNTAR.out.versions)
             } else {
-                ch_nextclade_db = Channel.of(file(params.nextclade_dataset))
+                ch_nextclade_db = Channel.value(file(params.nextclade_dataset))
             }
         } else if (params.nextclade_dataset_name) {
             NEXTCLADE_DATASETGET (
@@ -117,7 +116,7 @@ workflow PREPARE_GENOME {
     //
     ch_snpeff_db     = Channel.empty()
     ch_snpeff_config = Channel.empty()
-    if (params.gff && !params.skip_snpeff) {
+    if (!params.skip_snpeff) {
         SNPEFF_BUILD (
             ch_fasta,
             ch_gff

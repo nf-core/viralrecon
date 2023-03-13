@@ -435,7 +435,7 @@ workflow NANOPORE {
         QUAST (
             ARTIC_MINION.out.fasta.collect{ it[1] },
             PREPARE_GENOME.out.fasta.collect(),
-            PREPARE_GENOME.out.gff,
+            params.gff ? PREPARE_GENOME.out.gff : [],
             true,
             params.gff
         )
@@ -480,7 +480,7 @@ workflow NANOPORE {
             ch_asciigenome,
             PREPARE_GENOME.out.fasta.collect(),
             PREPARE_GENOME.out.chrom_sizes.collect(),
-            PREPARE_GENOME.out.gff,
+            params.gff ? PREPARE_GENOME.out.gff : [],
             PREPARE_GENOME.out.primer_bed.collect(),
             params.asciigenome_window_size,
             params.asciigenome_read_depth
