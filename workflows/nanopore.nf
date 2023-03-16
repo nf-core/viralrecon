@@ -54,11 +54,6 @@ include { ASCIIGENOME } from '../modules/local/asciigenome'
 include { MULTIQC     } from '../modules/local/multiqc_nanopore'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NO_SAMPLE_NAME     } from '../modules/local/multiqc_tsv_from_list'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NO_BARCODES        } from '../modules/local/multiqc_tsv_from_list'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_BARCODE_COUNT      } from '../modules/local/multiqc_tsv_from_list'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_GUPPYPLEX_COUNT    } from '../modules/local/multiqc_tsv_from_list'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NEXTCLADE          } from '../modules/local/multiqc_tsv_from_list'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -189,14 +184,13 @@ workflow NANOPORE {
                 .filter { it[1] == null }
                 .filter { it[-1] >= params.min_barcode_reads }
                 .map { it -> [ "${it[0]}\t${it[-1]}" ] }
-                .set { ch_barcodes_no_sample }
-
-            MULTIQC_TSV_NO_SAMPLE_NAME (
-                ch_barcodes_no_sample.collect(),
-                ['Barcode', 'Read count'],
-                'fail_barcodes_no_sample'
-            )
-            .set { ch_custom_no_sample_name_multiqc }
+                .collect()                
+                .map { 
+                    tsv_data ->
+                        def header = ['Barcode', 'Read count']
+                        WorkflowCommons.multiqcTsvFromList(tsv_data, header)
+                }
+                .set { ch_custom_no_sample_name_multiqc }
 
             //
             // MODULE: Create custom content file for MultiQC to report samples that were in samplesheet but have no barcodes
@@ -204,14 +198,13 @@ workflow NANOPORE {
             ch_fastq_dirs
                 .filter { it[-1] == null }
                 .map { it -> [ "${it[1]}\t${it[0]}" ] }
-                .set { ch_samples_no_barcode }
-
-            MULTIQC_TSV_NO_BARCODES (
-                ch_samples_no_barcode.collect(),
-                ['Sample', 'Missing barcode'],
-                'fail_no_barcode_samples'
-            )
-            .set { ch_custom_no_barcodes_multiqc }
+                .collect()                
+                .map { 
+                    tsv_data ->
+                        def header = ['Sample', 'Missing barcode']
+                        WorkflowCommons.multiqcTsvFromList(tsv_data, header)
+                }
+                .set { ch_custom_no_barcodes_multiqc }
 
             ch_fastq_dirs
                 .filter { (it[1] != null)  }
@@ -247,11 +240,15 @@ workflow NANOPORE {
         }
         .set { ch_pass_fail_barcode_count }
 
-    MULTIQC_TSV_BARCODE_COUNT (
-        ch_pass_fail_barcode_count.fail.collect(),
-        ['Sample', 'Barcode count'],
-        'fail_barcode_count_samples'
-    )
+    ch_pass_fail_barcode_count
+        .fail
+        .collect()
+        .map { 
+            tsv_data ->
+                def header = ['Sample', 'Barcode count']
+                WorkflowCommons.multiqcTsvFromList(tsv_data, header)
+        }
+        .set { ch_custom_fail_barcodes_count_multiqc }
 
     // Re-arrange channels to have meta map of information for sample
     ch_fastq_dirs
@@ -282,11 +279,15 @@ workflow NANOPORE {
         }
         .set { ch_pass_fail_guppyplex_count }
 
-    MULTIQC_TSV_GUPPYPLEX_COUNT (
-        ch_pass_fail_guppyplex_count.fail.collect(),
-        ['Sample', 'Read count'],
-        'fail_guppyplex_count_samples'
-    )
+    ch_pass_fail_guppyplex_count
+        .fail
+        .collect()
+        .map { 
+            tsv_data ->
+                def header = ['Sample', 'Read count']
+                WorkflowCommons.multiqcTsvFromList(tsv_data, header)
+        }
+        .set { ch_custom_fail_guppyplex_count_multiqc }
 
     //
     // MODULE: Nanoplot QC for FastQ files
@@ -413,18 +414,18 @@ workflow NANOPORE {
         NEXTCLADE_RUN
             .out
             .csv
-            .map { meta, csv ->
-                def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
-                return [ "$meta.id\t$clade" ]
+            .map { 
+                meta, csv ->
+                    def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
+                    return [ "$meta.id\t$clade" ]
+            }
+            .collect()                
+            .map { 
+                tsv_data ->
+                    def header = ['Sample', 'clade']
+                    WorkflowCommons.multiqcTsvFromList(tsv_data, header)
             }
             .set { ch_nextclade_multiqc }
-
-        MULTIQC_TSV_NEXTCLADE (
-            ch_nextclade_multiqc.collect(),
-            ['Sample', 'clade'],
-            'nextclade_clade'
-        )
-        .set { ch_nextclade_multiqc }
     }
 
     //
@@ -520,10 +521,10 @@ workflow NANOPORE {
             ch_multiqc_custom_config,
             CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
-            ch_custom_no_sample_name_multiqc.ifEmpty([]),
-            ch_custom_no_barcodes_multiqc.ifEmpty([]),
-            MULTIQC_TSV_BARCODE_COUNT.out.ifEmpty([]),
-            MULTIQC_TSV_GUPPYPLEX_COUNT.out.ifEmpty([]),
+            ch_custom_no_sample_name_multiqc.collectFile(name: 'fail_barcodes_no_sample_mqc.tsv').ifEmpty([]),
+            ch_custom_no_barcodes_multiqc.collectFile(name: 'fail_no_barcode_samples_mqc.tsv').ifEmpty([]),
+            ch_custom_fail_barcodes_count_multiqc.collectFile(name: 'fail_barcode_count_samples_mqc.tsv').ifEmpty([]),
+            ch_custom_fail_guppyplex_count_multiqc.collectFile(name: 'fail_guppyplex_count_samples_mqc.tsv').ifEmpty([]),
             ch_amplicon_heatmap_multiqc.ifEmpty([]),
             ch_pycoqc_multiqc.collect{it[1]}.ifEmpty([]),
             ARTIC_MINION.out.json.collect{it[1]}.ifEmpty([]),
@@ -533,7 +534,7 @@ workflow NANOPORE {
             ch_quast_multiqc.collect().ifEmpty([]),
             ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_nextclade_multiqc.collect().ifEmpty([])
+            ch_nextclade_multiqc.collectFile(name: 'nextclade_clade_mqc.tsv').ifEmpty([])
         )
         multiqc_report = MULTIQC.out.report.toList()
     }
