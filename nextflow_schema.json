@@ -320,7 +320,7 @@
                 "kraken2_db": {
                     "type": "string",
                     "format": "path",
-                    "default": "s3://nf-core-awsmegatests/viralrecon/input_data/kraken2_human.tar.gz",
+                    "default": "s3://ngi-igenomes/test-data/viralrecon/kraken2_human.tar.gz",
                     "fa_icon": "fab fa-gitkraken",
                     "description": "Full path to Kraken2 database built from host genome."
                 },
