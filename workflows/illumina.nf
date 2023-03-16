@@ -59,9 +59,6 @@ include { CUTADAPT } from '../modules/local/cutadapt'
 include { MULTIQC  } from '../modules/local/multiqc_illumina'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_READS         } from '../modules/local/multiqc_tsv_from_list'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_MAPPED        } from '../modules/local/multiqc_tsv_from_list'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NEXTCLADE          } from '../modules/local/multiqc_tsv_from_list'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -234,14 +231,13 @@ workflow ILLUMINA {
                     return [ "$meta.id\t$num_reads" ]
                 }
             }
-            .set { ch_pass_fail_reads }
-
-        MULTIQC_TSV_FAIL_READS (
-            ch_pass_fail_reads.collect(),
-            ['Sample', 'Reads before trimming'],
-            'fail_mapped_reads'
-        )
-        .set { ch_fail_reads_multiqc }
+            .collect()
+            .map { 
+                tsv_data ->
+                    def header = ['Sample', 'Reads before trimming']
+                    WorkflowCommons.multiqcTsvFromList(tsv_data, header)
+            }
+            .set { ch_fail_reads_multiqc }
     }
 
     //
@@ -320,12 +316,15 @@ workflow ILLUMINA {
             }
             .set { ch_pass_fail_mapped }
 
-        MULTIQC_TSV_FAIL_MAPPED (
-            ch_pass_fail_mapped.fail.collect(),
-            ['Sample', 'Mapped reads'],
-            'fail_mapped_samples'
-        )
-        .set { ch_fail_mapping_multiqc }
+        ch_pass_fail_mapped
+            .fail
+            .collect()
+            .map { 
+                tsv_data ->
+                    def header = ['Sample', 'Mapped reads']
+                    WorkflowCommons.multiqcTsvFromList(tsv_data, header)
+            }
+            .set { ch_fail_mapping_multiqc }
     }
 
     //
@@ -507,14 +506,13 @@ workflow ILLUMINA {
                 def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
                 return [ "$meta.id\t$clade" ]
             }
+            .collect()                
+            .map { 
+                tsv_data ->
+                    def header = ['Sample', 'clade']
+                    WorkflowCommons.multiqcTsvFromList(tsv_data, header)
+            }
             .set { ch_nextclade_multiqc }
-
-        MULTIQC_TSV_NEXTCLADE (
-            ch_nextclade_multiqc.collect(),
-            ['Sample', 'clade'],
-            'nextclade_clade'
-        )
-        .set { ch_nextclade_multiqc }
     }
 
     //
@@ -620,8 +618,8 @@ workflow ILLUMINA {
             ch_multiqc_custom_config,
             CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
-            ch_fail_reads_multiqc.ifEmpty([]),
-            ch_fail_mapping_multiqc.ifEmpty([]),
+            ch_fail_reads_multiqc.collectFile(name: 'fail_mapped_reads_mqc.tsv').ifEmpty([]),
+            ch_fail_mapping_multiqc.collectFile(name: 'fail_mapped_samples_mqc.tsv').ifEmpty([]),
             ch_amplicon_heatmap_multiqc.ifEmpty([]),
             FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
             FASTQ_TRIM_FASTP_FASTQC.out.trim_json.collect{it[1]}.ifEmpty([]),
@@ -636,7 +634,7 @@ workflow ILLUMINA {
             ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_quast_multiqc.collect().ifEmpty([]),
             ch_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_nextclade_multiqc.collect().ifEmpty([]),
+            ch_nextclade_multiqc.collectFile(name: 'nextclade_clade_mqc.tsv').ifEmpty([]),
             ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
             ch_spades_quast_multiqc.collect().ifEmpty([]),
             ch_unicycler_quast_multiqc.collect().ifEmpty([]),
