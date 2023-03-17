@@ -101,6 +101,10 @@ module_order:
         - "./assembly_minia/*.tsv"
 
 report_section_order:
+  fail_mapped_reads:
+    after: summary_variants_metrics
+  fail_mapped_samples:
+    after: summary_variants_metrics
   summary_assembly_metrics:
     before: summary_variants_metrics
   amplicon_heatmap:

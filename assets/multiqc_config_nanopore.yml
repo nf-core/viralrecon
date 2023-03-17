@@ -37,6 +37,14 @@ module_order:
         - "./quast/*.tsv"
 
 report_section_order:
+  fail_barcodes_no_sample:
+    after: summary_variants_metrics
+  fail_no_barcode_samples:
+    after: summary_variants_metrics
+  fail_barcode_count_samples:
+    after: summary_variants_metrics
+  fail_guppyplex_count_samples:
+    after: summary_variants_metrics
   amplicon_heatmap:
     before: summary_variants_metrics
   software_versions:

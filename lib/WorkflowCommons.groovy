@@ -46,6 +46,18 @@ class WorkflowCommons {
     }
 
     //
+    // Create MultiQC tsv custom content from a list of values
+    //
+    public static String multiqcTsvFromList(tsv_data, header) {
+        def tsv_string = ""
+        if (tsv_data.size() > 0) {
+            tsv_string += "${header.join('\t')}\n"
+            tsv_string += tsv_data.join('\n')
+        }
+        return tsv_string
+    }
+
+    //
     // Function to check whether primer BED file has the correct suffixes as provided to the pipeline
     //
     public static void checkPrimerSuffixes(primer_bed_file, primer_left_suffix, primer_right_suffix, log) {
