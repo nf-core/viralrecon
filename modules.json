@@ -42,7 +42,7 @@
                     },
                     "bcftools/norm": {
                         "branch": "master",
-                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "git_sha": "bcad95fb35e567ad25840d3297c3e17eff211a3a",
                         "installed_by": ["modules"]
                     },
                     "bcftools/query": {
@@ -142,7 +142,7 @@
                     },
                     "kraken2/kraken2": {
                         "branch": "master",
-                        "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
+                        "git_sha": "7c695e0147df1157413e06246d9b0094617d3e6b",
                         "installed_by": ["modules"]
                     },
                     "minia": {
@@ -177,13 +177,13 @@
                     },
                     "picard/collectmultiplemetrics": {
                         "branch": "master",
-                        "git_sha": "2f88b26e9804b99e98f7cd08e74c3f88288a3358",
+                        "git_sha": "75027bf77472b1f4fd2cdd7e46f83119dfb0f2c6",
                         "installed_by": ["modules"]
                     },
                     "picard/markduplicates": {
                         "branch": "master",
-                        "git_sha": "2f88b26e9804b99e98f7cd08e74c3f88288a3358",
-                        "installed_by": ["bam_markduplicates_picard", "modules"]
+                        "git_sha": "75027bf77472b1f4fd2cdd7e46f83119dfb0f2c6",
+                        "installed_by": ["modules", "bam_markduplicates_picard"]
                     },
                     "plasmidid": {
                         "branch": "master",
@@ -266,7 +266,7 @@
                 "nf-core": {
                     "bam_markduplicates_picard": {
                         "branch": "master",
-                        "git_sha": "6daac2bc63f4847e0c7cc661f4f5b043ac13faaf",
+                        "git_sha": "6f1697c121719dedde9e0537b6ed6a9cb8c13583",
                         "installed_by": ["subworkflows"]
                     },
                     "bam_sort_stats_samtools": {
@@ -276,7 +276,7 @@
                     },
                     "bam_stats_samtools": {
                         "branch": "master",
-                        "git_sha": "92eb5091ae5368a60cda58b3a0ced8b36d715b0f",
+                        "git_sha": "b4b7f89e7fd6d2293f0c176213f710e0bcdaf19e",
                         "installed_by": ["bam_sort_stats_samtools", "bam_markduplicates_picard"]
                     },
                     "fastq_align_bowtie2": {
