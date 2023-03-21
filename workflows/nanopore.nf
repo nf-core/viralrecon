@@ -62,6 +62,7 @@ include { INPUT_CHECK         } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome_nanopore'
 include { SNPEFF_SNPSIFT      } from '../subworkflows/local/snpeff_snpsift'
 include { VARIANTS_LONG_TABLE } from '../subworkflows/local/variants_long_table'
+include { FILTER_BAM_SAMTOOLS } from '../subworkflows/local/filter_bam_samtools'
 
 /*
 ========================================================================================
@@ -85,11 +86,6 @@ include { NEXTCLADE_RUN                 } from '../modules/nf-core/nextclade/run
 include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/mosdepth/main'
 include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main'
-
-//
-// SUBWORKFLOW: Consisting entirely of nf-core/modules
-//
-include { FILTER_BAM_SAMTOOLS } from '../subworkflows/nf-core/filter_bam_samtools'
 
 /*
 ========================================================================================

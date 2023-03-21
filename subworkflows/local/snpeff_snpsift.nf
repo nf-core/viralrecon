@@ -5,7 +5,7 @@
 include { SNPEFF_ANN            } from '../../modules/local/snpeff_ann'
 include { SNPSIFT_EXTRACTFIELDS } from '../../modules/local/snpsift_extractfields'
 
-include { VCF_BGZIP_TABIX_STATS } from '../nf-core/vcf_bgzip_tabix_stats'
+include { VCF_BGZIP_TABIX_STATS } from './vcf_bgzip_tabix_stats'
 
 workflow SNPEFF_SNPSIFT {
     take:

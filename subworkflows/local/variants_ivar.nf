@@ -5,7 +5,7 @@
 include { IVAR_VARIANTS         } from '../../modules/nf-core/ivar/variants/main'
 include { IVAR_VARIANTS_TO_VCF  } from '../../modules/local/ivar_variants_to_vcf'
 include { BCFTOOLS_SORT         } from '../../modules/nf-core/bcftools/sort/main'
-include { VCF_TABIX_STATS       } from '../nf-core/vcf_tabix_stats'
+include { VCF_TABIX_STATS       } from './vcf_tabix_stats'
 include { VARIANTS_QC           } from './variants_qc'
 
 workflow VARIANTS_IVAR {

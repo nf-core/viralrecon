@@ -3,7 +3,7 @@
 //
 
 include { IVAR_TRIM               } from '../../modules/nf-core/ivar/trim/main'
-include { BAM_SORT_STATS_SAMTOOLS } from './bam_sort_stats_samtools/main'
+include { BAM_SORT_STATS_SAMTOOLS } from '../nf-core/bam_sort_stats_samtools/main'
 
 workflow BAM_TRIM_PRIMERS_IVAR {
     take:
