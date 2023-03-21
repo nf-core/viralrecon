@@ -63,16 +63,18 @@ include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../mod
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK         } from '../subworkflows/local/input_check'
-include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome_illumina'
-include { VARIANTS_IVAR       } from '../subworkflows/local/variants_ivar'
-include { VARIANTS_BCFTOOLS   } from '../subworkflows/local/variants_bcftools'
-include { CONSENSUS_IVAR      } from '../subworkflows/local/consensus_ivar'
-include { CONSENSUS_BCFTOOLS  } from '../subworkflows/local/consensus_bcftools'
-include { VARIANTS_LONG_TABLE } from '../subworkflows/local/variants_long_table'
-include { ASSEMBLY_SPADES     } from '../subworkflows/local/assembly_spades'
-include { ASSEMBLY_UNICYCLER  } from '../subworkflows/local/assembly_unicycler'
-include { ASSEMBLY_MINIA      } from '../subworkflows/local/assembly_minia'
+include { INPUT_CHECK             } from '../subworkflows/local/input_check'
+include { PREPARE_GENOME          } from '../subworkflows/local/prepare_genome_illumina'
+include { VARIANTS_IVAR           } from '../subworkflows/local/variants_ivar'
+include { VARIANTS_BCFTOOLS       } from '../subworkflows/local/variants_bcftools'
+include { CONSENSUS_IVAR          } from '../subworkflows/local/consensus_ivar'
+include { CONSENSUS_BCFTOOLS      } from '../subworkflows/local/consensus_bcftools'
+include { VARIANTS_LONG_TABLE     } from '../subworkflows/local/variants_long_table'
+include { ASSEMBLY_SPADES         } from '../subworkflows/local/assembly_spades'
+include { ASSEMBLY_UNICYCLER      } from '../subworkflows/local/assembly_unicycler'
+include { ASSEMBLY_MINIA          } from '../subworkflows/local/assembly_minia'
+include { BAM_TRIM_PRIMERS_IVAR   } from '../subworkflows/local/bam_trim_primers_ivar'
+include { FASTQ_TRIM_FASTP_FASTQC } from '../subworkflows/local/fastq_trim_fastp_fastqc'
 
 /*
 ========================================================================================
@@ -94,9 +96,7 @@ include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
 //
-include { FASTQ_TRIM_FASTP_FASTQC   } from '../subworkflows/nf-core/fastq_trim_fastp_fastqc'
 include { FASTQ_ALIGN_BOWTIE2       } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
-include { BAM_TRIM_PRIMERS_IVAR     } from '../subworkflows/nf-core/bam_trim_primers_ivar'
 include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard'
 
 /*
