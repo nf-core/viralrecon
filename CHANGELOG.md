@@ -3,7 +3,20 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [[2.6](https://github.com/nf-core/viralrecon/releases/tag/2.6)] - 2023-03-17
+## [[2.6.0](https://github.com/nf-core/viralrecon/releases/tag/2.6.0)] - 2023-03-23
+
+### Credits
+
+Special thanks to the following for their code contributions to the release:
+
+- [Friederike Hanssen](https://github.com/FriederikeHanssen)
+- [Hugo Tavares](https://github.com/tavareshugo)
+- [Matthew Wells](https://github.com/mattheww95)
+- [Maxime Garcia](https://github.com/maxulysse)
+- [Phil Ewels](https://github.com/ewels)
+- [Sara Monzón](https://github.com/saramonzon)
+
+Thank you to everyone else that has contributed by reporting bugs, enhancements or in any other way, shape or form.
 
 ### Enhancements & fixes
 
