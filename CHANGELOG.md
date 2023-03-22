@@ -11,6 +11,7 @@ Special thanks to the following for their code contributions to the release:
 
 - [Friederike Hanssen](https://github.com/FriederikeHanssen)
 - [Hugo Tavares](https://github.com/tavareshugo)
+- [Jessica Wu](https://github.com/wutron)
 - [Matthew Wells](https://github.com/mattheww95)
 - [Maxime Garcia](https://github.com/maxulysse)
 - [Phil Ewels](https://github.com/ewels)
@@ -29,6 +30,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[#348](https://github.com/nf-core/viralrecon/issues/348)] - Document full parameters of iVar consensus
 - [[#349](https://github.com/nf-core/viralrecon/issues/349)] - ERROR in Script plasmidID
 - [[#356](https://github.com/nf-core/viralrecon/issues/356)] - Add NEB SARS-CoV-2 primers
+- [[#368](https://github.com/nf-core/viralrecon/issues/368)] - Incorrect depth from ivar variants reported in variants long table
 - Updated pipeline template to [nf-core/tools 2.7.2](https://github.com/nf-core/tools/releases/tag/2.7.2)
 - Add `tower.yml` for Report rendering in Nextflow Tower
 - Use `--skip_plasmidid` by default
