@@ -31,6 +31,8 @@ A number of improvements were made to the pipeline recently, mainly with regard 
 
 ### Illumina
 
+![nf-core/viralrecon Illumina metro map](docs/images/nf-core-viralrecon_metro_map_illumina.png)
+
 1. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html))
 2. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 3. Adapter trimming ([`fastp`](https://github.com/OpenGene/fastp))
@@ -60,6 +62,8 @@ A number of improvements were made to the pipeline recently, mainly with regard 
 7. Present QC and visualisation for raw read, alignment, assembly and variant calling results ([`MultiQC`](http://multiqc.info/))
 
 ### Nanopore
+
+![nf-core/viralrecon Nanopore metro map](docs/images/nf-core-viralrecon_metro_map_nanopore.png)
 
 1. Sequencing QC ([`pycoQC`](https://github.com/a-slide/pycoQC))
 2. Aggregate pre-demultiplexed reads from MinKNOW/Guppy ([`artic guppyplex`](https://artic.readthedocs.io/en/latest/commands/))
