@@ -98,7 +98,7 @@ A number of improvements were made to the pipeline recently, mainly with regard 
 
 4. Start running your own analysis!
 
-   > - Parameters passed via custom config files including the `-c` Nextflow option will be ignored. Please provide pipeline parameters via the `-params-file` Nextflow option instead; see [docs](https://nf-co.re/usage/configuration?q=params#custom-configuration-files).
+   > - Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration except for parameters; see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
    - Typical command for Illumina shotgun analysis:
 
