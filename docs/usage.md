@@ -4,6 +4,10 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
+## Pipeline parameters
+
+Parameters passed via custom config files including the `-c` Nextflow option will be ignored. Please provide pipeline parameters via the `-params-file` Nextflow option instead; see [docs](https://nf-co.re/usage/configuration?q=params#custom-configuration-files).
+
 ## Samplesheet format
 
 ### Illumina

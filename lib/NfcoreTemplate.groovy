@@ -33,6 +33,18 @@ class NfcoreTemplate {
     }
 
     //
+    //  Warn if using custom configs to provide pipeline parameters
+    //
+    public static void warnParamsProvidedInConfig(workflow, log) {
+        if (workflow.configFiles.size() > 1) {
+            log.warn "[$workflow.manifest.name] Multiple config files detected!\n" +
+                    "Parameters passed via custom config files including the '-c' Nextflow option will be ignored.\n" +
+                    "Please provide pipeline parameters via the '-params-file' Nextflow option instead.\n" +
+                    "Docs: https://nf-co.re/usage/configuration?q=params#custom-configuration-files\n"
+        }
+    }
+
+    //
     // Generate version string
     //
     public static String version(workflow) {
