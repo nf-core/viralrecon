@@ -62,6 +62,9 @@ class WorkflowMain {
         // Print parameter summary log to screen
         log.info paramsSummaryLog(workflow, params, log)
 
+        // Warn about using custom configs to provide pipeline parameters
+        NfcoreTemplate.warnParamsProvidedInConfig(workflow, log)
+
         // Validate workflow parameters via the JSON schema
         if (params.validate_params) {
             NfcoreSchema.validateParameters(workflow, params, log)
@@ -105,7 +108,7 @@ class WorkflowMain {
                             "   - https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config\n\n" +
                             " If you would still like to blame us please come and find us on nf-core Slack:\n" +
                             "   - https://nf-co.re/viralrecon#contributions-and-support\n" +
-                            "============================================================================="
+                            "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         if (params.genomes && params.genome && params.genomes.containsKey(params.genome)) {
             def genome_map = params.genomes[ params.genome ]
             if (primer_set) {
@@ -117,7 +120,7 @@ class WorkflowMain {
                         if (genome_map.containsKey(primer_set_version)) {
                             genome_map = genome_map[ primer_set_version ]
                         } else {
-                            log.error "=============================================================================\n" +
+                            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                                 " --primer_set_version '${primer_set_version}' not found!\n\n" +
                                 " Currently, the available primer set version keys are: ${genome_map.keySet().join(", ")}\n\n" +
                                 " Please check:\n" +
@@ -128,7 +131,7 @@ class WorkflowMain {
                             System.exit(1)
                         }
                     } else {
-                        log.error "=============================================================================\n" +
+                        log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                             " --primer_set '${primer_set}' not found!\n\n" +
                             " Currently, the available primer set keys are: ${genome_map.keySet().join(", ")}\n\n" +
                             " Please check:\n" +
@@ -138,7 +141,7 @@ class WorkflowMain {
                         System.exit(1)
                     }
                 } else {
-                    log.error "=============================================================================\n" +
+                    log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                         " Genome '${params.genome}' does not contain any primer sets!\n\n" +
                         " Please check:\n" +
                         "   - The value provided to --genome (currently '${params.genome}')\n" +

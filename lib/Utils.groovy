@@ -33,7 +33,7 @@ class Utils {
         }
 
         if (channels_missing | channel_priority_violation) {
-            log.warn "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            log.warn "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  There is a problem with your Conda configuration!\n\n" +
                 "  You will need to set-up the conda-forge and bioconda channels correctly.\n" +
                 "  Please refer to https://bioconda.github.io/\n" +
@@ -41,7 +41,7 @@ class Utils {
                 "  ${channels}\n" +
                 "  but the following channel order is required:\n" +
                 "  ${required_channels_in_order}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
         }
     }
 }

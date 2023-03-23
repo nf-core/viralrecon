@@ -126,7 +126,7 @@ def parse_ivar_line(line):
     QUAL = "."
 
     ## Determine FILTER field
-    INFO = f"DP={line[11]}"
+    INFO = f"DP={int(float(line[11]))}"
     pass_test = line[13]
 
     return (
