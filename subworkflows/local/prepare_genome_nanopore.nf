@@ -2,12 +2,12 @@
 // Uncompress and prepare reference genome files
 //
 
-include { GUNZIP as GUNZIP_FASTA      } from '../../modules/nf-core/modules/gunzip/main'
-include { GUNZIP as GUNZIP_GFF        } from '../../modules/nf-core/modules/gunzip/main'
-include { GUNZIP as GUNZIP_PRIMER_BED } from '../../modules/nf-core/modules/gunzip/main'
-include { UNTAR                       } from '../../modules/nf-core/modules/untar/main'
-include { CUSTOM_GETCHROMSIZES        } from '../../modules/nf-core/modules/custom/getchromsizes/main'
-include { NEXTCLADE_DATASETGET        } from '../../modules/nf-core/modules/nextclade/datasetget/main'
+include { GUNZIP as GUNZIP_FASTA      } from '../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_GFF        } from '../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_PRIMER_BED } from '../../modules/nf-core/gunzip/main'
+include { UNTAR                       } from '../../modules/nf-core/untar/main'
+include { CUSTOM_GETCHROMSIZES        } from '../../modules/nf-core/custom/getchromsizes/main'
+include { NEXTCLADE_DATASETGET        } from '../../modules/nf-core/nextclade/datasetget/main'
 include { COLLAPSE_PRIMERS            } from '../../modules/local/collapse_primers'
 include { SNPEFF_BUILD                } from '../../modules/local/snpeff_build'
 
@@ -26,12 +26,13 @@ workflow PREPARE_GENOME {
         ch_fasta    = GUNZIP_FASTA.out.gunzip.map { it[1] }
         ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
     } else {
-        ch_fasta = file(params.fasta)
+        ch_fasta = Channel.value(file(params.fasta))
     }
 
     //
     // Uncompress GFF annotation file
     //
+    ch_gff = Channel.empty()
     if (params.gff) {
         if (params.gff.endsWith('.gz')) {
             GUNZIP_GFF (
@@ -40,20 +41,18 @@ workflow PREPARE_GENOME {
             ch_gff      = GUNZIP_GFF.out.gunzip.map { it[1] }
             ch_versions = ch_versions.mix(GUNZIP_GFF.out.versions)
         } else {
-            ch_gff = file(params.gff)
+            ch_gff = Channel.value(file(params.gff))
         }
-    } else {
-        ch_gff = []
     }
 
     //
     // Create chromosome sizes file
     //
     CUSTOM_GETCHROMSIZES (
-        ch_fasta
+        ch_fasta.map { [ [:], it ] }
     )
-    ch_fai         = CUSTOM_GETCHROMSIZES.out.fai
-    ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes
+    ch_fai         = CUSTOM_GETCHROMSIZES.out.fai.map { it[1] }
+    ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes.map { it[1] }
     ch_versions    = ch_versions.mix(CUSTOM_GETCHROMSIZES.out.versions)
 
     //
@@ -68,7 +67,7 @@ workflow PREPARE_GENOME {
             ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { it[1] }
             ch_versions   = ch_versions.mix(GUNZIP_PRIMER_BED.out.versions)
         } else {
-            ch_primer_bed = file(params.primer_bed)
+            ch_primer_bed = Channel.value(file(params.primer_bed))
         }
     }
 
@@ -99,7 +98,7 @@ workflow PREPARE_GENOME {
                 ch_nextclade_db = UNTAR.out.untar.map { it[1] }
                 ch_versions     = ch_versions.mix(UNTAR.out.versions)
             } else {
-                ch_nextclade_db = file(params.nextclade_dataset)
+                ch_nextclade_db = Channel.value(file(params.nextclade_dataset))
             }
         } else if (params.nextclade_dataset_name) {
             NEXTCLADE_DATASETGET (
@@ -117,7 +116,7 @@ workflow PREPARE_GENOME {
     //
     ch_snpeff_db     = Channel.empty()
     ch_snpeff_config = Channel.empty()
-    if (params.gff && !params.skip_snpeff) {
+    if (!params.skip_snpeff) {
         SNPEFF_BUILD (
             ch_fasta,
             ch_gff

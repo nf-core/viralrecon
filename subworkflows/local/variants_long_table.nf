@@ -2,7 +2,7 @@
 // Create a long table with variant information including AA changes and lineage info
 //
 
-include { BCFTOOLS_QUERY           } from '../../modules/nf-core/modules/bcftools/query/main'
+include { BCFTOOLS_QUERY           } from '../../modules/nf-core/bcftools/query/main'
 include { MAKE_VARIANTS_LONG_TABLE } from '../../modules/local/make_variants_long_table'
 
 workflow VARIANTS_LONG_TABLE {

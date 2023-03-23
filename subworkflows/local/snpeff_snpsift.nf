@@ -5,7 +5,7 @@
 include { SNPEFF_ANN            } from '../../modules/local/snpeff_ann'
 include { SNPSIFT_EXTRACTFIELDS } from '../../modules/local/snpsift_extractfields'
 
-include { VCF_BGZIP_TABIX_STATS } from '../nf-core/vcf_bgzip_tabix_stats'
+include { VCF_BGZIP_TABIX_STATS } from './vcf_bgzip_tabix_stats'
 
 workflow SNPEFF_SNPSIFT {
     take:
@@ -27,7 +27,10 @@ workflow SNPEFF_SNPSIFT {
     ch_versions = ch_versions.mix(SNPEFF_ANN.out.versions.first())
 
     VCF_BGZIP_TABIX_STATS (
-        SNPEFF_ANN.out.vcf
+        SNPEFF_ANN.out.vcf,
+        [],
+        [],
+        []
     )
     ch_versions = ch_versions.mix(VCF_BGZIP_TABIX_STATS.out.versions)
 
@@ -43,6 +46,7 @@ workflow SNPEFF_SNPSIFT {
 
     vcf         = VCF_BGZIP_TABIX_STATS.out.vcf   // channel: [ val(meta), [ vcf.gz ] ]
     tbi         = VCF_BGZIP_TABIX_STATS.out.tbi   // channel: [ val(meta), [ tbi ] ]
+    csi         = VCF_BGZIP_TABIX_STATS.out.csi   // channel: [ val(meta), [ csi ] ]
     stats       = VCF_BGZIP_TABIX_STATS.out.stats // channel: [ val(meta), [ txt ] ]
 
     snpsift_txt = SNPSIFT_EXTRACTFIELDS.out.txt   // channel: [ val(meta), [ txt ] ]

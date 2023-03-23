@@ -2,19 +2,19 @@
 // Uncompress and prepare reference genome files
 //
 
-include { GUNZIP as GUNZIP_FASTA        } from '../../modules/nf-core/modules/gunzip/main'
-include { GUNZIP as GUNZIP_GFF          } from '../../modules/nf-core/modules/gunzip/main'
-include { GUNZIP as GUNZIP_PRIMER_BED   } from '../../modules/nf-core/modules/gunzip/main'
-include { GUNZIP as GUNZIP_PRIMER_FASTA } from '../../modules/nf-core/modules/gunzip/main'
-include { UNTAR as UNTAR_BOWTIE2_INDEX  } from '../../modules/nf-core/modules/untar/main'
-include { UNTAR as UNTAR_NEXTCLADE_DB   } from '../../modules/nf-core/modules/untar/main'
-include { UNTAR as UNTAR_KRAKEN2_DB     } from '../../modules/nf-core/modules/untar/main'
-include { UNTAR as UNTAR_BLAST_DB       } from '../../modules/nf-core/modules/untar/main'
-include { BOWTIE2_BUILD                 } from '../../modules/nf-core/modules/bowtie2/build/main'
-include { BLAST_MAKEBLASTDB             } from '../../modules/nf-core/modules/blast/makeblastdb/main'
-include { BEDTOOLS_GETFASTA             } from '../../modules/nf-core/modules/bedtools/getfasta/main'
-include { CUSTOM_GETCHROMSIZES          } from '../../modules/nf-core/modules/custom/getchromsizes/main'
-include { NEXTCLADE_DATASETGET          } from '../../modules/nf-core/modules/nextclade/datasetget/main'
+include { GUNZIP as GUNZIP_FASTA        } from '../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_GFF          } from '../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_PRIMER_BED   } from '../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_PRIMER_FASTA } from '../../modules/nf-core/gunzip/main'
+include { UNTAR as UNTAR_BOWTIE2_INDEX  } from '../../modules/nf-core/untar/main'
+include { UNTAR as UNTAR_NEXTCLADE_DB   } from '../../modules/nf-core/untar/main'
+include { UNTAR as UNTAR_KRAKEN2_DB     } from '../../modules/nf-core/untar/main'
+include { UNTAR as UNTAR_BLAST_DB       } from '../../modules/nf-core/untar/main'
+include { BOWTIE2_BUILD                 } from '../../modules/nf-core/bowtie2/build/main'
+include { BLAST_MAKEBLASTDB             } from '../../modules/nf-core/blast/makeblastdb/main'
+include { BEDTOOLS_GETFASTA             } from '../../modules/nf-core/bedtools/getfasta/main'
+include { CUSTOM_GETCHROMSIZES          } from '../../modules/nf-core/custom/getchromsizes/main'
+include { NEXTCLADE_DATASETGET          } from '../../modules/nf-core/nextclade/datasetget/main'
 include { COLLAPSE_PRIMERS              } from '../../modules/local/collapse_primers'
 include { KRAKEN2_BUILD                 } from '../../modules/local/kraken2_build'
 include { SNPEFF_BUILD                  } from '../../modules/local/snpeff_build'
@@ -34,12 +34,13 @@ workflow PREPARE_GENOME {
         ch_fasta    = GUNZIP_FASTA.out.gunzip.map { it[1] }
         ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
     } else {
-        ch_fasta = file(params.fasta)
+        ch_fasta = Channel.value(file(params.fasta))
     }
 
     //
     // Uncompress GFF annotation file
     //
+    ch_gff = Channel.empty()
     if (params.gff) {
         if (params.gff.endsWith('.gz')) {
             GUNZIP_GFF (
@@ -48,25 +49,19 @@ workflow PREPARE_GENOME {
             ch_gff      = GUNZIP_GFF.out.gunzip.map { it[1] }
             ch_versions = ch_versions.mix(GUNZIP_GFF.out.versions)
         } else {
-            ch_gff = file(params.gff)
+            ch_gff = Channel.value(file(params.gff))
         }
-    } else {
-        ch_gff = []
     }
 
     //
     // Create chromosome sizes file
     //
-    ch_fai         = Channel.empty()
-    ch_chrom_sizes = Channel.empty()
-    if (params.protocol == 'amplicon' || !params.skip_asciigenome) {
-        CUSTOM_GETCHROMSIZES (
-            ch_fasta
-        )
-        ch_fai         = CUSTOM_GETCHROMSIZES.out.fai
-        ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes
-        ch_versions    = ch_versions.mix(CUSTOM_GETCHROMSIZES.out.versions)
-    }
+    CUSTOM_GETCHROMSIZES (
+        ch_fasta.map { [ [:], it ] }
+    )
+    ch_fai         = CUSTOM_GETCHROMSIZES.out.fai.map { it[1] }
+    ch_chrom_sizes = CUSTOM_GETCHROMSIZES.out.sizes.map { it[1] }
+    ch_versions    = ch_versions.mix(CUSTOM_GETCHROMSIZES.out.versions)
 
     //
     // Prepare reference files required for variant calling
@@ -81,13 +76,13 @@ workflow PREPARE_GENOME {
                 ch_kraken2_db = UNTAR_KRAKEN2_DB.out.untar.map { it[1] }
                 ch_versions   = ch_versions.mix(UNTAR_KRAKEN2_DB.out.versions)
             } else {
-                ch_kraken2_db = file(params.kraken2_db)
+                ch_kraken2_db = Channel.value(file(params.kraken2_db))
             }
         } else {
             KRAKEN2_BUILD (
                 params.kraken2_db_name
             )
-            ch_kraken2_db = KRAKEN2_BUILD.out.db
+            ch_kraken2_db = KRAKEN2_BUILD.out.db.first()
             ch_versions   = ch_versions.mix(KRAKEN2_BUILD.out.versions)
         }
     }
@@ -107,7 +102,7 @@ workflow PREPARE_GENOME {
                 ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { it[1] }
                 ch_versions   = ch_versions.mix(GUNZIP_PRIMER_BED.out.versions)
             } else {
-                ch_primer_bed = file(params.primer_bed)
+                ch_primer_bed = Channel.value(file(params.primer_bed))
             }
         }
 
@@ -130,7 +125,7 @@ workflow PREPARE_GENOME {
                     ch_primer_fasta = GUNZIP_PRIMER_FASTA.out.gunzip.map { it[1] }
                     ch_versions     = ch_versions.mix(GUNZIP_PRIMER_FASTA.out.versions)
                 } else {
-                    ch_primer_fasta = file(params.primer_fasta)
+                    ch_primer_fasta = Channel.value(file(params.primer_fasta))
                 }
             } else {
                 BEDTOOLS_GETFASTA (
@@ -156,11 +151,11 @@ workflow PREPARE_GENOME {
                 ch_bowtie2_index = UNTAR_BOWTIE2_INDEX.out.untar.map { it[1] }
                 ch_versions      = ch_versions.mix(UNTAR_BOWTIE2_INDEX.out.versions)
             } else {
-                ch_bowtie2_index = file(params.bowtie2_index)
+                ch_bowtie2_index = Channel.value(file(params.bowtie2_index))
             }
         } else {
             BOWTIE2_BUILD (
-                ch_fasta
+                ch_fasta.map { [ [:], it ] }
             )
             ch_bowtie2_index = BOWTIE2_BUILD.out.index
             ch_versions      = ch_versions.mix(BOWTIE2_BUILD.out.versions)
@@ -180,7 +175,7 @@ workflow PREPARE_GENOME {
                 ch_nextclade_db = UNTAR_NEXTCLADE_DB.out.untar.map { it[1] }
                 ch_versions     = ch_versions.mix(UNTAR_NEXTCLADE_DB.out.versions)
             } else {
-                ch_nextclade_db = file(params.nextclade_dataset)
+                ch_nextclade_db = Channel.value(file(params.nextclade_dataset))
             }
         } else if (params.nextclade_dataset_name) {
             NEXTCLADE_DATASETGET (
@@ -207,7 +202,7 @@ workflow PREPARE_GENOME {
                     ch_blast_db = UNTAR_BLAST_DB.out.untar.map { it[1] }
                     ch_versions = ch_versions.mix(UNTAR_BLAST_DB.out.versions)
                 } else {
-                    ch_blast_db = file(params.blast_db)
+                    ch_blast_db = Channel.value(file(params.blast_db))
                 }
             } else {
                 BLAST_MAKEBLASTDB (
@@ -224,7 +219,7 @@ workflow PREPARE_GENOME {
     //
     ch_snpeff_db     = Channel.empty()
     ch_snpeff_config = Channel.empty()
-    if (!params.skip_variants && params.gff && !params.skip_snpeff) {
+    if (!params.skip_variants && !params.skip_snpeff) {
         SNPEFF_BUILD (
             ch_fasta,
             ch_gff

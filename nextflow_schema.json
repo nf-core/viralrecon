@@ -320,7 +320,7 @@
                 "kraken2_db": {
                     "type": "string",
                     "format": "path",
-                    "default": "s3://nf-core-awsmegatests/viralrecon/input_data/kraken2_human.tar.gz",
+                    "default": "s3://ngi-igenomes/test-data/viralrecon/kraken2_human.tar.gz",
                     "fa_icon": "fab fa-gitkraken",
                     "description": "Full path to Kraken2 database built from host genome."
                 },
@@ -519,7 +519,8 @@
                 "skip_plasmidid": {
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
-                    "description": "Skip assembly report generation by PlasmidID."
+                    "description": "Skip assembly report generation by PlasmidID.",
+                    "default": true
                 },
                 "skip_assembly_quast": {
                     "type": "boolean",
@@ -544,6 +545,12 @@
                 "help": {
                     "type": "boolean",
                     "description": "Display help text.",
+                    "fa_icon": "fas fa-question-circle",
+                    "hidden": true
+                },
+                "version": {
+                    "type": "boolean",
+                    "description": "Display version and exit.",
                     "fa_icon": "fas fa-question-circle",
                     "hidden": true
                 },
@@ -578,19 +585,12 @@
                     "hidden": true,
                     "help_text": "Set to disable colourful command line output and live life in monochrome."
                 },
-                "tracedir": {
+                "hook_url": {
                     "type": "string",
-                    "format": "directory-path",
-                    "description": "Directory to keep pipeline Nextflow logs and reports.",
-                    "default": "${params.outdir}/pipeline_info",
-                    "fa_icon": "fas fa-cogs",
+                    "description": "Incoming hook URL for messaging service",
+                    "fa_icon": "fas fa-people-group",
+                    "help_text": "Incoming hook URL for messaging service. Currently, only MS Teams is supported.",
                     "hidden": true
-                },
-                "enable_conda": {
-                    "type": "boolean",
-                    "hidden": true,
-                    "description": "Run this workflow with Conda. You can also use '-profile conda' instead of providing this parameter.",
-                    "fa_icon": "fas fa-bacon"
                 },
                 "validate_params": {
                     "type": "boolean",
@@ -655,8 +655,7 @@
                     "description": "Git commit id for Institutional configs.",
                     "default": "master",
                     "hidden": true,
-                    "fa_icon": "fas fa-users-cog",
-                    "help_text": "Provide git commit id for custom Institutional configs hosted at `nf-core/configs`. This was implemented for reproducibility purposes. Default: `master`.\n\n```bash\n## Download and use config file with following git commit id\n--custom_config_version d52db660777c4bf36546ddb188ec530c3ada1b96\n```"
+                    "fa_icon": "fas fa-users-cog"
                 },
                 "custom_config_base": {
                     "type": "string",

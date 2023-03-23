@@ -2,10 +2,10 @@
 // Assembly and downstream processing for SPAdes scaffolds
 //
 
-include { SPADES                     } from '../../modules/nf-core/modules/spades/main'
-include { BANDAGE_IMAGE              } from '../../modules/nf-core/modules/bandage/image/main'
-include { GUNZIP as GUNZIP_SCAFFOLDS } from '../../modules/nf-core/modules/gunzip/main'
-include { GUNZIP as GUNZIP_GFA       } from '../../modules/nf-core/modules/gunzip/main'
+include { SPADES                     } from '../../modules/nf-core/spades/main'
+include { BANDAGE_IMAGE              } from '../../modules/nf-core/bandage/image/main'
+include { GUNZIP as GUNZIP_SCAFFOLDS } from '../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_GFA       } from '../../modules/nf-core/gunzip/main'
 
 include { ASSEMBLY_QC   } from './assembly_qc'
 
@@ -38,6 +38,7 @@ workflow ASSEMBLY_SPADES {
     //
     SPADES (
         ch_reads,
+        [],
         hmm
     )
     ch_versions = ch_versions.mix(SPADES.out.versions.first())

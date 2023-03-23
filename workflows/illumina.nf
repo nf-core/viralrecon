@@ -1,7 +1,7 @@
 /*
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     VALIDATE INPUTS
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 def valid_params = [
@@ -34,9 +34,9 @@ def variant_caller = params.variant_caller
 if (!variant_caller) { variant_caller = params.protocol == 'amplicon' ? 'ivar' : 'bcftools' }
 
 /*
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     CONFIG FILES
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yml", checkIfExists: true)
@@ -47,9 +47,9 @@ ch_blast_outfmt6_header     = file("$projectDir/assets/headers/blast_outfmt6_hea
 ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_header_mqc.txt", checkIfExists: true)
 
 /*
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT LOCAL MODULES/SUBWORKFLOWS
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 //
@@ -59,53 +59,50 @@ include { CUTADAPT } from '../modules/local/cutadapt'
 include { MULTIQC  } from '../modules/local/multiqc_illumina'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_READS         } from '../modules/local/multiqc_tsv_from_list'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_FAIL_MAPPED        } from '../modules/local/multiqc_tsv_from_list'
-include { MULTIQC_TSV_FROM_LIST as MULTIQC_TSV_NEXTCLADE          } from '../modules/local/multiqc_tsv_from_list'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK         } from '../subworkflows/local/input_check'
-include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome_illumina'
-include { VARIANTS_IVAR       } from '../subworkflows/local/variants_ivar'
-include { VARIANTS_BCFTOOLS   } from '../subworkflows/local/variants_bcftools'
-include { CONSENSUS_IVAR      } from '../subworkflows/local/consensus_ivar'
-include { CONSENSUS_BCFTOOLS  } from '../subworkflows/local/consensus_bcftools'
-include { VARIANTS_LONG_TABLE } from '../subworkflows/local/variants_long_table'
-include { ASSEMBLY_SPADES     } from '../subworkflows/local/assembly_spades'
-include { ASSEMBLY_UNICYCLER  } from '../subworkflows/local/assembly_unicycler'
-include { ASSEMBLY_MINIA      } from '../subworkflows/local/assembly_minia'
+include { INPUT_CHECK             } from '../subworkflows/local/input_check'
+include { PREPARE_GENOME          } from '../subworkflows/local/prepare_genome_illumina'
+include { VARIANTS_IVAR           } from '../subworkflows/local/variants_ivar'
+include { VARIANTS_BCFTOOLS       } from '../subworkflows/local/variants_bcftools'
+include { CONSENSUS_IVAR          } from '../subworkflows/local/consensus_ivar'
+include { CONSENSUS_BCFTOOLS      } from '../subworkflows/local/consensus_bcftools'
+include { VARIANTS_LONG_TABLE     } from '../subworkflows/local/variants_long_table'
+include { ASSEMBLY_SPADES         } from '../subworkflows/local/assembly_spades'
+include { ASSEMBLY_UNICYCLER      } from '../subworkflows/local/assembly_unicycler'
+include { ASSEMBLY_MINIA          } from '../subworkflows/local/assembly_minia'
+include { BAM_TRIM_PRIMERS_IVAR   } from '../subworkflows/local/bam_trim_primers_ivar'
+include { FASTQ_TRIM_FASTP_FASTQC } from '../subworkflows/local/fastq_trim_fastp_fastqc'
 
 /*
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     IMPORT NF-CORE MODULES/SUBWORKFLOWS
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { CAT_FASTQ                     } from '../modules/nf-core/modules/cat/fastq/main'
-include { FASTQC                        } from '../modules/nf-core/modules/fastqc/main'
-include { KRAKEN2_KRAKEN2               } from '../modules/nf-core/modules/kraken2/kraken2/main'
-include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/modules/picard/collectmultiplemetrics/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/modules/custom/dumpsoftwareversions/main'
-include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/modules/mosdepth/main'
-include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/modules/mosdepth/main'
+include { CAT_FASTQ                     } from '../modules/nf-core/cat/fastq/main'
+include { FASTQC                        } from '../modules/nf-core/fastqc/main'
+include { KRAKEN2_KRAKEN2               } from '../modules/nf-core/kraken2/kraken2/main'
+include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/picard/collectmultiplemetrics/main'
+include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/mosdepth/main'
+include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main'
 
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
 //
-include { FASTQC_FASTP           } from '../subworkflows/nf-core/fastqc_fastp'
-include { ALIGN_BOWTIE2          } from '../subworkflows/nf-core/align_bowtie2'
-include { PRIMER_TRIM_IVAR       } from '../subworkflows/nf-core/primer_trim_ivar'
-include { MARK_DUPLICATES_PICARD } from '../subworkflows/nf-core/mark_duplicates_picard'
+include { FASTQ_ALIGN_BOWTIE2       } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
+include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard/main'
 
 /*
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 // Info required for completion email and summary
@@ -198,13 +195,14 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Read QC and trim adapters
     //
-    FASTQC_FASTP (
+    FASTQ_TRIM_FASTP_FASTQC (
         ch_cat_fastq,
+        [],
         params.save_trimmed_fail,
         false
     )
-    ch_variants_fastq = FASTQC_FASTP.out.reads
-    ch_versions = ch_versions.mix(FASTQC_FASTP.out.versions)
+    ch_variants_fastq = FASTQ_TRIM_FASTP_FASTQC.out.reads
+    ch_versions = ch_versions.mix(FASTQ_TRIM_FASTP_FASTQC.out.versions)
 
     //
     // Filter empty FastQ files after adapter trimming
@@ -212,7 +210,7 @@ workflow ILLUMINA {
     ch_fail_reads_multiqc = Channel.empty()
     if (!params.skip_fastp) {
         ch_variants_fastq
-            .join(FASTQC_FASTP.out.trim_json)
+            .join(FASTQ_TRIM_FASTP_FASTQC.out.trim_json)
             .map {
                 meta, reads, json ->
                     pass = WorkflowIllumina.getFastpReadsAfterFiltering(json) > 0
@@ -233,14 +231,13 @@ workflow ILLUMINA {
                     return [ "$meta.id\t$num_reads" ]
                 }
             }
-            .set { ch_pass_fail_reads }
-
-        MULTIQC_TSV_FAIL_READS (
-            ch_pass_fail_reads.collect(),
-            ['Sample', 'Reads before trimming'],
-            'fail_mapped_reads'
-        )
-        .set { ch_fail_reads_multiqc }
+            .collect()
+            .map { 
+                tsv_data ->
+                    def header = ['Sample', 'Reads before trimming']
+                    WorkflowCommons.multiqcTsvFromList(tsv_data, header)
+            }
+            .set { ch_fail_reads_multiqc }
     }
 
     //
@@ -275,17 +272,18 @@ workflow ILLUMINA {
     ch_bowtie2_multiqc          = Channel.empty()
     ch_bowtie2_flagstat_multiqc = Channel.empty()
     if (!params.skip_variants) {
-        ALIGN_BOWTIE2 (
+        FASTQ_ALIGN_BOWTIE2 (
             ch_variants_fastq,
             PREPARE_GENOME.out.bowtie2_index,
             params.save_unaligned,
-            false
+            false,
+            PREPARE_GENOME.out.fasta
         )
-        ch_bam                      = ALIGN_BOWTIE2.out.bam
-        ch_bai                      = ALIGN_BOWTIE2.out.bai
-        ch_bowtie2_multiqc          = ALIGN_BOWTIE2.out.log_out
-        ch_bowtie2_flagstat_multiqc = ALIGN_BOWTIE2.out.flagstat
-        ch_versions                 = ch_versions.mix(ALIGN_BOWTIE2.out.versions)
+        ch_bam                      = FASTQ_ALIGN_BOWTIE2.out.bam
+        ch_bai                      = FASTQ_ALIGN_BOWTIE2.out.bai
+        ch_bowtie2_multiqc          = FASTQ_ALIGN_BOWTIE2.out.log_out
+        ch_bowtie2_flagstat_multiqc = FASTQ_ALIGN_BOWTIE2.out.flagstat
+        ch_versions                 = ch_versions.mix(FASTQ_ALIGN_BOWTIE2.out.versions)
     }
 
     //
@@ -318,12 +316,15 @@ workflow ILLUMINA {
             }
             .set { ch_pass_fail_mapped }
 
-        MULTIQC_TSV_FAIL_MAPPED (
-            ch_pass_fail_mapped.fail.collect(),
-            ['Sample', 'Mapped reads'],
-            'fail_mapped_samples'
-        )
-        .set { ch_fail_mapping_multiqc }
+        ch_pass_fail_mapped
+            .fail
+            .collect()
+            .map { 
+                tsv_data ->
+                    def header = ['Sample', 'Mapped reads']
+                    WorkflowCommons.multiqcTsvFromList(tsv_data, header)
+            }
+            .set { ch_fail_mapping_multiqc }
     }
 
     //
@@ -331,14 +332,15 @@ workflow ILLUMINA {
     //
     ch_ivar_trim_flagstat_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_ivar_trim && params.protocol == 'amplicon') {
-        PRIMER_TRIM_IVAR (
+        BAM_TRIM_PRIMERS_IVAR (
             ch_bam.join(ch_bai, by: [0]),
-            PREPARE_GENOME.out.primer_bed
+            PREPARE_GENOME.out.primer_bed,
+            PREPARE_GENOME.out.fasta
         )
-        ch_bam                        = PRIMER_TRIM_IVAR.out.bam
-        ch_bai                        = PRIMER_TRIM_IVAR.out.bai
-        ch_ivar_trim_flagstat_multiqc = PRIMER_TRIM_IVAR.out.flagstat
-        ch_versions                   = ch_versions.mix(PRIMER_TRIM_IVAR.out.versions)
+        ch_bam                        = BAM_TRIM_PRIMERS_IVAR.out.bam
+        ch_bai                        = BAM_TRIM_PRIMERS_IVAR.out.bai
+        ch_ivar_trim_flagstat_multiqc = BAM_TRIM_PRIMERS_IVAR.out.flagstat
+        ch_versions                   = ch_versions.mix(BAM_TRIM_PRIMERS_IVAR.out.versions)
     }
 
     //
@@ -346,13 +348,15 @@ workflow ILLUMINA {
     //
     ch_markduplicates_flagstat_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_markduplicates) {
-        MARK_DUPLICATES_PICARD (
-            ch_bam
+        BAM_MARKDUPLICATES_PICARD (
+            ch_bam,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fai
         )
-        ch_bam                             = MARK_DUPLICATES_PICARD.out.bam
-        ch_bai                             = MARK_DUPLICATES_PICARD.out.bai
-        ch_markduplicates_flagstat_multiqc = MARK_DUPLICATES_PICARD.out.flagstat
-        ch_versions                        = ch_versions.mix(MARK_DUPLICATES_PICARD.out.versions)
+        ch_bam                             = BAM_MARKDUPLICATES_PICARD.out.bam
+        ch_bai                             = BAM_MARKDUPLICATES_PICARD.out.bai
+        ch_markduplicates_flagstat_multiqc = BAM_MARKDUPLICATES_PICARD.out.flagstat
+        ch_versions                        = ch_versions.mix(BAM_MARKDUPLICATES_PICARD.out.versions)
     }
 
     //
@@ -360,9 +364,9 @@ workflow ILLUMINA {
     //
     if (!params.skip_variants && !params.skip_picard_metrics) {
         PICARD_COLLECTMULTIPLEMETRICS (
-            ch_bam,
-            PREPARE_GENOME.out.fasta,
-            []
+            ch_bam.join(ch_bai, by: [0]),
+            PREPARE_GENOME.out.fasta.map { [ [:], it ] },
+            [ [:], [] ]
         )
         ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first().ifEmpty(null))
     }
@@ -375,8 +379,8 @@ workflow ILLUMINA {
     if (!params.skip_variants && !params.skip_mosdepth) {
         MOSDEPTH_GENOME (
             ch_bam.join(ch_bai, by: [0]),
-            [],
-            []
+            [ [:], [] ],
+            [ [:], [] ]
         )
         ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
         ch_versions         = ch_versions.mix(MOSDEPTH_GENOME.out.versions.first().ifEmpty(null))
@@ -389,8 +393,8 @@ workflow ILLUMINA {
         if (params.protocol == 'amplicon') {
             MOSDEPTH_AMPLICON (
                 ch_bam.join(ch_bai, by: [0]),
-                PREPARE_GENOME.out.primer_collapsed_bed,
-                []
+                PREPARE_GENOME.out.primer_collapsed_bed.map { [ [:], it ] },
+                [ [:], [] ]
             )
             ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
 
@@ -415,9 +419,9 @@ workflow ILLUMINA {
         VARIANTS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            (params.protocol == 'amplicon' || !params.skip_asciigenome) ? PREPARE_GENOME.out.fai : [],
-            (params.protocol == 'amplicon' || !params.skip_asciigenome) ? PREPARE_GENOME.out.chrom_sizes : [],
-            PREPARE_GENOME.out.gff,
+            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.fai : [],
+            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
+            params.gff ? PREPARE_GENOME.out.gff : [],
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config,
@@ -439,8 +443,8 @@ workflow ILLUMINA {
         VARIANTS_BCFTOOLS (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            (params.protocol == 'amplicon' || !params.skip_asciigenome) ? PREPARE_GENOME.out.chrom_sizes : [],
-            PREPARE_GENOME.out.gff,
+            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
+            params.gff ? PREPARE_GENOME.out.gff : [],
             (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config
@@ -463,7 +467,7 @@ workflow ILLUMINA {
         CONSENSUS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff,
+            params.gff ? PREPARE_GENOME.out.gff : [],
             PREPARE_GENOME.out.nextclade_db
         )
 
@@ -482,7 +486,7 @@ workflow ILLUMINA {
             ch_vcf,
             ch_tbi,
             PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff,
+            params.gff ? PREPARE_GENOME.out.gff : [],
             PREPARE_GENOME.out.nextclade_db
         )
 
@@ -502,14 +506,13 @@ workflow ILLUMINA {
                 def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
                 return [ "$meta.id\t$clade" ]
             }
+            .collect()                
+            .map { 
+                tsv_data ->
+                    def header = ['Sample', 'clade']
+                    WorkflowCommons.multiqcTsvFromList(tsv_data, header)
+            }
             .set { ch_nextclade_multiqc }
-
-        MULTIQC_TSV_NEXTCLADE (
-            ch_nextclade_multiqc.collect(),
-            ['Sample', 'clade'],
-            'nextclade_clade'
-        )
-        .set { ch_nextclade_multiqc }
     }
 
     //
@@ -556,7 +559,7 @@ workflow ILLUMINA {
             params.spades_mode,
             ch_spades_hmm,
             PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff,
+            params.gff ? PREPARE_GENOME.out.gff : [],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -572,7 +575,7 @@ workflow ILLUMINA {
         ASSEMBLY_UNICYCLER (
             ch_assembly_fastq.map { meta, fastq -> [ meta, fastq, [] ] },
             PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff,
+            params.gff ? PREPARE_GENOME.out.gff : [],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -588,7 +591,7 @@ workflow ILLUMINA {
         ASSEMBLY_MINIA (
             ch_assembly_fastq,
             PREPARE_GENOME.out.fasta,
-            PREPARE_GENOME.out.gff,
+            params.gff ? PREPARE_GENOME.out.gff : [],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -615,11 +618,11 @@ workflow ILLUMINA {
             ch_multiqc_custom_config,
             CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
-            ch_fail_reads_multiqc.ifEmpty([]),
-            ch_fail_mapping_multiqc.ifEmpty([]),
+            ch_fail_reads_multiqc.collectFile(name: 'fail_mapped_reads_mqc.tsv').ifEmpty([]),
+            ch_fail_mapping_multiqc.collectFile(name: 'fail_mapped_samples_mqc.tsv').ifEmpty([]),
             ch_amplicon_heatmap_multiqc.ifEmpty([]),
-            FASTQC_FASTP.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
-            FASTQC_FASTP.out.trim_json.collect{it[1]}.ifEmpty([]),
+            FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]),
+            FASTQ_TRIM_FASTP_FASTQC.out.trim_json.collect{it[1]}.ifEmpty([]),
             ch_kraken2_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bowtie2_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bowtie2_multiqc.collect{it[1]}.ifEmpty([]),
@@ -631,7 +634,7 @@ workflow ILLUMINA {
             ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_quast_multiqc.collect().ifEmpty([]),
             ch_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_nextclade_multiqc.collect().ifEmpty([]),
+            ch_nextclade_multiqc.collectFile(name: 'nextclade_clade_mqc.tsv').ifEmpty([]),
             ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
             ch_spades_quast_multiqc.collect().ifEmpty([]),
             ch_unicycler_quast_multiqc.collect().ifEmpty([]),
@@ -642,9 +645,9 @@ workflow ILLUMINA {
 }
 
 /*
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     COMPLETION EMAIL AND SUMMARY
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 workflow.onComplete {
@@ -655,7 +658,7 @@ workflow.onComplete {
 }
 
 /*
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     THE END
-========================================================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */

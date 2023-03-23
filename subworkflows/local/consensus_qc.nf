@@ -2,9 +2,9 @@
 // Consensus calling QC
 //
 
-include { QUAST             } from '../../modules/nf-core/modules/quast/main'
-include { PANGOLIN          } from '../../modules/nf-core/modules/pangolin/main'
-include { NEXTCLADE_RUN     } from '../../modules/nf-core/modules/nextclade/run/main'
+include { QUAST             } from '../../modules/nf-core/quast/main'
+include { PANGOLIN          } from '../../modules/nf-core/pangolin/main'
+include { NEXTCLADE_RUN     } from '../../modules/nf-core/nextclade/run/main'
 include { PLOT_BASE_DENSITY } from '../../modules/local/plot_base_density'
 
 workflow CONSENSUS_QC {

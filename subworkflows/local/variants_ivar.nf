@@ -2,10 +2,10 @@
 // Variant calling with IVar, downstream processing and QC
 //
 
-include { IVAR_VARIANTS         } from '../../modules/nf-core/modules/ivar/variants/main'
+include { IVAR_VARIANTS         } from '../../modules/nf-core/ivar/variants/main'
 include { IVAR_VARIANTS_TO_VCF  } from '../../modules/local/ivar_variants_to_vcf'
-include { BCFTOOLS_SORT         } from '../../modules/nf-core/modules/bcftools/sort/main'
-include { VCF_TABIX_STATS       } from '../nf-core/vcf_tabix_stats'
+include { BCFTOOLS_SORT         } from '../../modules/nf-core/bcftools/sort/main'
+include { VCF_TABIX_STATS       } from './vcf_tabix_stats'
 include { VARIANTS_QC           } from './variants_qc'
 
 workflow VARIANTS_IVAR {
@@ -59,7 +59,10 @@ workflow VARIANTS_IVAR {
     ch_versions = ch_versions.mix(BCFTOOLS_SORT.out.versions.first())
 
     VCF_TABIX_STATS (
-        BCFTOOLS_SORT.out.vcf
+        BCFTOOLS_SORT.out.vcf,
+        [],
+        [],
+        []
     )
     ch_versions = ch_versions.mix(VCF_TABIX_STATS.out.versions)
 
@@ -88,6 +91,7 @@ workflow VARIANTS_IVAR {
 
     vcf             = BCFTOOLS_SORT.out.vcf           // channel: [ val(meta), [ vcf ] ]
     tbi             = VCF_TABIX_STATS.out.tbi         // channel: [ val(meta), [ tbi ] ]
+    csi             = VCF_TABIX_STATS.out.csi         // channel: [ val(meta), [ csi ] ]
     stats           = VCF_TABIX_STATS.out.stats       // channel: [ val(meta), [ txt ] ]
 
     snpeff_vcf      = VARIANTS_QC.out.snpeff_vcf      // channel: [ val(meta), [ vcf.gz ] ]
