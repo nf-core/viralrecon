@@ -11,6 +11,7 @@ Special thanks to the following for their code contributions to the release:
 
 - [Friederike Hanssen](https://github.com/FriederikeHanssen)
 - [Hugo Tavares](https://github.com/tavareshugo)
+- [James Fellows Yates](https://github.com/jfy133)
 - [Jessica Wu](https://github.com/wutron)
 - [Matthew Wells](https://github.com/mattheww95)
 - [Maxime Garcia](https://github.com/maxulysse)
