@@ -256,7 +256,7 @@
                     "fa_icon": "fas fast-forward",
                     "description": "Skip freyja deep SARS-CoV-2 variant analysis using a depth weighted approach."
                 },
-                "freyja_db": {
+                "freyja_db_name": {
                     "type": "string",
                     "default": "freyja_db",
                     "hidden": true,
