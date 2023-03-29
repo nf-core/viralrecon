@@ -120,6 +120,26 @@
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
                         "installed_by": ["modules"]
                     },
+                    "freyja/boot": {
+                        "branch": "master",
+                        "git_sha": "4bb5cb441e89811385d18a90809ecf36c9daafd8",
+                        "installed_by": ["bam_variant_demix_boot_freyja"]
+                    },
+                    "freyja/demix": {
+                        "branch": "master",
+                        "git_sha": "4bb5cb441e89811385d18a90809ecf36c9daafd8",
+                        "installed_by": ["bam_variant_demix_boot_freyja"]
+                    },
+                    "freyja/update": {
+                        "branch": "master",
+                        "git_sha": "4bb5cb441e89811385d18a90809ecf36c9daafd8",
+                        "installed_by": ["bam_variant_demix_boot_freyja"]
+                    },
+                    "freyja/variants": {
+                        "branch": "master",
+                        "git_sha": "4bb5cb441e89811385d18a90809ecf36c9daafd8",
+                        "installed_by": ["bam_variant_demix_boot_freyja"]
+                    },
                     "gunzip": {
                         "branch": "master",
                         "git_sha": "0f8a77ff00e65eaeebc509b8156eaa983192474b",
@@ -278,6 +298,11 @@
                         "branch": "master",
                         "git_sha": "b4b7f89e7fd6d2293f0c176213f710e0bcdaf19e",
                         "installed_by": ["bam_sort_stats_samtools", "bam_markduplicates_picard"]
+                    },
+                    "bam_variant_demix_boot_freyja": {
+                        "branch": "master",
+                        "git_sha": "4bb5cb441e89811385d18a90809ecf36c9daafd8",
+                        "installed_by": ["subworkflows"]
                     },
                     "fastq_align_bowtie2": {
                         "branch": "master",
