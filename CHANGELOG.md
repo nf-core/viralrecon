@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unpublished Version / DEV]
 
 ### Enhancements & fixes
-
+- [[#299](https://github.com/nf-core/viralrecon/issues/299)] - Add the freyja pipeline as a subworkflow
 ## [[2.6.0](https://github.com/nf-core/viralrecon/releases/tag/2.6.0)] - 2023-03-23
 
 ### Credits

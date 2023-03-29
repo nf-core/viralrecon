@@ -21,6 +21,7 @@ The directories listed below will be created in the results directory after the 
   - [Pangolin](#nanopore-pangolin) - Lineage analysis
   - [Nextclade](#nanopore-nextclade) - Clade assignment, mutation calling and sequence quality checks
   - [ASCIIGenome](#nanopore-asciigenome) - Individual variant screenshots with annotation tracks
+  - [Freyja](#fre)
   - [Variants long table](#nanopore-variants-long-table) - Collate per-sample information for individual variants, functional effect prediction and lineage analysis
 - [Workflow reporting](#nanopore-workflow-reporting)
   - [MultiQC](#nanopore-multiqc) - Present QC, visualisation and custom reporting for sequencing, raw reads, alignment and variant calling results
@@ -240,6 +241,29 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 </details>
 
 [Nextclade](https://github.com/nextstrain/nextclade) performs viral genome clade assignment, mutation calling and sequence quality checks for the consensus sequences generated in this pipeline. Similar to Pangolin, it has been used extensively during the COVID-19 pandemic. A [web application](https://clades.nextstrain.org/) also exists that allows users to upload genome sequences via a web browser.
+
+### Nanopore: Freyja
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<CALLER>/freyja/demix`
+  - `*.tsv`: Analysis results including the lineages present, their corresponding abundances, and summarization by constellation
+- `<CALLER>/freyja/freyja_db`
+  - `.json`: dataset containing lineage metadata that correspond to barcodes.
+  - `.yml`: dataset containing the lineage topology.
+  - `.csv`: dataset containing lineage defining barcodes.
+- `<CALLER>/freyja/variants`
+  - `*.variants.tsv`: Analysis results including identified variants in a gff-like format
+  - `*.depth.tsv`: Analysis results including the depth of the identified variants
+- `<CALLER>/freyja/boot`
+  - `*lineages.csv` Analysis results inculding lineages present and their corresponding abundances with variation identified through bootstrapping
+  - `*summarized.csv`Analysis results inculding lineages present but summarized by constellation and their corresponding abundances with variation identified through bootstrapping
+
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--artic_minion_caller` parameter (Default: 'nanopolish').
+
+</details>
+
+[Freyja](https://github.com/andersen-lab/Freyja) is a tool to recover relative lineage abundances from mixed SARS-CoV-2 samples from a sequencing dataset (BAM aligned to the Hu-1 reference). The method uses lineage-determining mutational "barcodes" derived from the [UShER](https://usher-wiki.readthedocs.io/en/latest/#) global phylogenetic tree as a basis set to solve the constrained (unit sum, non-negative) de-mixing problem.
 
 ### Nanopore: ASCIIGenome
 
@@ -696,6 +720,27 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 </details>
 
 [Nextclade](https://github.com/nextstrain/nextclade) performs viral genome clade assignment, mutation calling and sequence quality checks for the consensus sequences generated in this pipeline. Similar to Pangolin, it has been used extensively during the COVID-19 pandemic. A [web application](https://clades.nextstrain.org/) also exists that allows users to upload genome sequences via a web browser.
+
+### Freyja
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<CALLER>/freyja/demix`
+  - `*.tsv`: Analysis results including the lineages present, their corresponding abundances, and summarization by constellation
+- `<CALLER>/freyja/freyja_db`
+  - `.json`: dataset containing lineage metadata that correspond to barcodes.
+  - `.yml`: dataset containing the lineage topology.
+  - `.csv`: dataset containing lineage defining barcodes.
+- `<CALLER>/freyja/variants`
+  - `*.variants.tsv`: Analysis results including identified variants in a gff-like format
+  - `*.depth.tsv`: Analysis results including the depth of the identified variants
+- `<CALLER>/freyja/boot`
+  - `*lineages.csv` Analysis results inculding lineages present and their corresponding abundances with variation identified through bootstrapping
+  - `*summarized.csv`Analysis results inculding lineages present but summarized by constellation and their corresponding abundances with variation identified through bootstrapping
+
+</details>
+
+[Freyja](https://github.com/andersen-lab/Freyja) is a tool to recover relative lineage abundances from mixed SARS-CoV-2 samples from a sequencing dataset (BAM aligned to the Hu-1 reference). The method uses lineage-determining mutational "barcodes" derived from the [UShER](https://usher-wiki.readthedocs.io/en/latest/#) global phylogenetic tree as a basis set to solve the constrained (unit sum, non-negative) de-mixing problem.
 
 ### Variants long table
 
