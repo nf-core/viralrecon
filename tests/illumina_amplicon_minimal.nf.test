@@ -1,0 +1,102 @@
+nextflow_pipeline {
+
+    name "Test nf-core/viralrecon main.nf"
+    script "main.nf"
+
+    test("Illumina Amplicon Arctic Minimal") {
+
+        options "-profile test,docker"
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(path("$outputDir/pipeline_info/software_versions.yml")).match("software_versions") },
+
+                { assert new File("$outputDir/assembly/cutadapt/log/SAMPLE1_PE.primer_trim.cutadapt.log").exists() },
+                { assert new File("$outputDir/assembly/cutadapt/log/SAMPLE2_PE.primer_trim.cutadapt.log").exists() },
+                { assert new File("$outputDir/assembly/cutadapt/log/SAMPLE3_SE.primer_trim.cutadapt.log").exists() },
+
+                { assert new File("$outputDir/assembly/minia/blastn/SAMPLE1_PE.blastn.txt").exists() },
+                { assert new File("$outputDir/assembly/minia/blastn/SAMPLE2_PE.blastn.txt").exists() },
+                { assert new File("$outputDir/assembly/minia/blastn/SAMPLE3_SE.blastn.txt").exists() },
+                { assert new File("$outputDir/assembly/minia/quast/genome_stats/genome_info.txt").exists() },
+                { assert new File("$outputDir/assembly/minia/quast/report.txt").exists() },
+                { assert new File("$outputDir/assembly/minia/SAMPLE1_PE.contigs.fa").exists() },
+                { assert new File("$outputDir/assembly/minia/SAMPLE1_PE.h5").exists() },
+                { assert new File("$outputDir/assembly/minia/SAMPLE1_PE.unitigs.fa").exists() },
+                { assert new File("$outputDir/assembly/minia/SAMPLE2_PE.contigs.fa").exists() },
+                { assert new File("$outputDir/assembly/minia/SAMPLE2_PE.h5").exists() },
+                { assert new File("$outputDir/assembly/minia/SAMPLE2_PE.unitigs.fa").exists() },
+                { assert new File("$outputDir/assembly/minia/SAMPLE3_SE.contigs.fa").exists() },
+                { assert new File("$outputDir/assembly/minia/SAMPLE3_SE.h5").exists() },
+                { assert new File("$outputDir/assembly/minia/SAMPLE3_SE.unitigs.fa").exists() },                  
+
+                { assert snapshot(path("$outputDir/assembly/spades/rnaviral/abacas/SAMPLE1_PE.abacas.MULTIFASTA.fa"),
+                                  path("$outputDir/assembly/spades/rnaviral/abacas/SAMPLE2_PE.abacas.MULTIFASTA.fa"),
+                                  path("$outputDir/assembly/spades/rnaviral/abacas/SAMPLE3_SE.abacas.MULTIFASTA.fa"),
+                                  path("$outputDir/assembly/spades/rnaviral/blastn/").list()).match("spades") },
+                { assert new File("$outputDir/assembly/spades/rnaviral/SAMPLE1_PE.assembly.gfa.gz").exists() },
+                { assert new File("$outputDir/assembly/spades/rnaviral/SAMPLE1_PE.contigs.fa.gz").exists() },
+                { assert new File("$outputDir/assembly/spades/rnaviral/SAMPLE1_PE.scaffolds.fa.gz").exists() },
+                { assert new File("$outputDir/assembly/spades/rnaviral/SAMPLE2_PE.assembly.gfa.gz").exists() },
+                { assert new File("$outputDir/assembly/spades/rnaviral/SAMPLE2_PE.contigs.fa.gz").exists() },
+                { assert new File("$outputDir/assembly/spades/rnaviral/SAMPLE2_PE.scaffolds.fa.gz").exists() },
+                { assert new File("$outputDir/assembly/spades/rnaviral/SAMPLE3_SE.assembly.gfa.gz").exists() },
+                { assert new File("$outputDir/assembly/spades/rnaviral/SAMPLE3_SE.contigs.fa.gz").exists() },
+                { assert new File("$outputDir/assembly/spades/rnaviral/SAMPLE3_SE.scaffolds.fa.gz").exists() },                
+
+                { assert snapshot(path("$outputDir/assembly/unicycler/abacas/SAMPLE1_PE.abacas.MULTIFASTA.fa"),
+                                  path("$outputDir/assembly/unicycler/abacas/SAMPLE2_PE.abacas.MULTIFASTA.fa"),
+                                  path("$outputDir/assembly/unicycler/abacas/SAMPLE3_SE.abacas.MULTIFASTA.fa"),
+                                  path("$outputDir/assembly/unicycler/blastn/").list()).match("unicycler") },
+                { assert new File("$outputDir/assembly/unicycler/SAMPLE1_PE.assembly.gfa.gz").exists() },
+                { assert new File("$outputDir/assembly/unicycler/SAMPLE1_PE.scaffolds.fa.gz").exists() },
+                { assert new File("$outputDir/assembly/unicycler/SAMPLE2_PE.assembly.gfa.gz").exists() },
+                { assert new File("$outputDir/assembly/unicycler/SAMPLE2_PE.scaffolds.fa.gz").exists() },
+                { assert new File("$outputDir/assembly/unicycler/SAMPLE3_SE.assembly.gfa.gz").exists() },
+                { assert new File("$outputDir/assembly/unicycler/SAMPLE3_SE.scaffolds.fa.gz").exists() },                             
+
+                { assert new File("$outputDir/fastp/log/SAMPLE1_PE.fastp.log").exists() },
+                { assert new File("$outputDir/fastp/log/SAMPLE2_PE.fastp.log").exists() },
+                { assert new File("$outputDir/fastp/log/SAMPLE3_SE.fastp.log").exists() },
+
+                { assert snapshot(path("$outputDir/kraken2/").list()).match("kraken") },
+
+                { assert snapshot(path("$outputDir/multiqc/summary_assembly_metrics_mqc.csv"),
+                                  path("$outputDir/multiqc/summary_variants_metrics_mqc.csv"),
+                                  path("$outputDir/pipeline_info/samplesheet.valid.csv")).match("multiqc") },
+
+                { assert snapshot(path("$outputDir/variants/bowtie2/log/").list()).match("variants_bowtie2") },
+                { assert new File("$outputDir/variants/bowtie2/SAMPLE1_PE.ivar_trim.sorted.bam").exists() },
+                { assert new File("$outputDir/variants/bowtie2/SAMPLE1_PE.ivar_trim.sorted.bam.bai").exists() },
+                { assert new File("$outputDir/variants/bowtie2/SAMPLE1_PE.sorted.bam").exists() },
+                { assert new File("$outputDir/variants/bowtie2/SAMPLE1_PE.sorted.bam.bai").exists() },
+                { assert new File("$outputDir/variants/bowtie2/SAMPLE2_PE.ivar_trim.sorted.bam").exists() },
+                { assert new File("$outputDir/variants/bowtie2/SAMPLE2_PE.ivar_trim.sorted.bam.bai").exists() },
+                { assert new File("$outputDir/variants/bowtie2/SAMPLE2_PE.sorted.bam").exists() },
+                { assert new File("$outputDir/variants/bowtie2/SAMPLE2_PE.sorted.bam.bai").exists() },
+                { assert new File("$outputDir/variants/bowtie2/SAMPLE3_SE.ivar_trim.sorted.bam").exists() },
+                { assert new File("$outputDir/variants/bowtie2/SAMPLE3_SE.ivar_trim.sorted.bam.bai").exists() },
+                { assert new File("$outputDir/variants/bowtie2/SAMPLE3_SE.sorted.bam").exists() },
+                { assert new File("$outputDir/variants/bowtie2/SAMPLE3_SE.sorted.bam.bai").exists() },                  
+
+                { assert snapshot(path("$outputDir/variants/ivar/SAMPLE1_PE.tsv"),
+                                  path("$outputDir/variants/ivar/SAMPLE1_PE.vcf.gz"),
+                                  path("$outputDir/variants/ivar/SAMPLE1_PE.vcf.gz.tbi"),
+                                  path("$outputDir/variants/ivar/SAMPLE2_PE.tsv"),
+                                  path("$outputDir/variants/ivar/SAMPLE2_PE.vcf.gz"),
+                                  path("$outputDir/variants/ivar/SAMPLE2_PE.vcf.gz.tbi"),
+                                  path("$outputDir/variants/ivar/SAMPLE3_SE.tsv"),
+                                  path("$outputDir/variants/ivar/SAMPLE3_SE.vcf.gz"),
+                                  path("$outputDir/variants/ivar/SAMPLE3_SE.vcf.gz.tbi"),
+                                  path("$outputDir/variants/ivar/variants_long_table.csv")).match("variants_ivar") }
+            )
+        }
+    }
+}

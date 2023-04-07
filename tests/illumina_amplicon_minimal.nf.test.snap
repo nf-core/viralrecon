@@ -1,0 +1,97 @@
+{
+    "kraken": {
+        "content": [
+            "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
+            "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
+            "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc"
+        ],
+        "timestamp": "2023-04-07T04:50:45+0000"
+    },
+    "variants_bowtie2": {
+        "content": [
+            "SAMPLE1_PE.bowtie2.log:md5,20e68f8b6b41da0dffeccbb49e867be2",
+            "SAMPLE1_PE.ivar_trim.ivar.log:md5,d41d8cd98f00b204e9800998ecf8427e",
+            "SAMPLE2_PE.bowtie2.log:md5,2cc188d8003e49d74567b2f04c2f34b2",
+            "SAMPLE2_PE.ivar_trim.ivar.log:md5,d41d8cd98f00b204e9800998ecf8427e",
+            "SAMPLE3_SE.bowtie2.log:md5,b385622109b303f70f77eb820b53f993",
+            "SAMPLE3_SE.ivar_trim.ivar.log:md5,d41d8cd98f00b204e9800998ecf8427e"
+        ],
+        "timestamp": "2023-04-07T04:50:45+0000"
+    },
+    "unicycler": {
+        "content": [
+            "SAMPLE1_PE.abacas.MULTIFASTA.fa:md5,952c208f5841468cd8ea860a7dd71548",
+            "SAMPLE2_PE.abacas.MULTIFASTA.fa:md5,ec6366220a525d40779c5309d6d77308",
+            "SAMPLE3_SE.abacas.MULTIFASTA.fa:md5,e11b1440e13d039da6d3f5feb4aa754e",
+            [
+                "SAMPLE1_PE.blastn.txt:md5,4fb1490e587e102fa78876d780a1f30a",
+                "SAMPLE1_PE.filter.blastn.txt:md5,1d39dd2977e886d36d8434a822d56f5f",
+                "SAMPLE2_PE.blastn.txt:md5,383583e18554e0b047f356e4c1dfaeb3",
+                "SAMPLE2_PE.filter.blastn.txt:md5,2c6d3316d3b17b57b4cc13315dcce3b5",
+                "SAMPLE3_SE.blastn.txt:md5,f89f981990613e7c5309de28416d0333",
+                "SAMPLE3_SE.filter.blastn.txt:md5,0564086a34f2c9aba6bb05d7839935ba"
+            ]
+        ],
+        "timestamp": "2023-04-07T04:50:45+0000"
+    },
+    "software_versions": {
+        "content": [
+            "software_versions.yml:md5,ef7a4826069f261ce02c44d5f99233fa"
+        ],
+        "timestamp": "2023-04-07T04:50:45+0000"
+    },
+    "variants_ivar": {
+        "content": [
+            "SAMPLE1_PE.tsv:md5,d11ff38b97ad069639067037f2f00e6a",
+            "SAMPLE1_PE.vcf.gz:md5,6b2ff5dc1def621c22fc5910e1698a96",
+            "SAMPLE1_PE.vcf.gz.tbi:md5,ce4e23a5d6dac1648d26de40f798e75f",
+            "SAMPLE2_PE.tsv:md5,81285393974428d2fed60b398aa9a6d7",
+            "SAMPLE2_PE.vcf.gz:md5,c97135a9d8dc38cf7e9ca1f79b6d7831",
+            "SAMPLE2_PE.vcf.gz.tbi:md5,5e2793e12f1b60df9b3a3af28dc71065",
+            "SAMPLE3_SE.tsv:md5,b795c8391eb11ad367b341a1b049f885",
+            "SAMPLE3_SE.vcf.gz:md5,c12b1a67438438915444bf1fd13c917d",
+            "SAMPLE3_SE.vcf.gz.tbi:md5,35626e8b0df7c0194d526f96b7074a5b",
+            "variants_long_table.csv:md5,ecbcee0b54392669f4a5f2f3e3e26381"
+        ],
+        "timestamp": "2023-04-07T04:50:45+0000"
+    },
+    "minia": {
+        "content": [
+            [
+                "SAMPLE1_PE.blastn.txt:md5,31a8c08c19897585386f2c2a033fd657",
+                "SAMPLE1_PE.filter.blastn.txt:md5,cfa1546cafa6178f147e060f52750f92",
+                "SAMPLE2_PE.blastn.txt:md5,d6cdcfabf873d7892b67ac7bae1b1dda",
+                "SAMPLE2_PE.filter.blastn.txt:md5,aaadc271b5c553a05d515680dcb53776",
+                "SAMPLE3_SE.blastn.txt:md5,3c765040dfaee35dc3952af66a1b8ab7",
+                "SAMPLE3_SE.filter.blastn.txt:md5,82631146a6c17f8b3014904a6df7edef"
+            ],
+            "genome_info.txt:md5,e1419a4ee82c39f55d97bcadfa10781b",
+            "report.txt:md5,ef895fd6943107268cf7446c6b97c627"
+        ],
+        "timestamp": "2023-04-07T04:50:45+0000"
+    },
+    "spades": {
+        "content": [
+            "SAMPLE1_PE.abacas.MULTIFASTA.fa:md5,b7d6e637640806170dba5dc00c1605d0",
+            "SAMPLE2_PE.abacas.MULTIFASTA.fa:md5,8d605060cee8d2abfff32905f21744d6",
+            "SAMPLE3_SE.abacas.MULTIFASTA.fa:md5,005d364c4aa0dbe341a8bd3a1d146ff4",
+            [
+                "SAMPLE1_PE.blastn.txt:md5,4d5739d5a1323d2b78a907dd1dcd09e0",
+                "SAMPLE1_PE.filter.blastn.txt:md5,526ab7a829380a10caae17e9958d4c0a",
+                "SAMPLE2_PE.blastn.txt:md5,f9b22fb7b5aa3568a8062dcd4c554530",
+                "SAMPLE2_PE.filter.blastn.txt:md5,6d49278a7c104072110b2137a25ffe4c",
+                "SAMPLE3_SE.blastn.txt:md5,2ddc232f7b15037e8adc185209ffd00e",
+                "SAMPLE3_SE.filter.blastn.txt:md5,568d5541b5d3a3a48875e80993964725"
+            ]
+        ],
+        "timestamp": "2023-04-07T04:50:45+0000"
+    },
+    "multiqc": {
+        "content": [
+            "summary_assembly_metrics_mqc.csv:md5,cc8480163d2cba8cd933d1473d361439",
+            "summary_variants_metrics_mqc.csv:md5,549d5efaf5951f1d0d618165eb6db1f3",
+            "samplesheet.valid.csv:md5,e08e45a438f48faacc72befe1c59b1a4"
+        ],
+        "timestamp": "2023-04-07T04:50:45+0000"
+    }
+}
