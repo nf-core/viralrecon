@@ -122,7 +122,7 @@
                     },
                     "freyja/boot": {
                         "branch": "master",
-                        "git_sha": "4bb5cb441e89811385d18a90809ecf36c9daafd8",
+                        "git_sha": "281c744ed84352c24697f0916c7744853ce83927",
                         "installed_by": ["bam_variant_demix_boot_freyja"]
                     },
                     "freyja/demix": {
