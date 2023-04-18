@@ -1,0 +1,109 @@
+{
+    "pycoqc": {
+        "content": [
+            "pycoqc.json:md5,38f552a127c189f4172d53ba1c6a8889"
+        ],
+        "timestamp": "2023-04-18T18:05:23+0000"
+    },
+    "software_versions": {
+        "content": [
+            "software_versions.yml:md5,028d95e131853d95d55f25cda09a00b5"
+        ],
+        "timestamp": "2023-04-18T18:05:23+0000"
+    },
+    "nanoplot": {
+        "content": [
+            "NanoStats.txt:md5,4018bcec599e3729cfd120583020632c",
+            "NanoStats.txt:md5,66a8707bfc78a3b2497adef91927cc5d",
+            "NanoStats.txt:md5,b8d01eba34a90f68f9358d0b3341ab2b",
+            "NanoStats.txt:md5,8ad808a50da29ad969127ce395736573",
+            "NanoStats.txt:md5,f2eb6fee70de9d9e267fad1ac51ff16b",
+            "NanoStats.txt:md5,1b522f5739ee39294ad00cbb64ebe2ea",
+            "NanoStats.txt:md5,a97a3f3801ada6311d111aa8d156c58b",
+            "NanoStats.txt:md5,32b209204157808d7b2afc2ac8a885e5",
+            "NanoStats.txt:md5,6fde5cec9986e2354dc9995ad78bcd4f"
+        ],
+        "timestamp": "2023-04-18T18:05:23+0000"
+    },
+    "nanopolish": {
+        "content": [
+            "all_samples.mosdepth.heatmap.tsv:md5,61c17d8f0284bb490f40075645ca6bf7",
+            [
+                "SAMPLE_01.csv:md5,9c3ec56ce0094784ac43d0c4e5d33733",
+                "SAMPLE_02.csv:md5,fc18a387e9006a7a1b8db20439ec36d0",
+                "SAMPLE_03.csv:md5,fbec2adcb885ac2d32a6ca5dbfc12c89",
+                "SAMPLE_04.csv:md5,aafaf43976a3bed420ef2c9d0f71fb69",
+                "SAMPLE_05.csv:md5,08d6cf5193fd965902d5ac99548239b5",
+                "SAMPLE_06.csv:md5,5b8fff4380e7ef92357d8e9a2c4273f7",
+                "SAMPLE_07.csv:md5,0bae6893dd5d631f48a227fec20f24e6",
+                "SAMPLE_08.csv:md5,38b9b6dd5ae6d40b952225c732cd03c3",
+                "SAMPLE_09.csv:md5,f7ba757943b461fd2cd19ad286d980f3"
+            ],
+            [
+                "SAMPLE_01.pangolin.csv:md5,def1bd40982494cd011d0c6098dd8a5a",
+                "SAMPLE_02.pangolin.csv:md5,9b8e5d481265f96421f0913eaa881b86",
+                "SAMPLE_03.pangolin.csv:md5,ebbc3a2d8281404010df329c0b892c08",
+                "SAMPLE_04.pangolin.csv:md5,6dfcea38de84aab3a35b14ee9e6b37dc",
+                "SAMPLE_05.pangolin.csv:md5,318d4082b6b2d76ec5710d893770528d",
+                "SAMPLE_06.pangolin.csv:md5,9357939c90ff4cad698bf77af9e49aac",
+                "SAMPLE_07.pangolin.csv:md5,10765148276219072957a990bd259512",
+                "SAMPLE_08.pangolin.csv:md5,efeee576bdf9643ef1db26f3cdd6538a",
+                "SAMPLE_09.pangolin.csv:md5,69fe0609247d9d31b2e12f234a039559"
+            ],
+            [
+                "SAMPLE_01.mapped.sorted.bam.flagstat:md5,9573b991e1cdbe9611629b7b0b8421f8",
+                "SAMPLE_01.mapped.sorted.bam.idxstats:md5,98b56a8efa1ce26c56e8151d7ee8c409",
+                "SAMPLE_01.mapped.sorted.bam.stats:md5,aba091faa8f697d017c37cc4025cd06b",
+                "SAMPLE_02.mapped.sorted.bam.flagstat:md5,e13e7cf047869e7fa3947d09824d5679",
+                "SAMPLE_02.mapped.sorted.bam.idxstats:md5,facf4995ba14ae521edecb3a34423eb1",
+                "SAMPLE_02.mapped.sorted.bam.stats:md5,6ebc98b93d38931cc01910670b0e796b",
+                "SAMPLE_03.mapped.sorted.bam.flagstat:md5,0a1fd66c6f4d333a3db38a83a656bf0b",
+                "SAMPLE_03.mapped.sorted.bam.idxstats:md5,a71bc353b634ef7e98004beb949ef9b4",
+                "SAMPLE_03.mapped.sorted.bam.stats:md5,3b21f907007234b020a97118c609fb5a",
+                "SAMPLE_04.mapped.sorted.bam.flagstat:md5,40e8ab032fa5866ee7863a571d50d6b8",
+                "SAMPLE_04.mapped.sorted.bam.idxstats:md5,df01d54f22e47d2ff5af4fd733daf672",
+                "SAMPLE_04.mapped.sorted.bam.stats:md5,494f290e97c73ad83082dfebcbb576f5",
+                "SAMPLE_05.mapped.sorted.bam.flagstat:md5,0ae9a8a6deae8e378c7559d6cd90db7f",
+                "SAMPLE_05.mapped.sorted.bam.idxstats:md5,33eff4424cada7f250704f3627194d65",
+                "SAMPLE_05.mapped.sorted.bam.stats:md5,f8dbddaffb7a1ac7c8ff3024a8a79140",
+                "SAMPLE_06.mapped.sorted.bam.flagstat:md5,97b44059a2ba8e3ed9da6fbee747a1f2",
+                "SAMPLE_06.mapped.sorted.bam.idxstats:md5,2849c083adcd0867b05e99e1af6b54aa",
+                "SAMPLE_06.mapped.sorted.bam.stats:md5,1d261f9247b781ff91b41fb483434c1b",
+                "SAMPLE_07.mapped.sorted.bam.flagstat:md5,034a82f1d6f78cc7cd5ef957c5363585",
+                "SAMPLE_07.mapped.sorted.bam.idxstats:md5,fe6867b6e2df3a1cf374838fa1936e3a",
+                "SAMPLE_07.mapped.sorted.bam.stats:md5,258be710cd893ea5a1e5099712b8dddb",
+                "SAMPLE_08.mapped.sorted.bam.flagstat:md5,318c174f2e51b2cda25c1ff2baa17b2d",
+                "SAMPLE_08.mapped.sorted.bam.idxstats:md5,1f6640accb07f184d74a17567677d4bf",
+                "SAMPLE_08.mapped.sorted.bam.stats:md5,a368db856a9c1db2f0205a2a975c6f94",
+                "SAMPLE_09.mapped.sorted.bam.flagstat:md5,747467968f020d74d4d126ba5ff6468e",
+                "SAMPLE_09.mapped.sorted.bam.idxstats:md5,1297500e3064a15d55ccf1f1d74aeab4",
+                "SAMPLE_09.mapped.sorted.bam.stats:md5,bd81fd602cc0cea13d2e4af8fce73962"
+            ],
+            "SAMPLE_01.snpeff.genes.txt:md5,82f0aa12ef483b034e498c1581491b27",
+            "SAMPLE_01.snpeff.vcf.gz:md5,0be8b72a37f12d11b59ae2a5c85a7357",
+            "SAMPLE_02.snpeff.genes.txt:md5,9bf1e7a40afe5f7ab7c654734c921a17",
+            "SAMPLE_02.snpeff.vcf.gz:md5,0ebea1603405588d5955274c0e0987af",
+            "SAMPLE_03.snpeff.genes.txt:md5,6c0bc551ae0e0900791d10af4f78a911",
+            "SAMPLE_03.snpeff.vcf.gz:md5,effa2c8599b0b3d34b0a71cbb369aa0c",
+            "SAMPLE_04.snpeff.genes.txt:md5,55fce80f80d692e5d2e2d5d09bbf4835",
+            "SAMPLE_04.snpeff.vcf.gz:md5,b8b8fa70bb9157df40f73135522edb89",
+            "SAMPLE_05.snpeff.genes.txt:md5,9db85fc52c6fb24c991f37dfac1464ce",
+            "SAMPLE_05.snpeff.vcf.gz:md5,302f1a9a215ead84c15770323cbf9ece",
+            "SAMPLE_06.snpeff.genes.txt:md5,ccf87e10ea14d6a1abf6bdc41fa50333",
+            "SAMPLE_06.snpeff.vcf.gz:md5,d0d40d4c31d6fac2475a155d38bdb83d",
+            "SAMPLE_07.snpeff.genes.txt:md5,f56075b1b329cba994886c93c4ddb846",
+            "SAMPLE_07.snpeff.vcf.gz:md5,00bdf02500d31b5398956c85cc84b438",
+            "SAMPLE_08.snpeff.genes.txt:md5,130536bf0237d7f3f746d32aaa32840a",
+            "SAMPLE_08.snpeff.vcf.gz:md5,baeafcfc2f738cce771ba895d66e9e01",
+            "SAMPLE_09.snpeff.genes.txt:md5,aa5474dfbed7223eef658297cfc5c0d1",
+            "SAMPLE_09.snpeff.vcf.gz:md5,48fc000c89ff988f0e2baa9e24ec22f6"
+        ],
+        "timestamp": "2023-04-18T18:05:23+0000"
+    },
+    "multiqc": {
+        "content": [
+            "summary_variants_metrics_mqc.csv:md5,33721b269b33a71d4113de8db814a483"
+        ],
+        "timestamp": "2023-04-18T18:05:23+0000"
+    }
+}
