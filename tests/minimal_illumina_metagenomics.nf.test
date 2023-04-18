@@ -1,7 +1,8 @@
 nextflow_pipeline {
 
-    name "Test nf-core/viralrecon main.nf"
+    name "Test Workflow main.nf"
     script "main.nf"
+    tag "nf-core/viralrecon"
 
     test("Illumina Metagenomics Arctic Minimal") {
 
