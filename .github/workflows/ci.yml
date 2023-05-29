@@ -1,118 +1,165 @@
-name: nf-core CI
 # This workflow runs the pipeline with the minimal test dataset to check that it completes without any syntax errors
+name: nf-core CI
 on:
   push:
     branches:
       - dev
   pull_request:
+    branches:
+      - dev
+      - master
   release:
     types: [published]
-
 env:
   NXF_ANSI_LOG: false
 
+# cancel-in-progress: true ensures that if a new push is made to the same branch while a previous run is still in progress, the previous run is cancelled
 concurrency:
   group: "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
   cancel-in-progress: true
 
+# Define the jobs to be run
 jobs:
-  test:
-    name: Run pipeline with test data
-    # Only run on push if this is the nf-core dev branch (merged PRs)
-    if: "${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}"
+  test-dev:
+    # Only run this job if the base branch is 'dev' or if the event is a push
+    if: ${{ (github.base_ref == 'dev' || (github.event_name == 'push')) && !contains(github.event.head_commit.message, '[ci skip]') }}
+    name: Run pipeline with test data on dev
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        NXF_VER:
-          - "22.10.1"
-          - "latest-everything"
+        NXF_VER: ["latest-everything"]
+        NFTEST_VER: ["0.7.3"]
+        aligner: ["illumina", "nanopore"]
+        profile: ["docker"]
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v3
+
+      - name: Hash Github Workspace
+        id: hash_workspace
+        run: |
+          echo "digest=$(echo viralrecon_2.7_${{ github.workspace }} | md5sum | cut -c 1-25)" >> $GITHUB_OUTPUT
+
+      - name: Cache test data
+        id: cache-testdata
+        uses: actions/cache@v3
+        with:
+          path: test-datasets/
+          key: ${{ steps.hash_workspace.outputs.digest }}
+
+      - name: Check out test data
+        if: steps.cache-testdata.outputs.cache-hit != 'true'
+        uses: actions/checkout@v3
+        with:
+          repository: nf-core/test-datasets
+          ref: viralrecon
+          path: test-datasets/
+
+      - name: Replace remote paths in samplesheets
+        run: |
+          for f in ${{ github.workspace }}/test-datasets/samplesheet/*.csv; do
+            sed -i "s=https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/=${{ github.workspace }}/test-datasets/=g" $f
+            echo "========== $f ============"
+            cat $f
+            echo "========================================"
+          done;
 
       - name: Install Nextflow
         uses: nf-core/setup-nextflow@v1
         with:
           version: "${{ matrix.NXF_VER }}"
 
-      - name: Run pipeline with test data
+      - name: Install nf-test
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --outdir ./results
+          wget -qO- https://code.askimed.com/install/nf-test | bash -s ${{ matrix.NFTEST_VER }}
+          sudo mv nf-test /usr/local/bin/
 
-  parameters:
-    name: Test workflow parameters
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
+      - name: Run nf-test
+        run: |
+          nf-test test tests/pipeline/${{ matrix.aligner }}/ --tap=test.tap
+
+      - name: Output log on failure
+        if: failure()
+        run: |
+          sudo apt install bat > /dev/null
+          batcat --decorations=always --color=always ${{ github.workspace }}/.nf-test/tests/*/output/pipeline_info/software_versions.yml
+
+      - name: PR comment with file
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: test.tap
+
+  test-master:
+    # Only run this job if the base branch is 'master'
+    if: ${{ (github.base_ref == 'master') }}
+    name: Run pipeline with test data on master
     runs-on: ubuntu-latest
+    # Define the matrix of variables to be used in the job
     strategy:
       matrix:
-        parameters:
-          - "--consensus_caller ivar"
-          - "--variant_caller bcftools --consensus_caller ivar"
-          - "--skip_fastp --skip_pangolin"
-          - "--skip_variants"
-          - "--skip_cutadapt --skip_snpeff"
-          - "--skip_kraken2"
-          - "--skip_assembly"
-          - "--spades_mode corona"
-          - "--spades_mode metaviral"
-          - "--skip_plasmidid false --skip_asciigenome"
+        NXF_VER: ["22.10.1", "latest-everything"]
+        NFTEST_VER: ["0.7.3"]
+        aligner: ["illumina", "nanopore"]
+        profile: ["docker"]
+
+    # Define the steps for the job
     steps:
+      # Checkout the pipeline code from the repository
       - name: Check out pipeline code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: Hash Github Workspace
+        id: hash_workspace
+        run: |
+          echo "digest=$(echo viralrecon_2.7_${{ github.workspace }} | md5sum | cut -c 1-25)" >> $GITHUB_OUTPUT
+
+      - name: Cache test data
+        id: cache-testdata
+        uses: actions/cache@v3
+        with:
+          path: test-datasets/
+          key: ${{ steps.hash_workspace.outputs.digest }}
+
+      - name: Check out test data
+        if: steps.cache-testdata.outputs.cache-hit != 'true'
+        uses: actions/checkout@v3
+        with:
+          repository: nf-core/test-datasets
+          ref: viralrecon
+          path: test-datasets/
+
+      - name: Replace remote paths in samplesheets
+        run: |
+          for f in ${{ github.workspace }}/test-datasets/samplesheet/*.csv; do
+            sed -i "s=https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/=${{ github.workspace }}/test-datasets/=g" $f
+            echo "========== $f ============"
+            cat $f
+            echo "========================================"
+          done;
 
       - name: Install Nextflow
+        uses: nf-core/setup-nextflow@v1
+        with:
+          version: "${{ matrix.NXF_VER }}"
+
+      - name: Install nf-test
         run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
+          wget -qO- https://code.askimed.com/install/nf-test | bash -s ${{ matrix.NFTEST_VER }}
+          sudo mv nf-test /usr/local/bin/
 
-      - name: Run pipeline with various parameters
+      - name: Run nf-test
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }} --outdir ./results
+          nf-test test tests/pipeline/${{ matrix.aligner }}/ --tap=test.tap
 
-  test_sispa:
-    name: Test SISPA workflow
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        parameters:
-          - "--gff false"
-          - "--genome 'NC_045512.2'"
-    steps:
-      - name: Check out pipeline code
-        uses: actions/checkout@v2
-
-      - name: Install Nextflow
+      - name: Output log on failure
+        if: failure()
         run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
+          sudo apt install bat > /dev/null
+          batcat --decorations=always --color=always ${{ github.workspace }}/.nf-test/tests/*/output/pipeline_info/software_versions.yml
 
-      - name: Run pipeline with minimal SISPA data and various options
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }} --outdir ./results
-
-  test_nanopore:
-    name: Test Nanopore workflow
-    if: ${{ github.event_name != 'push' || (github.event_name == 'push' && github.repository == 'nf-core/viralrecon') }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        parameters:
-          - "--gff false"
-          - "--input false"
-          - "--min_barcode_reads 10000"
-          - "--min_guppyplex_reads 10000"
-          - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false"
-          - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false --artic_minion_medaka_model r941_min_high_g360"
-    steps:
-      - name: Check out pipeline code
-        uses: actions/checkout@v2
-
-      - name: Install Nextflow
-        run: |
-          wget -qO- get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
-
-      - name: Run pipeline with minimal Nanopore data and various options
-        run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test_nanopore,docker ${{ matrix.parameters }} --outdir ./results
+      - name: PR comment with file
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: test.tap
