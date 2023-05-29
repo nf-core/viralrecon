@@ -1,0 +1,78 @@
+{
+    "kraken": {
+        "content": [
+            "SRR11140744.kraken2.report.txt:md5,8af6d6b36473056da22d0a01e65a468a",
+            "SRR11140746.kraken2.report.txt:md5,f0f4463333187c4d5d14b16f1cafc999",
+            "SRR11140748.kraken2.report.txt:md5,dcb606266fa1e1b47b4ef5d275159490",
+            "SRR11140750.kraken2.report.txt:md5,980edcdd341cbd5ae3bcaff214d8eb5d"
+        ],
+        "timestamp": "2023-05-29T03:03:47+0000"
+    },
+    "unicycler": {
+        "content": [
+            "SRR11140744.abacas.MULTIFASTA.fa:md5,c2527479da458eba5c2d583db729a8d3",
+            "SRR11140746.abacas.MULTIFASTA.fa:md5,5b1cf53cd4a03e49e519034c443159d4",
+            "SRR11140748.abacas.MULTIFASTA.fa:md5,30bc96a11ab07c22a673ef9a0f1274e2",
+            "SRR11140750.abacas.MULTIFASTA.fa:md5,c83df4475455d1a508ef0b90d1c71e3a",
+            [
+                "SRR11140744.blastn.txt:md5,532392e40ae6a537cb5bcd967a890979",
+                "SRR11140744.filter.blastn.txt:md5,456a3d915c23214b5d0ae331e65e6034",
+                "SRR11140746.blastn.txt:md5,dc22cd9d9dc563e493f97f52a0368b2b",
+                "SRR11140746.filter.blastn.txt:md5,a6eeb0c0c981ecfbd88f9428f8e58860",
+                "SRR11140748.blastn.txt:md5,3045082fb7ceb5f83b3956ad5571541e",
+                "SRR11140748.filter.blastn.txt:md5,e692a55f6af237e7d61974573a38c4a8",
+                "SRR11140750.blastn.txt:md5,8825ba9169e95082589683998ff9d80a",
+                "SRR11140750.filter.blastn.txt:md5,02c0b70db8710d6853c2f51d9c1c9673"
+            ]
+        ],
+        "timestamp": "2023-05-29T03:03:47+0000"
+    },
+    "variants_bowtie2": {
+        "content": [
+            "SRR11140744.bowtie2.log:md5,9a1130e952fee63fc55693e8f7bd8e68",
+            "SRR11140746.bowtie2.log:md5,0198cb871169eeaf98649c2e9e150b39",
+            "SRR11140748.bowtie2.log:md5,2544f6945a64020985706a9af72dab4f",
+            "SRR11140750.bowtie2.log:md5,e885492960cf52936980d59732e9d42b"
+        ],
+        "timestamp": "2023-05-29T03:03:47+0000"
+    },
+    "software_versions": {
+        "content": [
+            "{ABACAS={abacas=1.3.1}, ASCIIGENOME={asciigenome=1.16.0, bedtools=2.30.0}, BANDAGE_IMAGE={bandage=0.8.1}, BCFTOOLS_CONSENSUS={bcftools=1.16}, BCFTOOLS_FILTER={bcftools=1.16}, BCFTOOLS_MPILEUP={bcftools=1.16}, BCFTOOLS_NORM={bcftools=1.16}, BCFTOOLS_QUERY={bcftools=1.16}, BCFTOOLS_STATS={bcftools=1.16}, BEDTOOLS_MASKFASTA={bedtools=2.30.0}, BEDTOOLS_MERGE={bedtools=2.30.0}, BLAST_BLASTN={blast=2.13.0+}, BLAST_MAKEBLASTDB={blast=2.13.0+}, BOWTIE2_ALIGN={bowtie2=2.4.4, pigz=2.6, samtools=1.16.1}, BOWTIE2_BUILD={bowtie2=2.4.4}, CUSTOM_DUMPSOFTWAREVERSIONS={python=3.11.0, yaml=6.0}, CUSTOM_GETCHROMSIZES={getchromsizes=1.16.1}, FASTP={fastp=0.23.2}, FASTQC_RAW={fastqc=0.11.9}, FASTQC_TRIM={fastqc=0.11.9}, FILTER_BLASTN={sed=4.7}, GUNZIP_FASTA={gunzip=1.10}, GUNZIP_GFF={gunzip=1.10}, GUNZIP_SCAFFOLDS={gunzip=1.10}, KRAKEN2_KRAKEN2={kraken2=2.1.2, pigz=2.6}, MAKE_BED_MASK={python=3.9.5, samtools=1.14}, MAKE_VARIANTS_LONG_TABLE={python=3.9.9}, MINIA={minia=3.2.5}, MOSDEPTH_GENOME={mosdepth=0.3.3}, NEXTCLADE_RUN={nextclade=2.12.0}, PICARD_COLLECTMULTIPLEMETRICS={picard=3.0.0}, PLOT_MOSDEPTH_REGIONS_GENOME={r-base=4.0.3}, QUAST={quast=5.2.0}, RENAME_FASTA_HEADER={sed=4.7}, SAMPLESHEET_CHECK={python=3.9.5}, SAMTOOLS_FLAGSTAT={samtools=1.16.1}, SAMTOOLS_IDXSTATS={samtools=1.16.1}, SAMTOOLS_INDEX={samtools=1.16.1}, SAMTOOLS_SORT={samtools=1.16.1}, SAMTOOLS_STATS={samtools=1.16.1}, SNPEFF_ANN={snpeff=5.0e}, SNPEFF_BUILD={snpeff=5.0e}, SNPSIFT_EXTRACTFIELDS={snpsift=4.3}, SPADES={spades=3.15.5}, TABIX_BGZIP={tabix=1.12}, TABIX_TABIX={tabix=1.12}, UNICYCLER={unicycler=0.4.8}, UNTAR_KRAKEN2_DB={untar=1.30}, UNTAR_NEXTCLADE_DB={untar=1.30}, Workflow={nf-core/viralrecon=2.7.0dev}}"
+        ],
+        "timestamp": "2023-05-29T03:03:47+0000"
+    },
+    "variants_bcftools": {
+        "content": [
+            "variants_long_table.csv:md5,1f19b881215b5c314938e8f4a0a7adc1"
+        ],
+        "timestamp": "2023-05-29T03:03:47+0000"
+    },
+    "spades": {
+        "content": [
+            "SRR11140744.abacas.MULTIFASTA.fa:md5,b5ad499d56e9ad356d14f896d7e5dab3",
+            "SRR11140746.abacas.MULTIFASTA.fa:md5,661b6ad9242e5bb30a0d017ed6c7f479",
+            "SRR11140748.abacas.MULTIFASTA.fa:md5,6c2cc81b42da54e9899416e693b84705",
+            "SRR11140750.abacas.MULTIFASTA.fa:md5,9ee5e1f3388ed97664f4a66cc1e0d2fd",
+            [
+                "SRR11140744.blastn.txt:md5,be34cfc8975d53ac5a3a20db79ae08d9",
+                "SRR11140744.filter.blastn.txt:md5,f5fc88fadafa4846e16807ca19db9530",
+                "SRR11140746.blastn.txt:md5,b0cbb5828a35d551c4dc09bb523638fb",
+                "SRR11140746.filter.blastn.txt:md5,49e551237c07e8f3dcfe90443466cc47",
+                "SRR11140748.blastn.txt:md5,884dd45fd7b787bb11e2a991f6e23e37",
+                "SRR11140748.filter.blastn.txt:md5,1a5c6ba6774bf02c3695a5220e7bba2e",
+                "SRR11140750.blastn.txt:md5,a63b9f8213d35d2b7a4b7f95f2df0080",
+                "SRR11140750.filter.blastn.txt:md5,0465e84582fb13391281563430fd6cb5"
+            ]
+        ],
+        "timestamp": "2023-05-29T03:03:47+0000"
+    },
+    "multiqc": {
+        "content": [
+            "summary_assembly_metrics_mqc.csv:md5,456fe9459d7016345d4ea63703085b46",
+            "summary_variants_metrics_mqc.csv:md5,b520d8e8e03d715c0d135c132c06b9f0",
+            "samplesheet.valid.csv:md5,e3117ad44c61c67d6f45f1e0bef21534"
+        ],
+        "timestamp": "2023-05-29T03:03:47+0000"
+    }
+}
