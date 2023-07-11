@@ -245,6 +245,11 @@
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",
                         "installed_by": ["modules"]
                     },
+                    "umitools/dedup": {
+                        "branch": "master",
+                        "git_sha": "7297204bf49273300a3dbfa4b7a4027c8683f1bd",
+                        "installed_by": ["modules"]
+                    },
                     "unicycler": {
                         "branch": "master",
                         "git_sha": "c8e35eb2055c099720a75538d1b8adb3fb5a464c",

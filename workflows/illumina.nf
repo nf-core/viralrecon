@@ -98,6 +98,7 @@ include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main
 //
 include { FASTQ_ALIGN_BOWTIE2       } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
 include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard/main'
+include { BAM_DEDUP_UMITOOLS        } from '../subworkflows/local/bam_dedup_umitools/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -232,7 +233,7 @@ workflow ILLUMINA {
                 }
             }
             .collect()
-            .map { 
+            .map {
                 tsv_data ->
                     def header = ['Sample', 'Reads before trimming']
                     WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -319,7 +320,7 @@ workflow ILLUMINA {
         ch_pass_fail_mapped
             .fail
             .collect()
-            .map { 
+            .map {
                 tsv_data ->
                     def header = ['Sample', 'Mapped reads']
                     WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -347,7 +348,7 @@ workflow ILLUMINA {
     // SUBWORKFLOW: Mark duplicate reads
     //
     ch_markduplicates_flagstat_multiqc = Channel.empty()
-    if (!params.skip_variants && !params.skip_markduplicates) {
+    if (!params.skip_variants && !params.skip_markduplicates && !params.umi) {
         BAM_MARKDUPLICATES_PICARD (
             ch_bam,
             PREPARE_GENOME.out.fasta,
@@ -357,6 +358,16 @@ workflow ILLUMINA {
         ch_bai                             = BAM_MARKDUPLICATES_PICARD.out.bai
         ch_markduplicates_flagstat_multiqc = BAM_MARKDUPLICATES_PICARD.out.flagstat
         ch_versions                        = ch_versions.mix(BAM_MARKDUPLICATES_PICARD.out.versions)
+    } else if (!params.skip_variants && !params.skip_markduplicates && params.umi) {
+        ch_bam_bai = ch_bam.join(ch_bai, remainder:true)
+        BAM_DEDUP_UMITOOLS (
+            ch_bam_bai,
+            PREPARE_GENOME.out.fasta
+        )
+        ch_bam                             = BAM_DEDUP_UMITOOLS.out.bam
+        ch_bai                             = BAM_DEDUP_UMITOOLS.out.bai
+        ch_markduplicates_flagstat_multiqc = BAM_DEDUP_UMITOOLS.out.flagstat
+        ch_versions                        = ch_versions.mix(BAM_DEDUP_UMITOOLS.out.versions)
     }
 
     //
@@ -506,8 +517,8 @@ workflow ILLUMINA {
                 def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
                 return [ "$meta.id\t$clade" ]
             }
-            .collect()                
-            .map { 
+            .collect()
+            .map {
                 tsv_data ->
                     def header = ['Sample', 'clade']
                     WorkflowCommons.multiqcTsvFromList(tsv_data, header)
