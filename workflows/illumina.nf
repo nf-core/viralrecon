@@ -364,8 +364,8 @@ workflow ILLUMINA {
             ch_bam_bai,
             PREPARE_GENOME.out.fasta
         )
-        c
         ch_bam                             = BAM_DEDUP_UMITOOLS.out.bam
+        ch_umitools_log                    = BAM_DEDUP_UMITOOLS.out.out_log
         ch_bai                             = BAM_DEDUP_UMITOOLS.out.bai
         ch_markduplicates_flagstat_multiqc = BAM_DEDUP_UMITOOLS.out.flagstat
         ch_versions                        = ch_versions.mix(BAM_DEDUP_UMITOOLS.out.versions)
@@ -640,6 +640,7 @@ workflow ILLUMINA {
             ch_bowtie2_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_trim_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
             ch_markduplicates_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_umitools_log.collect{it[1]}.ifEmpty([]),
             ch_mosdepth_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_counts_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([]),

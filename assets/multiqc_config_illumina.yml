@@ -18,6 +18,7 @@ run_modules:
   - bcftools
   - snpeff
   - quast
+  - umitools
   - pangolin
   - cutadapt
 
@@ -48,6 +49,11 @@ module_order:
       info: "This section of the report shows SAMTools counts/statistics after primer sequence removal with iVar."
       path_filters:
         - "./ivar_trim/*"
+  - umitools:
+      name: "VARIANTS: umitools (MarkDuplicates)"
+      info: "This section reports summary log og umitools when removing umi duplicates"
+      path_filters:
+        - "./umi_metrics/*"
   - samtools:
       name: "VARIANTS: SAMTools (MarkDuplicates)"
       anchor: "samtools_markduplicates"
