@@ -348,6 +348,7 @@ workflow ILLUMINA {
     // SUBWORKFLOW: Mark duplicate reads
     //
     ch_markduplicates_flagstat_multiqc = Channel.empty()
+    ch_umitools_log = Channel.empty()
     if (!params.skip_variants && !params.skip_markduplicates && !params.umi) {
         BAM_MARKDUPLICATES_PICARD (
             ch_bam,
