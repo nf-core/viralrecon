@@ -98,7 +98,7 @@ include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main
 //
 include { FASTQ_ALIGN_BOWTIE2       } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
 include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard/main'
-include { BAM_DEDUP_UMITOOLS        } from '../subworkflows/local/bam_dedup_umitools/main'
+include { BAM_DEDUP_UMITOOLS        } from '../subworkflows/local/bam_dedup_umitools'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -364,6 +364,7 @@ workflow ILLUMINA {
             ch_bam_bai,
             PREPARE_GENOME.out.fasta
         )
+        c
         ch_bam                             = BAM_DEDUP_UMITOOLS.out.bam
         ch_bai                             = BAM_DEDUP_UMITOOLS.out.bai
         ch_markduplicates_flagstat_multiqc = BAM_DEDUP_UMITOOLS.out.flagstat
