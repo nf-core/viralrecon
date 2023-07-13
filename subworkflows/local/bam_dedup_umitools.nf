@@ -2,7 +2,7 @@
 // UMI-tools deduplication with UMI statistics, index BAM file and run samtools stats, flagstat and idxstats
 //
 
-include { UMITOOLS_DEDUP     } from '../../modules/nf-core/samtools/sort/main'
+include { UMITOOLS_DEDUP     } from '../../modules/nf-core/umitools/dedup/main'
 include { SAMTOOLS_INDEX     } from '../../modules/nf-core/samtools/index/main'
 include { BAM_STATS_SAMTOOLS } from '../nf-core/bam_stats_samtools/main'
 
@@ -37,7 +37,7 @@ workflow BAM_DEDUP_UMITOOLS {
 
     emit:
     bam                    = UMITOOLS_DEDUP.out.bam                   // channel: [ val(meta), path(bam) ]
-    log                    = UMITOOLS_DEDUP.out.log                   // channel: [ val(meta), path(log) ]
+    log_out                = UMITOOLS_DEDUP.out.log                   // channel: [ val(meta), path(log) ]
     tsv_edit_distance      = UMITOOLS_DEDUP.out.tsv_edit_distance     // channel: [ val(meta), path(tsv) ]
     tsv_per_umi            = UMITOOLS_DEDUP.out.tsv_per_umi           // channel: [ val(meta), path(tsv) ]
     tsv_umi_per_position   = UMITOOLS_DEDUP.out.tsv_umi_per_position  // channel: [ val(meta), path(tsv) ]
