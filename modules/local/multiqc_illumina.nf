@@ -21,6 +21,7 @@ process MULTIQC {
     path ('bowtie2/*')
     path ('ivar_trim/*')
     path ('picard_markduplicates/*')
+    path ('umi_metrics/*')
     path ('mosdepth/*')
     path ('variants/*')
     path ('variants/*')

@@ -365,7 +365,7 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.fasta
         )
         ch_bam                             = BAM_DEDUP_UMITOOLS.out.bam
-        ch_umitools_log                    = BAM_DEDUP_UMITOOLS.out.out_log
+        ch_umitools_log                    = BAM_DEDUP_UMITOOLS.out.log_out
         ch_bai                             = BAM_DEDUP_UMITOOLS.out.bai
         ch_markduplicates_flagstat_multiqc = BAM_DEDUP_UMITOOLS.out.flagstat
         ch_versions                        = ch_versions.mix(BAM_DEDUP_UMITOOLS.out.versions)
