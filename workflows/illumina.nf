@@ -641,7 +641,7 @@ workflow ILLUMINA {
             ch_bowtie2_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_trim_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
             ch_markduplicates_flagstat_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_umitools_log.collect{it[1]}.ifEmpty([]),
+//            ch_umitools_log.collect{it[1]}.ifEmpty([]), Only supported by > 1.14 version
             ch_mosdepth_multiqc.collect{it[1]}.ifEmpty([]),
             ch_ivar_counts_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([]),
