@@ -27,7 +27,12 @@ module_order:
       name: "PREPROCESS: FastQC (raw reads)"
       info: "This section of the report shows FastQC results for the raw reads before adapter trimming."
       path_filters:
-        - "./fastqc/*.zip"
+        - "./fastqc/*raw*.zip"
+  - fastqc:
+      name: "PREPROCESS: FastQC (trimmed reads)"
+      info: "This section of the report shows FastQC results for the raw reads after adapter trimming."
+      path_filters:
+        - "./fastqc/*trim*.zip"
   - fastp:
       name: "PREPROCESS: fastp (adapter trimming)"
       info: "This section of the report shows fastp results for reads after adapter and quality trimming."
