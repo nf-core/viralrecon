@@ -5,7 +5,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unpublished Version / DEV]
 
+### Credits
+
+- [Adam Talbot](https://github.com/adamrtalbot)
+
+### Software dependencies
+
 ### Enhancements & fixes
+
+- [[#386](https://github.com/nf-core/viralrecon/pull/386/files)] - Software closes gracefully when encountering an error
 
 ## [[2.6.0](https://github.com/nf-core/viralrecon/releases/tag/2.6.0)] - 2023-03-23
 
