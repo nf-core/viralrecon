@@ -141,87 +141,85 @@ workflow NANOPORE {
         .collect()
         .map { fai, bed -> WorkflowCommons.checkContigsInBED(fai, bed, log) }
 
-    // barcode_dirs       = file(params.fastq_dir / "barcode*", type: 'dir' , maxdepth: 1)
-    // single_barcode_dir = file(params.fastq_dir / "*.fastq", type: 'file', maxdepth: 1)
+    barcode_dirs       = file("${params.fastq_dir}/barcode*", type: 'dir' , maxdepth: 1)
+    single_barcode_dir = file("${params.fastq_dir}/*.fastq" , type: 'file', maxdepth: 1)
     ch_custom_no_sample_name_multiqc = Channel.empty()
     ch_custom_no_barcodes_multiqc    = Channel.empty()
-    ch_fastq_dirs                    = Channel.empty()
-    // Directory of barcodes (barcode01/, barcode02/, etc.)
-    Channel
-        .fromPath( "${params.fastq_dir}/barcode*", type: 'dir' , maxDepth: 1 )
-        .filter( ~/.*barcode[0-9]{1,4}$/ )
-        .map { dir ->
-            def count = 0
-            for (x in dir.listFiles()) {
-                if (x.isFile() && x.toString().contains('.fastq')) {
-                    count += x.countFastq()
+    if (barcode_dirs) {
+        Channel
+            .fromPath( barcode_dirs )
+            .filter( ~/.*barcode[0-9]{1,4}$/ )
+            .map { dir ->
+                def count = 0
+                for (x in dir.listFiles()) {
+                    if (x.isFile() && x.toString().contains('.fastq')) {
+                        count += x.countFastq()
+                    }
                 }
+                return [ dir.baseName , dir, count ]
             }
-            return [ dir.baseName , dir, count ]
+            .set { ch_fastq_dirs }
+
+        //
+        // SUBWORKFLOW: Read in samplesheet containing sample to barcode mappings
+        //
+        if (params.input) {
+            INPUT_CHECK (
+                ch_input,
+                params.platform
+            )
+            .sample_info
+            .join(ch_fastq_dirs, remainder: true)
+            .set { ch_fastq_dirs }
+            ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+
+            //
+            // MODULE: Create custom content file for MultiQC to report barcodes were allocated reads >= params.min_barcode_reads but no sample name in samplesheet
+            //
+            ch_fastq_dirs
+                .filter { it[1] == null }
+                .filter { it[-1] >= params.min_barcode_reads }
+                .map { it -> [ "${it[0]}\t${it[-1]}" ] }
+                .collect()                
+                .map { 
+                    tsv_data ->
+                        def header = ['Barcode', 'Read count']
+                        WorkflowCommons.multiqcTsvFromList(tsv_data, header)
+                }
+                .set { ch_custom_no_sample_name_multiqc }
+
+            //
+            // MODULE: Create custom content file for MultiQC to report samples that were in samplesheet but have no barcodes
+            //
+            ch_fastq_dirs
+                .filter { it[-1] == null }
+                .map { it -> [ "${it[1]}\t${it[0]}" ] }
+                .collect()                
+                .map { 
+                    tsv_data ->
+                        def header = ['Sample', 'Missing barcode']
+                        WorkflowCommons.multiqcTsvFromList(tsv_data, header)
+                }
+                .set { ch_custom_no_barcodes_multiqc }
+
+            ch_fastq_dirs
+                .filter { (it[1] != null)  }
+                .filter { (it[-1] != null) }
+                .set { ch_fastq_dirs }
+
+        } else {
+            ch_fastq_dirs
+                .map { barcode, dir, count -> [ barcode, barcode, dir, count ] }
+                .set { ch_fastq_dirs }
         }
-        .set { ch_fastq_dirs }
-
-    //
-    // SUBWORKFLOW: Read in samplesheet containing sample to barcode mappings
-    //
-    if (params.input) {
-        INPUT_CHECK (
-            ch_input,
-            params.platform
-        )
-        .sample_info
-        .join(ch_fastq_dirs, remainder: true)
-        .set { ch_fastq_dirs }
-        ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-
-        //
-        // MODULE: Create custom content file for MultiQC to report barcodes were allocated reads >= params.min_barcode_reads but no sample name in samplesheet
-        //
-        ch_fastq_dirs
-            .filter { it[1] == null }
-            .filter { it[-1] >= params.min_barcode_reads }
-            .map { it -> [ "${it[0]}\t${it[-1]}" ] }
-            .collect()
-            .map {
-                tsv_data ->
-                    def header = ['Barcode', 'Read count']
-                    WorkflowCommons.multiqcTsvFromList(tsv_data, header)
-            }
-            .set { ch_custom_no_sample_name_multiqc }
-
-        //
-        // MODULE: Create custom content file for MultiQC to report samples that were in samplesheet but have no barcodes
-        //
-        ch_fastq_dirs
-            .filter { it[-1] == null }
-            .map { it -> [ "${it[1]}\t${it[0]}" ] }
-            .collect()
-            .map {
-                tsv_data ->
-                    def header = ['Sample', 'Missing barcode']
-                    WorkflowCommons.multiqcTsvFromList(tsv_data, header)
-            }
-            .set { ch_custom_no_barcodes_multiqc }
-
-        ch_fastq_dirs
-            .filter { (it[1] != null)  }
-            .filter { (it[-1] != null) }
-            .set { ch_fastq_dirs }
-
+    } else if (single_barcode_dir) {
+        Channel
+            .fromPath("${params.fastq_dir}", type: 'dir', maxDepth: 1)
+            .map { it -> [ 'SAMPLE_1', 'single_barcode', it, 10000000 ] }
+            .set{ ch_fastq_dirs }
     } else {
-        ch_fastq_dirs
-            .map { barcode, dir, count -> [ barcode, barcode, dir, count ] }
-            .set { ch_fastq_dirs }
-    }
-    // Single barcode directory (barcode/*.fastq)
-    Channel
-        .fromPath("${params.fastq_dir}/*.{fastq,fq}{,.gz}", type: 'file', maxDepth: 1)
-        .map { it -> [ 'SAMPLE_1', 'single_barcode', it, 10000000 ] }
-        .mix{ ch_fastq_dirs }
-
-    // Check there are valid FASTQ files
-    if ( ch_fastq_dirs.isEmpty(true) ) {
-        error "Please specify a valid folder containing ONT basecalled, barcoded fastq files generated by guppy_barcoder or guppy_basecaller e.g. '--fastq_dir ./20191023_1522_MC-110615_0_FAO93606_12bf9b4f/fastq_pass/. Found: ${params.fastq_dir}"
+        log.error "Please specify a valid folder containing ONT basecalled, barcoded fastq files generated by guppy_barcoder or guppy_basecaller e.g. '--fastq_dir ./20191023_1522_MC-110615_0_FAO93606_12bf9b4f/fastq_pass/"
+        System.exit(1)
     }
 
     //
@@ -241,7 +239,7 @@ workflow NANOPORE {
     ch_pass_fail_barcode_count
         .fail
         .collect()
-        .map {
+        .map { 
             tsv_data ->
                 def header = ['Sample', 'Barcode count']
                 WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -280,7 +278,7 @@ workflow NANOPORE {
     ch_pass_fail_guppyplex_count
         .fail
         .collect()
-        .map {
+        .map { 
             tsv_data ->
                 def header = ['Sample', 'Read count']
                 WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -412,13 +410,13 @@ workflow NANOPORE {
         NEXTCLADE_RUN
             .out
             .csv
-            .map {
+            .map { 
                 meta, csv ->
                     def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
                     return [ "$meta.id\t$clade" ]
             }
-            .collect()
-            .map {
+            .collect()                
+            .map { 
                 tsv_data ->
                     def header = ['Sample', 'clade']
                     WorkflowCommons.multiqcTsvFromList(tsv_data, header)
