@@ -177,7 +177,7 @@ class NfcoreSchema {
         }
 
         if (has_error) {
-            System.exit(1)
+            Nextflow.error("")
         }
     }
 
