@@ -1,6 +1,7 @@
 //
 // This file holds several functions specific to the main.nf workflow in the nf-core/viralrecon pipeline
 //
+import nextflow.Nextflow
 
 class WorkflowMain {
 

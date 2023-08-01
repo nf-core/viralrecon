@@ -1,7 +1,7 @@
 //
 // This file holds several functions specific to the workflow/illumina.nf in the nf-core/viralrecon pipeline
 //
-
+import nextflow.Nextflow
 import groovy.json.JsonSlurper
 
 class WorkflowIllumina {
