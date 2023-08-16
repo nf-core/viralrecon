@@ -265,7 +265,7 @@
                 },
                 "freyja_repeats": {
                     "type": "integer",
-                    "default": 1000,
+                    "default": 100,
                     "fa_icon": "fas fa-hand-paper",
                     "description": "Specify the number of bootstrap repeats to do."
                 },
