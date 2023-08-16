@@ -745,8 +745,6 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 
 [Nextclade](https://github.com/nextstrain/nextclade) performs viral genome clade assignment, mutation calling and sequence quality checks for the consensus sequences generated in this pipeline. Similar to Pangolin, it has been used extensively during the COVID-19 pandemic. A [web application](https://clades.nextstrain.org/) also exists that allows users to upload genome sequences via a web browser.
 
-
-
 ### Variants long table
 
 <details markdown="1">
