@@ -259,7 +259,6 @@
                 "freyja_db_name": {
                     "type": "string",
                     "default": "freyja_db",
-                    "hidden": true,
                     "fa_icon": "fas fa-folder-open",
                     "description": "Specify the name where to store UShER database (default: 'freyja_db')."
                 },
@@ -272,14 +271,12 @@
                 "freyja_barcodes": {
                     "type": "string",
                     "format": "path",
-                    "hidden": true,
                     "fa_icon": "fas fa-file",
                     "description": "Lineage defining barcodes, default is most recent from UShER database."
                 },
                 "freyja_lineages": {
                     "type": "string",
                     "format": "path",
-                    "hidden": true,
                     "fa_icon": "fas fa-file",
                     "description": "Metadata of lineages that match barcode, default is most recent from UShER database."
                 },
