@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Enhancements & fixes
 
-- [[#386](https://github.com/nf-core/viralrecon/pull/386/files)] - Software closes gracefully when encountering an error
+- [[#387](https://github.com/nf-core/viralrecon/pull/387/files)] - Software closes gracefully when encountering an error
 
 ## [[2.6.0](https://github.com/nf-core/viralrecon/releases/tag/2.6.0)] - 2023-03-23
 
