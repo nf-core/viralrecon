@@ -21,7 +21,8 @@ WorkflowIllumina.initialise(params, log, valid_params)
 def checkPathParamList = [
     params.input, params.fasta, params.gff, params.bowtie2_index,
     params.kraken2_db, params.primer_bed, params.primer_fasta,
-    params.blast_db, params.spades_hmm, params.multiqc_config
+    params.blast_db, params.spades_hmm, params.multiqc_config,
+    params.freyja_barcodes, params.freyja_lineages
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
@@ -96,8 +97,9 @@ include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
 //
-include { FASTQ_ALIGN_BOWTIE2       } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
-include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard/main'
+include { FASTQ_ALIGN_BOWTIE2           } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
+include { BAM_MARKDUPLICATES_PICARD     } from '../subworkflows/nf-core/bam_markduplicates_picard/main'
+include { BAM_VARIANT_DEMIX_BOOT_FREYJA } from '../subworkflows/nf-core/bam_variant_demix_boot_freyja/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -232,7 +234,7 @@ workflow ILLUMINA {
                 }
             }
             .collect()
-            .map { 
+            .map {
                 tsv_data ->
                     def header = ['Sample', 'Reads before trimming']
                     WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -319,7 +321,7 @@ workflow ILLUMINA {
         ch_pass_fail_mapped
             .fail
             .collect()
-            .map { 
+            .map {
                 tsv_data ->
                     def header = ['Sample', 'Mapped reads']
                     WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -458,6 +460,21 @@ workflow ILLUMINA {
     }
 
     //
+    // SUBWORKFLOW: Determine variants with Freyja
+    //
+    if (!params.skip_variants && !params.skip_freyja) {
+        BAM_VARIANT_DEMIX_BOOT_FREYJA(
+            ch_bam,
+            PREPARE_GENOME.out.fasta,
+            params.freyja_repeats,
+            params.freyja_db_name,
+            params.freyja_barcodes,
+            params.freyja_lineages,
+        )
+        ch_versions= ch_versions.mix(BAM_VARIANT_DEMIX_BOOT_FREYJA.out.versions)
+    }
+
+    //
     // SUBWORKFLOW: Call consensus with iVar and downstream QC
     //
     ch_quast_multiqc    = Channel.empty()
@@ -506,8 +523,8 @@ workflow ILLUMINA {
                 def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
                 return [ "$meta.id\t$clade" ]
             }
-            .collect()                
-            .map { 
+            .collect()
+            .map {
                 tsv_data ->
                     def header = ['Sample', 'clade']
                     WorkflowCommons.multiqcTsvFromList(tsv_data, header)

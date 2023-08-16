@@ -251,6 +251,35 @@
                     "description": "Maximum window size before and after variant locii used to generate ASCIIGenome screenshots.",
                     "fa_icon": "fab fa-windows"
                 },
+                "skip_freyja": {
+                    "type": "boolean",
+                    "fa_icon": "fas fast-forward",
+                    "description": "Skip freyja deep SARS-CoV-2 variant analysis using a depth weighted approach."
+                },
+                "freyja_db_name": {
+                    "type": "string",
+                    "default": "freyja_db",
+                    "fa_icon": "fas fa-folder-open",
+                    "description": "Specify the name where to store UShER database (default: 'freyja_db')."
+                },
+                "freyja_repeats": {
+                    "type": "integer",
+                    "default": 100,
+                    "fa_icon": "fas fa-hand-paper",
+                    "description": "Specify the number of bootstrap repeats to do."
+                },
+                "freyja_barcodes": {
+                    "type": "string",
+                    "format": "path",
+                    "fa_icon": "fas fa-file",
+                    "description": "Lineage defining barcodes, default is most recent from UShER database."
+                },
+                "freyja_lineages": {
+                    "type": "string",
+                    "format": "path",
+                    "fa_icon": "fas fa-file",
+                    "description": "Metadata of lineages that match barcode, default is most recent from UShER database."
+                },
                 "multiqc_title": {
                     "type": "string",
                     "hidden": true,

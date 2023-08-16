@@ -20,6 +20,7 @@ The directories listed below will be created in the results directory after the 
   - [QUAST](#nanopore-quast) - Consensus assessment report
   - [Pangolin](#nanopore-pangolin) - Lineage analysis
   - [Nextclade](#nanopore-nextclade) - Clade assignment, mutation calling and sequence quality checks
+  - [Freyja](#nanopore-freyja) - Relative lineage abundance analysis from mixed SARS-CoV-2 samples (typically wastewater)
   - [ASCIIGenome](#nanopore-asciigenome) - Individual variant screenshots with annotation tracks
   - [Variants long table](#nanopore-variants-long-table) - Collate per-sample information for individual variants, functional effect prediction and lineage analysis
 - [Workflow reporting](#nanopore-workflow-reporting)
@@ -241,6 +242,30 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 
 [Nextclade](https://github.com/nextstrain/nextclade) performs viral genome clade assignment, mutation calling and sequence quality checks for the consensus sequences generated in this pipeline. Similar to Pangolin, it has been used extensively during the COVID-19 pandemic. A [web application](https://clades.nextstrain.org/) also exists that allows users to upload genome sequences via a web browser.
 
+### Nanopore: Freyja
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<CALLER>/freyja/demix`
+  - `*.tsv`: Analysis results including the lineages present, their corresponding abundances, and summarization by constellation
+- `<CALLER>/freyja/freyja_db`
+  - `.json`: dataset containing lineage metadata that correspond to barcodes.
+  - `.yml`: dataset containing the lineage topology.
+  - `.csv`: dataset containing lineage defining barcodes.
+- `<CALLER>/freyja/variants`
+  - `*.variants.tsv`: Analysis results including identified variants in a gff-like format
+  - `*.depth.tsv`: Analysis results including the depth of the identified variants
+- `<CALLER>/freyja/boot`
+  - `*lineages.csv` Analysis results inculding lineages present and their corresponding abundances with variation identified through bootstrapping
+  - `*summarized.csv`Analysis results inculding lineages present but summarized by constellation and their corresponding abundances with variation identified through bootstrapping
+
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--artic_minion_caller` parameter (Default: 'nanopolish').
+
+</details>
+
+[Freyja](https://github.com/andersen-lab/Freyja) is a tool to recover relative lineage abundances from mixed SARS-CoV-2 samples from a sequencing dataset (BAM aligned to the Hu-1 reference). The method uses lineage-determining mutational "barcodes" derived from the [UShER](https://usher-wiki.readthedocs.io/en/latest/#) global phylogenetic tree as a basis set to solve the constrained (unit sum, non-negative) de-mixing problem.
+
 ### Nanopore: ASCIIGenome
 
 <details markdown="1">
@@ -321,6 +346,7 @@ An example MultiQC report generated from a full-sized dataset can be viewed on t
   - [mosdepth](#mosdepth) - Whole-genome and amplicon coverage metrics
   - [iVar variants](#ivar-variants) _||_ [BCFTools call](#bcftools-call) - Variant calling
     - [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
+    - [Freyja](#freyja) - Relative lineage abundance analysis from mixed SARS-CoV-2 samples (typically wastewater)
     - [ASCIIGenome](#asciigenome) - Individual variant screenshots with annotation tracks
   - [iVar consensus](#ivar-consensus) _||_ [BCFTools and BEDTools](#bcftools-and-bedtools) - Consensus sequence generation
     - [QUAST](#quast) - Consensus assessment report
@@ -592,6 +618,28 @@ iVar outputs a tsv format which is not compatible with downstream analysis such 
 [SnpSift](http://snpeff.sourceforge.net/SnpSift.html) annotates genomic variants using databases, filters, and manipulates genomic annotated variants. After annotation with SnpEff, you can use SnpSift to help filter large genomic datasets in order to find the most significant variants.
 
 ![MultiQC - SnpEff annotation counts](images/mqc_snpeff_plot.png)
+
+### Freyja
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<CALLER>/freyja/demix`
+  - `*.tsv`: Analysis results including the lineages present, their corresponding abundances, and summarization by constellation
+- `<CALLER>/freyja/freyja_db`
+  - `.json`: dataset containing lineage metadata that correspond to barcodes.
+  - `.yml`: dataset containing the lineage topology.
+  - `.csv`: dataset containing lineage defining barcodes.
+- `<CALLER>/freyja/variants`
+  - `*.variants.tsv`: Analysis results including identified variants in a gff-like format
+  - `*.depth.tsv`: Analysis results including the depth of the identified variants
+- `<CALLER>/freyja/boot`
+  - `*lineages.csv` Analysis results inculding lineages present and their corresponding abundances with variation identified through bootstrapping
+  - `*summarized.csv`Analysis results inculding lineages present but summarized by constellation and their corresponding abundances with variation identified through bootstrapping
+
+</details>
+
+[Freyja](https://github.com/andersen-lab/Freyja) is a tool to recover relative lineage abundances from mixed SARS-CoV-2 samples from a sequencing dataset (BAM aligned to the Hu-1 reference). The method uses lineage-determining mutational "barcodes" derived from the [UShER](https://usher-wiki.readthedocs.io/en/latest/#) global phylogenetic tree as a basis set to solve the constrained (unit sum, non-negative) de-mixing problem.
 
 ### ASCIIGenome
 
