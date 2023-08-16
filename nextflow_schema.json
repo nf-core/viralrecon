@@ -273,14 +273,12 @@
                     "type": "string",
                     "format": "path",
                     "hidden": true,
-                    "default": "[]",
                     "fa_icon": "fas fa-file",
                     "description": "Lineage defining barcodes, default is most recent from UShER database."
                 },
                 "freyja_lineages": {
                     "type": "string",
                     "format": "path",
-                    "default": "[]",
                     "hidden": true,
                     "fa_icon": "fas fa-file",
                     "description": "Metadata of lineages that match barcode, default is most recent from UShER database."
