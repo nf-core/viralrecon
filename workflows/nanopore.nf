@@ -427,6 +427,21 @@ workflow NANOPORE {
     }
 
     //
+    // SUBWORKFLOW: Determine variants with Freyja
+    //
+    if (!params.skip_freyja) {
+        BAM_VARIANT_DEMIX_BOOT_FREYJA(
+            ARTIC_MINION.out.bam_primertrimmed,
+            ARTIC_MINION.out.fasta,
+            params.freyja_repeats,
+            params.freyja_db_name,
+            params.freyja_barcodes,
+            params.freyja_lineages,
+        )
+        ch_versions= ch_versions.mix(BAM_VARIANT_DEMIX_BOOT_FREYJA.out.versions)
+    }
+
+    //
     // MODULE: Consensus QC across all samples with QUAST
     //
     ch_quast_multiqc = Channel.empty()
