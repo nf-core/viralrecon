@@ -432,7 +432,7 @@ workflow NANOPORE {
     if (!params.skip_freyja) {
         BAM_VARIANT_DEMIX_BOOT_FREYJA(
             ARTIC_MINION.out.bam_primertrimmed,
-            ARTIC_MINION.out.fasta,
+            PREPARE_GENOME.out.fasta,
             params.freyja_repeats,
             params.freyja_db_name,
             params.freyja_barcodes,
