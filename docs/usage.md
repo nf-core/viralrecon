@@ -418,7 +418,7 @@ If the `--save_reference` parameter is provided then the Nextclade dataset gener
 
 #### Freyja
 
-[Freyja](https://github.com/andersen-lab/Freyja) depends on a dataset of barcodes that uses lineage defening mutations (provide by [UShER](https://usher-wiki.readthedocs.io/en/latest/#)), by default the most recent barcodes will be downloaded. However, when running analyses across large time windows and these analyses need to be compared, it might be of interest to keep the constant barcodes (or rerun all freyja analyses with the most recent dataset). To do this specify the barcodes and lineages using the variables `freyja_barcodes`, `freyja_lineages` respectivly.
+[Freyja](https://github.com/andersen-lab/Freyja) relies on a dataset of barcodes that use lineage defining mutations (see [UShER](https://usher-wiki.readthedocs.io/en/latest/#)). By default the most recent barcodes will be downloaded and used. However, if analyses need to be compared across multiple datasets, it might be of interest to re-use the same barcodes, or to rerun all Freyja analyses with the most recent dataset. To do this, specify the barcodes and lineages using the `--freyja_barcodes`, `--freyja_lineages` parameters, respectivly.
 
 ### nf-core/configs
 
