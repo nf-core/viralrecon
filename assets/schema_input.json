@@ -29,8 +29,13 @@
                         "maxLength": 0
                     }
                 ]
+            },
+            "barcode": {
+                "type": "integer",
+                "pattern": "^\\d+$",
+                "errorMessage": "Barcode must be provided and must be an integer"
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["sample"]
     }
 }

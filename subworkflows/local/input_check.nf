@@ -6,17 +6,34 @@ include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
 
 workflow INPUT_CHECK {
     take:
-    samplesheet // file: /path/to/samplesheet.csv
+    samplesheet // file  : /path/to/samplesheet.csv
+    platform    // string: sequencing platform. Accepted values: 'illumina', 'nanopore'
 
     main:
-    SAMPLESHEET_CHECK ( samplesheet )
-        .csv
-        .splitCsv ( header:true, sep:',' )
-        .map { create_fastq_channel(it) }
-        .set { reads }
+
+    SAMPLESHEET_CHECK (
+        samplesheet,
+        platform
+    )
+
+    if (platform == 'illumina') {
+        SAMPLESHEET_CHECK
+            .out
+            .csv
+            .splitCsv ( header:true, sep:',' )
+            .map { create_fastq_channel(it) }
+            .set { sample_info }
+    } else if (platform == 'nanopore') {
+        SAMPLESHEET_CHECK
+            .out
+            .csv
+            .splitCsv ( header:true, sep:',' )
+            .map { row -> [ row.barcode, row.sample ] }
+            .set { sample_info }
+    }
 
     emit:
-    reads                                     // channel: [ val(meta), [ reads ] ]
+    sample_info                               // channel: [ val(meta), [ reads ] ]
     versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 

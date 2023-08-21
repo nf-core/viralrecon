@@ -4,11 +4,13 @@
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
-## Introduction
+## Pipeline parameters
 
-<!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
+Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration except for parameters; see [docs](https://nf-co.re/usage/configuration#custom-configuration-files).
 
-## Samplesheet input
+## Samplesheet format
+
+### Illumina
 
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
 
@@ -16,48 +18,170 @@ You will need to create a samplesheet with information about the samples you wou
 --input '[path to samplesheet file]'
 ```
 
-### Multiple runs of the same sample
+The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once (e.g. to increase sequencing depth). The pipeline will concatenate the raw reads before performing any downstream analysis.
 
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
-
-```console
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
-```
-
-### Full samplesheet
-
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
-
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+A final samplesheet file may look something like the one below. `SAMPLE_1` was sequenced twice in Illumina PE format, `SAMPLE_2` was sequenced once in Illumina SE format.
 
 ```console
 sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+SAMPLE_1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+SAMPLE_1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
+SAMPLE_2,AEG588A2_S4_L003_R1_001.fastq.gz,
 ```
 
-| Column    | Description                                                                                                                                                                            |
-| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+| Column    | Description                                                                                                                |
+| --------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample.              |
+| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". |
+| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". |
 
-An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
+> **NB:** Dashes (`-`) and spaces in sample names are automatically converted to underscores (`_`) to avoid downstream issues in the pipeline.
+
+### Nanopore
+
+You have the option to provide a samplesheet to the pipeline that maps sample ids to barcode ids. This allows you to associate barcode ids to clinical/public database identifiers that can be used to QC or pre-process the data with more appropriate sample names.
+
+```console
+--input '[path to samplesheet file]'
+```
+
+It has to be a comma-separated file with 2 columns. A final samplesheet file may look something like the one below:
+
+```console
+sample,barcode
+21X983255,1
+70H209408,2
+49Y807476,3
+70N209581,4
+```
+
+| Column    | Description                                                                           |
+| --------- | ------------------------------------------------------------------------------------- |
+| `sample`  | Custom sample name, one per barcode.                                                  |
+| `barcode` | Barcode identifier attributed to that sample during multiplexing. Must be an integer. |
+
+> **NB:** Dashes (`-`) and spaces in sample names are automatically converted to underscores (`_`) to avoid downstream issues in the pipeline.
+
+## Nanopore input format
+
+For Nanopore data the pipeline only supports amplicon-based analysis obtained from primer sets created and maintained by the [ARTIC Network](https://artic.network/). The [artic minion](https://artic.readthedocs.io/en/latest/commands/) tool from the [ARTIC field bioinformatics pipeline](https://github.com/artic-network/fieldbioinformatics) is used to align reads, call variants and to generate the consensus sequence.
+
+### Nanopolish
+
+The default variant caller used by artic minion is [Nanopolish](https://github.com/jts/nanopolish) and this requires that you provide `*.fastq`, `*.fast5` and `sequencing_summary.txt` files as input to the pipeline. These files can typically be obtained after demultiplexing and basecalling the sequencing data using [Guppy](https://nanoporetech.com/nanopore-sequencing-data-analysis) (see [ARTIC SOP docs](https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html)). This pipeline requires that the files are organised in the format outlined below and gzip compressed files are also accepted:
+
+```console
+.
+└── fastq_pass
+    └── barcode01
+        ├── FAP51364_pass_barcode01_97ca62ca_0.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_1.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_2.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_3.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_4.fastq
+        ├── FAP51364_pass_barcode01_97ca62ca_5.fastq
+    <TRUNCATED>
+```
+
+```console
+.
+└── fast5_pass
+    ├── barcode01
+        ├── FAP51364_pass_barcode01_97ca62ca_0.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_1.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_2.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_3.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_4.fast5
+        ├── FAP51364_pass_barcode01_97ca62ca_5.fast5
+    <TRUNCATED>
+```
+
+The command to run the pipeline would then be:
+
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --outdir <OUTDIR> \
+    --platform nanopore \
+    --genome 'MN908947.3' \
+    --primer_set_version 3 \
+    --fastq_dir fastq_pass/ \
+    --fast5_dir fast5_pass/ \
+    --sequencing_summary sequencing_summary.txt \
+    -profile <docker/singularity/podman/conda/institute>
+```
+
+### Medaka
+
+You also have the option of using [Medaka](https://github.com/nanoporetech/medaka) as an alternative variant caller to Nanopolish via the `--artic_minion_caller medaka` parameter. Medaka is faster than Nanopolish, performs mostly the same and can be run directly from `fastq` input files as opposed to requiring the `fastq`, `fast5` and `sequencing_summary.txt` files required to run Nanopolish. You must provide the appropriate [Medaka model](https://github.com/nanoporetech/medaka#models) via the `--artic_minion_medaka_model` parameter if using `--artic_minion_caller medaka`. The `fastq` files have to be organised in the same way as for Nanopolish as outlined in the section above.
+
+The command to run the pipeline would then be:
+
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --outdir <OUTDIR> \
+    --platform nanopore \
+    --genome 'MN908947.3' \
+    --primer_set_version 3 \
+    --fastq_dir fastq_pass/ \
+    --artic_minion_caller medaka \
+    --artic_minion_medaka_model r941_min_high_g360 \
+    -profile <docker/singularity/podman/conda/institute>
+```
+
+## Illumina primer sets
+
+The Illumina processing mode of the pipeline has been tested on numerous different primer sets. Where possible we are trying to collate links and settings for standard primer sets to make it easier to run the pipeline with standard parameter keys. If you are able to get permissions from the vendor/supplier to share the primer information then we would be more than happy to support it within the pipeline.
+
+For SARS-CoV-2 data we recommend using the "MN908947.3" genome because it is supported out-of-the-box by the most commonly used primer sets available from the [ARTIC Network](https://artic.network/). For ease of use, we are also maintaining a version of the "MN908947.3" genome along with the appropriate links to the ARTIC primer sets in the [genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config) used by the pipeline. The genomes config file can be updated independently from the main pipeline code to make it possible to dynamically extend this file for other viral genomes/primer sets on request.
+
+For further information or help, don't hesitate to get in touch on the [Slack `#viralrecon` channel](https://nfcore.slack.com/channels/viralrecon) (you can join with [this invite](https://nf-co.re/join/slack)).
+
+### ARTIC primer sets
+
+An example command using v3 ARTIC primers with "MN908947.3":
+
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --outdir <OUTDIR> \
+    --platform illumina \
+    --protocol amplicon \
+    --genome 'MN908947.3' \
+    --primer_set artic \
+    --primer_set_version 3 \
+    --skip_assembly \
+    -profile <docker/singularity/podman/conda/institute>
+```
+
+### SWIFT primer sets
+
+The [SWIFT amplicon panel](https://swiftbiosci.com/swift-amplicon-sars-cov-2-panel/) is another commonly used method used to prep and sequence SARS-CoV-2 samples. We haven't been able to obtain explicit permission to host standard SWIFT primer sets but you can obtain a masterfile which is freely available from their website that contains the primer sequences as well as genomic co-ordinates. You just need to convert this file to [BED6](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) format and provide it to the pipeline with `--primer_bed swift_primers.bed`. Be sure to check the values provided to `--primer_left_suffix` and `--primer_right_suffix` match the primer names defined in the BED file as highlighted in [this issue](https://github.com/nf-core/viralrecon/issues/169). For an explanation behind the usage of the `--ivar_trim_offset 5` for SWIFT primer sets see [this issue](https://github.com/nf-core/viralrecon/issues/170).
+
+An example command using SWIFT primers with "MN908947.3":
+
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --outdir <OUTDIR> \
+    --platform illumina \
+    --protocol amplicon \
+    --genome 'MN908947.3' \
+    --primer_bed swift_primers.bed \
+    --primer_left_suffix '_F' \
+    --primer_right_suffix '_R' \
+    --ivar_trim_offset 5 \
+    --skip_assembly \
+    -profile <docker/singularity/podman/conda/institute>
+```
 
 ## Running the pipeline
 
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run nf-core/viralrecon --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run nf-core/viralrecon --input samplesheet.csv --outdir <OUTDIR> --genome 'MN908947.3' -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -180,6 +304,10 @@ To use a different container from the default container or conda environment spe
 A pipeline might not always support every possible argument or option of a particular tool used in pipeline. Fortunately, nf-core pipelines provide some freedom to users to insert additional parameters that the pipeline does not include by default.
 
 To learn how to provide additional arguments to a particular tool of the pipeline, please see the [customising tool arguments](https://nf-co.re/docs/usage/configuration#customising-tool-arguments) section of the nf-core website.
+
+#### Freyja
+
+[Freyja](https://github.com/andersen-lab/Freyja) relies on a dataset of barcodes that use lineage defining mutations (see [UShER](https://usher-wiki.readthedocs.io/en/latest/#)). By default the most recent barcodes will be downloaded and used. However, if analyses need to be compared across multiple datasets, it might be of interest to re-use the same barcodes, or to rerun all Freyja analyses with the most recent dataset. To do this, specify the barcodes and lineages using the `--freyja_barcodes`, `--freyja_lineages` parameters, respectivly.
 
 ### nf-core/configs
 
