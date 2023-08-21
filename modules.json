@@ -103,7 +103,8 @@
                     "custom/dumpsoftwareversions": {
                         "branch": "master",
                         "git_sha": "05c280924b6c768d484c7c443dad5e605c4ff4b4",
-                        "installed_by": ["modules"]
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/custom/dumpsoftwareversions/custom-dumpsoftwareversions.diff"
                     },
                     "custom/getchromsizes": {
                         "branch": "master",
