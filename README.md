@@ -156,18 +156,18 @@ For more details and further functionality, please refer to the [usage documenta
 
 An executable Python script called [`fastq_dir_to_samplesheet.py`](https://github.com/nf-core/viralrecon/blob/master/bin/fastq_dir_to_samplesheet.py) has been provided if you are using `--platform illumina` and would like to auto-create an input samplesheet based on a directory containing FastQ files **before** you run the pipeline (requires Python 3 installed locally) e.g.
 
-   ```console
-   wget -L https://raw.githubusercontent.com/nf-core/viralrecon/master/bin/fastq_dir_to_samplesheet.py
-   ./fastq_dir_to_samplesheet.py <FASTQ_DIR> samplesheet.csv
-   ```
+```console
+wget -L https://raw.githubusercontent.com/nf-core/viralrecon/master/bin/fastq_dir_to_samplesheet.py
+./fastq_dir_to_samplesheet.py <FASTQ_DIR> samplesheet.csv
+```
 
 ### Reference genomes
 
 You can find the default keys used to specify `--genome` in the [genomes config file](https://github.com/nf-core/configs/blob/master/conf/pipeline/viralrecon/genomes.config). This provides default options for
 
-   - Reference genomes (including SARS-CoV-2)
-   - Genome associates primer sets
-   - [Nextclade datasets](https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html)
+- Reference genomes (including SARS-CoV-2)
+- Genome associates primer sets
+- [Nextclade datasets](https://docs.nextstrain.org/projects/nextclade/en/latest/user/datasets.html)
 
 The Pangolin and Nextclade lineage and clade definitions change regularly as new SARS-CoV-2 lineages are discovered. For instructions to use more recent versions of lineage analysis tools like Pangolin and Nextclade please refer to the [updating containers](https://nf-co.re/viralrecon/usage#updating-containers) section in the usage docs.
 
