@@ -98,19 +98,17 @@ class NfcoreTemplate {
         misc_fields['Nextflow Compile Timestamp'] = workflow.nextflow.timestamp
 
         def email_fields = [:]
-        email_fields['version']           = NfcoreTemplate.version(workflow)
-        email_fields['runName']           = workflow.runName
-        email_fields['success']           = workflow.success
-        email_fields['dateComplete']      = workflow.complete
-        email_fields['duration']          = workflow.duration
-        email_fields['exitStatus']        = workflow.exitStatus
-        email_fields['errorMessage']      = (workflow.errorMessage ?: 'None')
-        email_fields['errorReport']       = (workflow.errorReport ?: 'None')
-        email_fields['commandLine']       = workflow.commandLine
-        email_fields['projectDir']        = workflow.projectDir
-        email_fields['summary']           = summary << misc_fields
-        email_fields['fail_mapped_reads'] = fail_mapped_reads.keySet()
-        email_fields['min_mapped_reads']  = params.min_mapped_reads
+        email_fields['version']      = NfcoreTemplate.version(workflow)
+        email_fields['runName']      = workflow.runName
+        email_fields['success']      = workflow.success
+        email_fields['dateComplete'] = workflow.complete
+        email_fields['duration']     = workflow.duration
+        email_fields['exitStatus']   = workflow.exitStatus
+        email_fields['errorMessage'] = (workflow.errorMessage ?: 'None')
+        email_fields['errorReport']  = (workflow.errorReport ?: 'None')
+        email_fields['commandLine']  = workflow.commandLine
+        email_fields['projectDir']   = workflow.projectDir
+        email_fields['summary']      = summary << misc_fields
 
         // On success try attach the multiqc report
         def mqc_report = null
@@ -148,7 +146,7 @@ class NfcoreTemplate {
         def email_html    = html_template.toString()
 
         // Render the sendmail template
-        def max_multiqc_email_size = params.max_multiqc_email_size as nextflow.util.MemoryUnit
+        def max_multiqc_email_size = (params.containsKey('max_multiqc_email_size') ? params.max_multiqc_email_size : 0) as nextflow.util.MemoryUnit
         def smail_fields           = [ email: email_address, subject: subject, email_txt: email_txt, email_html: email_html, projectDir: "$projectDir", mqcFile: mqc_report, mqcMaxSize: max_multiqc_email_size.toBytes() ]
         def sf                     = new File("$projectDir/assets/sendmail_template.txt")
         def sendmail_template      = engine.createTemplate(sf).make(smail_fields)
