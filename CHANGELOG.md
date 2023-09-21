@@ -18,6 +18,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 
 - [[#299](https://github.com/nf-core/viralrecon/issues/299)] - Add the freyja pipeline as a subworkflow
 - [[PR #387](https://github.com/nf-core/viralrecon/pull/387)] - Software closes gracefully when encountering an error
+- [[PR #395](https://github.com/nf-core/viralrecon/pull/395)] - Remove minia from default assemblers because it is unreliable
 
 ### Parameters
 
