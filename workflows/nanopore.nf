@@ -1,4 +1,19 @@
 /*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PRINT PARAMS SUMMARY
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+include { paramsSummaryLog; paramsSummaryMap } from 'plugin/nf-validation'
+
+def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
+def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
+def summary_params = paramsSummaryMap(workflow)
+
+// Print parameter summary log to screen
+log.info logo + paramsSummaryLog(workflow) + citation
+
+/*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     VALIDATE INPUTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -9,14 +24,13 @@ def valid_params = [
     artic_minion_aligner : ['minimap2', 'bwa']
 ]
 
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
-
 // Validate input parameters
 WorkflowNanopore.initialise(params, log, valid_params)
 
 def checkPathParamList = [
     params.input, params.fastq_dir, params.fast5_dir,
-    params.sequencing_summary, params.gff
+    params.sequencing_summary, params.gff,
+    params.freyja_barcodes, params.freyja_lineages
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
@@ -58,11 +72,12 @@ include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../mod
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK         } from '../subworkflows/local/input_check'
-include { PREPARE_GENOME      } from '../subworkflows/local/prepare_genome_nanopore'
-include { SNPEFF_SNPSIFT      } from '../subworkflows/local/snpeff_snpsift'
-include { VARIANTS_LONG_TABLE } from '../subworkflows/local/variants_long_table'
-include { FILTER_BAM_SAMTOOLS } from '../subworkflows/local/filter_bam_samtools'
+include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
+include { PREPARE_GENOME                } from '../subworkflows/local/prepare_genome_nanopore'
+include { SNPEFF_SNPSIFT                } from '../subworkflows/local/snpeff_snpsift'
+include { VARIANTS_LONG_TABLE           } from '../subworkflows/local/variants_long_table'
+include { FILTER_BAM_SAMTOOLS           } from '../subworkflows/local/filter_bam_samtools'
+include { BAM_VARIANT_DEMIX_BOOT_FREYJA } from '../subworkflows/nf-core/bam_variant_demix_boot_freyja/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -180,8 +195,8 @@ workflow NANOPORE {
                 .filter { it[1] == null }
                 .filter { it[-1] >= params.min_barcode_reads }
                 .map { it -> [ "${it[0]}\t${it[-1]}" ] }
-                .collect()                
-                .map { 
+                .collect()
+                .map {
                     tsv_data ->
                         def header = ['Barcode', 'Read count']
                         WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -194,8 +209,8 @@ workflow NANOPORE {
             ch_fastq_dirs
                 .filter { it[-1] == null }
                 .map { it -> [ "${it[1]}\t${it[0]}" ] }
-                .collect()                
-                .map { 
+                .collect()
+                .map {
                     tsv_data ->
                         def header = ['Sample', 'Missing barcode']
                         WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -239,7 +254,7 @@ workflow NANOPORE {
     ch_pass_fail_barcode_count
         .fail
         .collect()
-        .map { 
+        .map {
             tsv_data ->
                 def header = ['Sample', 'Barcode count']
                 WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -278,7 +293,7 @@ workflow NANOPORE {
     ch_pass_fail_guppyplex_count
         .fail
         .collect()
-        .map { 
+        .map {
             tsv_data ->
                 def header = ['Sample', 'Read count']
                 WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -410,18 +425,33 @@ workflow NANOPORE {
         NEXTCLADE_RUN
             .out
             .csv
-            .map { 
+            .map {
                 meta, csv ->
                     def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
                     return [ "$meta.id\t$clade" ]
             }
-            .collect()                
-            .map { 
+            .collect()
+            .map {
                 tsv_data ->
                     def header = ['Sample', 'clade']
                     WorkflowCommons.multiqcTsvFromList(tsv_data, header)
             }
             .set { ch_nextclade_multiqc }
+    }
+
+    //
+    // SUBWORKFLOW: Determine variants with Freyja
+    //
+    if (!params.skip_freyja) {
+        BAM_VARIANT_DEMIX_BOOT_FREYJA(
+            ARTIC_MINION.out.bam_primertrimmed,
+            PREPARE_GENOME.out.fasta,
+            params.freyja_repeats,
+            params.freyja_db_name,
+            params.freyja_barcodes,
+            params.freyja_lineages,
+        )
+        ch_versions= ch_versions.mix(BAM_VARIANT_DEMIX_BOOT_FREYJA.out.versions)
     }
 
     //

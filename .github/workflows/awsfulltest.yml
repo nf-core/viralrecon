@@ -18,18 +18,22 @@ jobs:
         platform: ["illumina", "nanopore"]
     steps:
       - name: Launch workflow via tower
-        uses: nf-core/tower-action@v3
+        uses: seqeralabs/action-tower-launch@v2
         with:
           workspace_id: ${{ secrets.TOWER_WORKSPACE_ID }}
           access_token: ${{ secrets.TOWER_ACCESS_TOKEN }}
           compute_env: ${{ secrets.TOWER_COMPUTE_ENV }}
+          revision: ${{ github.sha }}
           workdir: s3://${{ secrets.AWS_S3_BUCKET }}/work/viralrecon/work-${{ github.sha }}
           parameters: |
             {
+              "hook_url": "${{ secrets.MEGATESTS_ALERTS_SLACK_HOOK_URL }}",
               "outdir": "s3://${{ secrets.AWS_S3_BUCKET }}/viralrecon/results-${{ github.sha }}/platform_${{ matrix.platform }}"
             }
           profiles: test_full_${{ matrix.platform }},aws_tower
       - uses: actions/upload-artifact@v3
         with:
           name: Tower debug log file
-          path: tower_action_*.log
+          path: |
+            tower_action_*.log
+            tower_action_*.json

@@ -2,6 +2,8 @@
 // This file holds several functions specific to the main.nf workflow in the nf-core/viralrecon pipeline
 //
 
+import nextflow.Nextflow
+
 class WorkflowMain {
 
     //
@@ -18,39 +20,9 @@ class WorkflowMain {
     }
 
     //
-    // Generate help string
-    //
-    public static String help(workflow, params, log) {
-        def command = "nextflow run ${workflow.manifest.name} --input samplesheet.csv --outdir <OUTDIR> --genome 'MN908947.3' -profile docker"
-        def help_string = ''
-        help_string += NfcoreTemplate.logo(workflow, params.monochrome_logs)
-        help_string += NfcoreSchema.paramsHelp(workflow, params, command)
-        help_string += '\n' + citation(workflow) + '\n'
-        help_string += NfcoreTemplate.dashedLine(params.monochrome_logs)
-        return help_string
-    }
-
-    //
-    // Generate parameter summary log string
-    //
-    public static String paramsSummaryLog(workflow, params, log) {
-        def summary_log = ''
-        summary_log += NfcoreTemplate.logo(workflow, params.monochrome_logs)
-        summary_log += NfcoreSchema.paramsSummaryLog(workflow, params)
-        summary_log += '\n' + citation(workflow) + '\n'
-        summary_log += NfcoreTemplate.dashedLine(params.monochrome_logs)
-        return summary_log
-    }
-
-    //
     // Validate parameters and print summary to screen
     //
     public static void initialise(workflow, params, log) {
-        // Print help to screen if required
-        if (params.help) {
-            log.info help(workflow, params, log)
-            System.exit(0)
-        }
 
         // Print workflow version and exit on --version
         if (params.version) {
@@ -59,16 +31,8 @@ class WorkflowMain {
             System.exit(0)
         }
 
-        // Print parameter summary log to screen
-        log.info paramsSummaryLog(workflow, params, log)
-
         // Warn about using custom configs to provide pipeline parameters
         NfcoreTemplate.warnParamsProvidedInConfig(workflow, log)
-
-        // Validate workflow parameters via the JSON schema
-        if (params.validate_params) {
-            NfcoreSchema.validateParameters(workflow, params, log)
-        }
 
         // Check that a -profile or Nextflow config has been provided to run the pipeline
         NfcoreTemplate.checkConfigProvided(workflow, log)
@@ -84,18 +48,15 @@ class WorkflowMain {
         // Check sequencing platform
         def platformList = ['illumina', 'nanopore']
         if (!params.platform) {
-            log.error "Platform not specified with e.g. '--platform illumina'. Valid options: ${platformList.join(', ')}."
-            System.exit(1)
+            Nextflow.error("Platform not specified with e.g. '--platform illumina'. Valid options: ${platformList.join(', ')}.")
         } else if (!platformList.contains(params.platform)) {
-            log.error "Invalid platform option: '${params.platform}'. Valid options: ${platformList.join(', ')}."
-            System.exit(1)
+            Nextflow.error("Invalid platform option: '${params.platform}'. Valid options: ${platformList.join(', ')}.")
         }
 
         // Check Nextclade dataset parameters
         if (!params.skip_consensus && !params.skip_nextclade) {
             if (!params.nextclade_dataset && !params.nextclade_dataset_name) {
-                log.error "Nextclade dataset not specified with '--nextclade_dataset' or '--nextclade_dataset_name'. A list of available datasets can be obtained using the Nextclade 'nextclade dataset list' command."
-                System.exit(1)
+                Nextflow.error("Nextclade dataset not specified with '--nextclade_dataset' or '--nextclade_dataset_name'. A list of available datasets can be obtained using the Nextclade 'nextclade dataset list' command.")
             }
         }
     }
@@ -120,33 +81,30 @@ class WorkflowMain {
                         if (genome_map.containsKey(primer_set_version)) {
                             genome_map = genome_map[ primer_set_version ]
                         } else {
-                            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                            Nextflow.error("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                                 " --primer_set_version '${primer_set_version}' not found!\n\n" +
                                 " Currently, the available primer set version keys are: ${genome_map.keySet().join(", ")}\n\n" +
                                 " Please check:\n" +
                                 "   - The value provided to --primer_set_version (currently '${primer_set_version}')\n" +
                                 "   - The value provided to --primer_set (currently '${primer_set}')\n" +
                                 "   - The value provided to --genome (currently '${params.genome}')\n" +
-                                "   - Any custom config files provided to the pipeline.\n\n" + support_link
-                            System.exit(1)
+                                "   - Any custom config files provided to the pipeline.\n\n" + support_link)
                         }
                     } else {
-                        log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                        Nextflow.error("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                             " --primer_set '${primer_set}' not found!\n\n" +
                             " Currently, the available primer set keys are: ${genome_map.keySet().join(", ")}\n\n" +
                             " Please check:\n" +
                             "   - The value provided to --primer_set (currently '${primer_set}')\n" +
                             "   - The value provided to --genome (currently '${params.genome}')\n" +
-                            "   - Any custom config files provided to the pipeline.\n\n" + support_link
-                        System.exit(1)
+                            "   - Any custom config files provided to the pipeline.\n\n" + support_link)
                     }
                 } else {
-                    log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+                    Nextflow.error("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                         " Genome '${params.genome}' does not contain any primer sets!\n\n" +
                         " Please check:\n" +
                         "   - The value provided to --genome (currently '${params.genome}')\n" +
-                        "   - Any custom config files provided to the pipeline.\n\n" + support_link
-                    System.exit(1)
+                        "   - Any custom config files provided to the pipeline.\n\n" + support_link)
                 }
             }
             if (genome_map.containsKey(attribute)) {

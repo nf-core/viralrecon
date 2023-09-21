@@ -251,6 +251,35 @@
                     "description": "Maximum window size before and after variant locii used to generate ASCIIGenome screenshots.",
                     "fa_icon": "fab fa-windows"
                 },
+                "skip_freyja": {
+                    "type": "boolean",
+                    "fa_icon": "fas fast-forward",
+                    "description": "Skip freyja deep SARS-CoV-2 variant analysis using a depth weighted approach."
+                },
+                "freyja_db_name": {
+                    "type": "string",
+                    "default": "freyja_db",
+                    "fa_icon": "fas fa-folder-open",
+                    "description": "Specify the name where to store UShER database (default: 'freyja_db')."
+                },
+                "freyja_repeats": {
+                    "type": "integer",
+                    "default": 100,
+                    "fa_icon": "fas fa-hand-paper",
+                    "description": "Specify the number of bootstrap repeats to do."
+                },
+                "freyja_barcodes": {
+                    "type": "string",
+                    "format": "path",
+                    "fa_icon": "fas fa-file",
+                    "description": "Lineage defining barcodes, default is most recent from UShER database."
+                },
+                "freyja_lineages": {
+                    "type": "string",
+                    "format": "path",
+                    "fa_icon": "fas fa-file",
+                    "description": "Metadata of lineages that match barcode, default is most recent from UShER database."
+                },
                 "multiqc_title": {
                     "type": "string",
                     "hidden": true,
@@ -599,12 +628,26 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
-                "show_hidden_params": {
+                "validationShowHiddenParams": {
                     "type": "boolean",
                     "fa_icon": "far fa-eye-slash",
                     "description": "Show all params when using `--help`",
                     "hidden": true,
                     "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
+                },
+                "validationFailUnrecognisedParams": {
+                    "type": "boolean",
+                    "fa_icon": "far fa-check-circle",
+                    "description": "Validation of parameters fails when an unrecognised parameter is found.",
+                    "hidden": true,
+                    "help_text": "By default, when an unrecognised parameter is found, it returns a warinig."
+                },
+                "validationLenientMode": {
+                    "type": "boolean",
+                    "fa_icon": "far fa-check-circle",
+                    "description": "Validation of parameters in lenient more.",
+                    "hidden": true,
+                    "help_text": "Allows string values that are parseable as numbers or booleans. For further information see [JSONSchema docs](https://github.com/everit-org/json-schema#lenient-mode)."
                 }
             }
         },
