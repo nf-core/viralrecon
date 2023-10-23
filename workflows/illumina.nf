@@ -35,12 +35,13 @@ def checkPathParamList = [
     params.input, params.fasta, params.gff, params.bowtie2_index,
     params.kraken2_db, params.primer_bed, params.primer_fasta,
     params.blast_db, params.spades_hmm, params.multiqc_config,
-    params.freyja_barcodes, params.freyja_lineages
+    params.freyja_barcodes, params.freyja_lineages, params.additional_annot
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
-if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = []                              }
+if (params.input)            { ch_input          = file(params.input)            } else { exit 1, 'Input samplesheet file not specified!' }
+if (params.spades_hmm)       { ch_spades_hmm     = file(params.spades_hmm)       } else { ch_spades_hmm = []                              }
+if (params.additional_annot) { ch_additional_gtf = file(params.additional_annot) } else { additional_annot = []                           }
 
 def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
 
