@@ -19,16 +19,18 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[#299](https://github.com/nf-core/viralrecon/issues/299)] - Add the freyja pipeline as a subworkflow
 - [[PR #387](https://github.com/nf-core/viralrecon/pull/387)] - Software closes gracefully when encountering an error
 - [[PR #395](https://github.com/nf-core/viralrecon/pull/395)] - Remove minia from default assemblers because it is unreliable
+- [[PR #401](https://github.com/nf-core/viralrecon/pull/401)] - Added option to add a custom annotation
 
 ### Parameters
 
-| Old parameter       | New parameter |
-| ------------------- | ------------- |
-| `--skip_freyja`     |               |
-| `--freyja_repeats`  |               |
-| `--freyja_db_name`  |               |
-| `--freyja_barcodes` |               |
-| `--freyja_lineages` |               |
+| Old parameter       | New parameter        |
+| ------------------- | -------------------- |
+| `--skip_freyja`     |                      |
+| `--freyja_repeats`  |                      |
+| `--freyja_db_name`  |                      |
+| `--freyja_barcodes` |                      |
+| `--freyja_lineages` |                      |
+|                     | `--additional_annot` |
 
 > **NB:** Parameter has been **updated** if both old and new parameter information is present.
 > **NB:** Parameter has been **added** if just the new parameter information is present.
