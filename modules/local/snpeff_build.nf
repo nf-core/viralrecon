@@ -20,7 +20,14 @@ process SNPEFF_BUILD {
     task.ext.when == null || task.ext.when
 
     script:
+    def args = task.ext.args ?: ''
     def basename = fasta.baseName
+    def extension = gff.getExtension()
+    if (extension == "gtf") {
+        format = "gtf22"
+    } else {
+        format = "gff3"
+    }
 
     def avail_mem = 4
     if (!task.memory) {
@@ -36,7 +43,7 @@ process SNPEFF_BUILD {
     cd ../../
     mkdir -p snpeff_db/${basename}/
     cd snpeff_db/${basename}/
-    ln -s ../../$gff genes.gff
+    ln -s ../../$gff genes.$extension
 
     cd ../../
     echo "${basename}.genome : ${basename}" > snpeff.config
@@ -46,7 +53,8 @@ process SNPEFF_BUILD {
         build \\
         -config snpeff.config \\
         -dataDir ./snpeff_db \\
-        -gff3 \\
+        -${format} \\
+        $args \\
         -v \\
         ${basename}
 
