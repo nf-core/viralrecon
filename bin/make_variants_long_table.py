@@ -247,27 +247,50 @@ def snpsift_to_table(snpsift_file):
 
     return table
 
+
 def one_effect_per_line(table):
     one_effect_per_line_table = pd.DataFrame()
     for i in range(len(table)):
-        gene_list = table.iloc[i,4].split(",")
-        effect_list = table.iloc[i,5].split(",")
-        hgvs_c_list = table.iloc[i,6].split(",")
-        hgvs_p_list = table.iloc[i,7].split(",")
-        
+        gene_list = table.iloc[i, 4].split(",")
+        effect_list = table.iloc[i, 5].split(",")
+        hgvs_c_list = table.iloc[i, 6].split(",")
+        hgvs_p_list = table.iloc[i, 7].split(",")
+
         count = 0
         for j in range(len(gene_list)):
             if "upstream" in effect_list[j] or "downstream" in effect_list[j]:
                 count += 1
         for j in range(len(gene_list)):
             if len(effect_list) == count:
-                row = {'CHROM':table.iloc[i,0], 'POS':table.iloc[i,1], 'REF':table.iloc[i,2], 'ALT':table.iloc[i,3], 'GENE':gene_list[0], 'EFFECT':effect_list[0], 'HGVS_C':hgvs_c_list[0], 'HGVS_P':hgvs_p_list[0],}
-                one_effect_per_line_table = pd.concat([one_effect_per_line_table, pd.DataFrame([row])], ignore_index=True)
+                row = {
+                    "CHROM": table.iloc[i, 0],
+                    "POS": table.iloc[i, 1],
+                    "REF": table.iloc[i, 2],
+                    "ALT": table.iloc[i, 3],
+                    "GENE": gene_list[0],
+                    "EFFECT": effect_list[0],
+                    "HGVS_C": hgvs_c_list[0],
+                    "HGVS_P": hgvs_p_list[0],
+                }
+                one_effect_per_line_table = pd.concat(
+                    [one_effect_per_line_table, pd.DataFrame([row])], ignore_index=True
+                )
             else:
                 if not "upstream" in effect_list[j] and not "downstream" in effect_list[j]:
-                    row = {'CHROM':table.iloc[i,0], 'POS':table.iloc[i,1], 'REF':table.iloc[i,2], 'ALT':table.iloc[i,3], 'GENE':gene_list[j], 'EFFECT':effect_list[j], 'HGVS_C':hgvs_c_list[j], 'HGVS_P':hgvs_p_list[j],}
-                    one_effect_per_line_table = pd.concat([one_effect_per_line_table, pd.DataFrame([row])], ignore_index=True)
-    return(one_effect_per_line_table)
+                    row = {
+                        "CHROM": table.iloc[i, 0],
+                        "POS": table.iloc[i, 1],
+                        "REF": table.iloc[i, 2],
+                        "ALT": table.iloc[i, 3],
+                        "GENE": gene_list[j],
+                        "EFFECT": effect_list[j],
+                        "HGVS_C": hgvs_c_list[j],
+                        "HGVS_P": hgvs_p_list[j],
+                    }
+                    one_effect_per_line_table = pd.concat(
+                        [one_effect_per_line_table, pd.DataFrame([row])], ignore_index=True
+                    )
+    return one_effect_per_line_table
 
 
 def main(args=None):
