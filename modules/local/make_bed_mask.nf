@@ -4,7 +4,7 @@ process MAKE_BED_MASK {
     conda "conda-forge::python=3.9.5 bioconda::samtools=1.14"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/mulled-v2-1a35167f7a491c7086c13835aaa74b39f1f43979:6b5cffa1187cfccf2dc983ed3b5359d49b999eb0-0' :
-        'biocontainers/mulled-v2-1a35167f7a491c7086c13835aaa74b39f1f43979:6b5cffa1187cfccf2dc983ed3b5359d49b999eb0-0' }"
+        'quay.io/biocontainers/mulled-v2-1a35167f7a491c7086c13835aaa74b39f1f43979:6b5cffa1187cfccf2dc983ed3b5359d49b999eb0-0' }"
 
     input:
     tuple val(meta), path(bam), path(vcf)
