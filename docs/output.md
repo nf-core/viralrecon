@@ -911,9 +911,7 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 
 ![MultiQC - QUAST contig counts](images/mqc_quast_plot.png)
 
-:::note
-The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
-:::
+## Illumina: Workflow reporting and genomes
 
 ### MultiQC
 
