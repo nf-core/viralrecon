@@ -27,9 +27,7 @@ workflow CONSENSUS_QC {
         QUAST (
             consensus.collect{ it[1] },
             fasta,
-            gff,
-            true,
-            params.gff
+            gff
         )
         ch_quast_results = QUAST.out.results
         ch_quast_tsv     = QUAST.out.tsv
