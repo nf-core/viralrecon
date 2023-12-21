@@ -18,9 +18,9 @@ You will need to create a samplesheet with information about the samples you wou
 --input '[path to samplesheet file]'
 ```
 
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once (e.g. to increase sequencing depth). The pipeline will concatenate the raw reads before performing any downstream analysis.
+### Multiple runs of the same sample
 
-A final samplesheet file may look something like the one below. `SAMPLE_1` was sequenced twice in Illumina PE format, `SAMPLE_2` was sequenced once in Illumina SE format.
+The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
 
 ```console
 sample,fastq_1,fastq_2
