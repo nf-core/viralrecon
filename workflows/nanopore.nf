@@ -467,10 +467,8 @@ workflow NANOPORE {
             .set { ch_to_quast }
         QUAST (
             ch_to_quast,
-            PREPARE_GENOME.out.fasta.collect(),
-            params.gff ? PREPARE_GENOME.out.gff : [],
-            true,
-            params.gff
+            PREPARE_GENOME.out.fasta.collect().map { [ [:], it ] },
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [],
         )
         ch_quast_multiqc = QUAST.out.tsv
         ch_versions      = ch_versions.mix(QUAST.out.versions)
@@ -563,7 +561,7 @@ workflow NANOPORE {
             FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]),
             BCFTOOLS_STATS.out.stats.collect{it[1]}.ifEmpty([]),
             ch_mosdepth_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_quast_multiqc.collect().ifEmpty([]),
+            ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
             ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
             ch_nextclade_multiqc.collectFile(name: 'nextclade_clade_mqc.tsv').ifEmpty([])
