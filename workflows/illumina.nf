@@ -292,7 +292,7 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.bowtie2_index,
             params.save_unaligned,
             false,
-            PREPARE_GENOME.out.fasta
+            PREPARE_GENOME.out.fasta.map { [ [:], it ] }
         )
         ch_bam                      = FASTQ_ALIGN_BOWTIE2.out.bam
         ch_bai                      = FASTQ_ALIGN_BOWTIE2.out.bai
@@ -350,7 +350,7 @@ workflow ILLUMINA {
         BAM_TRIM_PRIMERS_IVAR (
             ch_bam.join(ch_bai, by: [0]),
             PREPARE_GENOME.out.primer_bed,
-            PREPARE_GENOME.out.fasta
+            PREPARE_GENOME.out.fasta.map { [ [:], it ] }
         )
         ch_bam                        = BAM_TRIM_PRIMERS_IVAR.out.bam
         ch_bai                        = BAM_TRIM_PRIMERS_IVAR.out.bai
@@ -365,7 +365,7 @@ workflow ILLUMINA {
     if (!params.skip_variants && !params.skip_markduplicates) {
         BAM_MARKDUPLICATES_PICARD (
             ch_bam,
-            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fasta.map { [ [:], it ] },
             PREPARE_GENOME.out.fai
         )
         ch_bam                             = BAM_MARKDUPLICATES_PICARD.out.bam
