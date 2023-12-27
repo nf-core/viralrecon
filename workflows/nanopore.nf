@@ -372,8 +372,9 @@ workflow NANOPORE {
     if (!params.skip_mosdepth) {
 
         MOSDEPTH_GENOME (
-            ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
-            [ [:], [] ],
+            ARTIC_MINION.out.bam_primertrimmed
+                .join(ARTIC_MINION.out.bai_primertrimmed, by: [0])
+                .map { meta, bam, bai -> [ meta, bam, bai, [] ] },
             [ [:], [] ]
         )
         ch_mosdepth_multiqc  = MOSDEPTH_GENOME.out.global_txt
@@ -385,8 +386,7 @@ workflow NANOPORE {
         ch_versions = ch_versions.mix(PLOT_MOSDEPTH_REGIONS_GENOME.out.versions)
 
         MOSDEPTH_AMPLICON (
-            ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
-            PREPARE_GENOME.out.primer_collapsed_bed.map { [ [:], it ] }.collect(),
+            ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]).join(PREPARE_GENOME.out.primer_collapsed_bed),
             [ [:], [] ]
         )
         ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
