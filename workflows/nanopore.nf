@@ -347,9 +347,11 @@ workflow NANOPORE {
     //
     BCFTOOLS_STATS (
         VCFLIB_VCFUNIQ.out.vcf.join(TABIX_TABIX.out.tbi, by: [0]),
-        [],
-        [],
-        []
+        [ [:], [] ],
+        [ [:], [] ],
+        [ [:], [] ],
+        [ [:], [] ],
+        [ [:], [] ]
     )
     ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions.first().ifEmpty(null))
 
@@ -358,7 +360,7 @@ workflow NANOPORE {
     //
     FILTER_BAM_SAMTOOLS (
         ARTIC_MINION.out.bam.join(ARTIC_MINION.out.bai, by: [0]),
-        []
+        [ [:], [] ]
     )
     ch_versions = ch_versions.mix(FILTER_BAM_SAMTOOLS.out.versions)
 
