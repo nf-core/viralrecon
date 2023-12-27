@@ -47,10 +47,15 @@ workflow ASSEMBLY_QC {
     ch_quast_results = Channel.empty()
     ch_quast_tsv     = Channel.empty()
     if (!params.skip_assembly_quast) {
+        scaffolds
+            .collect{ it[1] }
+            .map { scaffolds_collect -> tuple([id: "quast"], scaffolds_collect) }
+            .set { ch_to_quast }
+
         QUAST (
-            scaffolds.collect{ it[1] },
-            fasta,
-            gff
+            ch_to_quast,
+            fasta.map { [ [:], it ] },
+            gff.map { [ [:], it ] }
         )
         ch_quast_results = QUAST.out.results
         ch_quast_tsv     = QUAST.out.tsv

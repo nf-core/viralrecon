@@ -459,8 +459,12 @@ workflow NANOPORE {
     //
     ch_quast_multiqc = Channel.empty()
     if (!params.skip_variants_quast) {
+        ARTIC_MINION.out.fasta
+            .collect{ it[1] }
+            .map { consensus_collect -> tuple([id: "quast"], consensus_collect) }
+            .set { ch_to_quast }
         QUAST (
-            ARTIC_MINION.out.fasta.collect{ it[1] },
+            ch_to_quast,
             PREPARE_GENOME.out.fasta.collect(),
             params.gff ? PREPARE_GENOME.out.gff : [],
             true,
