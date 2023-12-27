@@ -63,9 +63,9 @@ workflow VARIANTS_BCFTOOLS {
 
     VCF_TABIX_STATS (
         BCFTOOLS_NORM.out.vcf,
-        [],
-        [],
-        []
+        [ [:], [] ],
+        [ [:], [] ],
+        [ [:], [] ]
     )
     ch_versions = ch_versions.mix(VCF_TABIX_STATS.out.versions)
 
