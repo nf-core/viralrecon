@@ -393,7 +393,9 @@ workflow ILLUMINA {
     ch_amplicon_heatmap_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_mosdepth) {
         MOSDEPTH_GENOME (
-            ch_bam.join(ch_bai, by: [0]),
+            ch_bam
+                .join(ch_bai, by: [0])
+                .map { meta, bam, bai -> [ meta, bam, bai, [] ] },
             [ [:], [] ],
         )
         ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
@@ -406,8 +408,10 @@ workflow ILLUMINA {
 
         if (params.protocol == 'amplicon') {
             MOSDEPTH_AMPLICON (
-                ch_bam.join(ch_bai, by: [0]),
-                PREPARE_GENOME.out.primer_collapsed_bed.map { [ [:], it ] },
+                ch_bam
+                    .join(ch_bai, by: [0])
+                    .join(PREPARE_GENOME.out.primer_collapsed_bed),
+                [ [:], [] ],
             )
             ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
 
