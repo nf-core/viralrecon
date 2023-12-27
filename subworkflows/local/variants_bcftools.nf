@@ -26,7 +26,7 @@ workflow VARIANTS_BCFTOOLS {
     //
     BCFTOOLS_MPILEUP (
         bam.map{ meta, bam_file -> [ meta, bam_file, [] ] },
-        fasta,
+        fasta.map { [ [:], it ] },
         params.save_mpileup
     )
     ch_versions = ch_versions.mix(BCFTOOLS_MPILEUP.out.versions.first())
@@ -57,7 +57,7 @@ workflow VARIANTS_BCFTOOLS {
     //
     BCFTOOLS_NORM (
         ch_vcf.join(ch_tbi, by: [0]),
-        fasta
+        fasta.map { [ [:], it ] }
     )
     ch_versions = ch_versions.mix(BCFTOOLS_NORM.out.versions.first())
 
