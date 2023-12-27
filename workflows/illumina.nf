@@ -499,7 +499,7 @@ workflow ILLUMINA {
         CONSENSUS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.nextclade_db
         )
 
@@ -518,7 +518,7 @@ workflow ILLUMINA {
             ch_vcf,
             ch_tbi,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.nextclade_db
         )
 
@@ -591,7 +591,7 @@ workflow ILLUMINA {
             params.spades_mode,
             ch_spades_hmm,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -607,7 +607,7 @@ workflow ILLUMINA {
         ASSEMBLY_UNICYCLER (
             ch_assembly_fastq.map { meta, fastq -> [ meta, fastq, [] ] },
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -623,7 +623,7 @@ workflow ILLUMINA {
         ASSEMBLY_MINIA (
             ch_assembly_fastq,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )

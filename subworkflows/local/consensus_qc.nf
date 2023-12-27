@@ -32,7 +32,7 @@ workflow CONSENSUS_QC {
         QUAST (
             ch_to_quast,
             fasta.map { [ [:], it ] },
-            gff.map { [ [:], it ] }
+            gff
         )
         ch_quast_results = QUAST.out.results
         ch_quast_tsv     = QUAST.out.tsv
