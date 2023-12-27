@@ -60,9 +60,9 @@ workflow VARIANTS_IVAR {
 
     VCF_TABIX_STATS (
         BCFTOOLS_SORT.out.vcf,
-        [],
-        [],
-        []
+        [ [:], [] ],
+        [ [:], [] ],
+        [ [:], [] ]
     )
     ch_versions = ch_versions.mix(VCF_TABIX_STATS.out.versions)
 
