@@ -660,13 +660,13 @@ workflow ILLUMINA {
             ch_ivar_counts_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_quast_multiqc.collect().ifEmpty([]),
+            ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
             ch_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
             ch_nextclade_multiqc.collectFile(name: 'nextclade_clade_mqc.tsv').ifEmpty([]),
             ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_spades_quast_multiqc.collect().ifEmpty([]),
-            ch_unicycler_quast_multiqc.collect().ifEmpty([]),
-            ch_minia_quast_multiqc.collect().ifEmpty([])
+            ch_spades_quast_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_unicycler_quast_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_minia_quast_multiqc.collect{it[1]}.ifEmpty([])
         )
         multiqc_report = MULTIQC.out.report.toList()
     }
