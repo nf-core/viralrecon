@@ -468,7 +468,7 @@ workflow NANOPORE {
         QUAST (
             ch_to_quast,
             PREPARE_GENOME.out.fasta.collect().map { [ [:], it ] },
-            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [],
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
         )
         ch_quast_multiqc = QUAST.out.tsv
         ch_versions      = ch_versions.mix(QUAST.out.versions)
