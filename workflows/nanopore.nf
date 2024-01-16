@@ -347,9 +347,11 @@ workflow NANOPORE {
     //
     BCFTOOLS_STATS (
         VCFLIB_VCFUNIQ.out.vcf.join(TABIX_TABIX.out.tbi, by: [0]),
-        [],
-        [],
-        []
+        [ [:], [] ],
+        [ [:], [] ],
+        [ [:], [] ],
+        [ [:], [] ],
+        [ [:], [] ]
     )
     ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions.first().ifEmpty(null))
 
@@ -358,7 +360,7 @@ workflow NANOPORE {
     //
     FILTER_BAM_SAMTOOLS (
         ARTIC_MINION.out.bam.join(ARTIC_MINION.out.bai, by: [0]),
-        []
+        [ [:], [] ]
     )
     ch_versions = ch_versions.mix(FILTER_BAM_SAMTOOLS.out.versions)
 
@@ -370,8 +372,9 @@ workflow NANOPORE {
     if (!params.skip_mosdepth) {
 
         MOSDEPTH_GENOME (
-            ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
-            [ [:], [] ],
+            ARTIC_MINION.out.bam_primertrimmed
+                .join(ARTIC_MINION.out.bai_primertrimmed, by: [0])
+                .map { meta, bam, bai -> [ meta, bam, bai, [] ] },
             [ [:], [] ]
         )
         ch_mosdepth_multiqc  = MOSDEPTH_GENOME.out.global_txt
@@ -383,8 +386,7 @@ workflow NANOPORE {
         ch_versions = ch_versions.mix(PLOT_MOSDEPTH_REGIONS_GENOME.out.versions)
 
         MOSDEPTH_AMPLICON (
-            ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]),
-            PREPARE_GENOME.out.primer_collapsed_bed.map { [ [:], it ] }.collect(),
+            ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]).join(PREPARE_GENOME.out.primer_collapsed_bed),
             [ [:], [] ]
         )
         ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
@@ -459,12 +461,14 @@ workflow NANOPORE {
     //
     ch_quast_multiqc = Channel.empty()
     if (!params.skip_variants_quast) {
+        ARTIC_MINION.out.fasta
+            .collect{ it[1] }
+            .map { consensus_collect -> tuple([id: "quast"], consensus_collect) }
+            .set { ch_to_quast }
         QUAST (
-            ARTIC_MINION.out.fasta.collect{ it[1] },
-            PREPARE_GENOME.out.fasta.collect(),
-            params.gff ? PREPARE_GENOME.out.gff : [],
-            true,
-            params.gff
+            ch_to_quast,
+            PREPARE_GENOME.out.fasta.collect().map { [ [:], it ] },
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
         )
         ch_quast_multiqc = QUAST.out.tsv
         ch_versions      = ch_versions.mix(QUAST.out.versions)
@@ -557,7 +561,7 @@ workflow NANOPORE {
             FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]),
             BCFTOOLS_STATS.out.stats.collect{it[1]}.ifEmpty([]),
             ch_mosdepth_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_quast_multiqc.collect().ifEmpty([]),
+            ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
             ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
             ch_nextclade_multiqc.collectFile(name: 'nextclade_clade_mqc.tsv').ifEmpty([])
@@ -576,6 +580,7 @@ workflow.onComplete {
     if (params.email || params.email_on_fail) {
         NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
     }
+    NfcoreTemplate.dump_parameters(workflow, params)
     NfcoreTemplate.summary(workflow, params, log)
 }
 

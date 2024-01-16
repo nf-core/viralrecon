@@ -28,7 +28,7 @@ jobs:
           - "latest-everything"
     steps:
       - name: Check out pipeline code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Nextflow
         uses: nf-core/setup-nextflow@v1
@@ -103,7 +103,7 @@ jobs:
           - "--min_barcode_reads 10000"
           - "--min_guppyplex_reads 10000"
           - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false"
-          - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false --artic_minion_medaka_model r941_min_high_g360"
+          - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false --artic_minion_medaka_model ./r941_min_high_g360_model.hdf5"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -112,6 +112,9 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
+      - name: Download medaka model
+        run: |
+          wget https://github.com/nanoporetech/medaka/raw/master/medaka/data/r941_min_high_g360_model.hdf5
 
       - name: Run pipeline with minimal Nanopore data and various options
         run: |

@@ -206,7 +206,7 @@ workflow PREPARE_GENOME {
                 }
             } else {
                 BLAST_MAKEBLASTDB (
-                    ch_fasta
+                    ch_fasta.map { [ [:], it ] }
                 )
                 ch_blast_db = BLAST_MAKEBLASTDB.out.db
                 ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
