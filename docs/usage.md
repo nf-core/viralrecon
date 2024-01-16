@@ -104,6 +104,7 @@ nextflow run nf-core/viralrecon \
     --outdir <OUTDIR> \
     --platform nanopore \
     --genome 'MN908947.3' \
+    --primer_set 'artic' \
     --primer_set_version 3 \
     --fastq_dir fastq_pass/ \
     --fast5_dir fast5_pass/ \
@@ -123,6 +124,7 @@ nextflow run nf-core/viralrecon \
     --outdir <OUTDIR> \
     --platform nanopore \
     --genome 'MN908947.3' \
+    --primer_set 'artic' \
     --primer_set_version 3 \
     --fastq_dir fastq_pass/ \
     --artic_minion_caller medaka \
