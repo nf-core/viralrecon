@@ -453,7 +453,8 @@ workflow NANOPORE {
             params.freyja_barcodes,
             params.freyja_lineages,
         )
-        ch_versions= ch_versions.mix(BAM_VARIANT_DEMIX_BOOT_FREYJA.out.versions)
+        ch_versions       = ch_versions.mix(BAM_VARIANT_DEMIX_BOOT_FREYJA.out.versions)
+        ch_freyja_multiqc = BAM_VARIANT_DEMIX_BOOT_FREYJA.out.demix
     }
 
     //
@@ -564,7 +565,8 @@ workflow NANOPORE {
             ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
             ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
             ch_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_nextclade_multiqc.collectFile(name: 'nextclade_clade_mqc.tsv').ifEmpty([])
+            ch_nextclade_multiqc.collectFile(name: 'nextclade_clade_mqc.tsv').ifEmpty([]),
+            ch_freyja_multiqc.collect{it[1]}.ifEmpty([]),
         )
         multiqc_report = MULTIQC.out.report.toList()
     }

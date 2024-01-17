@@ -16,6 +16,7 @@ run_modules:
   - snpeff
   - quast
   - pangolin
+  - freyja
 
 module_order:
   - pangolin:
@@ -26,6 +27,9 @@ module_order:
       path_filters:
         - "./samtools_stats/*"
   - mosdepth
+  - freyja:
+    path_filters:
+      - "./freyja_demix/*.tsv"
   - bcftools:
       path_filters:
         - "./bcftools_stats/*.txt"
