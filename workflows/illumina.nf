@@ -35,12 +35,13 @@ def checkPathParamList = [
     params.input, params.fasta, params.gff, params.bowtie2_index,
     params.kraken2_db, params.primer_bed, params.primer_fasta,
     params.blast_db, params.spades_hmm, params.multiqc_config,
-    params.freyja_barcodes, params.freyja_lineages
+    params.freyja_barcodes, params.freyja_lineages, params.additional_annot
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
-if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = []                              }
+if (params.input)            { ch_input          = file(params.input)            } else { exit 1, 'Input samplesheet file not specified!' }
+if (params.spades_hmm)       { ch_spades_hmm     = file(params.spades_hmm)       } else { ch_spades_hmm = []                              }
+if (params.additional_annot) { ch_additional_gtf = file(params.additional_annot) } else { additional_annot = []                           }
 
 def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
 
@@ -84,6 +85,7 @@ include { VARIANTS_BCFTOOLS       } from '../subworkflows/local/variants_bcftool
 include { CONSENSUS_IVAR          } from '../subworkflows/local/consensus_ivar'
 include { CONSENSUS_BCFTOOLS      } from '../subworkflows/local/consensus_bcftools'
 include { VARIANTS_LONG_TABLE     } from '../subworkflows/local/variants_long_table'
+include { ADDITIONAL_ANNOT        } from '../subworkflows/local/additional_annot'
 include { ASSEMBLY_SPADES         } from '../subworkflows/local/assembly_spades'
 include { ASSEMBLY_UNICYCLER      } from '../subworkflows/local/assembly_unicycler'
 include { ASSEMBLY_MINIA          } from '../subworkflows/local/assembly_minia'
@@ -558,6 +560,21 @@ workflow ILLUMINA {
             ch_pangolin_multiqc
         )
         ch_versions = ch_versions.mix(VARIANTS_LONG_TABLE.out.versions)
+    }
+
+    //
+    // SUBWORKFLOW: Create variants long table report for additional annotation file
+    //
+    if (params.additional_annot) {
+        ADDITIONAL_ANNOT (
+            ch_vcf,
+            ch_tbi,
+            PREPARE_GENOME.out.fasta,
+            ch_additional_gtf,
+            ch_pangolin_multiqc
+
+        )
+        ch_versions = ch_versions.mix(ADDITIONAL_ANNOT.out.versions)
     }
 
     //

@@ -289,6 +289,7 @@ As described in the documentation, [ASCIIGenome](https://asciigenome.readthedocs
 
 - `<CALLER>/`
   - `variants_long_table.csv`: Long format table collating per-sample information for individual variants, functional effect prediction and lineage analysis.
+  - `additional_variants_long_table.csv`: Long format table similar to `variants_long_table.csv` for additional annotation file with overlapping annotation features.
 
 **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--artic_minion_caller` parameter (Default: 'nanopolish').
 

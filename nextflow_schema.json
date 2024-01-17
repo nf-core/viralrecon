@@ -78,6 +78,14 @@
                     "description": "Full path to GFF annotation file.",
                     "fa_icon": "fas fa-file-invoice"
                 },
+                "additional_annot": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
+                    "pattern": "^\\S+(\\.gff|\\.gtf)(\\.gz)?$",
+                    "description": "Full path to additional annotation file in GTF or GFF format.",
+                    "fa_icon": "fas fa-file-invoice"
+                },
                 "bowtie2_index": {
                     "type": "string",
                     "format": "path",
