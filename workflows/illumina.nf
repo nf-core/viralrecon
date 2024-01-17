@@ -294,7 +294,7 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.bowtie2_index,
             params.save_unaligned,
             false,
-            PREPARE_GENOME.out.fasta
+            PREPARE_GENOME.out.fasta.map { [ [:], it ] }
         )
         ch_bam                      = FASTQ_ALIGN_BOWTIE2.out.bam
         ch_bai                      = FASTQ_ALIGN_BOWTIE2.out.bai
@@ -352,7 +352,7 @@ workflow ILLUMINA {
         BAM_TRIM_PRIMERS_IVAR (
             ch_bam.join(ch_bai, by: [0]),
             PREPARE_GENOME.out.primer_bed,
-            PREPARE_GENOME.out.fasta
+            PREPARE_GENOME.out.fasta.map { [ [:], it ] }
         )
         ch_bam                        = BAM_TRIM_PRIMERS_IVAR.out.bam
         ch_bai                        = BAM_TRIM_PRIMERS_IVAR.out.bai
@@ -367,7 +367,7 @@ workflow ILLUMINA {
     if (!params.skip_variants && !params.skip_markduplicates) {
         BAM_MARKDUPLICATES_PICARD (
             ch_bam,
-            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fasta.map { [ [:], it ] },
             PREPARE_GENOME.out.fai
         )
         ch_bam                             = BAM_MARKDUPLICATES_PICARD.out.bam
@@ -395,9 +395,10 @@ workflow ILLUMINA {
     ch_amplicon_heatmap_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_mosdepth) {
         MOSDEPTH_GENOME (
-            ch_bam.join(ch_bai, by: [0]),
+            ch_bam
+                .join(ch_bai, by: [0])
+                .map { meta, bam, bai -> [ meta, bam, bai, [] ] },
             [ [:], [] ],
-            [ [:], [] ]
         )
         ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
         ch_versions         = ch_versions.mix(MOSDEPTH_GENOME.out.versions.first().ifEmpty(null))
@@ -409,9 +410,10 @@ workflow ILLUMINA {
 
         if (params.protocol == 'amplicon') {
             MOSDEPTH_AMPLICON (
-                ch_bam.join(ch_bai, by: [0]),
-                PREPARE_GENOME.out.primer_collapsed_bed.map { [ [:], it ] },
-                [ [:], [] ]
+                ch_bam
+                    .join(ch_bai, by: [0])
+                    .join(PREPARE_GENOME.out.primer_collapsed_bed),
+                [ [:], [] ],
             )
             ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
 
@@ -499,7 +501,7 @@ workflow ILLUMINA {
         CONSENSUS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.nextclade_db
         )
 
@@ -518,7 +520,7 @@ workflow ILLUMINA {
             ch_vcf,
             ch_tbi,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.nextclade_db
         )
 
@@ -606,7 +608,7 @@ workflow ILLUMINA {
             params.spades_mode,
             ch_spades_hmm,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -622,7 +624,7 @@ workflow ILLUMINA {
         ASSEMBLY_UNICYCLER (
             ch_assembly_fastq.map { meta, fastq -> [ meta, fastq, [] ] },
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -638,7 +640,7 @@ workflow ILLUMINA {
         ASSEMBLY_MINIA (
             ch_assembly_fastq,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -679,13 +681,13 @@ workflow ILLUMINA {
             ch_ivar_counts_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_quast_multiqc.collect().ifEmpty([]),
+            ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
             ch_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
             ch_nextclade_multiqc.collectFile(name: 'nextclade_clade_mqc.tsv').ifEmpty([]),
             ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_spades_quast_multiqc.collect().ifEmpty([]),
-            ch_unicycler_quast_multiqc.collect().ifEmpty([]),
-            ch_minia_quast_multiqc.collect().ifEmpty([])
+            ch_spades_quast_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_unicycler_quast_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_minia_quast_multiqc.collect{it[1]}.ifEmpty([])
         )
         multiqc_report = MULTIQC.out.report.toList()
     }
@@ -701,6 +703,7 @@ workflow.onComplete {
     if (params.email || params.email_on_fail) {
         NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
     }
+    NfcoreTemplate.dump_parameters(workflow, params)
     NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
 }
 

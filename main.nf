@@ -23,7 +23,7 @@ if (params.platform == 'illumina' && params.protocol == 'amplicon') {
     primer_set         = params.primer_set
     primer_set_version = params.primer_set_version
 } else if (params.platform == 'nanopore') {
-    primer_set          = 'artic'
+    primer_set          = params.primer_set
     primer_set_version  = params.primer_set_version
     params.artic_scheme = WorkflowMain.getGenomeAttribute(params, 'scheme', log, primer_set, primer_set_version)
 }
