@@ -444,6 +444,7 @@ workflow NANOPORE {
     //
     // SUBWORKFLOW: Determine variants with Freyja
     //
+    ch_freyja_multiqc = Channel.empty()
     if (!params.skip_freyja) {
         BAM_VARIANT_DEMIX_BOOT_FREYJA(
             ARTIC_MINION.out.bam_primertrimmed,

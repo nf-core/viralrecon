@@ -477,6 +477,7 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Determine variants with Freyja
     //
+    ch_freyja_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_freyja) {
         BAM_VARIANT_DEMIX_BOOT_FREYJA(
             ch_bam,
