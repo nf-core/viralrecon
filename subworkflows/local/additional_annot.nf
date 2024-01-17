@@ -46,9 +46,9 @@ workflow ADDITIONAL_ANNOT {
 
     VCF_BGZIP_TABIX_STATS (
         SNPEFF_ANN.out.vcf,
-        [],
-        [],
-        []
+        [ [:], [] ],
+        [ [:], [] ],
+        [ [:], [] ]
     )
     ch_versions = ch_versions.mix(VCF_BGZIP_TABIX_STATS.out.versions)
 
@@ -66,7 +66,7 @@ workflow ADDITIONAL_ANNOT {
     ch_versions = ch_versions.mix(BCFTOOLS_QUERY.out.versions.first())
 
     MAKE_VARIANTS_LONG_TABLE_ADDITIONAL (
-        BCFTOOLS_QUERY.out.txt.collect{it[1]},
+        BCFTOOLS_QUERY.out.output.collect{it[1]},
         SNPSIFT_EXTRACTFIELDS.out.txt.collect{it[1]}.ifEmpty([]),
         pangolin.collect{it[1]}.ifEmpty([])
     )
