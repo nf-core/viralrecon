@@ -2,6 +2,7 @@
 // Run snpEff, bgzip, tabix, stats and SnpSift commands
 //
 
+include { GUNZIP as GUNZIP_GFF                                            } from '../../modules/nf-core/gunzip/main'
 include { SNPEFF_BUILD                                                    } from '../../modules/local/snpeff_build'
 include { SNPEFF_ANN                                                      } from '../../modules/local/snpeff_ann'
 include { SNPSIFT_EXTRACTFIELDS                                           } from '../../modules/local/snpsift_extractfields'
@@ -23,6 +24,21 @@ workflow ADDITIONAL_ANNOT {
     ch_versions = Channel.empty()
 
     //
+    // Uncompress additional annotation file
+    //
+    ch_annot = Channel.empty()
+
+    if (params.additional_annot.endsWith('.gz')) {
+        GUNZIP_GFF (
+            [ [:], annot ]
+        )
+        ch_annot       = GUNZIP_GFF.out.gunzip.map { it[1] }
+        ch_versions = ch_versions.mix(GUNZIP_GFF.out.versions)
+    } else {
+        ch_annot = Channel.value(file(params.additional_annot))
+    }
+
+    //
     // Make snpEff database
     //
     ch_snpeff_db     = Channel.empty()
@@ -30,7 +46,7 @@ workflow ADDITIONAL_ANNOT {
 
     SNPEFF_BUILD (
         fasta,
-        annot
+        ch_annot
     )
     ch_snpeff_db     = SNPEFF_BUILD.out.db
     ch_snpeff_config = SNPEFF_BUILD.out.config
