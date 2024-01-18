@@ -56,6 +56,7 @@ jobs:
           - "--spades_mode corona"
           - "--spades_mode metaviral"
           - "--skip_plasmidid false --skip_asciigenome"
+          - "--additional_annot ./GCA_009858895.3_ASM985889v3_genomic.gtf.gz"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -64,6 +65,10 @@ jobs:
         run: |
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
+
+      - name: Download GTF for additional annotation
+        run: |
+          wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/858/895/GCA_009858895.3_ASM985889v3/GCA_009858895.3_ASM985889v3_genomic.gtf.gz
 
       - name: Run pipeline with various parameters
         run: |
