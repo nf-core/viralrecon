@@ -295,7 +295,7 @@ As described in the documentation, [ASCIIGenome](https://asciigenome.readthedocs
 
 </details>
 
-Create variants long format table collating per-sample information for individual variants ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html)), functional effect prediction ([`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html)) and lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin)).
+Create variants long format table collating per-sample information for individual variants ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html)), functional effect prediction ([`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html)) and lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin)). The variants used for this table are the ones passing artic minion quality filters (`*.pass.unique.vcf.gz`) explained before in [Nanopore: artic minion](#nanopore-artic-minion) output files.
 
 The more pertinent variant information is summarised in this table to make it easier for researchers to assess the impact of variants found amongst the sequenced sample(s). An example of the fields included in the table are shown below:
 
@@ -306,6 +306,24 @@ SAMPLE1_PE,MN908947.3,1875,C,T,PASS,92,62,29,0.32,orf1ab,missense_variant,c.1610
 SAMPLE1_PE,MN908947.3,3037,C,T,PASS,213,0,213,1.0,orf1ab,synonymous_variant,c.2772C>T,p.Phe924Phe,p.F924F,ivar,B.1
 SAMPLE1_PE,MN908947.3,11719,G,A,PASS,195,9,186,0.95,orf1ab,synonymous_variant,c.11454G>A,p.Gln3818Gln,p.Q3818Q,ivar,B.1
 ```
+
+Table columns:
+    - SAMPLE: sample name
+    - CHROM: Reference/fragment ID
+    - POS: Position of the variant respect to the reference genome
+    - REF: Reference allele
+    - ALT: Alternative allele
+    - FILTER: Column indicating if the variant passed the filters. If PASS the variant passed all the filters. If not, the name of the filter that wasn't passed will appear.
+    - DP: Position read depth
+    - REF_DP: Reference allele depth
+    - ALT_DP: Alternative allele depth
+    - AF: Alternative allele frequency
+    - GENE: Gene name in annotation file​
+    - EFFECT: Effect of the variant
+    - HGVS_C: Position annotation at CDS level
+    - HGVS_P: Position annotation at protein level
+    - HGVS_P_1LETTER: Position annotation at protein level with the aminoacid annotation in 1 letter format
+    - Caller: Variant caller used​​
 
 ## Nanopore: Workflow reporting
 
