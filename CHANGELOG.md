@@ -20,7 +20,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #387](https://github.com/nf-core/viralrecon/pull/387)] - Software closes gracefully when encountering an error
 - [[PR #395](https://github.com/nf-core/viralrecon/pull/395)] - Remove minia from default assemblers because it is unreliable
 - [[PR #393](https://github.com/nf-core/viralrecon/pull/393)] - Changed primer set to params
-- [[PR [#405](https://github.com/nf-core/viralrecon/issues/405)]] - Including parameter `depthcutoff` to freyja demix and boot
+- [[PR #405](https://github.com/nf-core/viralrecon/pull/412)] - Including parameter `depthcutoff` to freyja demix and boot
 - [[PR #413](https://github.com/nf-core/viralrecon/pull/413)] - Update multiqc module & include freyja in report
 
 ### Parameters
