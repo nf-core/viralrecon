@@ -20,6 +20,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #387](https://github.com/nf-core/viralrecon/pull/387)] - Software closes gracefully when encountering an error
 - [[PR #395](https://github.com/nf-core/viralrecon/pull/395)] - Remove minia from default assemblers because it is unreliable
 - [[PR #393](https://github.com/nf-core/viralrecon/pull/393)] - Changed primer set to params
+- [[PR #413](https://github.com/nf-core/viralrecon/pull/413)] - Update multiqc module & include freyja in report
 
 ### Parameters
 
@@ -42,6 +43,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | Dependency | Old version | New version |
 | ---------- | ----------- | ----------- |
 | `freyja`   |             | 1.3.12      |
+| `multiqc`  | 1.14        | 1.19        |
 
 > **NB:** Dependency has been **updated** if both old and new version information is present.
 >
