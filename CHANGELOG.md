@@ -20,16 +20,18 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #387](https://github.com/nf-core/viralrecon/pull/387)] - Software closes gracefully when encountering an error
 - [[PR #395](https://github.com/nf-core/viralrecon/pull/395)] - Remove minia from default assemblers because it is unreliable
 - [[PR #393](https://github.com/nf-core/viralrecon/pull/393)] - Changed primer set to params
+- [[PR [#405](https://github.com/nf-core/viralrecon/issues/405)]] - Including parameter `depthcutoff` to freyja demix and boot
 
 ### Parameters
 
-| Old parameter       | New parameter |
-| ------------------- | ------------- |
-| `--skip_freyja`     |               |
-| `--freyja_repeats`  |               |
-| `--freyja_db_name`  |               |
-| `--freyja_barcodes` |               |
-| `--freyja_lineages` |               |
+| Old parameter          | New parameter |
+| ---------------------- | ------------- |
+| `--skip_freyja`        |               |
+| `--freyja_repeats`     |               |
+| `--freyja_db_name`     |               |
+| `--freyja_barcodes`    |               |
+| `--freyja_lineages`    |               |
+| `--freyja_depthcutoff` |               |
 
 > **NB:** Parameter has been **updated** if both old and new parameter information is present.
 > **NB:** Parameter has been **added** if just the new parameter information is present.
