@@ -266,6 +266,8 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 
 [Freyja](https://github.com/andersen-lab/Freyja) is a tool to recover relative lineage abundances from mixed SARS-CoV-2 samples from a sequencing dataset (BAM aligned to the Hu-1 reference). The method uses lineage-determining mutational "barcodes" derived from the [UShER](https://usher-wiki.readthedocs.io/en/latest/#) global phylogenetic tree as a basis set to solve the constrained (unit sum, non-negative) de-mixing problem.
 
+<p align="center"><img src="images/freyja_screenshot.png" alt="Freyja screenshot"></p>
+
 ### Nanopore: ASCIIGenome
 
 <details markdown="1">
@@ -640,6 +642,8 @@ iVar outputs a tsv format which is not compatible with downstream analysis such 
 </details>
 
 [Freyja](https://github.com/andersen-lab/Freyja) is a tool to recover relative lineage abundances from mixed SARS-CoV-2 samples from a sequencing dataset (BAM aligned to the Hu-1 reference). The method uses lineage-determining mutational "barcodes" derived from the [UShER](https://usher-wiki.readthedocs.io/en/latest/#) global phylogenetic tree as a basis set to solve the constrained (unit sum, non-negative) de-mixing problem.
+
+<p align="center"><img src="images/freyja_screenshot.png" alt="Freyja screenshot"></p>
 
 ### ASCIIGenome
 
