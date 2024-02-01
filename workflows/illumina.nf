@@ -479,6 +479,7 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Determine variants with Freyja
     //
+    ch_freyja_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_freyja) {
         BAM_VARIANT_DEMIX_BOOT_FREYJA(
             ch_bam,
@@ -488,7 +489,8 @@ workflow ILLUMINA {
             params.freyja_barcodes,
             params.freyja_lineages,
         )
-        ch_versions= ch_versions.mix(BAM_VARIANT_DEMIX_BOOT_FREYJA.out.versions)
+        ch_versions       = ch_versions.mix(BAM_VARIANT_DEMIX_BOOT_FREYJA.out.versions)
+        ch_freyja_multiqc = BAM_VARIANT_DEMIX_BOOT_FREYJA.out.demix
     }
 
     //
@@ -687,7 +689,8 @@ workflow ILLUMINA {
             ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
             ch_spades_quast_multiqc.collect{it[1]}.ifEmpty([]),
             ch_unicycler_quast_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_minia_quast_multiqc.collect{it[1]}.ifEmpty([])
+            ch_minia_quast_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_freyja_multiqc.collect{it[1]}.ifEmpty([]),
         )
         multiqc_report = MULTIQC.out.report.toList()
     }

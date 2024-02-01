@@ -20,6 +20,7 @@ run_modules:
   - quast
   - pangolin
   - cutadapt
+  - freyja
 
 module_order:
   - fastqc:
@@ -62,6 +63,11 @@ module_order:
       info: "This section of the report shows Pangolin lineage analysis results for the called variants."
       path_filters:
         - "./variants/*.pangolin.csv"
+  - freyja:
+      name: "VARIANTS: Freyja"
+      info: "This section of the report shows relative lineage abundances from mixed SARS-CoV-2 samples from Freyja demix."
+      path_filters:
+        - "./freyja_demix/*.tsv"
   - bcftools:
       name: "VARIANTS: BCFTools"
       info: "This section of the report shows BCFTools stats results for the called variants."

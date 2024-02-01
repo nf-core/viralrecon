@@ -261,7 +261,7 @@
                 },
                 "skip_freyja": {
                     "type": "boolean",
-                    "fa_icon": "fas fast-forward",
+                    "fa_icon": "fas fa-forward",
                     "description": "Skip freyja deep SARS-CoV-2 variant analysis using a depth weighted approach."
                 },
                 "freyja_db_name": {
@@ -269,6 +269,12 @@
                     "default": "freyja_db",
                     "fa_icon": "fas fa-folder-open",
                     "description": "Specify the name where to store UShER database (default: 'freyja_db')."
+                },
+                "freyja_depthcutoff": {
+                    "type": "number",
+                    "description": "Specify a coverage depth minimum which excludes sites with coverage less than the specified value",
+                    "fa_icon": "fas fa-hand-paper",
+                    "help_text": "Using the `depthcutoff` option may result in some distinct lineages now having identical barcodes, which are grouped into the format `[lineage]-like(num)` (based on their shared phylogeny) in the output."
                 },
                 "freyja_repeats": {
                     "type": "integer",
