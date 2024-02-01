@@ -11,11 +11,13 @@ Special thanks to the following for their code contributions to the release:
 
 - [Adam Talbot](https://github.com/adamrtalbot)
 - [Joon Klaps](https://github.com/Joon-Klaps)
+- [Jessica Wu](https://github.com/wutron)
 
 Thank you to everyone else that has contributed by reporting bugs, enhancements or in any other way, shape or form.
 
 ### Enhancements & fixes
 
+- [[PR #396](https://github.com/nf-core/viralrecon/pull/396)] - Apply samtools fixmate after ivar trim
 - [[#299](https://github.com/nf-core/viralrecon/issues/299)] - Add the freyja pipeline as a subworkflow
 - [[PR #387](https://github.com/nf-core/viralrecon/pull/387)] - Software closes gracefully when encountering an error
 - [[PR #395](https://github.com/nf-core/viralrecon/pull/395)] - Remove minia from default assemblers because it is unreliable

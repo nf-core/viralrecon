@@ -4,6 +4,8 @@
 
 include { IVAR_TRIM               } from '../../modules/nf-core/ivar/trim/main'
 include { BAM_SORT_STATS_SAMTOOLS } from '../nf-core/bam_sort_stats_samtools/main'
+include { SAMTOOLS_COLLATE        } from '../../modules/nf-core/samtools/collate/main'
+include { SAMTOOLS_FIXMATE        } from '../../modules/nf-core/samtools/fixmate/main'
 
 workflow BAM_TRIM_PRIMERS_IVAR {
     take:
@@ -25,16 +27,25 @@ workflow BAM_TRIM_PRIMERS_IVAR {
     ch_versions = ch_versions.mix(IVAR_TRIM.out.versions.first())
 
     //
+    // samtools fixmate fills in mate coordinates and insert size fields
+    //
+    SAMTOOLS_COLLATE ( IVAR_TRIM.out.bam, fasta )
+    ch_versions = ch_versions.mix(SAMTOOLS_COLLATE.out.versions.first())
+
+    SAMTOOLS_FIXMATE ( SAMTOOLS_COLLATE.out.bam )
+    ch_versions = ch_versions.mix(SAMTOOLS_FIXMATE.out.versions.first())
+
+    //
     // Sort, index BAM file and run samtools stats, flagstat and idxstats
     //
     BAM_SORT_STATS_SAMTOOLS (
-        IVAR_TRIM.out.bam,
+        SAMTOOLS_FIXMATE.out.bam,
         fasta
     )
     ch_versions = ch_versions.mix(BAM_SORT_STATS_SAMTOOLS.out.versions)
 
     emit:
-    bam_orig = IVAR_TRIM.out.bam                    // channel: [ val(meta), bam   ]
+    bam_orig = SAMTOOLS_FIXMATE.out.bam             // channel: [ val(meta), bam   ]
     log_out  = IVAR_TRIM.out.log                    // channel: [ val(meta), log   ]
 
     bam      = BAM_SORT_STATS_SAMTOOLS.out.bam      // channel: [ val(meta), [ bam ] ]
