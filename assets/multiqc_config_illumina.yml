@@ -69,7 +69,7 @@ module_order:
         - "./variants/*.txt"
   - snpeff:
       name: "VARIANTS: SnpEff"
-      info: "This section of the report shows SnpEff results for the called variants."
+      info: "This section of the report shows SnpEff results for the called variants passing filters (Defaults: 0.25 allele frequency, minimum quality score = 20 and minimum position depth = 10). Some variants may have more than one annotation respect to genomic region, impact or effect, leading to differences in the number of variants respect to the vcf file."
       path_filters:
         - "./variants/*.csv"
   - quast:
