@@ -27,6 +27,10 @@ indent_size = unset
 [README.md]
 indent_style = unset
 
+# ignore Changelog
+[CHANGELOG.md]
+indent_style = unset
+
 # ignore python
 [*.{py}]
 indent_style = unset
