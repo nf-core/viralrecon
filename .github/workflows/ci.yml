@@ -43,7 +43,7 @@ jobs:
 
       - name: Run pipeline with test data
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --outdir ./results
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --publish_dir_mode link --outdir ./results
 
   parameters:
     name: Test workflow parameters
@@ -79,7 +79,7 @@ jobs:
 
       - name: Run pipeline with various parameters
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }} --outdir ./results
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }} --publish_dir_mode link --outdir ./results
 
   test_sispa:
     name: Test SISPA workflow
