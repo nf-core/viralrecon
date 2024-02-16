@@ -110,6 +110,10 @@ jobs:
           wget -qO- get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
 
+      - name: Download GTF for additional annotation
+        run: |
+          wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/858/895/GCA_009858895.3_ASM985889v3/GCA_009858895.3_ASM985889v3_genomic.gtf.gz
+
       - name: Run pipeline with minimal SISPA data and various options
         run: |
           nextflow run ${GITHUB_WORKSPACE} -profile test_sispa,docker ${{ matrix.parameters }} --outdir ./results
@@ -122,6 +126,7 @@ jobs:
       matrix:
         parameters:
           - "--gff false"
+          - "--additional_annot ./GCA_009858895.3_ASM985889v3_genomic.gtf.gz"
           - "--input false"
           - "--min_barcode_reads 10000"
           - "--min_guppyplex_reads 10000"
