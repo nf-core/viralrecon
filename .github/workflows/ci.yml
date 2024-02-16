@@ -30,6 +30,15 @@ jobs:
       - name: Check out pipeline code
         uses: actions/checkout@v4
 
+      - name: Free some space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@v1.3.1
+
       - name: Install Nextflow
         uses: nf-core/setup-nextflow@v1
         with:
@@ -37,7 +46,7 @@ jobs:
 
       - name: Run pipeline with test data
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --outdir ./results
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker --publish_dir_mode link --outdir ./results
 
   parameters:
     name: Test workflow parameters
@@ -61,6 +70,15 @@ jobs:
       - name: Check out pipeline code
         uses: actions/checkout@v2
 
+      - name: Free some space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@v1.3.1
+
       - name: Install Nextflow
         run: |
           wget -qO- get.nextflow.io | bash
@@ -72,7 +90,7 @@ jobs:
 
       - name: Run pipeline with various parameters
         run: |
-          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }} --outdir ./results
+          nextflow run ${GITHUB_WORKSPACE} -profile test,docker ${{ matrix.parameters }} --publish_dir_mode link --outdir ./results
 
   test_sispa:
     name: Test SISPA workflow
