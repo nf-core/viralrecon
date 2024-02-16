@@ -30,13 +30,14 @@ WorkflowNanopore.initialise(params, log, valid_params)
 def checkPathParamList = [
     params.input, params.fastq_dir, params.fast5_dir,
     params.sequencing_summary, params.gff,
-    params.freyja_barcodes, params.freyja_lineages
+    params.freyja_barcodes, params.freyja_lineages, params.additional_annot
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 if (params.input)              { ch_input              = file(params.input)              }
 if (params.fast5_dir)          { ch_fast5_dir          = file(params.fast5_dir)          } else { ch_fast5_dir          = [] }
 if (params.sequencing_summary) { ch_sequencing_summary = file(params.sequencing_summary) } else { ch_sequencing_summary = [] }
+if (params.additional_annot)   { ch_additional_gtf = file(params.additional_annot)       } else { additional_annot      = [] }
 
 // Need to stage medaka model properly depending on whether it is a string or a file
 ch_medaka_model = Channel.empty()
@@ -75,6 +76,7 @@ include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../mod
 include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME                } from '../subworkflows/local/prepare_genome_nanopore'
 include { SNPEFF_SNPSIFT                } from '../subworkflows/local/snpeff_snpsift'
+include { ADDITIONAL_ANNOT              } from '../subworkflows/local/additional_annot'
 include { VARIANTS_LONG_TABLE           } from '../subworkflows/local/variants_long_table'
 include { FILTER_BAM_SAMTOOLS           } from '../subworkflows/local/filter_bam_samtools'
 include { BAM_VARIANT_DEMIX_BOOT_FREYJA } from '../subworkflows/nf-core/bam_variant_demix_boot_freyja/main'
@@ -532,6 +534,21 @@ workflow NANOPORE {
             ch_pangolin_multiqc
         )
         ch_versions = ch_versions.mix(VARIANTS_LONG_TABLE.out.versions)
+    }
+
+    //
+    // SUBWORKFLOW: Create variants long table report for additional annotation file
+    //
+    if (params.additional_annot) {
+        ADDITIONAL_ANNOT (
+            VCFLIB_VCFUNIQ.out.vcf,
+            TABIX_TABIX.out.tbi,
+            PREPARE_GENOME.out.fasta,
+            ch_additional_gtf,
+            ch_pangolin_multiqc
+
+        )
+        ch_versions = ch_versions.mix(ADDITIONAL_ANNOT.out.versions)
     }
 
     //
