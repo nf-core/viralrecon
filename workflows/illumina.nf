@@ -6,7 +6,7 @@
 
 def valid_params = [
     protocols         : ['metagenomic', 'amplicon'],
-    variant_callers   : ['ivar', 'bcftools'],
+    variant_callers   : ['ivar', 'bcftools'. 'lofreq'],
     consensus_callers : ['ivar', 'bcftools'],
     assemblers        : ['spades', 'unicycler', 'minia'],
     spades_modes      : ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
@@ -65,6 +65,7 @@ include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../mod
 //
 include { INPUT_CHECK             } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME          } from '../subworkflows/local/prepare_genome_illumina'
+include { LOFREQ_IVAR             } from '../subworkflows/local/lofreq_ivar'
 include { VARIANTS_IVAR           } from '../subworkflows/local/variants_ivar'
 include { VARIANTS_BCFTOOLS       } from '../subworkflows/local/variants_bcftools'
 include { CONSENSUS_IVAR          } from '../subworkflows/local/consensus_ivar'
@@ -89,6 +90,8 @@ include { CAT_FASTQ                     } from '../modules/nf-core/cat/fastq/mai
 include { FASTQC                        } from '../modules/nf-core/fastqc/main'
 include { KRAKEN2_KRAKEN2               } from '../modules/nf-core/kraken2/kraken2/main'
 include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/picard/collectmultiplemetrics/main'
+include { LOFREQ_CALLPARALLEL           } from '../modules/nf-core/lofreq/callparallel/main'
+include { BCFTOOLS_MERGE                } from '../modules/nf-core/bcftools/merge/main'   
 include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/mosdepth/main'
 include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main'
@@ -98,6 +101,7 @@ include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main
 //
 include { FASTQ_ALIGN_BOWTIE2       } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
 include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard/main'
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -405,6 +409,61 @@ workflow ILLUMINA {
             ch_versions                 = ch_versions.mix(PLOT_MOSDEPTH_REGIONS_AMPLICON.out.versions)
         }
     }
+
+
+
+    // SUBWORKFLOW: Call variants with Lofreq
+    ch_lofreq_vcf             = Channel.empty()
+    //ch_vcf                    = Channel.empty()
+    //ch_lofreq_tbi             = Channel.empty()
+    ch_bam
+        .join(ch_bai, by: [0])
+        .map{ meta,bam,bai -> [meta, bam, bai, []] }
+        .set{ ch_lofreq_bam_bai }
+    if (!params.skip_variants && variant_caller == 'lofreq') {
+        LOFREQ_CALLPARALLEL (
+            ch_lofreq_bam_bai,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fai
+        )
+        ch_lofreq_vcf               = LOFREQ_CALLPARALLEL.out.vcf
+        //ch_lofreq_tbi               = LOFREQ_CALLPARALLEL.out.tbi
+        ch_versions                 = ch_versions.mix(LOFREQ_CALLPARALLEL.out.versions)
+
+    // SUBWORKFLOW: Call variants with ivar
+        VARIANTS_IVAR (
+            ch_bam,
+            PREPARE_GENOME.out.fasta,
+            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.fai : [],
+            (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
+            params.gff ? PREPARE_GENOME.out.gff : [],
+            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
+            PREPARE_GENOME.out.snpeff_db,
+            PREPARE_GENOME.out.snpeff_config,
+            ch_ivar_variants_header_mqc
+        )
+        ch_vcf                      = VARIANTS_IVAR.out.vcf
+        ch_tbi                      = VARIANTS_IVAR.out.tbi
+        ch_ivar_counts_multiqc      = VARIANTS_IVAR.out.multiqc_tsv
+        ch_bcftools_stats_multiqc   = VARIANTS_IVAR.out.stats
+        ch_snpeff_multiqc           = VARIANTS_IVAR.out.snpeff_csv
+        ch_snpsift_txt              = VARIANTS_IVAR.out.snpsift_txt
+        ch_versions                 = ch_versions.mix(VARIANTS_IVAR.out.versions)
+
+
+    // MODULE: Merge ivar and lofreq variants
+        BCFTOOLS_MERGE(
+            ch_lofreq_vcf,
+            ch_vcf,
+            //ch_vcf,
+            //ch_tbi,
+            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fai
+        )
+        ch_merged_vcf               = BCFTOOLS_MERGE.out.merged_variants
+        ch_versions                 = ch_versions.mix(BCFTOOLS_MERGE.out.versions)
+    }
+
 
     //
     // SUBWORKFLOW: Call variants with IVar
