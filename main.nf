@@ -13,6 +13,24 @@ nextflow.enable.dsl = 2
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT FUNCTIONS / MODULES / SUBWORKFLOWS / WORKFLOWS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+if (params.platform == 'illumina') {
+    include { ILLUMINA as VIRALRECON } from './workflows/illumina'
+} else if (params.platform == 'nanopore') {
+    include { NANOPORE as VIRALRECON } from './workflows/nanopore'
+}
+
+include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_viralrecon_pipeline'
+include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_viralrecon_pipeline'
+
+include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_viralrecon_pipeline'
+
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     GENOME PARAMETER VALUES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
@@ -25,74 +43,52 @@ if (params.platform == 'illumina' && params.protocol == 'amplicon') {
 } else if (params.platform == 'nanopore') {
     primer_set          = params.primer_set
     primer_set_version  = params.primer_set_version
-    params.artic_scheme = WorkflowMain.getGenomeAttribute(params, 'scheme', log, primer_set, primer_set_version)
+    params.artic_scheme = getGenomeAttribute('scheme')
 }
 
-params.fasta         = WorkflowMain.getGenomeAttribute(params, 'fasta'     , log, primer_set, primer_set_version)
-params.gff           = WorkflowMain.getGenomeAttribute(params, 'gff'       , log, primer_set, primer_set_version)
-params.bowtie2_index = WorkflowMain.getGenomeAttribute(params, 'bowtie2'   , log, primer_set, primer_set_version)
-params.primer_bed    = WorkflowMain.getGenomeAttribute(params, 'primer_bed', log, primer_set, primer_set_version)
+params.fasta         = getGenomeAttribute('fasta')
+params.gff           = getGenomeAttribute('gff')
+params.bowtie2_index = getGenomeAttribute('bowtie2')
+params.primer_bed    = getGenomeAttribute('primer_bed')
 
-params.nextclade_dataset           = WorkflowMain.getGenomeAttribute(params, 'nextclade_dataset'          , log, primer_set, primer_set_version)
-params.nextclade_dataset_name      = WorkflowMain.getGenomeAttribute(params, 'nextclade_dataset_name'     , log, primer_set, primer_set_version)
-params.nextclade_dataset_reference = WorkflowMain.getGenomeAttribute(params, 'nextclade_dataset_reference', log, primer_set, primer_set_version)
-params.nextclade_dataset_tag       = WorkflowMain.getGenomeAttribute(params, 'nextclade_dataset_tag'      , log, primer_set, primer_set_version)
+params.nextclade_dataset           = getGenomeAttribute('nextclade_dataset')
+params.nextclade_dataset_name      = getGenomeAttribute('nextclade_dataset_name')
+params.nextclade_dataset_reference = getGenomeAttribute('nextclade_dataset_reference')
+params.nextclade_dataset_tag       = getGenomeAttribute('nextclade_dataset_tag')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    VALIDATE & PRINT PARAMETER SUMMARY
+    NAMED WORKFLOWS FOR PIPELINE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { validateParameters; paramsHelp } from 'plugin/nf-validation'
 
-// Print help message if needed
-if (params.help) {
-    def logo = NfcoreTemplate.logo(workflow, params.monochrome_logs)
-    def citation = '\n' + WorkflowMain.citation(workflow) + '\n'
-    def String command = "nextflow run ${workflow.manifest.name} --input samplesheet.csv --genome GRCh37 -profile docker"
-    log.info logo + paramsHelp(command) + citation + NfcoreTemplate.dashedLine(params.monochrome_logs)
-    System.exit(0)
-}
 
-// Validate input parameters
-if (params.validate_params) {
-    validateParameters()
-}
-
-WorkflowMain.initialise(workflow, params, log, args)
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    NAMED WORKFLOW FOR PIPELINE
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-if (params.platform == 'illumina') {
-    include { ILLUMINA } from './workflows/illumina'
-} else if (params.platform == 'nanopore') {
-    include { NANOPORE } from './workflows/nanopore'
-}
-
+//
+// WORKFLOW: Run main nf-core/viralrecon analysis pipeline depending on type of input
+//
 workflow NFCORE_VIRALRECON {
 
-    //
-    // WORKFLOW: Variant and de novo assembly analysis for Illumina data
-    //
-    if (params.platform == 'illumina') {
-        ILLUMINA ()
+    take:
+    samplesheet // channel: samplesheet read in from --input
+
+    main:
 
     //
-    // WORKFLOW: Variant analysis for Nanopore data
+    // WORKFLOW: Run pipeline
     //
-    } else if (params.platform == 'nanopore') {
-        NANOPORE ()
-    }
+    VIRALRECON (
+        samplesheet
+    )
+
+    emit:
+    multiqc_report = VIRALRECON.out.multiqc_report // channel: /path/to/multiqc_report.html
+
 }
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    RUN ALL WORKFLOWS
+    RUN MAIN WORKFLOW
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
@@ -102,7 +98,41 @@ workflow NFCORE_VIRALRECON {
 //
 
 workflow {
-    NFCORE_VIRALRECON ()
+
+    main:
+
+    //
+    // SUBWORKFLOW: Run initialisation tasks
+    //
+    PIPELINE_INITIALISATION (
+        params.version,
+        params.help,
+        params.validate_params,
+        params.monochrome_logs,
+        args,
+        params.outdir,
+        params.input
+    )
+
+    //
+    // WORKFLOW: Run main workflow
+    //
+    NFCORE_VIRALRECON (
+        PIPELINE_INITIALISATION.out.samplesheet
+    )
+
+    //
+    // SUBWORKFLOW: Run completion tasks
+    //
+    PIPELINE_COMPLETION (
+        params.email,
+        params.email_on_fail,
+        params.plaintext_email,
+        params.outdir,
+        params.monochrome_logs,
+        params.hook_url,
+        NFCORE_VIRALRECON.out.multiqc_report
+    )
 }
 
 /*
