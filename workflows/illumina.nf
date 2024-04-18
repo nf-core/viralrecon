@@ -193,7 +193,7 @@ workflow ILLUMINA {
     )
     .reads
     .set { ch_cat_fastq }
-    ch_versions = ch_versions.mix(CAT_FASTQ.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(CAT_FASTQ.out.versions.first())
 
     //
     // SUBWORKFLOW: Read QC and trim adapters
@@ -256,7 +256,7 @@ workflow ILLUMINA {
             params.kraken2_variants_host_filter || params.kraken2_assembly_host_filter
         )
         ch_kraken2_multiqc = KRAKEN2_KRAKEN2.out.report
-        ch_versions        = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first().ifEmpty(null))
+        ch_versions        = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
 
         if (params.kraken2_variants_host_filter) {
             ch_variants_fastq = KRAKEN2_KRAKEN2.out.unclassified_reads_fastq
@@ -371,7 +371,7 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.fasta.map { [ [:], it ] },
             [ [:], [] ]
         )
-        ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first())
     }
 
     //
@@ -387,7 +387,7 @@ workflow ILLUMINA {
             [ [:], [] ],
         )
         ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
-        ch_versions         = ch_versions.mix(MOSDEPTH_GENOME.out.versions.first().ifEmpty(null))
+        ch_versions         = ch_versions.mix(MOSDEPTH_GENOME.out.versions.first())
 
         PLOT_MOSDEPTH_REGIONS_GENOME (
             MOSDEPTH_GENOME.out.regions_bed.collect { it[1] }
@@ -401,7 +401,7 @@ workflow ILLUMINA {
                     .join(PREPARE_GENOME.out.primer_collapsed_bed),
                 [ [:], [] ],
             )
-            ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
+            ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first())
 
             PLOT_MOSDEPTH_REGIONS_AMPLICON (
                 MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
@@ -561,13 +561,13 @@ workflow ILLUMINA {
         )
         ch_assembly_fastq   = CUTADAPT.out.reads
         ch_cutadapt_multiqc = CUTADAPT.out.log
-        ch_versions         = ch_versions.mix(CUTADAPT.out.versions.first().ifEmpty(null))
+        ch_versions         = ch_versions.mix(CUTADAPT.out.versions.first())
 
         if (!params.skip_fastqc) {
             FASTQC (
                 CUTADAPT.out.reads
             )
-            ch_versions = ch_versions.mix(FASTQC.out.versions.first().ifEmpty(null))
+            ch_versions = ch_versions.mix(FASTQC.out.versions.first())
         }
     }
 
