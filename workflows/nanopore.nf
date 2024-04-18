@@ -278,7 +278,7 @@ workflow NANOPORE {
     ARTIC_GUPPYPLEX (
         ch_fastq_dirs
     )
-    ch_versions = ch_versions.mix(ARTIC_GUPPYPLEX.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(ARTIC_GUPPYPLEX.out.versions.first())
 
     //
     // MODULE: Create custom content file for MultiQC to report samples with reads < params.min_guppyplex_reads
@@ -312,7 +312,7 @@ workflow NANOPORE {
         NANOPLOT (
             ARTIC_GUPPYPLEX.out.fastq
         )
-        ch_versions = ch_versions.mix(NANOPLOT.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(NANOPLOT.out.versions.first())
     }
 
     //
@@ -329,7 +329,7 @@ workflow NANOPORE {
         params.artic_scheme,
         params.primer_set_version
     )
-    ch_versions = ch_versions.mix(ARTIC_MINION.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(ARTIC_MINION.out.versions.first())
 
     //
     // MODULE: Remove duplicate variants
@@ -337,7 +337,7 @@ workflow NANOPORE {
     VCFLIB_VCFUNIQ (
         ARTIC_MINION.out.vcf.join(ARTIC_MINION.out.tbi, by: [0]),
     )
-    ch_versions = ch_versions.mix(VCFLIB_VCFUNIQ.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(VCFLIB_VCFUNIQ.out.versions.first())
 
     //
     // MODULE: Index VCF file
@@ -345,7 +345,7 @@ workflow NANOPORE {
     TABIX_TABIX (
         VCFLIB_VCFUNIQ.out.vcf
     )
-    ch_versions = ch_versions.mix(TABIX_TABIX.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(TABIX_TABIX.out.versions.first())
 
     //
     // MODULE: VCF stats with bcftools stats
@@ -358,7 +358,7 @@ workflow NANOPORE {
         [ [:], [] ],
         [ [:], [] ]
     )
-    ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(BCFTOOLS_STATS.out.versions.first())
 
     //
     // SUBWORKFLOW: Filter unmapped reads from BAM
@@ -383,7 +383,7 @@ workflow NANOPORE {
             [ [:], [] ]
         )
         ch_mosdepth_multiqc  = MOSDEPTH_GENOME.out.global_txt
-        ch_versions          = ch_versions.mix(MOSDEPTH_GENOME.out.versions.first().ifEmpty(null))
+        ch_versions          = ch_versions.mix(MOSDEPTH_GENOME.out.versions.first())
 
         PLOT_MOSDEPTH_REGIONS_GENOME (
             MOSDEPTH_GENOME.out.regions_bed.collect { it[1] }
@@ -394,7 +394,7 @@ workflow NANOPORE {
             ARTIC_MINION.out.bam_primertrimmed.join(ARTIC_MINION.out.bai_primertrimmed, by: [0]).join(PREPARE_GENOME.out.primer_collapsed_bed),
             [ [:], [] ]
         )
-        ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first())
 
         PLOT_MOSDEPTH_REGIONS_AMPLICON (
             MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
@@ -412,7 +412,7 @@ workflow NANOPORE {
             ARTIC_MINION.out.fasta
         )
         ch_pangolin_multiqc = PANGOLIN.out.report
-        ch_versions         = ch_versions.mix(PANGOLIN.out.versions.first().ifEmpty(null))
+        ch_versions         = ch_versions.mix(PANGOLIN.out.versions.first())
     }
 
     //
@@ -424,7 +424,7 @@ workflow NANOPORE {
             ARTIC_MINION.out.fasta,
             PREPARE_GENOME.out.nextclade_db.collect()
         )
-        ch_versions = ch_versions.mix(NEXTCLADE_RUN.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(NEXTCLADE_RUN.out.versions.first())
 
         //
         // MODULE: Get Nextclade clade information for MultiQC report
@@ -523,7 +523,7 @@ workflow NANOPORE {
             params.asciigenome_window_size,
             params.asciigenome_read_depth
         )
-        ch_versions = ch_versions.mix(ASCIIGENOME.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(ASCIIGENOME.out.versions.first())
     }
 
     //
