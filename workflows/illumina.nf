@@ -119,6 +119,14 @@ workflow ILLUMINA {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
+    ch_genome_fasta
+    ch_genome_gff
+    ch_primer_bed
+    ch_bowtie2_index
+    ch_nextclade_dataset
+    ch_nextclade_dataset_name
+    ch_nextclade_dataset_reference
+    ch_nextclade_dataset_tag
 
     main:
     ch_versions      = Channel.empty()
@@ -128,7 +136,12 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Uncompress and prepare reference genome files
     //
-    PREPARE_GENOME ()
+    PREPARE_GENOME (
+        ch_genome_fasta,
+        ch_genome_gff,
+        ch_primer_bed,
+        ch_bowtie2_index
+    )
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
     // Check genome fasta only contains a single contig

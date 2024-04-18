@@ -106,6 +106,18 @@ def fail_barcode_reads = [:]
 
 workflow NANOPORE {
 
+    take:
+    ch_samplesheet // channel: samplesheet read in from --input
+    ch_genome_fasta
+    ch_genome_gff
+    ch_primer_bed
+    ch_bowtie2_index
+    ch_nextclade_dataset
+    ch_nextclade_dataset_name
+    ch_nextclade_dataset_reference
+    ch_nextclade_dataset_tag
+
+    main:
     ch_versions      = Channel.empty()
     ch_multiqc_files = Channel.empty()
     multiqc_report   = Channel.empty()

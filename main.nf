@@ -78,7 +78,15 @@ workflow NFCORE_VIRALRECON {
     // WORKFLOW: Run pipeline
     //
     VIRALRECON (
-        samplesheet
+        samplesheet,
+        params.fasta,
+        params.gff,
+        params.primer_bed,
+        params.bowtie2_index,
+        params.nextclade_dataset,
+        params.nextclade_dataset_name,
+        params.nextclade_dataset_reference,
+        params.nextclade_dataset_tag
     )
 
     emit:
