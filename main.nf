@@ -49,7 +49,7 @@ if (params.platform == 'illumina' && params.protocol == 'amplicon') {
 params.fasta         = getGenomeAttribute('fasta')
 params.gff           = getGenomeAttribute('gff')
 params.bowtie2_index = getGenomeAttribute('bowtie2')
-params.primer_bed    = getGenomeAttribute('primer_bed')
+params.primer_bed    = getGenomeAttribute('primer_bed', primer_set, primer_set_version)
 
 params.nextclade_dataset           = getGenomeAttribute('nextclade_dataset')
 params.nextclade_dataset_name      = getGenomeAttribute('nextclade_dataset_name')
