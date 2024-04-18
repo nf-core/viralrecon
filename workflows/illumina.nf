@@ -70,7 +70,6 @@ include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../mod
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK             } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME          } from '../subworkflows/local/prepare_genome_illumina'
 include { VARIANTS_IVAR           } from '../subworkflows/local/variants_ivar'
 include { VARIANTS_BCFTOOLS       } from '../subworkflows/local/variants_bcftools'
@@ -125,17 +124,6 @@ workflow ILLUMINA {
     main:
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
-    //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
-    def criteria = multiMapCriteria {
-        meta, fastq_1, fastq_2, long_fastq, fast5 ->
-            shortreads: fastq_1     != 'NA' ? tuple(meta, [fastq_1, fastq_2]) : null
-            longreads: long_fastq   != 'NA' ? tuple(meta, long_fastq) : null
-            fast5: fast5            != 'NA' ? tuple(meta, fast5) : null
-    }
-
-    ch_versions = Channel.empty()
 
     //
     // SUBWORKFLOW: Uncompress and prepare reference genome files
@@ -181,37 +169,13 @@ workflow ILLUMINA {
     }
 
     //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
-    INPUT_CHECK (
-        ch_samplesheet,
-        params.platform
-    )
-    .sample_info
-    .map {
-        meta, fastq ->
-            meta.id = meta.id.split('_')[0..-2].join('_')
-            [ meta, fastq ]
-    }
-    .groupTuple(by: [0])
-    .branch {
-        meta, fastq ->
-            single  : fastq.size() == 1
-                return [ meta, fastq.flatten() ]
-            multiple: fastq.size() > 1
-                return [ meta, fastq.flatten() ]
-    }
-    .set { ch_fastq }
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-
-    //
     // MODULE: Concatenate FastQ files from same sample if required
     //
     CAT_FASTQ (
-        ch_fastq.multiple
+        ch_samplesheet
     )
     .reads
-    .mix(ch_fastq.single)
+    .mix(ch_samplesheet)
     .set { ch_cat_fastq }
     ch_versions = ch_versions.mix(CAT_FASTQ.out.versions.first().ifEmpty(null))
 
