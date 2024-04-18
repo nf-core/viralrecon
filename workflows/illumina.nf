@@ -140,7 +140,11 @@ workflow ILLUMINA {
         ch_genome_fasta,
         ch_genome_gff,
         ch_primer_bed,
-        ch_bowtie2_index
+        ch_bowtie2_index,
+        ch_nextclade_dataset,
+        ch_nextclade_dataset_name,
+        ch_nextclade_dataset_reference,
+        ch_nextclade_dataset_tag
     )
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
