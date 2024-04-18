@@ -188,7 +188,6 @@ workflow ILLUMINA {
         ch_samplesheet
     )
     .reads
-    .mix(ch_samplesheet)
     .set { ch_cat_fastq }
     ch_versions = ch_versions.mix(CAT_FASTQ.out.versions.first().ifEmpty(null))
 
