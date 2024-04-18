@@ -112,7 +112,6 @@ include { BAM_VARIANT_DEMIX_BOOT_FREYJA } from '../subworkflows/nf-core/bam_vari
 */
 
 // Info required for completion email and summary
-def multiqc_report    = []
 def pass_mapped_reads = [:]
 def fail_mapped_reads = [:]
 
@@ -122,8 +121,9 @@ workflow ILLUMINA {
     ch_samplesheet // channel: samplesheet read in from --input
 
     main:
-    ch_versions = Channel.empty()
+    ch_versions      = Channel.empty()
     ch_multiqc_files = Channel.empty()
+    multiqc_report   = Channel.empty()
 
     //
     // SUBWORKFLOW: Uncompress and prepare reference genome files
@@ -654,11 +654,14 @@ workflow ILLUMINA {
             ch_minia_quast_multiqc.collect{it[1]}.ifEmpty([]),
             ch_freyja_multiqc.collect{it[1]}.ifEmpty([]),
         )
-        
-        emit:
-            multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
-            versions       = ch_versions                 // channel: [ path(versions.yml) ]
+
+        multiqc_report = MULTIQC.out.report.toList()        
     }
+
+    emit:
+    multiqc_report                  // channel: /path/to/multiqc_report.html
+    versions         = ch_versions  // channel: [ path(versions.yml) ]
+
 }
 
 /*

@@ -101,13 +101,13 @@ include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main
 */
 
 // Info required for completion email and summary
-def multiqc_report     = []
 def pass_barcode_reads = [:]
 def fail_barcode_reads = [:]
 
 workflow NANOPORE {
 
-    ch_versions = Channel.empty()
+    ch_versions     = Channel.empty()
+    multiqc_report  = Channel.empty()
 
     //
     // MODULE: PycoQC on sequencing summary file
@@ -567,10 +567,14 @@ workflow NANOPORE {
             ch_nextclade_multiqc.collectFile(name: 'nextclade_clade_mqc.tsv').ifEmpty([]),
             ch_freyja_multiqc.collect{it[1]}.ifEmpty([]),
         )
-        emit:
-            multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
-            versions       = ch_versions                 // channel: [ path(versions.yml) ]
+
+        multiqc_report = MULTIQC.out.report.toList()
     }
+
+    emit:
+    multiqc_report                // channel: /path/to/multiqc_report.html
+    versions       = ch_versions  // channel: [ path(versions.yml) ]
+
 }
 
 /*
