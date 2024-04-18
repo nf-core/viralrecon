@@ -106,8 +106,9 @@ def fail_barcode_reads = [:]
 
 workflow NANOPORE {
 
-    ch_versions     = Channel.empty()
-    multiqc_report  = Channel.empty()
+    ch_versions      = Channel.empty()
+    ch_multiqc_files = Channel.empty()
+    multiqc_report   = Channel.empty()
 
     //
     // MODULE: PycoQC on sequencing summary file
