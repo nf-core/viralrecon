@@ -671,7 +671,7 @@ workflow ILLUMINA {
             ch_freyja_multiqc.collect{it[1]}.ifEmpty([]),
         )
 
-        multiqc_report = MULTIQC.out.report.toList()        
+        multiqc_report = MULTIQC.out.report.toList()
     }
 
     emit:

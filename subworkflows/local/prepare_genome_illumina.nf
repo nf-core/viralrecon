@@ -30,7 +30,7 @@ workflow PREPARE_GENOME {
     nextclade_dataset_name
     nextclade_dataset_reference
     nextclade_dataset_tag
-    
+
 
     main:
 

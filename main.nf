@@ -91,7 +91,7 @@ workflow NFCORE_VIRALRECON {
             params.nextclade_dataset_reference,
             params.nextclade_dataset_tag
         )
-    
+
     multiqc_report = ILLUMINA.out.multiqc_report
 
     } else if (params.platform == 'nanopore') {
@@ -107,7 +107,7 @@ workflow NFCORE_VIRALRECON {
             params.nextclade_dataset_reference,
             params.nextclade_dataset_tag
         )
-    
+
     multiqc_report = NANOPORE.out.multiqc_report
     }
 
