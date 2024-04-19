@@ -27,7 +27,6 @@ def checkPathParamList = [
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-if (params.input)              { ch_input              = file(params.input)              }
 if (params.fast5_dir)          { ch_fast5_dir          = file(params.fast5_dir)          } else { ch_fast5_dir          = [] }
 if (params.sequencing_summary) { ch_sequencing_summary = file(params.sequencing_summary) } else { ch_sequencing_summary = [] }
 
@@ -65,7 +64,6 @@ include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../mod
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK                   } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME                } from '../subworkflows/local/prepare_genome_nanopore'
 include { SNPEFF_SNPSIFT                } from '../subworkflows/local/snpeff_snpsift'
 include { VARIANTS_LONG_TABLE           } from '../subworkflows/local/variants_long_table'
