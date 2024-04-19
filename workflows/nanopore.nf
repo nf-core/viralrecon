@@ -191,8 +191,11 @@ workflow NANOPORE {
         //
         // SUBWORKFLOW: Read in samplesheet containing sample to barcode mappings
         //
-        if (ch_samplesheet) {
-
+        if (ch_samplesheet.queue.size() == 0) {
+            ch_fastq_dirs
+                .map { barcode, dir, count -> [ barcode, barcode, dir, count ] }
+                .set { ch_fastq_dirs }
+        } else {
             ch_samplesheet
             .join(ch_fastq_dirs, remainder: true)
             .set { ch_fastq_dirs }
@@ -229,11 +232,6 @@ workflow NANOPORE {
             ch_fastq_dirs
                 .filter { (it[1] != null)  }
                 .filter { (it[-1] != null) }
-                .set { ch_fastq_dirs }
-
-        } else {
-            ch_fastq_dirs
-                .map { barcode, dir, count -> [ barcode, barcode, dir, count ] }
                 .set { ch_fastq_dirs }
         }
     } else if (single_barcode_dir) {

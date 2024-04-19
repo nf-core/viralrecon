@@ -101,13 +101,16 @@ workflow PIPELINE_INITIALISATION {
             }
             .set { ch_samplesheet }
     } else {
-        Channel
-            .fromSamplesheet("input")
-            .map {
-                meta, fastq_1, fastq_2, barcode->
-                    tuple( "barcode"+ String.format('%02d', barcode).toString(), meta.id)
-            }
-            .set { ch_samplesheet }
+        ch_samplesheet = Channel.empty()
+        if (input){
+            Channel
+                .fromSamplesheet("input")
+                .map {
+                    meta, fastq_1, fastq_2, barcode->
+                        tuple( "barcode"+ String.format('%02d', barcode).toString(), meta.id)
+                }
+                .set { ch_samplesheet }
+        }
     }
 
     emit:
