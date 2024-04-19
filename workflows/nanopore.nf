@@ -565,8 +565,10 @@ workflow NANOPORE {
         ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
 
         MULTIQC (
+            ch_multiqc_files.collect(),
             ch_multiqc_config,
             ch_multiqc_custom_config,
+            ch_multiqc_logo.toList(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
             ch_custom_no_sample_name_multiqc.collectFile(name: 'fail_barcodes_no_sample_mqc.tsv').ifEmpty([]),
             ch_custom_no_barcodes_multiqc.collectFile(name: 'fail_no_barcode_samples_mqc.tsv').ifEmpty([]),
