@@ -43,7 +43,7 @@ if (params.platform == 'illumina' && params.protocol == 'amplicon') {
 } else if (params.platform == 'nanopore') {
     primer_set          = params.primer_set
     primer_set_version  = params.primer_set_version
-    params.artic_scheme = getGenomeAttribute('scheme')
+    params.artic_scheme = getGenomeAttribute('scheme', primer_set, primer_set_version)
 }
 
 params.fasta         = getGenomeAttribute('fasta')
