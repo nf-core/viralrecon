@@ -191,15 +191,11 @@ workflow NANOPORE {
         //
         // SUBWORKFLOW: Read in samplesheet containing sample to barcode mappings
         //
-        if (params.input) {
-            INPUT_CHECK (
-                ch_input,
-                params.platform
-            )
-            .sample_info
+        if (ch_samplesheet) {
+
+            ch_samplesheet
             .join(ch_fastq_dirs, remainder: true)
             .set { ch_fastq_dirs }
-            ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
             //
             // MODULE: Create custom content file for MultiQC to report barcodes were allocated reads >= params.min_barcode_reads but no sample name in samplesheet
