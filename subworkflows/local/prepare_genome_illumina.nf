@@ -24,7 +24,7 @@ workflow PREPARE_GENOME {
     take:
     fasta
     gff
-    bed
+    primer_bed
     bowtie2_index
     nextclade_dataset
     nextclade_dataset_name
@@ -106,15 +106,15 @@ workflow PREPARE_GENOME {
     ch_primer_fasta         = Channel.empty()
     ch_primer_collapsed_bed = Channel.empty()
     if (params.protocol == 'amplicon') {
-        if (bed) {
-            if (bed.endsWith('.gz')) {
+        if (primer_bed) {
+            if (primer_bed.endsWith('.gz')) {
                 GUNZIP_PRIMER_BED (
-                    [ [:], bed ]
+                    [ [:], primer_bed ]
                 )
                 ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { it[1] }
                 ch_versions   = ch_versions.mix(GUNZIP_PRIMER_BED.out.versions)
             } else {
-                ch_primer_bed = Channel.value(file(bed))
+                ch_primer_bed = Channel.value(file(primer_bed))
             }
         }
 
