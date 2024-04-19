@@ -109,6 +109,7 @@ workflow NANOPORE {
     ch_genome_fasta
     ch_genome_gff
     ch_primer_bed
+    ch_artic_scheme
     ch_bowtie2_index
     ch_nextclade_dataset
     ch_nextclade_dataset_name
@@ -135,7 +136,16 @@ workflow NANOPORE {
     //
     // SUBWORKFLOW: Uncompress and prepare reference genome files
     //
-    PREPARE_GENOME ()
+    PREPARE_GENOME (
+        ch_genome_fasta,
+        ch_genome_gff,
+        ch_primer_bed,
+        ch_bowtie2_index,
+        ch_nextclade_dataset,
+        ch_nextclade_dataset_name,
+        ch_nextclade_dataset_reference,
+        ch_nextclade_dataset_tag
+    )
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
     // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
@@ -324,7 +334,7 @@ workflow NANOPORE {
         PREPARE_GENOME.out.primer_bed.collect(),
         ch_medaka_model.collect().ifEmpty([]),
         params.artic_minion_medaka_model ?: '',
-        params.artic_scheme,
+        ch_artic_scheme,
         params.primer_set_version
     )
     ch_versions = ch_versions.mix(ARTIC_MINION.out.versions.first())
