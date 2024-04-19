@@ -191,10 +191,7 @@ workflow NANOPORE {
         //
         // SUBWORKFLOW: Read in samplesheet containing sample to barcode mappings
         //
-        if (!params.input){
-            ch_samplesheet = null
-        }
-        if (ch_samplesheet) {
+        if (params.input) {
             ch_samplesheet
             .join(ch_fastq_dirs, remainder: true)
             .set { ch_fastq_dirs }
