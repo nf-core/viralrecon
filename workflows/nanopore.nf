@@ -23,13 +23,13 @@ def valid_params = [
 def checkPathParamList = [
     params.input, params.fastq_dir, params.fast5_dir,
     params.sequencing_summary, params.gff,
-    params.freyja_barcodes, params.freyja_lineages, params.additional_annot
+    params.freyja_barcodes, params.freyja_lineages, params.additional_annotation
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-if (params.fast5_dir)          { ch_fast5_dir          = file(params.fast5_dir)          } else { ch_fast5_dir          = [] }
-if (params.sequencing_summary) { ch_sequencing_summary = file(params.sequencing_summary) } else { ch_sequencing_summary = [] }
-if (params.additional_annot)   { ch_additional_gtf = file(params.additional_annot)       } else { additional_annot      = [] }
+if (params.fast5_dir)               { ch_fast5_dir          = file(params.fast5_dir)               } else { ch_fast5_dir          = [] }
+if (params.sequencing_summary)      { ch_sequencing_summary = file(params.sequencing_summary)      } else { ch_sequencing_summary = [] }
+if (params.additional_annotation)   { ch_additional_gtf     = file(params.additional_annotation)   } else { additional_annotation = [] }
 
 // Need to stage medaka model properly depending on whether it is a string or a file
 ch_medaka_model = Channel.empty()
@@ -67,7 +67,7 @@ include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../mod
 //
 include { PREPARE_GENOME                } from '../subworkflows/local/prepare_genome_nanopore'
 include { SNPEFF_SNPSIFT                } from '../subworkflows/local/snpeff_snpsift'
-include { ADDITIONAL_ANNOT              } from '../subworkflows/local/additional_annot'
+include { ADDITIONAL_ANNOTATION         } from '../subworkflows/local/additional_annotation'
 include { VARIANTS_LONG_TABLE           } from '../subworkflows/local/variants_long_table'
 include { FILTER_BAM_SAMTOOLS           } from '../subworkflows/local/filter_bam_samtools'
 include { BAM_VARIANT_DEMIX_BOOT_FREYJA } from '../subworkflows/nf-core/bam_variant_demix_boot_freyja/main'
@@ -547,8 +547,8 @@ workflow NANOPORE {
     //
     // SUBWORKFLOW: Create variants long table report for additional annotation file
     //
-    if (params.additional_annot) {
-        ADDITIONAL_ANNOT (
+    if (params.additional_annotation) {
+        ADDITIONAL_ANNOTATION (
             VCFLIB_VCFUNIQ.out.vcf,
             TABIX_TABIX.out.tbi,
             PREPARE_GENOME.out.fasta,
@@ -556,7 +556,7 @@ workflow NANOPORE {
             ch_pangolin_multiqc
 
         )
-        ch_versions = ch_versions.mix(ADDITIONAL_ANNOT.out.versions)
+        ch_versions = ch_versions.mix(ADDITIONAL_ANNOTATION.out.versions)
     }
 
     //

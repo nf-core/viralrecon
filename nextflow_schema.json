@@ -79,7 +79,7 @@
                     "description": "Full path to GFF annotation file.",
                     "fa_icon": "fas fa-file-invoice"
                 },
-                "additional_annot": {
+                "additional_annotation": {
                     "type": "string",
                     "format": "file-path",
                     "mimetype": "text/plain",

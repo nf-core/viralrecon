@@ -68,7 +68,7 @@ jobs:
           - "--spades_mode corona"
           - "--spades_mode metaviral"
           - "--skip_plasmidid false --skip_asciigenome"
-          - "--additional_annot ./GCA_009858895.3_ASM985889v3_genomic.gtf.gz"
+          - "--additional_annotation ./GCA_009858895.3_ASM985889v3_genomic.gtf.gz"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -88,7 +88,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Download GTF for additional annotation
-        if: contains(matrix.parameters, 'additional_annot')
+        if: contains(matrix.parameters, 'additional_annotation')
         run: |
           wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/858/895/GCA_009858895.3_ASM985889v3/GCA_009858895.3_ASM985889v3_genomic.gtf.gz
 
@@ -126,7 +126,7 @@ jobs:
       matrix:
         parameters:
           - "--gff false"
-          - "--additional_annot ./GCA_009858895.3_ASM985889v3_genomic.gtf.gz"
+          - "--additional_annotation ./GCA_009858895.3_ASM985889v3_genomic.gtf.gz"
           - "--input false"
           - "--min_barcode_reads 10000"
           - "--min_guppyplex_reads 10000"
@@ -142,11 +142,12 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Download GTF for additional annotation
-        if: contains(matrix.parameters, 'additional_annot')
+        if: contains(matrix.parameters, 'additional_annotation')
         run: |
           wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/858/895/GCA_009858895.3_ASM985889v3/GCA_009858895.3_ASM985889v3_genomic.gtf.gz
 
       - name: Download medaka model
+        if: contains(matrix.parameters, 'r941_min_high_g360_model.hdf5')
         run: |
           wget https://github.com/nanoporetech/medaka/raw/master/medaka/data/r941_min_high_g360_model.hdf5
 

@@ -11,12 +11,12 @@ include { BCFTOOLS_QUERY                                                  } from
 include { MAKE_VARIANTS_LONG_TABLE as MAKE_VARIANTS_LONG_TABLE_ADDITIONAL } from '../../modules/local/make_variants_long_table'
 
 
-workflow ADDITIONAL_ANNOT {
+workflow ADDITIONAL_ANNOTATION {
     take:
     vcf      // channel: [ val(meta), [ vcf ] ]
     tbi      // channel: [ val(meta), [ tbi ] ]
     fasta    // path   : genome.fasta
-    annot    // path   : additional_annot
+    annot    // path   : additional_annotation
     pangolin // channel: [ val(meta), [ csv ] ]
 
     main:
@@ -28,14 +28,14 @@ workflow ADDITIONAL_ANNOT {
     //
     ch_annot = Channel.empty()
 
-    if (params.additional_annot.endsWith('.gz')) {
+    if (params.additional_annotation.endsWith('.gz')) {
         GUNZIP_GFF (
             [ [:], annot ]
         )
         ch_annot       = GUNZIP_GFF.out.gunzip.map { it[1] }
         ch_versions = ch_versions.mix(GUNZIP_GFF.out.versions)
     } else {
-        ch_annot = Channel.value(file(params.additional_annot))
+        ch_annot = Channel.value(file(params.additional_annotation))
     }
 
     //
