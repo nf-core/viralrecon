@@ -400,7 +400,7 @@ workflow ILLUMINA {
             MOSDEPTH_AMPLICON (
                 ch_bam
                     .join(ch_bai, by: [0])
-                    .join(PREPARE_GENOME.out.primer_collapsed_bed),
+                    .combine(PREPARE_GENOME.out.primer_collapsed_bed),
                 [ [:], [] ],
             )
             ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first())
