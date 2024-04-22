@@ -88,6 +88,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Download GTF for additional annotation
+        if: contains(matrix.parameters, 'additional_annot')
         run: |
           wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/858/895/GCA_009858895.3_ASM985889v3/GCA_009858895.3_ASM985889v3_genomic.gtf.gz
 
@@ -141,6 +142,7 @@ jobs:
           sudo mv nextflow /usr/local/bin/
 
       - name: Download GTF for additional annotation
+        if: contains(matrix.parameters, 'additional_annot')
         run: |
           wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/858/895/GCA_009858895.3_ASM985889v3/GCA_009858895.3_ASM985889v3_genomic.gtf.gz
 
