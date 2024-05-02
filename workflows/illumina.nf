@@ -472,6 +472,7 @@ workflow ILLUMINA {
         BAM_VARIANT_DEMIX_BOOT_FREYJA(
             ch_bam,
             PREPARE_GENOME.out.fasta,
+            params.skip_freyja_boot,
             params.freyja_repeats,
             params.freyja_db_name,
             params.freyja_barcodes,
