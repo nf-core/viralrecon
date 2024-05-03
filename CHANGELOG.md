@@ -23,17 +23,19 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #405](https://github.com/nf-core/viralrecon/pull/412)] - Including parameter `depthcutoff` to freyja demix and boot
 - [[PR #413](https://github.com/nf-core/viralrecon/pull/413)] - Update multiqc module & include freyja in report
 - [[PR #401](https://github.com/nf-core/viralrecon/pull/401)] - Added option to add a custom annotation
+- [[PR #417](https://github.com/nf-core/viralrecon/pull/417)] - Allow skipping of Freyja bootstrapping module & freyja module update
 
 ### Parameters
 
-| Old parameter       | New parameter             |
-| ------------------- | ------------------------- |
-| `--skip_freyja`     |                           |
-| `--freyja_repeats`  |                           |
-| `--freyja_db_name`  |                           |
-| `--freyja_barcodes` |                           |
-| `--freyja_lineages` |                           |
-|                     | `--additional_annotation` |
+| Old parameter | New parameter             |
+| ------------- | ------------------------- |
+|               | `--skip_freyja`           |
+|               | `--freyja_repeats`        |
+|               | `--freyja_db_name`        |
+|               | `--freyja_barcodes`       |
+|               | `--freyja_lineages`       |
+|               | `--skip_freyja_boot`      |
+|               | `--additional_annotation` |
 
 > **NB:** Parameter has been **updated** if both old and new parameter information is present.
 > **NB:** Parameter has been **added** if just the new parameter information is present.
@@ -45,7 +47,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 
 | Dependency | Old version | New version |
 | ---------- | ----------- | ----------- |
-| `freyja`   |             | 1.3.12      |
+| `freyja`   |             | 1.5.0       |
 | `multiqc`  | 1.14        | 1.19        |
 
 > **NB:** Dependency has been **updated** if both old and new version information is present.
