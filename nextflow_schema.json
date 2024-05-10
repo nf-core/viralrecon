@@ -265,6 +265,11 @@
                     "fa_icon": "fas fa-forward",
                     "description": "Skip freyja deep SARS-CoV-2 variant analysis using a depth weighted approach."
                 },
+                "skip_freyja_boot": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip the bootstrapping  module of Freyja"
+                },
                 "freyja_db_name": {
                     "type": "string",
                     "default": "freyja_db",
@@ -281,7 +286,8 @@
                     "type": "integer",
                     "default": 100,
                     "fa_icon": "fas fa-hand-paper",
-                    "description": "Specify the number of bootstrap repeats to do."
+                    "description": "Specify the number of bootstrap repeats to do.",
+                    "minimum": 1
                 },
                 "freyja_barcodes": {
                     "type": "string",
