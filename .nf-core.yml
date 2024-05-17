@@ -1,6 +1,2 @@
 repository_type: pipeline
-lint:
-  files_unchanged:
-    - assets/email_template.html
-    - assets/email_template.txt
-    - lib/NfcoreTemplate.groovy
+nf_core_version: "2.14.1"
