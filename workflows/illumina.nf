@@ -575,7 +575,7 @@ workflow ILLUMINA {
     if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
         CUTADAPT (
             ch_assembly_fastq,
-            PREPARE_GENOME.out.primer_fasta
+            PREPARE_GENOME.out.primer_fasta.collect { it[1] }
         )
         ch_assembly_fastq   = CUTADAPT.out.reads
         ch_cutadapt_multiqc = CUTADAPT.out.log

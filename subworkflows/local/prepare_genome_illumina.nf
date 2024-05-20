@@ -141,7 +141,7 @@ workflow PREPARE_GENOME {
                 }
             } else {
                 BEDTOOLS_GETFASTA (
-                    ch_primer_bed,
+                    ch_primer_bed.map { [ [:], it ] },
                     ch_fasta
                 )
                 ch_primer_fasta = BEDTOOLS_GETFASTA.out.fasta
