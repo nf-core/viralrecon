@@ -481,7 +481,7 @@ workflow NANOPORE {
         QUAST (
             ch_to_quast,
             PREPARE_GENOME.out.fasta.collect().map { [ [:], it ] },
-            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
+            (!params.gff && !params.genome) ? [ [:], [] ] : PREPARE_GENOME.out.gff.map { [ [:], it ] },
         )
         ch_quast_multiqc = QUAST.out.tsv
         ch_versions      = ch_versions.mix(QUAST.out.versions)
@@ -492,7 +492,7 @@ workflow NANOPORE {
     //
     ch_snpeff_multiqc = Channel.empty()
     ch_snpsift_txt    = Channel.empty()
-    if (ch_genome_gff && !params.skip_snpeff) {
+    if (!params.skip_snpeff && (params.gff || params.genome) ) {
         SNPEFF_SNPSIFT (
             VCFLIB_VCFUNIQ.out.vcf,
             PREPARE_GENOME.out.snpeff_db.collect(),
@@ -524,7 +524,7 @@ workflow NANOPORE {
             ch_asciigenome,
             PREPARE_GENOME.out.fasta.collect(),
             PREPARE_GENOME.out.chrom_sizes.collect(),
-            ch_genome_gff ? PREPARE_GENOME.out.gff : [],
+            (!params.gff && !params.genome) ? [] : PREPARE_GENOME.out.gff,
             PREPARE_GENOME.out.primer_bed.collect(),
             params.asciigenome_window_size,
             params.asciigenome_read_depth
@@ -535,7 +535,7 @@ workflow NANOPORE {
     //
     // SUBWORKFLOW: Create variants long table report
     //
-    if (!params.skip_variants_long_table && ch_genome_gff && !params.skip_snpeff) {
+    if (!params.skip_variants_long_table && (params.gff || params.genome) && !params.skip_snpeff) {
         VARIANTS_LONG_TABLE (
             VCFLIB_VCFUNIQ.out.vcf,
             TABIX_TABIX.out.tbi,
