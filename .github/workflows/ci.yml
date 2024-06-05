@@ -125,7 +125,7 @@ jobs:
     strategy:
       matrix:
         parameters:
-          - "--gff false"
+          - "--gff false --freyja_depthcutoff 1"
           - "--additional_annotation ./GCA_009858895.3_ASM985889v3_genomic.gtf.gz"
           - "--input false"
           - "--min_barcode_reads 10000"
