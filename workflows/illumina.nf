@@ -428,7 +428,7 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.fasta,
             (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.fai : [],
             (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
-            (!params.gff && !params.genome) ? [] : PREPARE_GENOME.out.gff,
+            ch_genome_gff ? PREPARE_GENOME.out.gff : [],
             (params.protocol == 'amplicon' && ch_primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config,
@@ -451,7 +451,7 @@ workflow ILLUMINA {
             ch_bam,
             PREPARE_GENOME.out.fasta,
             (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
-            (!params.gff && !params.genome) ? [] : PREPARE_GENOME.out.gff,
+            ch_genome_gff ? PREPARE_GENOME.out.gff : [],
             (params.protocol == 'amplicon' && ch_primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config
@@ -492,7 +492,7 @@ workflow ILLUMINA {
         CONSENSUS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            (!params.gff && !params.genome) ? [ [:], [] ] : PREPARE_GENOME.out.gff.map { [ [:], it ] },
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.nextclade_db
         )
 
@@ -511,7 +511,7 @@ workflow ILLUMINA {
             ch_vcf,
             ch_tbi,
             PREPARE_GENOME.out.fasta,
-            (!params.gff && !params.genome) ? [ [:], [] ] : PREPARE_GENOME.out.gff.map { [ [:], it ] },
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.nextclade_db
         )
 
@@ -543,7 +543,7 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Create variants long table report
     //
-    if (!params.skip_variants && !params.skip_variants_long_table && !params.skip_snpeff && (params.gff || params.genome) ) {
+    if (!params.skip_variants && !params.skip_variants_long_table && ch_genome_gff && !params.skip_snpeff) {
         VARIANTS_LONG_TABLE (
             ch_vcf,
             ch_tbi,
@@ -599,7 +599,7 @@ workflow ILLUMINA {
             params.spades_mode,
             ch_spades_hmm,
             PREPARE_GENOME.out.fasta,
-            (!params.gff && !params.genome) ? [ [:], [] ] : PREPARE_GENOME.out.gff.map { [ [:], it ] },
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -615,7 +615,7 @@ workflow ILLUMINA {
         ASSEMBLY_UNICYCLER (
             ch_assembly_fastq.map { meta, fastq -> [ meta, fastq, [] ] },
             PREPARE_GENOME.out.fasta,
-            (!params.gff && !params.genome) ? [ [:], [] ] : PREPARE_GENOME.out.gff.map { [ [:], it ] },
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -631,7 +631,7 @@ workflow ILLUMINA {
         ASSEMBLY_MINIA (
             ch_assembly_fastq,
             PREPARE_GENOME.out.fasta,
-            (!params.gff && !params.genome) ? [ [:], [] ] : PREPARE_GENOME.out.gff.map { [ [:], it ] },
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
