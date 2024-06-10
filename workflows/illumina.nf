@@ -428,8 +428,8 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.fasta,
             (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.fai : [],
             (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
-            params.gff ? PREPARE_GENOME.out.gff : [],
-            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
+            ch_genome_gff ? PREPARE_GENOME.out.gff : [],
+            (params.protocol == 'amplicon' && ch_primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config,
             ch_ivar_variants_header_mqc
@@ -451,8 +451,8 @@ workflow ILLUMINA {
             ch_bam,
             PREPARE_GENOME.out.fasta,
             (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
-            params.gff ? PREPARE_GENOME.out.gff : [],
-            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
+            ch_genome_gff ? PREPARE_GENOME.out.gff : [],
+            (params.protocol == 'amplicon' && ch_primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config
         )
@@ -492,7 +492,7 @@ workflow ILLUMINA {
         CONSENSUS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.nextclade_db
         )
 
@@ -511,7 +511,7 @@ workflow ILLUMINA {
             ch_vcf,
             ch_tbi,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.nextclade_db
         )
 
@@ -543,7 +543,7 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Create variants long table report
     //
-    if (!params.skip_variants && !params.skip_variants_long_table && params.gff && !params.skip_snpeff) {
+    if (!params.skip_variants && !params.skip_variants_long_table && ch_genome_gff && !params.skip_snpeff) {
         VARIANTS_LONG_TABLE (
             ch_vcf,
             ch_tbi,
@@ -575,7 +575,7 @@ workflow ILLUMINA {
     if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
         CUTADAPT (
             ch_assembly_fastq,
-            PREPARE_GENOME.out.primer_fasta
+            PREPARE_GENOME.out.primer_fasta.collect { it[1] }
         )
         ch_assembly_fastq   = CUTADAPT.out.reads
         ch_cutadapt_multiqc = CUTADAPT.out.log
@@ -599,7 +599,7 @@ workflow ILLUMINA {
             params.spades_mode,
             ch_spades_hmm,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -615,7 +615,7 @@ workflow ILLUMINA {
         ASSEMBLY_UNICYCLER (
             ch_assembly_fastq.map { meta, fastq -> [ meta, fastq, [] ] },
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -631,7 +631,7 @@ workflow ILLUMINA {
         ASSEMBLY_MINIA (
             ch_assembly_fastq,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header
         )
@@ -643,21 +643,37 @@ workflow ILLUMINA {
     // Collate and save software versions
     //
     softwareVersionsToYAML(ch_versions)
-        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_pipeline_software_mqc_versions.yml', sort: true, newLine: true)
-        .set { ch_collated_versions }
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'nf_core_pipeline_software_mqc_versions.yml',
+            sort: true,
+            newLine: true
+        ).set { ch_collated_versions }
 
     //
     // MODULE: MultiQC
     //
     if (!params.skip_multiqc) {
-        summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+        summary_params                        = paramsSummaryMap(
+            workflow, parameters_schema: "nextflow_schema.json")
         ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
-        ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-        ch_methods_description                = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
-        ch_multiqc_logo                       = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
-        ch_multiqc_files                      = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+        ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
+            file(params.multiqc_methods_description, checkIfExists: true) :
+            file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+        ch_methods_description                = Channel.value(
+            methodsDescriptionText(ch_multiqc_custom_methods_description))
+
+        ch_multiqc_logo                       = params.multiqc_logo ?
+            Channel.fromPath(params.multiqc_logo, checkIfExists: true) :
+            Channel.empty()
+
+        ch_multiqc_files                      = ch_multiqc_files.mix(
+            ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
         ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
-        ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
+        ch_multiqc_files                      = ch_multiqc_files.mix(
+            ch_methods_description.collectFile(
+                name: 'methods_description_mqc.yaml',
+                sort: false))
 
         MULTIQC (
             ch_multiqc_files.collect(),

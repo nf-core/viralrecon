@@ -481,7 +481,7 @@ workflow NANOPORE {
         QUAST (
             ch_to_quast,
             PREPARE_GENOME.out.fasta.collect().map { [ [:], it ] },
-            params.gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
         )
         ch_quast_multiqc = QUAST.out.tsv
         ch_versions      = ch_versions.mix(QUAST.out.versions)
@@ -492,7 +492,7 @@ workflow NANOPORE {
     //
     ch_snpeff_multiqc = Channel.empty()
     ch_snpsift_txt    = Channel.empty()
-    if (params.gff && !params.skip_snpeff) {
+    if (ch_genome_gff && !params.skip_snpeff) {
         SNPEFF_SNPSIFT (
             VCFLIB_VCFUNIQ.out.vcf,
             PREPARE_GENOME.out.snpeff_db.collect(),
@@ -524,7 +524,7 @@ workflow NANOPORE {
             ch_asciigenome,
             PREPARE_GENOME.out.fasta.collect(),
             PREPARE_GENOME.out.chrom_sizes.collect(),
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            ch_genome_gff ? PREPARE_GENOME.out.gff : [],
             PREPARE_GENOME.out.primer_bed.collect(),
             params.asciigenome_window_size,
             params.asciigenome_read_depth
@@ -535,7 +535,7 @@ workflow NANOPORE {
     //
     // SUBWORKFLOW: Create variants long table report
     //
-    if (!params.skip_variants_long_table && params.gff && !params.skip_snpeff) {
+    if (!params.skip_variants_long_table && ch_genome_gff && !params.skip_snpeff) {
         VARIANTS_LONG_TABLE (
             VCFLIB_VCFUNIQ.out.vcf,
             TABIX_TABIX.out.tbi,
@@ -564,22 +564,38 @@ workflow NANOPORE {
     // MODULE: Pipeline reporting
     //
     softwareVersionsToYAML(ch_versions)
-        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_pipeline_software_mqc_versions.yml', sort: true, newLine: true)
-        .set { ch_collated_versions }
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'nf_core_pipeline_software_mqc_versions.yml',
+            sort: true,
+            newLine: true
+        ).set { ch_collated_versions }
 
 
     //
     // MODULE: MultiQC
     //
     if (!params.skip_multiqc) {
-        summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+        summary_params                        = paramsSummaryMap(
+            workflow, parameters_schema: "nextflow_schema.json")
         ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
-        ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-        ch_methods_description                = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
-        ch_multiqc_logo                       = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
-        ch_multiqc_files                      = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+        ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
+            file(params.multiqc_methods_description, checkIfExists: true) :
+            file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+        ch_methods_description                = Channel.value(
+            methodsDescriptionText(ch_multiqc_custom_methods_description))
+
+        ch_multiqc_logo                       = params.multiqc_logo ?
+            Channel.fromPath(params.multiqc_logo, checkIfExists: true) :
+            Channel.empty()
+
+        ch_multiqc_files                      = ch_multiqc_files.mix(
+            ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
         ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
-        ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
+        ch_multiqc_files                      = ch_multiqc_files.mix(
+            ch_methods_description.collectFile(
+                name: 'methods_description_mqc.yaml',
+                sort: false))
 
         MULTIQC (
             ch_multiqc_files.collect(),
