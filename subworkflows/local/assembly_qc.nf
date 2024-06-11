@@ -10,11 +10,12 @@ include { QUAST         } from '../../modules/nf-core/quast/main'
 
 workflow ASSEMBLY_QC {
     take:
-    scaffolds    // channel: [ val(meta), [ scaffolds ] ]
-    fasta        // channel: /path/to/genome.fasta
-    gff          // channel: /path/to/genome.gff
-    blast_db     // channel: /path/to/blast_db/
-    blast_header // channel: /path/to/blast_header.txt
+    scaffolds             // channel: [ val(meta), [ scaffolds ] ]
+    fasta                 // channel: /path/to/genome.fasta
+    gff                   // channel: /path/to/genome.gff
+    blast_db              // channel: /path/to/blast_db/
+    blast_header          // channel: /path/to/blast_header.txt
+    blast_filtered_header // channel: /path/to/blast_filtered_header.txt
 
     main:
 
@@ -35,7 +36,8 @@ workflow ASSEMBLY_QC {
 
         FILTER_BLASTN (
             BLAST_BLASTN.out.txt,
-            blast_header
+            blast_header,
+            blast_filtered_header
         )
         ch_blast_filter_txt = FILTER_BLASTN.out.txt
         ch_versions         = ch_versions.mix(FILTER_BLASTN.out.versions.first())

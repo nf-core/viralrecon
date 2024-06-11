@@ -51,8 +51,9 @@ ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yml"
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 // Header files
-ch_blast_outfmt6_header     = file("$projectDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
-ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_header_mqc.txt", checkIfExists: true)
+ch_blast_outfmt6_header          = file("$projectDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
+ch_blast_filtered_outfmt6_header = file("$projectDir/assets/headers/blast_filtered_outfmt6_header.txt", checkIfExists: true)
+ch_ivar_variants_header_mqc      = file("$projectDir/assets/headers/ivar_variants_header_mqc.txt", checkIfExists: true)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -601,7 +602,8 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.fasta,
             ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
-            ch_blast_outfmt6_header
+            ch_blast_outfmt6_header,
+            ch_blast_filtered_outfmt6_header
         )
         ch_spades_quast_multiqc = ASSEMBLY_SPADES.out.quast_tsv
         ch_versions             = ch_versions.mix(ASSEMBLY_SPADES.out.versions)
@@ -617,7 +619,8 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.fasta,
             ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
-            ch_blast_outfmt6_header
+            ch_blast_outfmt6_header,
+            ch_blast_filtered_outfmt6_header
         )
         ch_unicycler_quast_multiqc = ASSEMBLY_UNICYCLER.out.quast_tsv
         ch_versions                = ch_versions.mix(ASSEMBLY_UNICYCLER.out.versions)
@@ -633,7 +636,8 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.fasta,
             ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
-            ch_blast_outfmt6_header
+            ch_blast_outfmt6_header,
+            ch_blast_filtered_outfmt6_header
         )
         ch_minia_quast_multiqc = ASSEMBLY_MINIA.out.quast_tsv
         ch_versions            = ch_versions.mix(ASSEMBLY_MINIA.out.versions)
