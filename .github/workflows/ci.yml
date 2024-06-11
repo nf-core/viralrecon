@@ -127,7 +127,7 @@ jobs:
         parameters:
           - "--gff false --freyja_depthcutoff 1"
           - "--additional_annotation ./GCA_009858895.3_ASM985889v3_genomic.gtf.gz"
-          - "--input false"
+          - "--input false --freyja_depthcutoff 1"
           - "--min_barcode_reads 10000"
           - "--min_guppyplex_reads 10000"
           - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false"
