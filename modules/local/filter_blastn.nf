@@ -21,9 +21,12 @@ process FILTER_BLASTN {
 
     script:
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def min_contig_length = params.min_contig_length
+    def min_perc_cgaligned = params.min_perc_cgaligned
+
     """
     cat $header $hits > ${prefix}.blastn.txt
-    awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$5/\$15,\$5/\$14}' $hits | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$15 > 200 && \$17 > 0.7 && \$1 !~ /phage/ {print \$0}' > tmp.out
+    awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$6/\$16,\$6/\$15}' $hits | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$16 > ${min_contig_length} && \$18 > ${min_perc_cgaligned} && \$1 !~ /phage/ {print \$0}' > tmp.out
     cat $filtered_header tmp.out > ${prefix}.filter.blastn.txt
 
     cat <<-END_VERSIONS > versions.yml

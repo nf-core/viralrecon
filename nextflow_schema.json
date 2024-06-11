@@ -572,6 +572,18 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Specify this parameter to skip all of the de novo assembly steps in the pipeline."
+                },
+                "min_contig_length": {
+                    "type": "integer",
+                    "default": 200,
+                    "fa_icon": "fas fa-sliders-h",
+                    "description": "Minimum contig length to filter from BLAST results."
+                },
+                "min_perc_cgaligned": {
+                    "type": "number",
+                    "default": 0.7,
+                    "fa_icon": "fas fa-sliders-h",
+                    "description": "Minimum percentage of contig aligned to filter from BLAST results."
                 }
             },
             "fa_icon": "fas fa-random"
