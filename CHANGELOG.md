@@ -11,6 +11,7 @@ Special thanks to the following for their code contributions to the release:
 
 - [Adam Talbot](https://github.com/adamrtalbot)
 - [Joon Klaps](https://github.com/Joon-Klaps)
+- [Sarai Varona](https://github.com/svarona)
 
 Thank you to everyone else that has contributed by reporting bugs, enhancements or in any other way, shape or form.
 
@@ -24,6 +25,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #413](https://github.com/nf-core/viralrecon/pull/413)] - Update multiqc module & include freyja in report
 - [[PR #401](https://github.com/nf-core/viralrecon/pull/401)] - Added option to add a custom annotation
 - [[PR #417](https://github.com/nf-core/viralrecon/pull/417)] - Allow skipping of Freyja bootstrapping module & freyja module update
+- [[PR #434](https://github.com/nf-core/viralrecon/pull/434)] - Enhancements in BLAST filtering
 
 ### Parameters
 
@@ -36,6 +38,8 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 |               | `--freyja_lineages`       |
 |               | `--skip_freyja_boot`      |
 |               | `--additional_annotation` |
+|               | `--min_contig_length`     |
+|               | `--min_perc_cgaligned`    |
 
 > **NB:** Parameter has been **updated** if both old and new parameter information is present.
 > **NB:** Parameter has been **added** if just the new parameter information is present.
