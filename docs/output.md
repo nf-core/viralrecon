@@ -910,7 +910,9 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 
 - `assembly/<ASSEMBLER>/blastn/`
   - `*.blastn.txt`: BLAST results against the target virus.
-  - `*.filter.blastn.txt`: Filtered BLAST results.
+  - `*.filter.blastn.txt`: Filtered BLAST results. Applied filters by default are:
+    - `qlen` (contig length) > 200 nt
+    - `%cgAligned` (percentage of contig aligned) > 0.7 (70%)
 
 **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades').
 
