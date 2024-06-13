@@ -579,7 +579,7 @@
                     "fa_icon": "fas fa-sliders-h",
                     "description": "Minimum contig length to filter from BLAST results."
                 },
-                "min_perc_cgaligned": {
+                "min_perc_contig_aligned": {
                     "type": "number",
                     "default": 0.7,
                     "fa_icon": "fas fa-sliders-h",
