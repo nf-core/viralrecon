@@ -25,7 +25,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #413](https://github.com/nf-core/viralrecon/pull/413)] - Update multiqc module & include freyja in report
 - [[PR #401](https://github.com/nf-core/viralrecon/pull/401)] - Added option to add a custom annotation
 - [[PR #417](https://github.com/nf-core/viralrecon/pull/417)] - Allow skipping of Freyja bootstrapping module & freyja module update
-- [[PR #434](https://github.com/nf-core/viralrecon/pull/434)] - Enhancements in BLAST filtering
+- [[PR #434](https://github.com/nf-core/viralrecon/pull/434)] - Add blast result filtering through `min_contig_length` and `min_perc_contig_aligned`. 
 
 ### Parameters
 
