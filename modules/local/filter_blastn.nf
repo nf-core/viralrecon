@@ -13,7 +13,7 @@ process FILTER_BLASTN {
     path filtered_header
 
     output:
-    tuple val(meta), path('*.txt'), emit: txt
+    tuple val(meta), path('*filter.blastn.txt'), emit: txt
     path "versions.yml"           , emit: versions
 
     when:
