@@ -29,17 +29,17 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 
 ### Parameters
 
-| Old parameter | New parameter              |
-| ------------- | -------------------------- |
-|               | `--skip_freyja`            |
-|               | `--freyja_repeats`         |
-|               | `--freyja_db_name`         |
-|               | `--freyja_barcodes`        |
-|               | `--freyja_lineages`        |
-|               | `--skip_freyja_boot`       |
-|               | `--additional_annotation`  |
-|               | `--min_contig_length`      |
-|               | `--min_perc_contig_aligned`|
+| Old parameter | New parameter               |
+| ------------- | --------------------------- |
+|               | `--skip_freyja`             |
+|               | `--freyja_repeats`          |
+|               | `--freyja_db_name`          |
+|               | `--freyja_barcodes`         |
+|               | `--freyja_lineages`         |
+|               | `--skip_freyja_boot`        |
+|               | `--additional_annotation`   |
+|               | `--min_contig_length`       |
+|               | `--min_perc_contig_aligned` |
 
 > **NB:** Parameter has been **updated** if both old and new parameter information is present.
 > **NB:** Parameter has been **added** if just the new parameter information is present.
