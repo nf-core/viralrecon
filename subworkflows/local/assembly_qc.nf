@@ -31,7 +31,6 @@ workflow ASSEMBLY_QC {
             scaffolds,
             blast_db
         )
-        ch_blast_txt = BLAST_BLASTN.out.txt
         ch_versions  = ch_versions.mix(BLAST_BLASTN.out.versions.first())
 
         FILTER_BLASTN (
@@ -39,6 +38,7 @@ workflow ASSEMBLY_QC {
             blast_header,
             blast_filtered_header
         )
+        ch_blast_txt = FILTER_BLASTN.out.blast
         ch_blast_filter_txt = FILTER_BLASTN.out.txt
         ch_versions         = ch_versions.mix(FILTER_BLASTN.out.versions.first())
     }

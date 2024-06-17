@@ -909,7 +909,7 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 <summary>Output files</summary>
 
 - `assembly/<ASSEMBLER>/blastn/`
-  - `*.blastn.txt`: BLAST results against the target virus.
+  - `*results.blastn.txt`: BLAST results against the target virus.
   - `*.filter.blastn.txt`: Filtered BLAST results.
     - Applied filters by default are:
       - `qlen` (contig length) > 200 nt

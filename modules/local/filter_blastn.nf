@@ -13,8 +13,9 @@ process FILTER_BLASTN {
     path filtered_header
 
     output:
-    tuple val(meta), path('*filter.blastn.txt'), emit: txt
-    path "versions.yml"           , emit: versions
+    tuple val(meta), path('*filter.blastn.txt')  , emit: txt
+    tuple val(meta), path('*.results.blastn.txt'), emit: blast
+    path "versions.yml"                          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -25,7 +26,7 @@ process FILTER_BLASTN {
     def min_perc_contig_aligned = params.min_perc_contig_aligned
 
     """
-    cat $header $hits > ${prefix}.blastn.txt
+    cat $header $hits > ${prefix}.results.blastn.txt
     awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"}{print \$0,\$6/\$16,\$6/\$15}' $hits | awk 'BEGIN{OFS=\"\\t\";FS=\"\\t\"} \$16 > ${min_contig_length} && \$18 > ${min_perc_contig_aligned} && \$1 !~ /phage/ {print \$0}' > tmp.out
     cat $filtered_header tmp.out > ${prefix}.filter.blastn.txt
 
