@@ -126,12 +126,12 @@ jobs:
       matrix:
         parameters:
           - "--gff false --freyja_depthcutoff 1"
-          - "--additional_annotation ./GCA_009858895.3_ASM985889v3_genomic.gtf.gz"
-          - "--input false"
+          - "--additional_annotation ./GCA_009858895.3_ASM985889v3_genomic.gtf.gz --freyja_depthcutoff 1"
+          - "--input false --freyja_depthcutoff 1"
           - "--min_barcode_reads 10000"
           - "--min_guppyplex_reads 10000"
-          - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false"
-          - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false --artic_minion_medaka_model ./r941_min_high_g360_model.hdf5"
+          - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false --freyja_depthcutoff 1"
+          - "--artic_minion_caller medaka --sequencing_summary false --fast5_dir false --artic_minion_medaka_model ./r941_min_high_g360_model.hdf5 --freyja_depthcutoff 1"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
