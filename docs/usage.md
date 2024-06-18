@@ -321,6 +321,21 @@ To learn how to provide additional arguments to a particular tool of the pipelin
 
 [Freyja](https://github.com/andersen-lab/Freyja) relies on a dataset of barcodes that use lineage defining mutations (see [UShER](https://usher-wiki.readthedocs.io/en/latest/#)). By default the most recent barcodes will be downloaded and used. However, if analyses need to be compared across multiple datasets, it might be of interest to re-use the same barcodes, or to rerun all Freyja analyses with the most recent dataset. To do this, specify the barcodes and lineages using the `--freyja_barcodes`, `--freyja_lineages` parameters, respectivly. The boostrapping of Freyja can be skipped by specifying `--skip_freyja_boot`.
 
+### Cutadapt
+
+According to [Cutadapt's documentation regarding adapter types](https://cutadapt.readthedocs.io/en/stable/guide.html#adapter-types), you can have:
+
+- Regular 3’ adapter: `-a ADAPTER`
+    - Set `--skip_noninternal_primers` to `true`
+    - Change `modules_illumina.config` > `CUTADAPT` > `ext.args` to use `-a` instead of `-g`
+- Regular 5’ adapter: `-g ADAPTER`
+    - Set `--skip_noninternal_primers` to `true`
+- Non-internal 3’ adapter: `-a ADAPTERX`:
+    - Change `modules_illumina.config` > `PREPARE_PRIMER_FASTA` > `ext.args` to use `$` instead of `^` to add the X at the end of the sequence.
+    - Change `modules_illumina.config` > `CUTADAPT` > `ext.args` to use `-a` instead of `-g`
+- Non-internal 5’ adapter: `-g XADAPTER`: This is the option by default.
+
+
 ### nf-core/configs
 
 In most cases, you will only need to create a custom config as a one-off but if you and others within your organisation are likely to be running nf-core pipelines regularly and need to use the same settings regularly it may be a good idea to request that your custom config file is uploaded to the `nf-core/configs` git repository. Before you do this please can you test that the config file works with your pipeline of choice using the `-c` parameter. You can then create a pull request to the `nf-core/configs` repository with the addition of your config file, associated documentation file (see examples in [`nf-core/configs/docs`](https://github.com/nf-core/configs/tree/master/docs)), and amending [`nfcore_custom.config`](https://github.com/nf-core/configs/blob/master/nfcore_custom.config) to include your custom profile.
