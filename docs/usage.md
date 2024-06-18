@@ -326,15 +326,14 @@ To learn how to provide additional arguments to a particular tool of the pipelin
 According to [Cutadapt's documentation regarding adapter types](https://cutadapt.readthedocs.io/en/stable/guide.html#adapter-types), you can have:
 
 - Regular 3’ adapter: `-a ADAPTER`
-    - Set `--skip_noninternal_primers` to `true`
-    - Change `modules_illumina.config` > `CUTADAPT` > `ext.args` to use `-a` instead of `-g`
+  - Set `--skip_noninternal_primers` to `true`
+  - Change `modules_illumina.config` > `CUTADAPT` > `ext.args` to use `-a` instead of `-g`
 - Regular 5’ adapter: `-g ADAPTER`
-    - Set `--skip_noninternal_primers` to `true`
+  - Set `--skip_noninternal_primers` to `true`
 - Non-internal 3’ adapter: `-a ADAPTERX`:
-    - Change `modules_illumina.config` > `PREPARE_PRIMER_FASTA` > `ext.args` to use `$` instead of `^` to add the X at the end of the sequence.
-    - Change `modules_illumina.config` > `CUTADAPT` > `ext.args` to use `-a` instead of `-g`
+  - Change `modules_illumina.config` > `PREPARE_PRIMER_FASTA` > `ext.args` to use `$` instead of `^` to add the X at the end of the sequence.
+  - Change `modules_illumina.config` > `CUTADAPT` > `ext.args` to use `-a` instead of `-g`
 - Non-internal 5’ adapter: `-g XADAPTER`: This is the option by default.
-
 
 ### nf-core/configs
 

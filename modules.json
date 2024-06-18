@@ -108,9 +108,7 @@
                     "cutadapt": {
                         "branch": "master",
                         "git_sha": "6618151ed69274863dc6fe6d2920afa90abaca1f",
-                        "installed_by": [
-                            "modules"
-                        ]
+                        "installed_by": ["modules"]
                     },
                     "fastp": {
                         "branch": "master",
