@@ -575,6 +575,12 @@ workflow ILLUMINA {
     //
     ch_cutadapt_multiqc = Channel.empty()
     if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
+            ch_assembly_fastq
+                .map { info, reads -> 
+                    def meta = info +
+                        [primers: PREPARE_GENOME.out.primer_fasta.value[1]]
+                    return [meta, reads] }
+                .set{ ch_assembly_fastq }
         CUTADAPT (
             ch_assembly_fastq
         )
