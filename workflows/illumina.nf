@@ -581,14 +581,14 @@ workflow ILLUMINA {
                 PREPARE_GENOME.out.primer_fasta.collect { it[1] }
                 )
             ch_assembly_fastq
-                .map { info, reads -> 
+                .map { info, reads ->
                     def meta = info +
                         [primers: PREPARE_PRIMER_FASTA.out.adapters.value]
                     return [meta, reads] }
                 .set{ ch_assembly_fastq }
         } else {
             ch_assembly_fastq
-                .map { info, reads -> 
+                .map { info, reads ->
                     def meta = info +
                         [primers: PREPARE_GENOME.out.primer_fasta.value[1]]
                     return [meta, reads] }
