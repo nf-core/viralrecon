@@ -53,6 +53,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | ---------- | ----------- | ----------- |
 | `freyja`   |             | 1.5.0       |
 | `multiqc`  | 1.14        | 1.19        |
+| `fastp`    | 0.23.2      | 0.23.4      |
 
 > **NB:** Dependency has been **updated** if both old and new version information is present.
 >

@@ -204,6 +204,7 @@ workflow ILLUMINA {
     FASTQ_TRIM_FASTP_FASTQC (
         ch_cat_fastq,
         [],
+        false,
         params.save_trimmed_fail,
         false
     )
