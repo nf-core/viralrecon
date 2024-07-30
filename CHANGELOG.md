@@ -17,7 +17,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 
 ### Enhancements & fixes
 
-- [[#299](https://github.com/nf-core/viralrecon/issues/299)] - Add the freyja pipeline as a subworkflow
+- [[PR #375](https://github.com/nf-core/viralrecon/pull/375)] - Add the freyja pipeline as a subworkflow
 - [[PR #387](https://github.com/nf-core/viralrecon/pull/387)] - Software closes gracefully when encountering an error
 - [[PR #395](https://github.com/nf-core/viralrecon/pull/395)] - Remove minia from default assemblers because it is unreliable
 - [[PR #393](https://github.com/nf-core/viralrecon/pull/393)] - Changed primer set to params
@@ -29,6 +29,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #438](https://github.com/nf-core/viralrecon/pull/438)] - Update fastp container to 0.23.4
 - [[PR #439](https://github.com/nf-core/viralrecon/pull/439)] - Fix cardinality issue when using `--bowtie2_index`
 - [[PR #435](https://github.com/nf-core/viralrecon/pull/435)] - Changed cutadapt to use nf-core modules, added `skip_noninternal_primers` param to allow users to process primers inside the pipeline.
+- [[PR #438](https://github.com/nf-core/viralrecon/pull/438)] - Update fastp container to 0.23.4
 
 ### Parameters
 
