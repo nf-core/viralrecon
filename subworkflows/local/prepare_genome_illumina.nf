@@ -158,12 +158,12 @@ workflow PREPARE_GENOME {
         if (bowtie2_index) {
             if (bowtie2_index.endsWith('.tar.gz')) {
                 UNTAR_BOWTIE2_INDEX (
-                    [ [:], bowtie2_index ]
+                    [ [:], file(bowtie2_index) ]
                 )
                 ch_bowtie2_index = UNTAR_BOWTIE2_INDEX.out.untar
                 ch_versions      = ch_versions.mix(UNTAR_BOWTIE2_INDEX.out.versions)
             } else {
-                ch_bowtie2_index = [ [:], bowtie2_index ]
+                ch_bowtie2_index = [ [:], file(bowtie2_index) ]
             }
         } else {
             BOWTIE2_BUILD (
