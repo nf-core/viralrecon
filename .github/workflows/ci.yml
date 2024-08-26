@@ -69,7 +69,7 @@ jobs:
           - "--spades_mode metaviral"
           - "--skip_plasmidid false --skip_asciigenome"
           - "--additional_annotation ./GCA_009858895.3_ASM985889v3_genomic.gtf.gz"
-          - "--bowtie2_index ./GCA_009858895.3_ASM985889v3_genomic.bt2.index.tar.gz"
+          - "--bowtie2_index ./GCA_009858895.3_ASM985889v3_genomic.200409.bt2.index.tar.gz"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
