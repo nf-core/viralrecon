@@ -69,6 +69,7 @@ jobs:
           - "--spades_mode metaviral"
           - "--skip_plasmidid false --skip_asciigenome"
           - "--additional_annotation ./GCA_009858895.3_ASM985889v3_genomic.gtf.gz"
+          - "--bowtie2_index ./GCA_009858895.3_ASM985889v3_genomic.bt2.index.tar.gz"
     steps:
       - name: Check out pipeline code
         uses: actions/checkout@v2
@@ -91,6 +92,11 @@ jobs:
         if: contains(matrix.parameters, 'additional_annotation')
         run: |
           wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/009/858/895/GCA_009858895.3_ASM985889v3/GCA_009858895.3_ASM985889v3_genomic.gtf.gz
+
+      - name: Download prebuild bowtie2 index
+        if: contains(matrix.parameters, 'bowtie2_index')
+        run: |
+          wget https://github.com/nf-core/test-datasets/raw/viralrecon/genome/MN908947.3/GCA_009858895.3_ASM985889v3_genomic.200409.bt2.index.tar.gz
 
       - name: Run pipeline with various parameters
         run: |
