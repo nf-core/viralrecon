@@ -158,12 +158,12 @@ workflow PREPARE_GENOME {
         if (bowtie2_index) {
             if (bowtie2_index.endsWith('.tar.gz')) {
                 UNTAR_BOWTIE2_INDEX (
-                    [ [:], bowtie2_index ]
+                    [ [:], file(bowtie2_index) ]
                 )
-                ch_bowtie2_index = UNTAR_BOWTIE2_INDEX.out.untar.map { it[1] }
+                ch_bowtie2_index = UNTAR_BOWTIE2_INDEX.out.untar
                 ch_versions      = ch_versions.mix(UNTAR_BOWTIE2_INDEX.out.versions)
             } else {
-                ch_bowtie2_index = Channel.value(file(bowtie2_index))
+                ch_bowtie2_index = [ [:], file(bowtie2_index) ]
             }
         } else {
             BOWTIE2_BUILD (
@@ -246,7 +246,7 @@ workflow PREPARE_GENOME {
     gff                  = ch_gff                  // path: genome.gff
     fai                  = ch_fai                  // path: genome.fai
     chrom_sizes          = ch_chrom_sizes          // path: genome.sizes
-    bowtie2_index        = ch_bowtie2_index        // path: bowtie2/index/
+    bowtie2_index        = ch_bowtie2_index        // channel: [ [:], bowtie2/index/ ]
     primer_bed           = ch_primer_bed           // path: primer.bed
     primer_collapsed_bed = ch_primer_collapsed_bed // path: primer.collapsed.bed
     primer_fasta         = ch_primer_fasta         // path: primer.fasta
