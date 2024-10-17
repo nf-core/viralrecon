@@ -26,8 +26,13 @@
                 "exists": true,
                 "pattern": "^\\S+\\.f(ast)?q\\.gz$",
                 "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+            },
+            "barcode": {
+                "type": "integer",
+                "pattern": "^\\d+$",
+                "errorMessage": "Barcode must be provided and must be an integer"
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["sample"]
     }
 }

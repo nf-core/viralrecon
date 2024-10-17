@@ -14,6 +14,7 @@ template:
   name: viralrecon
   org: nf-core
   outdir: .
-  skip_features: null
+  skip_features:
+    - igenomes
   version: 2.7.0dev
 update: null
