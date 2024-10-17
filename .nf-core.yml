@@ -1,6 +1,20 @@
-repository_type: pipeline
-nf_core_version: "2.14.1"
+bump_version: null
 lint:
   files_unchanged:
     - assets/email_template.html
     - assets/email_template.txt
+nf_core_version: 3.0.2
+org_path: null
+repository_type: pipeline
+template:
+  author: Patel H, Varona S and Monzon S
+  description: Assembly and intrahost/low-frequency variant calling for viral samples
+  force: false
+  is_nfcore: true
+  name: viralrecon
+  org: nf-core
+  outdir: .
+  skip_features:
+    - igenomes
+  version: 2.7.0dev
+update: null

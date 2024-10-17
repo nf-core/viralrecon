@@ -6,25 +6,28 @@ The directories listed below will be created in the results directory after the 
 
 # Nanopore: Pipeline overview
 
-- [Preprocessing](#nanopore-preprocessing)
-  - [pycoQC](#nanopore-pycoqc) - Sequencing QC
-  - [artic guppyplex](#nanopore-artic-guppyplex) - Aggregate pre-demultiplexed reads from MinKNOW/Guppy
-  - [NanoPlot](#nanopore-nanoplot) - Read QC
-- [Variant calling](#nanopore-variant-calling)
-  - [artic minion](#nanopore-artic-minion) - Align reads, call variants and generate consensus sequence
-- [Downstream analysis](#nanopore-downstream-analysis)
-  - [SAMtools](#nanopore-samtools) - Remove unmapped reads and obtain alignment metrics
-  - [mosdepth](#nanopore-mosdepth) - Genome-wide and amplicon coverage QC plots
-  - [BCFTools](#nanopore-bcftools) - Variant count metrics
-  - [SnpEff and SnpSift](#nanopore-snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
-  - [QUAST](#nanopore-quast) - Consensus assessment report
-  - [Pangolin](#nanopore-pangolin) - Lineage analysis
-  - [Nextclade](#nanopore-nextclade) - Clade assignment, mutation calling and sequence quality checks
-  - [Freyja](#nanopore-freyja) - Relative lineage abundance analysis from mixed SARS-CoV-2 samples (typically wastewater)
-  - [ASCIIGenome](#nanopore-asciigenome) - Individual variant screenshots with annotation tracks
-  - [Variants long table](#nanopore-variants-long-table) - Collate per-sample information for individual variants, functional effect prediction and lineage analysis
-- [Workflow reporting](#nanopore-workflow-reporting)
-  - [MultiQC](#nanopore-multiqc) - Present QC, visualisation and custom reporting for sequencing, raw reads, alignment and variant calling results
+- [Introduction](#introduction)
+- [Nanopore: Pipeline overview](#nanopore-pipeline-overview)
+  - [Nanopore: Preprocessing](#nanopore-preprocessing)
+    - [Nanopore: pycoQC](#nanopore-pycoqc)
+    - [Nanopore: artic guppyplex](#nanopore-artic-guppyplex)
+    - [Nanopore: NanoPlot](#nanopore-nanoplot)
+  - [Nanopore: Variant calling](#nanopore-variant-calling)
+    - [Nanopore: artic minion](#nanopore-artic-minion)
+  - [Nanopore: Downstream analysis](#nanopore-downstream-analysis)
+    - [Nanopore: SAMtools](#nanopore-samtools)
+    - [Nanopore: mosdepth](#nanopore-mosdepth)
+    - [Nanopore: BCFTools](#nanopore-bcftools)
+    - [Nanopore: SnpEff and SnpSift](#nanopore-snpeff-and-snpsift)
+    - [Nanopore: QUAST](#nanopore-quast)
+    - [Nanopore: Pangolin](#nanopore-pangolin)
+    - [Nanopore: Nextclade](#nanopore-nextclade)
+    - [Nanopore: Freyja](#nanopore-freyja)
+    - [Nanopore: ASCIIGenome](#nanopore-asciigenome)
+    - [Nanopore: Variants long table](#nanopore-variants-long-table)
+  - [Nanopore: Workflow reporting](#nanopore-workflow-reporting)
+    - [Nanopore: MultiQC](#nanopore-multiqc)
+- [Pipeline information](#pipeline-information)
 
 ## Nanopore: Preprocessing
 
@@ -354,37 +357,44 @@ An example MultiQC report generated from a full-sized dataset can be viewed on t
 
 # Illumina: Pipeline overview
 
-- [Preprocessing](#illumina-preprocessing)
-  - [cat](#cat) - Merge re-sequenced FastQ files
-  - [FastQC](#fastqc) - Raw read QC
-  - [fastp](#fastp) - Adapter and quality trimming
-  - [Kraken 2](#kraken-2) - Removal/QC for host reads
-- [Variant calling](#illumina-variant-calling)
-  - [Bowtie 2](#bowtie-2) - Read alignment relative to reference genome
-  - [SAMtools](#samtools) - Sort, index and generate metrics for alignments
-  - [iVar trim](#ivar-trim) - Primer sequence removal for amplicon data
-  - [picard MarkDuplicates](#picard-markduplicates) - Duplicate read marking and removal
-  - [picard CollectMultipleMetrics](#picard-collectmultiplemetrics) - Alignment metrics
-  - [mosdepth](#mosdepth) - Whole-genome and amplicon coverage metrics
-  - [iVar variants](#ivar-variants) _||_ [BCFTools call](#bcftools-call) - Variant calling
-    - [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
-    - [Freyja](#freyja) - Relative lineage abundance analysis from mixed SARS-CoV-2 samples (typically wastewater)
-    - [ASCIIGenome](#asciigenome) - Individual variant screenshots with annotation tracks
-  - [iVar consensus](#ivar-consensus) _||_ [BCFTools and BEDTools](#bcftools-and-bedtools) - Consensus sequence generation
-    - [QUAST](#quast) - Consensus assessment report
-    - [Pangolin](#pangolin) - Lineage analysis
-    - [Nextclade](#nextclade) - Clade assignment, mutation calling and sequence quality checks
-  - [Variants long table](#variants-long-table) - Collate per-sample information for individual variants, functional effect prediction and lineage analysis
-- [De novo assembly](#illumina-de-novo-assembly)
-  - [Cutadapt](#cutadapt) - Primer trimming for amplicon data
-  - [SPAdes](#spades) _||_ [Unicycler](#unicycler) _||_ [minia](#minia) - Viral genome assembly
-    - [BLAST](#blast) - Blast to reference assembly
-    - [ABACAS](#abacas) - Order contigs according to reference genome
-    - [PlasmidID](#plasmidid) - Assembly report and visualisation
-    - [Assembly QUAST](#assembly-quast) - Assembly quality assessment
-- [Workflow reporting and genomes](#illumina-workflow-reporting-and-genomes)
-  - [MultiQC](#multiqc) - Present QC for raw reads, alignment, assembly and variant calling
-  - [Reference genome files](#reference-genome-files) - Save reference genome indices/files
+- [Introduction](#introduction)
+- [Illumina: Pipeline overview](#illumina-pipeline-overview)
+  - [Illumina: Preprocessing](#illumina-preprocessing)
+    - [cat](#cat)
+    - [FastQC](#fastqc)
+    - [fastp](#fastp)
+    - [Kraken 2](#kraken-2)
+  - [Illumina: Variant calling](#illumina-variant-calling)
+    - [Bowtie 2](#bowtie-2)
+    - [SAMtools](#samtools)
+    - [iVar trim](#ivar-trim)
+    - [picard MarkDuplicates](#picard-markduplicates)
+    - [picard CollectMultipleMetrics](#picard-collectmultiplemetrics)
+    - [mosdepth](#mosdepth)
+    - [iVar variants](#ivar-variants)
+    - [BCFTools call](#bcftools-call)
+    - [SnpEff and SnpSift](#snpeff-and-snpsift)
+    - [Freyja](#freyja)
+    - [ASCIIGenome](#asciigenome)
+    - [iVar consensus](#ivar-consensus)
+    - [BCFTools and BEDTools](#bcftools-and-bedtools)
+    - [QUAST](#quast)
+    - [Pangolin](#pangolin)
+    - [Nextclade](#nextclade)
+    - [Variants long table](#variants-long-table)
+  - [Illumina: De novo assembly](#illumina-de-novo-assembly)
+    - [Cutadapt](#cutadapt)
+    - [SPAdes](#spades)
+    - [Unicycler](#unicycler)
+    - [minia](#minia)
+    - [BLAST](#blast)
+    - [ABACAS](#abacas)
+    - [PlasmidID](#plasmidid)
+    - [Assembly QUAST](#assembly-quast)
+  - [Illumina: Workflow reporting and genomes](#illumina-workflow-reporting-and-genomes)
+    - [MultiQC](#multiqc)
+    - [Reference genome files](#reference-genome-files)
+- [Pipeline information](#pipeline-information)
 
 ## Illumina: Preprocessing
 
