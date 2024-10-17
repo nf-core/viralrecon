@@ -105,6 +105,11 @@
                         "git_sha": "1b0ffa4e5aed5b7e3cd4311af31bd3b2c8345051",
                         "installed_by": ["modules"]
                     },
+                    "cutadapt": {
+                        "branch": "master",
+                        "git_sha": "06c8865e36741e05ad32ef70ab3fac127486af48",
+                        "installed_by": ["modules"]
+                    },
                     "fastp": {
                         "branch": "master",
                         "git_sha": "1ceaa8ba4d0fd886dbca0e545815d905b7407de7",

@@ -584,6 +584,12 @@
                     "default": 0.7,
                     "fa_icon": "fas fa-sliders-h",
                     "description": "Minimum percentage of contig aligned to filter from BLAST results."
+                },
+                "skip_noninternal_primers": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Set this parameter to false to add an X at the begining or end of the primer's fasta sequence to specify cutadapt that they are non-internal 5' or 3' adapters, respectively.",
+                    "help_text": "See viralrecon's usage and cutadapt documentation: https://cutadapt.readthedocs.io/en/stable/guide.html#adapter-types"
                 }
             },
             "fa_icon": "fas fa-random"

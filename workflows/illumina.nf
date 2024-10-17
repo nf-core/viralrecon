@@ -65,10 +65,10 @@ ch_ivar_variants_header_mqc      = file("$projectDir/assets/headers/ivar_variant
 //
 // MODULE: Loaded from modules/local/
 //
-include { CUTADAPT } from '../modules/local/cutadapt'
-include { MULTIQC  } from '../modules/local/multiqc_illumina'
+include { MULTIQC                                                 } from '../modules/local/multiqc_illumina'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions'
+include { PREPARE_PRIMER_FASTA                                    } from '../modules/local/prepare_primer_fasta'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -96,6 +96,7 @@ include { FASTQ_TRIM_FASTP_FASTQC } from '../subworkflows/local/fastq_trim_fastp
 // MODULE: Installed directly from nf-core/modules
 //
 include { CAT_FASTQ                     } from '../modules/nf-core/cat/fastq/main'
+include { CUTADAPT                      } from '../modules/nf-core/cutadapt/main'
 include { FASTQC                        } from '../modules/nf-core/fastqc/main'
 include { KRAKEN2_KRAKEN2               } from '../modules/nf-core/kraken2/kraken2/main'
 include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/picard/collectmultiplemetrics/main'
@@ -576,9 +577,27 @@ workflow ILLUMINA {
     //
     ch_cutadapt_multiqc = Channel.empty()
     if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
+        if (!params.skip_noninternal_primers){
+            PREPARE_PRIMER_FASTA(
+                PREPARE_GENOME.out.primer_fasta.collect { it[1] }
+                )
+            ch_assembly_fastq
+                .map { info, reads ->
+                    def meta = info +
+                        [primers: PREPARE_PRIMER_FASTA.out.adapters.value]
+                    return [meta, reads] }
+                .set{ ch_assembly_fastq }
+        } else {
+            ch_assembly_fastq
+                .map { info, reads ->
+                    def meta = info +
+                        [primers: PREPARE_GENOME.out.primer_fasta.value[1]]
+                    return [meta, reads] }
+                .set{ ch_assembly_fastq }
+        }
+
         CUTADAPT (
-            ch_assembly_fastq,
-            PREPARE_GENOME.out.primer_fasta.collect { it[1] }
+            ch_assembly_fastq
         )
         ch_assembly_fastq   = CUTADAPT.out.reads
         ch_cutadapt_multiqc = CUTADAPT.out.log
