@@ -24,12 +24,15 @@ workflow CONSENSUS_QC {
     ch_quast_results = Channel.empty()
     ch_quast_tsv     = Channel.empty()
     if (!params.skip_variants_quast) {
+    consensus
+        .collect{ it[1] }
+        .map { consensus_collect -> tuple([id: "quast"], consensus_collect) }
+        .set { ch_to_quast }
+
         QUAST (
-            consensus.collect{ it[1] },
-            fasta,
-            gff,
-            true,
-            params.gff
+            ch_to_quast,
+            fasta.map { [ [:], it ] },
+            gff
         )
         ch_quast_results = QUAST.out.results
         ch_quast_tsv     = QUAST.out.tsv

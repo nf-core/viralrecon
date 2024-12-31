@@ -1,6 +1,7 @@
 //
 // This file holds several functions common to the multiple workflows in the nf-core/viralrecon pipeline
 //
+import nextflow.Nextflow
 
 class WorkflowCommons {
 
@@ -9,12 +10,11 @@ class WorkflowCommons {
     //
     private static void genomeExistsError(params, log) {
         if (params.genomes && params.genome && !params.genomes.containsKey(params.genome)) {
-            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            Nextflow.error("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Genome '${params.genome}' not found in any config files provided to the pipeline.\n" +
                 "  Currently, the available genome keys are:\n" +
                 "  ${params.genomes.keySet().join(", ")}\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         }
     }
 
@@ -121,14 +121,13 @@ class WorkflowCommons {
         def intersect = bed_contigs.intersect(fai_contigs)
         if (intersect.size() != bed_contigs.size()) {
             def diff = bed_contigs.minus(intersect).sort()
-            log.error "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
+            Nextflow.error("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 "  Contigs in primer BED file do not match those in the reference genome:\n\n" +
                 "  ${diff.join('\n  ')}\n\n" +
                 "  Please check:\n" +
                 "    - Primer BED file supplied with --primer_bed\n" +
                 "    - Genome FASTA file supplied with --fasta\n" +
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-            System.exit(1)
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         }
     }
 

@@ -1,4 +1,16 @@
 /*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PRINT PARAMS SUMMARY
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+include { paramsSummaryLog       } from 'plugin/nf-schema'
+include { paramsSummaryMap       } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_viralrecon_pipeline'
+
+/*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     VALIDATE INPUTS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -12,21 +24,18 @@ def valid_params = [
     spades_modes      : ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio']
 ]
 
-def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
-
-// Validate input parameters
-WorkflowIllumina.initialise(params, log, valid_params)
-
 // Check input path parameters to see if they exist
 def checkPathParamList = [
     params.input, params.fasta, params.gff, params.bowtie2_index,
     params.kraken2_db, params.primer_bed, params.primer_fasta,
-    params.blast_db, params.spades_hmm, params.multiqc_config
+    params.blast_db, params.spades_hmm, params.multiqc_config,
+    params.freyja_barcodes, params.freyja_lineages, params.additional_annotation
 ]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-if (params.input)      { ch_input      = file(params.input)      } else { exit 1, 'Input samplesheet file not specified!' }
-if (params.spades_hmm) { ch_spades_hmm = file(params.spades_hmm) } else { ch_spades_hmm = []                              }
+if (params.input)                 { ch_input          = file(params.input)                 } else { exit 1, 'Input samplesheet file not specified!' }
+if (params.spades_hmm)            { ch_spades_hmm     = file(params.spades_hmm)            } else { ch_spades_hmm = []                              }
+if (params.additional_annotation) { ch_additional_gtf = file(params.additional_annotation) } else { additional_annotation = []                      }
 
 def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
 
@@ -43,8 +52,9 @@ ch_multiqc_config        = file("$projectDir/assets/multiqc_config_illumina.yml"
 ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) : []
 
 // Header files
-ch_blast_outfmt6_header     = file("$projectDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
-ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_header_mqc.txt", checkIfExists: true)
+ch_blast_outfmt6_header          = file("$projectDir/assets/headers/blast_outfmt6_header.txt", checkIfExists: true)
+ch_blast_filtered_outfmt6_header = file("$projectDir/assets/headers/blast_filtered_outfmt6_header.txt", checkIfExists: true)
+ch_ivar_variants_header_mqc      = file("$projectDir/assets/headers/ivar_variants_header_mqc.txt", checkIfExists: true)
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -55,21 +65,21 @@ ch_ivar_variants_header_mqc = file("$projectDir/assets/headers/ivar_variants_hea
 //
 // MODULE: Loaded from modules/local/
 //
-include { CUTADAPT } from '../modules/local/cutadapt'
-include { MULTIQC  } from '../modules/local/multiqc_illumina'
+include { MULTIQC                                                 } from '../modules/local/multiqc_illumina'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions'
+include { PREPARE_PRIMER_FASTA                                    } from '../modules/local/prepare_primer_fasta'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK             } from '../subworkflows/local/input_check'
 include { PREPARE_GENOME          } from '../subworkflows/local/prepare_genome_illumina'
 include { VARIANTS_IVAR           } from '../subworkflows/local/variants_ivar'
 include { VARIANTS_BCFTOOLS       } from '../subworkflows/local/variants_bcftools'
 include { CONSENSUS_IVAR          } from '../subworkflows/local/consensus_ivar'
 include { CONSENSUS_BCFTOOLS      } from '../subworkflows/local/consensus_bcftools'
 include { VARIANTS_LONG_TABLE     } from '../subworkflows/local/variants_long_table'
+include { ADDITIONAL_ANNOTATION   } from '../subworkflows/local/additional_annotation'
 include { ASSEMBLY_SPADES         } from '../subworkflows/local/assembly_spades'
 include { ASSEMBLY_UNICYCLER      } from '../subworkflows/local/assembly_unicycler'
 include { ASSEMBLY_MINIA          } from '../subworkflows/local/assembly_minia'
@@ -86,18 +96,19 @@ include { FASTQ_TRIM_FASTP_FASTQC } from '../subworkflows/local/fastq_trim_fastp
 // MODULE: Installed directly from nf-core/modules
 //
 include { CAT_FASTQ                     } from '../modules/nf-core/cat/fastq/main'
+include { CUTADAPT                      } from '../modules/nf-core/cutadapt/main'
 include { FASTQC                        } from '../modules/nf-core/fastqc/main'
 include { KRAKEN2_KRAKEN2               } from '../modules/nf-core/kraken2/kraken2/main'
 include { PICARD_COLLECTMULTIPLEMETRICS } from '../modules/nf-core/picard/collectmultiplemetrics/main'
-include { CUSTOM_DUMPSOFTWAREVERSIONS   } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 include { MOSDEPTH as MOSDEPTH_GENOME   } from '../modules/nf-core/mosdepth/main'
 include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main'
 
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
 //
-include { FASTQ_ALIGN_BOWTIE2       } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
-include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markduplicates_picard/main'
+include { FASTQ_ALIGN_BOWTIE2           } from '../subworkflows/nf-core/fastq_align_bowtie2/main'
+include { BAM_MARKDUPLICATES_PICARD     } from '../subworkflows/nf-core/bam_markduplicates_picard/main'
+include { BAM_VARIANT_DEMIX_BOOT_FREYJA } from '../subworkflows/nf-core/bam_variant_demix_boot_freyja/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -106,18 +117,38 @@ include { BAM_MARKDUPLICATES_PICARD } from '../subworkflows/nf-core/bam_markdupl
 */
 
 // Info required for completion email and summary
-def multiqc_report    = []
 def pass_mapped_reads = [:]
 def fail_mapped_reads = [:]
 
 workflow ILLUMINA {
 
-    ch_versions = Channel.empty()
+    take:
+    ch_samplesheet // channel: samplesheet read in from --input
+    ch_genome_fasta
+    ch_genome_gff
+    ch_primer_bed
+    ch_bowtie2_index
+    ch_nextclade_dataset
+    ch_nextclade_dataset_name
+    ch_nextclade_dataset_tag
+
+    main:
+    ch_versions      = Channel.empty()
+    ch_multiqc_files = Channel.empty()
+    multiqc_report   = Channel.empty()
 
     //
     // SUBWORKFLOW: Uncompress and prepare reference genome files
     //
-    PREPARE_GENOME ()
+    PREPARE_GENOME (
+        ch_genome_fasta,
+        ch_genome_gff,
+        ch_primer_bed,
+        ch_bowtie2_index,
+        ch_nextclade_dataset,
+        ch_nextclade_dataset_name,
+        ch_nextclade_dataset_tag
+    )
     ch_versions = ch_versions.mix(PREPARE_GENOME.out.versions)
 
     // Check genome fasta only contains a single contig
@@ -158,39 +189,14 @@ workflow ILLUMINA {
     }
 
     //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
-    //
-    INPUT_CHECK (
-        ch_input,
-        params.platform
-    )
-    .sample_info
-    .map {
-        meta, fastq ->
-            meta.id = meta.id.split('_')[0..-2].join('_')
-            [ meta, fastq ]
-    }
-    .groupTuple(by: [0])
-    .branch {
-        meta, fastq ->
-            single  : fastq.size() == 1
-                return [ meta, fastq.flatten() ]
-            multiple: fastq.size() > 1
-                return [ meta, fastq.flatten() ]
-    }
-    .set { ch_fastq }
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-
-    //
     // MODULE: Concatenate FastQ files from same sample if required
     //
     CAT_FASTQ (
-        ch_fastq.multiple
+        ch_samplesheet
     )
     .reads
-    .mix(ch_fastq.single)
     .set { ch_cat_fastq }
-    ch_versions = ch_versions.mix(CAT_FASTQ.out.versions.first().ifEmpty(null))
+    ch_versions = ch_versions.mix(CAT_FASTQ.out.versions.first())
 
     //
     // SUBWORKFLOW: Read QC and trim adapters
@@ -198,6 +204,7 @@ workflow ILLUMINA {
     FASTQ_TRIM_FASTP_FASTQC (
         ch_cat_fastq,
         [],
+        false,
         params.save_trimmed_fail,
         false
     )
@@ -232,7 +239,7 @@ workflow ILLUMINA {
                 }
             }
             .collect()
-            .map { 
+            .map {
                 tsv_data ->
                     def header = ['Sample', 'Reads before trimming']
                     WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -253,7 +260,7 @@ workflow ILLUMINA {
             params.kraken2_variants_host_filter || params.kraken2_assembly_host_filter
         )
         ch_kraken2_multiqc = KRAKEN2_KRAKEN2.out.report
-        ch_versions        = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first().ifEmpty(null))
+        ch_versions        = ch_versions.mix(KRAKEN2_KRAKEN2.out.versions.first())
 
         if (params.kraken2_variants_host_filter) {
             ch_variants_fastq = KRAKEN2_KRAKEN2.out.unclassified_reads_fastq
@@ -277,7 +284,7 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.bowtie2_index,
             params.save_unaligned,
             false,
-            PREPARE_GENOME.out.fasta
+            PREPARE_GENOME.out.fasta.map { [ [:], it ] }
         )
         ch_bam                      = FASTQ_ALIGN_BOWTIE2.out.bam
         ch_bai                      = FASTQ_ALIGN_BOWTIE2.out.bai
@@ -319,7 +326,7 @@ workflow ILLUMINA {
         ch_pass_fail_mapped
             .fail
             .collect()
-            .map { 
+            .map {
                 tsv_data ->
                     def header = ['Sample', 'Mapped reads']
                     WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -335,7 +342,7 @@ workflow ILLUMINA {
         BAM_TRIM_PRIMERS_IVAR (
             ch_bam.join(ch_bai, by: [0]),
             PREPARE_GENOME.out.primer_bed,
-            PREPARE_GENOME.out.fasta
+            PREPARE_GENOME.out.fasta.map { [ [:], it ] }
         )
         ch_bam                        = BAM_TRIM_PRIMERS_IVAR.out.bam
         ch_bai                        = BAM_TRIM_PRIMERS_IVAR.out.bai
@@ -350,7 +357,7 @@ workflow ILLUMINA {
     if (!params.skip_variants && !params.skip_markduplicates) {
         BAM_MARKDUPLICATES_PICARD (
             ch_bam,
-            PREPARE_GENOME.out.fasta,
+            PREPARE_GENOME.out.fasta.map { [ [:], it ] },
             PREPARE_GENOME.out.fai
         )
         ch_bam                             = BAM_MARKDUPLICATES_PICARD.out.bam
@@ -368,7 +375,7 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.fasta.map { [ [:], it ] },
             [ [:], [] ]
         )
-        ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first().ifEmpty(null))
+        ch_versions = ch_versions.mix(PICARD_COLLECTMULTIPLEMETRICS.out.versions.first())
     }
 
     //
@@ -378,12 +385,13 @@ workflow ILLUMINA {
     ch_amplicon_heatmap_multiqc = Channel.empty()
     if (!params.skip_variants && !params.skip_mosdepth) {
         MOSDEPTH_GENOME (
-            ch_bam.join(ch_bai, by: [0]),
+            ch_bam
+                .join(ch_bai, by: [0])
+                .map { meta, bam, bai -> [ meta, bam, bai, [] ] },
             [ [:], [] ],
-            [ [:], [] ]
         )
         ch_mosdepth_multiqc = MOSDEPTH_GENOME.out.global_txt
-        ch_versions         = ch_versions.mix(MOSDEPTH_GENOME.out.versions.first().ifEmpty(null))
+        ch_versions         = ch_versions.mix(MOSDEPTH_GENOME.out.versions.first())
 
         PLOT_MOSDEPTH_REGIONS_GENOME (
             MOSDEPTH_GENOME.out.regions_bed.collect { it[1] }
@@ -392,11 +400,12 @@ workflow ILLUMINA {
 
         if (params.protocol == 'amplicon') {
             MOSDEPTH_AMPLICON (
-                ch_bam.join(ch_bai, by: [0]),
-                PREPARE_GENOME.out.primer_collapsed_bed.map { [ [:], it ] },
-                [ [:], [] ]
+                ch_bam
+                    .join(ch_bai, by: [0])
+                    .combine(PREPARE_GENOME.out.primer_collapsed_bed),
+                [ [:], [] ],
             )
-            ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first().ifEmpty(null))
+            ch_versions = ch_versions.mix(MOSDEPTH_AMPLICON.out.versions.first())
 
             PLOT_MOSDEPTH_REGIONS_AMPLICON (
                 MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
@@ -421,8 +430,8 @@ workflow ILLUMINA {
             PREPARE_GENOME.out.fasta,
             (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.fai : [],
             (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
-            params.gff ? PREPARE_GENOME.out.gff : [],
-            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
+            ch_genome_gff ? PREPARE_GENOME.out.gff : [],
+            (params.protocol == 'amplicon' && ch_primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config,
             ch_ivar_variants_header_mqc
@@ -444,8 +453,8 @@ workflow ILLUMINA {
             ch_bam,
             PREPARE_GENOME.out.fasta,
             (params.protocol == 'amplicon' || !params.skip_asciigenome || !params.skip_markduplicates) ? PREPARE_GENOME.out.chrom_sizes : [],
-            params.gff ? PREPARE_GENOME.out.gff : [],
-            (params.protocol == 'amplicon' && params.primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
+            ch_genome_gff ? PREPARE_GENOME.out.gff : [],
+            (params.protocol == 'amplicon' && ch_primer_bed) ? PREPARE_GENOME.out.primer_bed : [],
             PREPARE_GENOME.out.snpeff_db,
             PREPARE_GENOME.out.snpeff_config
         )
@@ -458,6 +467,24 @@ workflow ILLUMINA {
     }
 
     //
+    // SUBWORKFLOW: Determine variants with Freyja
+    //
+    ch_freyja_multiqc = Channel.empty()
+    if (!params.skip_variants && !params.skip_freyja) {
+        BAM_VARIANT_DEMIX_BOOT_FREYJA(
+            ch_bam,
+            PREPARE_GENOME.out.fasta,
+            params.skip_freyja_boot,
+            params.freyja_repeats,
+            params.freyja_db_name,
+            params.freyja_barcodes,
+            params.freyja_lineages,
+        )
+        ch_versions       = ch_versions.mix(BAM_VARIANT_DEMIX_BOOT_FREYJA.out.versions)
+        ch_freyja_multiqc = BAM_VARIANT_DEMIX_BOOT_FREYJA.out.demix
+    }
+
+    //
     // SUBWORKFLOW: Call consensus with iVar and downstream QC
     //
     ch_quast_multiqc    = Channel.empty()
@@ -467,7 +494,7 @@ workflow ILLUMINA {
         CONSENSUS_IVAR (
             ch_bam,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.nextclade_db
         )
 
@@ -486,7 +513,7 @@ workflow ILLUMINA {
             ch_vcf,
             ch_tbi,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.nextclade_db
         )
 
@@ -506,8 +533,8 @@ workflow ILLUMINA {
                 def clade = WorkflowCommons.getNextcladeFieldMapFromCsv(csv)['clade']
                 return [ "$meta.id\t$clade" ]
             }
-            .collect()                
-            .map { 
+            .collect()
+            .map {
                 tsv_data ->
                     def header = ['Sample', 'clade']
                     WorkflowCommons.multiqcTsvFromList(tsv_data, header)
@@ -518,7 +545,7 @@ workflow ILLUMINA {
     //
     // SUBWORKFLOW: Create variants long table report
     //
-    if (!params.skip_variants && !params.skip_variants_long_table && params.gff && !params.skip_snpeff) {
+    if (!params.skip_variants && !params.skip_variants_long_table && ch_genome_gff && !params.skip_snpeff) {
         VARIANTS_LONG_TABLE (
             ch_vcf,
             ch_tbi,
@@ -529,23 +556,46 @@ workflow ILLUMINA {
     }
 
     //
+    // SUBWORKFLOW: Create variants long table report for additional annotation file
+    //
+    if (params.additional_annotation) {
+        ADDITIONAL_ANNOTATION (
+            ch_vcf,
+            ch_tbi,
+            PREPARE_GENOME.out.fasta,
+            ch_additional_gtf,
+            ch_pangolin_multiqc
+
+        )
+        ch_versions = ch_versions.mix(ADDITIONAL_ANNOTATION.out.versions)
+    }
+
+    //
     // MODULE: Primer trimming with Cutadapt
     //
     ch_cutadapt_multiqc = Channel.empty()
     if (params.protocol == 'amplicon' && !params.skip_assembly && !params.skip_cutadapt) {
+        ch_primers =  PREPARE_GENOME.out.primer_fasta.collect { it[1] }
+        if (!params.skip_noninternal_primers){
+            PREPARE_PRIMER_FASTA(
+                PREPARE_GENOME.out.primer_fasta.collect { it[1] }
+                )
+            ch_primers = PREPARE_PRIMER_FASTA.out.adapters
+        }
+
         CUTADAPT (
             ch_assembly_fastq,
-            PREPARE_GENOME.out.primer_fasta
+            ch_primers
         )
         ch_assembly_fastq   = CUTADAPT.out.reads
         ch_cutadapt_multiqc = CUTADAPT.out.log
-        ch_versions         = ch_versions.mix(CUTADAPT.out.versions.first().ifEmpty(null))
+        ch_versions         = ch_versions.mix(CUTADAPT.out.versions.first())
 
         if (!params.skip_fastqc) {
             FASTQC (
                 CUTADAPT.out.reads
             )
-            ch_versions = ch_versions.mix(FASTQC.out.versions.first().ifEmpty(null))
+            ch_versions = ch_versions.mix(FASTQC.out.versions.first())
         }
     }
 
@@ -559,9 +609,10 @@ workflow ILLUMINA {
             params.spades_mode,
             ch_spades_hmm,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
-            ch_blast_outfmt6_header
+            ch_blast_outfmt6_header,
+            ch_blast_filtered_outfmt6_header
         )
         ch_spades_quast_multiqc = ASSEMBLY_SPADES.out.quast_tsv
         ch_versions             = ch_versions.mix(ASSEMBLY_SPADES.out.versions)
@@ -575,9 +626,10 @@ workflow ILLUMINA {
         ASSEMBLY_UNICYCLER (
             ch_assembly_fastq.map { meta, fastq -> [ meta, fastq, [] ] },
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
-            ch_blast_outfmt6_header
+            ch_blast_outfmt6_header,
+            ch_blast_filtered_outfmt6_header
         )
         ch_unicycler_quast_multiqc = ASSEMBLY_UNICYCLER.out.quast_tsv
         ch_versions                = ch_versions.mix(ASSEMBLY_UNICYCLER.out.versions)
@@ -591,32 +643,56 @@ workflow ILLUMINA {
         ASSEMBLY_MINIA (
             ch_assembly_fastq,
             PREPARE_GENOME.out.fasta,
-            params.gff ? PREPARE_GENOME.out.gff : [],
+            ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
-            ch_blast_outfmt6_header
+            ch_blast_outfmt6_header,
+            ch_blast_filtered_outfmt6_header
         )
         ch_minia_quast_multiqc = ASSEMBLY_MINIA.out.quast_tsv
         ch_versions            = ch_versions.mix(ASSEMBLY_MINIA.out.versions)
     }
 
     //
-    // MODULE: Pipeline reporting
+    // Collate and save software versions
     //
-    CUSTOM_DUMPSOFTWAREVERSIONS (
-        ch_versions.unique().collectFile(name: 'collated_versions.yml')
-    )
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'nf_core_pipeline_software_mqc_versions.yml',
+            sort: true,
+            newLine: true
+        ).set { ch_collated_versions }
 
     //
     // MODULE: MultiQC
     //
     if (!params.skip_multiqc) {
-        workflow_summary    = WorkflowCommons.paramsSummaryMultiqc(workflow, summary_params)
-        ch_workflow_summary = Channel.value(workflow_summary)
+        summary_params                        = paramsSummaryMap(
+            workflow, parameters_schema: "nextflow_schema.json")
+        ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
+        ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
+            file(params.multiqc_methods_description, checkIfExists: true) :
+            file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
+        ch_methods_description                = Channel.value(
+            methodsDescriptionText(ch_multiqc_custom_methods_description))
+
+        ch_multiqc_logo                       = params.multiqc_logo ?
+            Channel.fromPath(params.multiqc_logo, checkIfExists: true) :
+            Channel.empty()
+
+        ch_multiqc_files                      = ch_multiqc_files.mix(
+            ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+        ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
+        ch_multiqc_files                      = ch_multiqc_files.mix(
+            ch_methods_description.collectFile(
+                name: 'methods_description_mqc.yaml',
+                sort: false))
 
         MULTIQC (
+            ch_multiqc_files.collect(),
             ch_multiqc_config,
             ch_multiqc_custom_config,
-            CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect(),
+            ch_multiqc_logo.toList(),
             ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'),
             ch_fail_reads_multiqc.collectFile(name: 'fail_mapped_reads_mqc.tsv').ifEmpty([]),
             ch_fail_mapping_multiqc.collectFile(name: 'fail_mapped_samples_mqc.tsv').ifEmpty([]),
@@ -632,29 +708,23 @@ workflow ILLUMINA {
             ch_ivar_counts_multiqc.collect{it[1]}.ifEmpty([]),
             ch_bcftools_stats_multiqc.collect{it[1]}.ifEmpty([]),
             ch_snpeff_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_quast_multiqc.collect().ifEmpty([]),
+            ch_quast_multiqc.collect{it[1]}.ifEmpty([]),
             ch_pangolin_multiqc.collect{it[1]}.ifEmpty([]),
             ch_nextclade_multiqc.collectFile(name: 'nextclade_clade_mqc.tsv').ifEmpty([]),
             ch_cutadapt_multiqc.collect{it[1]}.ifEmpty([]),
-            ch_spades_quast_multiqc.collect().ifEmpty([]),
-            ch_unicycler_quast_multiqc.collect().ifEmpty([]),
-            ch_minia_quast_multiqc.collect().ifEmpty([])
+            ch_spades_quast_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_unicycler_quast_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_minia_quast_multiqc.collect{it[1]}.ifEmpty([]),
+            ch_freyja_multiqc.collect{it[1]}.ifEmpty([]),
         )
+
         multiqc_report = MULTIQC.out.report.toList()
     }
-}
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    COMPLETION EMAIL AND SUMMARY
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
+    emit:
+    multiqc_report                  // channel: /path/to/multiqc_report.html
+    versions         = ch_versions  // channel: [ path(versions.yml) ]
 
-workflow.onComplete {
-    if (params.email || params.email_on_fail) {
-        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report, fail_mapped_reads)
-    }
-    NfcoreTemplate.summary(workflow, params, log, fail_mapped_reads, pass_mapped_reads)
 }
 
 /*

@@ -20,6 +20,7 @@ run_modules:
   - quast
   - pangolin
   - cutadapt
+  - freyja
 
 module_order:
   - fastqc:
@@ -62,6 +63,11 @@ module_order:
       info: "This section of the report shows Pangolin lineage analysis results for the called variants."
       path_filters:
         - "./variants/*.pangolin.csv"
+  - freyja:
+      name: "VARIANTS: Freyja"
+      info: "This section of the report shows relative lineage abundances from mixed SARS-CoV-2 samples from Freyja demix."
+      path_filters:
+        - "./freyja_demix/*.tsv"
   - bcftools:
       name: "VARIANTS: BCFTools"
       info: "This section of the report shows BCFTools stats results for the called variants."
@@ -69,7 +75,7 @@ module_order:
         - "./variants/*.txt"
   - snpeff:
       name: "VARIANTS: SnpEff"
-      info: "This section of the report shows SnpEff results for the called variants."
+      info: "This section of the report shows SnpEff results for the called variants passing filters (Defaults: 0.25 allele frequency, minimum quality score = 20 and minimum position depth = 10). Some variants may have more than one annotation respect to genomic region, impact or effect, leading to differences in the number of variants respect to the vcf file."
       path_filters:
         - "./variants/*.csv"
   - quast:

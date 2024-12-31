@@ -1,15 +1,16 @@
 process MULTIQC {
     label 'process_medium'
 
-    conda "bioconda::multiqc=1.14"
+    conda "bioconda::multiqc=1.19"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/multiqc:1.14--pyhdfd78af_0' :
-        'quay.io/biocontainers/multiqc:1.14--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/multiqc:1.19--pyhdfd78af_0' :
+        'quay.io/biocontainers/multiqc:1.19--pyhdfd78af_0' }"
 
     input:
-    path 'multiqc_config.yaml'
-    path multiqc_custom_config
-    path software_versions
+    path  multiqc_files, stageAs: "?/*"
+    path(multiqc_config)
+    path(extra_multiqc_config)
+    path(multiqc_logo)
     path workflow_summary
     path fail_reads_summary
     path fail_mapping_summary
@@ -32,6 +33,7 @@ process MULTIQC {
     path ('assembly_spades/*')
     path ('assembly_unicycler/*')
     path ('assembly_minia/*')
+    path ('freyja_demix/*')
 
     output:
     path "*multiqc_report.html"     , emit: report
@@ -46,10 +48,13 @@ process MULTIQC {
 
     script:
     def args = task.ext.args ?: ''
-    def custom_config = multiqc_custom_config ? "--config $multiqc_custom_config" : ''
+    def config = multiqc_config ? "--config $multiqc_config" : ''
+    def extra_config = extra_multiqc_config ? "--config $extra_multiqc_config" : ''
+    def logo = multiqc_logo ? /--cl-config 'custom_logo: "${multiqc_logo}"'/ : ''
+
     """
     ## Run MultiQC once to parse tool logs
-    multiqc -f $args $custom_config .
+    multiqc -f $args $config $extra_config $logo.
 
     ## Parse YAML files dumped by MultiQC to obtain metrics
     multiqc_to_custom_csv.py --platform illumina
@@ -66,7 +71,7 @@ process MULTIQC {
     rm -f variants/report.tsv
 
     ## Run MultiQC a second time
-    multiqc -f $args -e general_stats --ignore nextclade_clade_mqc.tsv $custom_config .
+    multiqc -f $args -e general_stats --ignore nextclade_clade_mqc.tsv $config $extra_config $logo .
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

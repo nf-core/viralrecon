@@ -28,9 +28,9 @@ workflow SNPEFF_SNPSIFT {
 
     VCF_BGZIP_TABIX_STATS (
         SNPEFF_ANN.out.vcf,
-        [],
-        [],
-        []
+        [ [:], [] ],
+        [ [:], [] ],
+        [ [:], [] ]
     )
     ch_versions = ch_versions.mix(VCF_BGZIP_TABIX_STATS.out.versions)
 

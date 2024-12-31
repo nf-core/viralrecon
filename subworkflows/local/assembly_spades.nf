@@ -11,13 +11,14 @@ include { ASSEMBLY_QC   } from './assembly_qc'
 
 workflow ASSEMBLY_SPADES {
     take:
-    reads        // channel: [ val(meta), [ reads ] ]
-    mode         // string : spades assembly mode e.g. 'rnaviral'
-    hmm          // channel: /path/to/spades.hmm
-    fasta        // channel: /path/to/genome.fasta
-    gff          // channel: /path/to/genome.gff
-    blast_db     // channel: /path/to/blast_db/
-    blast_header // channel: /path/to/blast_header.txt
+    reads                 // channel: [ val(meta), [ reads ] ]
+    mode                  // string : spades assembly mode e.g. 'rnaviral'
+    hmm                   // channel: /path/to/spades.hmm
+    fasta                 // channel: /path/to/genome.fasta
+    gff                   // channel: /path/to/genome.gff
+    blast_db              // channel: /path/to/blast_db/
+    blast_header          // channel: /path/to/blast_header.txt
+    blast_filtered_header // channel: /path/to/blast_filtered_header.txt
 
     main:
 
@@ -95,7 +96,8 @@ workflow ASSEMBLY_SPADES {
         fasta,
         gff,
         blast_db,
-        blast_header
+        blast_header,
+        blast_filtered_header
     )
     ch_versions = ch_versions.mix(ASSEMBLY_QC.out.versions)
 
