@@ -22,6 +22,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 
 ### Enhancements & fixes
 
+- [[#471](https://github.com/nf-core/viralrecon/issues/471)] - Remove deprecated `docker.useremulation` from `nextflow.config`
 - [[#297](https://github.com/nf-core/viralrecon/issues/297)] - Add tube map for pipeline
 - [[#316](https://github.com/nf-core/viralrecon/issues/316)] - Variant calling isn't run when using `--skip_asciigenome` with metagenomic data
 - [[#317](https://github.com/nf-core/viralrecon/issues/317)] - `ivar_variants_to_vcf`: Ignore lines without annotation in ivar tsv file
