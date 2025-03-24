@@ -1,6 +1,17 @@
-repository_type: pipeline
 lint:
   files_unchanged:
     - assets/email_template.html
     - assets/email_template.txt
-    - lib/NfcoreTemplate.groovy
+nf_core_version: 3.2.0
+repository_type: pipeline
+template:
+  author: Patel H, Varona S and Monzon S
+  description: Assembly and intrahost/low-frequency variant calling for viral samples
+  force: false
+  is_nfcore: true
+  name: viralrecon
+  org: nf-core
+  outdir: .
+  skip_features:
+    - igenomes
+  version: 2.7.0dev

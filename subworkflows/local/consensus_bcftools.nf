@@ -28,7 +28,7 @@ workflow CONSENSUS_BCFTOOLS {
     // Filter variants by allele frequency, zip and index
     //
     BCFTOOLS_FILTER (
-        vcf
+        vcf.join(tbi, by: [0])
     )
     ch_versions = ch_versions.mix(BCFTOOLS_FILTER.out.versions.first())
 
@@ -68,7 +68,10 @@ workflow CONSENSUS_BCFTOOLS {
     // Call consensus sequence with BCFTools
     //
     BCFTOOLS_CONSENSUS (
-        BCFTOOLS_FILTER.out.vcf.join(TABIX_TABIX.out.tbi, by: [0]).join(BEDTOOLS_MASKFASTA.out.fasta, by: [0])
+        BCFTOOLS_FILTER.out.vcf
+            .join(TABIX_TABIX.out.tbi, by: [0])
+            .join(BEDTOOLS_MASKFASTA.out.fasta, by: [0])
+            .map { meta, vcf, tbi, fasta -> tuple(meta, vcf, tbi, fasta, []) }
     )
     ch_versions = ch_versions.mix(BCFTOOLS_CONSENSUS.out.versions.first())
 

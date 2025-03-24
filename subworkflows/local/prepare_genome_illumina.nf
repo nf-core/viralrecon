@@ -20,6 +20,17 @@ include { KRAKEN2_BUILD                 } from '../../modules/local/kraken2_buil
 include { SNPEFF_BUILD                  } from '../../modules/local/snpeff_build'
 
 workflow PREPARE_GENOME {
+
+    take:
+    fasta
+    gff
+    primer_bed
+    bowtie2_index
+    nextclade_dataset
+    nextclade_dataset_name
+    nextclade_dataset_tag
+
+
     main:
 
     ch_versions = Channel.empty()
@@ -27,29 +38,29 @@ workflow PREPARE_GENOME {
     //
     // Uncompress genome fasta file if required
     //
-    if (params.fasta.endsWith('.gz')) {
+    if (fasta.endsWith('.gz')) {
         GUNZIP_FASTA (
-            [ [:], params.fasta ]
+            [ [:], fasta ]
         )
         ch_fasta    = GUNZIP_FASTA.out.gunzip.map { it[1] }
         ch_versions = ch_versions.mix(GUNZIP_FASTA.out.versions)
     } else {
-        ch_fasta = Channel.value(file(params.fasta))
+        ch_fasta = Channel.value(file(fasta))
     }
 
     //
     // Uncompress GFF annotation file
     //
     ch_gff = Channel.empty()
-    if (params.gff) {
-        if (params.gff.endsWith('.gz')) {
+    if (gff) {
+        if (gff.endsWith('.gz')) {
             GUNZIP_GFF (
-                [ [:], params.gff ]
+                [ [:], gff ]
             )
             ch_gff      = GUNZIP_GFF.out.gunzip.map { it[1] }
             ch_versions = ch_versions.mix(GUNZIP_GFF.out.versions)
         } else {
-            ch_gff = Channel.value(file(params.gff))
+            ch_gff = Channel.value(file(gff))
         }
     }
 
@@ -94,15 +105,15 @@ workflow PREPARE_GENOME {
     ch_primer_fasta         = Channel.empty()
     ch_primer_collapsed_bed = Channel.empty()
     if (params.protocol == 'amplicon') {
-        if (params.primer_bed) {
-            if (params.primer_bed.endsWith('.gz')) {
+        if (primer_bed) {
+            if (primer_bed.endsWith('.gz')) {
                 GUNZIP_PRIMER_BED (
-                    [ [:], params.primer_bed ]
+                    [ [:], primer_bed ]
                 )
                 ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { it[1] }
                 ch_versions   = ch_versions.mix(GUNZIP_PRIMER_BED.out.versions)
             } else {
-                ch_primer_bed = Channel.value(file(params.primer_bed))
+                ch_primer_bed = Channel.value(file(primer_bed))
             }
         }
 
@@ -129,7 +140,7 @@ workflow PREPARE_GENOME {
                 }
             } else {
                 BEDTOOLS_GETFASTA (
-                    ch_primer_bed,
+                    ch_primer_bed.map { [ [:], it ] },
                     ch_fasta
                 )
                 ch_primer_fasta = BEDTOOLS_GETFASTA.out.fasta
@@ -143,15 +154,15 @@ workflow PREPARE_GENOME {
     //
     ch_bowtie2_index = Channel.empty()
     if (!params.skip_variants) {
-        if (params.bowtie2_index) {
-            if (params.bowtie2_index.endsWith('.tar.gz')) {
+        if (bowtie2_index) {
+            if (bowtie2_index.endsWith('.tar.gz')) {
                 UNTAR_BOWTIE2_INDEX (
-                    [ [:], params.bowtie2_index ]
+                    [ [:], file(bowtie2_index) ]
                 )
-                ch_bowtie2_index = UNTAR_BOWTIE2_INDEX.out.untar.map { it[1] }
+                ch_bowtie2_index = UNTAR_BOWTIE2_INDEX.out.untar
                 ch_versions      = ch_versions.mix(UNTAR_BOWTIE2_INDEX.out.versions)
             } else {
-                ch_bowtie2_index = Channel.value(file(params.bowtie2_index))
+                ch_bowtie2_index = [ [:], file(bowtie2_index) ]
             }
         } else {
             BOWTIE2_BUILD (
@@ -167,21 +178,20 @@ workflow PREPARE_GENOME {
     //
     ch_nextclade_db = Channel.empty()
     if (!params.skip_consensus && !params.skip_nextclade) {
-        if (params.nextclade_dataset) {
-            if (params.nextclade_dataset.endsWith('.tar.gz')) {
+        if (nextclade_dataset) {
+            if (nextclade_dataset.endsWith('.tar.gz')) {
                 UNTAR_NEXTCLADE_DB (
-                    [ [:], params.nextclade_dataset ]
+                    [ [:], nextclade_dataset ]
                 )
                 ch_nextclade_db = UNTAR_NEXTCLADE_DB.out.untar.map { it[1] }
                 ch_versions     = ch_versions.mix(UNTAR_NEXTCLADE_DB.out.versions)
             } else {
-                ch_nextclade_db = Channel.value(file(params.nextclade_dataset))
+                ch_nextclade_db = Channel.value(file(nextclade_dataset))
             }
-        } else if (params.nextclade_dataset_name) {
+        } else if (nextclade_dataset_name) {
             NEXTCLADE_DATASETGET (
-                params.nextclade_dataset_name,
-                params.nextclade_dataset_reference,
-                params.nextclade_dataset_tag
+                nextclade_dataset_name,
+                nextclade_dataset_tag
             )
             ch_nextclade_db = NEXTCLADE_DATASETGET.out.dataset
             ch_versions     = ch_versions.mix(NEXTCLADE_DATASETGET.out.versions)
@@ -199,14 +209,16 @@ workflow PREPARE_GENOME {
                     UNTAR_BLAST_DB (
                         [ [:], params.blast_db ]
                     )
-                    ch_blast_db = UNTAR_BLAST_DB.out.untar.map { it[1] }
+                    ch_blast_db = UNTAR_BLAST_DB.out.untar
                     ch_versions = ch_versions.mix(UNTAR_BLAST_DB.out.versions)
                 } else {
-                    ch_blast_db = Channel.value(file(params.blast_db))
+                    ch_blast_db = Channel.value(
+                        [[id:'custom_blastdb'], file(params.blast_db)]
+                    )
                 }
             } else {
                 BLAST_MAKEBLASTDB (
-                    ch_fasta
+                    ch_fasta.map { [ [:], it ] }
                 )
                 ch_blast_db = BLAST_MAKEBLASTDB.out.db
                 ch_versions = ch_versions.mix(BLAST_MAKEBLASTDB.out.versions)
@@ -234,7 +246,7 @@ workflow PREPARE_GENOME {
     gff                  = ch_gff                  // path: genome.gff
     fai                  = ch_fai                  // path: genome.fai
     chrom_sizes          = ch_chrom_sizes          // path: genome.sizes
-    bowtie2_index        = ch_bowtie2_index        // path: bowtie2/index/
+    bowtie2_index        = ch_bowtie2_index        // channel: [ [:], bowtie2/index/ ]
     primer_bed           = ch_primer_bed           // path: primer.bed
     primer_collapsed_bed = ch_primer_collapsed_bed // path: primer.collapsed.bed
     primer_fasta         = ch_primer_fasta         // path: primer.fasta

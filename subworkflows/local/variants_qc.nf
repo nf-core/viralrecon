@@ -31,7 +31,7 @@ workflow VARIANTS_QC {
     ch_snpeff_txt   = Channel.empty()
     ch_snpeff_html  = Channel.empty()
     ch_snpsift_txt  = Channel.empty()
-    if (params.gff && !params.skip_snpeff) {
+    if (gff && !params.skip_snpeff) {
         SNPEFF_SNPSIFT (
             vcf,
             snpeff_db,

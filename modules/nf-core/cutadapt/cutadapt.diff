@@ -1,0 +1,46 @@
+Changes in component 'nf-core/cutadapt'
+'modules/nf-core/cutadapt/meta.yml' is unchanged
+Changes in 'cutadapt/main.nf':
+--- modules/nf-core/cutadapt/main.nf
++++ modules/nf-core/cutadapt/main.nf
+@@ -9,6 +9,7 @@
+ 
+     input:
+     tuple val(meta), path(reads)
++    path adapters
+ 
+     output:
+     tuple val(meta), path('*.trim.fastq.gz'), emit: reads
+@@ -22,11 +23,25 @@
+     def args = task.ext.args ?: ''
+     def prefix = task.ext.prefix ?: "${meta.id}"
+     def trimmed  = meta.single_end ? "-o ${prefix}.trim.fastq.gz" : "-o ${prefix}_1.trim.fastq.gz -p ${prefix}_2.trim.fastq.gz"
++
++    // Adjust primers depending on conditions
++    def primers
++    if (params.threeprime_adapters && meta.single_end) {
++        primers = "-a file:${adapters}"
++    } else if (params.threeprime_adapters && !meta.single_end) {
++        primers = "-a file:${adapters} -A file:${adapters}"
++    } else if (!params.threeprime_adapters && meta.single_end) {
++        primers = "-g file:${adapters}"
++    } else {
++        primers = "-g file:${adapters} -G file:${adapters}"
++    }
++
+     """
+     cutadapt \\
+         -Z \\
+         --cores $task.cpus \\
+         $args \\
++        $primers \\
+         $trimmed \\
+         $reads \\
+         > ${prefix}.cutadapt.log
+
+'modules/nf-core/cutadapt/environment.yml' is unchanged
+'modules/nf-core/cutadapt/tests/main.nf.test' is unchanged
+'modules/nf-core/cutadapt/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/cutadapt/tests/nextflow.config' is unchanged
+'modules/nf-core/cutadapt/tests/tags.yml' is unchanged
+************************************************************

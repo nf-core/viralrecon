@@ -1,10 +1,10 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/viralrecon/master/nextflow_schema.json",
     "title": "nf-core/viralrecon pipeline parameters",
     "description": "Assembly and intrahost/low-frequency variant calling for viral samples",
     "type": "object",
-    "definitions": {
+    "$defs": {
         "input_output_options": {
             "title": "Input/output options",
             "type": "object",
@@ -15,9 +15,10 @@
                 "input": {
                     "type": "string",
                     "format": "file-path",
+                    "exists": true,
+                    "schema": "assets/schema_input.json",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
-                    "schema": "assets/schema_input.json",
                     "fa_icon": "fas fa-file-csv",
                     "help_text": "You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/viralrecon/docs/usage#introduction).",
                     "description": "Path to comma-separated file containing information about the samples you would like to analyse."
@@ -46,6 +47,11 @@
                     "fa_icon": "fas fa-envelope",
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+                },
+                "multiqc_title": {
+                    "type": "string",
+                    "description": "MultiQC report title. Printed as page header, used for filename if not otherwise specified.",
+                    "fa_icon": "fas fa-file-signature"
                 }
             }
         },
@@ -76,6 +82,14 @@
                     "mimetype": "text/plain",
                     "pattern": "^\\S+\\.gff(\\.gz)?$",
                     "description": "Full path to GFF annotation file.",
+                    "fa_icon": "fas fa-file-invoice"
+                },
+                "additional_annotation": {
+                    "type": "string",
+                    "format": "file-path",
+                    "mimetype": "text/plain",
+                    "pattern": "^\\S+(\\.gff|\\.gtf)(\\.gz)?$",
+                    "description": "Full path to additional annotation file in GTF or GFF format.",
                     "fa_icon": "fas fa-file-invoice"
                 },
                 "bowtie2_index": {
@@ -229,11 +243,6 @@
                     "description": "Name of Nextclade dataset to retrieve. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
                     "fa_icon": "fas fa-project-diagram"
                 },
-                "nextclade_dataset_reference": {
-                    "type": "string",
-                    "description": "Accession id to download dataset based on a particular reference sequence. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
-                    "fa_icon": "fas fa-project-diagram"
-                },
                 "nextclade_dataset_tag": {
                     "type": "string",
                     "description": "Version tag of the dataset to download. A list of available datasets can be obtained using the 'nextclade dataset list' command.",
@@ -251,19 +260,46 @@
                     "description": "Maximum window size before and after variant locii used to generate ASCIIGenome screenshots.",
                     "fa_icon": "fab fa-windows"
                 },
-                "multiqc_title": {
-                    "type": "string",
-                    "hidden": true,
-                    "fa_icon": "fas fa-signature",
-                    "description": "Custom title for the MultiQC report."
+                "skip_freyja": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip freyja deep SARS-CoV-2 variant analysis using a depth weighted approach."
                 },
-                "multiqc_config": {
+                "skip_freyja_boot": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-forward",
+                    "description": "Skip the bootstrapping  module of Freyja"
+                },
+                "freyja_db_name": {
                     "type": "string",
-                    "format": "file-path",
-                    "mimetype": "text/plain",
-                    "description": "Custom config file to supply to MultiQC.",
-                    "fa_icon": "fas fa-cog",
-                    "hidden": true
+                    "default": "freyja_db",
+                    "fa_icon": "fas fa-folder-open",
+                    "description": "Specify the name where to store UShER database (default: 'freyja_db')."
+                },
+                "freyja_depthcutoff": {
+                    "type": "number",
+                    "description": "Specify a coverage depth minimum which excludes sites with coverage less than the specified value",
+                    "fa_icon": "fas fa-hand-paper",
+                    "help_text": "Using the `depthcutoff` option may result in some distinct lineages now having identical barcodes, which are grouped into the format `[lineage]-like(num)` (based on their shared phylogeny) in the output."
+                },
+                "freyja_repeats": {
+                    "type": "integer",
+                    "default": 100,
+                    "fa_icon": "fas fa-hand-paper",
+                    "description": "Specify the number of bootstrap repeats to do.",
+                    "minimum": 1
+                },
+                "freyja_barcodes": {
+                    "type": "string",
+                    "format": "path",
+                    "fa_icon": "fas fa-file",
+                    "description": "Lineage defining barcodes, default is most recent from UShER database."
+                },
+                "freyja_lineages": {
+                    "type": "string",
+                    "format": "path",
+                    "fa_icon": "fas fa-file",
+                    "description": "Metadata of lineages that match barcode, default is most recent from UShER database."
                 },
                 "max_multiqc_email_size": {
                     "type": "string",
@@ -531,6 +567,30 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Specify this parameter to skip all of the de novo assembly steps in the pipeline."
+                },
+                "min_contig_length": {
+                    "type": "integer",
+                    "default": 200,
+                    "fa_icon": "fas fa-sliders-h",
+                    "description": "Minimum contig length to filter from BLAST results."
+                },
+                "min_perc_contig_aligned": {
+                    "type": "number",
+                    "default": 0.7,
+                    "fa_icon": "fas fa-sliders-h",
+                    "description": "Minimum percentage of contig aligned to filter from BLAST results."
+                },
+                "skip_noninternal_primers": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Set this parameter to false to add an X at the begining or end of the primer's fasta sequence to specify cutadapt that they are non-internal 5' or 3' adapters, respectively.",
+                    "help_text": "See viralrecon's usage and cutadapt documentation: https://cutadapt.readthedocs.io/en/stable/guide.html#adapter-types"
+                },
+                "threeprime_adapters": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Set this parameter to true when the primer's for cutadapt are 3' adapters. Default value is false, as default primers are 5' adapters.",
+                    "help_text": "See viralrecon's usage and cutadapt documentation: https://cutadapt.readthedocs.io/en/stable/guide.html#adapter-types"
                 }
             },
             "fa_icon": "fas fa-random"
@@ -542,12 +602,6 @@
             "description": "Less common options for the pipeline, typically set in a config file.",
             "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
             "properties": {
-                "help": {
-                    "type": "boolean",
-                    "description": "Display help text.",
-                    "fa_icon": "fas fa-question-circle",
-                    "hidden": true
-                },
                 "version": {
                     "type": "boolean",
                     "description": "Display version and exit.",
@@ -592,6 +646,24 @@
                     "help_text": "Incoming hook URL for messaging service. Currently, only MS Teams is supported.",
                     "hidden": true
                 },
+                "multiqc_config": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Custom config file to supply to MultiQC.",
+                    "fa_icon": "fas fa-cog",
+                    "hidden": true
+                },
+                "multiqc_logo": {
+                    "type": "string",
+                    "description": "Custom logo file to supply to MultiQC. File name must also be set in the MultiQC config file",
+                    "fa_icon": "fas fa-image",
+                    "hidden": true
+                },
+                "multiqc_methods_description": {
+                    "type": "string",
+                    "description": "Custom MultiQC yaml file containing HTML including a methods description.",
+                    "fa_icon": "fas fa-cog"
+                },
                 "validate_params": {
                     "type": "boolean",
                     "description": "Boolean whether to validate parameters against the schema at runtime",
@@ -599,47 +671,18 @@
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
-                "show_hidden_params": {
-                    "type": "boolean",
-                    "fa_icon": "far fa-eye-slash",
-                    "description": "Show all params when using `--help`",
-                    "hidden": true,
-                    "help_text": "By default, parameters set as _hidden_ in the schema are not shown on the command line when a user runs with `--help`. Specifying this option will tell the pipeline to show all parameters."
-                }
-            }
-        },
-        "max_job_request_options": {
-            "title": "Max job request options",
-            "type": "object",
-            "fa_icon": "fab fa-acquisitions-incorporated",
-            "description": "Set the top limit for requested resources for any single job.",
-            "help_text": "If you are running on a smaller system, a pipeline step requesting more resources than are available may cause the Nextflow to stop the run with an error. These options allow you to cap the maximum resources requested by any single job so that the pipeline will run on your system.\n\nNote that you can not _increase_ the resources requested by any job using these options. For that you will need your own configuration file. See [the nf-core website](https://nf-co.re/usage/configuration) for details.",
-            "properties": {
-                "max_cpus": {
-                    "type": "integer",
-                    "description": "Maximum number of CPUs that can be requested for any single job.",
-                    "default": 16,
-                    "fa_icon": "fas fa-microchip",
-                    "hidden": true,
-                    "help_text": "Use to set an upper-limit for the CPU requirement for each process. Should be an integer e.g. `--max_cpus 1`"
-                },
-                "max_memory": {
+                "pipelines_testdata_base_path": {
                     "type": "string",
-                    "description": "Maximum amount of memory that can be requested for any single job.",
-                    "default": "128.GB",
-                    "fa_icon": "fas fa-memory",
-                    "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
-                    "hidden": true,
-                    "help_text": "Use to set an upper-limit for the memory requirement for each process. Should be a string in the format integer-unit e.g. `--max_memory '8.GB'`"
+                    "fa_icon": "far fa-check-circle",
+                    "description": "Base URL or local path to location of pipeline test dataset files",
+                    "default": "https://raw.githubusercontent.com/nf-core/test-datasets/",
+                    "hidden": true
                 },
-                "max_time": {
+                "trace_report_suffix": {
                     "type": "string",
-                    "description": "Maximum amount of time that can be requested for any single job.",
-                    "default": "240.h",
-                    "fa_icon": "far fa-clock",
-                    "pattern": "^(\\d+\\.?\\s*(s|m|h|day)\\s*)+$",
-                    "hidden": true,
-                    "help_text": "Use to set an upper-limit for the time requirement for each process. Should be a string in the format integer-unit e.g. `--max_time '2.h'`"
+                    "fa_icon": "far calendar",
+                    "description": "Suffix to add to the trace report filename. Default is the date and time in the format yyyy-MM-dd_HH-mm-ss.",
+                    "hidden": true
                 }
             }
         },
@@ -695,34 +738,31 @@
     },
     "allOf": [
         {
-            "$ref": "#/definitions/input_output_options"
+            "$ref": "#/$defs/input_output_options"
         },
         {
-            "$ref": "#/definitions/reference_genome_options"
+            "$ref": "#/$defs/reference_genome_options"
         },
         {
-            "$ref": "#/definitions/nanopore_options"
+            "$ref": "#/$defs/nanopore_options"
         },
         {
-            "$ref": "#/definitions/nanopore_illumina_options"
+            "$ref": "#/$defs/nanopore_illumina_options"
         },
         {
-            "$ref": "#/definitions/illumina_qc_read_trimming_and_filtering_options"
+            "$ref": "#/$defs/illumina_qc_read_trimming_and_filtering_options"
         },
         {
-            "$ref": "#/definitions/illumina_variant_calling_options"
+            "$ref": "#/$defs/illumina_variant_calling_options"
         },
         {
-            "$ref": "#/definitions/illumina_de_novo_assembly_options"
+            "$ref": "#/$defs/illumina_de_novo_assembly_options"
         },
         {
-            "$ref": "#/definitions/generic_options"
+            "$ref": "#/$defs/generic_options"
         },
         {
-            "$ref": "#/definitions/max_job_request_options"
-        },
-        {
-            "$ref": "#/definitions/institutional_config_options"
+            "$ref": "#/$defs/institutional_config_options"
         }
     ]
 }

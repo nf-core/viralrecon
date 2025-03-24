@@ -2,10 +2,10 @@ process ARTIC_GUPPYPLEX {
     tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::artic=1.2.3"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/artic:1.2.3--pyhdfd78af_0' :
-        'quay.io/biocontainers/artic:1.2.3--pyhdfd78af_0' }"
+        'biocontainers/artic:1.2.3--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), path(fastq_dir)
@@ -20,7 +20,6 @@ process ARTIC_GUPPYPLEX {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def VERSION = '1.2.3' // WARN: Version information provided by tool on CLI is incorrect. Please update this string when bumping container versions.
     """
     artic \\
         guppyplex \\
@@ -31,7 +30,18 @@ process ARTIC_GUPPYPLEX {
     pigz -p $task.cpus *.fastq
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        artic: $VERSION
+        artic: \$(artic -v 2>&1 | sed 's/^.*artic //; s/ .*\$//')
+    END_VERSIONS
+    """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    echo '' | gzip > ${prefix}.fastq.gz
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        artic: \$(artic -v 2>&1 | sed 's/^.*artic //; s/ .*\$//')
     END_VERSIONS
     """
 }

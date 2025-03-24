@@ -6,24 +6,28 @@ The directories listed below will be created in the results directory after the 
 
 # Nanopore: Pipeline overview
 
-- [Preprocessing](#nanopore-preprocessing)
-  - [pycoQC](#nanopore-pycoqc) - Sequencing QC
-  - [artic guppyplex](#nanopore-artic-guppyplex) - Aggregate pre-demultiplexed reads from MinKNOW/Guppy
-  - [NanoPlot](#nanopore-nanoplot) - Read QC
-- [Variant calling](#nanopore-variant-calling)
-  - [artic minion](#nanopore-artic-minion) - Align reads, call variants and generate consensus sequence
-- [Downstream analysis](#nanopore-downstream-analysis)
-  - [SAMtools](#nanopore-samtools) - Remove unmapped reads and obtain alignment metrics
-  - [mosdepth](#nanopore-mosdepth) - Genome-wide and amplicon coverage QC plots
-  - [BCFTools](#nanopore-bcftools) - Variant count metrics
-  - [SnpEff and SnpSift](#nanopore-snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
-  - [QUAST](#nanopore-quast) - Consensus assessment report
-  - [Pangolin](#nanopore-pangolin) - Lineage analysis
-  - [Nextclade](#nanopore-nextclade) - Clade assignment, mutation calling and sequence quality checks
-  - [ASCIIGenome](#nanopore-asciigenome) - Individual variant screenshots with annotation tracks
-  - [Variants long table](#nanopore-variants-long-table) - Collate per-sample information for individual variants, functional effect prediction and lineage analysis
-- [Workflow reporting](#nanopore-workflow-reporting)
-  - [MultiQC](#nanopore-multiqc) - Present QC, visualisation and custom reporting for sequencing, raw reads, alignment and variant calling results
+- [Introduction](#introduction)
+- [Nanopore: Pipeline overview](#nanopore-pipeline-overview)
+  - [Nanopore: Preprocessing](#nanopore-preprocessing)
+    - [Nanopore: pycoQC](#nanopore-pycoqc)
+    - [Nanopore: artic guppyplex](#nanopore-artic-guppyplex)
+    - [Nanopore: NanoPlot](#nanopore-nanoplot)
+  - [Nanopore: Variant calling](#nanopore-variant-calling)
+    - [Nanopore: artic minion](#nanopore-artic-minion)
+  - [Nanopore: Downstream analysis](#nanopore-downstream-analysis)
+    - [Nanopore: SAMtools](#nanopore-samtools)
+    - [Nanopore: mosdepth](#nanopore-mosdepth)
+    - [Nanopore: BCFTools](#nanopore-bcftools)
+    - [Nanopore: SnpEff and SnpSift](#nanopore-snpeff-and-snpsift)
+    - [Nanopore: QUAST](#nanopore-quast)
+    - [Nanopore: Pangolin](#nanopore-pangolin)
+    - [Nanopore: Nextclade](#nanopore-nextclade)
+    - [Nanopore: Freyja](#nanopore-freyja)
+    - [Nanopore: ASCIIGenome](#nanopore-asciigenome)
+    - [Nanopore: Variants long table](#nanopore-variants-long-table)
+  - [Nanopore: Workflow reporting](#nanopore-workflow-reporting)
+    - [Nanopore: MultiQC](#nanopore-multiqc)
+- [Pipeline information](#pipeline-information)
 
 ## Nanopore: Preprocessing
 
@@ -241,6 +245,32 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 
 [Nextclade](https://github.com/nextstrain/nextclade) performs viral genome clade assignment, mutation calling and sequence quality checks for the consensus sequences generated in this pipeline. Similar to Pangolin, it has been used extensively during the COVID-19 pandemic. A [web application](https://clades.nextstrain.org/) also exists that allows users to upload genome sequences via a web browser.
 
+### Nanopore: Freyja
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<CALLER>/freyja/demix`
+  - `*.tsv`: Analysis results including the lineages present, their corresponding abundances, and summarization by constellation
+- `<CALLER>/freyja/freyja_db`
+  - `.json`: dataset containing lineage metadata that correspond to barcodes.
+  - `.yml`: dataset containing the lineage topology.
+  - `.csv`: dataset containing lineage defining barcodes.
+- `<CALLER>/freyja/variants`
+  - `*.variants.tsv`: Analysis results including identified variants in a gff-like format
+  - `*.depth.tsv`: Analysis results including the depth of the identified variants
+- `<CALLER>/freyja/boot`
+  - `*lineages.csv` Analysis results inculding lineages present and their corresponding abundances with variation identified through bootstrapping
+  - `*summarized.csv`Analysis results inculding lineages present but summarized by constellation and their corresponding abundances with variation identified through bootstrapping
+
+**NB:** The value of `<CALLER>` in the output directory name above is determined by the `--artic_minion_caller` parameter (Default: 'nanopolish').
+
+</details>
+
+[Freyja](https://github.com/andersen-lab/Freyja) is a tool to recover relative lineage abundances from mixed SARS-CoV-2 samples from a sequencing dataset (BAM aligned to the Hu-1 reference). The method uses lineage-determining mutational "barcodes" derived from the [UShER](https://usher-wiki.readthedocs.io/en/latest/#) global phylogenetic tree as a basis set to solve the constrained (unit sum, non-negative) de-mixing problem.
+
+<p align="center"><img src="images/freyja_screenshot.png" alt="Freyja screenshot"></p>
+
 ### Nanopore: ASCIIGenome
 
 <details markdown="1">
@@ -264,12 +294,13 @@ As described in the documentation, [ASCIIGenome](https://asciigenome.readthedocs
 
 - `<CALLER>/`
   - `variants_long_table.csv`: Long format table collating per-sample information for individual variants, functional effect prediction and lineage analysis.
+  - `additional_variants_long_table.csv`: Long format table similar to `variants_long_table.csv` for additional annotation file with overlapping annotation features.
 
 **NB:** The value of `<CALLER>` in the output directory name above is determined by the `--artic_minion_caller` parameter (Default: 'nanopolish').
 
 </details>
 
-Create variants long format table collating per-sample information for individual variants ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html)), functional effect prediction ([`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html)) and lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin)).
+Create variants long format table collating per-sample information for individual variants ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html)), functional effect prediction ([`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html)) and lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin)). The variants used for this table are the ones passing artic minion quality filters (`*.pass.unique.vcf.gz`) explained before in [Nanopore: artic minion](#nanopore-artic-minion) output files.
 
 The more pertinent variant information is summarised in this table to make it easier for researchers to assess the impact of variants found amongst the sequenced sample(s). An example of the fields included in the table are shown below:
 
@@ -280,6 +311,25 @@ SAMPLE1_PE,MN908947.3,1875,C,T,PASS,92,62,29,0.32,orf1ab,missense_variant,c.1610
 SAMPLE1_PE,MN908947.3,3037,C,T,PASS,213,0,213,1.0,orf1ab,synonymous_variant,c.2772C>T,p.Phe924Phe,p.F924F,ivar,B.1
 SAMPLE1_PE,MN908947.3,11719,G,A,PASS,195,9,186,0.95,orf1ab,synonymous_variant,c.11454G>A,p.Gln3818Gln,p.Q3818Q,ivar,B.1
 ```
+
+Table columns:
+
+- SAMPLE: sample name
+- CHROM: Reference/fragment ID
+- POS: Position of the variant respect to the reference genome
+- REF: Reference allele
+- ALT: Alternative allele
+- FILTER: Column indicating if the variant passed the filters. If PASS the variant passed all the filters. If not, the name of the filter that wasn't passed will appear.
+- DP: Position read depth
+- REF_DP: Reference allele depth
+- ALT_DP: Alternative allele depth
+- AF: Alternative allele frequency
+- GENE: Gene name in annotation file​
+- EFFECT: Effect of the variant
+- HGVS_C: Position annotation at CDS level
+- HGVS_P: Position annotation at protein level
+- HGVS_P_1LETTER: Position annotation at protein level with the aminoacid annotation in 1 letter format
+- Caller: Variant caller used​​
 
 ## Nanopore: Workflow reporting
 
@@ -307,36 +357,44 @@ An example MultiQC report generated from a full-sized dataset can be viewed on t
 
 # Illumina: Pipeline overview
 
-- [Preprocessing](#illumina-preprocessing)
-  - [cat](#cat) - Merge re-sequenced FastQ files
-  - [FastQC](#fastqc) - Raw read QC
-  - [fastp](#fastp) - Adapter and quality trimming
-  - [Kraken 2](#kraken-2) - Removal/QC for host reads
-- [Variant calling](#illumina-variant-calling)
-  - [Bowtie 2](#bowtie-2) - Read alignment relative to reference genome
-  - [SAMtools](#samtools) - Sort, index and generate metrics for alignments
-  - [iVar trim](#ivar-trim) - Primer sequence removal for amplicon data
-  - [picard MarkDuplicates](#picard-markduplicates) - Duplicate read marking and removal
-  - [picard CollectMultipleMetrics](#picard-collectmultiplemetrics) - Alignment metrics
-  - [mosdepth](#mosdepth) - Whole-genome and amplicon coverage metrics
-  - [iVar variants](#ivar-variants) _||_ [BCFTools call](#bcftools-call) - Variant calling
-    - [SnpEff and SnpSift](#snpeff-and-snpsift) - Genetic variant annotation and functional effect prediction
-    - [ASCIIGenome](#asciigenome) - Individual variant screenshots with annotation tracks
-  - [iVar consensus](#ivar-consensus) _||_ [BCFTools and BEDTools](#bcftools-and-bedtools) - Consensus sequence generation
-    - [QUAST](#quast) - Consensus assessment report
-    - [Pangolin](#pangolin) - Lineage analysis
-    - [Nextclade](#nextclade) - Clade assignment, mutation calling and sequence quality checks
-  - [Variants long table](#variants-long-table) - Collate per-sample information for individual variants, functional effect prediction and lineage analysis
-- [De novo assembly](#illumina-de-novo-assembly)
-  - [Cutadapt](#cutadapt) - Primer trimming for amplicon data
-  - [SPAdes](#spades) _||_ [Unicycler](#unicycler) _||_ [minia](#minia) - Viral genome assembly
-    - [BLAST](#blast) - Blast to reference assembly
-    - [ABACAS](#abacas) - Order contigs according to reference genome
-    - [PlasmidID](#plasmidid) - Assembly report and visualisation
-    - [Assembly QUAST](#assembly-quast) - Assembly quality assessment
-- [Workflow reporting and genomes](#illumina-workflow-reporting-and-genomes)
-  - [MultiQC](#multiqc) - Present QC for raw reads, alignment, assembly and variant calling
-  - [Reference genome files](#reference-genome-files) - Save reference genome indices/files
+- [Introduction](#introduction)
+- [Illumina: Pipeline overview](#illumina-pipeline-overview)
+  - [Illumina: Preprocessing](#illumina-preprocessing)
+    - [cat](#cat)
+    - [FastQC](#fastqc)
+    - [fastp](#fastp)
+    - [Kraken 2](#kraken-2)
+  - [Illumina: Variant calling](#illumina-variant-calling)
+    - [Bowtie 2](#bowtie-2)
+    - [SAMtools](#samtools)
+    - [iVar trim](#ivar-trim)
+    - [picard MarkDuplicates](#picard-markduplicates)
+    - [picard CollectMultipleMetrics](#picard-collectmultiplemetrics)
+    - [mosdepth](#mosdepth)
+    - [iVar variants](#ivar-variants)
+    - [BCFTools call](#bcftools-call)
+    - [SnpEff and SnpSift](#snpeff-and-snpsift)
+    - [Freyja](#freyja)
+    - [ASCIIGenome](#asciigenome)
+    - [iVar consensus](#ivar-consensus)
+    - [BCFTools and BEDTools](#bcftools-and-bedtools)
+    - [QUAST](#quast)
+    - [Pangolin](#pangolin)
+    - [Nextclade](#nextclade)
+    - [Variants long table](#variants-long-table)
+  - [Illumina: De novo assembly](#illumina-de-novo-assembly)
+    - [Cutadapt](#cutadapt)
+    - [SPAdes](#spades)
+    - [Unicycler](#unicycler)
+    - [minia](#minia)
+    - [BLAST](#blast)
+    - [ABACAS](#abacas)
+    - [PlasmidID](#plasmidid)
+    - [Assembly QUAST](#assembly-quast)
+  - [Illumina: Workflow reporting and genomes](#illumina-workflow-reporting-and-genomes)
+    - [MultiQC](#multiqc)
+    - [Reference genome files](#reference-genome-files)
+- [Pipeline information](#pipeline-information)
 
 ## Illumina: Preprocessing
 
@@ -593,6 +651,30 @@ iVar outputs a tsv format which is not compatible with downstream analysis such 
 
 ![MultiQC - SnpEff annotation counts](images/mqc_snpeff_plot.png)
 
+### Freyja
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `<CALLER>/freyja/demix`
+  - `*.tsv`: Analysis results including the lineages present, their corresponding abundances, and summarization by constellation
+- `<CALLER>/freyja/freyja_db`
+  - `.json`: dataset containing lineage metadata that correspond to barcodes.
+  - `.yml`: dataset containing the lineage topology.
+  - `.csv`: dataset containing lineage defining barcodes.
+- `<CALLER>/freyja/variants`
+  - `*.variants.tsv`: Analysis results including identified variants in a gff-like format
+  - `*.depth.tsv`: Analysis results including the depth of the identified variants
+- `<CALLER>/freyja/boot`
+  - `*lineages.csv` Analysis results inculding lineages present and their corresponding abundances with variation identified through bootstrapping
+  - `*summarized.csv`Analysis results inculding lineages present but summarized by constellation and their corresponding abundances with variation identified through bootstrapping
+
+</details>
+
+[Freyja](https://github.com/andersen-lab/Freyja) is a tool to recover relative lineage abundances from mixed SARS-CoV-2 samples from a sequencing dataset (BAM aligned to the Hu-1 reference). The method uses lineage-determining mutational "barcodes" derived from the [UShER](https://usher-wiki.readthedocs.io/en/latest/#) global phylogenetic tree as a basis set to solve the constrained (unit sum, non-negative) de-mixing problem.
+
+<p align="center"><img src="images/freyja_screenshot.png" alt="Freyja screenshot"></p>
+
 ### ASCIIGenome
 
 <details markdown="1">
@@ -704,12 +786,31 @@ Phylogenetic Assignment of Named Global Outbreak LINeages ([Pangolin](https://gi
 
 - `variants/<VARIANT_CALLER>/`
   - `variants_long_table.csv`: Long format table collating per-sample information for individual variants, functional effect prediction and lineage analysis.
+  - `additional_variants_long_table.csv`: Long format table similar to `variants_long_table.csv` for additional annotation file with overlapping annotation features.
 
 **NB:** The value of `<VARIANT_CALLER>` in the output directory name above is determined by the `--variant_caller` parameter (Default: 'ivar' for '--protocol amplicon' and 'bcftools' for '--protocol metagenomic').
 
 </details>
 
-Create variants long format table collating per-sample information for individual variants ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html)), functional effect prediction ([`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html)) and lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin)).
+Create variants long format table collating per-sample information for individual variants ([`BCFTools`](http://samtools.github.io/bcftools/bcftools.html)), functional effect prediction ([`SnpSift`](http://snpeff.sourceforge.net/SnpSift.html)) and lineage analysis ([`Pangolin`](https://github.com/cov-lineages/pangolin)). The variants used for this table are the ones passing variant caller filters (`variants/<VARIANT_CALLER>/*.vcf.gz`):
+
+- For ivar by default filters are:
+  - Allele frequency threshold >= 0.25
+  - Minimum quality score threshold = 20
+  - Minimum position depth = 10
+  - If using metagenomics protocol, strand bias filter also is aplied in `ivar_variants_to_vcf.py`
+- For bcftools default filters are:
+  - Minimum quality score threshold = 20
+  - Minimum position depth = 10
+
+To filter variants included in the consensus genome from the variants long table file, the following filters should be applied:
+
+- AF >= 0.75
+
+Additionally, to filter variants included in the consensus genome that are missense variants from the variants long table file, the following filters should be applied:
+
+- AF >= 0.75
+- EFFECT == missense_variant
 
 The more pertinent variant information is summarised in this table to make it easier for researchers to assess the impact of variants found amongst the sequenced sample(s). An example of the fields included in the table are shown below:
 
@@ -720,6 +821,25 @@ SAMPLE1_PE,MN908947.3,1875,C,T,PASS,92,62,29,0.32,orf1ab,missense_variant,c.1610
 SAMPLE1_PE,MN908947.3,3037,C,T,PASS,213,0,213,1.0,orf1ab,synonymous_variant,c.2772C>T,p.Phe924Phe,p.F924F,ivar,B.1
 SAMPLE1_PE,MN908947.3,11719,G,A,PASS,195,9,186,0.95,orf1ab,synonymous_variant,c.11454G>A,p.Gln3818Gln,p.Q3818Q,ivar,B.1
 ```
+
+Table columns:
+
+- SAMPLE: sample name
+- CHROM: Reference/fragment ID
+- POS: Position of the variant respect to the reference genome
+- REF: Reference allele
+- ALT: Alternative allele
+- FILTER: Column indicating if the variant passed the filters. If PASS the variant passed all the filters. If not, the name of the filter that wasn't passed will appear.
+- DP: Position read depth
+- REF_DP: Reference allele depth
+- ALT_DP: Alternative allele depth
+- AF: Alternative allele frequency
+- GENE: Gene name in annotation file​
+- EFFECT: Effect of the variant
+- HGVS_C: Position annotation at CDS level
+- HGVS_P: Position annotation at protein level
+- HGVS_P_1LETTER: Position annotation at protein level with the aminoacid annotation in 1 letter format
+- Caller: Variant caller used​​
 
 ## Illumina: De novo assembly
 
@@ -799,8 +919,31 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 <summary>Output files</summary>
 
 - `assembly/<ASSEMBLER>/blastn/`
-  - `*.blastn.txt`: BLAST results against the target virus.
+  - `*results.blastn.txt`: BLAST results against the target virus.
   - `*.filter.blastn.txt`: Filtered BLAST results.
+    - Applied filters by default are:
+      - `qlen` (contig length) > 200 nt
+      - `%cgAligned` (percentage of contig aligned) > 0.7 (70%)
+    - Columns description (for more information see: https://www.metagenomics.wiki/tools/blast/blastn-output-format-6):
+      - stitle: Subject Title. Name of the reference genome.
+      - staxids: Subject Taxonomy ID(s), separated by a ';'. When blast databse is no annotated with taxids, 0 will appear.
+      - qaccver: Query accesion version. Contig name.
+      - saccver: Subject accession version. Reference genome accession version.
+      - pident: Percentage of identical matches.
+      - length: Alignment length.
+      - mismatch: Number of mismatches.
+      - gapopen: Number of gap openings.
+      - qstart: Start of alignment in query (sample's contig).
+      - qend: End of alignment in query (sample's contig).
+      - sstart: Start of alignment in subject (reference genome).
+      - send: Start of alignment in subject (reference genome).
+      - evalue: Expect value.
+      - bitscore: Bit score. The bit-score is the requires size of a sequence database in which the current match could be found just by chance. The bit-score is a log2 scaled and normalized raw-score. Each increase by one doubles the required database size (2bit-score).
+      - slen: Subject (reference genome) sequence length.
+      - qlen: Query (contig) sequence length.
+      - qcovs: Query Coverage Per Subject.
+      - %cgAligned: Percentage of contig covered in the alignment. It is calculated dividing `length/qlen`.
+      - %refCovered: Percentage of reference genome covered in the alignment. It is calculated dividing `length/slen`.
 
 **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades').
 
@@ -878,9 +1021,9 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
 
 </details>
 
-[MultiQC](http://multiqc.info) is a visualization tool that generates a single HTML report summarizing all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in the report data directory.
+[MultiQC](http://multiqc.info) is a visualization tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in the report data directory.
 
-Results generated by MultiQC collate pipeline QC from FastQC, fastp, Cutadapt, Bowtie 2, Kraken 2, samtools, picard CollectMultipleMetrics, BCFTools, SnpEff and QUAST.
+Results generated by MultiQC collate pipeline QC from supported tools e.g. FastQC. The pipeline has special steps which also allow the software versions to be reported in the MultiQC output for future traceability. For more information about how to use MultiQC reports, see <http://multiqc.info>.
 
 The default [`multiqc config file`](https://github.com/nf-core/viralrecon/blob/master/assets/multiqc_config_illumina.yaml) has been written in a way in which to structure these QC metrics to make them more interpretable in the final report.
 
@@ -915,6 +1058,7 @@ A number of genome-specific files are generated by the pipeline because they are
   - Reports generated by Nextflow: `execution_report.html`, `execution_timeline.html`, `execution_trace.txt` and `pipeline_dag.dot`/`pipeline_dag.svg`.
   - Reports generated by the pipeline: `pipeline_report.html`, `pipeline_report.txt` and `software_versions.yml`. The `pipeline_report*` files will only be present if the `--email` / `--email_on_fail` parameter's are used when running the pipeline.
   - Reformatted samplesheet files used as input to the pipeline: `samplesheet.valid.csv`.
+  - Parameters used by the pipeline run: `params.json`.
 
 </details>
 

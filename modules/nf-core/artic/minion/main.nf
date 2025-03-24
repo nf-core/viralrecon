@@ -2,7 +2,7 @@ process ARTIC_MINION {
     tag "$meta.id"
     label 'process_high'
 
-    conda "bioconda::artic=1.2.3"
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/artic:1.2.3--pyhdfd78af_0' :
         'quay.io/biocontainers/artic:1.2.3--pyhdfd78af_0' }"
@@ -48,7 +48,6 @@ process ARTIC_MINION {
         model   = medaka_model_file ? "--medaka-model ./$medaka_model_file" : "--medaka-model $medaka_model_string"
     }
     def hd5_plugin_path = task.ext.hd5_plugin_path ? "export HDF5_PLUGIN_PATH=" + task.ext.hd5_plugin_path : "export HDF5_PLUGIN_PATH=/usr/local/lib/python3.6/site-packages/ont_fast5_api/vbz_plugin"
-    def VERSION = '1.2.3' // WARN: Version information provided by tool on CLI is incorrect. Please update this string when bumping container versions.
     """
     $hd5_plugin_path
 
@@ -67,7 +66,59 @@ process ARTIC_MINION {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        artic: $VERSION
+        artic: \$(artic -v 2>&1 | sed 's/^.*artic //; s/ .*\$//')
+    END_VERSIONS
+    """
+
+    stub:
+    prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    touch ${prefix}.1.trimmed.rg.sorted.bam
+    touch ${prefix}.1.trimmed.rg.sorted.bai
+    touch ${prefix}.1.vcf
+    touch ${prefix}.2.trimmed.rg.sorted.bam
+    touch ${prefix}.2.trimmed.rg.sorted.bai
+    touch ${prefix}.2.vcf
+
+    touch ${prefix}.alignreport.csv
+    touch ${prefix}.amplicon_depths.tsv
+
+    touch ${prefix}.consensus.fasta
+    touch ${prefix}.coverage_mask.txt
+    touch ${prefix}.coverage_mask.txt.1.depths
+    touch ${prefix}.coverage_mask.txt.2.depths
+
+    touch ${prefix}.fail.vcf
+
+    touch ${prefix}.merged.vcf
+    echo "" | gzip > ${prefix}.merged.vcf.gz
+    touch ${prefix}.merged.vcf.tbi
+
+    touch ${prefix}.minion.log.txt
+
+    echo "" | gzip > ${prefix}.normalised.vcf.gz
+    touch ${prefix}.normalised.vcf.tbi
+
+    touch ${prefix}.pass.vcf
+    echo "" | gzip > ${prefix}.pass.vcf.gz
+    touch ${prefix}.pass.vcf.gz.tbi
+
+    touch ${prefix}.preconsensus.fasta
+    touch ${prefix}.preconsensus.fasta.fai
+
+    touch ${prefix}.primers.vcf
+    touch ${prefix}.primersitereport.txt
+    touch ${prefix}.primertrimmed.rg.sorted.bam
+    touch ${prefix}.primertrimmed.rg.sorted.bam.bai
+
+    touch ${prefix}.sorted.bam
+    touch ${prefix}.sorted.bam.bai
+    touch ${prefix}.trimmed.rg.sorted.bam
+    touch ${prefix}.trimmed.rg.sorted.bam.bai
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        artic: \$(artic -v 2>&1 | sed 's/^.*artic //; s/ .*\$//')
     END_VERSIONS
     """
 }

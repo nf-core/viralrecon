@@ -21,8 +21,10 @@ workflow FILTER_BAM_SAMTOOLS {
     SAMTOOLS_VIEW (
         bam_bai,
         fasta,
-        []
+        [],
+        bam_bai.map { it[2].getName().tokenize('.')[-1] }
     )
+
     ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())
 
     //
