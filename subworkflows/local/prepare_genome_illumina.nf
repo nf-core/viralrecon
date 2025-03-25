@@ -16,7 +16,7 @@ include { BEDTOOLS_GETFASTA             } from '../../modules/nf-core/bedtools/g
 include { CUSTOM_GETCHROMSIZES          } from '../../modules/nf-core/custom/getchromsizes/main'
 include { NEXTCLADE_DATASETGET          } from '../../modules/nf-core/nextclade/datasetget/main'
 include { COLLAPSE_PRIMERS              } from '../../modules/local/collapse_primers/main'
-include { KRAKEN2_BUILD                 } from '../../modules/local/kraken2_build'
+include { KRAKEN2_BUILD                 } from '../../modules/local/kraken2/build/main'
 include { SNPEFF_BUILD                  } from '../../modules/local/snpeff_build'
 
 workflow PREPARE_GENOME {
