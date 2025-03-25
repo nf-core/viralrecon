@@ -59,7 +59,7 @@ ch_multiqc_custom_config = params.multiqc_config ? file(params.multiqc_config) :
 // MODULE: Loaded from modules/local/
 //
 include { ASCIIGENOME } from '../modules/local/asciigenome/main'
-include { MULTIQC     } from '../modules/local/multiqc_nanopore'
+include { MULTIQC     } from '../modules/local/multiqc/nanopore/main'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions'
 include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions'
 
