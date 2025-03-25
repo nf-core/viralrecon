@@ -2,7 +2,7 @@
 // Variant calling QC
 //
 
-include { ASCIIGENOME    } from '../../modules/local/asciigenome'
+include { ASCIIGENOME    } from '../../modules/local/asciigenome/main'
 include { SNPEFF_SNPSIFT } from './snpeff_snpsift'
 
 workflow VARIANTS_QC {
