@@ -3,8 +3,8 @@
 //
 
 include { GUNZIP as GUNZIP_GFF                                            } from '../../modules/nf-core/gunzip/main'
-include { SNPEFF_BUILD                                                    } from '../../modules/local/snpeff_build/main'
-include { SNPEFF_ANN                                                      } from '../../modules/local/snpeff_ann/main'
+include { SNPEFF_BUILD                                                    } from '../../modules/local/snpeff/build/main'
+include { SNPEFF_ANN                                                      } from '../../modules/local/snpeff/ann/main'
 include { SNPSIFT_EXTRACTFIELDS                                           } from '../../modules/local/snpsift_extractfields'
 include { VCF_BGZIP_TABIX_STATS                                           } from './vcf_bgzip_tabix_stats'
 include { BCFTOOLS_QUERY                                                  } from '../../modules/nf-core/bcftools/query/main'
