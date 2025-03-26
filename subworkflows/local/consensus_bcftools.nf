@@ -8,7 +8,7 @@ include { BEDTOOLS_MERGE      } from '../../modules/nf-core/bedtools/merge/main'
 include { BEDTOOLS_MASKFASTA  } from '../../modules/nf-core/bedtools/maskfasta/main'
 include { BCFTOOLS_CONSENSUS  } from '../../modules/nf-core/bcftools/consensus/main'
 include { MAKE_BED_MASK       } from '../../modules/local/make_bed_mask/main'
-include { RENAME_FASTA_HEADER } from '../../modules/local/rename_fasta_header'
+include { RENAME_FASTA_HEADER } from '../../modules/local/rename_fasta_header/main'
 include { CONSENSUS_QC        } from './consensus_qc'
 
 workflow CONSENSUS_BCFTOOLS {
