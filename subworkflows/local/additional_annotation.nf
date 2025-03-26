@@ -3,7 +3,7 @@
 //
 
 include { GUNZIP as GUNZIP_GFF                                            } from '../../modules/nf-core/gunzip/main'
-include { SNPEFF_BUILD                                                    } from '../../modules/local/snpeff_build'
+include { SNPEFF_BUILD                                                    } from '../../modules/local/snpeff_build/main'
 include { SNPEFF_ANN                                                      } from '../../modules/local/snpeff_ann/main'
 include { SNPSIFT_EXTRACTFIELDS                                           } from '../../modules/local/snpsift_extractfields'
 include { VCF_BGZIP_TABIX_STATS                                           } from './vcf_bgzip_tabix_stats'
