@@ -66,8 +66,8 @@ ch_ivar_variants_header_mqc      = file("$projectDir/assets/headers/ivar_variant
 // MODULE: Loaded from modules/local/
 //
 include { MULTIQC                                                 } from '../modules/local/multiqc/illumina/main'
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions'
-include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions'
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_GENOME   } from '../modules/local/plot_mosdepth_regions/main'
+include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../modules/local/plot_mosdepth_regions/main'
 include { PREPARE_PRIMER_FASTA                                    } from '../modules/local/prepare_primer_fasta'
 
 //
