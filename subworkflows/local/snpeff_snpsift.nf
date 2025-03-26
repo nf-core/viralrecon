@@ -3,7 +3,7 @@
 //
 
 include { SNPEFF_ANN            } from '../../modules/local/snpeff/ann/main'
-include { SNPSIFT_EXTRACTFIELDS } from '../../modules/local/snpsift_extractfields'
+include { SNPSIFT_EXTRACTFIELDS } from '../../modules/local/snpsift/extractfields/main'
 
 include { VCF_BGZIP_TABIX_STATS } from './vcf_bgzip_tabix_stats'
 
