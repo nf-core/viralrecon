@@ -136,7 +136,7 @@ workflow PREPARE_GENOME {
                     ch_primer_fasta = GUNZIP_PRIMER_FASTA.out.gunzip.map { it[1] }
                     ch_versions     = ch_versions.mix(GUNZIP_PRIMER_FASTA.out.versions)
                 } else {
-                    ch_primer_fasta = Channel.value(file(params.primer_fasta))
+                    ch_primer_fasta = Channel.fromPath(params.primer_fasta, checkIfExists: true)
                 }
             } else {
                 BEDTOOLS_GETFASTA (
