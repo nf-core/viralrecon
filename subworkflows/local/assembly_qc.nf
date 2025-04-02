@@ -2,11 +2,12 @@
 // Downstream analysis for assembly scaffolds
 //
 
-include { FILTER_BLASTN } from '../../modules/local/filter_blastn'
-include { ABACAS        } from '../../modules/nf-core/abacas/main'
-include { BLAST_BLASTN  } from '../../modules/nf-core/blast/blastn/main'
-include { PLASMIDID     } from '../../modules/nf-core/plasmidid/main'
-include { QUAST         } from '../../modules/nf-core/quast/main'
+include { FILTER_BLASTN                  } from '../../modules/local/filter_blastn'
+include { ABACAS as ABACAS_SINGLE        } from '../../modules/nf-core/abacas/main'
+include { ABACAS_MULTI                   } from '../../subworkflows/local/abacas_multifasta'
+include { BLAST_BLASTN                   } from '../../modules/nf-core/blast/blastn/main'
+include { PLASMIDID                      } from '../../modules/nf-core/plasmidid/main'
+include { QUAST                          } from '../../modules/nf-core/quast/main'
 
 workflow ASSEMBLY_QC {
     take:
@@ -16,6 +17,7 @@ workflow ASSEMBLY_QC {
     blast_db              // channel: /path/to/blast_db/
     blast_header          // channel: /path/to/blast_header.txt
     blast_filtered_header // channel: /path/to/blast_filtered_header.txt
+    assembler
 
     main:
 
@@ -64,17 +66,34 @@ workflow ASSEMBLY_QC {
         ch_versions      = ch_versions.mix(QUAST.out.versions)
     }
 
-    //
-    // Contiguate assembly with ABACAS
-    //
+//
+// Contiguate assembly with ABACAS
+//
     ch_abacas_results = Channel.empty()
     if (!params.skip_abacas) {
-        ABACAS (
+        fasta
+            .branch { fasta ->
+                multi: fasta.countFasta() > 1
+                single: true
+            }
+            .set { fasta_type }
+
+        ABACAS_SINGLE (
             scaffolds,
-            fasta
+            fasta_type.single
         )
-        ch_abacas_results = ABACAS.out.results
-        ch_versions       = ch_versions.mix(ABACAS.out.versions.first())
+
+        ABACAS_MULTI (
+            scaffolds,
+            fasta_type.multi,
+            assembler
+        )
+
+        ch_abacas_results = ABACAS_SINGLE.out.results.mix(ABACAS_MULTI.out.abacas_results)
+        ch_versions = ch_versions.mix(
+            ABACAS_SINGLE.out.versions.first(),
+            ABACAS_MULTI.out.versions.first()
+        )
     }
 
     //

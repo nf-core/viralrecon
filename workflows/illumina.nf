@@ -612,7 +612,8 @@ workflow ILLUMINA {
             ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header,
-            ch_blast_filtered_outfmt6_header
+            ch_blast_filtered_outfmt6_header,
+            'spades'
         )
         ch_spades_quast_multiqc = ASSEMBLY_SPADES.out.quast_tsv
         ch_versions             = ch_versions.mix(ASSEMBLY_SPADES.out.versions)
@@ -629,7 +630,8 @@ workflow ILLUMINA {
             ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header,
-            ch_blast_filtered_outfmt6_header
+            ch_blast_filtered_outfmt6_header,
+            'unicycler'
         )
         ch_unicycler_quast_multiqc = ASSEMBLY_UNICYCLER.out.quast_tsv
         ch_versions                = ch_versions.mix(ASSEMBLY_UNICYCLER.out.versions)
@@ -646,7 +648,8 @@ workflow ILLUMINA {
             ch_genome_gff ? PREPARE_GENOME.out.gff.map { [ [:], it ] } : [ [:], [] ],
             PREPARE_GENOME.out.blast_db,
             ch_blast_outfmt6_header,
-            ch_blast_filtered_outfmt6_header
+            ch_blast_filtered_outfmt6_header,
+            'minia'
         )
         ch_minia_quast_multiqc = ASSEMBLY_MINIA.out.quast_tsv
         ch_versions            = ch_versions.mix(ASSEMBLY_MINIA.out.versions)
