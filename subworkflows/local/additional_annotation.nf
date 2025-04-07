@@ -59,13 +59,17 @@ workflow ADDITIONAL_ANNOTATION {
     }
 
     genome_ids = vcf.map { genome_id.value }
-    snpeff_cache_per_sample = vcf.map { [ [ id: genome_id.value ], ch_snpeff_db.collect().value[0] ] }
+
+    snpeff_db_value     = ch_snpeff_db.first()
+    snpeff_config_value = ch_snpeff_config.first()
+
+    snpeff_cache_per_sample = vcf.map { [ [ id: genome_id.value ], snpeff_db_value.value ] }
 
     SNPEFF_SNPEFF(
         vcf,
         genome_ids,
         snpeff_cache_per_sample,
-        ch_snpeff_config
+        snpeff_config_value
     )
     ch_versions = ch_versions.mix(SNPEFF_SNPEFF.out.versions.first())
 
