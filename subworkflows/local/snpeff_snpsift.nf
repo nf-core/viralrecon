@@ -17,18 +17,17 @@ workflow SNPEFF_SNPSIFT {
     main:
 
     ch_versions = Channel.empty()
-    // Obtener el ID del genoma a partir del nombre del FASTA
+
+    // Obtain genome ID from FASTA name
     genome_id = fasta_path.map { input ->
         def file = input instanceof List ? input.flatten()[0] : input
         def filename = file.getName()
         return filename.replaceAll(/\.f(ast|na)?(\.gz)?$/, '')
     }
 
-    // Repetir el ID del genoma y el cache por cada muestra
     genome_ids = vcf.map { genome_id.value }
     snpeff_cache_per_sample = vcf.map { [ [ id: genome_id.value ], db.collect().value[0] ] }
 
-    // Ejecutar snpEff para cada muestra
     SNPEFF_SNPEFF(
         vcf,
         genome_ids,
