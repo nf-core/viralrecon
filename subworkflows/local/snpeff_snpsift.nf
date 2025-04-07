@@ -2,7 +2,7 @@
 // Run snpEff, bgzip, tabix, stats and SnpSift commands
 //
 
-include { SNPEFF_ANN            } from '../../modules/local/snpeff_ann'
+include { SNPEFF_SNPEFF } from '../../modules/nf-core/snpeff/snpeff/main'
 include { SNPSIFT_EXTRACTFIELDS } from '../../modules/local/snpsift_extractfields'
 
 include { VCF_BGZIP_TABIX_STATS } from './vcf_bgzip_tabix_stats'
@@ -12,22 +12,33 @@ workflow SNPEFF_SNPSIFT {
     vcf    // channel: [ val(meta), [ vcf ] ]
     db     // path   : snpEff database
     config // path   : snpEff config
-    fasta  // path   : genome.fasta
+    fasta_path  // path   : genome.fasta
 
     main:
 
     ch_versions = Channel.empty()
+    // Obtener el ID del genoma a partir del nombre del FASTA
+    genome_id = fasta_path.map { input ->
+        def file = input instanceof List ? input.flatten()[0] : input
+        def filename = file.getName()
+        return filename.replaceAll(/\.f(ast|na)?(\.gz)?$/, '')
+    }
 
-    SNPEFF_ANN (
+    // Repetir el ID del genoma y el cache por cada muestra
+    genome_ids = vcf.map { genome_id.value }
+    snpeff_cache_per_sample = vcf.map { [ [ id: genome_id.value ], db.collect().value[0] ] }
+
+    // Ejecutar snpEff para cada muestra
+    SNPEFF_SNPEFF(
         vcf,
-        db,
-        config,
-        fasta
+        genome_ids,
+        snpeff_cache_per_sample,
+        config
     )
-    ch_versions = ch_versions.mix(SNPEFF_ANN.out.versions.first())
+    ch_versions = ch_versions.mix(SNPEFF_SNPEFF.out.versions)
 
     VCF_BGZIP_TABIX_STATS (
-        SNPEFF_ANN.out.vcf,
+        SNPEFF_SNPEFF.out.vcf,
         [ [:], [] ],
         [ [:], [] ],
         [ [:], [] ]
@@ -40,9 +51,9 @@ workflow SNPEFF_SNPSIFT {
     ch_versions = ch_versions.mix(SNPSIFT_EXTRACTFIELDS.out.versions.first())
 
     emit:
-    csv         = SNPEFF_ANN.out.csv              // channel: [ val(meta), [ csv ] ]
-    txt         = SNPEFF_ANN.out.txt              // channel: [ val(meta), [ txt ] ]
-    html        = SNPEFF_ANN.out.html             // channel: [ val(meta), [ html ] ]
+    csv         = SNPEFF_SNPEFF.out.report           // channel: [ val(meta), [ csv ] ]
+    txt         = SNPEFF_SNPEFF.out.genes_txt           // channel: [ val(meta), [ txt ] ]
+    html        = SNPEFF_SNPEFF.out.summary_html         // channel: [ val(meta), [ html ] ]
 
     vcf         = VCF_BGZIP_TABIX_STATS.out.vcf   // channel: [ val(meta), [ vcf.gz ] ]
     tbi         = VCF_BGZIP_TABIX_STATS.out.tbi   // channel: [ val(meta), [ tbi ] ]
