@@ -14,6 +14,7 @@ Special thanks to the following for their code contributions to the release:
 - [Sarai Varona](https://github.com/svarona)
 - [Jaime Ozáez](https://github.com/jaimeozaez)
 - [Sara Monzon](https://github.com/saramonzon)
+- [Alejandro Bernabeu](https://github.com/Aberdur)
 
 Thank you to everyone else that has contributed by reporting bugs, enhancements or in any other way, shape or form.
 
@@ -38,7 +39,8 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #485](https://github.com/nf-core/viralrecon/pull/485)] - Added kraken2 to nanopore workflow
 - [[PR #486](https://github.com/nf-core/viralrecon/pull/486)] - Updated local modules version
 - [[PR #491](https://github.com/nf-core/viralrecon/pull/491)] - Remove asciiigenome
-- [[PR #491](https://github.com/nf-core/viralrecon/pull/494] - Partial update of nf-core modules
+- [[PR #494](https://github.com/nf-core/viralrecon/pull/494] - Partial update of nf-core modules
+- [[PR #495](https://github.com/nf-core/viralrecon/pull/495)] - Replace local snpeff_ann module with nf-core/snpeff/snpeff
 
 ### Parameters
 
