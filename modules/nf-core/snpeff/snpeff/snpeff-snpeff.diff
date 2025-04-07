@@ -1,0 +1,31 @@
+Changes in component 'nf-core/snpeff/snpeff'
+Changes in 'snpeff/snpeff/main.nf':
+--- modules/nf-core/snpeff/snpeff/main.nf
++++ modules/nf-core/snpeff/snpeff/main.nf
+@@ -11,6 +11,7 @@
+     tuple val(meta), path(vcf)
+     val   db
+     tuple val(meta2), path(cache)
++    path config
+ 
+     output:
+     tuple val(meta), path("*.ann.vcf"),   emit: vcf
+@@ -32,9 +33,11 @@
+     }
+     def prefix = task.ext.prefix ?: "${meta.id}"
+     def cache_command = cache ? "-dataDir \${PWD}/${cache}" : ""
++    def config_command = config ? "-c \${PWD}/${config}" : ""
+     """
+     snpEff \\
+         -Xmx${avail_mem}M \\
++        $config_command \\
+         $db \\
+         $args \\
+         -csvStats ${prefix}.csv \\
+
+'modules/nf-core/snpeff/snpeff/meta.yml' is unchanged
+'modules/nf-core/snpeff/snpeff/environment.yml' is unchanged
+'modules/nf-core/snpeff/snpeff/tests/nextflow.config' is unchanged
+'modules/nf-core/snpeff/snpeff/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/snpeff/snpeff/tests/main.nf.test' is unchanged
+************************************************************
