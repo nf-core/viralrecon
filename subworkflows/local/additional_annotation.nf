@@ -59,7 +59,7 @@ workflow ADDITIONAL_ANNOTATION {
     }
 
     genome_ids = vcf.map { genome_id.value }
-    snpeff_cache_per_sample = vcf.map { [ [ id: genome_id.value ], db.collect().value[0] ] }
+    snpeff_cache_per_sample = vcf.map { [ [ id: genome_id.value ], ch_snpeff_db.collect().value[0] ] }
 
     SNPEFF_SNPEFF(
         vcf,
