@@ -12,26 +12,20 @@ workflow SNPEFF_SNPSIFT {
     vcf    // channel: [ val(meta), [ vcf ] ]
     db     // path   : snpEff database
     config // path   : snpEff config
-    fasta_path  // path   : genome.fasta
+    fasta  // path   : genome.fasta
 
     main:
 
     ch_versions = Channel.empty()
 
     // Obtain genome ID from FASTA name
-    genome_id = fasta_path.map { input ->
-        def file = input instanceof List ? input.flatten()[0] : input
-        def filename = file.getName()
-        return filename.replaceAll(/\.f(ast|na)?(\.gz)?$/, '')
-    }
-
-    genome_ids = vcf.map { genome_id.value }
-    snpeff_cache_per_sample = vcf.map { [ [ id: genome_id.value ], db.collect().value[0] ] }
+    // Get genome ID from fasta basename
+    genome_id = fasta.map { it.baseName }
 
     SNPEFF_SNPEFF(
         vcf,
-        genome_ids,
-        snpeff_cache_per_sample,
+        genome_id,
+        db.map{ db -> [ [:], db ] },
         config
     )
     ch_versions = ch_versions.mix(SNPEFF_SNPEFF.out.versions)

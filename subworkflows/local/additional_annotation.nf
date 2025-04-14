@@ -15,7 +15,7 @@ workflow ADDITIONAL_ANNOTATION {
     take:
     vcf      // channel: [ val(meta), [ vcf ] ]
     tbi      // channel: [ val(meta), [ tbi ] ]
-    fasta_path    // path   : genome.fasta
+    fasta    // path   : genome.fasta
     annot    // path   : additional_annotation
     pangolin // channel: [ val(meta), [ csv ] ]
 
@@ -52,24 +52,13 @@ workflow ADDITIONAL_ANNOTATION {
     ch_snpeff_config = SNPEFF_BUILD.out.config
     ch_versions      = ch_versions.mix(SNPEFF_BUILD.out.versions)
 
-    genome_id = fasta_path.map { input ->
-        def file = input instanceof List ? input.flatten()[0] : input
-        def filename = file.getName()
-        return filename.replaceAll(/\.f(ast|na)?(\.gz)?$/, '')
-    }
-
-    genome_ids = vcf.map { genome_id.value }
-
-    snpeff_db_value     = ch_snpeff_db.first()
-    snpeff_config_value = ch_snpeff_config.first()
-
-    snpeff_cache_per_sample = vcf.map { [ [ id: genome_id.value ], snpeff_db_value.value ] }
+    genome_id = fasta.map { it.baseName }
 
     SNPEFF_SNPEFF(
         vcf,
-        genome_ids,
-        snpeff_cache_per_sample,
-        snpeff_config_value
+        genome_id,
+        SNPEFF_BUILD.out.db.map { [ [:], it ] },
+        SNPEFF_BUILD.out.config
     )
     ch_versions = ch_versions.mix(SNPEFF_SNPEFF.out.versions.first())
 
