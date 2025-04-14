@@ -20,7 +20,7 @@ workflow SNPEFF_SNPSIFT {
 
     // Obtain genome ID from FASTA name
     // Get genome ID from fasta basename
-    genome_id = fasta.map { it.baseName }
+    genome_id = fasta.map { it.baseName }.getVal()
 
     SNPEFF_SNPEFF(
         vcf,
