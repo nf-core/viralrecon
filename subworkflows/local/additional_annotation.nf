@@ -45,7 +45,7 @@ workflow ADDITIONAL_ANNOTATION {
     ch_snpeff_config = Channel.empty()
 
     SNPEFF_BUILD (
-        fasta_path,
+        fasta,
         ch_annot
     )
     ch_snpeff_db     = SNPEFF_BUILD.out.db
