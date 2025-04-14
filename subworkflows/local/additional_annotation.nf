@@ -52,7 +52,7 @@ workflow ADDITIONAL_ANNOTATION {
     ch_snpeff_config = SNPEFF_BUILD.out.config
     ch_versions      = ch_versions.mix(SNPEFF_BUILD.out.versions)
 
-    genome_id = fasta.map { it.baseName }.first().getVal()
+    genome_id = fasta.baseName
 
     SNPEFF_SNPEFF(
         vcf,
