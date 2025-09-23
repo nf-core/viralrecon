@@ -74,7 +74,7 @@ include { PREPARE_PRIMER_FASTA                                    } from '../mod
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { PREPARE_GENOME          } from '../subworkflows/local/prepare_genome_illumina/main'
-include { VARIANTS_IVAR           } from '../subworkflows/local/variants_ivar'
+include { VARIANTS_IVAR           } from '../subworkflows/local/variants_ivar/main'
 include { VARIANTS_BCFTOOLS       } from '../subworkflows/local/variants_bcftools/main'
 include { CONSENSUS_IVAR          } from '../subworkflows/local/consensus_ivar'
 include { CONSENSUS_BCFTOOLS      } from '../subworkflows/local/consensus_bcftools'
