@@ -78,7 +78,7 @@ include { VARIANTS_IVAR           } from '../subworkflows/local/variants_ivar/ma
 include { VARIANTS_BCFTOOLS       } from '../subworkflows/local/variants_bcftools/main'
 include { CONSENSUS_IVAR          } from '../subworkflows/local/consensus_ivar/main'
 include { CONSENSUS_BCFTOOLS      } from '../subworkflows/local/consensus_bcftools/main'
-include { VARIANTS_LONG_TABLE     } from '../subworkflows/local/variants_long_table'
+include { VARIANTS_LONG_TABLE     } from '../subworkflows/local/variants_long_table/main'
 include { ADDITIONAL_ANNOTATION   } from '../subworkflows/local/additional_annotation/main'
 include { ASSEMBLY_SPADES         } from '../subworkflows/local/assembly_spades/main'
 include { ASSEMBLY_UNICYCLER      } from '../subworkflows/local/assembly_unicycler/main'
