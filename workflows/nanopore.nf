@@ -66,7 +66,7 @@ include { PLOT_MOSDEPTH_REGIONS as PLOT_MOSDEPTH_REGIONS_AMPLICON } from '../mod
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { PREPARE_GENOME                } from '../subworkflows/local/prepare_genome_nanopore'
+include { PREPARE_GENOME                } from '../subworkflows/local/prepare_genome_nanopore/main'
 include { SNPEFF_SNPSIFT                } from '../subworkflows/local/snpeff_snpsift/main'
 include { ADDITIONAL_ANNOTATION         } from '../subworkflows/local/additional_annotation/main'
 include { VARIANTS_LONG_TABLE           } from '../subworkflows/local/variants_long_table'
