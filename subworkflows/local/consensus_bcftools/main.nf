@@ -9,7 +9,7 @@ include { BEDTOOLS_MASKFASTA  } from '../../modules/nf-core/bedtools/maskfasta/m
 include { BCFTOOLS_CONSENSUS  } from '../../modules/nf-core/bcftools/consensus/main'
 include { MAKE_BED_MASK       } from '../../modules/local/make_bed_mask/main'
 include { RENAME_FASTA_HEADER } from '../../modules/local/rename_fasta_header/main'
-include { CONSENSUS_QC        } from './consensus_qc'
+include { CONSENSUS_QC        } from './consensus_qc/main'
 
 workflow CONSENSUS_BCFTOOLS {
     take:
