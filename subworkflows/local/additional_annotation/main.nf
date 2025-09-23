@@ -6,7 +6,7 @@ include { GUNZIP as GUNZIP_GFF                                            } from
 include { SNPEFF_BUILD                                                    } from '../../modules/local/snpeff/build/main'
 include { SNPEFF_ANN                                                      } from '../../modules/local/snpeff/ann/main'
 include { SNPSIFT_EXTRACTFIELDS                                           } from '../../modules/local/snpsift/extractfields/main'
-include { VCF_BGZIP_TABIX_STATS                                           } from './vcf_bgzip_tabix_stats'
+include { VCF_BGZIP_TABIX_STATS                                           } from './vcf_bgzip_tabix_stats/main'
 include { BCFTOOLS_QUERY                                                  } from '../../modules/nf-core/bcftools/query/main'
 include { MAKE_VARIANTS_LONG_TABLE as MAKE_VARIANTS_LONG_TABLE_ADDITIONAL } from '../../modules/local/make_variants_long_table/main'
 
