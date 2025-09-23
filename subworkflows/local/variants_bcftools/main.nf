@@ -5,7 +5,7 @@
 include { BCFTOOLS_MPILEUP } from '../../modules/nf-core/bcftools/mpileup/main'
 include { BCFTOOLS_NORM    } from '../../modules/nf-core/bcftools/norm/main'
 include { VCF_TABIX_STATS  } from './vcf_tabix_stats'
-include { VARIANTS_QC      } from './variants_qc'
+include { VARIANTS_QC      } from './variants_qc/main'
 
 workflow VARIANTS_BCFTOOLS {
     take:
