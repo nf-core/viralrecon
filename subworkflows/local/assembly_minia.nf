@@ -4,7 +4,7 @@
 
 include { MINIA       } from '../../modules/nf-core/minia/main'
 
-include { ASSEMBLY_QC } from './assembly_qc'
+include { ASSEMBLY_QC } from './assembly_qc/main'
 
 workflow ASSEMBLY_MINIA {
     take:

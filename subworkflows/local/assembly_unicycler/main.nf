@@ -7,7 +7,7 @@ include { BANDAGE_IMAGE              } from '../../modules/nf-core/bandage/image
 include { GUNZIP as GUNZIP_SCAFFOLDS } from '../../modules/nf-core/gunzip/main'
 include { GUNZIP as GUNZIP_GFA       } from '../../modules/nf-core/gunzip/main'
 
-include { ASSEMBLY_QC   } from './assembly_qc'
+include { ASSEMBLY_QC   } from './assembly_qc/main'
 
 workflow ASSEMBLY_UNICYCLER {
     take:
