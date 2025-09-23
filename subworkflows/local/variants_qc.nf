@@ -3,7 +3,7 @@
 //
 
 include { ASCIIGENOME    } from '../../modules/local/asciigenome/main'
-include { SNPEFF_SNPSIFT } from './snpeff_snpsift'
+include { SNPEFF_SNPSIFT } from './snpeff_snpsift/main'
 
 workflow VARIANTS_QC {
     take:
