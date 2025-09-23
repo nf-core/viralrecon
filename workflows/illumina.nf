@@ -84,7 +84,7 @@ include { ASSEMBLY_SPADES         } from '../subworkflows/local/assembly_spades'
 include { ASSEMBLY_UNICYCLER      } from '../subworkflows/local/assembly_unicycler/main'
 include { ASSEMBLY_MINIA          } from '../subworkflows/local/assembly_minia'
 include { BAM_TRIM_PRIMERS_IVAR   } from '../subworkflows/local/bam_trim_primers_ivar'
-include { FASTQ_TRIM_FASTP_FASTQC } from '../subworkflows/local/fastq_trim_fastp_fastqc'
+include { FASTQ_TRIM_FASTP_FASTQC } from '../subworkflows/local/fastq_trim_fastp_fastqc/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
