@@ -2,8 +2,8 @@
 // Run BCFTools tabix and stats commands
 //
 
-include { TABIX_TABIX    } from '../../modules/nf-core/tabix/tabix/main'
-include { BCFTOOLS_STATS } from '../../modules/nf-core/bcftools/stats/main'
+include { TABIX_TABIX    } from '../../../modules/nf-core/tabix/tabix/main'
+include { BCFTOOLS_STATS } from '../../../modules/nf-core/bcftools/stats/main'
 
 workflow VCF_TABIX_STATS {
     take:

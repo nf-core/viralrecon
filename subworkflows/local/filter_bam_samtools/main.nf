@@ -2,9 +2,9 @@
 // Filter co-ordinate sorted BAM, index and run samtools stats, flagstat and idxstats
 //
 
-include { SAMTOOLS_VIEW      } from '../../modules/nf-core/samtools/view/main'
-include { SAMTOOLS_INDEX     } from '../../modules/nf-core/samtools/index/main'
-include { BAM_STATS_SAMTOOLS } from '../nf-core/bam_stats_samtools/main'
+include { SAMTOOLS_VIEW      } from '../../../modules/nf-core/samtools/view/main'
+include { SAMTOOLS_INDEX     } from '../../../modules/nf-core/samtools/index/main'
+include { BAM_STATS_SAMTOOLS } from '../../nf-core/bam_stats_samtools/main'
 
 workflow FILTER_BAM_SAMTOOLS {
     take:

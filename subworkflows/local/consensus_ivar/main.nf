@@ -2,8 +2,8 @@
 // Consensus calling with iVar and downstream processing QC
 //
 
-include { IVAR_CONSENSUS } from '../../modules/nf-core/ivar/consensus/main'
-include { CONSENSUS_QC   } from './consensus_qc/main'
+include { IVAR_CONSENSUS } from '../../../modules/nf-core/ivar/consensus/main'
+include { CONSENSUS_QC   } from '../consensus_qc/main'
 
 workflow CONSENSUS_IVAR {
     take:

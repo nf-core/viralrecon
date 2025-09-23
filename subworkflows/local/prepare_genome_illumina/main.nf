@@ -2,22 +2,22 @@
 // Uncompress and prepare reference genome files
 //
 
-include { GUNZIP as GUNZIP_FASTA        } from '../../modules/nf-core/gunzip/main'
-include { GUNZIP as GUNZIP_GFF          } from '../../modules/nf-core/gunzip/main'
-include { GUNZIP as GUNZIP_PRIMER_BED   } from '../../modules/nf-core/gunzip/main'
-include { GUNZIP as GUNZIP_PRIMER_FASTA } from '../../modules/nf-core/gunzip/main'
-include { UNTAR as UNTAR_BOWTIE2_INDEX  } from '../../modules/nf-core/untar/main'
-include { UNTAR as UNTAR_NEXTCLADE_DB   } from '../../modules/nf-core/untar/main'
-include { UNTAR as UNTAR_KRAKEN2_DB     } from '../../modules/nf-core/untar/main'
-include { UNTAR as UNTAR_BLAST_DB       } from '../../modules/nf-core/untar/main'
-include { BOWTIE2_BUILD                 } from '../../modules/nf-core/bowtie2/build/main'
-include { BLAST_MAKEBLASTDB             } from '../../modules/nf-core/blast/makeblastdb/main'
-include { BEDTOOLS_GETFASTA             } from '../../modules/nf-core/bedtools/getfasta/main'
-include { CUSTOM_GETCHROMSIZES          } from '../../modules/nf-core/custom/getchromsizes/main'
-include { NEXTCLADE_DATASETGET          } from '../../modules/nf-core/nextclade/datasetget/main'
-include { COLLAPSE_PRIMERS              } from '../../modules/local/collapse_primers/main'
-include { KRAKEN2_BUILD                 } from '../../modules/local/kraken2/build/main'
-include { SNPEFF_BUILD                  } from '../../modules/local/snpeff/build/main'
+include { GUNZIP as GUNZIP_FASTA        } from '../../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_GFF          } from '../../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_PRIMER_BED   } from '../../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_PRIMER_FASTA } from '../../../modules/nf-core/gunzip/main'
+include { UNTAR as UNTAR_BOWTIE2_INDEX  } from '../../../modules/nf-core/untar/main'
+include { UNTAR as UNTAR_NEXTCLADE_DB   } from '../../../modules/nf-core/untar/main'
+include { UNTAR as UNTAR_KRAKEN2_DB     } from '../../../modules/nf-core/untar/main'
+include { UNTAR as UNTAR_BLAST_DB       } from '../../../modules/nf-core/untar/main'
+include { BOWTIE2_BUILD                 } from '../../../modules/nf-core/bowtie2/build/main'
+include { BLAST_MAKEBLASTDB             } from '../../../modules/nf-core/blast/makeblastdb/main'
+include { BEDTOOLS_GETFASTA             } from '../../../modules/nf-core/bedtools/getfasta/main'
+include { CUSTOM_GETCHROMSIZES          } from '../../../modules/nf-core/custom/getchromsizes/main'
+include { NEXTCLADE_DATASETGET          } from '../../../modules/nf-core/nextclade/datasetget/main'
+include { COLLAPSE_PRIMERS              } from '../../../modules/local/collapse_primers/main'
+include { KRAKEN2_BUILD                 } from '../../../modules/local/kraken2/build/main'
+include { SNPEFF_BUILD                  } from '../../../modules/local/snpeff/build/main'
 
 workflow PREPARE_GENOME {
 

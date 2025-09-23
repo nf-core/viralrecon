@@ -2,12 +2,12 @@
 // Assembly and downstream processing for Unicycler scaffolds
 //
 
-include { UNICYCLER                  } from '../../modules/nf-core/unicycler/main'
-include { BANDAGE_IMAGE              } from '../../modules/nf-core/bandage/image/main'
-include { GUNZIP as GUNZIP_SCAFFOLDS } from '../../modules/nf-core/gunzip/main'
-include { GUNZIP as GUNZIP_GFA       } from '../../modules/nf-core/gunzip/main'
+include { UNICYCLER                  } from '../../../modules/nf-core/unicycler/main'
+include { BANDAGE_IMAGE              } from '../../../modules/nf-core/bandage/image/main'
+include { GUNZIP as GUNZIP_SCAFFOLDS } from '../../../modules/nf-core/gunzip/main'
+include { GUNZIP as GUNZIP_GFA       } from '../../../modules/nf-core/gunzip/main'
 
-include { ASSEMBLY_QC   } from './assembly_qc/main'
+include { ASSEMBLY_QC   } from '../assembly_qc/main'
 
 workflow ASSEMBLY_UNICYCLER {
     take:

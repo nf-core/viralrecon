@@ -2,11 +2,11 @@
 // Downstream analysis for assembly scaffolds
 //
 
-include { FILTER_BLASTN } from '../../modules/local/filter_blastn/main'
-include { ABACAS        } from '../../modules/nf-core/abacas/main'
-include { BLAST_BLASTN  } from '../../modules/nf-core/blast/blastn/main'
-include { PLASMIDID     } from '../../modules/nf-core/plasmidid/main'
-include { QUAST         } from '../../modules/nf-core/quast/main'
+include { FILTER_BLASTN } from '../../../modules/local/filter_blastn/main'
+include { ABACAS        } from '../../../modules/nf-core/abacas/main'
+include { BLAST_BLASTN  } from '../../../modules/nf-core/blast/blastn/main'
+include { PLASMIDID     } from '../../../modules/nf-core/plasmidid/main'
+include { QUAST         } from '../../../modules/nf-core/quast/main'
 
 workflow ASSEMBLY_QC {
     take:
