@@ -106,6 +106,9 @@ include { BAM_TRIM_PRIMERS_IVAR   } from '../subworkflows/local/bam_trim_primers
 include { FASTQ_TRIM_FASTP_FASTQC } from '../subworkflows/local/fastq_trim_fastp_fastqc'
 include { SNPEFF_SNPSIFT          } from '../subworkflows/local/snpeff_snpsift'
 include { FILTER_BAM_SAMTOOLS     } from '../subworkflows/local/filter_bam_samtools'
+include { CONSENSUS_INTEGRATION as CONSENSUS_INTEGRATION_SPADES } from '../subworkflows/local/consensus_integration'
+include { CONSENSUS_INTEGRATION as CONSENSUS_INTEGRATION_UNICYCLER } from '../subworkflows/local/consensus_integration'
+include { CONSENSUS_INTEGRATION as CONSENSUS_INTEGRATION_MINIA } from '../subworkflows/local/consensus_integration'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -688,6 +691,43 @@ workflow VIRALRECON {
             )
             ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLY_MINIA.out.quast_results.collect{it[1]}.ifEmpty([]))
             ch_versions      = ch_versions.mix(ASSEMBLY_MINIA.out.versions)
+        }
+
+        //
+        // SUBWORKFLOW: Run PriorCons to integrate consensus using evolutionary priors
+        //
+        if (!params.skip_consensus && !params.skip_assembly && !params.skip_abacas && !params.skip_consensus_integration) {
+            ch_consensus_mapping = Channel.empty()
+            if (params.consensus_caller == 'bcftools') {
+                ch_consensus_mapping = CONSENSUS_BCFTOOLS.out.consensus
+            } else if (params.consensus_caller == 'ivar') {
+                ch_consensus_mapping = CONSENSUS_IVAR.out.consensus
+            }
+
+            if ('spades' in assemblers) {
+                CONSENSUS_INTEGRATION_SPADES(
+                    PREPARE_GENOME.out.fasta,
+                    ch_consensus_mapping,
+                    ASSEMBLY_SPADES.out.abacas_results.map { meta, files -> [meta, files.findAll { it.toString().endsWith('.fasta') }]}
+                )
+            }
+
+            if ('unicycler' in assemblers) {
+                CONSENSUS_INTEGRATION_UNICYCLER(
+                    PREPARE_GENOME.out.fasta,
+                    ch_consensus_mapping,
+                    ASSEMBLY_UNICYCLER.out.abacas_results.map { meta, files -> [meta, files.findAll { it.toString().endsWith('.fasta') }]}
+                )
+            }
+
+            if ('minia' in assemblers) {
+                CONSENSUS_INTEGRATION_MINIA(
+                    PREPARE_GENOME.out.fasta,
+                    ch_consensus_mapping,
+                    ASSEMBLY_MINIA.out.abacas_results.map { meta, files -> [meta, files.findAll { it.toString().endsWith('.fasta') }]}
+                )
+            }
+            
         }
 
     } else if (params.platform == 'nanopore') {
