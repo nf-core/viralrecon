@@ -424,6 +424,34 @@
                     "description": "Minimum number of mapped reads below which samples are removed from further processing. Some downstream steps in the pipeline will fail if this threshold is too low.",
                     "fa_icon": "fas fa-hand-paper"
                 },
+                "min_depth_variants": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Minimum depth of coverage required to call a variant.",
+                    "fa_icon": "fas fa-hand-paper"
+                },
+                "min_depth_consensus": {
+                    "type": "integer",
+                    "default": 10,
+                    "description": "Minimum depth of coverage required to call a base in the consensus sequence.",
+                    "fa_icon": "fas fa-hand-paper"
+                },
+                "min_allele_freq_variants": {
+                    "type": "number",
+                    "default": 0.25,
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Minimum allele frequency required to call a variant.",
+                    "fa_icon": "fas fa-hand-paper"
+                },
+                "min_allele_freq_consensus": {
+                    "type": "number",
+                    "default": 0.75,
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Minimum allele frequency required to call a base in the consensus sequence.",
+                    "fa_icon": "fas fa-hand-paper"
+                },
                 "ivar_trim_noprimer": {
                     "type": "boolean",
                     "description": "This option unsets the '-e' parameter in 'ivar trim' to discard reads without primers.",
