@@ -38,6 +38,13 @@ nextflow_pipeline {
                 sequencing_summary: false,
                 fast5_dir: false
             ]
+        ],
+        [
+            name: "-profile test_nanopore --mapper_nanopore 'minimap2'",
+            params: [
+                mapper_nanopore: 'minimap2',
+                fast5_dir: false
+            ]
         ]
     ]
 

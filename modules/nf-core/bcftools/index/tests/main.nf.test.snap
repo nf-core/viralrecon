@@ -1,0 +1,148 @@
+{
+    "sarscov2 - vcf - csi - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.vcf.gz.csi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "1": [
+                    
+                ],
+                "2": [
+                    [
+                        "BCFTOOLS_INDEX",
+                        "bcftools",
+                        "1.22"
+                    ]
+                ],
+                "csi": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.vcf.gz.csi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "tbi": [
+                    
+                ],
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_INDEX",
+                        "bcftools",
+                        "1.22"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.2"
+        },
+        "timestamp": "2026-01-20T12:03:32.869223843"
+    },
+    "sarscov2 - vcf - tbi": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test.vcf.gz.tbi"
+                ]
+            ],
+            {
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_INDEX",
+                        "bcftools",
+                        "1.22"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.2"
+        },
+        "timestamp": "2026-01-20T12:03:24.708477718"
+    },
+    "sarscov2 - vcf - tbi - stub": {
+        "content": [
+            {
+                "0": [
+                    
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.vcf.gz.tbi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    [
+                        "BCFTOOLS_INDEX",
+                        "bcftools",
+                        "1.22"
+                    ]
+                ],
+                "csi": [
+                    
+                ],
+                "tbi": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.vcf.gz.tbi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_INDEX",
+                        "bcftools",
+                        "1.22"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.2"
+        },
+        "timestamp": "2026-01-20T12:03:40.444304193"
+    },
+    "sarscov2 - vcf - csi": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test.vcf.gz.csi"
+                ]
+            ],
+            {
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_INDEX",
+                        "bcftools",
+                        "1.22"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.2"
+        },
+        "timestamp": "2026-01-20T12:03:17.363152216"
+    }
+}

@@ -53,6 +53,8 @@ include { FASTQ_TRIM_FASTP_FASTQC } from '../subworkflows/local/fastq_trim_fastp
 include { SNPEFF_SNPSIFT          } from '../subworkflows/local/snpeff_snpsift'
 include { FILTER_BAM_SAMTOOLS     } from '../subworkflows/local/filter_bam_samtools'
 include { HIV_RESISTANCE          } from '../subworkflows/local/hiv_resitance_detection'
+include { ARTIC_MINION_PROTOCOL   } from '../subworkflows/local/artic_minion_protocol'
+include { MINIMAP2_MAPPING         } from '../subworkflows/local/minimap2_mapping'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,9 +75,6 @@ include { MOSDEPTH as MOSDEPTH_AMPLICON } from '../modules/nf-core/mosdepth/main
 include { PYCOQC                        } from '../modules/nf-core/pycoqc/main'
 include { NANOPLOT                      } from '../modules/nf-core/nanoplot/main'
 include { ARTIC_GUPPYPLEX               } from '../modules/nf-core/artic/guppyplex/main'
-include { ARTIC_MINION                  } from '../modules/nf-core/artic/minion/main'
-include { VCFLIB_VCFUNIQ                } from '../modules/nf-core/vcflib/vcfuniq/main'
-include { TABIX_TABIX                   } from '../modules/nf-core/tabix/tabix/main'
 include { BCFTOOLS_STATS                } from '../modules/nf-core/bcftools/stats/main'
 include { QUAST                         } from '../modules/nf-core/quast/main'
 include { PANGOLIN_UPDATEDATA           } from '../modules/nf-core/pangolin/updatedata/main'
@@ -84,7 +83,6 @@ include { NEXTCLADE_RUN                 } from '../modules/nf-core/nextclade/run
 include { MULTIQC                       } from '../modules/nf-core/multiqc/main'
 include { UNTAR as UNTAR_PANGODB        } from '../modules/nf-core/untar/main'
 include { GUNZIP as GUNZIP_GFF          } from '../modules/nf-core/gunzip/main'
-
 
 //
 // SUBWORKFLOW: Consisting entirely of nf-core/modules
@@ -187,9 +185,9 @@ workflow VIRALRECON {
     if (sequencing_summary)             { ch_sequencing_summary = file(sequencing_summary)             } else { ch_sequencing_summary = [] }
 
     // Need to stage artic model properly depending on whether it is a string or a file
-    ch_artic_model = params.artic_minion_model_dir ?
-        channel.value([ [:], file(params.artic_minion_model_dir, type: 'dir'), params.artic_minion_model ]) :
-        channel.value([ [:], [], params.artic_minion_model ])
+    ch_clair3_model = params.clair3_model_dir ?
+        channel.value([ [:], file(params.clair3_model_dir, type: 'dir'), params.clair3_model ]) :
+        channel.value([ [:], [], params.clair3_model ])
 
     /*
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -991,36 +989,64 @@ workflow VIRALRECON {
         }
 
         //
-        // MODULE: Run Artic minion
+        // MODULE: Run Nanopore mapping, variant calling and consensus generation
         //
+        ch_bam       = channel.empty()
+        ch_bai       = channel.empty()
+        ch_vcf       = channel.empty()
+        ch_tbi       = channel.empty()
+        ch_consensus = channel.empty()
 
-        ARTIC_MINION (
-            ARTIC_GUPPYPLEX.out.fastq.filter { it[-1].countFastq() > min_guppyplex_reads },
-            ch_artic_model,
-            ch_fasta_primer_bed_nanopore,
-            []
-        )
-        ch_multiqc_files = ch_multiqc_files.mix(ARTIC_MINION.out.json.collect{it[1]}.ifEmpty([]))
+        if (params.mapper_nanopore == 'artic') {
 
-        //
-        // MODULE: Remove duplicate variants
-        //
-        VCFLIB_VCFUNIQ (
-            ARTIC_MINION.out.vcf.join(ARTIC_MINION.out.tbi, by: [0]),
-        )
+            ARTIC_MINION_PROTOCOL (
+                ARTIC_GUPPYPLEX.out.fastq.filter { it[-1].countFastq() > min_guppyplex_reads },
+                ch_clair3_model,
+                ch_fasta_primer_bed_nanopore
+            )
 
-        //
-        // MODULE: Index VCF file
-        //
-        TABIX_TABIX (
-            VCFLIB_VCFUNIQ.out.vcf.map { meta, vcf_file -> [ meta, vcf_file, [], [] ] }
-        )
+            ch_bam  = ARTIC_MINION_PROTOCOL.out.bam
+            ch_bai  = ARTIC_MINION_PROTOCOL.out.bai
+
+            ch_vcf  = ARTIC_MINION_PROTOCOL.out.vcf
+            ch_tbi  = ARTIC_MINION_PROTOCOL.out.tbi
+
+            ch_consensus = ARTIC_MINION_PROTOCOL.out.consensus
+
+            ch_multiqc_files = ch_multiqc_files.mix(ARTIC_MINION_PROTOCOL.out.artic_minion_report.collect{it[1]}.ifEmpty([]))
+            ch_versions      = ch_versions.mix(ARTIC_MINION_PROTOCOL.out.versions)
+
+        } else if (params.mapper_nanopore == 'minimap2') {
+
+            MINIMAP2_MAPPING(
+                ARTIC_GUPPYPLEX.out.fastq.filter { it[-1].countFastq() > min_guppyplex_reads },
+                genome.fasta,
+                genome.fai,
+                genome.primer_bed
+            )
+
+            ch_bam  = MINIMAP2_MAPPING.out.bam
+            ch_bai  = MINIMAP2_MAPPING.out.bai
+
+            ch_vcf  = MINIMAP2_MAPPING.out.vcf
+            ch_tbi  = MINIMAP2_MAPPING.out.tbi
+
+            ch_consensus = MINIMAP2_MAPPING.out.consensus
+
+            ch_multiqc_files = ch_multiqc_files.mix(MINIMAP2_MAPPING.out.multiqc_files.collect{it[1]}.ifEmpty([]))
+
+            ch_versions      = ch_versions.mix(MINIMAP2_MAPPING.out.versions)
+
+        }
+
+        ch_bam_bai = ch_bam.join(ch_bai, by: [0])
+        ch_vcf_tbi = ch_vcf.join(ch_tbi, by: [0])
 
         //
         // MODULE: VCF stats with bcftools stats
         //
         BCFTOOLS_STATS (
-            VCFLIB_VCFUNIQ.out.vcf.join(TABIX_TABIX.out.index, by: [0]),
+            ch_vcf_tbi,
             [ [:], [] ],
             [ [:], [] ],
             [ [:], [] ],
@@ -1033,7 +1059,7 @@ workflow VIRALRECON {
         // SUBWORKFLOW: Filter unmapped reads from BAM
         //
         FILTER_BAM_SAMTOOLS (
-            ARTIC_MINION.out.bam.join(ARTIC_MINION.out.bai, by: [0]),
+            ch_bam_bai,
             ch_fasta_fai_nanopore
         )
         ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]))
@@ -1050,7 +1076,7 @@ workflow VIRALRECON {
             .set { ch_mapped_reads_nanopore }
 
         // Filter BAM files based on mapping threshold
-        ARTIC_MINION.out.bam_primertrimmed
+        ch_bam
             .join(ch_mapped_reads_nanopore, by: [0])
             .map { meta, bam, mapped, pass ->
                 if (pass) [ meta, bam ]
@@ -1058,7 +1084,7 @@ workflow VIRALRECON {
             .set { ch_filtered_bam_nanopore }
 
         // Filter BAI files based on mapping threshold
-        ARTIC_MINION.out.bai_primertrimmed
+        ch_bai
             .join(ch_mapped_reads_nanopore, by: [0])
             .map { meta, bai, mapped, pass ->
                 if (pass) [ meta, bai ]
@@ -1066,7 +1092,7 @@ workflow VIRALRECON {
             .set { ch_filtered_bai_nanopore }
 
         // Filter FASTA files based on mapping threshold
-        ARTIC_MINION.out.fasta
+        ch_consensus
             .join(ch_mapped_reads_nanopore, by: [0])
             .map { meta, fasta, mapped_reads, pass ->
                 if (pass) [ meta, fasta ]
@@ -1137,7 +1163,6 @@ workflow VIRALRECON {
         //
         ch_pango_database = channel.empty()
         ch_pangolin_report = channel.empty()
-        ch_pangolin_multiqc = channel.empty()
 
         if (!params.skip_pangolin) {
             if (!params.pango_database) {
@@ -1157,7 +1182,7 @@ workflow VIRALRECON {
             def ch_pango_database_for_run = ch_pango_database.collect(flat: false).map { dirs -> dirs[0] }
 
             PANGOLIN_RUN (
-                ARTIC_MINION.out.fasta,
+                ch_consensus,
                 ch_pango_database_for_run
             )
             ch_pangolin_multiqc = PANGOLIN_RUN.out.report
@@ -1170,7 +1195,7 @@ workflow VIRALRECON {
         //
         if (!params.skip_nextclade) {
             NEXTCLADE_RUN (
-                ARTIC_MINION.out.fasta,
+                ch_consensus,
                 genome.nextclade_db
             )
             ch_versions = ch_versions.mix(NEXTCLADE_RUN.out.versions)
@@ -1238,7 +1263,7 @@ workflow VIRALRECON {
         ch_snpsift_txt    = channel.empty()
         if (ch_genome_gff && !params.skip_snpeff) {
             SNPEFF_SNPSIFT (
-                VCFLIB_VCFUNIQ.out.vcf,
+                ch_vcf,
                 genome.snpeff_db,
                 genome.snpeff_config,
                 genome.fasta
@@ -1252,8 +1277,8 @@ workflow VIRALRECON {
         //
         if (!params.skip_variants_long_table && ch_genome_gff && !params.skip_snpeff) {
             VARIANTS_LONG_TABLE (
-                VCFLIB_VCFUNIQ.out.vcf,
-                TABIX_TABIX.out.index,
+                ch_vcf,
+                ch_tbi,
                 ch_snpsift_txt,
                 ch_pangolin_multiqc
             )
@@ -1277,8 +1302,8 @@ workflow VIRALRECON {
             }
 
             ADDITIONAL_ANNOTATION (
-                VCFLIB_VCFUNIQ.out.vcf,
-                TABIX_TABIX.out.index,
+                ch_vcf,
+                ch_tbi,
                 genome.fasta,
                 ch_annot,
                 ch_pangolin_multiqc

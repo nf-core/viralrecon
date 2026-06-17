@@ -210,17 +210,24 @@
                     "help_text": "e.g. '--artic_scheme ncov-2019'. See https://artic.readthedocs.io/en/latest/primer-schemes/ and https://github.com/artic-network/primer-schemes/blob/master/schemes_manifest.json.",
                     "fa_icon": "fas fa-stream"
                 },
-                "artic_minion_model_dir": {
+                "clair3_model_dir": {
                     "type": "string",
                     "description": "Path containing clair3 models. Defaults to models packaged with conda installation",
                     "help_text": "See https://artic.readthedocs.io/en/latest/commands/#usage-example_1",
                     "fa_icon": "fas fa-train"
                 },
-                "artic_minion_model": {
+                "clair3_model": {
                     "type": "string",
                     "description": "Clair3 model to use. If not provided the pipeline will attempt to determine the appropriate model based on the basecall_model_version_id field in the input FASTQ header (recommended)",
                     "help_text": "See https://artic.readthedocs.io/en/latest/commands/#usage-example_1",
                     "fa_icon": "fas fa-train"
+                },
+                "mapper_nanopore": {
+                    "type": "string",
+                    "default": "artic",
+                    "description": "Specify which mapping software you would like to use. Available options are 'artic' for the ARTIC protocol and 'minimap2' that performs variant calling with Clair3 and consensus caller with bcftools",
+                    "fa_icon": "fas fa-random",
+                    "enum": ["artic", "minimap2"]
                 },
                 "skip_pycoqc": {
                     "type": "boolean",

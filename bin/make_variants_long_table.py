@@ -301,10 +301,10 @@ def main(args=None):
     make_dir(out_dir)
 
     ## Check correct variant caller has been provided
-    variant_callers = ["ivar", "bcftools", "artic_minion"]
+    variant_callers = ["ivar", "bcftools", "artic", "clair3"]
     if args.variant_caller not in variant_callers:
         logger.error(
-            f"Invalid option '--variant caller {args.variant_caller}'. Valid options: " + ", ".join(variant_callers)
+            f"Invalid option '--variant_caller {args.variant_caller}'. Valid options: " + ", ".join(variant_callers)
         )
         sys.exit(1)
 
@@ -334,9 +334,7 @@ def main(args=None):
         bcftools_table = None
         if args.variant_caller == "ivar":
             bcftools_table = ivar_bcftools_query_to_table(bcftools_files[sample])
-        elif args.variant_caller == "bcftools":
-            bcftools_table = bcftools_bcftools_query_to_table(bcftools_files[sample])
-        elif args.variant_caller == "artic_minion":
+        elif args.variant_caller in ["bcftools", "artic", "clair3"]:
             bcftools_table = bcftools_bcftools_query_to_table(bcftools_files[sample])
 
         if not bcftools_table.empty:
