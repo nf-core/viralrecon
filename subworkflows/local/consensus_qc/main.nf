@@ -27,13 +27,14 @@ workflow CONSENSUS_QC {
     ch_quast_tsv     = channel.empty()
     if (!params.skip_variants_quast) {
     consensus
-        .collect{ it[1] }
+        .collect{ _meta, consensus_file -> consensus_file }
         .map { consensus_collect -> tuple([id: "quast"], consensus_collect) }
         .set { ch_to_quast }
 
         QUAST (
             ch_to_quast,
-            fasta.map { [ [:], it ] },
+            fasta.map { fasta_files ->
+                [ [:], fasta_files ] },
             gff
         )
         ch_quast_results = QUAST.out.results
@@ -57,7 +58,7 @@ workflow CONSENSUS_QC {
                 UNTAR_PANGODB (
                     [ [:], params.pango_database ]
                 )
-                ch_pango_database = UNTAR_PANGODB.out.untar.map { it[1] }
+                ch_pango_database = UNTAR_PANGODB.out.untar.map { _meta, pangolin_db -> pangolin_db }
             } else {
                 ch_pango_database = channel.value(file(params.pango_database, type: 'dir'))
             }

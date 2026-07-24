@@ -163,7 +163,7 @@ workflow VIRALRECON {
         }
     }
 
-    def assemblers = params.assemblers ? params.assemblers.split(',').collect{ it.trim().toLowerCase() } : []
+    def assemblers = params.assemblers ? params.assemblers.split(',').collect{ assembly_tool -> assembly_tool.trim().toLowerCase() } : []
 
     def variant_caller = params.variant_caller
     if (!variant_caller) { variant_caller = params.trim_primers ? 'ivar' : 'bcftools' }
@@ -210,7 +210,6 @@ workflow VIRALRECON {
             ch_genome_fasta,
             ch_genome_gff,
             ch_primer_bed,
-            ch_bowtie2_index,
             ch_nextclade_dataset,
             ch_nextclade_dataset_name,
             ch_nextclade_dataset_tag
@@ -232,23 +231,23 @@ workflow VIRALRECON {
         // Check genome fasta only contains a single contig
         genome
             .fasta
-            .map { isMultiFasta(it, log) }
+            .map { fasta_file -> isMultiFasta(fasta_file, log) }
 
         if (params.trim_primers && !params.skip_variants) {
             // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
             genome
                 .primer_bed
-                .map { checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }
+                .map { primer_bed_file -> checkPrimerSuffixes(primer_bed_file, params.primer_left_suffix, params.primer_right_suffix, log) }
 
             // Check whether the contigs in the primer BED file are present in the reference genome
             genome
                 .primer_bed
-                .map { [ getColFromFile(it, 0, true) ] }
+                .map { primer_bed_file -> [ getColFromFile(primer_bed_file, 0, true) ] }
                 .set { ch_bed_contigs }
 
             genome
                 .fai
-                .map { [ getColFromFile(it, 0, true) ] }
+                .map { fai_file -> [ getColFromFile(fai_file, 0, true) ] }
                 .concat(ch_bed_contigs)
                 .collect()
                 .map { fai, bed -> checkContigsInBED(fai, bed, log) }
@@ -257,7 +256,7 @@ workflow VIRALRECON {
             if (!params.ivar_trim_offset) {
                 genome
                     .primer_bed
-                    .map { checkIfSwiftProtocol(it, 'covid19genome', log) }
+                    .map { primer_bed_file -> checkIfSwiftProtocol(primer_bed_file, 'covid19genome', log) }
             }
         }
 
@@ -281,8 +280,8 @@ workflow VIRALRECON {
             false
         )
         ch_variants_fastq = FASTQ_TRIM_FASTP_FASTQC.out.reads
-        ch_multiqc_files = ch_multiqc_files.mix(FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(FASTQ_TRIM_FASTP_FASTQC.out.trim_json.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(FASTQ_TRIM_FASTP_FASTQC.out.fastqc_raw_zip.collect{_meta, zip -> zip}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(FASTQ_TRIM_FASTP_FASTQC.out.trim_json.collect{_meta, json -> json}.ifEmpty([]))
 
         //
         // Filter empty FastQ files after adapter trimming
@@ -333,7 +332,7 @@ workflow VIRALRECON {
                 params.kraken2_variants_host_filter || params.kraken2_assembly_host_filter,
                 params.kraken2_variants_host_filter || params.kraken2_assembly_host_filter
             )
-            ch_multiqc_files =  ch_multiqc_files.mix(KRAKEN2_KRAKEN2.out.report.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files =  ch_multiqc_files.mix(KRAKEN2_KRAKEN2.out.report.collect{_meta, report -> report}.ifEmpty([]))
 
             if (params.kraken2_variants_host_filter) {
                 ch_variants_fastq = KRAKEN2_KRAKEN2.out.unclassified_reads_fastq
@@ -359,8 +358,8 @@ workflow VIRALRECON {
             )
         ch_bam           = FASTQ_ALIGN_BOWTIE2.out.bam
         ch_bai           = FASTQ_ALIGN_BOWTIE2.out.index
-        ch_multiqc_files = ch_multiqc_files.mix(FASTQ_ALIGN_BOWTIE2.out.log_out.collect{it[1]}.ifEmpty([]))
-        ch_multiqc_files = ch_multiqc_files.mix(FASTQ_ALIGN_BOWTIE2.out.flagstat.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(FASTQ_ALIGN_BOWTIE2.out.log_out.collect{_meta, log -> log}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(FASTQ_ALIGN_BOWTIE2.out.flagstat.collect{_meta, flagstat -> flagstat}.ifEmpty([]))
         }
 
         //
@@ -418,7 +417,7 @@ workflow VIRALRECON {
             )
             ch_bam           = BAM_TRIM_PRIMERS_IVAR.out.bam
             ch_bai           = BAM_TRIM_PRIMERS_IVAR.out.bai
-            ch_multiqc_files = ch_multiqc_files.mix(BAM_TRIM_PRIMERS_IVAR.out.flagstat.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(BAM_TRIM_PRIMERS_IVAR.out.flagstat.collect{_meta, flagstat -> flagstat}.ifEmpty([]))
             ch_versions      = ch_versions.mix(BAM_TRIM_PRIMERS_IVAR.out.versions)
         }
 
@@ -432,7 +431,7 @@ workflow VIRALRECON {
             )
             ch_bam           = BAM_MARKDUPLICATES_PICARD.out.bam
             ch_bai           = BAM_MARKDUPLICATES_PICARD.out.index
-            ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.flagstat.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(BAM_MARKDUPLICATES_PICARD.out.flagstat.collect{_meta, flagstat -> flagstat}.ifEmpty([]))
         }
 
         //
@@ -441,8 +440,8 @@ workflow VIRALRECON {
         if (!params.skip_variants && !params.skip_picard_metrics) {
             PICARD_COLLECTMULTIPLEMETRICS (
                 ch_bam.join(ch_bai, by: [0]),
-                genome.fasta.map { [ [:], it ] },
-                genome.fai.map { [ [:], it ] }
+                genome.fasta.map { fasta_file -> [ [:], fasta_file ] },
+                genome.fai.map { fai_file -> [ [:], fai_file ] }
             )
         }
 
@@ -457,9 +456,9 @@ workflow VIRALRECON {
                 [ [:], [] ],
                 []
             )
-            ch_multiqc_files = ch_multiqc_files.mix(MOSDEPTH_GENOME.out.global_txt.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(MOSDEPTH_GENOME.out.global_txt.collect{_meta, global_txt -> global_txt}.ifEmpty([]))
             PLOT_MOSDEPTH_REGIONS_GENOME (
-                MOSDEPTH_GENOME.out.regions_bed.collect { it[1] }
+                MOSDEPTH_GENOME.out.regions_bed.collect { _meta, regions_bed -> regions_bed }
             )
 
             if (params.trim_primers) {
@@ -472,7 +471,7 @@ workflow VIRALRECON {
                 )
 
                 PLOT_MOSDEPTH_REGIONS_AMPLICON (
-                    MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
+                    MOSDEPTH_AMPLICON.out.regions_bed.collect { _meta, regions_bed -> regions_bed }
                 )
                 ch_multiqc_files = ch_multiqc_files.mix(PLOT_MOSDEPTH_REGIONS_AMPLICON.out.heatmap_tsv.collect().ifEmpty([]))
             }
@@ -489,9 +488,7 @@ workflow VIRALRECON {
                 ch_bam,
                 genome.fasta,
                 (params.trim_primers || !params.skip_markduplicates) ? genome.fai : [],
-                (params.trim_primers || !params.skip_markduplicates) ? genome.chrom_sizes : [],
                 ch_genome_gff ? genome.gff : [],
-                (params.trim_primers && ch_primer_bed) ? genome.primer_bed : [],
                 genome.snpeff_db,
                 genome.snpeff_config,
                 ch_ivar_variants_header_mqc
@@ -499,9 +496,9 @@ workflow VIRALRECON {
             ch_vcf           = VARIANTS_IVAR.out.vcf
             ch_tbi           = VARIANTS_IVAR.out.tbi
             ch_snpsift_txt   = VARIANTS_IVAR.out.snpsift_txt
-            ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_IVAR.out.multiqc_tsv.collect{it[1]}.ifEmpty([]))
-            ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_IVAR.out.stats.collect{it[1]}.ifEmpty([]))
-            ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_IVAR.out.snpeff_csv.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_IVAR.out.multiqc_tsv.collect{_meta, multiqc_tsv -> multiqc_tsv}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_IVAR.out.stats.collect{_meta, stats -> stats}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_IVAR.out.snpeff_csv.collect{_meta, snpeff_csv -> snpeff_csv}.ifEmpty([]))
             ch_versions      = ch_versions.mix(VARIANTS_IVAR.out.versions)
         }
 
@@ -512,16 +509,14 @@ workflow VIRALRECON {
             VARIANTS_BCFTOOLS (
                 ch_bam,
                 ch_reference_fasta_fai,
-                (params.trim_primers || !params.skip_markduplicates) ? genome.chrom_sizes : [],
                 ch_genome_gff ? genome.gff : [],
-                (params.trim_primers && ch_primer_bed) ? genome.primer_bed : [],
                 genome.snpeff_db,
                 genome.snpeff_config
             )
             ch_vcf           = VARIANTS_BCFTOOLS.out.vcf
             ch_tbi           = VARIANTS_BCFTOOLS.out.tbi
-            ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_BCFTOOLS.out.stats.collect{it[1]}.ifEmpty([]))
-            ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_BCFTOOLS.out.snpeff_csv.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_BCFTOOLS.out.stats.collect{_meta, stats -> stats}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_BCFTOOLS.out.snpeff_csv.collect{_meta, snpeff_csv -> snpeff_csv}.ifEmpty([]))
             ch_snpsift_txt   = VARIANTS_BCFTOOLS.out.snpsift_txt
         }
 
@@ -539,7 +534,7 @@ workflow VIRALRECON {
                 params.freyja_lineages_meta,
                 params.freyja_lineages_topology,
             )
-            ch_multiqc_files  = ch_multiqc_files.mix(BAM_VARIANT_DEMIX_BOOT_FREYJA.out.demix.collect{it -> it[1]}.ifEmpty([]))
+            ch_multiqc_files  = ch_multiqc_files.mix(BAM_VARIANT_DEMIX_BOOT_FREYJA.out.demix.collect{_meta, demix -> demix}.ifEmpty([]))
         }
 
         //
@@ -553,14 +548,14 @@ workflow VIRALRECON {
             CONSENSUS_IVAR (
                 ch_bam,
                 genome.fasta,
-                ch_genome_gff ? genome.gff.map { [ [:], it ] } : [ [:], [] ],
+                ch_genome_gff ? genome.gff.map { gff_file -> [ [:], gff_file ] } : [ [:], [] ],
                 genome.nextclade_db
             )
             ch_nextclade_report = CONSENSUS_IVAR.out.nextclade_report
             ch_pangolin_report  = CONSENSUS_IVAR.out.pangolin_report
             ch_consensus_genome = CONSENSUS_IVAR.out.consensus
-            ch_multiqc_files    = ch_multiqc_files.mix(ch_pangolin_report.collect{it[1]}.ifEmpty([]))
-            ch_multiqc_files    = ch_multiqc_files.mix(CONSENSUS_IVAR.out.quast_results.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files    = ch_multiqc_files.mix(ch_pangolin_report.collect{_meta, pangolin_report -> pangolin_report}.ifEmpty([]))
+            ch_multiqc_files    = ch_multiqc_files.mix(CONSENSUS_IVAR.out.quast_results.collect{_meta, quast_results -> quast_results}.ifEmpty([]))
             ch_versions         = ch_versions.mix(CONSENSUS_IVAR.out.versions)
         }
 
@@ -573,15 +568,15 @@ workflow VIRALRECON {
                 ch_vcf,
                 ch_tbi,
                 genome.fasta,
-                ch_genome_gff ? genome.gff.map { [ [:], it ] } : [ [:], [] ],
+                ch_genome_gff ? genome.gff.map { gff_file -> [ [:], gff_file ] } : [ [:], [] ],
                 genome.nextclade_db
             )
 
             ch_nextclade_report = CONSENSUS_BCFTOOLS.out.nextclade_report
             ch_pangolin_report  = CONSENSUS_BCFTOOLS.out.pangolin_report
             ch_consensus_genome = CONSENSUS_BCFTOOLS.out.consensus
-            ch_multiqc_files    = ch_multiqc_files.mix(CONSENSUS_BCFTOOLS.out.quast_results.collect{it[1]}.ifEmpty([]))
-            ch_multiqc_files    = ch_multiqc_files.mix(ch_pangolin_report.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files    = ch_multiqc_files.mix(CONSENSUS_BCFTOOLS.out.quast_results.collect{_meta, quast_results -> quast_results}.ifEmpty([]))
+            ch_multiqc_files    = ch_multiqc_files.mix(ch_pangolin_report.collect{_meta, pangolin_report -> pangolin_report}.ifEmpty([]))
             ch_versions         = ch_versions.mix(CONSENSUS_BCFTOOLS.out.versions)
         }
 
@@ -631,7 +626,7 @@ workflow VIRALRECON {
                 GUNZIP_GFF (
                     [ [:], ch_additional_gtf ]
                 )
-                ch_annot       = GUNZIP_GFF.out.gunzip.map { it[1] }
+                ch_annot       = GUNZIP_GFF.out.gunzip.map { _meta, gunzip -> gunzip }
             } else {
                 ch_annot = ch_additional_gtf
             }
@@ -680,7 +675,7 @@ workflow VIRALRECON {
                 ch_primers
             )
             ch_assembly_fastq   = CUTADAPT.out.reads
-            ch_multiqc_files    = ch_multiqc_files.mix(CUTADAPT.out.log.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files    = ch_multiqc_files.mix(CUTADAPT.out.log.collect{_meta, log -> log}.ifEmpty([]))
 
             if (!params.skip_fastqc) {
                 FASTQC (
@@ -698,13 +693,13 @@ workflow VIRALRECON {
                 params.spades_mode,
                 ch_spades_hmm,
                 genome.fasta,
-                ch_genome_gff ? genome.gff.map { [ [:], it ] } : [ [:], [] ],
+                ch_genome_gff ? genome.gff.map { gff_file -> [ [:], gff_file ] } : [ [:], [] ],
                 genome.blast_db,
                 ch_blast_outfmt6_header,
                 ch_blast_filtered_outfmt6_header,
                 ch_taxidlist
             )
-            ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLY_SPADES.out.quast_results.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLY_SPADES.out.quast_results.collect{_meta, quast_results -> quast_results}.ifEmpty([]))
             ch_versions      = ch_versions.mix(ASSEMBLY_SPADES.out.versions)
         }
 
@@ -715,13 +710,13 @@ workflow VIRALRECON {
             ASSEMBLY_UNICYCLER (
                 ch_assembly_fastq.map { meta, fastq -> [ meta, fastq, [] ] },
                 genome.fasta,
-                ch_genome_gff ? genome.gff.map { [ [:], it ] } : [ [:], [] ],
+                ch_genome_gff ? genome.gff.map { gff_file -> [ [:], gff_file ] } : [ [:], [] ],
                 genome.blast_db,
                 ch_blast_outfmt6_header,
                 ch_blast_filtered_outfmt6_header,
                 ch_taxidlist
             )
-            ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLY_UNICYCLER.out.quast_results.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLY_UNICYCLER.out.quast_results.collect{_meta, quast_results -> quast_results}.ifEmpty([]))
             ch_versions      = ch_versions.mix(ASSEMBLY_UNICYCLER.out.versions)
         }
 
@@ -732,13 +727,13 @@ workflow VIRALRECON {
             ASSEMBLY_MINIA (
                 ch_assembly_fastq,
                 genome.fasta,
-                ch_genome_gff ? genome.gff.map { [ [:], it ] } : [ [:], [] ],
+                ch_genome_gff ? genome.gff.map { gff_file -> [ [:], gff_file ] } : [ [:], [] ],
                 genome.blast_db,
                 ch_blast_outfmt6_header,
                 ch_blast_filtered_outfmt6_header,
                 ch_taxidlist
             )
-            ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLY_MINIA.out.quast_results.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLY_MINIA.out.quast_results.collect{_meta, quast_results -> quast_results}.ifEmpty([]))
             ch_versions      = ch_versions.mix(ASSEMBLY_MINIA.out.versions)
         }
 
@@ -765,25 +760,25 @@ workflow VIRALRECON {
         //
         if (sequencing_summary && !params.skip_pycoqc) {
             PYCOQC (
-                channel.of(ch_sequencing_summary).map { [ [:], it ] }
+                channel.of(ch_sequencing_summary).map { seq_summary -> [ [:], seq_summary ] }
             )
-            ch_multiqc_files = ch_multiqc_files.mix(PYCOQC.out.json.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(PYCOQC.out.json.collect{_meta, json -> json}.ifEmpty([]))
         }
 
         // Check primer BED file only contains suffixes provided --primer_left_suffix / --primer_right_suffix
         genome
             .primer_bed
-            .map { checkPrimerSuffixes(it, params.primer_left_suffix, params.primer_right_suffix, log) }
+            .map { primer_bed_file -> checkPrimerSuffixes(primer_bed_file, params.primer_left_suffix, params.primer_right_suffix, log) }
 
         // Check whether the contigs in the primer BED file are present in the reference genome
         genome
             .primer_bed
-            .map { [ getColFromFile(it, 0, true) ] }
+            .map { primer_bed_file -> [ getColFromFile(primer_bed_file, 0, true) ] }
             .set { ch_bed_contigs }
 
         genome
             .fai
-            .map { [ getColFromFile(it, 0, true) ] }
+            .map { fai_file -> [ getColFromFile(fai_file, 0, true) ] }
             .concat(ch_bed_contigs)
             .collect()
             .map { fai, bed -> checkContigsInBED(fai, bed, log) }
@@ -817,9 +812,9 @@ workflow VIRALRECON {
                 // MODULE: Create custom content file for MultiQC to report barcodes were allocated reads >= params.min_barcode_reads but no sample name in samplesheet
                 //
                 ch_fastq_dirs
-                    .filter { it[1] == null }
-                    .filter { it[-1] >= min_barcode_reads }
-                    .map { it -> [ "${it[0]}\t${it[-1]}" ] }
+                    .filter { barcode_entry -> barcode_entry[1] == null }
+                    .filter { barcode_entry -> barcode_entry[-1] >= min_barcode_reads }
+                    .map { barcode_entry -> [ "${barcode_entry[0]}\t${barcode_entry[-1]}" ] }
                     .collect()
                     .map {
                         tsv_data ->
@@ -835,8 +830,8 @@ workflow VIRALRECON {
                 // MODULE: Create custom content file for MultiQC to report samples that were in samplesheet but have no barcodes
                 //
                 ch_fastq_dirs
-                    .filter { it[-1] == null }
-                    .map { it -> [ "${it[1]}\t${it[0]}" ] }
+                    .filter { barcode_entry -> barcode_entry[-1] == null }
+                    .map { barcode_entry -> [ "${barcode_entry[1]}\t${barcode_entry[0]}" ] }
                     .collect()
                     .map {
                         tsv_data ->
@@ -850,8 +845,8 @@ workflow VIRALRECON {
                 ch_multiqc_files = ch_multiqc_files.mix ( ch_custom_no_barcodes_multiqc )
 
                 ch_fastq_dirs
-                    .filter { (it[1] != null)  }
-                    .filter { (it[-1] != null) }
+                    .filter { barcode_entry -> barcode_entry[1] != null  }
+                    .filter { barcode_entry -> barcode_entry[-1] != null }
                     .set { ch_fastq_dirs }
 
             } else {
@@ -862,7 +857,7 @@ workflow VIRALRECON {
         } else if (single_barcode_dir) {
             channel
                 .fromPath("${params.fastq_dir}", type: 'dir', maxDepth: 1)
-                .map { it -> [ 'SAMPLE_1', 'single_barcode', it, 10000000 ] }
+                .map { fastq_dir -> [ 'SAMPLE_1', 'single_barcode', fastq_dir, 10000000 ] }
                 .set{ ch_fastq_dirs }
         } else {
             error "Please specify a valid folder containing ONT basecalled, barcoded fastq files generated by guppy_barcoder or guppy_basecaller e.g. '--fastq_dir ./20191023_1522_MC-110615_0_FAO93606_12bf9b4f/fastq_pass/"
@@ -898,7 +893,7 @@ workflow VIRALRECON {
 
         // Re-arrange channels to have meta map of information for sample
         ch_fastq_dirs
-            .filter { it[-1] > min_barcode_reads }
+            .filter { barcode_entry -> barcode_entry[-1] > min_barcode_reads }
             .map { barcode, sample, dir, _count -> [ [ id: sample, barcode:barcode ], dir ] }
             .set { ch_fastq_dirs }
 
@@ -924,7 +919,7 @@ workflow VIRALRECON {
                 params.kraken2_variants_host_filter || params.kraken2_assembly_host_filter,
                 params.kraken2_variants_host_filter || params.kraken2_assembly_host_filter
             )
-            ch_multiqc_files =  ch_multiqc_files.mix(KRAKEN2_KRAKEN2.out.report.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files =  ch_multiqc_files.mix(KRAKEN2_KRAKEN2.out.report.collect{_meta, report -> report}.ifEmpty([]))
 
             if (params.kraken2_variants_host_filter) {
                 ch_variants_fastq = KRAKEN2_KRAKEN2.out.unclassified_reads_fastq
@@ -986,7 +981,7 @@ workflow VIRALRECON {
         if (params.mapper_nanopore == 'artic') {
 
             ARTIC_MINION_PROTOCOL (
-                ARTIC_GUPPYPLEX.out.fastq.filter { it[-1].countFastq() > min_guppyplex_reads },
+                ARTIC_GUPPYPLEX.out.fastq.filter { _meta, fastq -> fastq.countFastq() > min_guppyplex_reads },
                 ch_clair3_model,
                 ch_fasta_primer_bed_nanopore
             )
@@ -999,13 +994,15 @@ workflow VIRALRECON {
 
             ch_consensus = ARTIC_MINION_PROTOCOL.out.consensus
 
-            ch_multiqc_files = ch_multiqc_files.mix(ARTIC_MINION_PROTOCOL.out.artic_minion_report.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(ARTIC_MINION_PROTOCOL.out.artic_minion_report
+                .collect{_meta, artic_minion_report -> artic_minion_report}.ifEmpty([]))
             ch_versions      = ch_versions.mix(ARTIC_MINION_PROTOCOL.out.versions)
 
         } else if (params.mapper_nanopore == 'minimap2') {
 
             MINIMAP2_MAPPING(
-                ARTIC_GUPPYPLEX.out.fastq.filter { it[-1].countFastq() > min_guppyplex_reads },
+                ARTIC_GUPPYPLEX.out.fastq.filter { _meta, fastq ->
+                    fastq.countFastq() > min_guppyplex_reads },
                 genome.fasta,
                 genome.fai,
                 genome.primer_bed
@@ -1019,7 +1016,7 @@ workflow VIRALRECON {
 
             ch_consensus = MINIMAP2_MAPPING.out.consensus
 
-            ch_multiqc_files = ch_multiqc_files.mix(MINIMAP2_MAPPING.out.multiqc_files.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(MINIMAP2_MAPPING.out.multiqc_files.collect{_meta, multiqc_files -> multiqc_files}.ifEmpty([]))
 
             ch_versions      = ch_versions.mix(MINIMAP2_MAPPING.out.versions)
 
@@ -1039,7 +1036,7 @@ workflow VIRALRECON {
             [ [:], [] ],
             [ [:], [] ]
         )
-        ch_multiqc_files = ch_multiqc_files.mix(BCFTOOLS_STATS.out.stats.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(BCFTOOLS_STATS.out.stats.collect{_meta, stats -> stats}.ifEmpty([]))
 
         //
         // SUBWORKFLOW: Filter unmapped reads from BAM
@@ -1048,7 +1045,7 @@ workflow VIRALRECON {
             ch_bam_bai,
             ch_fasta_fai_nanopore
         )
-        ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.flagstat.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(FILTER_BAM_SAMTOOLS.out.flagstat.collect{_meta, flagstat -> flagstat}.ifEmpty([]))
 
         //
         // Filter channels to get samples that passed minimum mapped reads threshold
@@ -1123,10 +1120,10 @@ workflow VIRALRECON {
                 [ [:], [] ],
                 []
             )
-            ch_multiqc_files  = ch_multiqc_files.mix(MOSDEPTH_GENOME.out.global_txt.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files  = ch_multiqc_files.mix(MOSDEPTH_GENOME.out.global_txt.collect{_meta, global_txt -> global_txt}.ifEmpty([]))
 
             PLOT_MOSDEPTH_REGIONS_GENOME (
-                MOSDEPTH_GENOME.out.regions_bed.collect { it[1] }
+                MOSDEPTH_GENOME.out.regions_bed.collect { _meta, regions_bed -> regions_bed }
             )
 
             MOSDEPTH_AMPLICON (
@@ -1139,9 +1136,9 @@ workflow VIRALRECON {
 
 
             PLOT_MOSDEPTH_REGIONS_AMPLICON (
-                MOSDEPTH_AMPLICON.out.regions_bed.collect { it[1] }
+                MOSDEPTH_AMPLICON.out.regions_bed.collect { _meta, regions_bed -> regions_bed }
             )
-            ch_multiqc_files = ch_multiqc_files.mix(PLOT_MOSDEPTH_REGIONS_AMPLICON.out.heatmap_tsv.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(PLOT_MOSDEPTH_REGIONS_AMPLICON.out.heatmap_tsv.collect{_meta, heatmap_tsv -> heatmap_tsv}.ifEmpty([]))
         }
 
         //
@@ -1160,7 +1157,7 @@ workflow VIRALRECON {
                     UNTAR_PANGODB (
                         [ [:], params.pango_database ]
                     )
-                    ch_pango_database = UNTAR_PANGODB.out.untar.map { it[1] }
+                    ch_pango_database = UNTAR_PANGODB.out.untar.map { _meta, untar -> untar }
                 } else {
                     ch_pango_database = channel.value(file(params.pango_database, type: 'dir'))
                 }
@@ -1172,7 +1169,7 @@ workflow VIRALRECON {
                 ch_pango_database_for_run
             )
             ch_pangolin_multiqc = PANGOLIN_RUN.out.report
-            ch_multiqc_files    = ch_multiqc_files.mix(ch_pangolin_multiqc.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files    = ch_multiqc_files.mix(ch_pangolin_multiqc.collect{_meta, pangolin_multiqc -> pangolin_multiqc}.ifEmpty([]))
             ch_versions         = ch_versions.mix(PANGOLIN_RUN.out.versions)
         }
 
@@ -1224,7 +1221,7 @@ workflow VIRALRECON {
                 params.freyja_lineages_meta,
                 params.freyja_lineages_topology,
             )
-            ch_multiqc_files  = ch_multiqc_files.mix(BAM_VARIANT_DEMIX_BOOT_FREYJA.out.demix.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files  = ch_multiqc_files.mix(BAM_VARIANT_DEMIX_BOOT_FREYJA.out.demix.collect{_meta, demix -> demix}.ifEmpty([]))
         }
 
         //
@@ -1232,7 +1229,7 @@ workflow VIRALRECON {
         //
         if (!params.skip_variants_quast) {
             ch_filtered_fasta_nanopore
-                .collect{ it[1] }
+                .collect{ _meta, fasta_file -> fasta_file }
                 .map { consensus_collect -> tuple([id: "quast"], consensus_collect) }
                 .set { ch_to_quast }
             QUAST (
@@ -1240,7 +1237,7 @@ workflow VIRALRECON {
                 genome.fasta.map { fasta_file -> [ [:], fasta_file ] },
                 ch_gff_tuple_nanopore,
             )
-            ch_multiqc_files = ch_multiqc_files.mix(QUAST.out.results.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(QUAST.out.results.collect{ _meta, results -> results}.ifEmpty([]))
         }
 
         //
@@ -1254,7 +1251,7 @@ workflow VIRALRECON {
                 genome.snpeff_config,
                 genome.fasta
             )
-            ch_multiqc_files  = ch_multiqc_files.mix(SNPEFF_SNPSIFT.out.csv.collect{it[1]}.ifEmpty([]))
+            ch_multiqc_files  = ch_multiqc_files.mix(SNPEFF_SNPSIFT.out.csv.collect{_meta, csv -> csv}.ifEmpty([]))
             ch_snpsift_txt    = SNPEFF_SNPSIFT.out.snpsift_txt
         }
 
@@ -1282,7 +1279,7 @@ workflow VIRALRECON {
                 GUNZIP_GFF (
                     [ [:], ch_additional_gtf ]
                 )
-                ch_annot       = GUNZIP_GFF.out.gunzip.map { it[1] }
+                ch_annot       = GUNZIP_GFF.out.gunzip.map { _meta, gunzip -> gunzip }
             } else {
                 ch_annot = ch_additional_gtf
             }
