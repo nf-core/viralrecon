@@ -101,9 +101,6 @@ workflow VIRALRECON {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
-    multiqc_config
-    multiqc_logo
-    multiqc_methods_description
     outdir
     ch_genome_fasta
     ch_genome_gff
@@ -112,7 +109,6 @@ workflow VIRALRECON {
     ch_nextclade_dataset
     ch_nextclade_dataset_name
     ch_nextclade_dataset_tag
-    ch_artic_scheme
 
     main:
     /*
@@ -123,15 +119,6 @@ workflow VIRALRECON {
 
     def ch_multiqc_files = channel.empty()
     def ch_versions = channel.empty()
-
-
-    def valid_params = [
-        protocols            : ['metagenomic', 'amplicon'],
-        variant_callers      : ['ivar', 'bcftools'],
-        consensus_callers    : ['ivar', 'bcftools'],
-        assemblers           : ['spades', 'unicycler', 'minia'],
-        spades_modes         : ['rnaviral', 'corona', 'metaviral', 'meta', 'metaplasmid', 'plasmid', 'isolate', 'rna', 'bio'],
-    ]
 
     def checkPathParamList = []
     def sequencing_summary = (params.sequencing_summary == false || params.sequencing_summary == 'false') ? null : params.sequencing_summary
@@ -157,7 +144,6 @@ workflow VIRALRECON {
         if (param) { file(param, checkIfExists: true) }
     }
 
-    if (params.input)                 { ch_input          = file(params.input)                 } else { exit 1, 'Input samplesheet file not specified!' }
     if (params.spades_hmm)            { ch_spades_hmm     = file(params.spades_hmm)            } else { ch_spades_hmm = []                              }
     if (params.additional_annotation) { ch_additional_gtf = file(params.additional_annotation) } else { ch_additional_gtf = channel.empty()             }
     if (params.taxidlist)             { ch_taxidlist      = file(params.taxidlist)             } else { ch_taxidlist = []                               }
@@ -312,12 +298,12 @@ workflow VIRALRECON {
                 .set { ch_pass_fail_reads }
 
             ch_pass_fail_reads
-                .map { meta, reads, json, pass -> if (pass) [ meta, reads ] }
+                .map { meta, reads, _json, pass -> if (pass) [ meta, reads ] }
                 .set { ch_variants_fastq }
 
             ch_pass_fail_reads
                 .map {
-                    meta, reads, json, pass ->
+                    meta, _reads, json, pass ->
                     if (!pass) {
                         fail_mapped_reads[meta.id] = 0
                         def num_reads = getFastpReadsBeforeFiltering(json)
@@ -388,12 +374,12 @@ workflow VIRALRECON {
 
             ch_bam
                 .join(ch_mapped_reads, by: [0])
-                .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
+                .map { meta, ofile, _mapped, pass -> if (pass) [ meta, ofile ] }
                 .set { ch_bam }
 
             ch_bai
                 .join(ch_mapped_reads, by: [0])
-                .map { meta, ofile, mapped, pass -> if (pass) [ meta, ofile ] }
+                .map { meta, ofile, _mapped, pass -> if (pass) [ meta, ofile ] }
                 .set { ch_bai }
 
             ch_mapped_reads
@@ -886,7 +872,7 @@ workflow VIRALRECON {
         // MODULE: Create custom content file for MultiQC to report samples with reads < params.min_barcode_reads
         //
         ch_fastq_dirs
-            .branch { barcode, sample, dir, count  ->
+            .branch { _barcode, sample, _dir, count  ->
                 pass: count > min_barcode_reads
                     pass_barcode_reads[sample] = count
                     return [ "$sample\t$count" ]
@@ -913,7 +899,7 @@ workflow VIRALRECON {
         // Re-arrange channels to have meta map of information for sample
         ch_fastq_dirs
             .filter { it[-1] > min_barcode_reads }
-            .map { barcode, sample, dir, count -> [ [ id: sample, barcode:barcode ], dir ] }
+            .map { barcode, sample, dir, _count -> [ [ id: sample, barcode:barcode ], dir ] }
             .set { ch_fastq_dirs }
 
         //
@@ -1078,7 +1064,7 @@ workflow VIRALRECON {
         // Filter BAM files based on mapping threshold
         ch_bam
             .join(ch_mapped_reads_nanopore, by: [0])
-            .map { meta, bam, mapped, pass ->
+            .map { meta, bam, _mapped, pass ->
                 if (pass) [ meta, bam ]
             }
             .set { ch_filtered_bam_nanopore }
@@ -1086,7 +1072,7 @@ workflow VIRALRECON {
         // Filter BAI files based on mapping threshold
         ch_bai
             .join(ch_mapped_reads_nanopore, by: [0])
-            .map { meta, bai, mapped, pass ->
+            .map { meta, bai, _mapped, pass ->
                 if (pass) [ meta, bai ]
             }
             .set { ch_filtered_bai_nanopore }
@@ -1094,7 +1080,7 @@ workflow VIRALRECON {
         // Filter FASTA files based on mapping threshold
         ch_consensus
             .join(ch_mapped_reads_nanopore, by: [0])
-            .map { meta, fasta, mapped_reads, pass ->
+            .map { meta, fasta, _mapped_reads, pass ->
                 if (pass) [ meta, fasta ]
             }
             .set { ch_filtered_fasta_nanopore }
