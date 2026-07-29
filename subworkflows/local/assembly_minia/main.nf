@@ -41,7 +41,7 @@ workflow ASSEMBLY_MINIA {
     GUNZIP_CONTIGS
         .out
         .gunzip
-        .filter { meta, contig -> contig.size() > 0 }
+        .filter { _meta, contig -> contig.size() > 0 }
         .set { ch_contigs }
 
     //

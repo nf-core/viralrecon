@@ -26,10 +26,6 @@ input:
       description: |
         BED file with amplicon primer positions
         Structure: [ path(primer_bed) ]
-  - bowtie2_index:
-      description: |
-        Bowtie2 index files
-        Structure: [ path(bowtie2_index) ]
   - nextclade_dataset:
       description: |
         Full path to Nextclade dataset required for 'nextclade run' command.

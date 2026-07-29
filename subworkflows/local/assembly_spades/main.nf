@@ -31,7 +31,7 @@ workflow ASSEMBLY_SPADES {
     ch_reads = reads
     if (mode.contains('meta') || mode.contains('bio')) {
         reads
-            .filter { meta, illumina, pacbio, nanopore -> !meta.single_end }
+            .filter { meta, _illumina, _pacbio, _nanopore -> !meta.single_end }
             .set { ch_reads }
     }
 
@@ -65,13 +65,13 @@ workflow ASSEMBLY_SPADES {
     GUNZIP_SCAFFOLDS
         .out
         .gunzip
-        .filter { meta, scaffold -> scaffold.size() > 0 }
+        .filter { _meta, scaffold -> scaffold.size() > 0 }
         .set { ch_scaffolds }
 
     GUNZIP_GFA
         .out
         .gunzip
-        .filter { meta, gfa -> gfa.size() > 0 }
+        .filter { _meta, gfa -> gfa.size() > 0 }
         .set { ch_gfa }
 
     //
