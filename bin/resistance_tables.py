@@ -171,6 +171,7 @@ def integrate_codfreq_info(df_json, codfreq_df):
                 row["isInsertion"] = False  # Deactivate isInsertion
             elif row["isDeletion"] and not candidates.empty:
                 # Use the deletion codon with the highest count at this position.
+                # TODO: Validate this scenario on more deletion positive samples.
                 deletions = candidates[candidates["codon"].apply(is_deletion_codon)]
                 coverage = deletions["count"].max() if not deletions.empty else 0
             else:
