@@ -61,7 +61,7 @@ workflow HIV_RESISTANCE {
             vcf,
             tbi,
             fasta,
-            LIFTOFF.out.gff3.map { it[1] },
+            LIFTOFF.out.gff3.map { _meta, annotation -> annotation },
             pangolin
         )
 
@@ -89,12 +89,12 @@ workflow HIV_RESISTANCE {
     )
 
     RESISTANCE_REPORT (
-        SIERRALOCAL.out.json.collect{it[1]},
-        RESISTANCE_TABLES.out.mutation_csv.collect{it[1]},
-        RESISTANCE_TABLES.out.resistance_csv.collect{it[1]},
-        nextclade_report.collect{it[1]},
-        consensus.collect{it[1]},
-        CONSENSUS_LIFTOFF.out.gff3.collect{it[1]}
+        SIERRALOCAL.out.json.collect{_meta, json -> json},
+        RESISTANCE_TABLES.out.mutation_csv.collect{_meta, mutation_table -> mutation_table},
+        RESISTANCE_TABLES.out.resistance_csv.collect{_meta, resistance_table -> resistance_table},
+        nextclade_report.collect{_meta, report -> report},
+        consensus.collect{_meta, consensus_file -> consensus_file},
+        CONSENSUS_LIFTOFF.out.gff3.collect{_meta, annotation -> annotation}
     )
 
     emit:

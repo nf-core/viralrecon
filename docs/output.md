@@ -158,8 +158,8 @@ The final consensus sequence is generated with [BCFtools](https://github.com/sam
   - `minimap2/clair3/`
     - `*.filtered.vcf.gz`: Clair3 variants after filtering.
     - `*.filtered.vcf.gz.tbi`: Index file for filtered Clair3 variants.
-    - `*.norm.vcf.gz`: Normalised Clair3 variants.
-    - `*.norm.vcf.gz.tbi`: Index file for normalised Clair3 variants.
+    - `*.normalised.vcf.gz`: Normalised Clair3 variants.
+    - `*.normalised.vcf.gz.tbi`: Index file for normalised Clair3 variants.
   - `minimap2/bcftools/`
     - `*.consensus.fa`: Consensus fasta file generated with BCFtools.
     - `*.consensus.vcf.gz`: VCF file used for consensus generation.

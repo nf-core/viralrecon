@@ -59,9 +59,9 @@ workflow ADDITIONAL_ANNOTATION {
     )
 
     MAKE_VARIANTS_LONG_TABLE_ADDITIONAL (
-        BCFTOOLS_QUERY.out.output.collect{it[1]},
-        SNPSIFT_EXTRACTFIELDS.out.txt.collect{it[1]}.ifEmpty([]),
-        pangolin.collect{it[1]}.ifEmpty([])
+        BCFTOOLS_QUERY.out.output.collect{_meta, output -> output},
+        SNPSIFT_EXTRACTFIELDS.out.txt.collect{_meta, txt -> txt}.ifEmpty([]),
+        pangolin.collect{_meta, pangolin_file -> pangolin_file}.ifEmpty([])
     )
 
     emit:

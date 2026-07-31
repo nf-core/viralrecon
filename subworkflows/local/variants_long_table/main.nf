@@ -22,9 +22,9 @@ workflow VARIANTS_LONG_TABLE {
     )
 
     MAKE_VARIANTS_LONG_TABLE (
-        BCFTOOLS_QUERY.out.output.collect{it[1]},
-        snpsift.collect{it[1]}.ifEmpty([]),
-        pangolin.collect{it[1]}.ifEmpty([])
+        BCFTOOLS_QUERY.out.output.collect{_meta, output -> output},
+        snpsift.collect{_meta, txt -> txt}.ifEmpty([]),
+        pangolin.collect{_meta, csv -> csv}.ifEmpty([])
     )
 
     emit:

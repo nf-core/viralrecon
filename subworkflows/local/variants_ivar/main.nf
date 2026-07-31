@@ -15,9 +15,7 @@ workflow VARIANTS_IVAR {
     bam                 // channel: [ val(meta), [ bam ] ]
     fasta               // channel: /path/to/genome.fasta
     fai                 // channel: /path/to/genome.fai
-    sizes               // channel: /path/to/genome.sizes
     gff                 // channel: /path/to/genome.gff
-    bed                 // channel: /path/to/primers.bed
     snpeff_db           // channel: /path/to/snpeff_db/
     snpeff_config       // channel: /path/to/snpeff.config
     ivar_multiqc_header // channel: /path/to/multiqc_header for ivar variants
@@ -42,7 +40,7 @@ workflow VARIANTS_IVAR {
     IVAR_VARIANTS
         .out
         .tsv
-        .filter { meta, tsv -> getNumLinesInFile(tsv) > 1 }
+        .filter { _meta, tsv -> getNumLinesInFile(tsv) > 1 }
         .set { ch_ivar_tsv }
 
     //
@@ -69,13 +67,9 @@ workflow VARIANTS_IVAR {
     // Run downstream tools for variants QC
     //
     VARIANTS_QC (
-        bam,
         BCFTOOLS_SORT.out.vcf,
-        VCF_TABIX_STATS.out.stats,
         fasta,
-        sizes,
         gff,
-        bed,
         snpeff_db,
         snpeff_config
     )

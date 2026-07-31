@@ -1,10 +1,27 @@
 Changes in component 'nf-core/multiqc'
 'modules/nf-core/multiqc/environment.yml' is unchanged
+Changes in 'multiqc/meta.yml':
+--- modules/nf-core/multiqc/meta.yml
++++ modules/nf-core/multiqc/meta.yml
+@@ -87,6 +87,12 @@
+           description: Plots created by MultiQC
+           pattern: "*_plots"
+           ontologies: []
++  csv_reports:
++    - "*.csv":
++        type: file
++        description: Summary CSV files created by MultiQC
++        pattern: "*.csv"
++        ontologies: []
+   versions:
+     - - ${task.process}:
+           type: string
+
 Changes in 'multiqc/main.nf':
 --- modules/nf-core/multiqc/main.nf
 +++ modules/nf-core/multiqc/main.nf
 @@ -8,12 +8,13 @@
-         : 'community.wave.seqera.io/library/multiqc:1.34--db7c73dae76bc9e6'}"
+         : 'community.wave.seqera.io/library/multiqc:1.35--c17fb751507e9dfc'}"
  
      input:
 -    tuple val(meta), path(multiqc_files, stageAs: "?/*"), path(multiqc_config, stageAs: "?/*"), path(multiqc_logo), path(replace_names), path(sample_names)
@@ -74,28 +91,8 @@ Changes in 'multiqc/main.nf':
          ${replace} \\
          ${samples} \\
 
-Changes in 'multiqc/meta.yml':
---- modules/nf-core/multiqc/meta.yml
-+++ modules/nf-core/multiqc/meta.yml
-@@ -87,6 +87,12 @@
-           description: Plots created by MultiQC
-           pattern: "*_plots"
-           ontologies: []
-+  csv_reports:
-+    - "*.csv":
-+        type: file
-+        description: Summary CSV files created by MultiQC
-+        pattern: "*.csv"
-+        ontologies: []
-   versions:
-     - - ${task.process}:
-           type: string
-
-'modules/nf-core/multiqc/.conda-lock/linux_amd64-bd-c1f4a7982b743963_1.txt' was created
-'modules/nf-core/multiqc/.conda-lock/linux_amd64-bd-db7c73dae76bc9e6_1.txt' is unchanged
-'modules/nf-core/multiqc/.conda-lock/linux_arm64-bd-40bf3b435e89dc22_1.txt' was created
-'modules/nf-core/multiqc/.conda-lock/linux_arm64-bd-d167b8012595a136_1.txt' is unchanged
-'modules/nf-core/multiqc/tests/custom_prefix.config' is unchanged
+'modules/nf-core/multiqc/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/multiqc/tests/nextflow.config' is unchanged
 Changes in 'multiqc/tests/main.nf.test':
 --- modules/nf-core/multiqc/tests/main.nf.test
 +++ modules/nf-core/multiqc/tests/main.nf.test
@@ -133,6 +130,7 @@ Changes in 'multiqc/tests/main.nf.test':
  
      test("sarscov2 single-end [fastqc] [config]") {
 
-'modules/nf-core/multiqc/tests/main.nf.test.snap' is unchanged
-'modules/nf-core/multiqc/tests/nextflow.config' is unchanged
+'modules/nf-core/multiqc/tests/custom_prefix.config' is unchanged
+'modules/nf-core/multiqc/.conda-lock/linux_amd64-bd-c17fb751507e9dfc_1.txt' is unchanged
+'modules/nf-core/multiqc/.conda-lock/linux_arm64-bd-5c84a5000a226ab5_1.txt' is unchanged
 ************************************************************

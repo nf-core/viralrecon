@@ -72,7 +72,6 @@ workflow NFCORE_VIRALRECON {
     }
 
     def primer_bed   = params.primer_bed ?: getGenomeAttribute('primer_bed', primer_set, primer_set_version)
-    def artic_scheme = params.artic_scheme ?: (params.platform == 'nanopore' ? getGenomeAttribute('scheme', primer_set, primer_set_version) : null)
     def genome_gff   = (params.gff == false || params.gff == 'false') ? null : params.gff
 
     //
@@ -80,9 +79,6 @@ workflow NFCORE_VIRALRECON {
     //
     VIRALRECON (
         samplesheet,
-        params.multiqc_config,
-        params.multiqc_logo,
-        params.multiqc_methods_description,
         params.outdir,
         params.fasta,
         genome_gff,
@@ -90,8 +86,7 @@ workflow NFCORE_VIRALRECON {
         params.bowtie2_index,
         params.nextclade_dataset,
         params.nextclade_dataset_name,
-        params.nextclade_dataset_tag,
-        artic_scheme
+        params.nextclade_dataset_tag
     )
 
     emit:
