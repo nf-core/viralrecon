@@ -1,0 +1,62 @@
+nextflow_pipeline {
+
+    name "Test pipeline"
+    script "../main.nf"
+    tag "pipeline"
+    profile "test_metagenomic"
+
+    // Define scenarios
+    def test_scenario = [
+        [
+            name: "-profile test_metagenomic --gff false",
+            params: [
+                gff: false
+            ]
+        ],
+        [
+            name: "-profile test_metagenomic --genome 'NC_045512.2'",
+            params: [
+                genome: "NC_045512.2"
+            ]
+        ]
+    ]
+
+    // Loop through scenarios and generate tests dynamically
+    // Run all tests
+    test_scenario.each { scenario ->
+        test(scenario.name) {
+
+            when {
+                params {
+                    outdir = "$outputDir"
+                    scenario.params.each { key, value ->
+                        delegate."$key" = value
+                    }
+                }
+            }
+
+            then {
+                // stable_name: All files + folders in ${params.outdir}/ with a stable name
+                def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignoreFile: 'tests/.nftignore_stable_name', ignore: ['pipeline_info/*.{html,json,txt}'])
+                // stable_path: All files in ${params.outdir}/ with stable content
+                def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore', ignore: ['**/snpeff/*.snpeff.{vcf.gz,vcf.gx.tbi}','variants/**/*.{vcf.gz,vcf.gz.tbi}', 'multiqc/multiqc_data/bcftools_stats*.yaml', 'variants/**/bcftools_stats/*.bcftools_stats.txt', 'variants/bcftools/variants_long_table.csv'])
+                def softwareYaml = removeNextflowVersion("$outputDir/pipeline_info/nf_core_viralrecon_software_mqc_versions.yml")
+                softwareYaml.remove('NEXTCLADE_RUN')
+                softwareYaml.remove('PLOT_BASE_DENSITY')
+                softwareYaml.remove('MINIA')
+
+                assertAll(
+                    { assert workflow.success},
+                    { assert snapshot(
+                        // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                        softwareYaml,
+                        // All stable path name, with a relative path
+                        stable_name,
+                        // All files with stable contents
+                        stable_path
+                    ).match() }
+                )
+            }
+        }
+    }
+}

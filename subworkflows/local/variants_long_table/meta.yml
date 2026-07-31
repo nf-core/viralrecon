@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "variants_long_table"
+description: Create a long table with variant information including AA changes and lineage info
+keywords:
+  - variant
+  - long_table
+  - annotation
+components:
+  - bcftools/query
+  - make/variants/long/table
+input:
+  - vcf:
+      type: file
+      description: |
+        VCF file with sorted variants called
+        Structure: [ val(meta), [ vcf ] ]
+  - tbi:
+      type: file
+      description: |
+        tabix index file of sorted variants called
+        Structure: [ val(meta), [ tbi ] ]
+  - snpsift:
+      type: file
+      description: |
+        Variant annotation text file from SnpSift
+        Structure:  [ val(meta), [ txt ] ]
+  - pangolin:
+      description: |
+        CSV file with pangolin results
+        Structure: [ val(meta), [ csv ] ]
+output:
+  - query_table:
+      type: file
+      description: |
+        Text table with the bcftools query output
+        Structure: [ val(meta), [ txt ] ]
+  - long_table:
+      type: file
+      description: |
+        CSV long table with variant information including AA changes and lineage info
+        Structure: [ val(meta), [ csv ] ]
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@drpatelh"
+maintainers:
+  - "@svarona"
+  - "@saramonzon"

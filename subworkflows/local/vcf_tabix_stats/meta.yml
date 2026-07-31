@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "vcf_tabix_stats"
+description: Run BCFTools tabix and stats commands
+keywords:
+  - bcftools
+  - tabix
+  - stats
+components:
+  - tabix/tabix
+  - bcftools/stats
+input:
+  - vcf:
+      description: |
+        VCF file with variants called
+        Structure: [ val(meta), [ vcf ] ]
+  - regions:
+      description: |
+        Optionally, restrict the operation to regions listed in this file. (VCF, BED or tab-delimited)
+        Structure: [ path(regions) ]
+  - targets:
+      description: |
+        Optionally, restrict the operation to regions listed in this file (doesn't rely upon tbi index files)
+        Structure: [ path(targets) ]
+  - samples:
+      description: |
+        Optional, file of sample names to be included or excluded.
+        Structure: [ path(samples) ]
+output:
+  - tbi:
+      type: file
+      description: |
+        tabix index file
+        Structure: [ val(meta), [ tbi ] ]
+  - csi:
+      type: file
+      description: |
+        coordinate sorted index file
+        Structure: [ val(meta), [ csi ] ]
+  - stats:
+      type: file
+      description: |
+        Text output file containing stats
+        Structure: [ val(meta), [ txt ] ]
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@drpatelh"
+maintainers:
+  - "@svarona"
+  - "@saramonzon"

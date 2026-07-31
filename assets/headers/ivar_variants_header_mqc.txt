@@ -1,0 +1,8 @@
+#id: 'ivar_variants'
+#section_name: 'VARIANTS: Total variants (iVar)'
+#description: "Is calculated from the total number of variants called by
+#              <a href='https://andersen-lab.github.io/ivar/html/manualpage.html' target='_blank'>iVar</a> (Defaults: 0.25 allele frequency, minimum quality score = 20 and minimum position depth = 10)."
+#plot_type: 'bargraph'
+#anchor: 'ivar_variants'
+#pconfig:
+#    title: 'iVar variant counts'

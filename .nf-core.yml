@@ -5,6 +5,7 @@ lint:
     - assets/nf-core-viralrecon_logo_light.png
     - docs/images/nf-core-viralrecon_logo_light.png
     - docs/images/nf-core-viralrecon_logo_dark.png
+
   template_strings:
     - assets/hiv_template_report.html
 nf_core_version: 4.0.3

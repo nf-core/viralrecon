@@ -1,0 +1,80 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "snpeff_snpsift"
+description: Annotate variants running snpEff, bgzip, tabix, stats and SnpSift commands
+keywords:
+  - annotation
+  - variants
+  - snpEff
+  - SnpSift
+components:
+  - snpeff/ann
+  - snpsift/extractfields
+  - vcf_bgzip_tabix_stats
+input:
+  - vcf:
+      description: |
+        VCF file with variants called
+        Structure: [ val(meta), [ vcf ] ]
+  - db:
+      description: |
+        Path to SnpEff database folder
+        Structure: [ path(db) ]
+  - config:
+      description: |
+        Path to SnpEff config file
+        Structure: [ path(config) ]
+  - fasta:
+      type: file
+      description: |
+        Reference fasta file
+        Structure: [ path(fasta) ]
+output:
+  - csv:
+      type: file
+      description: |
+        Variant annotation CSV file
+        Structure: [ val(meta), [ csv ] ]
+  - txt:
+      type: file
+      description: |
+        Variant annotation text file
+        Structure: [ val(meta), [ txt ] ]
+  - html:
+      type: file
+      description: |
+        Variant annotation HTML report
+        Structure: [ val(meta), [ html ] ]
+  - vcf:
+      type: file
+      description: |
+        Variant calling file
+        Structure: [ val(meta), [ vcf.gz ] ]
+  - tbi:
+      type: file
+      description: |
+        tabix index file
+        Structure: [ val(meta), [ tbi ] ]
+  - csi:
+      type: file
+      description: |
+        coordinate sorted index file
+        Structure: [ val(meta), [ csi ] ]
+  - stats:
+      type: file
+      description: |
+        Text output file containing stats
+        Structure: [ val(meta), [ txt ] ]
+  - snpsift_txt:
+      type: file
+      description: |
+        Variant annotation text file from SnpSift
+        Structure:  [ val(meta), [ txt ] ]
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@drpatelh"
+maintainers:
+  - "@svarona"
+  - "@saramonzon"

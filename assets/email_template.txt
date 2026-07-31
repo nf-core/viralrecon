@@ -8,19 +8,31 @@
 ----------------------------------------------------
 Run Name: $runName
 
-<% if (success){
-    out << "## nf-core/viralrecon execution completed successfully! ##"
-} else {
+<% if (!success){
     out << """####################################################
-## nf-core/viralrecon execution completed unsuccessfully! ##
-####################################################
+## nf-core/viralrecon completed unsuccessfully!   ##
+####################################################\n
 The exit status of the task that caused the workflow execution to fail was: $exitStatus.
 The full error message was:
 
 ${errorReport}
 """
-} %>
+} else if (fail_mapped_reads.size() > 0) {
+    out << """####################################################
+## nf-core/viralrecon completed with warnings!    ##
+####################################################\n
+The pipeline finished successfully, but the following samples were skipped
+due to failing the minimum mapped read threshold (less than ${min_mapped_reads}):
 
+  - ${fail_mapped_reads.sort().join("\n  - ")}
+"""
+} else {
+    out << """####################################################
+## nf-core/viralrecon completed successfully!     ##
+####################################################\n
+"""
+}
+%>
 
 The workflow was completed at $dateComplete (duration: $duration)
 
@@ -29,10 +41,10 @@ The command used to launch the workflow was as follows:
   $commandLine
 
 
-
 Pipeline Configuration:
 -----------------------
 <% out << summary.collect{ k,v -> " - $k: $v" }.join("\n") %>
+
 
 --
 nf-core/viralrecon

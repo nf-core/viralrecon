@@ -1,0 +1,58 @@
+nextflow_pipeline {
+
+    name "Test pipeline"
+    script "../main.nf"
+    tag "pipeline"
+    profile "test_hiv"
+
+    // Define scenarios
+    def test_scenario = [
+        [
+            name: "-profile test_hiv",
+        ],
+        [
+            name: "-profile test_hiv --genome 'NC_001802.1'",
+            params: [
+                genome: "NC_001802.1"
+            ]
+        ]
+    ]
+
+    // Loop through scenarios and generate tests dynamically
+    // Run all tests
+    test_scenario.each { scenario ->
+        test(scenario.name) {
+
+            when {
+                params {
+                    outdir = "$outputDir"
+                    scenario.params.each { key, value ->
+                        delegate."$key" = value
+                    }
+                }
+            }
+
+            then {
+                // stable_name: All files + folders in ${params.outdir}/ with a stable name
+                def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignoreFile: 'tests/.nftignore_stable_name', ignore: ['pipeline_info/*.{html,json,txt}'])
+                // stable_path: All files in ${params.outdir}/ with stable content
+                def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore', ignore: ['**/*.consensus.qual.txt', '**/*.codfreq', '**/codfreq/*.json', '**/resistance.html'])
+                def softwareYaml = removeNextflowVersion("$outputDir/pipeline_info/nf_core_viralrecon_software_mqc_versions.yml")
+                softwareYaml.remove('NEXTCLADE_RUN')
+                softwareYaml.remove('PLOT_BASE_DENSITY')
+
+                assertAll(
+                    { assert workflow.success},
+                    { assert snapshot(
+                        // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                        softwareYaml,
+                        // All stable path name, with a relative path
+                        stable_name,
+                        // All files with stable contents
+                        stable_path
+                    ).match() }
+                )
+            }
+        }
+    }
+}

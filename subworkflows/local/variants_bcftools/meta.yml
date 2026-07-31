@@ -1,0 +1,126 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "variants_bcftools"
+description: Variant calling with BCFTools, downstream processing and QC
+keywords:
+  - variant
+  - bcftools
+  - qc
+components:
+  - bcftools/mpileup
+  - bcftools/norm
+  - vcf_tabix_stats
+  - variants_qc
+input:
+  - bam:
+      description: |
+        Mapping BAM files and their index files
+        Structure: [ val(meta), [ bam ], [bai] ]
+  - fasta:
+      description: |
+        Reference genome fasta file
+        Structure: [ path(fasta) ]
+  - sizes:
+      description: |
+        File containing chromosome lengths
+        Structure: [ path(sizes) ]
+  - gff:
+      description: |
+        GFF file of the reference genome
+        Structure: [ path(gff) ]
+  - bed:
+      description: |
+        BED file with amplicon primer positions
+        Structure: [ path(bed) ]
+  - vcf:
+      description: |
+        VCF file with variants called
+        Structure: [ val(meta), [ vcf ] ]
+  - snpeff_db:
+      description: |
+        Path to SnpEff database folder
+        Structure: [ path(snpeff_db) ]
+  - snpeff_config:
+      description: |
+        Path to SnpEff config file
+        Structure: [ path(snpeff_config) ]
+
+output:
+  - vcf_orig:
+      type: file
+      description: |
+        VCF file with variants called
+        Structure: [ val(meta), [ vcf ] ]
+  - tbi_orig:
+      type: file
+      description: |
+        tabix index file of variants called
+        Structure: [ val(meta), [ tbi ] ]
+  - stats_orig:
+      type: file
+      description: |
+        Text output file containing stats of variants called
+        Structure: [ val(meta), [ txt ] ]
+  - vcf:
+      type: file
+      description: |
+        VCF file with normalized variants called
+        Structure: [ val(meta), [ vcf ] ]
+  - tbi:
+      type: file
+      description: |
+        tabix index file of normalized variants called
+        Structure: [ val(meta), [ tbi ] ]
+  - csi:
+      type: file
+      description: |
+        coordinate sorted index file of normalized variants called
+        Structure: [ val(meta), [ csi ] ]
+  - stats:
+      type: file
+      description: |
+        Text output file containing stats of normalized variants called
+        Structure: [ val(meta), [ txt ] ]
+  - snpeff_vcf:
+      type: file
+      description: |
+        Annotated variant calling file from SnpEff
+        Structure: [ val(meta), [ vcf.gz ] ]
+  - snpeff_tbi:
+      type: file
+      description: |
+        tabix index file
+        Structure: [ val(meta), [ tbi ] ]
+  - snpeff_stats:
+      type: file
+      description: |
+        Text output file containing stats
+        Structure: [ val(meta), [ txt ] ]
+  - snpeff_csv:
+      type: file
+      description: |
+        Variant annotation CSV file
+        Structure: [ val(meta), [ csv ] ]
+  - snpeff_txt:
+      type: file
+      description: |
+        Variant annotation text file
+        Structure: [ val(meta), [ txt ] ]
+  - snpeff_html:
+      type: file
+      description: |
+        Variant annotation HTML report
+        Structure: [ val(meta), [ html ] ]
+  - snpsift_txt:
+      type: file
+      description: |
+        Variant annotation text file from SnpSift
+        Structure:  [ val(meta), [ txt ] ]
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@drpatelh"
+maintainers:
+  - "@svarona"
+  - "@saramonzon"

@@ -1,0 +1,29 @@
+Changes in component 'nf-core/liftoff'
+'modules/nf-core/liftoff/environment.yml' is unchanged
+Changes in 'liftoff/main.nf':
+--- modules/nf-core/liftoff/main.nf
++++ modules/nf-core/liftoff/main.nf
+@@ -14,7 +14,7 @@
+     path ref_db
+ 
+     output:
+-    tuple val(meta), path("${prefix}.gff3")     , emit: gff3
++    tuple val(meta), path("${prefix}.gff")      , emit: gff3
+     tuple val(meta), path("*.polished.gff3")    , emit: polished_gff3, optional: true
+     tuple val(meta), path("*.unmapped.txt")     , emit: unmapped_txt
+     tuple val("${task.process}"), val('liftoff'), eval('liftoff --version | sed "s/v//"'), emit: versions_liftoff, topic: versions
+@@ -48,7 +48,7 @@
+         $arg_g \\
+         $arg_db \\
+         -p $task.cpus \\
+-        -o "${prefix}.gff3" \\
++        -o "${prefix}.gff" \\
+         -u "${prefix}.unmapped.txt" \\
+         $args \\
+         target.fasta \\
+
+'modules/nf-core/liftoff/meta.yml' is unchanged
+'modules/nf-core/liftoff/tests/main.nf.test' is unchanged
+'modules/nf-core/liftoff/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/liftoff/tests/nextflow.config' is unchanged
+************************************************************

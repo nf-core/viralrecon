@@ -1,0 +1,514 @@
+{
+    "region filter": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "bcf_test"
+                        },
+                        "bcf_test_vcf.vcf.gz:md5,8e722884ffb75155212a3fc053918766"
+                    ]
+                ],
+                "1": [
+                    
+                ],
+                "2": [
+                    
+                ],
+                "3": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ],
+                "csi": [
+                    
+                ],
+                "tbi": [
+                    
+                ],
+                "vcf": [
+                    [
+                        {
+                            "id": "bcf_test"
+                        },
+                        "bcf_test_vcf.vcf.gz:md5,8e722884ffb75155212a3fc053918766"
+                    ]
+                ],
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-03-20T18:01:37.956400988",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "sarscov2 - vcf_gz_index_tbi - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test_vcf.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test_vcf.vcf.gz.tbi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "2": [
+                    
+                ],
+                "3": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ],
+                "csi": [
+                    
+                ],
+                "tbi": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test_vcf.vcf.gz.tbi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "vcf": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test_vcf.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-03-20T18:02:09.596096371",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "vcf": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test.vcf.gz:md5,8e722884ffb75155212a3fc053918766"
+                    ]
+                ],
+                "1": [
+                    
+                ],
+                "2": [
+                    
+                ],
+                "3": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ],
+                "csi": [
+                    
+                ],
+                "tbi": [
+                    
+                ],
+                "vcf": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test.vcf.gz:md5,8e722884ffb75155212a3fc053918766"
+                    ]
+                ],
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-03-20T18:00:58.717468093",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "bcf output": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "bcf_test"
+                        },
+                        "bcf_test.bcf.gz:md5,c8a304c8d2892039201154153c8cd536"
+                    ]
+                ],
+                "1": [
+                    
+                ],
+                "2": [
+                    
+                ],
+                "3": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ],
+                "csi": [
+                    
+                ],
+                "tbi": [
+                    
+                ],
+                "vcf": [
+                    [
+                        {
+                            "id": "bcf_test"
+                        },
+                        "bcf_test.bcf.gz:md5,c8a304c8d2892039201154153c8cd536"
+                    ]
+                ],
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-03-20T18:01:30.652047254",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "sarscov2 - vcf_gz_index": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "vcf_test"
+                    },
+                    "vcf_test_vcf.vcf.gz:md5,8e722884ffb75155212a3fc053918766"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "vcf_test"
+                    },
+                    "vcf_test_vcf.vcf.gz.csi"
+                ]
+            ],
+            [
+                
+            ],
+            {
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-03-20T18:01:07.534617189",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "sarscov2 - vcf_gz_index_csi": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "vcf_test"
+                    },
+                    "vcf_test_vcf.vcf.gz:md5,8e722884ffb75155212a3fc053918766"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "vcf_test"
+                    },
+                    "vcf_test_vcf.vcf.gz.csi"
+                ]
+            ],
+            [
+                
+            ],
+            {
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-03-20T18:01:15.227154384",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "vcf - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "1": [
+                    
+                ],
+                "2": [
+                    
+                ],
+                "3": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ],
+                "csi": [
+                    
+                ],
+                "tbi": [
+                    
+                ],
+                "vcf": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-03-20T18:01:45.747469081",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "sarscov2 - vcf_gz_index - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test_vcf.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "1": [
+                    
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test_vcf.vcf.gz.csi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "3": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ],
+                "csi": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test_vcf.vcf.gz.csi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "tbi": [
+                    
+                ],
+                "vcf": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test_vcf.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-03-20T18:01:54.174618449",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "sarscov2 - vcf_gz_index_csi - stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test_vcf.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "1": [
+                    
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test_vcf.vcf.gz.csi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "3": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ],
+                "csi": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test_vcf.vcf.gz.csi:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "tbi": [
+                    
+                ],
+                "vcf": [
+                    [
+                        {
+                            "id": "vcf_test"
+                        },
+                        "vcf_test_vcf.vcf.gz:md5,68b329da9893e34099c7d8ad5cb9c940"
+                    ]
+                ],
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-03-20T18:02:01.840860734",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    },
+    "sarscov2 - vcf_gz_index_tbi": {
+        "content": [
+            [
+                [
+                    {
+                        "id": "vcf_test"
+                    },
+                    "vcf_test_vcf.vcf.gz:md5,8e722884ffb75155212a3fc053918766"
+                ]
+            ],
+            [
+                
+            ],
+            [
+                [
+                    {
+                        "id": "vcf_test"
+                    },
+                    "vcf_test_vcf.vcf.gz.tbi"
+                ]
+            ],
+            {
+                "versions_bcftools": [
+                    [
+                        "BCFTOOLS_FILTER",
+                        "bcftools",
+                        "1.23.1"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-03-20T18:01:22.767723604",
+        "meta": {
+            "nf-test": "0.9.4",
+            "nextflow": "25.10.2"
+        }
+    }
+}
