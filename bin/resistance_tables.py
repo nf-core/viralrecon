@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
 import sys
-import glob
 import json
-import errno
 import logging
 import argparse
 import re
@@ -23,54 +20,36 @@ def parser_args(args=None):
     """
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
 
-    parser.add_argument(
-        "-sf",
-        "--sierralocal_file",
-        type=str,
-        help="JSON file containing sierra-local report.",
-    )
-    parser.add_argument(
-        "-cf",
-        "--codfreq_file",
-        type=str,
-        help="Path to codfreq file.",
-    )
-    parser.add_argument(
-        "-s",
-        "--sample_name",
-        type=str,
-        help="Name of the sample",
-    )
-    parser.add_argument(
-        "-om",
-        "--output_mutation_file",
-        type=str,
-        help="Full path to output mutation CSV file.",
-    )
-    parser.add_argument(
-        "-os",
-        "--output_mutation_short",
-        type=str,
-        help="Full path to output mutation shortenned CSV file.",
-    )
-    parser.add_argument(
-        "-or",
-        "--output_resistance_file",
-        type=str,
-        help="Full path to output resistance CSV file.",
-    )
+    parser.add_argument("-sf", "--sierralocal_file", type=str, help="JSON file containing sierra-local report.")
+    parser.add_argument("-cf", "--codfreq_file", type=str, help="Path to codfreq file.")
+    parser.add_argument("-s", "--sample_name", type=str, help="Name of the sample")
+    parser.add_argument( "-om", "--output_mutation_file", type=str, help="Full path to output mutation CSV file.")
+    parser.add_argument("-os", "--output_mutation_short", type=str,help="Full path to output mutation shortenned CSV file.")
+    parser.add_argument("-or", "--output_resistance_file", type=str, help="Full path to output resistance CSV file.")
 
     return parser.parse_args(args)
 
 def parse_codfreq(codfreq_path):
-    """Parse a .codfreq file into a pandas DataFrame."""
-    try:
-        df = pd.read_csv(codfreq_path)
-        return df
-    except Exception as e:
-        logger.warning(f"Could not parse codfreq file {codfreq_path}: {e}")
-        return pd.DataFrame()
+    return pd.read_csv(codfreq_path)
 
+def build_mutation_row(sample_name, gene_name, mut_text, mut, resistance_comments):
+    return {
+        "Sample_name": sample_name,
+        "Gene_name": gene_name,
+        "Mutations": mut_text,
+        "Mutations_type": mut.get("primaryType", "NA"),
+        "Mutations_comments": resistance_comments.get(mut_text, ""),
+        "isInsertion": mut.get("isInsertion", False),
+        "isDeletion": mut.get("isDeletion", False),
+        "isApobecMutation": mut.get("isApobecMutation", False),
+        "isApobecDRM": mut.get("isApobecDRM", False),
+        "isUnusual": mut.get("isUnusual", False),
+        "isSDRM": mut.get("isSDRM", False),
+        "hasStop": mut.get("hasStop", False),
+        "Mutation_AF": "NA",
+        "Coverage": "NA",
+        "INDEL>5%": "NA",
+    }
 
 def parse_sierra_json(sample_name, json_path):
     """Parse one Sierra-local JSON and return a pandas DataFrame with all mutations."""
@@ -126,70 +105,36 @@ def parse_sierra_json(sample_name, json_path):
                 mutant = match.group(1) # "KR" for "K70KR"
             else:
                 mutant = ""  # fallback
-            mut_type = mut.get("primaryType", "NA")
-
-            # If there are more than one possible amino acids, create a row for each
-            if len(mutant) > 1:
+            # If there are more than one possible amino acids, create a row for each.
+            # Deletions are reported as e.g. P90del and should remain a single row.
+            if len(mutant) > 1 and not mut.get("isDeletion"):
                 for aa in mutant:
                     if pos == lastAA and aa == "X" and not mut.get("isDeletion"):
                         continue  # skip, false positive at end of sequence
                     mut_text = f"{consensus}{pos}{aa}"
-                    resistance_comment = resistance_comments.get(mut_text, "")
-                    row = {
-                        "Sample_name": sample_name,
-                        "Gene_name": gene_name,
-                        "Mutations": mut_text,
-                        "Mutations_type": mut_type,
-                        "Mutations_comments": resistance_comment,
-                        "isInsertion": mut.get("isInsertion", False),
-                        "isDeletion": mut.get("isDeletion", False),
-                        "isApobecMutation": mut.get("isApobecMutation", False),
-                        "isApobecDRM": mut.get("isApobecDRM", False),
-                        "isUnusual": mut.get("isUnusual", False),
-                        "isSDRM": mut.get("isSDRM", False),
-                        "hasStop": mut.get("hasStop", False),
-                        "Mutation_AF": "NA",
-                        "Coverage": "NA",
-                        "INDEL>5%": "NA"
-                    }
-                    rows.append(row)
+                    rows.append(build_mutation_row(sample_name, gene_name, mut_text, mut, resistance_comments))
             else:
                 if pos == lastAA and aas == "X" and not mut.get("isDeletion"):
                     continue  # skip, false positive at end of sequence
                 # If there is only one possible amino acid, keep a single row
                 mut_text = mut.get("text", "NA")
-                resistance_comment = resistance_comments.get(mut_text, "")
-                row = {
-                    "Sample_name": sample_name,
-                    "Gene_name": gene_name,
-                    "Mutations": mut_text,
-                    "Mutations_type": mut_type,
-                    "Mutations_comments": resistance_comment,
-                    "isInsertion": mut.get("isInsertion", False),
-                    "isDeletion": mut.get("isDeletion", False),
-                    "isApobecMutation": mut.get("isApobecMutation", False),
-                    "isApobecDRM": mut.get("isApobecDRM", False),
-                    "isUnusual": mut.get("isUnusual", False),
-                    "isSDRM": mut.get("isSDRM", False),
-                    "hasStop": mut.get("hasStop", False),
-                    "Mutation_AF": "NA",
-                    "Coverage": "NA",
-                    "INDEL>5%": "NA"
-                }
-                rows.append(row)
+                rows.append(build_mutation_row(sample_name, gene_name, mut_text, mut, resistance_comments))
 
     df = pd.DataFrame(rows)
 
     return df
 
-def check_indel(row):
-    if row["isInsertion"] or row["isDeletion"]:
-        try:
-            return True if float(row["Mutation_AF"]) >= 0.05 else False
-        except Exception:
-            return False
-    else:
-        return "NA"
+def is_insertion_codon(codon):
+    return isinstance(codon, str) and len(codon) > 3
+
+def is_deletion_codon(codon):
+    return isinstance(codon, str) and "-" in codon
+
+def extract_mutation_position(mutation):
+    match = re.match(r"^[A-Z*_-](\d+)", str(mutation))
+    if not match:
+        raise ValueError(f"Could not extract mutation position from {mutation}")
+    return match.group(1)
 
 def integrate_codfreq_info(df_json, codfreq_df):
     """Update df_json with Mutation_AF and Coverage from codfreq_df."""
@@ -200,9 +145,8 @@ def integrate_codfreq_info(df_json, codfreq_df):
 
     for _, row in df_json.iterrows():
         gene = row["Gene_name"]
-        pos = row["Mutations"][1:-1]  # Extract position from format X123Y
+        pos = extract_mutation_position(row["Mutations"])
         aa = row["Mutations"][-1]  # Extract mutated amino acid
-
         is_indel = row["isInsertion"] or row["isDeletion"]
 
         # Search that position in codfreq
@@ -216,19 +160,20 @@ def integrate_codfreq_info(df_json, codfreq_df):
         total = candidates["total"].iloc[0]
 
         if is_indel:
-            # Take the 10 codons with the highest count at this position
             if aa == "_" and row["isInsertion"] and not candidates.empty:
                 # Use the insertion with the highest count
-                insertions = candidates[candidates["codon"].apply(lambda x: isinstance(x, str) and len(x) > 3)]
-                best = insertions.loc[insertions["count"].idxmax()]
-                coverage = best["count"]
+                insertions = candidates[candidates["codon"].apply(is_insertion_codon)]
+                coverage = insertions["count"].max() if not insertions.empty else 0
             elif row["isInsertion"] and not candidates.empty:
                 # Normal codon close to insertion -> look for the codon corresponding to the AA
                 subset = candidates[candidates["aa_codon"] == aa]
                 coverage = subset["count"].sum() if not subset.empty else 0
                 row["isInsertion"] = False  # Deactivate isInsertion
             elif row["isDeletion"] and not candidates.empty:
-                raise RuntimeError(f"DELETION case not yet implemented for gene={gene}, pos={pos}, aa={aa}")
+                # Use the deletion codon with the highest count at this position.
+                # TODO: Validate this scenario on more deletion positive samples.
+                deletions = candidates[candidates["codon"].apply(is_deletion_codon)]
+                coverage = deletions["count"].max() if not deletions.empty else 0
             else:
                 raise RuntimeError(f"NEW CASE SCENARIO not yet implemented for gene={gene}, pos={pos}, aa={aa}")
         else:
@@ -241,11 +186,8 @@ def integrate_codfreq_info(df_json, codfreq_df):
         row["Coverage"] = int(total)
 
         # Add "INDEL>5%" column
-        indel_sum = candidates[candidates["codon"].apply(lambda x: isinstance(x, str) and len(x) > 3 or "-" in x)]["count"].sum()
-        if indel_sum / total > 0.05:
-            row["INDEL>5%"] = True
-        else:
-            row["INDEL>5%"] = False
+        indel_sum = candidates[candidates["codon"].apply(lambda x: is_insertion_codon(x) or is_deletion_codon(x))]["count"].sum()
+        row["INDEL>5%"] = indel_sum / total > 0.05
 
         updated_rows.append(row)
 
@@ -257,8 +199,6 @@ def parse_resistance_json(sample_name, json_path):
     """Parse Sierra-local JSON and return a pandas DataFrame with drug resistance information."""
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)[0]
-
-    rows = []
 
     # Dictionary to map abbreviations to full drug names
     drug_fullnames = {
@@ -294,6 +234,7 @@ def parse_resistance_json(sample_name, json_path):
         logger.warning(f"No 'drugResistance' field found in {json_path}")
         return pd.DataFrame()
 
+    rows = []
     for entry in data["drugResistance"]:
         gene_name = entry.get("gene", {}).get("name", "NA")
 
@@ -329,18 +270,10 @@ def main(args=None):
     # Load codfreq files
     codfreq_df = parse_codfreq(args.codfreq_file)
 
-    mutation_df = integrate_codfreq_info(sierralocal_df, codfreq_df)
-
-    # Load sierra-local JSON files
-    sierralocal_df = parse_sierra_json(args.sample_name, args.sierralocal_file)
-
-    # Load codfreq files
-    codfreq_df = parse_codfreq(args.codfreq_file)
-
     # Integrate codfreq values
     mutation_df = integrate_codfreq_info(sierralocal_df, codfreq_df)
 
-    # Filtrar el DataFrame para eliminar esas filas
+    # Filter the DataFrame to remove those rows
     mutation_df = mutation_df[~((mutation_df["Mutations"].str[-1] == "X") & (mutation_df["Mutation_AF"] == 0))]
 
     if mutation_df.empty:
@@ -355,7 +288,7 @@ def main(args=None):
     filtered_mutation_df.to_csv(args.output_mutation_short, index=False, encoding="utf-8-sig")
     print(f"✅ Resistance table saved to {args.output_mutation_short}")
 
-   # Parse drug resistance info
+    # Parse drug resistance info
     resistance_df = parse_resistance_json(args.sample_name, args.sierralocal_file)
 
     if resistance_df.empty:

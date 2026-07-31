@@ -35,15 +35,13 @@ nextflow_pipeline {
             name: "-profile test_nanopore --sequencing_summary false",
             params: [
                 artic_minion_caller: 'medaka',
-                sequencing_summary: false,
-                fast5_dir: false
+                sequencing_summary: false
             ]
         ],
         [
             name: "-profile test_nanopore --mapper_nanopore 'minimap2'",
             params: [
-                mapper_nanopore: 'minimap2',
-                fast5_dir: false
+                mapper_nanopore: 'minimap2'
             ]
         ]
     ]
