@@ -32,13 +32,15 @@ def parser_args(args=None):
 def parse_codfreq(codfreq_path):
     return pd.read_csv(codfreq_path)
 
-def build_mutation_row(sample_name, gene_name, mut_text, mut, resistance_comments):
+def build_mutation_row(sample_name, gene_name, mut_text, original_mut_text, mut, resistance_comments):
     return {
         "Sample_name": sample_name,
         "Gene_name": gene_name,
         "Mutations": mut_text,
         "Mutations_type": mut.get("primaryType", "NA"),
-        "Mutations_comments": resistance_comments.get(mut_text, ""),
+        # Use the original combined mutation text, such as M184IM,
+        # because sierra-local stores the comment under that mutation name.
+        "Mutations_comments": resistance_comments.get(original_mut_text, ""),
         "isInsertion": mut.get("isInsertion", False),
         "isDeletion": mut.get("isDeletion", False),
         "isApobecMutation": mut.get("isApobecMutation", False),
@@ -98,6 +100,9 @@ def parse_sierra_json(sample_name, json_path):
         for mut in gene_entry.get("mutations", []):
             consensus = mut.get("consensus", "")
             text = mut.get("text", "")
+            # Keep the original combined mutation text so split mutations
+            # can retrieve the resistance comment linked to the combined form. For instance: M184IM
+            original_mut_text = text
             aas = mut.get("AAs", "")
             pos = mut.get("position", "")
             match = re.match(rf"{re.escape(consensus)}{str(pos)}(.+)", text)
@@ -112,13 +117,13 @@ def parse_sierra_json(sample_name, json_path):
                     if pos == lastAA and aa == "X" and not mut.get("isDeletion"):
                         continue  # skip, false positive at end of sequence
                     mut_text = f"{consensus}{pos}{aa}"
-                    rows.append(build_mutation_row(sample_name, gene_name, mut_text, mut, resistance_comments))
+                    rows.append(build_mutation_row(sample_name, gene_name, mut_text, original_mut_text, mut, resistance_comments))
             else:
                 if pos == lastAA and aas == "X" and not mut.get("isDeletion"):
                     continue  # skip, false positive at end of sequence
                 # If there is only one possible amino acid, keep a single row
                 mut_text = mut.get("text", "NA")
-                rows.append(build_mutation_row(sample_name, gene_name, mut_text, mut, resistance_comments))
+                rows.append(build_mutation_row(sample_name, gene_name, mut_text, original_mut_text, mut, resistance_comments))
 
     df = pd.DataFrame(rows)
 
