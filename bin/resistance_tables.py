@@ -202,6 +202,7 @@ def parse_resistance_json(sample_name, json_path):
 
     # Dictionary to map abbreviations to full drug names
     drug_fullnames = {
+        # PI:
         "ATV/r": "atazanavir/r",
         "DRV/r": "darunavir/r",
         "LPV/r": "lopinavir/r",
@@ -210,19 +211,23 @@ def parse_resistance_json(sample_name, json_path):
         "NFV": "nelfinavir",
         "SQV/r": "saquinavir/r",
         "TPV/r": "tipranavir/r",
+        # NRTI:
         "ABC": "abacavir",
         "AZT": "zidovudine",
         "FTC": "emtricitabine",
+        "ISL": "islatravir",
         "3TC": "lamivudine",
         "TDF": "tenofovir",
         "D4T": "stavudine",
         "DDI": "didanosine",
+        # NNRTI:
         "DOR": "doravirine",
         "EFV": "efavirenz",
         "ETR": "etravirine",
         "NVP": "nevirapine",
         "RPV": "rilpivirine",
         "DPV": "dapivirine",
+        # INSTI:
         "BIC": "bictegravir",
         "CAB": "cabotegravir",
         "DTG": "dolutegravir",
