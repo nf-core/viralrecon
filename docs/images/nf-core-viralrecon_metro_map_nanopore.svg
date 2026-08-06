@@ -5325,7 +5325,7 @@
          y="585.99976"
          id="tspan8474"><tspan
            style="font-weight:bold;-inkscape-font-specification:'Maven Pro Bold'"
-           id="tspan8472">v3.1dev</tspan></tspan></text><text
+           id="tspan8472">v3.1</tspan></tspan></text><text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.26196px;line-height:1.25;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.0848233;stroke-opacity:1"
        x="-69.880928"
@@ -6330,4 +6330,168 @@
          cx="70.964661"
          cy="-170.70625"
          r="1.1095507"
-         transform="rotate(90)" /></g></g></svg>
+         transform="rotate(90)" /></g>
+    <g
+       id="animated-pipeline-dots"
+       style="display:inline;pointer-events:none">
+      <circle
+         r="1.05"
+         fill="#01862e"
+         opacity="0"
+         stroke="#ffffff"
+         stroke-width="0.32">
+        <animate
+           attributeName="opacity"
+           dur="22.3s"
+           repeatCount="indefinite"
+           values="0;0;1;1;0;0"
+           keyTimes="0;0;0.002;0.101;0.102;1" />
+        <animateMotion
+           dur="22.3s"
+           repeatCount="indefinite"
+           keyTimes="0;0;0.101;1"
+           keyPoints="0;0;1;1"
+           calcMode="linear"
+           path="M -18.499108,-42.10264 H 11.764291" />
+      </circle>
+      <circle
+         r="0.95"
+         fill="#01862e"
+         opacity="0"
+         stroke="#ffffff"
+         stroke-width="0.3">
+        <animate
+           attributeName="opacity"
+           dur="22.3s"
+           repeatCount="indefinite"
+           values="0;0;1;1;0;0"
+           keyTimes="0;0.101;0.102;0.353;0.355;1" />
+        <animateMotion
+           dur="22.3s"
+           repeatCount="indefinite"
+           keyTimes="0;0.101;0.353;1"
+           keyPoints="0;0;1;1"
+           calcMode="linear"
+           path="M 11.764291,-42.150773 c 1.585201,0.02974 5.524358,0.03078 6.933117,0 c 2.233454,-0.04886 4.471772,-1.842101 5.994056,-3.737304 l 2.697309,-3.345408 c 1.554912,-1.859273 3.760201,-3.4743 5.994048,-3.4743 h 22.812735 c 2.233846,0 4.43914,1.615027 5.994053,3.4743 l 2.697312,3.345408 c 1.52228,1.895203 3.760597,3.688456 5.994053,3.737304 c 1.40876,0.03078 7.297993,0.02974 8.883196,0" />
+      </circle>
+      <circle
+         r="0.95"
+         fill="#01862e"
+         opacity="0"
+         stroke="#ffffff"
+         stroke-width="0.3">
+        <animate
+           attributeName="opacity"
+           dur="22.3s"
+           repeatCount="indefinite"
+           values="0;0;1;1;0;0"
+           keyTimes="0;0.101;0.102;0.351;0.353;1" />
+        <animateMotion
+           dur="22.3s"
+           repeatCount="indefinite"
+           keyTimes="0;0.101;0.351;1"
+           keyPoints="0;0;1;1"
+           calcMode="linear"
+           path="M 12.293552,-42.111689 c 1.574818,-0.02974 5.488173,-0.03078 6.887706,0 c 2.218824,0.04885 4.442483,1.84215 5.954795,3.7374 l 2.679643,3.345495 c 1.544726,1.859319 3.735571,3.474387 5.954788,3.474387 h 22.663315 c 2.219212,0 4.410062,-1.615068 5.954791,-3.474387 l 2.679646,-3.345495 c 1.512308,-1.89525 3.735965,-3.68855 5.954792,-3.7374 c 1.399533,-0.03078 7.250194,-0.02974 8.825013,0" />
+      </circle>
+      <circle
+         r="0.95"
+         fill="#01862e"
+         opacity="0"
+         stroke="#ffffff"
+         stroke-width="0.3">
+        <animate
+           attributeName="opacity"
+           dur="22.3s"
+           repeatCount="indefinite"
+           values="0;0;1;1;0;0"
+           keyTimes="0;0.353;0.355;0.65;0.651;1" />
+        <animateMotion
+           dur="22.3s"
+           repeatCount="indefinite"
+           keyTimes="0;0.353;0.65;1"
+           keyPoints="0;0;1;1"
+           calcMode="linear"
+           path="M 79.80388,-42.119209 C 82.392,-42.168029 84.985,-43.960233 86.748806,-45.854327 l 3.125026,-3.343451 c 1.801472,-1.858185 4.356467,-3.472267 6.944522,-3.472267 h 26.430256 c 2.58807,0 5.14306,1.614082 6.94454,3.472267 l 3.12503,3.343451 c 1.76367,1.894094 4.35692,3.686298 6.94454,3.735118 c 1.63215,0.03077 8.45525,0.02973 10.29182,0" />
+      </circle>
+      <circle
+         r="0.95"
+         fill="#01862e"
+         opacity="0"
+         stroke="#ffffff"
+         stroke-width="0.3">
+        <animate
+           attributeName="opacity"
+           dur="22.3s"
+           repeatCount="indefinite"
+           values="0;0;1;1;0;0"
+           keyTimes="0;0.353;0.355;0.65;0.651;1" />
+        <animateMotion
+           dur="22.3s"
+           repeatCount="indefinite"
+           keyTimes="0;0.353;0.65;1"
+           keyPoints="0;0;1;1"
+           calcMode="linear"
+           path="M 79.80388,-42.073828 C 82.392,-42.025008 84.985,-40.232803 86.748806,-38.33871 l 3.125026,3.343452 c 1.801472,1.858185 4.356467,3.472267 6.944522,3.472267 h 26.430256 c 2.58807,0 5.14306,-1.614082 6.94454,-3.472267 l 3.12503,-3.343452 c 1.76367,-1.894093 4.35692,-3.686298 6.94454,-3.735118 c 1.63215,-0.03077 8.45525,-0.02973 10.29182,0" />
+      </circle>
+      <circle
+         r="1.05"
+         fill="#01862e"
+         opacity="0"
+         stroke="#ffffff"
+         stroke-width="0.32">
+        <animate
+           attributeName="opacity"
+           dur="22.3s"
+           repeatCount="indefinite"
+           values="0;0;1;1;0;0"
+           keyTimes="0;0.65;0.651;0.695;0.697;1" />
+        <animateMotion
+           dur="22.3s"
+           repeatCount="indefinite"
+           keyTimes="0;0.65;0.695;1"
+           keyPoints="0;0;1;1"
+           calcMode="linear"
+           path="M 150.55454,-42.096518 H 164.08182" />
+      </circle>
+      <circle
+         r="0.82"
+         fill="#01862e"
+         opacity="0"
+         stroke="#ffffff"
+         stroke-width="0.26">
+        <animate
+           attributeName="opacity"
+           dur="22.3s"
+           repeatCount="indefinite"
+           values="0;0;1;1"
+           keyTimes="0;0.695;0.697;1" />
+        <animateMotion
+           dur="22.3s"
+           repeatCount="indefinite"
+           keyTimes="0;0.695;0.718;1"
+           keyPoints="0;0;1;1"
+           calcMode="linear"
+           path="M 164.08182,-42.260775 V -37.037264 H 162.27573" />
+      </circle>
+      <circle
+         r="0.82"
+         fill="#01862e"
+         opacity="0"
+         stroke="#ffffff"
+         stroke-width="0.26">
+        <animate
+           attributeName="opacity"
+           dur="22.3s"
+           repeatCount="indefinite"
+           values="0;0;1;1"
+           keyTimes="0;0.695;0.697;1" />
+        <animateMotion
+           dur="22.3s"
+           repeatCount="indefinite"
+           keyTimes="0;0.695;0.76;1"
+           keyPoints="0;0;1;1"
+           calcMode="linear"
+           path="M 164.08182,-42.096517 H 178.62444 H 183.67942" />
+      </circle>
+    </g></g></svg>
