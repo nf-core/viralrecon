@@ -5,7 +5,6 @@ This document describes the output produced by the pipeline. Most of the plots a
 The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
 # Nanopore: Pipeline overview
-
 - [Introduction](#introduction)
 - [Nanopore: Pipeline overview](#nanopore-pipeline-overview)
   - [Nanopore: Preprocessing](#nanopore-preprocessing)
@@ -423,7 +422,6 @@ The pipeline has special steps which also allow the software versions to be repo
 An example MultiQC report generated from a full-sized dataset can be viewed on the [nf-core website](https://nf-co.re/viralrecon/results).
 
 # Illumina: Pipeline overview
-
 - [Introduction](#introduction)
 - [Nanopore: Pipeline overview](#nanopore-pipeline-overview)
   - [Nanopore: Preprocessing](#nanopore-preprocessing)
