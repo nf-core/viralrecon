@@ -493,8 +493,7 @@ def extract_protein_sequences(seq_record, coordinates, gene_groups, sample_name)
         for genes_list, start, end, strand in merged:
             seq = extract_sequence(seq_record, start, end, strand)
 
-            gene_name = "_".join(genes_list)
-            fasta_lines.append(f">{sample_name}_{gene_name}\n{seq}")
+            fasta_lines.append(f">{sample_name}\n{seq}")
 
         fasta_block = "\n".join(fasta_lines)
 
