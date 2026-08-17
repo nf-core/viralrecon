@@ -5,6 +5,7 @@ This document describes the output produced by the pipeline. Most of the plots a
 The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
 # Nanopore: Pipeline overview
+
 - [Nanopore: Pipeline overview](#nanopore-pipeline-overview)
   - [Nanopore: Preprocessing](#nanopore-preprocessing)
     - [Nanopore: pycoQC](#nanopore-pycoqc)
@@ -110,8 +111,9 @@ The output directory depends on the value provided to `--mapper_nanopore`:
 ### Nanopore: ARTIC
 
 When `--mapper_nanopore artic` is selected, the pipeline uses the [`artic minion`](https://artic.readthedocs.io/en/latest/commands/#minion) command from the [ARTIC field bioinformatics pipeline](https://github.com/artic-network/fieldbioinformatics). ARTIC performs the core Nanopore amplicon workflow: read alignment against the reference genome, primer-aware processing, variant calling and consensus generation. The resulting BAM, VCF and consensus FASTA files are written under the `artic/` output directory.
->[!WARNING]
->Please take into account that `artic minion` requires the primer BED file supplied via `--primer_bed` to be in **BED7** format — see [Usage - Primer BED file format](usage.md#primer-bed-file-format) for details.
+
+> [!WARNING]
+> Please take into account that `artic minion` requires the primer BED file supplied via `--primer_bed` to be in **BED7** format — see [Usage - Primer BED file format](usage.md#primer-bed-file-format) for details.
 
 <details markdown="1">
 <summary>Output files</summary>
@@ -381,6 +383,7 @@ The pipeline has special steps which also allow the software versions to be repo
 An example MultiQC report generated from a full-sized dataset can be viewed on the [nf-core website](https://nf-co.re/viralrecon/results).
 
 # Illumina: Pipeline overview
+
 - [Illumina: Pipeline overview](#illumina-pipeline-overview)
   - [Illumina: Preprocessing](#illumina-preprocessing)
     - [cat](#cat)
