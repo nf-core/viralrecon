@@ -95,14 +95,16 @@ nextflow run nf-core/viralrecon \
     --sequencing_summary sequencing_summary.txt \
     -profile <docker/singularity/podman/conda/institute>
 ```
+
 ## Primer BED file format
 
-As you may already know, one of nf-core/viralrecon's steps is primer trimming, using a BED file with primer coordinates. If you are running the pipeline in amplicon mode (`--protocol amplicon`), you will then need to supply a BED file containing the primer positions by means of the `--primer_bed` parameter. This file is used by iVar for Illumina data and by `artic minion` for Nanopore data (if using ``--mapper_nanopore artic``), but these two tools have different requirements:
+As you may already know, one of nf-core/viralrecon's steps is primer trimming, using a BED file with primer coordinates. If you are running the pipeline in amplicon mode (`--protocol amplicon`), you will then need to supply a BED file containing the primer positions by means of the `--primer_bed` parameter. This file is used by iVar for Illumina data and by `artic minion` for Nanopore data (if using `--mapper_nanopore artic`), but these two tools have different requirements:
 
 - **Illumina data**: iVar accepts the file in either BED6 or BED7 format. Only the first 6 columns (chrom, start, end, name, score, strand) are required to soft clip primer sequences from the aligned BAM file.
 - **Nanopore data**: `artic minion` requires the file to be in **BED7** format, since this is required at the same time by [primalbedtools' bedfiles.py](https://github.com/ChrisgKent/primalbedtools/blob/main/primalbedtools/bedfiles.py), which artic minion relies on for BED file processing. The 7th column indicates the primer sequence.
 
 **BED6** example:
+
 ```
 MN908947.3 30 54 nCoV-2019_1_LEFT 60 -
 MN908947.3 385 410 nCoV-2019_1_RIGHT 60 +
@@ -111,6 +113,7 @@ MN908947.3 704 726 nCoV-2019_2_RIGHT 60 +
 ```
 
 **BED7** example (as above, plus a 7th column indicating the primer sequence):
+
 ```
 MN908947.3 30 54 nCoV-2019_1_LEFT 60 - ACCAACCAACTTTCGATCTCTTGT
 MN908947.3 385 410 nCoV-2019_1_RIGHT 60 + CATCTTTAAGATGTTGACGTGCCTC
