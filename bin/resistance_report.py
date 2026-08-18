@@ -21,7 +21,10 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 def parser_args(args=None):
     Description = "Parse Sierra-local JSON reports and corresponding resistance and mutation tables to generate an HTML report."
     Epilog = """Example usage:
-    python resistance_report.py --sierralocal_folder resistance_jsons --mutation_folder mutation_tables --resistance_folder resistance_tables --nextclade_folder nextclade_folder  --consensus_folder consensus --ivar_consensus_params "-t 0.8 -q 30 -m 50 -n N" --output_html resistance_report.html
+    python resistance_report.py --sierralocal_folder resistance_jsons --mutation_folder mutation_tables
+        --resistance_folder resistance_tables --nextclade_folder nextclade_folder
+        --consensus_folder consensus --ivar_consensus_params "-t 0.8 -q 30 -m 50 -n N"
+        --ivar_variant_params "-t 0.01" --output_html resistance_report.html
     """
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
 
@@ -75,10 +78,16 @@ def parser_args(args=None):
         help="List of genes to extract, organized into groups. Genes separated by commas (',') will be included in the same output FASTA file. Gene groups separated by semicolons (';') will produce separate FASTA files.",
     )
     parser.add_argument(
-        "-i",
+        "-ic",
         "--ivar_consensus_params",
         type=str,
         help="Parameters used for ivar consensus calling",
+    )
+    parser.add_argument(
+        "-iv",
+        "--ivar_variant_params",
+        type=str,
+        help="Parameters used for ivar variant calling",
     )
     parser.add_argument(
         "-d",
@@ -101,7 +110,7 @@ def get_sample_number(sample_name, all_samples):
     return sorted_samples.index(sample_name) + 1
 
 
-def parse_sequence_summary(json_path, subtype_info=None, ivar_params=None):
+def parse_sequence_summary(json_path, subtype_info=None, ivar_consensus_params=None, ivar_variant_params=None):
     """
     Extract sequence summary information from Sierra-local JSON.
     - Lists each gene present (PR, RT, IN)
@@ -205,15 +214,18 @@ def parse_sequence_summary(json_path, subtype_info=None, ivar_params=None):
 
     # --- Parse ivar consensus parameters if provided
     # Extract numeric values with regex
-    match_t = re.search(r"-t\s*([\d.]+)", ivar_params)
-    match_q = re.search(r"-q\s*(\d+)", ivar_params)
-    match_m = re.search(r"-m\s*(\d+)", ivar_params)
+    match_t = re.search(r"-t\s*([\d.]+)", ivar_consensus_params)
+    match_q = re.search(r"-q\s*(\d+)", ivar_consensus_params)
+    match_m = re.search(r"-m\s*(\d+)", ivar_consensus_params)
+    match_allele_freq = re.search(r"-t\s*([\d.]+)", ivar_variant_params)
 
     t_val = float(match_t.group(1))
     q_val = int(match_q.group(1))
     m_val = int(match_m.group(1))
+    min_allele_freq = float(match_allele_freq.group(1))
 
     summary_lines.append(f"Minimum read depth: ≥{m_val}")
+    summary_lines.append(f"Nucleotide mixture threshold (NMT): ≥{ min_allele_freq * 100:.0f}%")
     summary_lines.append(f"Mutation detection threshold (MDT): ≥{ (1-t_val) * 100:.0f}%")
     summary_lines.append(f"Minimum quality threshold: {q_val}")
 
@@ -578,7 +590,9 @@ def main():
         subtype = get_nextclade_subtype(nextclade_file, sample_name)
 
         # --- Parse sequence summary
-        seq_summary = parse_sequence_summary(json_file, subtype_info=subtype, ivar_params=args.ivar_consensus_params)
+        seq_summary = parse_sequence_summary(json_file, subtype_info=subtype,
+                                            ivar_consensus_params=args.ivar_consensus_params,
+                                            ivar_variant_params=args.ivar_variant_params)
 
         # --- Parse resistance table
         df_res = parse_resistance_table(res_file, deprecated_drugs)
