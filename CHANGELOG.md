@@ -18,6 +18,7 @@ Special thanks to the following for their code contributions to the release:
 - [Magdalena Matito](https://github.com/magdasmat)
 - [Jordan Speizer](https://github.com/speizerj)
 - [LilyAnderssonLee](https://github.com/LilyAnderssonLee)
+- [Víctor López](https://github.com/victor5lm)
 
 Thank you to everyone else that has contributed by reporting bugs, enhancements or in any other way, shape or form.
 
@@ -35,6 +36,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #594](https://github.com/nf-core/viralrecon/pull/594)] - Added mapping/variant calling/consensus steps for nanpore data appart from ARTIC protocol
 - [[PR #596](https://github.com/nf-core/viralrecon/pull/596)] - Template update for nf-core/tools v4.0.2
 - [[PR #607](https://github.com/nf-core/viralrecon/pull/607)] - Updated the multiqc module and fixed nextlfow lingting warnings
+- [[PR #615](https://github.com/nf-core/viralrecon/pull/615)] - Fixed collapse_primer_bed.py to support 7-column primer BED files and updated docs
 
 ### Parameters
 
