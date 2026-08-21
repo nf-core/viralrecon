@@ -24,7 +24,7 @@ def parser_args(args=None):
     python resistance_report.py --sierralocal_folder resistance_jsons --mutation_folder mutation_tables
         --resistance_folder resistance_tables --nextclade_folder nextclade_folder
         --consensus_folder consensus --ivar_consensus_params "-t 0.8 -q 30 -m 50 -n N"
-        --ivar_variant_params "-t 0.01" --output_html resistance_report.html
+        --ivar_variant_maf 0.01 --output_html resistance_report.html
     """
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
 
@@ -85,9 +85,10 @@ def parser_args(args=None):
     )
     parser.add_argument(
         "-iv",
-        "--ivar_variant_params",
-        type=str,
-        help="Parameters used for ivar variant calling",
+        "--ivar_variant_maf",
+        type=float,
+        default=0.01,
+        help="Minor allele frequency threshold used for ivar variant calling",
     )
     parser.add_argument(
         "-d",
@@ -110,7 +111,7 @@ def get_sample_number(sample_name, all_samples):
     return sorted_samples.index(sample_name) + 1
 
 
-def parse_sequence_summary(json_path, subtype_info=None, ivar_consensus_params=None, ivar_variant_params=None):
+def parse_sequence_summary(json_path, subtype_info=None, ivar_consensus_params=None, ivar_variant_maf=None):
     """
     Extract sequence summary information from Sierra-local JSON.
     - Lists each gene present (PR, RT, IN)
@@ -217,15 +218,13 @@ def parse_sequence_summary(json_path, subtype_info=None, ivar_consensus_params=N
     match_t = re.search(r"-t\s*([\d.]+)", ivar_consensus_params)
     match_q = re.search(r"-q\s*(\d+)", ivar_consensus_params)
     match_m = re.search(r"-m\s*(\d+)", ivar_consensus_params)
-    match_allele_freq = re.search(r"-t\s*([\d.]+)", ivar_variant_params)
 
     t_val = float(match_t.group(1))
     q_val = int(match_q.group(1))
     m_val = int(match_m.group(1))
-    min_allele_freq = float(match_allele_freq.group(1))
 
     summary_lines.append(f"Minimum read depth: ≥{m_val}")
-    summary_lines.append(f"Nucleotide mixture threshold (NMT): ≥{ min_allele_freq * 100:.0f}%")
+    summary_lines.append(f"Nucleotide mixture threshold (NMT): ≥{ ivar_variant_maf * 100:.0f}%")
     summary_lines.append(f"Mutation detection threshold (MDT): ≥{ (1-t_val) * 100:.0f}%")
     summary_lines.append(f"Minimum quality threshold: {q_val}")
 
@@ -248,6 +247,20 @@ def get_nextclade_subtype(nextclade_file, sample_name):
         print(f"⚠️ Could not parse Nextclade file for {sample_name}: {e}")
     return None
 
+def extract_triggered_mutations (mutation):
+    """Return the mutation lable using only amino acids that triggered sierra scoring"""
+    text = mutation.get("text", "")
+    triggered_aas = mutation.get("triggeredAAs", "")
+
+    match = re.match(r"^([A-Z*_-]\d+)", text)
+    if not match or not triggered_aas:
+        return text
+
+    mutation_prefix = match.group(1)
+    if len(triggered_aas) == 1:
+        return f"{mutation_prefix}{triggered_aas}"
+    return f"{mutation_prefix}{triggered_aas}"
+
 def extract_mutation_scoring(json_path):
     mutation_scores = {}
     with open(json_path, "r", encoding="utf-8") as f:
@@ -266,7 +279,7 @@ def extract_mutation_scoring(json_path):
                 score = mutation_block.get("score")
 
                 # Extract all mutation names
-                mutation_ids = [m.get("text") for m in mutations]
+                mutation_ids = [extract_triggered_mutations(m) for m in mutations]
 
                 # CASE 1 → single mutation: "M41L"
                 if len(mutation_ids) == 1:
@@ -592,7 +605,7 @@ def main():
         # --- Parse sequence summary
         seq_summary = parse_sequence_summary(json_file, subtype_info=subtype,
                                             ivar_consensus_params=args.ivar_consensus_params,
-                                            ivar_variant_params=args.ivar_variant_params)
+                                            ivar_variant_maf=args.ivar_variant_maf)
 
         # --- Parse resistance table
         df_res = parse_resistance_table(res_file, deprecated_drugs)

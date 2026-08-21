@@ -24,7 +24,6 @@ process RESISTANCE_REPORT {
     script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     def args = task.ext.args ?: ''
     def ivar_consensus_params = task.ext.args2 ?: '-t N/A -q N/A -m N/A -n N'
-    def ivar_variant_params = task.ext.args3 ?: '-t N/A'
     def prefix = task.ext.prefix ?: 'resistance'
 
     """
@@ -36,7 +35,6 @@ process RESISTANCE_REPORT {
         --consensus_folder ./consensus \\
         --gff_folder ./gff \\
         --ivar_consensus_params "'${ivar_consensus_params}'" \\
-        --ivar_variant_params "'${ivar_variant_params}'" \\
         --output_html ${prefix}.html \\
         $args
     """
