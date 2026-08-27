@@ -602,6 +602,11 @@
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Set this parameter to true when the primer's for cutadapt are 3' adapters. Default value is false, as default primers are 5' adapters.",
                     "help_text": "See viralrecon's usage and cutadapt documentation: https://cutadapt.readthedocs.io/en/stable/guide.html#adapter-types"
+                },
+                "perform_ev_typing": {
+                    "type": "boolean",
+                    "fa-icon": "fas fa-fast-forward",
+                    "description": "Whether to perform enterovirus typing."
                 }
             },
             "fa_icon": "fas fa-random"

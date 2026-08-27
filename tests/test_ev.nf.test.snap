@@ -11,6 +11,13 @@
                 "BLAST_BLASTN": {
                     "blastn": "2.17.0+"
                 },
+                "BLAST_REPORT": {
+                    "jinja2": "3.1.6",
+                    "matplotlib": "3.10.1,
+                    "pandas": "2.3.3",
+                    "python": "3.13.2",
+                    "seaborn": "0.13.2"
+                },
                 "CAT_FASTQ": {
                     "cat": 9.5
                 },
@@ -51,9 +58,6 @@
                 "SPADES": {
                     "spades": "4.1.0"
                 },
-                "UNICYCLER": {
-                    "unicycler": "0.5.1"
-                },
                 "UNTAR_BLAST_DB": {
                     "untar": 1.34
                 },
@@ -89,6 +93,9 @@
                 "assembly/spades/rnaviral/blastn",
                 "assembly/spades/rnaviral/blastn/SRR13266665.filter.blastn.txt",
                 "assembly/spades/rnaviral/blastn/SRR13266665.results.blastn.txt",
+                "assembly/spades/rnaviral/blastn/SRR13266665_blast_report.html",
+                "assembly/spades/rnaviral/blastn/SRR13266665_genotype.csv",
+                "assembly/spades/rnaviral/blastn/SRR13266665_reversed_contigs.fa",
                 "assembly/spades/rnaviral/log",
                 "assembly/spades/rnaviral/log/SRR13266665.spades.log",
                 "assembly/spades/rnaviral/quast.spades",
@@ -121,57 +128,6 @@
                 "assembly/spades/rnaviral/quast.spades/transposed_report.tex",
                 "assembly/spades/rnaviral/quast.spades/transposed_report.tsv",
                 "assembly/spades/rnaviral/quast.spades/transposed_report.txt",
-                "assembly/unicycler",
-                "assembly/unicycler/SRR13266665.assembly.gfa.gz",
-                "assembly/unicycler/SRR13266665.scaffolds.fa.gz",
-                "assembly/unicycler/abacas",
-                "assembly/unicycler/abacas/SRR13266665.abacas.MULTIFASTA.fa",
-                "assembly/unicycler/abacas/SRR13266665.abacas.bin",
-                "assembly/unicycler/abacas/SRR13266665.abacas.crunch",
-                "assembly/unicycler/abacas/SRR13266665.abacas.fasta",
-                "assembly/unicycler/abacas/SRR13266665.abacas.gaps",
-                "assembly/unicycler/abacas/SRR13266665.abacas.gaps.tab",
-                "assembly/unicycler/abacas/SRR13266665.abacas.nucmer.delta",
-                "assembly/unicycler/abacas/SRR13266665.abacas.nucmer.filtered.delta",
-                "assembly/unicycler/abacas/SRR13266665.abacas.nucmer.tiling",
-                "assembly/unicycler/abacas/SRR13266665.abacas.tab",
-                "assembly/unicycler/abacas/SRR13266665.abacas.unused.contigs.out",
-                "assembly/unicycler/bandage",
-                "assembly/unicycler/bandage/SRR13266665.png",
-                "assembly/unicycler/bandage/SRR13266665.svg",
-                "assembly/unicycler/blastn",
-                "assembly/unicycler/blastn/SRR13266665.filter.blastn.txt",
-                "assembly/unicycler/blastn/SRR13266665.results.blastn.txt",
-                "assembly/unicycler/log",
-                "assembly/unicycler/log/SRR13266665.unicycler.log",
-                "assembly/unicycler/quast.unicycler",
-                "assembly/unicycler/quast.unicycler/basic_stats",
-                "assembly/unicycler/quast.unicycler/basic_stats/GC_content_plot.pdf",
-                "assembly/unicycler/quast.unicycler/basic_stats/NGx_plot.pdf",
-                "assembly/unicycler/quast.unicycler/basic_stats/Nx_plot.pdf",
-                "assembly/unicycler/quast.unicycler/basic_stats/SRR13266665.scaffolds_GC_content_plot.pdf",
-                "assembly/unicycler/quast.unicycler/basic_stats/cumulative_plot.pdf",
-                "assembly/unicycler/quast.unicycler/basic_stats/gc.icarus.txt",
-                "assembly/unicycler/quast.unicycler/contigs_reports",
-                "assembly/unicycler/quast.unicycler/contigs_reports/SRR13266665-scaffolds.misassemblies.gff",
-                "assembly/unicycler/quast.unicycler/contigs_reports/all_alignments_SRR13266665-scaffolds.tsv",
-                "assembly/unicycler/quast.unicycler/contigs_reports/contigs_report_SRR13266665-scaffolds.mis_contigs.info",
-                "assembly/unicycler/quast.unicycler/contigs_reports/contigs_report_SRR13266665-scaffolds.stderr",
-                "assembly/unicycler/quast.unicycler/contigs_reports/contigs_report_SRR13266665-scaffolds.stdout",
-                "assembly/unicycler/quast.unicycler/contigs_reports/minimap_output",
-                "assembly/unicycler/quast.unicycler/contigs_reports/minimap_output/SRR13266665-scaffolds.coords_tmp",
-                "assembly/unicycler/quast.unicycler/icarus.html",
-                "assembly/unicycler/quast.unicycler/icarus_viewers",
-                "assembly/unicycler/quast.unicycler/icarus_viewers/contig_size_viewer.html",
-                "assembly/unicycler/quast.unicycler/quast.log",
-                "assembly/unicycler/quast.unicycler/report.html",
-                "assembly/unicycler/quast.unicycler/report.pdf",
-                "assembly/unicycler/quast.unicycler/report.tex",
-                "assembly/unicycler/quast.unicycler/report.tsv",
-                "assembly/unicycler/quast.unicycler/report.txt",
-                "assembly/unicycler/quast.unicycler/transposed_report.tex",
-                "assembly/unicycler/quast.unicycler/transposed_report.tsv",
-                "assembly/unicycler/quast.unicycler/transposed_report.txt",
                 "fastp",
                 "fastp/SRR13266665.fastp.html",
                 "fastp/SRR13266665.fastp.json",
@@ -233,7 +189,6 @@
                 "multiqc/multiqc_data/multiqc_fastqc.yaml",
                 "multiqc/multiqc_data/multiqc_kraken.yaml",
                 "multiqc/multiqc_data/multiqc_quast_quast_spades.yaml",
-                "multiqc/multiqc_data/multiqc_quast_quast_unicycler.yaml",
                 "multiqc/multiqc_data/multiqc_software_versions.yaml",
                 "multiqc/multiqc_data/multiqc_sources.yaml",
                 "multiqc/multiqc_data/multiqc_summary_assembly_metrics_plot.yaml",
@@ -246,7 +201,6 @@
             ],
             [
                 "SRR13266665.contigs.fa.gz:md5,d6fb919c8683a3025cf6c5fd512f5245",
-                "gc.icarus.txt:md5,3f5e959947cbc0d2744053261dbf77c4",
                 "gc.icarus.txt:md5,3f5e959947cbc0d2744053261dbf77c4",
                 "SRR13266665.fastp.json:md5,365cd8099c91d57ce07c0615d4899128",
                 "SRR13266665.kraken2.report.txt:md5,ba7c54a91f0a60efe950bed82f8d6e87",
@@ -293,6 +247,6 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T13:15:36.357602835"
+        "timestamp": "2026-06-12T15:23:41.756189166"
     }
 }

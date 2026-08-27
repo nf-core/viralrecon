@@ -1,0 +1,134 @@
+{
+    "Should generate an error report and csv with no recomendation": {
+        "content": [
+            {
+                "name": "error"
+            },
+            "test_blast_report.html",
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test_reversed_contigs.fa:md5,2c560058647efa1f1d6269090722cd77"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test_genotype.csv:md5,1eff0b835dadc38c761ae4f2eaf0faf8"
+                ]
+            ],
+            {
+                "versions_jinja2": [
+                    [
+                        "BLAST_REPORT",
+                        "jinja2",
+                        "3.1.6"
+                    ]
+                ],
+                "versions_matplotlib": [
+                    [
+                        "BLAST_REPORT",
+                        "matplotlib",
+                        "3.10.1"
+                    ]
+                ],
+                "versions_pandas": [
+                    [
+                        "BLAST_REPORT",
+                        "pandas",
+                        "2.3.3"
+                    ]
+                ],
+                "versions_python": [
+                    [
+                        "BLAST_REPORT",
+                        "python",
+                        "3.13.2"
+                    ]
+                ],
+                "versions_seaborn": [
+                    [
+                        "BLAST_REPORT",
+                        "seaborn",
+                        "0.13.2"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.10.4"
+        },
+        "timestamp": "2026-08-27T13:54:37.013852"
+    },
+    "Should generate a blast report and csv with proposed interpretation: manual assessment, and reverse complement contig": {
+        "content": [
+            {
+                "name": "normal"
+            },
+            "test_blast_report.html",
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test_reversed_contigs.fa:md5,eeca829ace57b8f0dc6ce38fdee5f91d"
+                ]
+            ],
+            [
+                [
+                    {
+                        "id": "test"
+                    },
+                    "test_genotype.csv:md5,1214bbae61a9103af59ed89be815eedc"
+                ]
+            ],
+            {
+                "versions_jinja2": [
+                    [
+                        "BLAST_REPORT",
+                        "jinja2",
+                        "3.1.6"
+                    ]
+                ],
+                "versions_matplotlib": [
+                    [
+                        "BLAST_REPORT",
+                        "matplotlib",
+                        "3.10.1"
+                    ]
+                ],
+                "versions_pandas": [
+                    [
+                        "BLAST_REPORT",
+                        "pandas",
+                        "2.3.3"
+                    ]
+                ],
+                "versions_python": [
+                    [
+                        "BLAST_REPORT",
+                        "python",
+                        "3.13.2"
+                    ]
+                ],
+                "versions_seaborn": [
+                    [
+                        "BLAST_REPORT",
+                        "seaborn",
+                        "0.13.2"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.9.2",
+            "nextflow": "25.10.4"
+        },
+        "timestamp": "2026-08-27T13:53:47.927347"
+    }
+}

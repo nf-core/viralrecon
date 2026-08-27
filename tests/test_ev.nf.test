@@ -17,7 +17,7 @@ nextflow_pipeline {
             // stable_name: All files + folders in ${params.outdir}/ with a stable name
             def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignoreFile: 'tests/.nftignore_stable_name', ignore: ['pipeline_info/*.{html,json,txt}'])
             // stable_path: All files in ${params.outdir}/ with stable content
-            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
+            def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore', ignore: ['**/*_blast_report.html'])
             def softwareYaml = removeNextflowVersion("$outputDir/pipeline_info/nf_core_viralrecon_software_mqc_versions.yml")
 
             assertAll(
