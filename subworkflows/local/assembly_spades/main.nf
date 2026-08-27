@@ -83,6 +83,7 @@ workflow ASSEMBLY_SPADES {
     GUNZIP_SCAFFOLDS
         .out
         .gunzip
+        .filter { _meta, scaffold -> scaffold.size() > 0 }
         .set { ch_scaffolds }
 
     GUNZIP_GFA

@@ -52,13 +52,14 @@ workflow ASSEMBLY_QC {
     ch_quast_tsv     = channel.empty()
     if (!params.skip_assembly_quast) {
         scaffolds
-            .collect{ it[1] }
+            .collect{ _meta, scaffolds_file -> scaffolds_file }
             .map { scaffolds_collect -> tuple([id: "quast"], scaffolds_collect) }
             .set { ch_to_quast }
 
         QUAST (
             ch_to_quast,
-            fasta.map { [ [:], it ] },
+            fasta.map { fasta_files ->
+                [ [:], fasta_files ] },
             gff
         )
         ch_quast_results = QUAST.out.results
@@ -72,7 +73,8 @@ workflow ASSEMBLY_QC {
     if (!params.skip_abacas) {
         ABACAS (
             scaffolds,
-            fasta.map { [ [:], it ] }
+            fasta.map { fasta_files ->
+                [ [:], fasta_files ] }
         )
         ch_abacas_results = ABACAS.out.results
     }

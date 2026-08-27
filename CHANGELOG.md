@@ -17,11 +17,14 @@ Special thanks to the following for their code contributions to the release:
 - [Sara Monzon](https://github.com/saramonzon)
 - [Magdalena Matito](https://github.com/magdasmat)
 - [Jordan Speizer](https://github.com/speizerj)
+- [LilyAnderssonLee](https://github.com/LilyAnderssonLee)
+- [Víctor López](https://github.com/victor5lm)
 
 Thank you to everyone else that has contributed by reporting bugs, enhancements or in any other way, shape or form.
 
 ### Enhancements & fixes
 
+- [[PR #605](https://github.com/nf-core/viralrecon/pull/605)] - Homogenize Nanopore normalized variant filenames
 - [[PR #589](https://github.com/nf-core/viralrecon/pull/589)] - Add strict syntax implementation plan, fix trivial errors
 - [[PR #585](https://github.com/nf-core/viralrecon/pull/585)] - Accept semver primer_set_version values (e.g. 5.3.2)
 - [[PR #546](https://github.com/nf-core/viralrecon/pull/546)] - Bumped dev branch version to development version
@@ -33,6 +36,8 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #580](https://github.com/nf-core/viralrecon/pull/580)] - Fix bug related to deprecated argument `--meta` in `Freyja` suite
 - [[PR #594](https://github.com/nf-core/viralrecon/pull/594)] - Added mapping/variant calling/consensus steps for nanpore data appart from ARTIC protocol
 - [[PR #596](https://github.com/nf-core/viralrecon/pull/596)] - Template update for nf-core/tools v4.0.2
+- [[PR #607](https://github.com/nf-core/viralrecon/pull/607)] - Updated the multiqc module and fixed nextlfow lingting warnings
+- [[PR #615](https://github.com/nf-core/viralrecon/pull/615)] - Fixed collapse_primer_bed.py to support 7-column primer BED files and updated docs
 
 ### Parameters
 
@@ -78,6 +83,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `mosdepth`     | 0.3.11      | 0.3.14           |
 | `samtools`     | 1.22.1      | 1.23.1           |
 | `cutadapt`     | 5.0         | 5.2              |
+| `multiqc`      | 1.34        | 1.35             |
 
 > **NB:** Dependency has been **updated** if both old and new version information is present.
 > **NB:** Dependency has been **added** if just the new version information is present.

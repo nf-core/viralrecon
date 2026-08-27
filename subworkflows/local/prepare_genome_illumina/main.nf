@@ -42,7 +42,7 @@ workflow PREPARE_GENOME_ILLUMINA {
         GUNZIP_FASTA (
             [ [:], fasta ]
         )
-        ch_fasta    = GUNZIP_FASTA.out.gunzip.map { it[1] }
+        ch_fasta    = GUNZIP_FASTA.out.gunzip.map { _meta, gunzip -> gunzip }
     } else {
         ch_fasta = channel.value(file(fasta))
     }
@@ -56,7 +56,7 @@ workflow PREPARE_GENOME_ILLUMINA {
             GUNZIP_GFF (
                 [ [:], gff ]
             )
-            ch_gff      = GUNZIP_GFF.out.gunzip.map { it[1] }
+            ch_gff      = GUNZIP_GFF.out.gunzip.map { _meta, gunzip -> gunzip }
         } else {
             ch_gff = channel.value(file(gff))
         }
@@ -66,11 +66,12 @@ workflow PREPARE_GENOME_ILLUMINA {
     // Create chromosome sizes file
     //
     SAMTOOLS_FAIDX (
-        ch_fasta.map { [ [:], it, [] ] },
+        ch_fasta.map { fasta_file ->
+            [ [:], fasta_file, [] ] },
         true
     )
-    ch_fai         = SAMTOOLS_FAIDX.out.fai.map { it[1] }
-    ch_chrom_sizes = SAMTOOLS_FAIDX.out.sizes.map { it[1] }
+    ch_fai         = SAMTOOLS_FAIDX.out.fai.map { _meta, fai -> fai }
+    ch_chrom_sizes = SAMTOOLS_FAIDX.out.sizes.map { _meta, sizes -> sizes }
 
     //
     // Prepare reference files required for variant calling
@@ -82,7 +83,7 @@ workflow PREPARE_GENOME_ILLUMINA {
                 UNTAR_KRAKEN2_DB (
                     [ [:], params.kraken2_db ]
                 )
-                ch_kraken2_db = UNTAR_KRAKEN2_DB.out.untar.map { it[1] }
+                ch_kraken2_db = UNTAR_KRAKEN2_DB.out.untar.map { _meta, kraken2_db -> kraken2_db }
             } else {
                 ch_kraken2_db = channel.value(file(params.kraken2_db))
             }
@@ -106,7 +107,7 @@ workflow PREPARE_GENOME_ILLUMINA {
                 GUNZIP_PRIMER_BED (
                     [ [:], primer_bed ]
                 )
-                ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { it[1] }
+                ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { _meta, gunzip -> gunzip }
             } else {
                 ch_primer_bed = channel.value(file(primer_bed))
             }
@@ -127,13 +128,14 @@ workflow PREPARE_GENOME_ILLUMINA {
                     GUNZIP_PRIMER_FASTA (
                         [ [:], params.primer_fasta ]
                     )
-                    ch_primer_fasta = GUNZIP_PRIMER_FASTA.out.gunzip.map { it[1] }
+                    ch_primer_fasta = GUNZIP_PRIMER_FASTA.out.gunzip.map { _meta, gunzip -> gunzip }
                 } else {
                     ch_primer_fasta = channel.value(file(params.primer_fasta))
                 }
             } else {
                 BEDTOOLS_GETFASTA (
-                    ch_primer_bed.map { [ [:], it ] },
+                    ch_primer_bed.map { primer_bed_file ->
+                        [ [:], primer_bed_file ] },
                     ch_fasta
                 )
                 ch_primer_fasta = BEDTOOLS_GETFASTA.out.fasta
@@ -176,7 +178,7 @@ workflow PREPARE_GENOME_ILLUMINA {
                 UNTAR_NEXTCLADE_DB (
                     [ [:], nextclade_dataset ]
                 )
-                ch_nextclade_db = UNTAR_NEXTCLADE_DB.out.untar.map { it[1] }
+                ch_nextclade_db = UNTAR_NEXTCLADE_DB.out.untar.map { _meta, untar -> untar }
             } else {
                 ch_nextclade_db = channel.value(file(nextclade_dataset))
             }
@@ -209,7 +211,8 @@ workflow PREPARE_GENOME_ILLUMINA {
                 }
             } else {
                 BLAST_MAKEBLASTDB (
-                    ch_fasta.map { [ [:], it ] },
+                    ch_fasta.map { fasta_file ->
+                        [ [:], fasta_file ] },
                     []
                 )
                 ch_blast_db = BLAST_MAKEBLASTDB.out.db

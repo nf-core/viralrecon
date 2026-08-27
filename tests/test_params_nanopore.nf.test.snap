@@ -678,6 +678,7 @@
                 "multiqc/multiqc_data/mosdepth_perchrom.yaml",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_amplicon_heatmap.yaml",
                 "multiqc/multiqc_data/multiqc_bcftools_stats.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
@@ -881,6 +882,7 @@
                 "mosdepth_cov_dist.yaml:md5,eca5b56c9660fc68bc8d5055c8c91cfe",
                 "mosdepth_cumcov_dist.yaml:md5,eca5b56c9660fc68bc8d5055c8c91cfe",
                 "mosdepth_perchrom.yaml:md5,ced2580d593ef240d12312d1ab13335d",
+                "multiqc_amplicon_heatmap.yaml:md5,d61d51f694aa88aff6811157fc2ce9dc",
                 "multiqc_bcftools_stats.yaml:md5,4cbfd6ce6a5071ec628f4fc3d643e4cc",
                 "multiqc_citations.yaml:md5,0e3d1cf6916e5b960e8afbe6d4a33f18",
                 "multiqc_fail_mapped_samples_nanopore.yaml:md5,60ac646e6d248e9fd52c687e2adb9f1d",
@@ -898,10 +900,10 @@
                 "pycoqc_stats_table.yaml:md5,7e91d1025c519911af28386064444b9a"
             ]
         ],
-        "timestamp": "2026-06-02T09:38:56.992975706",
+        "timestamp": "2026-07-27T16:42:30.266593",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "26.04.0"
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
         }
     },
     "-profile test_nanopore --additional_annotation 'https://github.com/nf-core/test-datasets/raw/refs/heads/viralrecon/genome/MN908947.3/GCA_009858895.3_ASM985889v3_genomic.200409.gtf.gz'": {
@@ -1685,6 +1687,7 @@
                 "multiqc/multiqc_data/mosdepth_perchrom.yaml",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_amplicon_heatmap.yaml",
                 "multiqc/multiqc_data/multiqc_bcftools_stats.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
@@ -1894,6 +1897,7 @@
                 "mosdepth_cov_dist.yaml:md5,eca5b56c9660fc68bc8d5055c8c91cfe",
                 "mosdepth_cumcov_dist.yaml:md5,eca5b56c9660fc68bc8d5055c8c91cfe",
                 "mosdepth_perchrom.yaml:md5,ced2580d593ef240d12312d1ab13335d",
+                "multiqc_amplicon_heatmap.yaml:md5,d61d51f694aa88aff6811157fc2ce9dc",
                 "multiqc_bcftools_stats.yaml:md5,4cbfd6ce6a5071ec628f4fc3d643e4cc",
                 "multiqc_citations.yaml:md5,f6a5976bbb1dbb8a839f64b168d37b37",
                 "multiqc_fail_mapped_samples_nanopore.yaml:md5,60ac646e6d248e9fd52c687e2adb9f1d",
@@ -1916,10 +1920,10 @@
                 "snpeff_variant_effects_region.yaml:md5,9f06790f32040f4d1156ef3be14e8dd8"
             ]
         ],
-        "timestamp": "2026-06-01T17:07:16.668107578",
+        "timestamp": "2026-07-28T10:24:10.863839",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "26.04.0"
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
         }
     },
     "-profile test_nanopore --mapper_nanopore 'minimap2'": {
@@ -2191,48 +2195,48 @@
                 "minimap2/clair3",
                 "minimap2/clair3/SAMPLE_01.filtered.vcf.gz",
                 "minimap2/clair3/SAMPLE_01.filtered.vcf.gz.tbi",
-                "minimap2/clair3/SAMPLE_01.norm.vcf.gz",
-                "minimap2/clair3/SAMPLE_01.norm.vcf.gz.tbi",
+                "minimap2/clair3/SAMPLE_01.normalised.vcf.gz",
+                "minimap2/clair3/SAMPLE_01.normalised.vcf.gz.tbi",
                 "minimap2/clair3/SAMPLE_01merge_output.vcf.gz",
                 "minimap2/clair3/SAMPLE_02.filtered.vcf.gz",
                 "minimap2/clair3/SAMPLE_02.filtered.vcf.gz.tbi",
-                "minimap2/clair3/SAMPLE_02.norm.vcf.gz",
-                "minimap2/clair3/SAMPLE_02.norm.vcf.gz.tbi",
+                "minimap2/clair3/SAMPLE_02.normalised.vcf.gz",
+                "minimap2/clair3/SAMPLE_02.normalised.vcf.gz.tbi",
                 "minimap2/clair3/SAMPLE_02merge_output.vcf.gz",
                 "minimap2/clair3/SAMPLE_03.filtered.vcf.gz",
                 "minimap2/clair3/SAMPLE_03.filtered.vcf.gz.tbi",
-                "minimap2/clair3/SAMPLE_03.norm.vcf.gz",
-                "minimap2/clair3/SAMPLE_03.norm.vcf.gz.tbi",
+                "minimap2/clair3/SAMPLE_03.normalised.vcf.gz",
+                "minimap2/clair3/SAMPLE_03.normalised.vcf.gz.tbi",
                 "minimap2/clair3/SAMPLE_03merge_output.vcf.gz",
                 "minimap2/clair3/SAMPLE_04.filtered.vcf.gz",
                 "minimap2/clair3/SAMPLE_04.filtered.vcf.gz.tbi",
-                "minimap2/clair3/SAMPLE_04.norm.vcf.gz",
-                "minimap2/clair3/SAMPLE_04.norm.vcf.gz.tbi",
+                "minimap2/clair3/SAMPLE_04.normalised.vcf.gz",
+                "minimap2/clair3/SAMPLE_04.normalised.vcf.gz.tbi",
                 "minimap2/clair3/SAMPLE_04merge_output.vcf.gz",
                 "minimap2/clair3/SAMPLE_05.filtered.vcf.gz",
                 "minimap2/clair3/SAMPLE_05.filtered.vcf.gz.tbi",
-                "minimap2/clair3/SAMPLE_05.norm.vcf.gz",
-                "minimap2/clair3/SAMPLE_05.norm.vcf.gz.tbi",
+                "minimap2/clair3/SAMPLE_05.normalised.vcf.gz",
+                "minimap2/clair3/SAMPLE_05.normalised.vcf.gz.tbi",
                 "minimap2/clair3/SAMPLE_05merge_output.vcf.gz",
                 "minimap2/clair3/SAMPLE_06.filtered.vcf.gz",
                 "minimap2/clair3/SAMPLE_06.filtered.vcf.gz.tbi",
-                "minimap2/clair3/SAMPLE_06.norm.vcf.gz",
-                "minimap2/clair3/SAMPLE_06.norm.vcf.gz.tbi",
+                "minimap2/clair3/SAMPLE_06.normalised.vcf.gz",
+                "minimap2/clair3/SAMPLE_06.normalised.vcf.gz.tbi",
                 "minimap2/clair3/SAMPLE_06merge_output.vcf.gz",
                 "minimap2/clair3/SAMPLE_07.filtered.vcf.gz",
                 "minimap2/clair3/SAMPLE_07.filtered.vcf.gz.tbi",
-                "minimap2/clair3/SAMPLE_07.norm.vcf.gz",
-                "minimap2/clair3/SAMPLE_07.norm.vcf.gz.tbi",
+                "minimap2/clair3/SAMPLE_07.normalised.vcf.gz",
+                "minimap2/clair3/SAMPLE_07.normalised.vcf.gz.tbi",
                 "minimap2/clair3/SAMPLE_07merge_output.vcf.gz",
                 "minimap2/clair3/SAMPLE_08.filtered.vcf.gz",
                 "minimap2/clair3/SAMPLE_08.filtered.vcf.gz.tbi",
-                "minimap2/clair3/SAMPLE_08.norm.vcf.gz",
-                "minimap2/clair3/SAMPLE_08.norm.vcf.gz.tbi",
+                "minimap2/clair3/SAMPLE_08.normalised.vcf.gz",
+                "minimap2/clair3/SAMPLE_08.normalised.vcf.gz.tbi",
                 "minimap2/clair3/SAMPLE_08merge_output.vcf.gz",
                 "minimap2/clair3/SAMPLE_09.filtered.vcf.gz",
                 "minimap2/clair3/SAMPLE_09.filtered.vcf.gz.tbi",
-                "minimap2/clair3/SAMPLE_09.norm.vcf.gz",
-                "minimap2/clair3/SAMPLE_09.norm.vcf.gz.tbi",
+                "minimap2/clair3/SAMPLE_09.normalised.vcf.gz",
+                "minimap2/clair3/SAMPLE_09.normalised.vcf.gz.tbi",
                 "minimap2/clair3/SAMPLE_09merge_output.vcf.gz",
                 "minimap2/freyja",
                 "minimap2/freyja/SARS-CoV-2",
@@ -2632,6 +2636,7 @@
                 "multiqc/multiqc_data/mosdepth_perchrom.yaml",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_amplicon_heatmap.yaml",
                 "multiqc/multiqc_data/multiqc_bcftools_stats.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
@@ -2873,8 +2878,8 @@
                 "SAMPLE_08.snpsift.txt:md5,67b7273d3896de8b8bf704944c5a4cf1",
                 "SAMPLE_09.snpsift.txt:md5,137b6ce4716989dcc218be5e2bed8748",
                 "variants_long_table.csv:md5,52f077d35348af0a41cebc3fd40fdb34",
-                "bcftools-stats-subtypes.yaml:md5,50b598c489418864ce1cdfb7e3977c47",
-                "bcftools_stats_indel-lengths.yaml:md5,8c916aef009892f9a8f01206dfb1e97d",
+                "bcftools-stats-subtypes.yaml:md5,db75b9afe770bc672c1366ca6132208c",
+                "bcftools_stats_indel-lengths.yaml:md5,4c82b7d03a8bedeee310bb6d31410ca9",
                 "kraken-top-n-plot_Class.yaml:md5,5abff3024f97ec7e0765c0d58d0ae636",
                 "kraken-top-n-plot_Domain.yaml:md5,4333d9803c8d86a1d90d6af9543c7da6",
                 "kraken-top-n-plot_Family.yaml:md5,2d820250969d39025a57785038b0f44b",
@@ -2887,7 +2892,8 @@
                 "mosdepth_cov_dist.yaml:md5,753a629b948dae8d07b1c578d41f5879",
                 "mosdepth_cumcov_dist.yaml:md5,753a629b948dae8d07b1c578d41f5879",
                 "mosdepth_perchrom.yaml:md5,f2319c5a117ddcfb5a5e7286c5ae3553",
-                "multiqc_bcftools_stats.yaml:md5,e0840b3d162e9718d43eae8e7bfc1bb6",
+                "multiqc_amplicon_heatmap.yaml:md5,9ac086220d4b3bc1c06afac913d006d2",
+                "multiqc_bcftools_stats.yaml:md5,5888f92a8a51fcf4b214f7d31205fc01",
                 "multiqc_citations.yaml:md5,f6a5976bbb1dbb8a839f64b168d37b37",
                 "multiqc_fail_mapped_samples_nanopore.yaml:md5,0d442fd5d9427f3ea3dadc3146564954",
                 "multiqc_fail_no_barcode_samples_table.yaml:md5,a2068fd5931030a8d949a29c63c3fadf",
@@ -2909,10 +2915,10 @@
                 "snpeff_variant_effects_region.yaml:md5,b4b2a98c1a31e33683d4ac5d6a9db6da"
             ]
         ],
-        "timestamp": "2026-06-03T08:42:40.360506047",
+        "timestamp": "2026-08-18T10:55:56.71240814",
         "meta": {
             "nf-test": "0.9.5",
-            "nextflow": "26.04.1"
+            "nextflow": "25.10.4"
         }
     },
     "-profile test_nanopore --min_guppyplex_reads 10000": {
@@ -3952,6 +3958,7 @@
                 "multiqc/multiqc_data/mosdepth_perchrom.yaml",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_amplicon_heatmap.yaml",
                 "multiqc/multiqc_data/multiqc_bcftools_stats.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
@@ -4150,6 +4157,7 @@
                 "mosdepth_cov_dist.yaml:md5,eca5b56c9660fc68bc8d5055c8c91cfe",
                 "mosdepth_cumcov_dist.yaml:md5,eca5b56c9660fc68bc8d5055c8c91cfe",
                 "mosdepth_perchrom.yaml:md5,ced2580d593ef240d12312d1ab13335d",
+                "multiqc_amplicon_heatmap.yaml:md5,d61d51f694aa88aff6811157fc2ce9dc",
                 "multiqc_bcftools_stats.yaml:md5,4cbfd6ce6a5071ec628f4fc3d643e4cc",
                 "multiqc_citations.yaml:md5,93642a6dfb9c72b0f9eb36eb0fbd5b49",
                 "multiqc_fail_mapped_samples_nanopore.yaml:md5,60ac646e6d248e9fd52c687e2adb9f1d",
@@ -4167,10 +4175,10 @@
                 "snpeff_variant_effects_region.yaml:md5,9f06790f32040f4d1156ef3be14e8dd8"
             ]
         ],
-        "timestamp": "2026-06-01T17:17:37.104005756",
+        "timestamp": "2026-07-28T11:07:01.044114",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "26.04.0"
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
         }
     },
     "-profile test_nanopore --min_barcode_reads 10000": {

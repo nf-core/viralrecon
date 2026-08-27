@@ -6,13 +6,9 @@ include { SNPEFF_SNPSIFT } from '../snpeff_snpsift'
 
 workflow VARIANTS_QC {
     take:
-    bam           // channel: [ val(meta), [ bam ] ]
     vcf           // channel: [ val(meta), [ vcf ] ]
-    stats         // channel: [ val(meta), [ bcftools_stats ] ]
     fasta         // channel: /path/to/genome.fasta
-    sizes         // channel: /path/to/genome.sizes
     gff           // channel: /path/to/genome.gff
-    bed           // channel: /path/to/primers.bed
     snpeff_db     // channel: /path/to/snpeff_db/
     snpeff_config // channel: /path/to/snpeff.config
 

@@ -776,6 +776,7 @@
                 "multiqc/multiqc_data/mosdepth_perchrom.yaml",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_amplicon_heatmap.yaml",
                 "multiqc/multiqc_data/multiqc_bcftools_stats.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
@@ -985,6 +986,7 @@
                 "mosdepth_cov_dist.yaml:md5,eca5b56c9660fc68bc8d5055c8c91cfe",
                 "mosdepth_cumcov_dist.yaml:md5,eca5b56c9660fc68bc8d5055c8c91cfe",
                 "mosdepth_perchrom.yaml:md5,ced2580d593ef240d12312d1ab13335d",
+                "multiqc_amplicon_heatmap.yaml:md5,d61d51f694aa88aff6811157fc2ce9dc",
                 "multiqc_bcftools_stats.yaml:md5,4cbfd6ce6a5071ec628f4fc3d643e4cc",
                 "multiqc_citations.yaml:md5,f6a5976bbb1dbb8a839f64b168d37b37",
                 "multiqc_fail_mapped_samples_nanopore.yaml:md5,60ac646e6d248e9fd52c687e2adb9f1d",
@@ -1007,10 +1009,10 @@
                 "snpeff_variant_effects_region.yaml:md5,9f06790f32040f4d1156ef3be14e8dd8"
             ]
         ],
+        "timestamp": "2026-07-28T13:08:02.368522",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "26.04.0"
-        },
-        "timestamp": "2026-05-27T11:14:19.739426176"
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
     }
 }

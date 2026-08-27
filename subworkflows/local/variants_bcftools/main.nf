@@ -12,9 +12,7 @@ workflow VARIANTS_BCFTOOLS {
     take:
     bam           // channel: [ val(meta), [ bam ] ]
     fasta_fai     // channel: [ val(meta), fasta, fai ]
-    sizes         // channel: /path/to/genome.sizes
     gff           // channel: /path/to/genome.gff
-    bed           // channel: /path/to/primers.bed
     snpeff_db     // channel: /path/to/snpeff_db/
     snpeff_config // channel: /path/to/snpeff.config
 
@@ -23,7 +21,7 @@ workflow VARIANTS_BCFTOOLS {
     //
     // Call variants
     //
-    ch_fasta = fasta_fai.map { meta, fasta_file, fai_file -> fasta_file }
+    ch_fasta = fasta_fai.map { _meta, fasta_file, _fai_file -> fasta_file }
 
     BCFTOOLS_MPILEUP (
         bam.map{ meta, bam_file -> [ meta, bam_file, [], [] ] },
@@ -37,19 +35,19 @@ workflow VARIANTS_BCFTOOLS {
         .vcf
         .join(BCFTOOLS_MPILEUP.out.tbi)
         .join(BCFTOOLS_MPILEUP.out.stats)
-        .filter { meta, vcf, tbi, stats -> getNumVariantsFromBCFToolsStats(stats) > 0 }
+        .filter { _meta, _vcf, _tbi, stats -> getNumVariantsFromBCFToolsStats(stats) > 0 }
         .set { ch_vcf_tbi_stats }
 
     ch_vcf_tbi_stats
-        .map { meta, vcf, tbi, stats -> [ meta, vcf ] }
+        .map { meta, vcf, _tbi, _stats -> [ meta, vcf ] }
         .set { ch_vcf }
 
     ch_vcf_tbi_stats
-        .map { meta, vcf, tbi, stats -> [ meta, tbi ] }
+        .map { meta, _vcf, tbi, _stats -> [ meta, tbi ] }
         .set { ch_tbi }
 
     ch_vcf_tbi_stats
-        .map { meta, vcf, tbi, stats -> [ meta, stats ] }
+        .map { meta, _vcf, _tbi, stats -> [ meta, stats ] }
         .set { ch_stats }
 
     //
@@ -57,7 +55,7 @@ workflow VARIANTS_BCFTOOLS {
     //
     BCFTOOLS_NORM (
         ch_vcf.join(ch_tbi, by: [0]),
-        ch_fasta.map { [ [:], it ] }
+        ch_fasta.map { fasta_file -> [ [:], fasta_file ] }
     )
 
     VCF_TABIX_STATS (
@@ -71,13 +69,9 @@ workflow VARIANTS_BCFTOOLS {
     // Run downstream tools for variants QC
     //
     VARIANTS_QC (
-        bam,
         BCFTOOLS_NORM.out.vcf,
-        VCF_TABIX_STATS.out.stats,
         ch_fasta,
-        sizes,
         gff,
-        bed,
         snpeff_db,
         snpeff_config
     )

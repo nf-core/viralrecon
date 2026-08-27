@@ -6,7 +6,6 @@ The directories listed below will be created in the results directory after the 
 
 # Nanopore: Pipeline overview
 
-- [Introduction](#introduction)
 - [Nanopore: Pipeline overview](#nanopore-pipeline-overview)
   - [Nanopore: Preprocessing](#nanopore-preprocessing)
     - [Nanopore: pycoQC](#nanopore-pycoqc)
@@ -113,6 +112,9 @@ The output directory depends on the value provided to `--mapper_nanopore`:
 
 When `--mapper_nanopore artic` is selected, the pipeline uses the [`artic minion`](https://artic.readthedocs.io/en/latest/commands/#minion) command from the [ARTIC field bioinformatics pipeline](https://github.com/artic-network/fieldbioinformatics). ARTIC performs the core Nanopore amplicon workflow: read alignment against the reference genome, primer-aware processing, variant calling and consensus generation. The resulting BAM, VCF and consensus FASTA files are written under the `artic/` output directory.
 
+> [!WARNING]
+> Please take into account that `artic minion` requires the primer BED file supplied via `--primer_bed` to be in **BED7** format — see [Usage - Primer BED file format](usage.md#primer-bed-file-format) for details.
+
 <details markdown="1">
 <summary>Output files</summary>
 
@@ -158,8 +160,8 @@ The final consensus sequence is generated with [BCFtools](https://github.com/sam
   - `minimap2/clair3/`
     - `*.filtered.vcf.gz`: Clair3 variants after filtering.
     - `*.filtered.vcf.gz.tbi`: Index file for filtered Clair3 variants.
-    - `*.norm.vcf.gz`: Normalised Clair3 variants.
-    - `*.norm.vcf.gz.tbi`: Index file for normalised Clair3 variants.
+    - `*.normalised.vcf.gz`: Normalised Clair3 variants.
+    - `*.normalised.vcf.gz.tbi`: Index file for normalised Clair3 variants.
   - `minimap2/bcftools/`
     - `*.consensus.fa`: Consensus fasta file generated with BCFtools.
     - `*.consensus.vcf.gz`: VCF file used for consensus generation.
@@ -382,7 +384,6 @@ An example MultiQC report generated from a full-sized dataset can be viewed on t
 
 # Illumina: Pipeline overview
 
-- [Introduction](#introduction)
 - [Illumina: Pipeline overview](#illumina-pipeline-overview)
   - [Illumina: Preprocessing](#illumina-preprocessing)
     - [cat](#cat)
@@ -417,8 +418,8 @@ An example MultiQC report generated from a full-sized dataset can be viewed on t
     - [Assembly QUAST](#assembly-quast)
   - [Illumina: HIV resistance detection](#illumina-hiv-resistance-detection)
     - [sierra-local](#sierra-local)
-    - [Liftoff](#Liftoff)
-    - [CodFreq](#CodFreq)
+    - [Liftoff](#liftoff)
+    - [CodFreq](#codfreq)
     - [Custom HIV Resistance Reports](#custom-hiv-resistance-reports)
   - [Illumina: Workflow reporting and genomes](#illumina-workflow-reporting-and-genomes)
     - [MultiQC](#multiqc)
