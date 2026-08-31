@@ -111,7 +111,7 @@
             },
             "mentions": [
                 {
-                    "@id": "#40c21c8d-8806-4e02-ba91-5dfa11f374f5"
+                    "@id": "#eb9ef2f2-661f-48ca-aa2a-4481d3f23c39"
                 }
             ],
             "name": "nf-core/viralrecon"
@@ -140,14 +140,14 @@
             ],
             "contributor": [
                 {
-                    "@id": "#30392baf-dfdf-4145-82c1-f4e3faa61ff3"
+                    "@id": "#b8f7a60a-8d2e-4e42-91b5-8a81953b3646"
                 },
                 {
-                    "@id": "#01d34d29-2b5c-4188-b4b4-ca510681b743"
+                    "@id": "#9ec1007e-e20a-475f-91ab-15dfb253e872"
                 }
             ],
             "dateCreated": "",
-            "dateModified": "2026-04-30T13:33:34Z",
+            "dateModified": "2026-07-24T12:39:51Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "image": {
                 "@id": "docs/images/nf-core-viralrecon_metro_map_illumina.png"
@@ -215,11 +215,11 @@
             "version": "!>=25.10.4"
         },
         {
-            "@id": "#40c21c8d-8806-4e02-ba91-5dfa11f374f5",
+            "@id": "#eb9ef2f2-661f-48ca-aa2a-4481d3f23c39",
             "@type": "TestSuite",
             "instance": [
                 {
-                    "@id": "#8280c516-085e-4d94-9532-ce98d1d00308"
+                    "@id": "#6c8ddca0-6cc2-4991-91e2-11fb35c6bf2b"
                 }
             ],
             "mainEntity": {
@@ -228,7 +228,7 @@
             "name": "Test suite for nf-core/viralrecon"
         },
         {
-            "@id": "#8280c516-085e-4d94-9532-ce98d1d00308",
+            "@id": "#6c8ddca0-6cc2-4991-91e2-11fb35c6bf2b",
             "@type": "TestInstance",
             "name": "GitHub Actions workflow for testing nf-core/viralrecon",
             "resource": "repos/nf-core/viralrecon/actions/workflows/nf-test.yml",
@@ -372,12 +372,12 @@
             "url": "https://nf-co.re/"
         },
         {
-            "@id": "#30392baf-dfdf-4145-82c1-f4e3faa61ff3",
+            "@id": "#b8f7a60a-8d2e-4e42-91b5-8a81953b3646",
             "@type": "Person",
             "name": "Patel H"
         },
         {
-            "@id": "#01d34d29-2b5c-4188-b4b4-ca510681b743",
+            "@id": "#9ec1007e-e20a-475f-91ab-15dfb253e872",
             "@type": "Person",
             "name": "Varona S and Monzon S"
         }

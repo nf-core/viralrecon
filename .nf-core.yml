@@ -8,7 +8,7 @@ lint:
 
   template_strings:
     - assets/hiv_template_report.html
-nf_core_version: 4.0.2
+nf_core_version: 4.0.3
 repository_type: pipeline
 template:
   author: Patel H, Varona S and Monzon S
