@@ -7,7 +7,7 @@ lint:
     - docs/images/nf-core-viralrecon_logo_dark.png
   template_strings:
     - assets/hiv_template_report.html
-nf_core_version: 4.0.3
+nf_core_version: 4.1.0
 repository_type: pipeline
 template:
   author: Patel H, Varona S and Monzon S
