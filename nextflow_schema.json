@@ -434,13 +434,13 @@
                 "min_depth_variants": {
                     "type": "integer",
                     "default": 10,
-                    "description": "Minimum depth of coverage required to call a variant.",
+                    "description": "Minimum depth of coverage required to call a variant. Used in the ivar variants subworkflow in the ivar variants module for the '-m' flag and in the bcftools variants subworkflow in the bcftools mpileup module to filter out variants with depth less than the specified value.",
                     "fa_icon": "fas fa-hand-paper"
                 },
                 "min_depth_consensus": {
                     "type": "integer",
                     "default": 10,
-                    "description": "Minimum depth of coverage required to call a base in the consensus sequence.",
+                    "description": "Minimum depth of coverage required to call a base in the consensus sequence. Used by the ivar consensus subworkflow in the ivar consensus module with the '-m' flag and in the bcftools consensus subworkflow in the make bed mask module for samtools mpileup to mask bases with depth less than the specified value.",
                     "fa_icon": "fas fa-hand-paper"
                 },
                 "min_allele_freq_variants": {
@@ -448,7 +448,7 @@
                     "default": 0.25,
                     "minimum": 0,
                     "maximum": 1,
-                    "description": "Minimum allele frequency required to call a variant.",
+                    "description": "Minimum allele frequency required to call a variant. Used in the ivar variants subworkflow in the ivar variants module for the '-t' flag.",
                     "fa_icon": "fas fa-hand-paper"
                 },
                 "min_allele_freq_consensus": {
@@ -456,7 +456,7 @@
                     "default": 0.75,
                     "minimum": 0,
                     "maximum": 1,
-                    "description": "Minimum allele frequency required to call a base in the consensus sequence.",
+                    "description": "Minimum allele frequency required to call a base in the consensus sequence. This threshold is used in the ivar consensus subworkflow in the ivar consensus module with the '-t' flag: a base that meets this threshold will be called directly. If a single base does not meet this threshold on its own, an ambiguous base representing all bases that collectively meet the threshold will be called instead. This is also used in the bcftools consensus subworkflow in the bcftools filter module to filter out variants with allele frequency less than the specified value.",
                     "fa_icon": "fas fa-hand-paper"
                 },
                 "ivar_trim_noprimer": {
