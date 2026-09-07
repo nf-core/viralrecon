@@ -3,11 +3,9 @@
 
 import os
 import re
-import glob
 import json
 import argparse
 import base64
-import functools
 import pandas as pd
 from datetime import date
 from Bio import SeqIO
@@ -19,56 +17,56 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 # ---------------------------------------------------------------------
 
 def parser_args(args=None):
-    Description = "Parse Sierra-local JSON reports and corresponding resistance and mutation tables to generate an HTML report."
+    Description = "Parse Sierra-local JSON reports and corresponding resistance and mutation tables to generate an HTML report per sample."
     Epilog = """Example usage:
-    python resistance_report.py --sierralocal_folder resistance_jsons --mutation_folder mutation_tables
-        --resistance_folder resistance_tables --nextclade_folder nextclade_folder
-        --consensus_folder consensus --ivar_consensus_params "-t 0.8 -q 30 -m 50 -n N"
-        --ivar_variant_maf 0.01 --output_html resistance_report.html
+    python resistance_report.py --sierralocal_json SAMPLE_resistance.json --mutation_csv SAMPLE_mutation_table.csv
+        --resistance_csv SAMPLE_resistance_table.csv --nextclade_csv SAMPLE_nextclade.csv
+        --consensus_fasta SAMPLE.fa --gff SAMPLE.gff --ivar_consensus_params "-t 0.8 -q 30 -m 50 -n N"
+        --output_html SAMPLE_resistance_report.html
     """
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
 
     parser.add_argument(
         "-s",
-        "--sierralocal_folder",
+        "--sierralocal_json",
         type=str,
-        default="./sierralocal_json",
-        help="Folder containing sierra-local JSON reports (default: ./sierralocal_json)",
+        required=True,
+        help="Sierra-local JSON report.",
     )
     parser.add_argument(
         "-m",
-        "--mutation_folder",
+        "--mutation_csv",
         type=str,
-        default="./mutation_tables",
-        help="Folder containing mutation CSV files (default: ./mutation_tables)",
+        required=True,
+        help="Mutation CSV file.",
     )
     parser.add_argument(
         "-r",
-        "--resistance_folder",
+        "--resistance_csv",
         type=str,
-        default="./resistance_tables",
-        help="Folder containing resistance CSV files (default: ./resistance_tables)",
+        required=True,
+        help="Resistance CSV file for one sample.",
     )
     parser.add_argument(
         "-n",
-        "--nextclade_folder",
+        "--nextclade_csv",
         type=str,
-        default="./nextclade_reports",
-        help="Folder containing nextclade CSV files (default: ./nextclade_reports)",
+        required=True,
+        help="Nextclade CSV file.",
     )
     parser.add_argument(
         "-cn",
-        "--consensus_folder",
+        "--consensus_fasta",
         type=str,
-        default="./consensus",
-        help="Folder containing consensus files (default: ./consensus)",
+        required=True,
+        help="Consensus FASTA file.",
     )
     parser.add_argument(
         "-gf",
-        "--gff_folder",
+        "--gff",
         type=str,
         required=True,
-        help="Folder containing GFF files with gene coordinates (required).",
+        help="GFF file with gene coordinates.",
     )
     parser.add_argument(
         "-ig",
@@ -84,24 +82,18 @@ def parser_args(args=None):
         help="Parameters used for ivar consensus calling",
     )
     parser.add_argument(
-        "-iv",
-        "--ivar_variant_maf",
-        type=float,
-        default=0.01,
-        help="Minor allele frequency threshold used for ivar variant calling",
-    )
-    parser.add_argument(
         "-d",
         "--deprecated_drugs",
         type=str,
-        default="D4T,DDI,DPV,FPV/r,IDV/r,NFV,SQV/r,TPV/r",
-        help="Comma-separated list of deprecated drugs that should be removed from the final report (default: D4T,DDI,DPV,FPV/r,IDV/r,NFV,SQV/r,TPV/r)",
+        default="",
+        help="Comma-separated list of deprecated drugs that should be removed from the final report (for example: D4T,DDI,DPV,FPV/r,IDV/r,NFV,SQV/r,TPV/r)",
     )
     parser.add_argument(
         "-o",
         "--output_html",
         type=str,
-        help="Full path to output HTML report file.",
+        required=True,
+        help="Full path to the sample HTML report file."
     )
     return parser.parse_args(args)
 
@@ -111,7 +103,7 @@ def get_sample_number(sample_name, all_samples):
     return sorted_samples.index(sample_name) + 1
 
 
-def parse_sequence_summary(json_path, subtype_info=None, ivar_consensus_params=None, ivar_variant_maf=None):
+def parse_sequence_summary(json_path, subtype_info=None, ivar_consensus_params=None):
     """
     Extract sequence summary information from Sierra-local JSON.
     - Lists each gene present (PR, RT, IN)
@@ -224,7 +216,6 @@ def parse_sequence_summary(json_path, subtype_info=None, ivar_consensus_params=N
     m_val = int(match_m.group(1))
 
     summary_lines.append(f"Minimum read depth: ≥{m_val}")
-    summary_lines.append(f"Nucleotide mixture threshold (NMT): ≥{ ivar_variant_maf * 100:.0f}%")
     summary_lines.append(f"Mutation detection threshold (MDT): ≥{ (1-t_val) * 100:.0f}%")
     summary_lines.append(f"Minimum quality threshold: {q_val}")
 
@@ -540,14 +531,6 @@ def main():
     # Remove from the report drugs that are deprecated or not used anymore
     deprecated_drugs = {d.strip() for d in args.deprecated_drugs.split(",")}
 
-    # Detect all files
-    mutation_files = sorted(glob.glob(os.path.join(args.mutation_folder, "*_mutation_table.csv")))
-    resistance_files = sorted(glob.glob(os.path.join(args.resistance_folder, "*_resistance_table.csv")))
-    json_files = sorted(glob.glob(os.path.join(args.sierralocal_folder, "*_resistance.json")))
-    nextclade_files = sorted(glob.glob(os.path.join(args.nextclade_folder, "*.csv")))
-    consensus_files = sorted(glob.glob(os.path.join(args.consensus_folder, "*.fa")))
-    gff_files = sorted(glob.glob(os.path.join(args.gff_folder, "*.gff")))
-
     # Build paths
     script_dir = os.path.dirname(os.path.abspath(__file__))
     asset_path = os.path.join(script_dir, "../assets")
@@ -573,89 +556,66 @@ def main():
         logo_bytes = f.read()
         logo_b64 = base64.b64encode(logo_bytes).decode("utf-8")
 
-    hivdb_version_info = extract_hivdb_version(json_files[0]) if json_files else {"db_version": "HIVDB version unknown", "publish_date": "unknown"}
+    hivdb_version_info = extract_hivdb_version(args.sierralocal_json)
 
-    all_samples_data = []
+    df_mut = pd.read_csv(args.mutation_csv)
+    if df_mut.empty:
+        raise ValueError(f"No mutation data found in {args.mutation_csv}")
 
-    for mut_file in mutation_files:
-        df_mut = pd.read_csv(mut_file)
-        if df_mut.empty:
-            continue
-        sample_name = df_mut["Sample_name"].iloc[0]
+    sample_name = df_mut["Sample_name"].iloc[0]
+    res_file = args.resistance_csv
+    json_file = args.sierralocal_json
+    nextclade_file = args.nextclade_csv
+    consensus_file = args.consensus_fasta
+    gff_file = args.gff
 
-        # search corresponding resistance and JSON files
-        res_file = next((r for r in resistance_files if sample_name in r), None)
-        json_file = next((j for j in json_files if sample_name in j), None)
-        nextclade_file = next((n for n in nextclade_files if sample_name in n), None)
-        consensus_file = next((c for c in consensus_files if sample_name in c), None)
-        gff_file = next((g for g in gff_files if sample_name in g), None)
+    consensus_seq = None
+    if os.path.exists(consensus_file):
+        with open(consensus_file, "r", encoding="utf-8") as f:
+            consensus_seq = f.read().strip()
 
-        consensus_seq = None
-        if consensus_file and os.path.exists(consensus_file):
-            with open(consensus_file, "r", encoding="utf-8") as f:
-                consensus_seq = f.read().strip()
+    subtype = get_nextclade_subtype(nextclade_file, sample_name)
 
-        if not res_file or not json_file:
-            print(f"⚠️ Skipping {sample_name}: missing resistance or JSON file")
-            continue
-
-        # --- Extract subtype from Nextclade
-        subtype = get_nextclade_subtype(nextclade_file, sample_name)
-
-        # --- Parse sequence summary
-        seq_summary = parse_sequence_summary(json_file, subtype_info=subtype,
-                                            ivar_consensus_params=args.ivar_consensus_params,
-                                            ivar_variant_maf=args.ivar_variant_maf)
-
-        # --- Parse resistance table
-        df_res = parse_resistance_table(res_file, deprecated_drugs)
-
-        # --- Extract mutation scoring from JSON
-        mutation_scores_raw = extract_mutation_scoring(json_file)
-        mutation_scores = sort_mutation_scores(mutation_scores_raw)
-
-        # Remove deprecated drugs from mutation_scores
-        mutation_scores = remove_deprecated_drugs(mutation_scores, deprecated_drugs)
-
-        # Parse gene groups
-        gene_groups = parse_interest_groups(args.interest_genes)
-
-        # Read GFF coordinates
-        coordinates = read_gff_coordinates(gff_file)
-
-        # Read FASTA
-        seq_record = next(SeqIO.parse(consensus_file, "fasta"))
-
-        protein_sequences = extract_protein_sequences(seq_record, coordinates, gene_groups, sample_name)
-
-        # Guardar toda la info en un dict
-        all_samples_data.append({
-            "sample_name": sample_name,
-            "sequence_summary": seq_summary,
-            "mutation_data": df_mut.to_dict(orient="records"),
-            "resistance_data": df_res.to_dict(orient="records"),
-            "consensus_genome": consensus_seq,
-            "mutation_scores": mutation_scores,
-            "protein_sequences": protein_sequences
-        })
-
-    # Ordenar alfabéticamente por nombre de muestra
-    all_samples_data.sort(key=lambda x: x["sample_name"])
-
-    # --- Render full HTML report
-    html_content = template.render(
-        all_samples=all_samples_data,
-        hivdb_version=hivdb_version_info,
-        date=date.today().strftime("%Y-%m-%d"),
-        css_content=css_content,
-        logo_b64=logo_b64
+    seq_summary = parse_sequence_summary(
+        json_file,
+        subtype_info=subtype,
+        ivar_consensus_params=args.ivar_consensus_params,
     )
 
-    output_html = args.output_html or "all_samples_report.html"
-    with open(output_html, "w", encoding="utf-8") as f:
+    df_res = parse_resistance_table(res_file, deprecated_drugs)
+
+    mutation_scores_raw = extract_mutation_scoring(json_file)
+    mutation_scores = sort_mutation_scores(mutation_scores_raw)
+    mutation_scores = remove_deprecated_drugs(mutation_scores, deprecated_drugs)
+
+    gene_groups = parse_interest_groups(args.interest_genes)
+    coordinates = read_gff_coordinates(gff_file)
+    seq_record = next(SeqIO.parse(consensus_file, "fasta"))
+    protein_sequences = extract_protein_sequences(seq_record, coordinates, gene_groups, sample_name)
+
+    sample_data = {
+        "sample_name": sample_name,
+        "sequence_summary": seq_summary,
+        "mutation_data": df_mut.to_dict(orient="records"),
+        "resistance_data": df_res.to_dict(orient="records"),
+        "consensus_genome": consensus_seq,
+        "mutation_scores": mutation_scores,
+        "protein_sequences": protein_sequences
+    }
+
+    # --- Render one HTML report for this sample
+    html_content = template.render(
+        all_samples = [sample_data],
+        hivdb_version = hivdb_version_info,
+        date = date.today().strftime("%Y-%m-%d"),
+        css_content = css_content,
+        logo_b64 = logo_b64
+    )
+
+    with open(args.output_html, "w", encoding="utf-8") as f:
         f.write(html_content)
 
-    print(f"✅ Report generated: {output_html}")
+    print(f"✅ Report generated for {sample_name}: {args.output_html}")
 
 if __name__ == "__main__":
     main()
