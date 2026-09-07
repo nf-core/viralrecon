@@ -1,4 +1,5 @@
 process RESISTANCE_REPORT {
+    tag "${meta.id}"
     label 'process_single'
 
     conda "${moduleDir}/environment.yml"
@@ -7,15 +8,10 @@ process RESISTANCE_REPORT {
         'community.wave.seqera.io/library/biopython_jinja2_pandas_python:bf9cf8457c0990de' }"
 
     input:
-    path sierralocal_json, stageAs: "sierralocal_json/*"
-    path mutation_csv    , stageAs: "mutation_tables/*"
-    path resistance_csv  , stageAs: "resistance_tables/*"
-    path nextclade_csv   , stageAs: "nextclade_reports/*"
-    path consensus       , stageAs: "consensus/*"
-    path annotation      , stageAs: "gff/*"
+    tuple val(meta), path(sierralocal_json), path(mutation_csv), path(resistance_csv), path(nextclade_csv), path(consensus), path(annotation)
 
     output:
-    path("*.html")      , emit: mutation_csv
+    tuple val(meta), path("*.html"), emit: html
     tuple val("${task.process}"), val('python'), eval('python --version | sed "s/Python //g"'), emit: versions_python, topic: versions
 
     when:
@@ -24,18 +20,19 @@ process RESISTANCE_REPORT {
     script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     def args = task.ext.args ?: ''
     def ivar_consensus_params = task.ext.args2 ?: '-t N/A -q N/A -m N/A -n N'
-    def prefix = task.ext.prefix ?: 'resistance'
+    def prefix = task.ext.prefix ?: "${meta.id}_resistance_report"
 
     """
     resistance_report.py \\
-        --sierralocal_folder ./sierralocal_json \\
-        --mutation_folder ./mutation_tables \\
-        --resistance_folder ./resistance_tables \\
-        --nextclade_folder ./nextclade_reports \\
-        --consensus_folder ./consensus \\
-        --gff_folder ./gff \\
+        --sierralocal_json $sierralocal_json \\
+        --mutation_csv $mutation_csv \\
+        --resistance_csv $resistance_csv \\
+        --nextclade_csv $nextclade_csv \\
+        --consensus_fasta $consensus \\
+        --gff $annotation \\
         --ivar_consensus_params "'${ivar_consensus_params}'" \\
         --output_html ${prefix}.html \\
         $args
+
     """
 }

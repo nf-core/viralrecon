@@ -20,25 +20,27 @@ def parser_args(args=None):
     """
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
 
-    parser.add_argument("-sf", "--sierralocal_file", type=str, help="JSON file containing sierra-local report.")
-    parser.add_argument("-cf", "--codfreq_file", type=str, help="Path to codfreq file.")
-    parser.add_argument("-s", "--sample_name", type=str, help="Name of the sample")
-    parser.add_argument( "-om", "--output_mutation_file", type=str, help="Full path to output mutation CSV file.")
-    parser.add_argument("-os", "--output_mutation_short", type=str,help="Full path to output mutation shortenned CSV file.")
-    parser.add_argument("-or", "--output_resistance_file", type=str, help="Full path to output resistance CSV file.")
-
+    parser.add_argument("-sf", "--sierralocal_file", type=str, required=True, help="JSON file containing sierra-local report.")
+    parser.add_argument("-cf", "--codfreq_file", type=str, required=True, help="Path to codfreq file.")
+    parser.add_argument("-s", "--sample_name", type=str, required=True, help="Name of the sample")
+    parser.add_argument( "-om", "--output_mutation_file", required=True, type=str, help="Full path to output mutation CSV file.")
+    parser.add_argument("-os", "--output_mutation_short", required=True, type=str,help="Full path to output mutation shortenned CSV file.")
+    parser.add_argument("-or", "--output_resistance_file", required=True, type=str, help="Full path to output resistance CSV file.")
+    parser.add_argument("-maf", "--min_allele_frequency", default=0.9, type=float, help="Minimum allele frequency threshold used in iVar consensus calling.")
     return parser.parse_args(args)
 
 def parse_codfreq(codfreq_path):
     return pd.read_csv(codfreq_path)
 
-def build_mutation_row(sample_name, gene_name, mut_text, mut, resistance_comments):
+def build_mutation_row(sample_name, gene_name, mut_text, original_mut_text, mut, resistance_comments):
     return {
         "Sample_name": sample_name,
         "Gene_name": gene_name,
         "Mutations": mut_text,
         "Mutations_type": mut.get("primaryType", "NA"),
-        "Mutations_comments": resistance_comments.get(mut_text, ""),
+        # Use the original combined mutation text, such as M184IM,
+        # because sierra-local stores the comment under that mutation name.
+        "Mutations_comments": resistance_comments.get(original_mut_text, ""),
         "isInsertion": mut.get("isInsertion", False),
         "isDeletion": mut.get("isDeletion", False),
         "isApobecMutation": mut.get("isApobecMutation", False),
@@ -98,6 +100,9 @@ def parse_sierra_json(sample_name, json_path):
         for mut in gene_entry.get("mutations", []):
             consensus = mut.get("consensus", "")
             text = mut.get("text", "")
+            # Keep the original combined mutation text so split mutations
+            # can retrieve the resistance comment linked to the combined form. For instance: M184IM
+            original_mut_text = text
             aas = mut.get("AAs", "")
             pos = mut.get("position", "")
             match = re.match(rf"{re.escape(consensus)}{str(pos)}(.+)", text)
@@ -112,13 +117,13 @@ def parse_sierra_json(sample_name, json_path):
                     if pos == lastAA and aa == "X" and not mut.get("isDeletion"):
                         continue  # skip, false positive at end of sequence
                     mut_text = f"{consensus}{pos}{aa}"
-                    rows.append(build_mutation_row(sample_name, gene_name, mut_text, mut, resistance_comments))
+                    rows.append(build_mutation_row(sample_name, gene_name, mut_text, original_mut_text, mut, resistance_comments))
             else:
                 if pos == lastAA and aas == "X" and not mut.get("isDeletion"):
                     continue  # skip, false positive at end of sequence
                 # If there is only one possible amino acid, keep a single row
                 mut_text = mut.get("text", "NA")
-                rows.append(build_mutation_row(sample_name, gene_name, mut_text, mut, resistance_comments))
+                rows.append(build_mutation_row(sample_name, gene_name, mut_text, original_mut_text, mut, resistance_comments))
 
     df = pd.DataFrame(rows)
 
@@ -202,6 +207,7 @@ def parse_resistance_json(sample_name, json_path):
 
     # Dictionary to map abbreviations to full drug names
     drug_fullnames = {
+        # PI:
         "ATV/r": "atazanavir/r",
         "DRV/r": "darunavir/r",
         "LPV/r": "lopinavir/r",
@@ -210,19 +216,23 @@ def parse_resistance_json(sample_name, json_path):
         "NFV": "nelfinavir",
         "SQV/r": "saquinavir/r",
         "TPV/r": "tipranavir/r",
+        # NRTI:
         "ABC": "abacavir",
         "AZT": "zidovudine",
         "FTC": "emtricitabine",
+        "ISL": "islatravir",
         "3TC": "lamivudine",
         "TDF": "tenofovir",
         "D4T": "stavudine",
         "DDI": "didanosine",
+        # NNRTI:
         "DOR": "doravirine",
         "EFV": "efavirenz",
         "ETR": "etravirine",
         "NVP": "nevirapine",
         "RPV": "rilpivirine",
         "DPV": "dapivirine",
+        # INSTI:
         "BIC": "bictegravir",
         "CAB": "cabotegravir",
         "DTG": "dolutegravir",
@@ -261,6 +271,37 @@ def parse_resistance_json(sample_name, json_path):
     df = pd.DataFrame(rows)
     return df
 
+def filter_mutations(mutation_df, min_allele_frequency):
+    """
+    Filter mutations with too low allele frequency using iVar consensus-style cumulative frequency logic.
+
+    Sierra-local may report more than two amino acid variants for the same codon
+    when more than one ambiguous nucleotide site is present in the consensus sequence.
+    This keeps amino acid variants ordered by allele frequency until
+    the cumulative allele frequency reaches the minimum allele frequency threshold.
+    """
+    if mutation_df.empty:
+        return mutation_df
+
+    mutation_df = mutation_df.copy()
+    mutation_df["_original_order"] = range(len(mutation_df))
+
+    mutation_df = mutation_df[~((mutation_df["Mutations"].str[-1] == "X") & (mutation_df["Mutation_AF"] == 0))]
+
+    mutation_df["_position"] = mutation_df["Mutations"].apply(extract_mutation_position).astype(int)
+
+    mutation_df = mutation_df.sort_values(
+        ["Gene_name", "_position", "Mutation_AF"],
+        ascending=[True, True, False],
+    )
+
+    mutation_df["_cumulative_AF"] = mutation_df.groupby(["Gene_name", "_position"])["Mutation_AF"].cumsum()
+    mutation_df["_cumulative_AF_before"] = mutation_df["_cumulative_AF"] - mutation_df["Mutation_AF"]
+
+    mutation_df = mutation_df[mutation_df["_cumulative_AF_before"] < min_allele_frequency]
+    mutation_df = mutation_df.sort_values("_original_order")
+    return mutation_df.drop(columns=["_original_order", "_position", "_cumulative_AF", "_cumulative_AF_before"])
+
 def main(args=None):
     args = parser_args(args)
 
@@ -274,7 +315,7 @@ def main(args=None):
     mutation_df = integrate_codfreq_info(sierralocal_df, codfreq_df)
 
     # Filter the DataFrame to remove those rows
-    mutation_df = mutation_df[~((mutation_df["Mutations"].str[-1] == "X") & (mutation_df["Mutation_AF"] == 0))]
+    mutation_df = filter_mutations(mutation_df, args.min_allele_frequency)
 
     if mutation_df.empty:
         logger.warning(f"No mutations found for sample {args.sample_name} or no valid codfreq data.")
@@ -282,7 +323,7 @@ def main(args=None):
     mutation_df.to_csv(args.output_mutation_file, index=False, encoding="utf-8-sig")
     print(f"✅ Resistance table saved to {args.output_mutation_file}")
 
-    # === Generate filtered mutation table ===
+    # === Generate mutation table with fewer fields===
     filtered_mutation_df = mutation_df[["Sample_name", "Gene_name", "Mutations", "Mutations_type", "Mutations_comments"]]
 
     filtered_mutation_df.to_csv(args.output_mutation_short, index=False, encoding="utf-8-sig")
