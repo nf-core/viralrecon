@@ -9,20 +9,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Dropdown menu */
-#sample-selector {
-  position: fixed;
-  top: 15px;
-  right: 20px;
-  z-index: 1000;
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid #97b5cf;
-  background-color: #f0f6fc;
-  box-shadow: 0 2px 6px rgba(17, 163, 222, 0.25);
-  font-size: 14px;
-}
-
 /* Report Title */
 .report-title {
   font-size: 2.5em;

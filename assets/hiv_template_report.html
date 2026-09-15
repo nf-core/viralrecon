@@ -21,17 +21,10 @@
       Database publish date: {{ hivdb_version.publish_date }}<br />
       Report generation date: {{ date }}
     </div>
-    <!-- Fixed dropdown for sample navigation -->
-    <select id="sample-selector" onchange="scrollToSample(this.value)">
-      <option value="">Select sample</option>
-      {% for sample in all_samples %}
-      <option value="sample_{{ loop.index }}">{{ loop.index }}. {{ sample.sample_name }}</option>
-      {% endfor %}
-    </select>
 
     {% for sample in all_samples %}
     <!-- HEADER -->
-    <div class="header" id="sample_{{ loop.index }}">{{ loop.index }}. {{ sample.sample_name }}</div>
+    <div class="header" id="sample_{{ loop.index }}">{{ sample.sample_name }}</div>
 
     <!-- SEQUENCE SUMMARY -->
     <div class="summary-title">
@@ -363,39 +356,6 @@
 
       document.addEventListener("DOMContentLoaded", makeMutationScoringSortable);
 
-      function scrollToSample(id) {
-        if (id) {
-          const element = document.getElementById(id);
-          if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }
-
-      // Highlight current sample dynamically while scrolling
-      document.addEventListener("DOMContentLoaded", () => {
-        const sections = Array.from(document.querySelectorAll("[id^='sample_']"));
-        const selector = document.getElementById("sample-selector");
-
-        function updateActiveSample() {
-          let current = sections[0].id;
-          const scrollPosition = window.scrollY + window.innerHeight / 3; // offset to trigger earlier
-
-          for (const section of sections) {
-            const rect = section.getBoundingClientRect();
-            const sectionTop = rect.top + window.scrollY;
-            if (scrollPosition >= sectionTop) {
-              current = section.id;
-            } else {
-              break;
-            }
-          }
-          if (selector.value !== current) {
-            selector.value = current;
-          }
-        }
-
-        window.addEventListener("scroll", updateActiveSample);
-        updateActiveSample(); // run once on load
-      });
     </script>
   </body>
 </html>

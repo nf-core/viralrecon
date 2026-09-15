@@ -22,7 +22,7 @@ def parser_args(args=None):
     python resistance_report.py --sierralocal_json SAMPLE_resistance.json --mutation_csv SAMPLE_mutation_table.csv
         --resistance_csv SAMPLE_resistance_table.csv --nextclade_csv SAMPLE_nextclade.csv
         --consensus_fasta SAMPLE.fa --gff SAMPLE.gff --ivar_consensus_params "-t 0.8 -q 30 -m 50 -n N"
-        --output_html SAMPLE_resistance_report.html
+        --ivar_variant_maf 0.01 --output_html SAMPLE_resistance_report.html
     """
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
 
@@ -82,6 +82,13 @@ def parser_args(args=None):
         help="Parameters used for ivar consensus calling",
     )
     parser.add_argument(
+        "-iv",
+        "--ivar_variant_maf",
+        type=float,
+        default=0.01,
+        help="Minor allele frequency threshold used for ivar variant calling",
+    )
+    parser.add_argument(
         "-d",
         "--deprecated_drugs",
         type=str,
@@ -103,7 +110,8 @@ def get_sample_number(sample_name, all_samples):
     return sorted_samples.index(sample_name) + 1
 
 
-def parse_sequence_summary(json_path, subtype_info=None, ivar_consensus_params=None):
+def parse_sequence_summary(json_path, subtype_info=None,
+                           ivar_consensus_params=None, ivar_variant_maf=None):
     """
     Extract sequence summary information from Sierra-local JSON.
     - Lists each gene present (PR, RT, IN)
@@ -216,6 +224,7 @@ def parse_sequence_summary(json_path, subtype_info=None, ivar_consensus_params=N
     m_val = int(match_m.group(1))
 
     summary_lines.append(f"Minimum read depth: ≥{m_val}")
+    summary_lines.append(f"Nucleotide mixture threshold (NMT): ≥{ ivar_variant_maf * 100:.0f}%")
     summary_lines.append(f"Mutation detection threshold (MDT): ≥{ (1-t_val) * 100:.0f}%")
     summary_lines.append(f"Minimum quality threshold: {q_val}")
 
@@ -580,6 +589,7 @@ def main():
         json_file,
         subtype_info=subtype,
         ivar_consensus_params=args.ivar_consensus_params,
+        ivar_variant_maf=args.ivar_variant_maf
     )
 
     df_res = parse_resistance_table(res_file, deprecated_drugs)
