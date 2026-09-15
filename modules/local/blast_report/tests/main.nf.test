@@ -1,0 +1,83 @@
+nextflow_process {
+
+    name "Test Process BLAST_REPORT"
+    script "../main.nf"
+    process "BLAST_REPORT"
+
+    test("Should generate a blast report and csv with proposed interpretation: manual assessment, and reverse complement contig") {
+
+        when {
+            params {
+                // define parameters here. Example:
+                // outdir = "tests/results"
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file(params.pipelines_testdata_base_path + '/local_modules/blast_report/SRR13266665.blast.tsv', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + '/local_modules/blast_report/SRR13266665_scaffolds.fa', checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            def html = path(process.out.blast_report.get(0)[1]).text
+            def csv = path(process.out.genotype.get(0)[1]).text
+            def reversed = path(process.out.reversed_contigs.get(0)[1]).text
+
+            assert html.contains("Proposed interpretation: Please do manual assessment.")
+            assert csv.contains("Please do manual assessment.")
+            assert reversed.contains("GTGCTAGCGCCCATTGGGCCCTGTGGGTGGGATCAACCCACAGGGCCCAATGGGCGCTAG")
+
+            assert process.success
+            assert snapshot(
+                name: "normal",
+                file(process.out.blast_report.get(0).get(1)).name,
+                process.out.reversed_contigs,
+                process.out.genotype,
+                process.out.findAll { key, val -> key.startsWith('versions') }
+            ).match()
+        }
+
+    }
+    test("Should generate an error report and csv with no recomendation") {
+
+        when {
+            params {
+                // define parameters here. Example:
+                // outdir = "tests/results"
+            }
+            process {
+                """
+                input[0] = [
+                    [ id:'test' ],
+                    file(params.pipelines_testdata_base_path + '/local_modules/blast_report/SRR13266665_error.blast.tsv', checkIfExists: true),
+                    file(params.pipelines_testdata_base_path + '/local_modules/blast_report/SRR13266665_scaffolds.fa', checkIfExists: true)
+                ]
+                """
+            }
+        }
+
+        then {
+            assert process.success
+
+            def html = path(process.out.blast_report.get(0)[1]).text
+            def csv = path(process.out.genotype.get(0)[1]).text
+
+            assert html.contains("Proposed interpretation: No recomendation due to lack of contigs meeting filtering criteria.")
+            assert csv.contains("No recomendation due to lack of contigs meeting filtering criteria.")
+
+            assert snapshot(
+                name: "error",
+                file(process.out.blast_report.get(0).get(1)).name,
+                process.out.reversed_contigs,
+                process.out.genotype,
+                process.out.findAll { key, val -> key.startsWith('versions') }
+            ).match()
+        }
+
+    }
+
+}

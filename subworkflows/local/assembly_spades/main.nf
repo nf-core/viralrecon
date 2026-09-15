@@ -8,6 +8,7 @@ include { GUNZIP as GUNZIP_SCAFFOLDS } from '../../../modules/nf-core/gunzip/mai
 include { GUNZIP as GUNZIP_GFA       } from '../../../modules/nf-core/gunzip/main'
 
 include { ASSEMBLY_QC   } from '../assembly_qc'
+include { BLAST_REPORT  } from '../../../modules/local/blast_report'
 
 workflow ASSEMBLY_SPADES {
     take:
@@ -44,11 +45,28 @@ workflow ASSEMBLY_SPADES {
         hmm
     )
 
+    SPADES.out.scaffolds
+        .mix(SPADES.out.contigs)
+        .groupTuple(by: 0)
+        .map { meta, files ->
+            // Choose scaffold if it exists and is not empty, otherwise contig
+            def scaffold = files.find { it.name.contains('scaffold') }
+            def contig = files.find { it.name.contains('contig') }
+
+            def assembly = scaffold ? scaffold : contig
+
+            if (!assembly) {
+                error "No assembly found for sample ${meta}"
+            }
+
+            [meta, file(assembly)]
+        }
+        .set { ch_assembly }
     //
     // Unzip scaffolds file
     //
     GUNZIP_SCAFFOLDS (
-        SPADES.out.scaffolds
+        ch_assembly
     )
 
     //
@@ -101,6 +119,21 @@ workflow ASSEMBLY_SPADES {
     )
     ch_versions = ch_versions.mix(ASSEMBLY_QC.out.versions)
 
+    ch_blast_report = channel.empty()
+    ch_reversed_fasta = channel.empty()
+    ch_genotype = channel.empty()
+
+    if (!params.skip_blast && (params.genome == 'NC_002058.3' || params.perform_ev_typing)) {
+        ch_blast_report_input = ASSEMBLY_QC.out.blast_txt.join(ch_scaffolds, by: [0])
+            .filter{ _meta, blast, _assembly_fasta -> blast.countLines() > 1 }
+        BLAST_REPORT (
+            ch_blast_report_input
+        )
+        ch_blast_report = BLAST_REPORT.out.blast_report
+        ch_reversed_fasta = BLAST_REPORT.out.reversed_contigs
+        ch_genotype = BLAST_REPORT.out.genotype
+    }
+
     emit:
     scaffolds          = SPADES.out.scaffolds               // channel: [ val(meta), [ scaffolds ] ]
     contigs            = SPADES.out.contigs                 // channel: [ val(meta), [ contigs ] ]
@@ -114,6 +147,9 @@ workflow ASSEMBLY_SPADES {
 
     blast_txt          = ASSEMBLY_QC.out.blast_txt          // channel: [ val(meta), [ txt ] ]
     blast_filter_txt   = ASSEMBLY_QC.out.blast_filter_txt   // channel: [ val(meta), [ txt ] ]
+    blast_report       = ch_blast_report                    // channel: [ val(meta), [ html ] ]
+    reversed_fasta     = ch_reversed_fasta                  // channel: [ val(meta), [ fasta ] ]
+    genotype           = ch_genotype                        // channel: [ val(meta), [ csv ] ]
 
     quast_results      = ASSEMBLY_QC.out.quast_results      // channel: [ val(meta), [ results ] ]
     quast_tsv          = ASSEMBLY_QC.out.quast_tsv          // channel: [ val(meta), [ tsv ] ]

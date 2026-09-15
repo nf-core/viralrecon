@@ -669,7 +669,6 @@ workflow VIRALRECON {
                 )
                 ch_primers = PREPARE_PRIMER_FASTA.out.adapters
             }
-
             CUTADAPT (
                 ch_assembly_fastq,
                 ch_primers

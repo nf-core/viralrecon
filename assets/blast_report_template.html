@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enterovirus Report</title>
+    <style>
+      {{ css_content | safe }}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>Enterovirus Genotyping</h1>
+        <p>Sample: {{ data.sample_name }}</p>
+      </header>
+
+      <div class="metadata">
+        <div class="metadata-grid">
+          {% if data.id %}
+          <div class="metadata-item">
+            <span class="metadata-label">Identifier:</span>
+            <span class="metadata-value">{{ data.id }}</span>
+          </div>
+          {% endif %}
+          <div class="metadata-item">
+            <span class="metadata-label">Analysis date:</span>
+            <span class="metadata-value">{{ data.time_stamp }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="description">
+          {% if data.is_error_report %}
+          <p><strong>Compilation of results</strong> for all contigs (unfiltered data).</p>
+          {% else %}
+          <p>
+            <strong>Compilation of results</strong> for contigs with a coverage of at least 50x and length of at least
+            200bp.
+          </p>
+          {% endif %}
+        </div>
+
+        <div class="suggestion">
+          <b>Proposed interpretation: {{ data.suggestion }}</b>
+
+          {% if suggestion != "Automatic suggestion disabled." %}
+          <details style="margin-top: 0.8rem; font-size: 0.9em">
+            <summary>Show details (criteria for genotype suggestion)</summary>
+            <div class="details-content" style="margin-top: 0.5rem; font-size: 0.9em; line-height: 1.4">
+              <b>A genotype is suggested if all following criteria is met:</b><br />
+              • The genotype has the highest score for both identity and bitscore<br />
+              • The genotype has the highest median for both identity and bitscore<br />
+              • The genotype has at least 20 hits, 90% identity and 400 bitscore
+            </div>
+          </details>
+          {% endif %}
+        </div>
+
+        {% if data.is_error_report %}
+        <div class="warning">
+          <span class="warning-icon">⚠️</span>
+          <span class="warning-text"
+            >Note! No contigs met the criteria for standard analysis (at least 200bp length and 50x coverage). Showing
+            results for all available contigs.</span
+          >
+        </div>
+        {% endif %} {% if data.warningtext and not data.is_error_report %}
+        <div class="warning">{{ data.warningtext | safe }}</div>
+        {% endif %}
+
+        <div class="figure-container">
+          <img src="{{ data.img_data_uri }}" alt="BLAST analysis results" />
+        </div>
+
+        <div class="figure-legend">
+          <h3>Explanation of figures</h3>
+          <ul>
+            <li>
+              <strong>Figure 1 and 2:</strong> Circles indicate identity per matched sequence, diamonds indicate average
+              value per contig.
+            </li>
+            <li><strong>Identity:</strong> How many nucleotides in alignment are identical.</li>
+            <li><strong>Bit-score:</strong> Normalized score to statistically report how good the alignment is.</li>
+          </ul>
+        </div>
+
+        <div class="links-section">
+          <h3>Reference information - Enterovirus genotypes per species</h3>
+          <div class="links-grid">
+            <a href="https://www.picornaviridae.com/ensavirinae/enterovirus/ev-a/ev-a.htm" class="link-card">
+              <h4>Enterovirus Species A</h4>
+              <p>Complete list of genotypes</p>
+            </a>
+            <a href="https://www.picornaviridae.com/ensavirinae/enterovirus/ev-b/ev-b.htm" class="link-card">
+              <h4>Enterovirus Species B</h4>
+              <p>Complete list of genotypes</p>
+            </a>
+            <a href="https://www.picornaviridae.com/ensavirinae/enterovirus/ev-c/ev-c.htm" class="link-card">
+              <h4>Enterovirus Species C</h4>
+              <p>Complete list of genotypes</p>
+            </a>
+            <a href="https://www.picornaviridae.com/ensavirinae/enterovirus/ev-d/ev-d.htm" class="link-card">
+              <h4>Enterovirus Species D</h4>
+              <p>Complete list of genotypes</p>
+            </a>
+          </div>
+        </div>
+
+        <div class="external-tool">
+          <p>For additional analysis, the contigs can be analysed with:</p>
+          <a href="https://mpf.rivm.nl/mpf/typingtool/enterovirus/">RIVM Enterovirus Genotyping Tool</a>
+        </div>
+
+        <div class="contigs-section">
+          <h3>Contigs</h3>
+          <div class="contigs-container">
+            <div class="contigs-header">
+              <div>
+                <strong>🧬 Sequence data:</strong>
+                <span style="color: var(--dark-gray); margin-left: 1rem">{{ data.contig_count }} contig(s) found</span>
+              </div>
+              <button class="toggle-btn" id="toggle-btn" onclick="toggleContigs()">
+                <span class="toggle-icon">▼</span> Show Contig Sequences
+              </button>
+            </div>
+            <div class="contigs-summary" id="contigs-summary">{{ data.contigs_summary | safe }}</div>
+            <div class="contigs-full" id="contigs-full" style="display: none">{{ data.contigs_content | safe }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer">
+        <div style="margin-top: 20px; text-align: center">
+          <img src="data:image/png;base64,{{ logo_b64 }}" style="height: 60px" />
+        </div>
+        <p style="margin: 15px 0; line-height: 1.5">
+          Generated automatically from <a href="https://github.com/nf-core/viralrecon">nf-core/viralrecon</a> using
+          <a href="https://blast.ncbi.nlm.nih.gov/Blast.cgi">BLAST</a>. This report was created during a collaboration
+          between the
+          <a href="https://www.isciii.es/ub/unidad">Bioinformatics Unit of Instituto de Salud Carlos III (BU-ISCIII)</a>
+          and both <a href="https://ki.se/">Karolinska Institutet (KI)</a> and
+          <a href="https://www.karolinska.se/lab">Karolinska University Laboratory (KUL)</a>.
+        </p>
+      </div>
+    </div>
+    <script>
+      function toggleContigs() {
+        const summaryDiv = document.getElementById("contigs-summary");
+        const fullDiv = document.getElementById("contigs-full");
+        const toggleBtn = document.getElementById("toggle-btn");
+
+        if (fullDiv.style.display === "none" || fullDiv.style.display === "") {
+          summaryDiv.style.display = "none";
+          fullDiv.style.display = "block";
+          toggleBtn.innerHTML = '<span class="toggle-icon">▲</span> Hide Contig Sequences';
+          toggleBtn.classList.add("expanded");
+        } else {
+          summaryDiv.style.display = "block";
+          fullDiv.style.display = "none";
+          toggleBtn.innerHTML = '<span class="toggle-icon">▼</span> Show Contig Sequences';
+          toggleBtn.classList.remove("expanded");
+        }
+      }
+    </script>
+  </body>
+</html>

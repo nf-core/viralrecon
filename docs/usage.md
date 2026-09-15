@@ -349,34 +349,34 @@ NXF_OPTS='-Xms1g -Xmx4g'
 
 ## Enterovirus
 
-`nf-core/viralrecon` has been extended to support **Enterovirus typing** through optimized BLASTN searches with taxonomic ID filtering.
+`nf-core/viralrecon` has been extended to support **Enterovirus typing** through optimized BLASTN searches with taxonomic ID filtering, and generation of an html report based on filtered blast results.
 
-The goal of this addition is to enable rapid and accurate **Enterovirus strain/genotype identification** directly from consensus sequences in the de novo assembly track, reducing BLASTN runtime while maintaining high typing accuracy.
+The goal of this addition is to enable rapid and accurate **Enterovirus genotype identification** directly from consensus sequences in the de novo assembly track, reducing BLASTN runtime while maintaining high typing accuracy.
 
-### Enterovirus profile and recommended params
+### Enterovirus typing profile and recommended params
 
-The Enterovirus profile introduces specific adjustments compared to a standard `viralrecon` run, primarily to optimize **strain/genotype typing**.
+The Enterovirus profile `ev_typing.conf` introduces specific adjustments compared to a standard `viralrecon` run, primarily to optimize **genotype typing**.
 
 By default, variant calling is deactivated for enterovirus typing because de novo assembly performs better through assembled contigs and BLAST comparison.
 
 #### De novo assembly
 
-De novo assembly is performed using **spades** and/or **unicycler** to generate contigs for BLASTN typing.
-Note that **minia** is not a default assembler for enterovirus.
+De novo assembly is performed using **spades** to generate contigs for BLASTN typing.
+Note that **unicycler** and **minia** are not default assemblers for enterovirus, and not compatible with the generation of the html report.
 
 #### BLASTN
 
-Typing through **blastn** is performed through supplying a blast database with taxid mapping and a taxidlist, to improve typing specificity and reduce runtime.
+Typing through **blastn** is performed through supplying a blast database with taxid mapping and a taxid list, to improve typing specificity and reduce runtime.
 The new optional parameter, `--taxidlist`, allows users to provide a list of **NCBI Taxonomy IDs** corresponding to Enterovirus taxa of interest.
 
-Taxonomy IDs related to enterovirus can be retriewed through // Add command here
+Taxonomy IDs related to enterovirus can be retriewed from [NCBI](https://www.ncbi.nlm.nih.gov/taxonomy/?term=txid12059[Organism:noexp]).
 
 Example usage:
 
 ```bash
 --blastdb path/to/blastdb
---taxidlist path/to/taxidlist_taxids.txt
---profile test_ev
+--taxidlist path/to/taxidlist.txt
+--profile ev_typing
 ```
 
 #### Reference genome
@@ -388,6 +388,30 @@ Users may provide their **own custom reference genomes** using the parameters:
 ```bash
 --fasta <path_to_reference.fasta>
 --gff   <path_to_annotation.gff>
+```
+
+#### Blast report
+
+When using `--genome 'NC_002058.3'` or `--perform_ev_typing`, which are enabled in the `-profile ev_typing` configuration, the pipeline generates an HTML report with the enterovirus typing results, a genotype CSV file, and a FASTA file containing forward and reverse complement contigs, if any reverse-oriented contigs are detected from **spades** assembly. In the HTML report, a genotype is suggested based on a number of parameters listed below which are configured with default values:
+
+| Parameter                      | Default | Description                                                             |
+| :----------------------------- | :------ | ----------------------------------------------------------------------- |
+| `--min_coverage (-mc)`         | 50      | Minimum coverage required for a BLAST hit to be included.               |
+| `--id (-i)`                    | None    | Optional run/ticket ID included in the final HTML report.               |
+| `--suggest_min_rows (-sr)`     | 20      | Minimum number of hits per genotype needed for an automated suggestion. |
+| `--suggest_min_identity (-si)` | 90      | Minimum identity threshold for automated suggestion.                    |
+| `--suggest_min_bitscore (-sb)` | 400     | Minimum bitscore threshold for automated suggestion.                    |
+| `--no_suggest (-ns)`           | Off     | Disable automated genotype suggestion logic.                            |
+| `--dpi (-d)`                   | 300     | DPI used for the generated plots in the HTML report.                    |
+
+The user can change this configuration by providing a custom config file with `-c` param. This config file should contain this piece of code with the specific configuration for `BLAST_REPORT`, where parameters can be changed from default through ext.args.
+
+```bash
+process {
+    withName: 'BLAST_REPORT' {
+      ext.args = "--suggest_min_bitscore 400"
+    }
+}
 ```
 
 ## HIV

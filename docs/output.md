@@ -961,6 +961,9 @@ In the variant calling branch of the pipeline we are using [iVar trim](#ivar-tri
       - qcovs: Query Coverage Per Subject.
       - %cgAligned: Percentage of contig covered in the alignment. It is calculated dividing `length/qlen`.
       - %refCovered: Percentage of reference genome covered in the alignment. It is calculated dividing `length/slen`.
+  - `*_blast_report.html`: Genotyping results report in HTML format, that can be viewed in your browser.
+  - `*_reversed_contigs.fa`: FASTA file containing forward and reverse complement contigs if any reverse-oriented contigs are detected.
+  - `*_genotype.csv`: Genotyping result in CSV format.
 
 **NB:** The value of `<ASSEMBLER>` in the output directory name above is determined by the `--assemblers` parameter (Default: 'spades').
 

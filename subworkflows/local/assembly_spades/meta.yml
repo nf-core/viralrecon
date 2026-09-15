@@ -84,6 +84,14 @@ output:
       description: |
         Filtered results of the  BLAST alignment
         Structure: [ val(meta), [ txt ] ]
+  - blast_report:
+      decsription: |
+        HTML report of blast results.
+        Structure: [ val(meta), [ html ] ]
+  - reversed_fasta:
+      description: |
+        Fasta file of reversed complement contigs.
+        Structure: [ val(meta), [ fasta ] ]
   - quast_results:
       description: |
         Results of the quast quality control

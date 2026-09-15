@@ -498,9 +498,6 @@
                 "variants/ivar/variants_long_table.csv"
             ],
             [
-                "DRR030302.fastp.json:md5,3a7c674a43a9e7f13d980b588d5cd15c",
-                "SRR4071760.fastp.json:md5,770bd2ad5d7329b9c7af34f6ba0152d6",
-                "SRR6937100.fastp.json:md5,cfe934875f19031cd661db3dc7c00b21",
                 "DRR030302.kraken2.report.txt:md5,5ab2ed70334d4061fb82f8d91475c761",
                 "SRR4071760.kraken2.report.txt:md5,c26f91bfafe58ba451f7d05f0b9b5611",
                 "SRR6937100.kraken2.report.txt:md5,6f5c455f6efd9fa807fefdbba83ba960",
@@ -552,7 +549,6 @@
                 "multiqc_bcftools_stats.yaml:md5,24a88a270740d3a4efd1332749d6d121",
                 "multiqc_bowtie2.yaml:md5,4daf8885acd63fc61f20e24cfe2102c4",
                 "multiqc_citations.yaml:md5,f564e5526b36c9a583e0af5ca7a34b64",
-                "multiqc_fastp.yaml:md5,9b021036c696d436ddf900bd81c9de5d",
                 "multiqc_fastqc.yaml:md5,444824ecaca1d11e9920430e6b06ddd3",
                 "multiqc_ivar_variants.yaml:md5,c0eb1e73e4ec11c252b2476108d4a560",
                 "multiqc_kraken.yaml:md5,bbacecf8e782bb601be23351c164dd6b",
@@ -1141,9 +1137,6 @@
                 "variants/ivar/variants_long_table.csv"
             ],
             [
-                "DRR030302.fastp.json:md5,3a7c674a43a9e7f13d980b588d5cd15c",
-                "SRR4071760.fastp.json:md5,770bd2ad5d7329b9c7af34f6ba0152d6",
-                "SRR6937100.fastp.json:md5,cfe934875f19031cd661db3dc7c00b21",
                 "DRR030302.kraken2.report.txt:md5,5ab2ed70334d4061fb82f8d91475c761",
                 "SRR4071760.kraken2.report.txt:md5,c26f91bfafe58ba451f7d05f0b9b5611",
                 "SRR6937100.kraken2.report.txt:md5,6f5c455f6efd9fa807fefdbba83ba960",
@@ -1195,7 +1188,6 @@
                 "multiqc_bcftools_stats.yaml:md5,675d4e41cc92af9381006d9dafcc5503",
                 "multiqc_bowtie2.yaml:md5,bb7fe62e1ee3c986e3afc4c6480ac9cf",
                 "multiqc_citations.yaml:md5,f564e5526b36c9a583e0af5ca7a34b64",
-                "multiqc_fastp.yaml:md5,9b021036c696d436ddf900bd81c9de5d",
                 "multiqc_fastqc.yaml:md5,444824ecaca1d11e9920430e6b06ddd3",
                 "multiqc_ivar_variants.yaml:md5,92e053dd68158082d67218932751c0b8",
                 "multiqc_kraken.yaml:md5,bbacecf8e782bb601be23351c164dd6b",
