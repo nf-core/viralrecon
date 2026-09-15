@@ -24,6 +24,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 
 ### Enhancements & fixes
 
+- [[#618](https://github.com/nf-core/viralrecon/issues/618)] - Update Freyja `2.0.3` → `2.0.4`, fixing the intermittent `FREYJA_BOOT` crash caused by a floating-point rounding bug in `perform_bootstrap`
 - [[PR #605](https://github.com/nf-core/viralrecon/pull/605)] - Homogenize Nanopore normalized variant filenames
 - [[PR #589](https://github.com/nf-core/viralrecon/pull/589)] - Add strict syntax implementation plan, fix trivial errors
 - [[PR #585](https://github.com/nf-core/viralrecon/pull/585)] - Accept semver primer_set_version values (e.g. 5.3.2)
