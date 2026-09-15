@@ -202,7 +202,6 @@
             [
                 "SRR13266665.contigs.fa.gz:md5,d6fb919c8683a3025cf6c5fd512f5245",
                 "gc.icarus.txt:md5,3f5e959947cbc0d2744053261dbf77c4",
-                "SRR13266665.fastp.json:md5,365cd8099c91d57ce07c0615d4899128",
                 "SRR13266665.kraken2.report.txt:md5,ba7c54a91f0a60efe950bed82f8d6e87",
                 "fastp-insert-size-plot.yaml:md5,f24342085c60ebe502748e94858075d8",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,ae0da8f82bc6727c525f78e537d86b6b",
@@ -237,7 +236,6 @@
                 "kraken-top-n-plot_Phylum.yaml:md5,aa0974a3cf61cd5a9abe0e4b02994b38",
                 "kraken-top-n-plot_Unclassified.yaml:md5,aa0974a3cf61cd5a9abe0e4b02994b38",
                 "multiqc_citations.yaml:md5,db2447b791e1f71a3b42cc5957febf64",
-                "multiqc_fastp.yaml:md5,a4918c922739495f9e994b452043b802",
                 "multiqc_fastqc.yaml:md5,739201476016f8db8752a42e43782b5f",
                 "multiqc_kraken.yaml:md5,b5b6612a16dd78f1f0a096fc7fe424bb",
                 "multiqc_quast_quast_spades.yaml:md5,d8d4dd92149a983cddaaa3bb10cd8b0c"

@@ -19,12 +19,14 @@ multiqc/multiqc_data/multiqc_quast_quast_unicycler.yaml
 multiqc/multiqc_data/multiqc_summary_assembly_metrics_plot.yaml
 multiqc/multiqc_data/quast_num_contigs.yaml
 multiqc/multiqc_data/quast_table.yaml
+multiqc/multiqc_data/multiqc_fastp.yaml
 multiqc/summary_variants_metrics_mqc.csv
 multiqc/summary_assembly_metrics_mqc.csv
 fastqc/{raw,trim}/*_fastqc.{html,zip}
 pipeline_info/*.{html,json,txt,yml}
 fastp/log/*.fastp.log
 fastp/*.fastp.html
+fastp/*.fastp.json
 **/quast*/*report.{txt,tsv,tex,pdf,html}
 **/quast*/icarus.html
 **/quast*/icarus_viewers/**
