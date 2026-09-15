@@ -8,7 +8,9 @@ process RESISTANCE_REPORT {
         'community.wave.seqera.io/library/biopython_jinja2_pandas_python:bf9cf8457c0990de' }"
 
     input:
-    tuple val(meta), path(sierralocal_json), path(mutation_csv), path(resistance_csv), path(nextclade_csv), path(consensus), path(annotation)
+    tuple val(meta), path(sierralocal_json), path(mutation_csv), path(resistance_csv), path(nextclade_csv), path(consensus), path(annotation), path(ivar_tsv)
+    val nextclade_dataset_name
+    val nextclade_dataset_tag
 
     output:
     tuple val(meta), path("*.html"), emit: html
@@ -21,6 +23,7 @@ process RESISTANCE_REPORT {
     def args = task.ext.args ?: ''
     def ivar_consensus_params = task.ext.args2 ?: '-t N/A -q N/A -m N/A -n N'
     def prefix = task.ext.prefix ?: "${meta.id}_resistance_report"
+    def pipeline_version = workflow.manifest.version ?: 'dev'
 
     """
     resistance_report.py \\
@@ -30,8 +33,12 @@ process RESISTANCE_REPORT {
         --nextclade_csv $nextclade_csv \\
         --consensus_fasta $consensus \\
         --gff $annotation \\
+        --ivar_tsv $ivar_tsv \\
         --ivar_consensus_params "'${ivar_consensus_params}'" \\
         --output_html ${prefix}.html \\
+        --nextclade_dataset_name $nextclade_dataset_name \\
+        --nextclade_dataset_tag $nextclade_dataset_tag \\
+        --pipeline_version $pipeline_version \\
         $args
 
     """

@@ -15,22 +15,39 @@
       <strong>not generated with <a href="https://hivdb.stanford.edu/hivdb/" target="_blank">HIVdb</a></strong
       >, but it is inspired by it.
     </p>
-    <!-- ADDITIONAL INFORMATION -->
-    <div class="report-subtitle">
-      Database version: {{ hivdb_version.db_version }}<br />
-      Database publish date: {{ hivdb_version.publish_date }}<br />
-      Report generation date: {{ date }}
+    <!-- VERSIONS -->
+    <div class="report-section">
+      <div class="summary-title">
+        <h2>Versions</h2>
+      </div>
+      <div class="metadata-grid">
+        <div><span class="meta-label">nf-core/viralrecon:</span> {{ pipeline_version }}</div>
+        <div><span class="meta-label">Report generated:</span> {{ date }}</div>
+        <div><span class="meta-label">HIVDB:</span> {{ hivdb_version.db_version }}</div>
+        <div><span class="meta-label">HIVDB publish date:</span> {{ hivdb_version.publish_date }}</div>
+        <div><span class="meta-label">nextclade_dataset_name:</span> {{ nextclade_dataset_name }}</div>
+        <div><span class="meta-label">nextclade_dataset_tag:</span> {{ nextclade_dataset_tag }}</div>
+      </div>
     </div>
 
     {% for sample in all_samples %}
     <!-- HEADER -->
     <div class="header" id="sample_{{ loop.index }}">{{ sample.sample_name }}</div>
 
-    <!-- SEQUENCE SUMMARY -->
+    <!-- SETTINGS -->
     <div class="summary-title">
-      <h2>Sequence Summary</h2>
+      <h2>Settings</h2>
+    </div>
+    <div class="metadata-grid sample-metadata">
+      {% for line in sample.sequence_summary %} {% if line is string and (line.startswith("Minimum read depth") or line.startswith("Nucleotide mixture threshold") or line.startswith("Mutation detection threshold") or line.startswith("Minimum quality threshold")) %}
+      <div>{{ line }}</div>
+      {% endif %} {% endfor %}
     </div>
 
+    <!-- QUALITY CHECK -->
+    <div class="summary-title">
+      <h2>Quality Check</h2>
+    </div>
     <div class="sequence-summary-info">
       <ul>
         {% for line in sample.sequence_summary %} {% if line is iterable and line[0] == "subtype" %}
@@ -43,7 +60,19 @@
             ⓘ
           </span>
         </li>
-        {% else %}
+        {% elif line is string and line.startswith("Supported mixed-site proportion") %}
+        <li>{{ line }}</li>
+        {% endif %} {% endfor %}
+      </ul>
+    </div>
+
+    <!-- SEQUENCE SUMMARY -->
+    <div class="summary-title">
+      <h2>Sequence Summary</h2>
+    </div>
+    <div class="sequence-summary-info">
+      <ul>
+        {% for line in sample.sequence_summary %} {% if line is string and line.startswith("Sequence includes") %}
         <li>{{ line }}</li>
         {% endif %} {% endfor %}
       </ul>

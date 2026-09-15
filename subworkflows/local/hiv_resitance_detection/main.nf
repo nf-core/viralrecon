@@ -19,8 +19,11 @@ workflow HIV_RESISTANCE {
     gff              // path   : genome.gff
     vcf              // channel: [ val(meta), [ vcf ] ]
     tbi              // channel: [ val(meta), [ tbi ] ]
+    ivar_tsv         // channel: [ val(meta), [ ivar_tsv ] ]
     pangolin         // channel: [ val(meta), [ csv ] ]
     nextclade_report // channel: [ val(meta), [ csv ] ]
+    nextclade_dataset_name
+    nextclade_dataset_tag
 
     main:
 
@@ -101,8 +104,13 @@ workflow HIV_RESISTANCE {
         .join(nextclade_report, by: [0])
         .join(consensus, by: [0])
         .join(CONSENSUS_LIFTOFF.out.gff3, by: [0])
+        .join(ivar_tsv, by: [0])
 
-    RESISTANCE_REPORT(ch_resistance_report_input)
+    RESISTANCE_REPORT(
+        ch_resistance_report_input,
+        nextclade_dataset_name,
+        nextclade_dataset_tag
+    )
 
     emit:
     sierralocal_results  = SIERRALOCAL.out.json                      // channel: [ val(meta), [ json ] ]

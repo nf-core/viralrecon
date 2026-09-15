@@ -1,5 +1,5 @@
 name: resistance_report
-description: Generate an HTML HIV drug resistance report from one sample's Sierra-local JSON report, mutation and resistance CSV tables, Nextclade subtype report, consensus FASTA file, and GFF annotation.
+description: Generate an HTML HIV drug resistance report from one sample's Sierra-local JSON report, mutation and resistance CSV tables, Nextclade subtype report, consensus FASTA file, GFF annotation, and iVar variants TSV.
 keywords:
   - hiv
   - drug resistance
@@ -11,7 +11,8 @@ tools:
       description: |
         Custom nf-core/viralrecon script that renders an HTML HIV drug resistance report
         from per-sample Sierra-local JSON reports, mutation and resistance CSV tables,
-        Nextclade subtype reports, consensus FASTA files, and GFF annotations.
+        Nextclade subtype reports, consensus FASTA files, GFF annotations,
+        and iVar variants TSV files.
       licence: ["MIT"]
 input:
   - sierralocal_json:
@@ -50,6 +51,18 @@ input:
       pattern: "*.{gff,gff3}"
       ontologies:
         - edam: http://edamontology.org/format_1975
+  - ivar_tsv:
+      type: file
+      description: iVar variants TSV file used to estimate the supported mixed-site proportion from nucleotide variants
+      pattern: "*.tsv"
+      ontologies:
+        - edam: http://edamontology.org/format_3475
+  - nextclade_dataset_name:
+      type: string
+      description: Nextclade dataset name used for subtype and QC annotation
+  - nextclade_dataset_tag:
+      type: string
+      description: Nextclade dataset tag used for subtype and QC annotation
 output:
   html:
     - "*.html":

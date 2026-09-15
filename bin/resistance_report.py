@@ -3,6 +3,7 @@
 
 import os
 import re
+import csv
 import json
 import argparse
 import base64
@@ -102,16 +103,74 @@ def parser_args(args=None):
         required=True,
         help="Full path to the sample HTML report file."
     )
+    parser.add_argument(
+        "--ivar_tsv",
+        type=str,
+        required=True,
+        help="iVar variants TSV file used to estimate polymorphic site proportion."
+    )
+    parser.add_argument(
+        "--nextclade_dataset_name",
+        type=str,
+        default="",
+        help="Nextclade dataset name, for example neherlab/hiv-1",
+    )
+    parser.add_argument(
+        "--nextclade_dataset_tag",
+        type=str,
+        default="",
+        help="Nextclade dataset tag, for example 2025-09-09--12-13-13Z",
+    )
+    parser.add_argument(
+        "--pipeline_version",
+        type=str,
+        default="dev",
+        help="nf-core/viralrecon pipeline version",
+    )
+
     return parser.parse_args(args)
 
-def get_sample_number(sample_name, all_samples):
-    """Return the sample index based on alphabetical order."""
-    sorted_samples = sorted(all_samples)
-    return sorted_samples.index(sample_name) + 1
+def count_non_n_consensus_sites(consensus_fasta):
+    seq_record = next(SeqIO.parse(consensus_fasta, "fasta"))
+    return sum(1 for base in seq_record.seq if base.upper() != "N")
 
+def estimate_polymorphism_proportion(ivar_tsv, consensus_fasta, min_af, max_af):
+    """
+    Estimate the proportion of within-sample polymorphic sites.
+
+    Polymorphic sites are defined as unique iVar PASS positions with ALT_FREQ
+    between min_af and max_af, inclusive. The denominator is the number of
+    non-N bases in the sample consensus FASTA.
+    """
+    polymorphic_positions = set()
+
+    with open(ivar_tsv, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f, delimiter="\t")
+        for row in reader:
+            try:
+                is_pass = row.get("PASS", "").upper() == "TRUE"
+                alt_freq = float(row.get("ALT_FREQ", 0))
+                pos = row.get("POS")
+            except ValueError:
+                continue
+
+            if is_pass and min_af <= alt_freq <= max_af and pos:
+                polymorphic_positions.add(pos)
+
+    non_n_sites = count_non_n_consensus_sites(consensus_fasta)
+    proportion = len(polymorphic_positions) / non_n_sites if non_n_sites else None
+
+    return {
+        "polymorphic_sites": len(polymorphic_positions),
+        "non_n_consensus_sites": non_n_sites,
+        "proportion": proportion,
+        "min_af": min_af,
+        "max_af": max_af,
+    }
 
 def parse_sequence_summary(json_path, subtype_info=None,
-                           ivar_consensus_params=None, ivar_variant_maf=None):
+                           ivar_consensus_params=None, ivar_variant_maf=None,
+                           polymorphism_summary=None):
     """
     Extract sequence summary information from Sierra-local JSON.
     - Lists each gene present (PR, RT, IN)
@@ -212,6 +271,12 @@ def parse_sequence_summary(json_path, subtype_info=None,
 
     # --- Add subtype info from Nextclade if provided
     summary_lines.append(("subtype", subtype_info))
+
+    # -- Add proportion of polymorphic sites
+    summary_lines.append(
+        f"Supported mixed-site proportion (from iVar nucleotide variants): "
+        f"{polymorphism_summary['proportion'] * 100:.2f}%"
+    )
 
     # --- Parse ivar consensus parameters if provided
     # Extract numeric values with regex
@@ -583,13 +648,21 @@ def main():
         with open(consensus_file, "r", encoding="utf-8") as f:
             consensus_seq = f.read().strip()
 
+    polymorphism_summary = estimate_polymorphism_proportion(
+        args.ivar_tsv,
+        consensus_file,
+        min_af=args.ivar_variant_maf,
+        max_af=1.0 - args.ivar_variant_maf,
+    )
+
     subtype = get_nextclade_subtype(nextclade_file, sample_name)
 
     seq_summary = parse_sequence_summary(
         json_file,
         subtype_info=subtype,
         ivar_consensus_params=args.ivar_consensus_params,
-        ivar_variant_maf=args.ivar_variant_maf
+        ivar_variant_maf=args.ivar_variant_maf,
+        polymorphism_summary=polymorphism_summary,
     )
 
     df_res = parse_resistance_table(res_file, deprecated_drugs)
@@ -610,13 +683,17 @@ def main():
         "resistance_data": df_res.to_dict(orient="records"),
         "consensus_genome": consensus_seq,
         "mutation_scores": mutation_scores,
-        "protein_sequences": protein_sequences
+        "protein_sequences": protein_sequences,
+        "polymorphism_summary": polymorphism_summary,
     }
 
     # --- Render one HTML report for this sample
     html_content = template.render(
         all_samples = [sample_data],
         hivdb_version = hivdb_version_info,
+        nextclade_dataset_name = args.nextclade_dataset_name,
+        nextclade_dataset_tag = args.nextclade_dataset_tag,
+        pipeline_version = args.pipeline_version,
         date = date.today().strftime("%Y-%m-%d"),
         css_content = css_content,
         logo_b64 = logo_b64

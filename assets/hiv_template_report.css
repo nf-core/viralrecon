@@ -24,17 +24,29 @@ html {
   box-shadow: 0 5px 10px rgba(17, 163, 222, 0.25);
 }
 
-/* Subtitle under report title */
-.report-subtitle {
-  font-size: 1.1em;
-  font-weight: normal;
-  color: #0e5f82;
-  background-color: #dbe7f2;
-  padding: 12px 18px;
-  border-radius: 8px;
+/* Report metadata */
+.report-section {
   margin: 10px 0 25px 0;
-  box-shadow: 0 3px 6px rgba(17, 163, 222, 0.2);
-  line-height: 1.4;
+}
+
+.metadata-grid {
+  width: 90%;
+  margin: 0 auto 20px auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px 28px;
+  color: #1b2f40;
+  font-size: 0.95em;
+  line-height: 1.35;
+}
+
+.sample-metadata {
+  margin-bottom: 20px;
+}
+
+.meta-label {
+  font-weight: bold;
+  color: #0c3c57;
 }
 
 /* Header */
