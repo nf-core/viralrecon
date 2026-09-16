@@ -103,7 +103,7 @@
                     },
                     "bowtie2/build": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "a0961c41021561ac7cf139f86bd7812a2f99e994",
                         "installed_by": ["modules"]
                     },
                     "cat/fastq": {

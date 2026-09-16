@@ -160,8 +160,7 @@ workflow PREPARE_GENOME_ILLUMINA {
         } else {
             BOWTIE2_BUILD (
                 ch_fasta
-                    .combine(ch_fai)
-                    .map { fasta_file, fai_file -> [ [:], fasta_file, fai_file ] }
+                    .map { fasta_file -> [ [:], fasta_file ] }
             )
             ch_bowtie2_index = BOWTIE2_BUILD.out.index
         }
