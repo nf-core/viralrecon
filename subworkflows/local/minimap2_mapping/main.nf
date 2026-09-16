@@ -130,7 +130,7 @@ workflow MINIMAP2_MAPPING {
     // Split multi-allelic positions and normalize
     //
     BCFTOOLS_NORM (
-        BCFTOOLS_FILTER.out.vcf.join(BCFTOOLS_INDEX.out.tbi, by: [0]),
+        BCFTOOLS_FILTER.out.vcf.join(BCFTOOLS_INDEX.out.index, by: [0]),
         fasta.map { fa -> tuple([:], fa) },
     )
 
