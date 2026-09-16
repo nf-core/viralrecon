@@ -311,7 +311,7 @@
                     },
                     "unicycler": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "2551201070036afe35ae6cb1a0903812665c1f01",
                         "installed_by": ["modules"]
                     },
                     "untar": {

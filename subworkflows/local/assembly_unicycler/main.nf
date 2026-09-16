@@ -29,7 +29,6 @@ workflow ASSEMBLY_UNICYCLER {
     UNICYCLER (
         reads
     )
-    ch_versions = ch_versions.mix(UNICYCLER.out.versions)
 
     //
     // Unzip scaffolds file
