@@ -330,27 +330,27 @@
                 "nf-core": {
                     "bam_markduplicates_picard": {
                         "branch": "master",
-                        "git_sha": "1298fbd2004c2913d6682ce4a419647d97a8fc3f",
+                        "git_sha": "6ef220fd9252b42fb3c50348bbdbcb6246730686",
                         "installed_by": ["subworkflows"]
                     },
                     "bam_sort_stats_samtools": {
                         "branch": "master",
-                        "git_sha": "156feda0cb6589cd29c04902004fa3b53bc00205",
+                        "git_sha": "6ef220fd9252b42fb3c50348bbdbcb6246730686",
                         "installed_by": ["fastq_align_bowtie2"]
                     },
                     "bam_stats_samtools": {
                         "branch": "master",
-                        "git_sha": "156feda0cb6589cd29c04902004fa3b53bc00205",
+                        "git_sha": "6ef220fd9252b42fb3c50348bbdbcb6246730686",
                         "installed_by": ["bam_markduplicates_picard", "bam_sort_stats_samtools"]
                     },
                     "bam_variant_demix_boot_freyja": {
                         "branch": "master",
-                        "git_sha": "d0526f051379b720c4f3915566644e6ccf588cb5",
+                        "git_sha": "6ef220fd9252b42fb3c50348bbdbcb6246730686",
                         "installed_by": ["subworkflows"]
                     },
                     "fastq_align_bowtie2": {
                         "branch": "master",
-                        "git_sha": "a30aa3fd25cc48b7612d53b749e9fcd879433f91",
+                        "git_sha": "6ef220fd9252b42fb3c50348bbdbcb6246730686",
                         "installed_by": ["subworkflows"]
                     },
                     "utils_nextflow_pipeline": {
