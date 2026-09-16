@@ -256,7 +256,7 @@
                     },
                     "quast": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "9a034dd2c5df2c9b283e09ddf2667d9118b4ccd7",
                         "installed_by": ["modules"]
                     },
                     "samtools/faidx": {
