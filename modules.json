@@ -226,12 +226,12 @@
                     },
                     "pangolin/run": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "d2ff09bbe2ca0f95fc70aee020a126549c3585de",
                         "installed_by": ["modules"]
                     },
                     "pangolin/updatedata": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "d2ff09bbe2ca0f95fc70aee020a126549c3585de",
                         "installed_by": ["modules"]
                     },
                     "picard/collectmultiplemetrics": {

@@ -1150,7 +1150,6 @@ workflow VIRALRECON {
             if (!params.pango_database) {
                 PANGOLIN_UPDATEDATA('pangolin_db')
                 ch_pango_database = PANGOLIN_UPDATEDATA.out.db
-                ch_versions       = ch_versions.mix(PANGOLIN_UPDATEDATA.out.versions)
             } else {
                 if (params.pango_database.endsWith('.tar.gz')) {
                     UNTAR_PANGODB (
@@ -1169,7 +1168,6 @@ workflow VIRALRECON {
             )
             ch_pangolin_multiqc = PANGOLIN_RUN.out.report
             ch_multiqc_files    = ch_multiqc_files.mix(ch_pangolin_multiqc.collect{_meta, pangolin_multiqc -> pangolin_multiqc}.ifEmpty([]))
-            ch_versions         = ch_versions.mix(PANGOLIN_RUN.out.versions)
         }
 
         //

@@ -52,7 +52,6 @@ workflow CONSENSUS_QC {
         if (!params.pango_database) {
             PANGOLIN_UPDATEDATA('pangolin_db')
             ch_pango_database = PANGOLIN_UPDATEDATA.out.db
-            ch_versions       = ch_versions.mix(PANGOLIN_UPDATEDATA.out.versions)
         } else {
             if (params.pango_database.endsWith('.tar.gz')) {
                 UNTAR_PANGODB (
@@ -68,7 +67,6 @@ workflow CONSENSUS_QC {
             ch_pango_database
         )
         ch_pangolin_report = PANGOLIN_RUN.out.report
-        ch_versions        = ch_versions.mix(PANGOLIN_RUN.out.versions)
     }
 
     //
