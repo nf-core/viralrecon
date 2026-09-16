@@ -67,7 +67,6 @@ workflow MINIMAP2_MAPPING {
         )
 
         ch_minimap_bam   = ARTIC_ALIGNTRIM.out.primertrimmed_bam
-        ch_versions      = ch_versions.mix(ARTIC_ALIGNTRIM.out.versions)
 
         ch_multiqc_files = ch_multiqc_files.mix(ARTIC_ALIGNTRIM.out.align_trim_report)
         ch_multiqc_files = ch_multiqc_files.mix(ARTIC_ALIGNTRIM.out.amp_depth_report)
