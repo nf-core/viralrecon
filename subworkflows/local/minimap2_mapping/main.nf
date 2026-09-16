@@ -139,7 +139,7 @@ workflow MINIMAP2_MAPPING {
     //
 
     BCFTOOLS_CONSENSUS_FILTER (
-        BCFTOOLS_NORM.out.vcf.join(BCFTOOLS_NORM.out.tbi, by: [0])
+        BCFTOOLS_NORM.out.vcf.join(BCFTOOLS_NORM.out.index, by: [0])
     )
 
     BCFTOOLS_INDEX_FILTER (
@@ -192,7 +192,7 @@ workflow MINIMAP2_MAPPING {
     bai          = BAM_SORT_STATS_SAMTOOLS.out.index
 
     vcf           = BCFTOOLS_NORM.out.vcf
-    tbi           = BCFTOOLS_NORM.out.tbi
+    tbi           = BCFTOOLS_NORM.out.index
 
     consensus     = RENAME_FASTA_HEADER.out.fasta
 
