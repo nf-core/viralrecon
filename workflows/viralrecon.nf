@@ -1180,7 +1180,6 @@ workflow VIRALRECON {
                 ch_consensus,
                 genome.nextclade_db
             )
-            ch_versions = ch_versions.mix(NEXTCLADE_RUN.out.versions)
 
             //
             // MODULE: Get Nextclade clade information for MultiQC report

@@ -33,7 +33,7 @@ workflow VARIANTS_BCFTOOLS {
     BCFTOOLS_MPILEUP
         .out
         .vcf
-        .join(BCFTOOLS_MPILEUP.out.tbi)
+        .join(BCFTOOLS_MPILEUP.out.index)
         .join(BCFTOOLS_MPILEUP.out.stats)
         .filter { _meta, _vcf, _tbi, stats -> getNumVariantsFromBCFToolsStats(stats) > 0 }
         .set { ch_vcf_tbi_stats }

@@ -81,7 +81,6 @@ workflow CONSENSUS_QC {
             nextclade_db
         )
         ch_nextclade_report = NEXTCLADE_RUN.out.csv
-        ch_versions         = ch_versions.mix(NEXTCLADE_RUN.out.versions)
     }
 
     //

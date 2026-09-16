@@ -187,7 +187,6 @@ workflow PREPARE_GENOME_ILLUMINA {
                 nextclade_dataset_tag
             )
             ch_nextclade_db = NEXTCLADE_DATASETGET.out.dataset
-            ch_versions = ch_versions.mix(NEXTCLADE_DATASETGET.out.versions)
         }
     }
 

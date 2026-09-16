@@ -211,17 +211,17 @@
                     },
                     "nanoplot": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "cc4d441624bd2a0db697502bdde9005a5a5f0b36",
                         "installed_by": ["modules"]
                     },
                     "nextclade/datasetget": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "bf8d32b65d51e0de16b35f3915b360a4dfb9f347",
                         "installed_by": ["modules"]
                     },
                     "nextclade/run": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "c302a1ab2512b6791535e1fe971b8cc52efe411d",
                         "installed_by": ["modules"]
                     },
                     "pangolin/run": {
