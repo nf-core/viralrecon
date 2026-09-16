@@ -24,7 +24,6 @@ workflow CONSENSUS_IVAR {
         fasta,
         params.save_mpileup
     )
-    ch_versions = ch_versions.mix(IVAR_CONSENSUS.out.versions)
 
     //
     // Consensus sequence QC

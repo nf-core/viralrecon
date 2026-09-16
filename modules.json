@@ -159,17 +159,17 @@
                     },
                     "ivar/consensus": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "3dd0d7a2ab0e2333bcf198c7bf0b8744c24413dc",
                         "installed_by": ["modules"]
                     },
                     "ivar/trim": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "3dd0d7a2ab0e2333bcf198c7bf0b8744c24413dc",
                         "installed_by": ["modules"]
                     },
                     "ivar/variants": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "3dd0d7a2ab0e2333bcf198c7bf0b8744c24413dc",
                         "installed_by": ["modules"]
                     },
                     "kraken2/kraken2": {

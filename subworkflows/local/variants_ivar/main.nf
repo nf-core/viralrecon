@@ -34,7 +34,6 @@ workflow VARIANTS_IVAR {
         gff,
         params.save_mpileup
     )
-    ch_versions = ch_versions.mix(IVAR_VARIANTS.out.versions)
 
     // Filter out samples with 0 variants
     IVAR_VARIANTS

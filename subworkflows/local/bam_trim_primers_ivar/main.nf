@@ -22,7 +22,6 @@ workflow BAM_TRIM_PRIMERS_IVAR {
         bam,
         bed
     )
-    ch_versions = ch_versions.mix(IVAR_TRIM.out.versions)
 
     //
     // Sort, index BAM file and run samtools stats, flagstat and idxstats
