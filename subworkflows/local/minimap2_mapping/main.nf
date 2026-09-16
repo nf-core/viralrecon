@@ -107,13 +107,11 @@ workflow MINIMAP2_MAPPING {
     }
 
     // Run CLAIR3
-    CLAIR3(
+    CLAIR3 (
         ch_input_bam_clair3,
         fasta.map { fa -> tuple([:], fa) },
         fai.map   { idx -> tuple([:], idx) }
     )
-
-    ch_versions = ch_versions.mix(CLAIR3.out.versions.first())
 
     //
     // Filter variants by allele frequency, zip and index

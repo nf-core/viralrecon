@@ -113,7 +113,7 @@
                     },
                     "clair3": {
                         "branch": "master",
-                        "git_sha": "4dd9d8439a429c7ee566e0e2347f76ddeef27e66",
+                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
                         "installed_by": ["modules"]
                     },
                     "cutadapt": {
