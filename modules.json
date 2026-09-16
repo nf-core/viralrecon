@@ -246,7 +246,7 @@
                     },
                     "plasmidid": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "770cef50bc217f70f41495520971852afba4ef82",
                         "installed_by": ["modules"]
                     },
                     "pycoqc": {

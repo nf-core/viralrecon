@@ -104,7 +104,6 @@ workflow ASSEMBLY_QC {
         ch_plasmidid_database = PLASMIDID.out.database
         ch_plasmidid_fasta    = PLASMIDID.out.fasta_files
         ch_plasmidid_kmer     = PLASMIDID.out.kmer
-        ch_versions           = PLASMIDID.out.versions
     }
 
     emit:
