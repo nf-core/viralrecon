@@ -966,7 +966,6 @@ workflow VIRALRECON {
             NANOPLOT (
                 ARTIC_GUPPYPLEX.out.fastq
             )
-            ch_versions = ch_versions.mix(NANOPLOT.out.versions)
         }
 
         //
