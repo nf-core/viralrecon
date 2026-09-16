@@ -144,7 +144,7 @@
                     },
                     "freyja/update": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "6ef220fd9252b42fb3c50348bbdbcb6246730686",
                         "installed_by": ["bam_variant_demix_boot_freyja"]
                     },
                     "freyja/variants": {
