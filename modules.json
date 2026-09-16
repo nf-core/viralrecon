@@ -251,7 +251,7 @@
                     },
                     "pycoqc": {
                         "branch": "master",
-                        "git_sha": "74690a3287947454f401025df414423073b896b2",
+                        "git_sha": "c565f1b27c06a1e8b726e2a646d4c822ae3b514a",
                         "installed_by": ["modules"]
                     },
                     "quast": {
