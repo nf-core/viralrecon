@@ -19,8 +19,11 @@ workflow HIV_RESISTANCE {
     gff              // path   : genome.gff
     vcf              // channel: [ val(meta), [ vcf ] ]
     tbi              // channel: [ val(meta), [ tbi ] ]
+    ivar_tsv         // channel: [ val(meta), [ ivar_tsv ] ]
     pangolin         // channel: [ val(meta), [ csv ] ]
     nextclade_report // channel: [ val(meta), [ csv ] ]
+    nextclade_dataset_name
+    nextclade_dataset_tag
 
     main:
 
@@ -88,13 +91,25 @@ workflow HIV_RESISTANCE {
         SIERRALOCAL.out.json.join(BAM2CODFREQ.out.codfreq, by: [0])
     )
 
-    RESISTANCE_REPORT (
-        SIERRALOCAL.out.json.collect{_meta, json -> json},
-        RESISTANCE_TABLES.out.mutation_csv.collect{_meta, mutation_table -> mutation_table},
-        RESISTANCE_TABLES.out.resistance_csv.collect{_meta, resistance_table -> resistance_table},
-        nextclade_report.collect{_meta, report -> report},
-        consensus.collect{_meta, consensus_file -> consensus_file},
-        CONSENSUS_LIFTOFF.out.gff3.collect{_meta, annotation -> annotation}
+    SIERRALOCAL.out.json.dump(tag:"SIERRALOCAL.out.json")
+    RESISTANCE_TABLES.out.mutation_csv.dump(tag:"RESISTANCE_TABLES.out.mutation_csv")
+    RESISTANCE_TABLES.out.resistance_csv.dump(tag:"RESISTANCE_TABLES.out.resistance_csv")
+    nextclade_report.dump(tag:"nextclade_report")
+    consensus.dump(tag:"consensus")
+    CONSENSUS_LIFTOFF.out.gff3.dump(tag:"CONSENSUS_LIFTOFF.out.gff3")
+
+    ch_resistance_report_input = SIERRALOCAL.out.json
+        .join(RESISTANCE_TABLES.out.mutation_csv, by: [0])
+        .join(RESISTANCE_TABLES.out.resistance_csv, by: [0])
+        .join(nextclade_report, by: [0])
+        .join(consensus, by: [0])
+        .join(CONSENSUS_LIFTOFF.out.gff3, by: [0])
+        .join(ivar_tsv, by: [0])
+
+    RESISTANCE_REPORT(
+        ch_resistance_report_input,
+        nextclade_dataset_name,
+        nextclade_dataset_tag
     )
 
     emit:
@@ -103,4 +118,5 @@ workflow HIV_RESISTANCE {
     mutation_table       = RESISTANCE_TABLES.out.mutation_csv        // channel: [ val(meta), [ mutation_csv ] ]
     mutation_table_short = RESISTANCE_TABLES.out.mutation_short_csv  // channel: [ val(meta), [ mutation_csv ] ]
     resistance_table     = RESISTANCE_TABLES.out.resistance_csv      // channel: [ val(meta), [ resistance_csv ] ]
+    resistance_report    = RESISTANCE_REPORT.out.html
 }

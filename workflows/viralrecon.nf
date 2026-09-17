@@ -482,6 +482,7 @@ workflow VIRALRECON {
         //
         ch_vcf                    = channel.empty()
         ch_tbi                    = channel.empty()
+        ch_ivar_tsv               = channel.empty()
         ch_snpsift_txt            = channel.empty()
         if (!params.skip_variants && variant_caller == 'ivar') {
             VARIANTS_IVAR (
@@ -495,6 +496,7 @@ workflow VIRALRECON {
             )
             ch_vcf           = VARIANTS_IVAR.out.vcf
             ch_tbi           = VARIANTS_IVAR.out.tbi
+            ch_ivar_tsv      = VARIANTS_IVAR.out.tsv
             ch_snpsift_txt   = VARIANTS_IVAR.out.snpsift_txt
             ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_IVAR.out.multiqc_tsv.collect{_meta, multiqc_tsv -> multiqc_tsv}.ifEmpty([]))
             ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_IVAR.out.stats.collect{_meta, stats -> stats}.ifEmpty([]))
@@ -646,6 +648,10 @@ workflow VIRALRECON {
         //
 
         if (!params.skip_variants && params.perform_hiv_resistance) {
+            if (params.skip_nextclade) {
+                error("HIV resistance report generation requires Nextclade output. Please remove the '--skip_nextclade' flag.")
+            }
+
             HIV_RESISTANCE (
                 ch_consensus_genome,
                 ch_bam.join(ch_bai, by: [0]),
@@ -653,8 +659,11 @@ workflow VIRALRECON {
                 genome.gff,
                 ch_vcf,
                 ch_tbi,
+                ch_ivar_tsv,
                 ch_pangolin_report,
-                ch_nextclade_report
+                ch_nextclade_report,
+                ch_nextclade_dataset_name,
+                ch_nextclade_dataset_tag
             )
         }
 

@@ -4,30 +4,10 @@ body {
   background-color: #f7faff;
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Dropdown menu */
-#sample-selector {
-  position: fixed;
-  top: 15px;
-  right: 20px;
-  z-index: 1000;
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid #97b5cf;
-  background-color: #f0f6fc;
-  box-shadow: 0 2px 6px rgba(17, 163, 222, 0.25);
-  font-size: 14px;
-}
-
 /* Report Title */
 .report-title {
   font-size: 2.5em;
   font-weight: bold;
-  text-align: left;
   margin: 20px 0;
   color: white;
   text-transform: uppercase;
@@ -36,23 +16,38 @@ html {
   padding: 25px 20px;
   border-radius: 12px;
   box-shadow: 0 5px 10px rgba(17, 163, 222, 0.25);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
 }
 
-/* Subtitle under report title */
-.report-subtitle {
-  font-size: 1.1em;
+.report-date {
+  flex-shrink: 0;
+  font-size: 0.45em;
   font-weight: normal;
-  color: #0e5f82;
-  background-color: #dbe7f2;
-  padding: 12px 18px;
-  border-radius: 8px;
-  margin: 10px 0 25px 0;
-  box-shadow: 0 3px 6px rgba(17, 163, 222, 0.2);
-  line-height: 1.4;
+  text-transform: none;
+  white-space: nowrap;
 }
 
-/* Header */
-.header {
+.metadata-grid {
+  width: 90%;
+  margin: 0 auto 20px auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 6px 28px;
+  color: #1b2f40;
+  font-size: 0.95em;
+  line-height: 1.35;
+}
+
+.meta-label {
+  font-weight: bold;
+  color: #0c3c57;
+}
+
+/* Sample identifier */
+.sample-strip {
   background-color: #11a3de;
   color: white;
   padding: 15px 25px;
@@ -73,6 +68,11 @@ html {
   box-sizing: border-box;
 }
 
+.summary-title-compact {
+  padding: 8px 18px;
+  margin-top: 12px;
+}
+
 .summary-title h2 {
   margin: 0;
   color: #0c3c57;
@@ -83,7 +83,7 @@ html {
 /* Summary content */
 .sequence-summary-info {
   width: 90%;
-  margin: 0 auto 20px auto;
+  margin: 0 auto 14px auto;
 }
 
 .sequence-summary-info ul {
@@ -96,6 +96,51 @@ html {
   padding: 3px 0;
   font-size: 0.95em;
   color: #1b2f40;
+}
+
+/* Collapsible report blocks */
+.report-details {
+  width: 95%;
+  margin: 12px auto 18px auto;
+  box-sizing: border-box;
+}
+
+.report-details > summary {
+  cursor: pointer;
+  font-weight: normal;
+  padding: 12px 25px;
+  background-color: #f0f6fc;
+  border-radius: 3px;
+  border: 1px solid #97b5cf;
+  color: #0c3c57;
+  font-size: 1.2em;
+}
+
+.overview-details {
+  margin-bottom: 20px;
+}
+
+.metadata-details {
+  margin-top: 22px;
+}
+
+.metadata-grid-compact {
+  width: 96%;
+  margin-top: 10px;
+  margin-bottom: 12px;
+  font-size: 0.9em;
+}
+
+.metadata-full-row {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 800px) {
+  .report-title {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 
 /* Subtype info icon styles */
@@ -113,7 +158,6 @@ html {
   height: 8px;
   color: #1b2f40;
   cursor: help;
-  position: relative;
   font-size: 12px;
   line-height: 1;
   vertical-align: middle;
@@ -128,20 +172,17 @@ html {
   width: 95%;
   box-sizing: border-box;
   font-size: 0.9em;
-  display: block;
   overflow: hidden;
 }
 
 .color-legend span {
   display: inline-block;
-  margin-bottom: 5px;
 }
 
 .coverage-note {
   font-size: 0.9em;
   color: #444;
   margin-top: 8px;
-  display: block;
 }
 
 /* Content block */
@@ -152,7 +193,6 @@ html {
 
 /* Table styles */
 .table-container {
-  position: relative;
   margin-bottom: 10px;
 }
 
@@ -166,7 +206,6 @@ html {
 }
 
 table {
-  width: auto;
   border-collapse: collapse;
 }
 
@@ -317,11 +356,11 @@ table thead th {
 }
 
 /* Consensus genome */
-details {
+details:not(.report-details) {
   margin-bottom: 20px;
 }
 
-details summary {
+details:not(.report-details) summary {
   cursor: pointer;
   font-weight: bold;
   padding: 5px 10px;
@@ -403,7 +442,6 @@ details pre {
 
 .footer img {
   height: 60px;
-  margin-right: auto;
 }
 
 .footer p {
