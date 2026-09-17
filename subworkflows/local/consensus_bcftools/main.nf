@@ -3,7 +3,7 @@
 //
 
 include { BCFTOOLS_FILTER     } from '../../../modules/nf-core/bcftools/filter/main'
-include { HTSLIB_BGZIPTABIX   } from '../../../modules/nf-core/htslib/bgziptabix/main'
+include { BCFTOOLS_INDEX      } from '../../../modules/nf-core/bcftools/index/main'
 include { BEDTOOLS_MERGE      } from '../../../modules/nf-core/bedtools/merge/main'
 include { BEDTOOLS_MASKFASTA  } from '../../../modules/nf-core/bedtools/maskfasta/main'
 include { BCFTOOLS_CONSENSUS  } from '../../../modules/nf-core/bcftools/consensus/main'
@@ -29,11 +29,8 @@ workflow CONSENSUS_BCFTOOLS {
         vcf.join(tbi, by: [0])
     )
 
-    HTSLIB_BGZIPTABIX (
-        BCFTOOLS_FILTER.out.vcf.map { meta, vcf_file -> [ meta, vcf_file, [], [] ] },
-        'compress',
-        true,
-        'vcf'
+    BCFTOOLS_INDEX (
+        BCFTOOLS_FILTER.out.vcf
     )
 
     //
@@ -65,7 +62,7 @@ workflow CONSENSUS_BCFTOOLS {
     //
     BCFTOOLS_CONSENSUS (
         BCFTOOLS_FILTER.out.vcf
-            .join(HTSLIB_BGZIPTABIX.out.index, by: [0])
+            .join(BCFTOOLS_INDEX.out.index, by: [0])
             .join(BEDTOOLS_MASKFASTA.out.fasta, by: [0])
             .map { _meta, vcf_file, tbi_file, fasta_file -> tuple(_meta, vcf_file, tbi_file, fasta_file, []) }
     )

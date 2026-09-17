@@ -4,7 +4,7 @@
 
 include { BCFTOOLS_MPILEUP                 } from '../../../modules/nf-core/bcftools/mpileup/main'
 include { BCFTOOLS_NORM                    } from '../../../modules/nf-core/bcftools/norm/main'
-include { VCF_TABIX_STATS                  } from '../vcf_tabix_stats'
+include { VCF_BGZIP_TABIX_STATS            } from '../vcf_bgzip_tabix_stats'
 include { VARIANTS_QC                      } from '../variants_qc'
 include { getNumVariantsFromBCFToolsStats  } from '../../../subworkflows/local/utils_nfcore_viralrecon_pipeline'
 
@@ -58,7 +58,7 @@ workflow VARIANTS_BCFTOOLS {
         ch_fasta.map { fasta_file -> [ [:], fasta_file ] }
     )
 
-    VCF_TABIX_STATS (
+    VCF_BGZIP_TABIX_STATS (
         BCFTOOLS_NORM.out.vcf,
         [ [:], [] ],
         [ [:], [] ],
@@ -82,8 +82,8 @@ workflow VARIANTS_BCFTOOLS {
     stats_orig      = ch_stats                        // channel: [ val(meta), [ txt ] ]
 
     vcf             = BCFTOOLS_NORM.out.vcf           // channel: [ val(meta), [ vcf ] ]
-    tbi             = VCF_TABIX_STATS.out.tbi         // channel: [ val(meta), [ tbi ] ]
-    stats           = VCF_TABIX_STATS.out.stats       // channel: [ val(meta), [ txt ] ]
+    tbi             = VCF_BGZIP_TABIX_STATS.out.tbi   // channel: [ val(meta), [ tbi ] ]
+    stats           = VCF_BGZIP_TABIX_STATS.out.stats // channel: [ val(meta), [ txt ] ]
 
     snpeff_vcf      = VARIANTS_QC.out.snpeff_vcf      // channel: [ val(meta), [ vcf.gz ] ]
     snpeff_tbi      = VARIANTS_QC.out.snpeff_tbi      // channel: [ val(meta), [ tbi ] ]
