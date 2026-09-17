@@ -26,7 +26,6 @@ workflow MINIMAP2_MAPPING {
 
     main:
 
-    ch_versions = channel.empty()
     ch_multiqc_files = channel.empty()
 
     def ch_fasta_fai = fasta
@@ -195,6 +194,4 @@ workflow MINIMAP2_MAPPING {
     consensus     = RENAME_FASTA_HEADER.out.fasta
 
     multiqc_files = ch_multiqc_files
-
-    versions      = ch_versions    // channel: [ versions.yml ]
 }

@@ -21,8 +21,6 @@ workflow ASSEMBLY_UNICYCLER {
 
     main:
 
-    ch_versions = channel.empty()
-
     //
     // Assemble reads with Unicycler
     //
@@ -85,7 +83,6 @@ workflow ASSEMBLY_UNICYCLER {
         blast_filtered_header,
         ch_taxidlist
     )
-    ch_versions = ch_versions.mix(ASSEMBLY_QC.out.versions)
 
     emit:
     scaffolds          = UNICYCLER.out.scaffolds            // channel: [ val(meta), [ scaffolds ] ]
@@ -111,6 +108,4 @@ workflow ASSEMBLY_UNICYCLER {
     plasmidid_database = ASSEMBLY_QC.out.plasmidid_database // channel: [ val(meta), [ database/ ] ]
     plasmidid_fasta    = ASSEMBLY_QC.out.plasmidid_fasta    // channel: [ val(meta), [ fasta_files/ ] ]
     plasmidid_kmer     = ASSEMBLY_QC.out.plasmidid_kmer     // channel: [ val(meta), [ kmer/ ] ]
-
-    versions           = ch_versions                        // channel: versions.yml
 }

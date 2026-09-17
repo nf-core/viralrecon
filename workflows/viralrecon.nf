@@ -118,7 +118,6 @@ workflow VIRALRECON {
     */
 
     def ch_multiqc_files = channel.empty()
-    def ch_versions = channel.empty()
 
     def checkPathParamList = []
     def sequencing_summary = (params.sequencing_summary == false || params.sequencing_summary == 'false') ? null : params.sequencing_summary
@@ -215,7 +214,6 @@ workflow VIRALRECON {
             ch_nextclade_dataset_tag
         )
     }
-    ch_versions = ch_versions.mix(genome.versions)
 
     if (params.platform == 'illumina') {
         //
@@ -418,7 +416,6 @@ workflow VIRALRECON {
             ch_bam           = BAM_TRIM_PRIMERS_IVAR.out.bam
             ch_bai           = BAM_TRIM_PRIMERS_IVAR.out.bai
             ch_multiqc_files = ch_multiqc_files.mix(BAM_TRIM_PRIMERS_IVAR.out.flagstat.collect{_meta, flagstat -> flagstat}.ifEmpty([]))
-            ch_versions      = ch_versions.mix(BAM_TRIM_PRIMERS_IVAR.out.versions)
         }
 
         //
@@ -499,7 +496,6 @@ workflow VIRALRECON {
             ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_IVAR.out.multiqc_tsv.collect{_meta, multiqc_tsv -> multiqc_tsv}.ifEmpty([]))
             ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_IVAR.out.stats.collect{_meta, stats -> stats}.ifEmpty([]))
             ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_IVAR.out.snpeff_csv.collect{_meta, snpeff_csv -> snpeff_csv}.ifEmpty([]))
-            ch_versions      = ch_versions.mix(VARIANTS_IVAR.out.versions)
         }
 
         //
@@ -556,7 +552,6 @@ workflow VIRALRECON {
             ch_consensus_genome = CONSENSUS_IVAR.out.consensus
             ch_multiqc_files    = ch_multiqc_files.mix(ch_pangolin_report.collect{_meta, pangolin_report -> pangolin_report}.ifEmpty([]))
             ch_multiqc_files    = ch_multiqc_files.mix(CONSENSUS_IVAR.out.quast_results.collect{_meta, quast_results -> quast_results}.ifEmpty([]))
-            ch_versions         = ch_versions.mix(CONSENSUS_IVAR.out.versions)
         }
 
         //
@@ -577,7 +572,6 @@ workflow VIRALRECON {
             ch_consensus_genome = CONSENSUS_BCFTOOLS.out.consensus
             ch_multiqc_files    = ch_multiqc_files.mix(CONSENSUS_BCFTOOLS.out.quast_results.collect{_meta, quast_results -> quast_results}.ifEmpty([]))
             ch_multiqc_files    = ch_multiqc_files.mix(ch_pangolin_report.collect{_meta, pangolin_report -> pangolin_report}.ifEmpty([]))
-            ch_versions         = ch_versions.mix(CONSENSUS_BCFTOOLS.out.versions)
         }
 
         //
@@ -700,7 +694,6 @@ workflow VIRALRECON {
                 ch_taxidlist
             )
             ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLY_SPADES.out.quast_results.collect{_meta, quast_results -> quast_results}.ifEmpty([]))
-            ch_versions      = ch_versions.mix(ASSEMBLY_SPADES.out.versions)
         }
 
         //
@@ -717,7 +710,6 @@ workflow VIRALRECON {
                 ch_taxidlist
             )
             ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLY_UNICYCLER.out.quast_results.collect{_meta, quast_results -> quast_results}.ifEmpty([]))
-            ch_versions      = ch_versions.mix(ASSEMBLY_UNICYCLER.out.versions)
         }
 
         //
@@ -734,7 +726,6 @@ workflow VIRALRECON {
                 ch_taxidlist
             )
             ch_multiqc_files = ch_multiqc_files.mix(ASSEMBLY_MINIA.out.quast_results.collect{_meta, quast_results -> quast_results}.ifEmpty([]))
-            ch_versions      = ch_versions.mix(ASSEMBLY_MINIA.out.versions)
         }
 
     } else if (params.platform == 'nanopore') {
@@ -995,7 +986,6 @@ workflow VIRALRECON {
 
             ch_multiqc_files = ch_multiqc_files.mix(ARTIC_MINION_PROTOCOL.out.artic_minion_report
                 .collect{_meta, artic_minion_report -> artic_minion_report}.ifEmpty([]))
-            ch_versions      = ch_versions.mix(ARTIC_MINION_PROTOCOL.out.versions)
 
         } else if (params.mapper_nanopore == 'minimap2') {
 
@@ -1016,9 +1006,6 @@ workflow VIRALRECON {
             ch_consensus = MINIMAP2_MAPPING.out.consensus
 
             ch_multiqc_files = ch_multiqc_files.mix(MINIMAP2_MAPPING.out.multiqc_files.collect{_meta, multiqc_files -> multiqc_files}.ifEmpty([]))
-
-            ch_versions      = ch_versions.mix(MINIMAP2_MAPPING.out.versions)
-
         }
 
         ch_bam_bai = ch_bam.join(ch_bai, by: [0])
@@ -1311,14 +1298,14 @@ workflow VIRALRECON {
             "${process}:\n${tool_versions.join('\n')}"
         }
 
-    def ch_collated_versions = softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
+    def collated_versions = softwareVersionsToYAML(topic_versions.versions_file)
         .mix(topic_versions_string)
         .collectFile(
-            storeDir: "${outdir}/pipeline_info",
-            name: 'nf_core_'  +  'viralrecon_software_'  + 'mqc_'  + 'versions.yml',
-            sort: true,
-            newLine: true
-        )
+        storeDir: "${params.outdir}/pipeline_info",
+        name: 'nf_core_' + 'viralrecon_software_' + 'mqc_' + 'versions.yml',
+        sort: true,
+        newLine: true
+    )
 
     //
     // MODULE: MultiQC
@@ -1346,7 +1333,7 @@ workflow VIRALRECON {
             sort: true
         )
     )
-    ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
+    ch_multiqc_files = ch_multiqc_files.mix(collated_versions)
 
     ch_multiqc_input = ch_multiqc_files
         .collect()
@@ -1360,7 +1347,6 @@ workflow VIRALRECON {
 
     emit:
     multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                 // channeel: [ path(versions.yml) ]
 }
 
 /*

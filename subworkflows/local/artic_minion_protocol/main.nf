@@ -14,8 +14,6 @@ workflow ARTIC_MINION_PROTOCOL {
 
     main:
 
-    ch_versions = channel.empty()
-
     ARTIC_MINION (
         reads,
         model,
@@ -52,5 +50,4 @@ workflow ARTIC_MINION_PROTOCOL {
 
     artic_minion_report = ARTIC_MINION.out.json
 
-    versions    = ch_versions    // channel: [ versions.yml ]
 }

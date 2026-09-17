@@ -18,8 +18,6 @@ workflow CONSENSUS_QC {
 
     main:
 
-    ch_versions = channel.empty()
-
     //
     // Consensus QC report across samples with QUAST
     //
@@ -46,7 +44,6 @@ workflow CONSENSUS_QC {
     //
     ch_pangolin_report = channel.empty()
     ch_pango_database = channel.empty()
-    ch_versions = channel.empty()
 
     if (!params.skip_pangolin) {
         if (!params.pango_database) {
@@ -104,6 +101,4 @@ workflow CONSENSUS_QC {
 
     bases_tsv        = ch_bases_tsv        // channel: [ val(meta), [ tsv ] ]
     bases_pdf        = ch_bases_pdf        // channel: [ val(meta), [ pdf ] ]
-
-    versions         = ch_versions         // channel: versions.yml
 }

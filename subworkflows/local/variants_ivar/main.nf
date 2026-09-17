@@ -22,8 +22,6 @@ workflow VARIANTS_IVAR {
 
     main:
 
-    ch_versions = channel.empty()
-
     //
     // Call variants
     //
@@ -91,5 +89,4 @@ workflow VARIANTS_IVAR {
     snpeff_txt      = VARIANTS_QC.out.snpeff_txt      // channel: [ val(meta), [ txt ] ]
     snpeff_html     = VARIANTS_QC.out.snpeff_html     // channel: [ val(meta), [ html ] ]
     snpsift_txt     = VARIANTS_QC.out.snpsift_txt     // channel: [ val(meta), [ txt ] ]
-    versions        = ch_versions                     // channel: versions.yml
 }
