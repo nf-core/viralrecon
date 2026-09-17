@@ -2,9 +2,9 @@
 // Run snpEff, bgzip, tabix, stats and SnpSift commands
 //
 
-include { ARTIC_MINION                  } from '../../../modules/nf-core/artic/minion/main'
-include { VCFLIB_VCFUNIQ                } from '../../../modules/nf-core/vcflib/vcfuniq/main'
-include { HTSLIB_BGZIPTABIX             } from '../../../modules/nf-core/htslib/bgziptabix/main'
+include { ARTIC_MINION   } from '../../../modules/nf-core/artic/minion/main'
+include { VCFLIB_VCFUNIQ } from '../../../modules/nf-core/vcflib/vcfuniq/main'
+include { BCFTOOLS_INDEX } from '../../../modules/nf-core/bcftools/index/main'
 
 workflow ARTIC_MINION_PROTOCOL {
     take:
@@ -32,11 +32,8 @@ workflow ARTIC_MINION_PROTOCOL {
     //
     // MODULE: Index VCF file
     //
-    HTSLIB_BGZIPTABIX (
-        VCFLIB_VCFUNIQ.out.vcf.map { meta, vcf -> [ meta, vcf, [], [] ] },
-        'compress',
-        true,
-        'vcf'
+    BCFTOOLS_INDEX (
+        VCFLIB_VCFUNIQ.out.vcf
     )
 
     emit:
@@ -44,7 +41,7 @@ workflow ARTIC_MINION_PROTOCOL {
     bai       = ARTIC_MINION.out.bai_primertrimmed
 
     vcf       = VCFLIB_VCFUNIQ.out.vcf
-    tbi       = HTSLIB_BGZIPTABIX.out.index
+    tbi       = BCFTOOLS_INDEX.out.index
 
     consensus = ARTIC_MINION.out.fasta
 
