@@ -684,12 +684,11 @@ def main():
         "consensus_genome": consensus_seq,
         "mutation_scores": mutation_scores,
         "protein_sequences": protein_sequences,
-        "polymorphism_summary": polymorphism_summary,
     }
 
     # --- Render one HTML report for this sample
     html_content = template.render(
-        all_samples = [sample_data],
+        sample = sample_data,
         hivdb_version = hivdb_version_info,
         nextclade_dataset_name = args.nextclade_dataset_name,
         nextclade_dataset_tag = args.nextclade_dataset_tag,

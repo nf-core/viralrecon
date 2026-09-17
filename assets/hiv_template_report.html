@@ -9,81 +9,76 @@
   </head>
   <body>
     <!-- TITLE -->
-    <div class="report-title">HIV Drug Resistance and Mutation Report</div>
-    <p style="margin-top: 10px; font-size: 0.9em; color: #003366">
-      ⚠️ Disclaimer: This report is
-      <strong>not generated with <a href="https://hivdb.stanford.edu/hivdb/" target="_blank">HIVdb</a></strong
-      >, but it is inspired by it.
-    </p>
+    <div class="report-title">
+      <span>HIV Drug Resistance and Mutation Report</span>
+      <span class="report-date"><strong>Generated:</strong> {{ date }}</span>
+    </div>
     <!-- VERSIONS -->
-    <div class="report-section">
-      <div class="summary-title">
-        <h2>Versions</h2>
-      </div>
-      <div class="metadata-grid">
-        <div><span class="meta-label">nf-core/viralrecon:</span> {{ pipeline_version }}</div>
-        <div><span class="meta-label">Report generated:</span> {{ date }}</div>
+    {% macro versions_block() -%}
+      <div class="metadata-grid metadata-grid-compact">
+        <div class="metadata-full-row"><span class="meta-label">nf-core/viralrecon:</span> {{ pipeline_version }}</div>
         <div><span class="meta-label">HIVDB:</span> {{ hivdb_version.db_version }}</div>
         <div><span class="meta-label">HIVDB publish date:</span> {{ hivdb_version.publish_date }}</div>
         <div><span class="meta-label">nextclade_dataset_name:</span> {{ nextclade_dataset_name }}</div>
         <div><span class="meta-label">nextclade_dataset_tag:</span> {{ nextclade_dataset_tag }}</div>
       </div>
-    </div>
+    {%- endmacro %}
 
-    {% for sample in all_samples %}
+    {% macro labeled_line(line) -%}
+      {% set parts = line.split(":", 1) %}
+      {% if parts | length > 1 %}
+        <span class="meta-label">{{ parts[0] }}:</span> {{ parts[1] | trim }}
+      {% else %}
+        {{ line }}
+      {% endif %}
+    {%- endmacro %}
+
     <!-- HEADER -->
-    <div class="header" id="sample_{{ loop.index }}">{{ sample.sample_name }}</div>
+    <div class="sample-strip">{{ sample.sample_name }}</div>
 
-    <!-- SETTINGS -->
-    <div class="summary-title">
-      <h2>Settings</h2>
-    </div>
-    <div class="metadata-grid sample-metadata">
-      {% for line in sample.sequence_summary %} {% if line is string and (line.startswith("Minimum read depth") or line.startswith("Nucleotide mixture threshold") or line.startswith("Mutation detection threshold") or line.startswith("Minimum quality threshold")) %}
-      <div>{{ line }}</div>
-      {% endif %} {% endfor %}
-    </div>
+    <details class="report-details overview-details" open>
+      <summary>Sample Overview</summary>
 
-    <!-- QUALITY CHECK -->
-    <div class="summary-title">
-      <h2>Quality Check</h2>
-    </div>
-    <div class="sequence-summary-info">
-      <ul>
-        {% for line in sample.sequence_summary %} {% if line is iterable and line[0] == "subtype" %}
-        <li class="subtype-line">
-          Subtype: <strong>{{ line[1] }}</strong>
-          <span
-            class="info-icon"
-            title="This subtype was obtained using Nextclade software (https://clades.nextstrain.org) with the complete consensus sequence. It can be visualized in the Nextclade web app when copy/pasting the consensus at the end of the sample."
-          >
-            ⓘ
-          </span>
-        </li>
-        {% elif line is string and line.startswith("Supported mixed-site proportion") %}
-        <li>{{ line }}</li>
-        {% endif %} {% endfor %}
-      </ul>
-    </div>
+      <!-- QUALITY CHECK -->
+      <div class="summary-title summary-title-compact">
+        <h2>Quality Check</h2>
+      </div>
+      <div class="sequence-summary-info">
+        <ul>
+          {% for line in sample.sequence_summary %} {% if line is iterable and line[0] == "subtype" %}
+          <li class="subtype-line">
+            <span class="meta-label">Subtype:</span>&nbsp;{{ line[1] }}
+            <span
+              class="info-icon"
+              title="This subtype was obtained using Nextclade software (https://clades.nextstrain.org) with the complete consensus sequence. It can be visualized in the Nextclade web app when copy/pasting the consensus at the end of the sample."
+            >
+              ⓘ
+            </span>
+          </li>
+          {% elif line is string and line.startswith("Supported mixed-site proportion") %}
+          <li>{{ labeled_line(line) }}</li>
+          {% endif %} {% endfor %}
+        </ul>
+      </div>
 
-    <!-- SEQUENCE SUMMARY -->
-    <div class="summary-title">
-      <h2>Sequence Summary</h2>
-    </div>
-    <div class="sequence-summary-info">
-      <ul>
-        {% for line in sample.sequence_summary %} {% if line is string and line.startswith("Sequence includes") %}
-        <li>{{ line }}</li>
-        {% endif %} {% endfor %}
-      </ul>
-    </div>
+      <!-- SEQUENCE SUMMARY -->
+      <div class="summary-title summary-title-compact">
+        <h2>Sequence Summary</h2>
+      </div>
+      <div class="sequence-summary-info">
+        <ul>
+          {% for line in sample.sequence_summary %} {% if line is string and line.startswith("Sequence includes") %}
+          <li>{{ labeled_line(line) }}</li>
+          {% endif %} {% endfor %}
+        </ul>
+      </div>
+    </details>
 
     {% for gene in ["PR", "RT", "IN"] %} {% set gene_mutations = sample.mutation_data | selectattr("Gene_name",
     "equalto", gene) | list %} {% set gene_resistances = sample.resistance_data | selectattr("Gene_name", "equalto",
     gene) | list %} {% if gene_mutations or gene_resistances %}
-    <div class="summary-title">
-      <h2>Drug resistance interpretation: {{ gene }}</h2>
-    </div>
+    <details class="report-details" open>
+      <summary>Drug resistance interpretation: {{ gene }}</summary>
     <div class="color-legend">
       <strong>Color legend:</strong>
       <span style="background-color: #ffcccc; padding: 2px 8px; margin: 0 5px; border-left: 3px solid #ff0000"
@@ -103,7 +98,7 @@
     </div>
     <div class="content-block">
       <!-- MUTATIONS -->
-      {% set mutation_labels = [] %} {% if gene == "PR" %} {% set mutation_labels = [ ("Major", "PI Major Mutations"),
+      {% if gene == "PR" %} {% set mutation_labels = [ ("Major", "PI Major Mutations"),
       ("Accessory", "PI Accessory Mutations"), ("Other", "PR Other Mutations") ] %} {% elif gene == "RT" %} {% set
       mutation_labels = [ ("NRTI", "NRTI Mutations"), ("NNRTI", "NNRTI Mutations"), ("Other", "RT Other Mutations") ] %}
       {% elif gene == "IN" %} {% set mutation_labels = [ ("Major", "INSTI Major Mutations"), ("Accessory", "INSTI
@@ -182,7 +177,7 @@
       <h3>{{ class_label }}</h3>
       <hr />
       <div class="table-scroll">
-        <table class="resistance-table">
+        <table>
           <thead>
             <tr>
               <th>Drug Name</th>
@@ -205,8 +200,6 @@
       </div>
       {% endif %} {% endfor %} {% endif %}
     </div>
-    {% endif %}
-
     <!-- COMMENTS -->
     {% set comment_list = [] %} {% for m in gene_mutations %} {% if m.Mutations_comments and
     m.Mutations_comments|string|lower not in ["nan", "none", ""] %} {% set _ = comment_list.append(m) %} {% endif %} {%
@@ -220,12 +213,13 @@
       </ul>
     </div>
     {% endif %}
+    </details>
+    {% endif %}
 
     <!-- MUTATION SCORING -->
     {% set mutation_scores = sample.mutation_scores.get(gene, {}) %} {% if mutation_scores %}
-    <div class="summary-title">
-      <h2>Mutation scoring: {{ gene }}</h2>
-    </div>
+    <details class="report-details" open>
+      <summary>Mutation scoring: {{ gene }}</summary>
 
     <div class="content-block">
       {% for drug_class, class_label in [ ("PI", "Protease Inhibitors (PI)"), ("NRTI", "Nucleoside Reverse Transcriptase
@@ -262,6 +256,7 @@
       </div>
       {% endif %} {% endfor %}
     </div>
+    </details>
     {% endif %} {% endfor %}
 
     <!-- Buttons to external resources -->
@@ -271,9 +266,8 @@
     </div>
 
     <!-- CONSENSUS GENOME -->
-    <div class="summary-title">
-      <h2>Consensus Genome</h2>
-    </div>
+    <details class="report-details" open>
+      <summary>Consensus Genome</summary>
 
     {% if sample.consensus_genome %}
     <div class="content-block">
@@ -291,16 +285,16 @@
         </summary>
         <pre>{{- sample.consensus_genome -}}</pre>
       </details>
-      {% else %}
-      <p>No consensus genome available</p>
-      {% endif %}
     </div>
+    {% else %}
+      <p>No consensus genome available</p>
+    {% endif %}
+    </details>
 
     <!-- PROTEIN SEQUENCES -->
     {% if sample.protein_sequences %}
-    <div class="summary-title">
-      <h2>Protein Sequences</h2>
-    </div>
+    <details class="report-details" open>
+      <summary>Protein Sequences</summary>
 
     {% for protein in sample.protein_sequences %}
     <div class="content-block">
@@ -320,12 +314,38 @@
         <pre>{{ protein.fasta }}</pre>
       </details>
     </div>
-    {% endfor %} {% endif %} {% endfor %}
+    {% endfor %}
+    </details>
+    {% endif %}
+
+    <details class="report-details metadata-details" open>
+      <summary>Settings</summary>
+      <div class="metadata-grid metadata-grid-compact">
+        {% for setting_name in ["Minimum read depth", "Nucleotide mixture threshold", "Minimum quality threshold", "Mutation detection threshold"] %}
+          {% for line in sample.sequence_summary %}
+            {% if line is string and line.startswith(setting_name) %}
+              <div>{{ labeled_line(line) }}</div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </details>
+
+    <details class="report-details metadata-details" open>
+      <summary>Versions</summary>
+      {{ versions_block() }}
+    </details>
+
+    <p style="margin-top: 10px; font-size: 0.9em; color: #003366">
+      ⚠️ Disclaimer: This report is
+      <strong>not generated with <a href="https://hivdb.stanford.edu/hivdb/" target="_blank">HIVdb</a></strong
+      >, but it is inspired by it.
+    </p>
 
     <!-- FOOTER -->
     <div class="footer">
       <div style="margin-top: 40px; text-align: left">
-        <img src="data:image/png;base64,{{ logo_b64 }}" style="height: 60px" />
+        <img src="data:image/png;base64,{{ logo_b64 }}" />
       </div>
       <p>
         Generated automatically from <a href="https://github.com/nf-core/viralrecon">nf-core/viralrecon</a> using data
