@@ -2,8 +2,8 @@
 // Run BCFTools tabix and stats commands
 //
 
-include { TABIX_TABIX    } from '../../../modules/nf-core/tabix/tabix/main'
-include { BCFTOOLS_STATS } from '../../../modules/nf-core/bcftools/stats/main'
+include { HTSLIB_BGZIPTABIX } from '../../../modules/nf-core/htslib/bgziptabix/main'
+include { BCFTOOLS_STATS    } from '../../../modules/nf-core/bcftools/stats/main'
 
 workflow VCF_TABIX_STATS {
     take:
@@ -14,14 +14,15 @@ workflow VCF_TABIX_STATS {
 
     main:
 
-    ch_vcf_for_tabix = vcf.map { meta, vcf_file -> [ meta, vcf_file, [], [] ] }
-
-    TABIX_TABIX (
-        ch_vcf_for_tabix
+    HTSLIB_BGZIPTABIX (
+        vcf.map { meta, vcf_file -> [ meta, vcf_file, [], [] ] },
+        'compress',
+        true,
+        'vcf'
     )
 
     BCFTOOLS_STATS (
-        vcf.join(TABIX_TABIX.out.index, by: [0]),
+        vcf.join(HTSLIB_BGZIPTABIX.out.index, by: [0]),
         regions,
         targets,
         samples,
@@ -30,7 +31,7 @@ workflow VCF_TABIX_STATS {
     )
 
     emit:
-    tbi      = TABIX_TABIX.out.index    // channel: [ val(meta), [ tbi ] ]
+    tbi      = HTSLIB_BGZIPTABIX.out.index    // channel: [ val(meta), [ tbi ] ]
 
     stats    = BCFTOOLS_STATS.out.stats // channel: [ val(meta), [ txt ] ]
 

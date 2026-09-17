@@ -4,7 +4,7 @@
 
 include { ARTIC_MINION                  } from '../../../modules/nf-core/artic/minion/main'
 include { VCFLIB_VCFUNIQ                } from '../../../modules/nf-core/vcflib/vcfuniq/main'
-include { TABIX_TABIX                   } from '../../../modules/nf-core/tabix/tabix/main'
+include { HTSLIB_BGZIPTABIX             } from '../../../modules/nf-core/htslib/bgziptabix/main'
 
 workflow ARTIC_MINION_PROTOCOL {
     take:
@@ -34,8 +34,11 @@ workflow ARTIC_MINION_PROTOCOL {
     //
     // MODULE: Index VCF file
     //
-    TABIX_TABIX (
-        VCFLIB_VCFUNIQ.out.vcf.map { meta, vcf -> [ meta, vcf, [], [] ] }
+    HTSLIB_BGZIPTABIX (
+        VCFLIB_VCFUNIQ.out.vcf.map { meta, vcf -> [ meta, vcf, [], [] ] },
+        'compress',
+        true,
+        'vcf'
     )
 
     emit:
@@ -43,7 +46,7 @@ workflow ARTIC_MINION_PROTOCOL {
     bai       = ARTIC_MINION.out.bai_primertrimmed
 
     vcf       = VCFLIB_VCFUNIQ.out.vcf
-    tbi       = TABIX_TABIX.out.index
+    tbi       = HTSLIB_BGZIPTABIX.out.index
 
     consensus = ARTIC_MINION.out.fasta
 
