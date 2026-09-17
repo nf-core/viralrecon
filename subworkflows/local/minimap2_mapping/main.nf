@@ -172,7 +172,7 @@ workflow MINIMAP2_MAPPING {
     //
     BCFTOOLS_CONSENSUS (
         BCFTOOLS_CONSENSUS_FILTER.out.vcf
-            .join(BCFTOOLS_INDEX_FILTER.out.tbi, by: [0])
+            .join(BCFTOOLS_INDEX_FILTER.out.index, by: [0])
             .join(BEDTOOLS_MASKFASTA.out.fasta, by: [0])
             .map { meta, vcf, tbi, mask_fasta -> tuple(meta, vcf, tbi, mask_fasta, []) }
     )
