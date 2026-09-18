@@ -29,7 +29,7 @@
                     "liftoff": "1.6.3"
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -39,6 +39,10 @@
                 },
                 "GFF2JSON": {
                     "python": "3.13.2"
+                },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
                 },
                 "IVAR_CONSENSUS": {
                     "ivar": "1.4.4"
@@ -67,11 +71,11 @@
                     "mosdepth": "0.3.14"
                 },
                 "NEXTCLADE_DATASETGET": {
-                    "nextclade": "3.11.0",
-                    "nextclade-tag": "2025-09-09--12-13-13Z"
+                    "nextclade-dataset": "2025-09-09--12-13-13Z",
+                    "nextclade": "3.21.2"
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_GENOME": {
                     "r-base": "4.2.0"
@@ -86,22 +90,22 @@
                     "python": "3.13.2"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SIERRALOCAL": {
                     "sierra-local": "0.4.3"
@@ -114,12 +118,6 @@
                 },
                 "SNPSIFT_EXTRACTFIELDS": {
                     "snpsift": 4.3
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNTAR_KRAKEN2_DB": {
                     "untar": 1.34
@@ -498,9 +496,9 @@
                 "variants/ivar/variants_long_table.csv"
             ],
             [
-                "DRR030302.fastp.json:md5,3a7c674a43a9e7f13d980b588d5cd15c",
-                "SRR4071760.fastp.json:md5,770bd2ad5d7329b9c7af34f6ba0152d6",
-                "SRR6937100.fastp.json:md5,cfe934875f19031cd661db3dc7c00b21",
+                "DRR030302.fastp.json:md5,fa9a19f51b36ba421e9242dea4de7e9b",
+                "SRR4071760.fastp.json:md5,04affbd47fee2af387e3e35400b47a8c",
+                "SRR6937100.fastp.json:md5,373158a2a6259ff2feca200bf8779c34",
                 "DRR030302.kraken2.report.txt:md5,5ab2ed70334d4061fb82f8d91475c761",
                 "SRR4071760.kraken2.report.txt:md5,c26f91bfafe58ba451f7d05f0b9b5611",
                 "SRR6937100.kraken2.report.txt:md5,6f5c455f6efd9fa807fefdbba83ba960",
@@ -511,7 +509,7 @@
                 "bcftools_stats_vqc_Count_Transitions.yaml:md5,d66c48c598160aa373354e640280d665",
                 "bcftools_stats_vqc_Count_Transversions.yaml:md5,ed8015cccd1080a84346f754a3ce8bd2",
                 "bowtie2_pe_plot.yaml:md5,1b002829da6f647a8f4efc33e96da568",
-                "fastp-insert-size-plot.yaml:md5,de26ba49b8a6cb43a6e9fc9c58c13708",
+                "fastp-insert-size-plot.yaml:md5,10b9da66b846b3f92a32438bff14a7da",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,6c4222897b9db16fcdf2ef82209a4c09",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,60a4eefbe7c07a67553b5458b3ce1402",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,69dc43d2d4cead054e7e184607f2dff7",
@@ -552,7 +550,7 @@
                 "multiqc_bcftools_stats.yaml:md5,24a88a270740d3a4efd1332749d6d121",
                 "multiqc_bowtie2.yaml:md5,4daf8885acd63fc61f20e24cfe2102c4",
                 "multiqc_citations.yaml:md5,f564e5526b36c9a583e0af5ca7a34b64",
-                "multiqc_fastp.yaml:md5,9b021036c696d436ddf900bd81c9de5d",
+                "multiqc_fastp.yaml:md5,cf8313deeccb8f8f6c12ebb271c29fcd",
                 "multiqc_fastqc.yaml:md5,444824ecaca1d11e9920430e6b06ddd3",
                 "multiqc_ivar_variants.yaml:md5,c0eb1e73e4ec11c252b2476108d4a560",
                 "multiqc_kraken.yaml:md5,bbacecf8e782bb601be23351c164dd6b",
@@ -581,13 +579,13 @@
                 "SRR6937100.mosdepth.summary.txt:md5,654bbc44b5946cfc199a75c223ebda9b",
                 "DRR030302.sorted.bam.flagstat:md5,b929bff546cbd88b865f2fb02dc9a3e1",
                 "DRR030302.sorted.bam.idxstats:md5,e2d55694ce41df30abab7c6e28e0b368",
-                "DRR030302.sorted.bam.stats:md5,cd2ef8250052132abb59d447a534798c",
+                "DRR030302.sorted.bam.stats:md5,40f0f5d498087f14838e1b43d960ab42",
                 "SRR4071760.sorted.bam.flagstat:md5,ba1f3c5310ef514b6326ac611444da0e",
                 "SRR4071760.sorted.bam.idxstats:md5,292e1509673ce1f3aedfffdf4c339b64",
-                "SRR4071760.sorted.bam.stats:md5,710d3e0d6738af9f776e852c7666af45",
+                "SRR4071760.sorted.bam.stats:md5,fdb0181e4f875bbce1d78691153c4585",
                 "SRR6937100.sorted.bam.flagstat:md5,b88b08adf1023728068d0d7b7a10facf",
                 "SRR6937100.sorted.bam.idxstats:md5,622095b9a86cb608aac5da2d268c4d55",
-                "SRR6937100.sorted.bam.stats:md5,1894b5f527cb8889b3f011950323c42e",
+                "SRR6937100.sorted.bam.stats:md5,23808ed6194968c1c87327fbebc6c77e",
                 "DRR030302.tsv:md5,3b89bf1591279da145149d0fa06c53a8",
                 "DRR030302.vcf.gz:md5,206bad41b9473b742d2cbae7d77ed6aa",
                 "DRR030302.vcf.gz.tbi:md5,ad624dbc79f44aec2e091383054a57e0",
@@ -624,9 +622,9 @@
                 "DRR030302_resistance.json:md5,1fdfd03ee587a38a356942c3ec82d08d",
                 "SRR4071760_resistance.json:md5,00d5130c19aa7d8909df48383eff6b9f",
                 "SRR6937100_resistance.json:md5,51689a45b50c07ddb1b54dedf8ce7043",
-                "DRR030302.csv:md5,1a9b758b80aac691d1890e4f51ffd580",
-                "SRR4071760.csv:md5,6d2a42c9d871306c2d8789fbb9613f32",
-                "SRR6937100.csv:md5,8dccbab1381f382bd23bd7a9bf1c6072",
+                "DRR030302.csv:md5,5b426bc3e9adf260ee7824b53143dff7",
+                "SRR4071760.csv:md5,5dae85bfb8630c5f26c108fd4daaa316",
+                "SRR6937100.csv:md5,3a0dd96ca24d2faf70cd1eb8609b0310",
                 "gc.icarus.txt:md5,19276775d96d211b053f1a3976d6a669",
                 "DRR030302.variant_counts.log:md5,870132c7920b47c3ef6a6e8a2f3a417a",
                 "SRR4071760.variant_counts.log:md5,66a253121f15c8920921671c869d8714",
@@ -650,7 +648,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T13:19:17.261137077"
+        "timestamp": "2026-09-17T13:24:33.0596663"
     },
     "-profile test_hiv": {
         "content": [
@@ -682,7 +680,7 @@
                     "liftoff": "1.6.3"
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -692,6 +690,10 @@
                 },
                 "GFF2JSON": {
                     "python": "3.13.2"
+                },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
                 },
                 "IVAR_CONSENSUS": {
                     "ivar": "1.4.4"
@@ -714,11 +716,11 @@
                     "mosdepth": "0.3.14"
                 },
                 "NEXTCLADE_DATASETGET": {
-                    "nextclade": "3.11.0",
-                    "nextclade-tag": "2025-09-09--12-13-13Z"
+                    "nextclade-dataset": "2025-09-09--12-13-13Z",
+                    "nextclade": "3.21.2"
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_GENOME": {
                     "r-base": "4.2.0"
@@ -733,22 +735,22 @@
                     "python": "3.13.2"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SIERRALOCAL": {
                     "sierra-local": "0.4.3"
@@ -761,12 +763,6 @@
                 },
                 "SNPSIFT_EXTRACTFIELDS": {
                     "snpsift": 4.3
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNTAR_KRAKEN2_DB": {
                     "untar": 1.34
@@ -1141,9 +1137,9 @@
                 "variants/ivar/variants_long_table.csv"
             ],
             [
-                "DRR030302.fastp.json:md5,3a7c674a43a9e7f13d980b588d5cd15c",
-                "SRR4071760.fastp.json:md5,770bd2ad5d7329b9c7af34f6ba0152d6",
-                "SRR6937100.fastp.json:md5,cfe934875f19031cd661db3dc7c00b21",
+                "DRR030302.fastp.json:md5,fa9a19f51b36ba421e9242dea4de7e9b",
+                "SRR4071760.fastp.json:md5,04affbd47fee2af387e3e35400b47a8c",
+                "SRR6937100.fastp.json:md5,373158a2a6259ff2feca200bf8779c34",
                 "DRR030302.kraken2.report.txt:md5,5ab2ed70334d4061fb82f8d91475c761",
                 "SRR4071760.kraken2.report.txt:md5,c26f91bfafe58ba451f7d05f0b9b5611",
                 "SRR6937100.kraken2.report.txt:md5,6f5c455f6efd9fa807fefdbba83ba960",
@@ -1154,7 +1150,7 @@
                 "bcftools_stats_vqc_Count_Transitions.yaml:md5,dc4e1856617f414a65ea2cec0ede7971",
                 "bcftools_stats_vqc_Count_Transversions.yaml:md5,f9e0533d48d495637e9c12c0f29d79e7",
                 "bowtie2_pe_plot.yaml:md5,e0f7a3f55b45307ecfd9a005f9e4bf43",
-                "fastp-insert-size-plot.yaml:md5,de26ba49b8a6cb43a6e9fc9c58c13708",
+                "fastp-insert-size-plot.yaml:md5,10b9da66b846b3f92a32438bff14a7da",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,6c4222897b9db16fcdf2ef82209a4c09",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,60a4eefbe7c07a67553b5458b3ce1402",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,69dc43d2d4cead054e7e184607f2dff7",
@@ -1195,7 +1191,7 @@
                 "multiqc_bcftools_stats.yaml:md5,675d4e41cc92af9381006d9dafcc5503",
                 "multiqc_bowtie2.yaml:md5,bb7fe62e1ee3c986e3afc4c6480ac9cf",
                 "multiqc_citations.yaml:md5,f564e5526b36c9a583e0af5ca7a34b64",
-                "multiqc_fastp.yaml:md5,9b021036c696d436ddf900bd81c9de5d",
+                "multiqc_fastp.yaml:md5,cf8313deeccb8f8f6c12ebb271c29fcd",
                 "multiqc_fastqc.yaml:md5,444824ecaca1d11e9920430e6b06ddd3",
                 "multiqc_ivar_variants.yaml:md5,92e053dd68158082d67218932751c0b8",
                 "multiqc_kraken.yaml:md5,bbacecf8e782bb601be23351c164dd6b",
@@ -1224,13 +1220,13 @@
                 "SRR6937100.mosdepth.summary.txt:md5,a66e374b8e2b73fb1bdc891107b05ade",
                 "DRR030302.sorted.bam.flagstat:md5,18da52dab55ff5a7188f3ad4ce94e0b0",
                 "DRR030302.sorted.bam.idxstats:md5,98f598f60dc0e29dda191c3a6732279e",
-                "DRR030302.sorted.bam.stats:md5,3a4adaeae717a2718a93ea9a61d844fd",
+                "DRR030302.sorted.bam.stats:md5,03401e4afb48856490f244535eb3947e",
                 "SRR4071760.sorted.bam.flagstat:md5,e8dd8d26adb2fd985da16242771960af",
                 "SRR4071760.sorted.bam.idxstats:md5,21d5a8100902fd96ade6abba61e37886",
-                "SRR4071760.sorted.bam.stats:md5,df9ab5d3b445b133e928574784673bac",
+                "SRR4071760.sorted.bam.stats:md5,5dc2fa1e59a9469d040df1fad565cbae",
                 "SRR6937100.sorted.bam.flagstat:md5,884eda3ffcbee5c84a59a71ae138e6b2",
                 "SRR6937100.sorted.bam.idxstats:md5,e224704bd96b929c0a93d60c871ffaee",
-                "SRR6937100.sorted.bam.stats:md5,e7c1a052272143530529f1d018059acb",
+                "SRR6937100.sorted.bam.stats:md5,4b7d088eed0b1b1d8cccddb8c2d249ed",
                 "DRR030302.tsv:md5,69a122f2bc41e0e3ca9807d913b46bca",
                 "DRR030302.vcf.gz:md5,e463c3c9ca5a6ca2f43c64bc63fa7ef1",
                 "DRR030302.vcf.gz.tbi:md5,84eb742a97d690b78e5b36a396b3d0c5",
@@ -1264,9 +1260,9 @@
                 "DRR030302_resistance.json:md5,33e7335a07432498d2d9e357d206bf0b",
                 "SRR4071760_resistance.json:md5,87d92a7208761e9d89600159499d9e49",
                 "SRR6937100_resistance.json:md5,51689a45b50c07ddb1b54dedf8ce7043",
-                "DRR030302.csv:md5,33c59afa2b86b87d2305cab6d9c9e488",
-                "SRR4071760.csv:md5,bf9b8691f1df4b0fc7b461c8e3a7fbbb",
-                "SRR6937100.csv:md5,895ef34bbeac6c0080ed27c800246258",
+                "DRR030302.csv:md5,940399f052c8ce2084b99fc83ac2389f",
+                "SRR4071760.csv:md5,317eafc82d3e2bfd1da3a64434238cce",
+                "SRR6937100.csv:md5,3d208099f2c9c2f37a238e9f7668c7a1",
                 "gc.icarus.txt:md5,326ce93821a2c908dc84c940d70812ec",
                 "DRR030302.variant_counts.log:md5,63145bddb440c9ec91677c4148d99b25",
                 "SRR4071760.variant_counts.log:md5,f0d877c9022632eb41004166bb14b8bf",
@@ -1290,6 +1286,6 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T13:17:24.293016822"
+        "timestamp": "2026-09-17T13:10:34.633744416"
     }
 }

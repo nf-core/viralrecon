@@ -3,7 +3,7 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## v3.1.0dev - [date]
+## v3.1.0dev - [unreleased<!-- TODO nf-core: replace with date on release -->]
 
 <!-- Release names are chosen by a combination of Dog + Flower in Code Name Generator -->
 
@@ -37,6 +37,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #596](https://github.com/nf-core/viralrecon/pull/596)] - Template update for nf-core/tools v4.0.2
 - [[PR #607](https://github.com/nf-core/viralrecon/pull/607)] - Updated the multiqc module and fixed nextlfow lingting warnings
 - [[PR #615](https://github.com/nf-core/viralrecon/pull/615)] - Fixed collapse_primer_bed.py to support 7-column primer BED files and updated docs
+- [[PR #620](https://github.com/nf-core/viralrecon/pull/620)] - Template and nf-core modules & subworkflows update
 
 ### Parameters
 
@@ -66,22 +67,35 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 
 Note, since the pipeline is now using Nextflow DSL2, each process will be run with its own [Biocontainer](https://biocontainers.pro/#/registry). This means that on occasion it is entirely possible for the pipeline to be using different versions of the same tool. However, the overall software dependency changes compared to the last release have been listed below for reference.
 
-| Dependency     | Old version | New version      |
-| -------------- | ----------- | ---------------- |
-| `blast`        | 2.16.0      | 2.17.0           |
-| `Freyja`       | 2.0.1       | 2.0.3            |
-| `sierra-local` |             | 0.4.3            |
-| `liftoff`      |             | 1.6.3            |
-| `pysam`        |             | 0.23.3           |
-| `bcftools`     | 1.22        | 1.23.1           |
-| `htslib`       | 1.22        | 1.23.1           |
-| `cutadapt`     | 5.0         | 5.2              |
-| `fastp`        | 1.0.1       | 1.1.0            |
-| `minia`        | 3.2.6       | 3.2.6=h22625ea_6 |
-| `mosdepth`     | 0.3.11      | 0.3.14           |
-| `samtools`     | 1.22.1      | 1.23.1           |
-| `cutadapt`     | 5.0         | 5.2              |
-| `multiqc`      | 1.34        | 1.35             |
+| Dependency          | Old version | New version      |
+| ------------------- | ----------- | ---------------- |
+| `blast`             | 2.16.0      | 2.17.0           |
+| `Freyja`            | 2.0.1       | 2.0.3            |
+| `sierra-local`      |             | 0.4.3            |
+| `liftoff`           |             | 1.6.3            |
+| `pysam`             |             | 0.23.3           |
+| `bcftools`          | 1.22        | 1.23.1           |
+| `htslib`            | 1.22        | 1.24             |
+| `cutadapt`          | 5.0         | 5.2              |
+| `fastp`             | 1.0.1       | 1.3.6            |
+| `minia`             | 3.2.6       | 3.2.6=h22625ea_6 |
+| `mosdepth`          | 0.3.11      | 0.3.14           |
+| `samtools`          | 1.22.1      | 1.24             |
+| `cutadapt`          | 5.0         | 5.2              |
+| `multiqc`           | 1.34        | 1.35             |
+| `artic/aligntrim`   | 1.0.2       | 1.2.0            |
+| `clair3`            |             | 2.0.0            |
+| `minimap2`          |             | 2.30             |
+| `nanoplot`          | 1.46.1      | 1.47.0           |
+| `nextclade`         | 3.11.0      | 3.21.2           |
+| `pangolin-data`     | 1.32        | 1.39             |
+| `pangolin`          | 4.3.1       | 4.4              |
+| `snakemake`         | 7.32.4      |                  |
+| `snakemake-minimal` |             | 9.21.1           |
+| `picard`            | 3.4.0       | 3.5.0            |
+| `parallel`          |             | 20210222         |
+| `tabix`             | 1.21        |                  |
+| `xz`                |             | 5.8.3            |
 
 > **NB:** Dependency has been **updated** if both old and new version information is present.
 > **NB:** Dependency has been **added** if just the new version information is present.

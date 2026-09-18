@@ -26,7 +26,6 @@ workflow MINIMAP2_MAPPING {
 
     main:
 
-    ch_versions = channel.empty()
     ch_multiqc_files = channel.empty()
 
     def ch_fasta_fai = fasta
@@ -67,7 +66,6 @@ workflow MINIMAP2_MAPPING {
         )
 
         ch_minimap_bam   = ARTIC_ALIGNTRIM.out.primertrimmed_bam
-        ch_versions      = ch_versions.mix(ARTIC_ALIGNTRIM.out.versions)
 
         ch_multiqc_files = ch_multiqc_files.mix(ARTIC_ALIGNTRIM.out.align_trim_report)
         ch_multiqc_files = ch_multiqc_files.mix(ARTIC_ALIGNTRIM.out.amp_depth_report)
@@ -108,13 +106,11 @@ workflow MINIMAP2_MAPPING {
     }
 
     // Run CLAIR3
-    CLAIR3(
+    CLAIR3 (
         ch_input_bam_clair3,
         fasta.map { fa -> tuple([:], fa) },
         fai.map   { idx -> tuple([:], idx) }
     )
-
-    ch_versions = ch_versions.mix(CLAIR3.out.versions.first())
 
     //
     // Filter variants by allele frequency, zip and index
@@ -131,7 +127,7 @@ workflow MINIMAP2_MAPPING {
     // Split multi-allelic positions and normalize
     //
     BCFTOOLS_NORM (
-        BCFTOOLS_FILTER.out.vcf.join(BCFTOOLS_INDEX.out.tbi, by: [0]),
+        BCFTOOLS_FILTER.out.vcf.join(BCFTOOLS_INDEX.out.index, by: [0]),
         fasta.map { fa -> tuple([:], fa) },
     )
 
@@ -140,7 +136,7 @@ workflow MINIMAP2_MAPPING {
     //
 
     BCFTOOLS_CONSENSUS_FILTER (
-        BCFTOOLS_NORM.out.vcf.join(BCFTOOLS_NORM.out.tbi, by: [0])
+        BCFTOOLS_NORM.out.vcf.join(BCFTOOLS_NORM.out.index, by: [0])
     )
 
     BCFTOOLS_INDEX_FILTER (
@@ -176,7 +172,7 @@ workflow MINIMAP2_MAPPING {
     //
     BCFTOOLS_CONSENSUS (
         BCFTOOLS_CONSENSUS_FILTER.out.vcf
-            .join(BCFTOOLS_INDEX_FILTER.out.tbi, by: [0])
+            .join(BCFTOOLS_INDEX_FILTER.out.index, by: [0])
             .join(BEDTOOLS_MASKFASTA.out.fasta, by: [0])
             .map { meta, vcf, tbi, mask_fasta -> tuple(meta, vcf, tbi, mask_fasta, []) }
     )
@@ -193,11 +189,9 @@ workflow MINIMAP2_MAPPING {
     bai          = BAM_SORT_STATS_SAMTOOLS.out.index
 
     vcf           = BCFTOOLS_NORM.out.vcf
-    tbi           = BCFTOOLS_NORM.out.tbi
+    tbi           = BCFTOOLS_NORM.out.index
 
     consensus     = RENAME_FASTA_HEADER.out.fasta
 
     multiqc_files = ch_multiqc_files
-
-    versions      = ch_versions    // channel: [ versions.yml ]
 }
