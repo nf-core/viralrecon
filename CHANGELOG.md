@@ -84,7 +84,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `cutadapt`          | 5.0         | 5.2              |
 | `multiqc`           | 1.34        | 1.35             |
 | `artic/aligntrim`   | 1.0.2       | 1.2.0            |
-| `clair2`            |             | 2.0.0            |
+| `clair3`            |             | 2.0.0            |
 | `minimap2`          |             | 2.30             |
 | `nanoplot`          | 1.46.1      | 1.47.0           |
 | `nextclade`         | 3.11.0      | 3.21.2           |
