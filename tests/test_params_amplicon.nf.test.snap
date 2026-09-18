@@ -1610,7 +1610,7 @@
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_nextclade_clade.yaml:md5,15ccc4848ada72c96c9b39606517a9bb",
-                "multiqc_pangolin.yaml:md5,9dfbcd84c0b04bc2a734a13d472ed71e",
+                "multiqc_pangolin.yaml:md5,112d9768dade444538762d80b2d854e9",
                 "multiqc_quast_quast_variants.yaml:md5,a8f0422aaf69f0d88d7c82645949a2fa",
                 "multiqc_snpeff.yaml:md5,8aa0c448d1aaed78f8f883048644730d",
                 "pangolin_run_table.yaml:md5,885db33ee9bed223b2bc3dc46384cf10",
