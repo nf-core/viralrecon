@@ -14,6 +14,9 @@
                 "BCFTOOLS_FILTER": {
                     "bcftools": "1.23.1"
                 },
+                "BCFTOOLS_INDEX": {
+                    "bcftools": "1.23.1"
+                },
                 "BCFTOOLS_QUERY": {
                     "bcftools": "1.23.1"
                 },
@@ -85,6 +88,10 @@
                 "GUNZIP_SCAFFOLDS": {
                     "gunzip": 1.13
                 },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
+                },
                 "IVAR_TRIM": {
                     "ivar": "1.4.4"
                 },
@@ -114,7 +121,7 @@
                     "mosdepth": "0.3.14"
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_AMPLICON": {
                     "r-base": "4.2.0"
@@ -132,22 +139,22 @@
                     "sed": 4.9
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -160,12 +167,6 @@
                 },
                 "SPADES": {
                     "spades": "4.1.0"
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -956,22 +957,22 @@
                 "SAMPLE3_SE.mosdepth.summary.txt:md5,151827c76fa414b871f38ff6dbd0d4b2",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.flagstat:md5,000dcc05db468d102cf5c8bc0df4f54a",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.idxstats:md5,b7caa98bc74687dbe5bb25006cb3a97e",
-                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,e0a9ead48a900efb21c392921b05858b",
+                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,7deb5da0708e97ea32fbb27c2a7067d0",
                 "SAMPLE1_PE.sorted.bam.flagstat:md5,9ddf5c6002053f54233178102563273e",
                 "SAMPLE1_PE.sorted.bam.idxstats:md5,271793725bcf671006c5d3e2ad6f38c4",
-                "SAMPLE1_PE.sorted.bam.stats:md5,e2bac850ae1d1710c6da7f6f4aee854a",
+                "SAMPLE1_PE.sorted.bam.stats:md5,cc9c8c60f957610fbe18f3c1df6d857a",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.flagstat:md5,9d0f4c412079be8ad1fb402cf5146af9",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.idxstats:md5,91d0f0eeb2dd7ee91270c3573243af5a",
-                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,5a35dce20e76486ae062bc01631eae53",
+                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,23e90edc0811d7883187cd0700fa8034",
                 "SAMPLE2_PE.sorted.bam.flagstat:md5,d42b9ac5227073908cf7c472bff38c3d",
                 "SAMPLE2_PE.sorted.bam.idxstats:md5,ac74dd8b6117d9729847303b12d34169",
-                "SAMPLE2_PE.sorted.bam.stats:md5,a6e3504e40f951c6e597b291fbf1a0a3",
+                "SAMPLE2_PE.sorted.bam.stats:md5,c0fe40ba1fa121eebe3d7c50b07c8caf",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.flagstat:md5,ef01b37192e2aff0b69b81a023b4b413",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.idxstats:md5,2fe07abf5fba31ef3f1cb743b149a492",
-                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,918ab8478cb016b7ad56b2c6cfd75022",
+                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,c88431d1f94c3d8aa7d49b2092e10e3d",
                 "SAMPLE3_SE.sorted.bam.flagstat:md5,d68c12d3e99e541497b5972a2a42bb2d",
                 "SAMPLE3_SE.sorted.bam.idxstats:md5,7252117e51e104cc85c3f9a2ff83329c",
-                "SAMPLE3_SE.sorted.bam.stats:md5,424cb3a593a20b47da8fc54db7184c35",
+                "SAMPLE3_SE.sorted.bam.stats:md5,65a1f600854814fe3ace0c25bf14c55f",
                 "SAMPLE1_PE.tsv:md5,51c21fa94ec839d2582561b94ef6af31",
                 "SAMPLE2_PE.tsv:md5,54192ef5e34fec8cdfbd58b4fb0ef614",
                 "SAMPLE3_SE.tsv:md5,00654366c21e2a9c64249f21baede9c4",
@@ -987,9 +988,9 @@
                 "SAMPLE2_PE.consensus.base_counts.tsv:md5,55817d4f0a2b0234644bd288ee814ae3",
                 "SAMPLE3_SE.consensus.N_run.tsv:md5,687774fe61ff85689d5fe5c9a54c8a75",
                 "SAMPLE3_SE.consensus.base_counts.tsv:md5,aae0f02b0e5d160faaed2e087ed47502",
-                "SAMPLE1_PE.csv:md5,dfc1b5ce2fd97ee83d1d1fe071606396",
-                "SAMPLE2_PE.csv:md5,89bbbdab888b936d0439ad461e0b4c1f",
-                "SAMPLE3_SE.csv:md5,84e83be9203e6088918fc067d9a87434",
+                "SAMPLE1_PE.csv:md5,6e0df02a0edeccaa1383260800089919",
+                "SAMPLE2_PE.csv:md5,2128bd1486d31cca340fe6bfe534bee5",
+                "SAMPLE3_SE.csv:md5,13ea2ace59678f1d8423ce317a2f3921",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SAMPLE1_PE.variant_counts.log:md5,dca67b678c8fb1ff819c6e2549bd526d",
                 "SAMPLE2_PE.variant_counts.log:md5,3e36a199838f298a5db0e86f360d394e",
@@ -1007,7 +1008,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T13:45:57.513967941"
+        "timestamp": "2026-09-17T16:36:35.587245369"
     },
     "-profile test --variant_caller bcftools --consensus_caller ivar --skip_assembly": {
         "content": [
@@ -1039,7 +1040,7 @@
                     "python": "3.13.2"
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -1061,6 +1062,10 @@
                 },
                 "GUNZIP_GFF": {
                     "gunzip": 1.13
+                },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
                 },
                 "IVAR_CONSENSUS": {
                     "ivar": "1.4.4"
@@ -1084,10 +1089,10 @@
                     "mosdepth": "0.3.14"
                 },
                 "PANGOLIN_RUN": {
-                    "pangolin": "4.3.1"
+                    "pangolin": 4.4
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_AMPLICON": {
                     "r-base": "4.2.0"
@@ -1099,22 +1104,22 @@
                     "quast": "5.3.0"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -1124,12 +1129,6 @@
                 },
                 "SNPSIFT_EXTRACTFIELDS": {
                     "snpsift": 4.3
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNTAR_KRAKEN2_DB": {
                     "untar": 1.34
@@ -1551,9 +1550,9 @@
                 "variants/freyja/variants/SAMPLE3_SE.variants.tsv"
             ],
             [
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
                 "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
                 "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc",
@@ -1566,7 +1565,7 @@
                 "bcftools_stats_vqc_Count_Transversions.yaml:md5,c5552f5e3655259743915e9bd1a26747",
                 "bowtie2_pe_plot.yaml:md5,10cecac4c6aa438ab9438b64e2817afd",
                 "bowtie2_se_plot.yaml:md5,6a04c9b4fceae4a74aeb95bf9f7d1e01",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -1607,14 +1606,14 @@
                 "multiqc_bcftools_stats.yaml:md5,d83695a1867262c91be414f4594ddafe",
                 "multiqc_bowtie2.yaml:md5,5060f240b4210f8cf0cc7718748a6f9b",
                 "multiqc_citations.yaml:md5,99f30b0065520c10671a0c6c4b86d39d",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_nextclade_clade.yaml:md5,15ccc4848ada72c96c9b39606517a9bb",
-                "multiqc_pangolin.yaml:md5,e77a283a3337c458b43e58851628137f",
+                "multiqc_pangolin.yaml:md5,9dfbcd84c0b04bc2a734a13d472ed71e",
                 "multiqc_quast_quast_variants.yaml:md5,a8f0422aaf69f0d88d7c82645949a2fa",
                 "multiqc_snpeff.yaml:md5,8aa0c448d1aaed78f8f883048644730d",
-                "pangolin_run_table.yaml:md5,610b82c6a5f938eac0b896db2887e0ae",
+                "pangolin_run_table.yaml:md5,2007b520b1647e38dbee0c855b4b5fa4",
                 "snpeff_effects.yaml:md5,7df21b2549cabc3b0d6bfc15491f04a0",
                 "snpeff_qualities.yaml:md5,d21b0b88d3fab496572b35ed0f611124",
                 "snpeff_variant_effects_class.yaml:md5,5b0f4d3c41ec159bd38800f6396738d6",
@@ -1632,12 +1631,12 @@
                 "SAMPLE2_PE.consensus.base_counts.tsv:md5,5866fd117630fa6af0a1491c0e2c8893",
                 "SAMPLE3_SE.consensus.N_run.tsv:md5,aea98ed2c53723c984486525de3cac6f",
                 "SAMPLE3_SE.consensus.base_counts.tsv:md5,83a4a3acc605baf224a2a74b9bf435c7",
-                "SAMPLE1_PE.csv:md5,96932d121f6b0af5a3eb039a009046a2",
-                "SAMPLE2_PE.csv:md5,52acedb39ac55afd71b4ece2b8146e8e",
-                "SAMPLE3_SE.csv:md5,74b13ff6f79fc1871a9a4718eb63b9e4",
-                "SAMPLE1_PE.pangolin.csv:md5,0963ba15d2b4ad4e205968abc814dd31",
-                "SAMPLE2_PE.pangolin.csv:md5,e2dc755865027ff88b0d0fcc11b4ef05",
-                "SAMPLE3_SE.pangolin.csv:md5,a7230337a83859b01b045067685f5cfa",
+                "SAMPLE1_PE.csv:md5,8814b9da347323c344e03af6110016ad",
+                "SAMPLE2_PE.csv:md5,0ec5a13840c5283872a2507cab47862c",
+                "SAMPLE3_SE.csv:md5,9aab100a31611b5c98c0be8670f17fa9",
+                "SAMPLE1_PE.pangolin.csv:md5,05e4940bf602aab91a18905109cc23d9",
+                "SAMPLE2_PE.pangolin.csv:md5,96f1815aefcc805c30d4c2fe911729bb",
+                "SAMPLE3_SE.pangolin.csv:md5,bee429498943fd5c471536eebec25281",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SAMPLE1_PE.snpsift.txt:md5,028aff82274704e783c8e2720dc8a3bf",
                 "SAMPLE2_PE.snpsift.txt:md5,769fe38ec4c3ebc6957e2234f83fe4b5",
@@ -1667,29 +1666,29 @@
                 "SAMPLE3_SE.mosdepth.summary.txt:md5,27f7f5f8a2caef36dcc1dd504dd4f581",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.flagstat:md5,175a8826b10890b304fd7a30335b98a0",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.idxstats:md5,461869ebfe660675af9e5b2b30bec52c",
-                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,cd580a5ea6402dbc30cbf6f1d7ca8a49",
+                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,1a70745269d81ff3cbba13fb44b9caa7",
                 "SAMPLE1_PE.sorted.bam.flagstat:md5,b71fa417d19a1c64e53a7a4bbb9a66a3",
                 "SAMPLE1_PE.sorted.bam.idxstats:md5,d3f51babb7c8757456be63c9b75ee3d0",
-                "SAMPLE1_PE.sorted.bam.stats:md5,af3b213b55439503167be5c552675999",
+                "SAMPLE1_PE.sorted.bam.stats:md5,9d0c1cf989168ab817626684b8ba0aff",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.flagstat:md5,47616687e389589e8fe1d596bbe4a332",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.idxstats:md5,5f9def3fdb732d1da43650235b5e00e2",
-                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,1fb3b3364c0c1bd3349ce9f512b68dae",
+                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,c831719b0e9f1b74cdd525433b01a108",
                 "SAMPLE2_PE.sorted.bam.flagstat:md5,041ab8f42dae5f155ee9d7d2a2f23442",
                 "SAMPLE2_PE.sorted.bam.idxstats:md5,72e323cef6b90aea7741eb88cfa843ee",
-                "SAMPLE2_PE.sorted.bam.stats:md5,aaf6ffaaa8272bc2bf92484d3be077d2",
+                "SAMPLE2_PE.sorted.bam.stats:md5,32bfb3d967b100796d1a132421815ab9",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.flagstat:md5,6a2d2647c43aa48506d8d1536e498dc5",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.idxstats:md5,6be1ee32c50c77d6a853f02cd42307ba",
-                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,398a4f332098cabfdd7aeb71f067b038",
+                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,31560fde30eae4f0559c7ee2c3028276",
                 "SAMPLE3_SE.sorted.bam.flagstat:md5,0ae9908cf4840b0ec4ae74afbd395244",
                 "SAMPLE3_SE.sorted.bam.idxstats:md5,184d8ad417ee4242377f18880675165b",
-                "SAMPLE3_SE.sorted.bam.stats:md5,f017c5a5b5921846bd999b332ba0aecf"
+                "SAMPLE3_SE.sorted.bam.stats:md5,f5f529e4ce6e707ab9b37b5ff54b558a"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-08T13:22:28.048941551"
+        "timestamp": "2026-09-17T16:29:25.594934319"
     },
     "-profile test --skip_noninternal_primers --threeprime_adapters": {
         "content": [
@@ -1704,6 +1703,9 @@
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_FILTER": {
+                    "bcftools": "1.23.1"
+                },
+                "BCFTOOLS_INDEX": {
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_QUERY": {
@@ -1748,7 +1750,7 @@
                     "cutadapt": 5.2
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -1783,6 +1785,10 @@
                 "GUNZIP_SCAFFOLDS": {
                     "gunzip": 1.13
                 },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
+                },
                 "IVAR_TRIM": {
                     "ivar": "1.4.4"
                 },
@@ -1812,10 +1818,10 @@
                     "mosdepth": "0.3.14"
                 },
                 "PANGOLIN_RUN": {
-                    "pangolin": "4.3.1"
+                    "pangolin": 4.4
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_AMPLICON": {
                     "r-base": "4.2.0"
@@ -1830,22 +1836,22 @@
                     "sed": 4.9
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -1858,12 +1864,6 @@
                 },
                 "SPADES": {
                     "spades": "4.1.0"
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -2626,9 +2626,9 @@
                 "SAMPLE3_SE.contigs.fa.gz:md5,2d84f37a6084a6cea12145bad9445b0f",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
                 "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
                 "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc",
@@ -2643,7 +2643,7 @@
                 "cutadapt_filtered_reads_plot.yaml:md5,893934616ec0e048a92966e974403df0",
                 "cutadapt_trimmed_sequences_plot_3_Counts.yaml:md5,40657a75445e8e2b239ef0bfc5e4877c",
                 "cutadapt_trimmed_sequences_plot_3_Obs_Exp.yaml:md5,7464da28073abfc9fd81bed01728bb88",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -2685,16 +2685,16 @@
                 "multiqc_bowtie2.yaml:md5,5060f240b4210f8cf0cc7718748a6f9b",
                 "multiqc_citations.yaml:md5,6604be3c186cd954ce9a4bdd68c0aa8c",
                 "multiqc_cutadapt.yaml:md5,b233c31d2f60c4a8dd13c30e1f286e57",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_ivar_variants.yaml:md5,22a1b3904671b16aace3b5f73a907614",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_nextclade_clade.yaml:md5,15ccc4848ada72c96c9b39606517a9bb",
-                "multiqc_pangolin.yaml:md5,fc7af8a7b55ba7b484757b0799208301",
+                "multiqc_pangolin.yaml:md5,0827c1034f39b03efb643dafbcde39ae",
                 "multiqc_quast_quast_spades.yaml:md5,7ebfe461373f913757bf20d74137df2a",
                 "multiqc_quast_quast_variants.yaml:md5,1465f3600b1643497310946af66d0618",
                 "multiqc_snpeff.yaml:md5,42d92c43058c25ce03620a2add521006",
-                "pangolin_run_table.yaml:md5,16f4616675164243c67439101defe45e",
+                "pangolin_run_table.yaml:md5,5a009661193e3c3dc9620af31069d198",
                 "snpeff_effects.yaml:md5,43533ac29b261ab7132c69c7034648ad",
                 "snpeff_variant_effects_class.yaml:md5,5f31369f0e087d4fe7eddc14d908f11f",
                 "snpeff_variant_effects_impact.yaml:md5,ab3b8b418a47185b61d19a06f2a8e846",
@@ -2720,22 +2720,22 @@
                 "SAMPLE3_SE.mosdepth.summary.txt:md5,27f7f5f8a2caef36dcc1dd504dd4f581",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.flagstat:md5,175a8826b10890b304fd7a30335b98a0",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.idxstats:md5,461869ebfe660675af9e5b2b30bec52c",
-                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,cd580a5ea6402dbc30cbf6f1d7ca8a49",
+                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,1a70745269d81ff3cbba13fb44b9caa7",
                 "SAMPLE1_PE.sorted.bam.flagstat:md5,b71fa417d19a1c64e53a7a4bbb9a66a3",
                 "SAMPLE1_PE.sorted.bam.idxstats:md5,d3f51babb7c8757456be63c9b75ee3d0",
-                "SAMPLE1_PE.sorted.bam.stats:md5,af3b213b55439503167be5c552675999",
+                "SAMPLE1_PE.sorted.bam.stats:md5,9d0c1cf989168ab817626684b8ba0aff",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.flagstat:md5,47616687e389589e8fe1d596bbe4a332",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.idxstats:md5,5f9def3fdb732d1da43650235b5e00e2",
-                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,1fb3b3364c0c1bd3349ce9f512b68dae",
+                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,c831719b0e9f1b74cdd525433b01a108",
                 "SAMPLE2_PE.sorted.bam.flagstat:md5,041ab8f42dae5f155ee9d7d2a2f23442",
                 "SAMPLE2_PE.sorted.bam.idxstats:md5,72e323cef6b90aea7741eb88cfa843ee",
-                "SAMPLE2_PE.sorted.bam.stats:md5,aaf6ffaaa8272bc2bf92484d3be077d2",
+                "SAMPLE2_PE.sorted.bam.stats:md5,32bfb3d967b100796d1a132421815ab9",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.flagstat:md5,6a2d2647c43aa48506d8d1536e498dc5",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.idxstats:md5,6be1ee32c50c77d6a853f02cd42307ba",
-                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,398a4f332098cabfdd7aeb71f067b038",
+                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,31560fde30eae4f0559c7ee2c3028276",
                 "SAMPLE3_SE.sorted.bam.flagstat:md5,0ae9908cf4840b0ec4ae74afbd395244",
                 "SAMPLE3_SE.sorted.bam.idxstats:md5,184d8ad417ee4242377f18880675165b",
-                "SAMPLE3_SE.sorted.bam.stats:md5,f017c5a5b5921846bd999b332ba0aecf",
+                "SAMPLE3_SE.sorted.bam.stats:md5,f5f529e4ce6e707ab9b37b5ff54b558a",
                 "SAMPLE1_PE.tsv:md5,d11ff38b97ad069639067037f2f00e6a",
                 "SAMPLE2_PE.tsv:md5,81285393974428d2fed60b398aa9a6d7",
                 "SAMPLE3_SE.tsv:md5,4ae3bc88a5952e78344d98d46fecdd55",
@@ -2751,12 +2751,12 @@
                 "SAMPLE2_PE.consensus.base_counts.tsv:md5,849837547485915dd5cb4efa7c8cfe9d",
                 "SAMPLE3_SE.consensus.N_run.tsv:md5,8fc26eab2393cfde6daf0212d18d58f9",
                 "SAMPLE3_SE.consensus.base_counts.tsv:md5,ecdec402d1e7a094dd26c3d2b906e690",
-                "SAMPLE1_PE.csv:md5,2d907beef116676a177200301bca4e7c",
-                "SAMPLE2_PE.csv:md5,610fb1a8df7fe7e18598237ebe9db36a",
-                "SAMPLE3_SE.csv:md5,1f129eab464674e6b2c404c809d0146b",
-                "SAMPLE1_PE.pangolin.csv:md5,93ad34cfc22d3c7a1bb9fe60c51e166f",
-                "SAMPLE2_PE.pangolin.csv:md5,151e8da109924024f0501e44c1798592",
-                "SAMPLE3_SE.pangolin.csv:md5,677f4e275cfb91cf5948d57a3f717412",
+                "SAMPLE1_PE.csv:md5,5e40958478d114bc16af8f121eabb7dd",
+                "SAMPLE2_PE.csv:md5,4d0aa4cf7bf41f4023ca6ec9a29411cc",
+                "SAMPLE3_SE.csv:md5,5208a92c30cfb23996cf6689cbb0a4ab",
+                "SAMPLE1_PE.pangolin.csv:md5,f86666cdf29f625ff8650d8ce7bc69cc",
+                "SAMPLE2_PE.pangolin.csv:md5,2769897eb0ad2cad9e00eab1e7a45e9f",
+                "SAMPLE3_SE.pangolin.csv:md5,9fee48a23dd3799f5c03f79ce0d633f6",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SAMPLE1_PE.variant_counts.log:md5,dca67b678c8fb1ff819c6e2549bd526d",
                 "SAMPLE2_PE.variant_counts.log:md5,3e36a199838f298a5db0e86f360d394e",
@@ -2774,7 +2774,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T12:29:42.169330446"
+        "timestamp": "2026-09-17T17:41:50.781528114"
     },
     "-profile test --spades_mode metaviral --skip_variants": {
         "content": [
@@ -2801,7 +2801,7 @@
                     "cutadapt": 5.2
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -2838,7 +2838,7 @@
                     "quast": "5.3.0"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SPADES": {
                     "spades": "4.1.0"
@@ -3240,16 +3240,16 @@
                 "SAMPLE2_PE.contigs.fa.gz:md5,7d3f8f4fe5449513fadaf5e9bee0f82b",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
                 "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
                 "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc",
                 "cutadapt_filtered_reads_plot.yaml:md5,d6d8c27798e7ed6434cb96c19847a148",
                 "cutadapt_trimmed_sequences_plot_default_Counts.yaml:md5,68220582d40423ff8e60ad0d6705d795",
                 "cutadapt_trimmed_sequences_plot_default_Obs_Exp.yaml:md5,403f19ed34112994146dfb1f97c5a8a1",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -3283,7 +3283,7 @@
                 "kraken-top-n-plot_Unclassified.yaml:md5,ba45c76e7733a0c21151bcea30cf2598",
                 "multiqc_citations.yaml:md5,38fb6cdab5d5ddca3a95c8c2522c80c6",
                 "multiqc_cutadapt.yaml:md5,2471bb372409a815d6e869a03daea482",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_quast_quast_spades.yaml:md5,643e56cdc671346f027c8e713d9d76fd"
@@ -3293,7 +3293,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T11:54:56.094304681"
+        "timestamp": "2026-09-17T17:10:16.604589912"
     },
     "-profile test --skip_plasmidid false": {
         "content": [
@@ -3308,6 +3308,9 @@
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_FILTER": {
+                    "bcftools": "1.23.1"
+                },
+                "BCFTOOLS_INDEX": {
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_QUERY": {
@@ -3352,7 +3355,7 @@
                     "cutadapt": 5.2
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -3387,6 +3390,10 @@
                 "GUNZIP_SCAFFOLDS": {
                     "gunzip": 1.13
                 },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
+                },
                 "IVAR_TRIM": {
                     "ivar": "1.4.4"
                 },
@@ -3416,12 +3423,13 @@
                     "mosdepth": "0.3.14"
                 },
                 "PANGOLIN_RUN": {
-                    "pangolin": "4.3.1"
+                    "pangolin": 4.4
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLASMIDID": {
+                    "parallel": 20210222,
                     "plasmidid": "1.6.4"
                 },
                 "PLOT_MOSDEPTH_REGIONS_AMPLICON": {
@@ -3440,22 +3448,22 @@
                     "sed": 4.9
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -3468,12 +3476,6 @@
                 },
                 "SPADES": {
                     "spades": "4.1.0"
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -4616,9 +4618,9 @@
                 "SAMPLE3_SE.contigs.fa.gz:md5,deea55f084df8fc24e3e70662b59af12",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
                 "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
                 "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc",
@@ -4633,7 +4635,7 @@
                 "cutadapt_filtered_reads_plot.yaml:md5,d6d8c27798e7ed6434cb96c19847a148",
                 "cutadapt_trimmed_sequences_plot_default_Counts.yaml:md5,68220582d40423ff8e60ad0d6705d795",
                 "cutadapt_trimmed_sequences_plot_default_Obs_Exp.yaml:md5,403f19ed34112994146dfb1f97c5a8a1",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -4675,16 +4677,16 @@
                 "multiqc_bowtie2.yaml:md5,5060f240b4210f8cf0cc7718748a6f9b",
                 "multiqc_citations.yaml:md5,6604be3c186cd954ce9a4bdd68c0aa8c",
                 "multiqc_cutadapt.yaml:md5,2471bb372409a815d6e869a03daea482",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_ivar_variants.yaml:md5,22a1b3904671b16aace3b5f73a907614",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_nextclade_clade.yaml:md5,15ccc4848ada72c96c9b39606517a9bb",
-                "multiqc_pangolin.yaml:md5,fc7af8a7b55ba7b484757b0799208301",
+                "multiqc_pangolin.yaml:md5,0827c1034f39b03efb643dafbcde39ae",
                 "multiqc_quast_quast_spades.yaml:md5,cb9b2122a8d6fd4aef51da97bdc5180d",
                 "multiqc_quast_quast_variants.yaml:md5,1465f3600b1643497310946af66d0618",
                 "multiqc_snpeff.yaml:md5,42d92c43058c25ce03620a2add521006",
-                "pangolin_run_table.yaml:md5,16f4616675164243c67439101defe45e",
+                "pangolin_run_table.yaml:md5,5a009661193e3c3dc9620af31069d198",
                 "snpeff_effects.yaml:md5,43533ac29b261ab7132c69c7034648ad",
                 "snpeff_variant_effects_class.yaml:md5,5f31369f0e087d4fe7eddc14d908f11f",
                 "snpeff_variant_effects_impact.yaml:md5,ab3b8b418a47185b61d19a06f2a8e846",
@@ -4710,22 +4712,22 @@
                 "SAMPLE3_SE.mosdepth.summary.txt:md5,27f7f5f8a2caef36dcc1dd504dd4f581",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.flagstat:md5,175a8826b10890b304fd7a30335b98a0",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.idxstats:md5,461869ebfe660675af9e5b2b30bec52c",
-                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,cd580a5ea6402dbc30cbf6f1d7ca8a49",
+                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,1a70745269d81ff3cbba13fb44b9caa7",
                 "SAMPLE1_PE.sorted.bam.flagstat:md5,b71fa417d19a1c64e53a7a4bbb9a66a3",
                 "SAMPLE1_PE.sorted.bam.idxstats:md5,d3f51babb7c8757456be63c9b75ee3d0",
-                "SAMPLE1_PE.sorted.bam.stats:md5,af3b213b55439503167be5c552675999",
+                "SAMPLE1_PE.sorted.bam.stats:md5,9d0c1cf989168ab817626684b8ba0aff",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.flagstat:md5,47616687e389589e8fe1d596bbe4a332",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.idxstats:md5,5f9def3fdb732d1da43650235b5e00e2",
-                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,1fb3b3364c0c1bd3349ce9f512b68dae",
+                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,c831719b0e9f1b74cdd525433b01a108",
                 "SAMPLE2_PE.sorted.bam.flagstat:md5,041ab8f42dae5f155ee9d7d2a2f23442",
                 "SAMPLE2_PE.sorted.bam.idxstats:md5,72e323cef6b90aea7741eb88cfa843ee",
-                "SAMPLE2_PE.sorted.bam.stats:md5,aaf6ffaaa8272bc2bf92484d3be077d2",
+                "SAMPLE2_PE.sorted.bam.stats:md5,32bfb3d967b100796d1a132421815ab9",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.flagstat:md5,6a2d2647c43aa48506d8d1536e498dc5",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.idxstats:md5,6be1ee32c50c77d6a853f02cd42307ba",
-                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,398a4f332098cabfdd7aeb71f067b038",
+                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,31560fde30eae4f0559c7ee2c3028276",
                 "SAMPLE3_SE.sorted.bam.flagstat:md5,0ae9908cf4840b0ec4ae74afbd395244",
                 "SAMPLE3_SE.sorted.bam.idxstats:md5,184d8ad417ee4242377f18880675165b",
-                "SAMPLE3_SE.sorted.bam.stats:md5,f017c5a5b5921846bd999b332ba0aecf",
+                "SAMPLE3_SE.sorted.bam.stats:md5,f5f529e4ce6e707ab9b37b5ff54b558a",
                 "SAMPLE1_PE.tsv:md5,d11ff38b97ad069639067037f2f00e6a",
                 "SAMPLE2_PE.tsv:md5,81285393974428d2fed60b398aa9a6d7",
                 "SAMPLE3_SE.tsv:md5,4ae3bc88a5952e78344d98d46fecdd55",
@@ -4741,12 +4743,12 @@
                 "SAMPLE2_PE.consensus.base_counts.tsv:md5,849837547485915dd5cb4efa7c8cfe9d",
                 "SAMPLE3_SE.consensus.N_run.tsv:md5,8fc26eab2393cfde6daf0212d18d58f9",
                 "SAMPLE3_SE.consensus.base_counts.tsv:md5,ecdec402d1e7a094dd26c3d2b906e690",
-                "SAMPLE1_PE.csv:md5,2d907beef116676a177200301bca4e7c",
-                "SAMPLE2_PE.csv:md5,610fb1a8df7fe7e18598237ebe9db36a",
-                "SAMPLE3_SE.csv:md5,1f129eab464674e6b2c404c809d0146b",
-                "SAMPLE1_PE.pangolin.csv:md5,93ad34cfc22d3c7a1bb9fe60c51e166f",
-                "SAMPLE2_PE.pangolin.csv:md5,151e8da109924024f0501e44c1798592",
-                "SAMPLE3_SE.pangolin.csv:md5,677f4e275cfb91cf5948d57a3f717412",
+                "SAMPLE1_PE.csv:md5,5e40958478d114bc16af8f121eabb7dd",
+                "SAMPLE2_PE.csv:md5,4d0aa4cf7bf41f4023ca6ec9a29411cc",
+                "SAMPLE3_SE.csv:md5,5208a92c30cfb23996cf6689cbb0a4ab",
+                "SAMPLE1_PE.pangolin.csv:md5,f86666cdf29f625ff8650d8ce7bc69cc",
+                "SAMPLE2_PE.pangolin.csv:md5,2769897eb0ad2cad9e00eab1e7a45e9f",
+                "SAMPLE3_SE.pangolin.csv:md5,9fee48a23dd3799f5c03f79ce0d633f6",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SAMPLE1_PE.variant_counts.log:md5,dca67b678c8fb1ff819c6e2549bd526d",
                 "SAMPLE2_PE.variant_counts.log:md5,3e36a199838f298a5db0e86f360d394e",
@@ -4764,7 +4766,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T12:04:56.608571462"
+        "timestamp": "2026-09-17T17:19:07.757232152"
     },
     "-profile test --additional_annotation 'https://github.com/nf-core/test-datasets/raw/refs/heads/viralrecon/genome/MN908947.3/GCA_009858895.3_ASM985889v3_genomic.200409.gtf.gz'": {
         "content": [
@@ -4779,6 +4781,9 @@
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_FILTER": {
+                    "bcftools": "1.23.1"
+                },
+                "BCFTOOLS_INDEX": {
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_QUERY": {
@@ -4823,7 +4828,7 @@
                     "cutadapt": 5.2
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -4858,6 +4863,10 @@
                 "GUNZIP_SCAFFOLDS": {
                     "gunzip": 1.13
                 },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
+                },
                 "IVAR_TRIM": {
                     "ivar": "1.4.4"
                 },
@@ -4890,10 +4899,10 @@
                     "mosdepth": "0.3.14"
                 },
                 "PANGOLIN_RUN": {
-                    "pangolin": "4.3.1"
+                    "pangolin": 4.4
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_AMPLICON": {
                     "r-base": "4.2.0"
@@ -4911,22 +4920,22 @@
                     "sed": 4.9
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -4939,12 +4948,6 @@
                 },
                 "SPADES": {
                     "spades": "4.1.0"
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -5288,6 +5291,10 @@
                 "assembly/unicycler/quast.unicycler/transposed_report.tex",
                 "assembly/unicycler/quast.unicycler/transposed_report.tsv",
                 "assembly/unicycler/quast.unicycler/transposed_report.txt",
+                "bcftools",
+                "bcftools/SAMPLE1_PE.bcftools_stats.txt",
+                "bcftools/SAMPLE2_PE.bcftools_stats.txt",
+                "bcftools/SAMPLE3_SE.bcftools_stats.txt",
                 "fastp",
                 "fastp/SAMPLE1_PE.fastp.html",
                 "fastp/SAMPLE1_PE.fastp.json",
@@ -5566,10 +5573,6 @@
                 "variants/ivar/additional_annotation/snpeff/SAMPLE3_SE.snpeff.vcf.gz",
                 "variants/ivar/additional_annotation/snpeff/SAMPLE3_SE.snpeff.vcf.gz.tbi",
                 "variants/ivar/additional_annotation/snpeff/SAMPLE3_SE.snpsift.txt",
-                "variants/ivar/additional_annotation/snpeff/bcftools_stats",
-                "variants/ivar/additional_annotation/snpeff/bcftools_stats/SAMPLE1_PE.snpeff.bcftools_stats.txt",
-                "variants/ivar/additional_annotation/snpeff/bcftools_stats/SAMPLE2_PE.snpeff.bcftools_stats.txt",
-                "variants/ivar/additional_annotation/snpeff/bcftools_stats/SAMPLE3_SE.snpeff.bcftools_stats.txt",
                 "variants/ivar/bcftools_stats",
                 "variants/ivar/bcftools_stats/SAMPLE1_PE.bcftools_stats.txt",
                 "variants/ivar/bcftools_stats/SAMPLE2_PE.bcftools_stats.txt",
@@ -5735,9 +5738,12 @@
                 "SAMPLE3_SE.contigs.fa.gz:md5,deea55f084df8fc24e3e70662b59af12",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.bcftools_stats.txt:md5,f60e68e48fc0bca588a2fb1bb9576b85",
+                "SAMPLE2_PE.bcftools_stats.txt:md5,63e2ca3cd6372f95362e6bf3c5622601",
+                "SAMPLE3_SE.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
                 "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
                 "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc",
@@ -5752,7 +5758,7 @@
                 "cutadapt_filtered_reads_plot.yaml:md5,d6d8c27798e7ed6434cb96c19847a148",
                 "cutadapt_trimmed_sequences_plot_default_Counts.yaml:md5,68220582d40423ff8e60ad0d6705d795",
                 "cutadapt_trimmed_sequences_plot_default_Obs_Exp.yaml:md5,403f19ed34112994146dfb1f97c5a8a1",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -5794,16 +5800,16 @@
                 "multiqc_bowtie2.yaml:md5,5060f240b4210f8cf0cc7718748a6f9b",
                 "multiqc_citations.yaml:md5,6604be3c186cd954ce9a4bdd68c0aa8c",
                 "multiqc_cutadapt.yaml:md5,2471bb372409a815d6e869a03daea482",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_ivar_variants.yaml:md5,22a1b3904671b16aace3b5f73a907614",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_nextclade_clade.yaml:md5,15ccc4848ada72c96c9b39606517a9bb",
-                "multiqc_pangolin.yaml:md5,fc7af8a7b55ba7b484757b0799208301",
+                "multiqc_pangolin.yaml:md5,0827c1034f39b03efb643dafbcde39ae",
                 "multiqc_quast_quast_spades.yaml:md5,cb9b2122a8d6fd4aef51da97bdc5180d",
                 "multiqc_quast_quast_variants.yaml:md5,1465f3600b1643497310946af66d0618",
                 "multiqc_snpeff.yaml:md5,42d92c43058c25ce03620a2add521006",
-                "pangolin_run_table.yaml:md5,16f4616675164243c67439101defe45e",
+                "pangolin_run_table.yaml:md5,5a009661193e3c3dc9620af31069d198",
                 "snpeff_effects.yaml:md5,43533ac29b261ab7132c69c7034648ad",
                 "snpeff_variant_effects_class.yaml:md5,5f31369f0e087d4fe7eddc14d908f11f",
                 "snpeff_variant_effects_impact.yaml:md5,ab3b8b418a47185b61d19a06f2a8e846",
@@ -5829,22 +5835,22 @@
                 "SAMPLE3_SE.mosdepth.summary.txt:md5,27f7f5f8a2caef36dcc1dd504dd4f581",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.flagstat:md5,175a8826b10890b304fd7a30335b98a0",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.idxstats:md5,461869ebfe660675af9e5b2b30bec52c",
-                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,cd580a5ea6402dbc30cbf6f1d7ca8a49",
+                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,1a70745269d81ff3cbba13fb44b9caa7",
                 "SAMPLE1_PE.sorted.bam.flagstat:md5,b71fa417d19a1c64e53a7a4bbb9a66a3",
                 "SAMPLE1_PE.sorted.bam.idxstats:md5,d3f51babb7c8757456be63c9b75ee3d0",
-                "SAMPLE1_PE.sorted.bam.stats:md5,af3b213b55439503167be5c552675999",
+                "SAMPLE1_PE.sorted.bam.stats:md5,9d0c1cf989168ab817626684b8ba0aff",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.flagstat:md5,47616687e389589e8fe1d596bbe4a332",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.idxstats:md5,5f9def3fdb732d1da43650235b5e00e2",
-                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,1fb3b3364c0c1bd3349ce9f512b68dae",
+                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,c831719b0e9f1b74cdd525433b01a108",
                 "SAMPLE2_PE.sorted.bam.flagstat:md5,041ab8f42dae5f155ee9d7d2a2f23442",
                 "SAMPLE2_PE.sorted.bam.idxstats:md5,72e323cef6b90aea7741eb88cfa843ee",
-                "SAMPLE2_PE.sorted.bam.stats:md5,aaf6ffaaa8272bc2bf92484d3be077d2",
+                "SAMPLE2_PE.sorted.bam.stats:md5,32bfb3d967b100796d1a132421815ab9",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.flagstat:md5,6a2d2647c43aa48506d8d1536e498dc5",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.idxstats:md5,6be1ee32c50c77d6a853f02cd42307ba",
-                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,398a4f332098cabfdd7aeb71f067b038",
+                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,31560fde30eae4f0559c7ee2c3028276",
                 "SAMPLE3_SE.sorted.bam.flagstat:md5,0ae9908cf4840b0ec4ae74afbd395244",
                 "SAMPLE3_SE.sorted.bam.idxstats:md5,184d8ad417ee4242377f18880675165b",
-                "SAMPLE3_SE.sorted.bam.stats:md5,f017c5a5b5921846bd999b332ba0aecf",
+                "SAMPLE3_SE.sorted.bam.stats:md5,f5f529e4ce6e707ab9b37b5ff54b558a",
                 "SAMPLE1_PE.tsv:md5,d11ff38b97ad069639067037f2f00e6a",
                 "SAMPLE2_PE.tsv:md5,81285393974428d2fed60b398aa9a6d7",
                 "SAMPLE3_SE.tsv:md5,4ae3bc88a5952e78344d98d46fecdd55",
@@ -5855,9 +5861,6 @@
                 "SAMPLE1_PE.snpsift.txt:md5,129fa11a2e0b6386313f2d82939fa1b3",
                 "SAMPLE2_PE.snpsift.txt:md5,07507b522b935be5cc374af9bd0c951b",
                 "SAMPLE3_SE.snpsift.txt:md5,a0b07a1346dc1e4903153713a09e1b6d",
-                "SAMPLE1_PE.snpeff.bcftools_stats.txt:md5,f60e68e48fc0bca588a2fb1bb9576b85",
-                "SAMPLE2_PE.snpeff.bcftools_stats.txt:md5,63e2ca3cd6372f95362e6bf3c5622601",
-                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2",
                 "SAMPLE1_PE.bcftools_stats.txt:md5,dea48017f4cfd2d4b8560e2343cf6bd8",
                 "SAMPLE2_PE.bcftools_stats.txt:md5,ad3a8f84c4dfb2af18fbf2d512340bc1",
                 "SAMPLE3_SE.bcftools_stats.txt:md5,474e5dde3ce408bb36eb4b2452d46907",
@@ -5870,12 +5873,12 @@
                 "SAMPLE2_PE.consensus.base_counts.tsv:md5,849837547485915dd5cb4efa7c8cfe9d",
                 "SAMPLE3_SE.consensus.N_run.tsv:md5,8fc26eab2393cfde6daf0212d18d58f9",
                 "SAMPLE3_SE.consensus.base_counts.tsv:md5,ecdec402d1e7a094dd26c3d2b906e690",
-                "SAMPLE1_PE.csv:md5,2d907beef116676a177200301bca4e7c",
-                "SAMPLE2_PE.csv:md5,610fb1a8df7fe7e18598237ebe9db36a",
-                "SAMPLE3_SE.csv:md5,1f129eab464674e6b2c404c809d0146b",
-                "SAMPLE1_PE.pangolin.csv:md5,93ad34cfc22d3c7a1bb9fe60c51e166f",
-                "SAMPLE2_PE.pangolin.csv:md5,151e8da109924024f0501e44c1798592",
-                "SAMPLE3_SE.pangolin.csv:md5,677f4e275cfb91cf5948d57a3f717412",
+                "SAMPLE1_PE.csv:md5,5e40958478d114bc16af8f121eabb7dd",
+                "SAMPLE2_PE.csv:md5,4d0aa4cf7bf41f4023ca6ec9a29411cc",
+                "SAMPLE3_SE.csv:md5,5208a92c30cfb23996cf6689cbb0a4ab",
+                "SAMPLE1_PE.pangolin.csv:md5,f86666cdf29f625ff8650d8ce7bc69cc",
+                "SAMPLE2_PE.pangolin.csv:md5,2769897eb0ad2cad9e00eab1e7a45e9f",
+                "SAMPLE3_SE.pangolin.csv:md5,9fee48a23dd3799f5c03f79ce0d633f6",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SAMPLE1_PE.variant_counts.log:md5,dca67b678c8fb1ff819c6e2549bd526d",
                 "SAMPLE2_PE.variant_counts.log:md5,3e36a199838f298a5db0e86f360d394e",
@@ -5893,7 +5896,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T12:13:48.494951862"
+        "timestamp": "2026-09-17T17:27:27.728025194"
     },
     "-profile test --skip_kraken2": {
         "content": [
@@ -5908,6 +5911,9 @@
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_FILTER": {
+                    "bcftools": "1.23.1"
+                },
+                "BCFTOOLS_INDEX": {
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_QUERY": {
@@ -5952,7 +5958,7 @@
                     "cutadapt": 5.2
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -5987,6 +5993,10 @@
                 "GUNZIP_SCAFFOLDS": {
                     "gunzip": 1.13
                 },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
+                },
                 "IVAR_TRIM": {
                     "ivar": "1.4.4"
                 },
@@ -6012,10 +6022,10 @@
                     "mosdepth": "0.3.14"
                 },
                 "PANGOLIN_RUN": {
-                    "pangolin": "4.3.1"
+                    "pangolin": 4.4
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_AMPLICON": {
                     "r-base": "4.2.0"
@@ -6033,22 +6043,22 @@
                     "sed": 4.9
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -6061,12 +6071,6 @@
                 },
                 "SPADES": {
                     "spades": "4.1.0"
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -6814,9 +6818,9 @@
                 "SAMPLE3_SE.contigs.fa.gz:md5,fe2f93d5989a3cf29e857f729124a6ca",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "bcftools-stats-subtypes.yaml:md5,f51422dce347adbd827524c9e5d6e81d",
                 "bcftools_stats_indel-lengths.yaml:md5,3010a9b1a6e1bf90357788d0987e80e9",
                 "bcftools_stats_vqc_Count_Indels.yaml:md5,02024268302dedeab70f7f75e36b5ede",
@@ -6828,7 +6832,7 @@
                 "cutadapt_filtered_reads_plot.yaml:md5,9d7c81c66e6788e27b32b29755fb577f",
                 "cutadapt_trimmed_sequences_plot_default_Counts.yaml:md5,9d9545d4e6b03e0f82dcc43ec9bf826f",
                 "cutadapt_trimmed_sequences_plot_default_Obs_Exp.yaml:md5,e5895ee811f94b30ac6d78a080c51389",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -6863,15 +6867,15 @@
                 "multiqc_bowtie2.yaml:md5,5060f240b4210f8cf0cc7718748a6f9b",
                 "multiqc_citations.yaml:md5,a2f94c9c104916441ab1c0231d1cec72",
                 "multiqc_cutadapt.yaml:md5,08bd6576508a85871ca8bef33fc5980b",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_ivar_variants.yaml:md5,22a1b3904671b16aace3b5f73a907614",
                 "multiqc_nextclade_clade.yaml:md5,15ccc4848ada72c96c9b39606517a9bb",
-                "multiqc_pangolin.yaml:md5,fc7af8a7b55ba7b484757b0799208301",
+                "multiqc_pangolin.yaml:md5,0827c1034f39b03efb643dafbcde39ae",
                 "multiqc_quast_quast_spades.yaml:md5,214e571157e51dad72cb21601353c297",
                 "multiqc_quast_quast_variants.yaml:md5,1465f3600b1643497310946af66d0618",
                 "multiqc_snpeff.yaml:md5,42d92c43058c25ce03620a2add521006",
-                "pangolin_run_table.yaml:md5,16f4616675164243c67439101defe45e",
+                "pangolin_run_table.yaml:md5,5a009661193e3c3dc9620af31069d198",
                 "snpeff_effects.yaml:md5,43533ac29b261ab7132c69c7034648ad",
                 "snpeff_variant_effects_class.yaml:md5,5f31369f0e087d4fe7eddc14d908f11f",
                 "snpeff_variant_effects_impact.yaml:md5,ab3b8b418a47185b61d19a06f2a8e846",
@@ -6897,22 +6901,22 @@
                 "SAMPLE3_SE.mosdepth.summary.txt:md5,27f7f5f8a2caef36dcc1dd504dd4f581",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.flagstat:md5,175a8826b10890b304fd7a30335b98a0",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.idxstats:md5,461869ebfe660675af9e5b2b30bec52c",
-                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,cd580a5ea6402dbc30cbf6f1d7ca8a49",
+                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,1a70745269d81ff3cbba13fb44b9caa7",
                 "SAMPLE1_PE.sorted.bam.flagstat:md5,b71fa417d19a1c64e53a7a4bbb9a66a3",
                 "SAMPLE1_PE.sorted.bam.idxstats:md5,d3f51babb7c8757456be63c9b75ee3d0",
-                "SAMPLE1_PE.sorted.bam.stats:md5,af3b213b55439503167be5c552675999",
+                "SAMPLE1_PE.sorted.bam.stats:md5,9d0c1cf989168ab817626684b8ba0aff",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.flagstat:md5,47616687e389589e8fe1d596bbe4a332",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.idxstats:md5,5f9def3fdb732d1da43650235b5e00e2",
-                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,1fb3b3364c0c1bd3349ce9f512b68dae",
+                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,c831719b0e9f1b74cdd525433b01a108",
                 "SAMPLE2_PE.sorted.bam.flagstat:md5,041ab8f42dae5f155ee9d7d2a2f23442",
                 "SAMPLE2_PE.sorted.bam.idxstats:md5,72e323cef6b90aea7741eb88cfa843ee",
-                "SAMPLE2_PE.sorted.bam.stats:md5,aaf6ffaaa8272bc2bf92484d3be077d2",
+                "SAMPLE2_PE.sorted.bam.stats:md5,32bfb3d967b100796d1a132421815ab9",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.flagstat:md5,6a2d2647c43aa48506d8d1536e498dc5",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.idxstats:md5,6be1ee32c50c77d6a853f02cd42307ba",
-                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,398a4f332098cabfdd7aeb71f067b038",
+                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,31560fde30eae4f0559c7ee2c3028276",
                 "SAMPLE3_SE.sorted.bam.flagstat:md5,0ae9908cf4840b0ec4ae74afbd395244",
                 "SAMPLE3_SE.sorted.bam.idxstats:md5,184d8ad417ee4242377f18880675165b",
-                "SAMPLE3_SE.sorted.bam.stats:md5,f017c5a5b5921846bd999b332ba0aecf",
+                "SAMPLE3_SE.sorted.bam.stats:md5,f5f529e4ce6e707ab9b37b5ff54b558a",
                 "SAMPLE1_PE.tsv:md5,d11ff38b97ad069639067037f2f00e6a",
                 "SAMPLE2_PE.tsv:md5,81285393974428d2fed60b398aa9a6d7",
                 "SAMPLE3_SE.tsv:md5,4ae3bc88a5952e78344d98d46fecdd55",
@@ -6928,12 +6932,12 @@
                 "SAMPLE2_PE.consensus.base_counts.tsv:md5,849837547485915dd5cb4efa7c8cfe9d",
                 "SAMPLE3_SE.consensus.N_run.tsv:md5,8fc26eab2393cfde6daf0212d18d58f9",
                 "SAMPLE3_SE.consensus.base_counts.tsv:md5,ecdec402d1e7a094dd26c3d2b906e690",
-                "SAMPLE1_PE.csv:md5,2d907beef116676a177200301bca4e7c",
-                "SAMPLE2_PE.csv:md5,610fb1a8df7fe7e18598237ebe9db36a",
-                "SAMPLE3_SE.csv:md5,1f129eab464674e6b2c404c809d0146b",
-                "SAMPLE1_PE.pangolin.csv:md5,93ad34cfc22d3c7a1bb9fe60c51e166f",
-                "SAMPLE2_PE.pangolin.csv:md5,151e8da109924024f0501e44c1798592",
-                "SAMPLE3_SE.pangolin.csv:md5,677f4e275cfb91cf5948d57a3f717412",
+                "SAMPLE1_PE.csv:md5,5e40958478d114bc16af8f121eabb7dd",
+                "SAMPLE2_PE.csv:md5,4d0aa4cf7bf41f4023ca6ec9a29411cc",
+                "SAMPLE3_SE.csv:md5,5208a92c30cfb23996cf6689cbb0a4ab",
+                "SAMPLE1_PE.pangolin.csv:md5,f86666cdf29f625ff8650d8ce7bc69cc",
+                "SAMPLE2_PE.pangolin.csv:md5,2769897eb0ad2cad9e00eab1e7a45e9f",
+                "SAMPLE3_SE.pangolin.csv:md5,9fee48a23dd3799f5c03f79ce0d633f6",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SAMPLE1_PE.variant_counts.log:md5,dca67b678c8fb1ff819c6e2549bd526d",
                 "SAMPLE2_PE.variant_counts.log:md5,3e36a199838f298a5db0e86f360d394e",
@@ -6951,7 +6955,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T14:08:03.021397634"
+        "timestamp": "2026-09-17T16:56:29.753826204"
     },
     "-profile test --skip_cutadapt --skip_snpeff": {
         "content": [
@@ -6966,6 +6970,9 @@
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_FILTER": {
+                    "bcftools": "1.23.1"
+                },
+                "BCFTOOLS_INDEX": {
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_SORT": {
@@ -7001,7 +7008,7 @@
                     "python": "3.13.2"
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -7033,6 +7040,10 @@
                 "GUNZIP_SCAFFOLDS": {
                     "gunzip": 1.13
                 },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
+                },
                 "IVAR_TRIM": {
                     "ivar": "1.4.4"
                 },
@@ -7059,10 +7070,10 @@
                     "mosdepth": "0.3.14"
                 },
                 "PANGOLIN_RUN": {
-                    "pangolin": "4.3.1"
+                    "pangolin": 4.4
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_AMPLICON": {
                     "r-base": "4.2.0"
@@ -7077,28 +7088,25 @@
                     "sed": 4.9
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SPADES": {
                     "spades": "4.1.0"
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -7812,9 +7820,9 @@
                 "SAMPLE3_SE.contigs.fa.gz:md5,029653d784220730de464f00d7cb7f5f",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
                 "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
                 "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc",
@@ -7826,7 +7834,7 @@
                 "bcftools_stats_vqc_Count_Transversions.yaml:md5,c2b352ef9c37d443e29f2d9c1ababcb4",
                 "bowtie2_pe_plot.yaml:md5,10cecac4c6aa438ab9438b64e2817afd",
                 "bowtie2_se_plot.yaml:md5,6a04c9b4fceae4a74aeb95bf9f7d1e01",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -7867,15 +7875,15 @@
                 "multiqc_bcftools_stats.yaml:md5,c7402841eba05c426d0375ee1b0c6740",
                 "multiqc_bowtie2.yaml:md5,5060f240b4210f8cf0cc7718748a6f9b",
                 "multiqc_citations.yaml:md5,795514ecb8a4697eb3e818ef2338594b",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_ivar_variants.yaml:md5,22a1b3904671b16aace3b5f73a907614",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_nextclade_clade.yaml:md5,15ccc4848ada72c96c9b39606517a9bb",
-                "multiqc_pangolin.yaml:md5,fc7af8a7b55ba7b484757b0799208301",
+                "multiqc_pangolin.yaml:md5,0827c1034f39b03efb643dafbcde39ae",
                 "multiqc_quast_quast_spades.yaml:md5,1b0db995e540c5cd1ae60aa6d9d259b4",
                 "multiqc_quast_quast_variants.yaml:md5,1465f3600b1643497310946af66d0618",
-                "pangolin_run_table.yaml:md5,16f4616675164243c67439101defe45e",
+                "pangolin_run_table.yaml:md5,5a009661193e3c3dc9620af31069d198",
                 "SAMPLE1_PE.bowtie2.log:md5,20e68f8b6b41da0dffeccbb49e867be2",
                 "SAMPLE1_PE.ivar_trim.ivar.log:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "SAMPLE2_PE.bowtie2.log:md5,2cc188d8003e49d74567b2f04c2f34b2",
@@ -7897,22 +7905,22 @@
                 "SAMPLE3_SE.mosdepth.summary.txt:md5,27f7f5f8a2caef36dcc1dd504dd4f581",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.flagstat:md5,175a8826b10890b304fd7a30335b98a0",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.idxstats:md5,461869ebfe660675af9e5b2b30bec52c",
-                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,cd580a5ea6402dbc30cbf6f1d7ca8a49",
+                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,1a70745269d81ff3cbba13fb44b9caa7",
                 "SAMPLE1_PE.sorted.bam.flagstat:md5,b71fa417d19a1c64e53a7a4bbb9a66a3",
                 "SAMPLE1_PE.sorted.bam.idxstats:md5,d3f51babb7c8757456be63c9b75ee3d0",
-                "SAMPLE1_PE.sorted.bam.stats:md5,af3b213b55439503167be5c552675999",
+                "SAMPLE1_PE.sorted.bam.stats:md5,9d0c1cf989168ab817626684b8ba0aff",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.flagstat:md5,47616687e389589e8fe1d596bbe4a332",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.idxstats:md5,5f9def3fdb732d1da43650235b5e00e2",
-                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,1fb3b3364c0c1bd3349ce9f512b68dae",
+                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,c831719b0e9f1b74cdd525433b01a108",
                 "SAMPLE2_PE.sorted.bam.flagstat:md5,041ab8f42dae5f155ee9d7d2a2f23442",
                 "SAMPLE2_PE.sorted.bam.idxstats:md5,72e323cef6b90aea7741eb88cfa843ee",
-                "SAMPLE2_PE.sorted.bam.stats:md5,aaf6ffaaa8272bc2bf92484d3be077d2",
+                "SAMPLE2_PE.sorted.bam.stats:md5,32bfb3d967b100796d1a132421815ab9",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.flagstat:md5,6a2d2647c43aa48506d8d1536e498dc5",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.idxstats:md5,6be1ee32c50c77d6a853f02cd42307ba",
-                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,398a4f332098cabfdd7aeb71f067b038",
+                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,31560fde30eae4f0559c7ee2c3028276",
                 "SAMPLE3_SE.sorted.bam.flagstat:md5,0ae9908cf4840b0ec4ae74afbd395244",
                 "SAMPLE3_SE.sorted.bam.idxstats:md5,184d8ad417ee4242377f18880675165b",
-                "SAMPLE3_SE.sorted.bam.stats:md5,f017c5a5b5921846bd999b332ba0aecf",
+                "SAMPLE3_SE.sorted.bam.stats:md5,f5f529e4ce6e707ab9b37b5ff54b558a",
                 "SAMPLE1_PE.tsv:md5,d11ff38b97ad069639067037f2f00e6a",
                 "SAMPLE2_PE.tsv:md5,81285393974428d2fed60b398aa9a6d7",
                 "SAMPLE3_SE.tsv:md5,4ae3bc88a5952e78344d98d46fecdd55",
@@ -7928,12 +7936,12 @@
                 "SAMPLE2_PE.consensus.base_counts.tsv:md5,849837547485915dd5cb4efa7c8cfe9d",
                 "SAMPLE3_SE.consensus.N_run.tsv:md5,8fc26eab2393cfde6daf0212d18d58f9",
                 "SAMPLE3_SE.consensus.base_counts.tsv:md5,ecdec402d1e7a094dd26c3d2b906e690",
-                "SAMPLE1_PE.csv:md5,2d907beef116676a177200301bca4e7c",
-                "SAMPLE2_PE.csv:md5,610fb1a8df7fe7e18598237ebe9db36a",
-                "SAMPLE3_SE.csv:md5,1f129eab464674e6b2c404c809d0146b",
-                "SAMPLE1_PE.pangolin.csv:md5,93ad34cfc22d3c7a1bb9fe60c51e166f",
-                "SAMPLE2_PE.pangolin.csv:md5,151e8da109924024f0501e44c1798592",
-                "SAMPLE3_SE.pangolin.csv:md5,677f4e275cfb91cf5948d57a3f717412",
+                "SAMPLE1_PE.csv:md5,5e40958478d114bc16af8f121eabb7dd",
+                "SAMPLE2_PE.csv:md5,4d0aa4cf7bf41f4023ca6ec9a29411cc",
+                "SAMPLE3_SE.csv:md5,5208a92c30cfb23996cf6689cbb0a4ab",
+                "SAMPLE1_PE.pangolin.csv:md5,f86666cdf29f625ff8650d8ce7bc69cc",
+                "SAMPLE2_PE.pangolin.csv:md5,2769897eb0ad2cad9e00eab1e7a45e9f",
+                "SAMPLE3_SE.pangolin.csv:md5,9fee48a23dd3799f5c03f79ce0d633f6",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SAMPLE1_PE.variant_counts.log:md5,dca67b678c8fb1ff819c6e2549bd526d",
                 "SAMPLE2_PE.variant_counts.log:md5,3e36a199838f298a5db0e86f360d394e",
@@ -7944,7 +7952,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T13:59:20.622241357"
+        "timestamp": "2026-09-17T16:48:31.518064949"
     },
     "-profile test --primer_set_version 5.3.2": {
         "content": [
@@ -7959,6 +7967,9 @@
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_FILTER": {
+                    "bcftools": "1.23.1"
+                },
+                "BCFTOOLS_INDEX": {
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_QUERY": {
@@ -8003,7 +8014,7 @@
                     "cutadapt": 5.2
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -8038,6 +8049,10 @@
                 "GUNZIP_SCAFFOLDS": {
                     "gunzip": 1.13
                 },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
+                },
                 "IVAR_TRIM": {
                     "ivar": "1.4.4"
                 },
@@ -8067,10 +8082,10 @@
                     "mosdepth": "0.3.14"
                 },
                 "PANGOLIN_RUN": {
-                    "pangolin": "4.3.1"
+                    "pangolin": 4.4
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_AMPLICON": {
                     "r-base": "4.2.0"
@@ -8088,22 +8103,22 @@
                     "sed": 4.9
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -8116,12 +8131,6 @@
                 },
                 "SPADES": {
                     "spades": "4.1.0"
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -8884,9 +8893,9 @@
                 "SAMPLE3_SE.contigs.fa.gz:md5,9e6ad3bcfdd4403823d2cdb970df0bb4",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
                 "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
                 "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc",
@@ -8901,7 +8910,7 @@
                 "cutadapt_filtered_reads_plot.yaml:md5,c7be1592cf1bf853f0bb420faaa287c7",
                 "cutadapt_trimmed_sequences_plot_default_Counts.yaml:md5,b70e82e7a1635954b92fccb98860b9b3",
                 "cutadapt_trimmed_sequences_plot_default_Obs_Exp.yaml:md5,caea60c63c19abc5c4011e5a355971a6",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -8943,16 +8952,16 @@
                 "multiqc_bowtie2.yaml:md5,5060f240b4210f8cf0cc7718748a6f9b",
                 "multiqc_citations.yaml:md5,6604be3c186cd954ce9a4bdd68c0aa8c",
                 "multiqc_cutadapt.yaml:md5,7e7094d1ac389587d5649689cbd77710",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_ivar_variants.yaml:md5,22a1b3904671b16aace3b5f73a907614",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_nextclade_clade.yaml:md5,15ccc4848ada72c96c9b39606517a9bb",
-                "multiqc_pangolin.yaml:md5,140a2853041a2ddc25a867a59f1ea970",
+                "multiqc_pangolin.yaml:md5,5f84b58fecd0eef6f97e3fd42bcefaa3",
                 "multiqc_quast_quast_spades.yaml:md5,f8d4cc6d02791961c2b29dd39837d029",
                 "multiqc_quast_quast_variants.yaml:md5,48261ab0bedc1432be6bd9b9e717701b",
                 "multiqc_snpeff.yaml:md5,42d92c43058c25ce03620a2add521006",
-                "pangolin_run_table.yaml:md5,1f8e51fe6f59f0fbdbd9472813978765",
+                "pangolin_run_table.yaml:md5,898b10ac33b85a3ae2f7f09f77f1804c",
                 "snpeff_effects.yaml:md5,43533ac29b261ab7132c69c7034648ad",
                 "snpeff_variant_effects_class.yaml:md5,5f31369f0e087d4fe7eddc14d908f11f",
                 "snpeff_variant_effects_impact.yaml:md5,ab3b8b418a47185b61d19a06f2a8e846",
@@ -8978,22 +8987,22 @@
                 "SAMPLE3_SE.mosdepth.summary.txt:md5,ff257348b46918288bbcad24c2044fdb",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.flagstat:md5,a760592f20226270f1b51f18acc98d3c",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.idxstats:md5,cc911ee77a983a917dcaa3ec0722c340",
-                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,97a1d93459a3f3f88fd3dc27350025f9",
+                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,bef790ac676308b69a7189f6d367178c",
                 "SAMPLE1_PE.sorted.bam.flagstat:md5,b71fa417d19a1c64e53a7a4bbb9a66a3",
                 "SAMPLE1_PE.sorted.bam.idxstats:md5,d3f51babb7c8757456be63c9b75ee3d0",
-                "SAMPLE1_PE.sorted.bam.stats:md5,af3b213b55439503167be5c552675999",
+                "SAMPLE1_PE.sorted.bam.stats:md5,9d0c1cf989168ab817626684b8ba0aff",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.flagstat:md5,75092e902570fb73ef8c17c7bffb30c2",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.idxstats:md5,a38540e2b4b2fb0cdb9ca5ef3fc446cf",
-                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,7960827f644267ae490df2f88ac0bca0",
+                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,154b649ec5218a9ab767386fec4793ce",
                 "SAMPLE2_PE.sorted.bam.flagstat:md5,041ab8f42dae5f155ee9d7d2a2f23442",
                 "SAMPLE2_PE.sorted.bam.idxstats:md5,72e323cef6b90aea7741eb88cfa843ee",
-                "SAMPLE2_PE.sorted.bam.stats:md5,aaf6ffaaa8272bc2bf92484d3be077d2",
+                "SAMPLE2_PE.sorted.bam.stats:md5,32bfb3d967b100796d1a132421815ab9",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.flagstat:md5,4532ec3b721e064f3f0843c7e1f5b35d",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.idxstats:md5,29d89d0ada7cd3632154905d9a7bb159",
-                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,8057b0a97f297a4490e59c1278ee3cd4",
+                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,bf50be6c54a7aefbbcf940a77467d60f",
                 "SAMPLE3_SE.sorted.bam.flagstat:md5,0ae9908cf4840b0ec4ae74afbd395244",
                 "SAMPLE3_SE.sorted.bam.idxstats:md5,184d8ad417ee4242377f18880675165b",
-                "SAMPLE3_SE.sorted.bam.stats:md5,f017c5a5b5921846bd999b332ba0aecf",
+                "SAMPLE3_SE.sorted.bam.stats:md5,f5f529e4ce6e707ab9b37b5ff54b558a",
                 "SAMPLE1_PE.tsv:md5,8abe3886a53a19bcfde3f5fedbbabe8b",
                 "SAMPLE2_PE.tsv:md5,9e130c5555aa88d89414137aa9ad89bc",
                 "SAMPLE3_SE.tsv:md5,a345cf2747419c5eeadb423bbdb3adc4",
@@ -9009,12 +9018,12 @@
                 "SAMPLE2_PE.consensus.base_counts.tsv:md5,2d9625c7c9030562cd9f5736282d4caa",
                 "SAMPLE3_SE.consensus.N_run.tsv:md5,0b51bafd294dec970f070f99170ab6e8",
                 "SAMPLE3_SE.consensus.base_counts.tsv:md5,2c543b9306bbb3e9a59a6d998259168e",
-                "SAMPLE1_PE.csv:md5,aef5bb094e2094de7302ee8b230a30d6",
-                "SAMPLE2_PE.csv:md5,a7eb39eb69cf02953a7c44e51642baa4",
-                "SAMPLE3_SE.csv:md5,a3ad777cf658dcd7e11484574fb4d4fe",
-                "SAMPLE1_PE.pangolin.csv:md5,93ad34cfc22d3c7a1bb9fe60c51e166f",
-                "SAMPLE2_PE.pangolin.csv:md5,65c41d6dd4d0bdb0e720227883142c20",
-                "SAMPLE3_SE.pangolin.csv:md5,677f4e275cfb91cf5948d57a3f717412",
+                "SAMPLE1_PE.csv:md5,b752351d004bf1539dc0acd7115daaa0",
+                "SAMPLE2_PE.csv:md5,da0f9f6e08a9ba71eff6ff7483a1f9e5",
+                "SAMPLE3_SE.csv:md5,7e018a2eb93a302920c484a4330da78b",
+                "SAMPLE1_PE.pangolin.csv:md5,f86666cdf29f625ff8650d8ce7bc69cc",
+                "SAMPLE2_PE.pangolin.csv:md5,e9512a35bf593aedcfd2b89f358f7c48",
+                "SAMPLE3_SE.pangolin.csv:md5,9fee48a23dd3799f5c03f79ce0d633f6",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SAMPLE1_PE.variant_counts.log:md5,dca67b678c8fb1ff819c6e2549bd526d",
                 "SAMPLE2_PE.variant_counts.log:md5,3e36a199838f298a5db0e86f360d394e",
@@ -9032,7 +9041,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T12:38:39.210124634"
+        "timestamp": "2026-09-17T17:50:03.677291878"
     },
     "-profile test --skip_variants": {
         "content": [
@@ -9059,7 +9068,7 @@
                     "cutadapt": 5.2
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -9096,7 +9105,7 @@
                     "quast": "5.3.0"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SPADES": {
                     "spades": "4.1.0"
@@ -9542,16 +9551,16 @@
                 "SAMPLE3_SE.contigs.fa.gz:md5,deea55f084df8fc24e3e70662b59af12",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
                 "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
                 "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc",
                 "cutadapt_filtered_reads_plot.yaml:md5,d6d8c27798e7ed6434cb96c19847a148",
                 "cutadapt_trimmed_sequences_plot_default_Counts.yaml:md5,68220582d40423ff8e60ad0d6705d795",
                 "cutadapt_trimmed_sequences_plot_default_Obs_Exp.yaml:md5,403f19ed34112994146dfb1f97c5a8a1",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -9585,7 +9594,7 @@
                 "kraken-top-n-plot_Unclassified.yaml:md5,ba45c76e7733a0c21151bcea30cf2598",
                 "multiqc_citations.yaml:md5,38fb6cdab5d5ddca3a95c8c2522c80c6",
                 "multiqc_cutadapt.yaml:md5,2471bb372409a815d6e869a03daea482",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_quast_quast_spades.yaml:md5,cb9b2122a8d6fd4aef51da97bdc5180d"
@@ -9595,7 +9604,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T13:50:19.546320331"
+        "timestamp": "2026-09-17T16:40:38.744968115"
     },
     "-profile test --consensus_caller ivar": {
         "content": [
@@ -9642,7 +9651,7 @@
                     "cutadapt": 5.2
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -9677,6 +9686,10 @@
                 "GUNZIP_SCAFFOLDS": {
                     "gunzip": 1.13
                 },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
+                },
                 "IVAR_CONSENSUS": {
                     "ivar": "1.4.4"
                 },
@@ -9705,10 +9718,10 @@
                     "mosdepth": "0.3.14"
                 },
                 "PANGOLIN_RUN": {
-                    "pangolin": "4.3.1"
+                    "pangolin": 4.4
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_AMPLICON": {
                     "r-base": "4.2.0"
@@ -9723,22 +9736,22 @@
                     "quast": "5.3.0"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -9751,12 +9764,6 @@
                 },
                 "SPADES": {
                     "spades": "4.1.0"
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -10525,9 +10532,9 @@
                 "SAMPLE3_SE.contigs.fa.gz:md5,deea55f084df8fc24e3e70662b59af12",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
                 "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
                 "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc",
@@ -10542,7 +10549,7 @@
                 "cutadapt_filtered_reads_plot.yaml:md5,d6d8c27798e7ed6434cb96c19847a148",
                 "cutadapt_trimmed_sequences_plot_default_Counts.yaml:md5,68220582d40423ff8e60ad0d6705d795",
                 "cutadapt_trimmed_sequences_plot_default_Obs_Exp.yaml:md5,403f19ed34112994146dfb1f97c5a8a1",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -10584,16 +10591,16 @@
                 "multiqc_bowtie2.yaml:md5,5060f240b4210f8cf0cc7718748a6f9b",
                 "multiqc_citations.yaml:md5,6604be3c186cd954ce9a4bdd68c0aa8c",
                 "multiqc_cutadapt.yaml:md5,2471bb372409a815d6e869a03daea482",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_ivar_variants.yaml:md5,22a1b3904671b16aace3b5f73a907614",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_nextclade_clade.yaml:md5,15ccc4848ada72c96c9b39606517a9bb",
-                "multiqc_pangolin.yaml:md5,e77a283a3337c458b43e58851628137f",
+                "multiqc_pangolin.yaml:md5,9dfbcd84c0b04bc2a734a13d472ed71e",
                 "multiqc_quast_quast_spades.yaml:md5,cb9b2122a8d6fd4aef51da97bdc5180d",
                 "multiqc_quast_quast_variants.yaml:md5,a8f0422aaf69f0d88d7c82645949a2fa",
                 "multiqc_snpeff.yaml:md5,42d92c43058c25ce03620a2add521006",
-                "pangolin_run_table.yaml:md5,610b82c6a5f938eac0b896db2887e0ae",
+                "pangolin_run_table.yaml:md5,2007b520b1647e38dbee0c855b4b5fa4",
                 "snpeff_effects.yaml:md5,43533ac29b261ab7132c69c7034648ad",
                 "snpeff_variant_effects_class.yaml:md5,5f31369f0e087d4fe7eddc14d908f11f",
                 "snpeff_variant_effects_impact.yaml:md5,ab3b8b418a47185b61d19a06f2a8e846",
@@ -10619,22 +10626,22 @@
                 "SAMPLE3_SE.mosdepth.summary.txt:md5,27f7f5f8a2caef36dcc1dd504dd4f581",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.flagstat:md5,175a8826b10890b304fd7a30335b98a0",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.idxstats:md5,461869ebfe660675af9e5b2b30bec52c",
-                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,cd580a5ea6402dbc30cbf6f1d7ca8a49",
+                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,1a70745269d81ff3cbba13fb44b9caa7",
                 "SAMPLE1_PE.sorted.bam.flagstat:md5,b71fa417d19a1c64e53a7a4bbb9a66a3",
                 "SAMPLE1_PE.sorted.bam.idxstats:md5,d3f51babb7c8757456be63c9b75ee3d0",
-                "SAMPLE1_PE.sorted.bam.stats:md5,af3b213b55439503167be5c552675999",
+                "SAMPLE1_PE.sorted.bam.stats:md5,9d0c1cf989168ab817626684b8ba0aff",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.flagstat:md5,47616687e389589e8fe1d596bbe4a332",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.idxstats:md5,5f9def3fdb732d1da43650235b5e00e2",
-                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,1fb3b3364c0c1bd3349ce9f512b68dae",
+                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,c831719b0e9f1b74cdd525433b01a108",
                 "SAMPLE2_PE.sorted.bam.flagstat:md5,041ab8f42dae5f155ee9d7d2a2f23442",
                 "SAMPLE2_PE.sorted.bam.idxstats:md5,72e323cef6b90aea7741eb88cfa843ee",
-                "SAMPLE2_PE.sorted.bam.stats:md5,aaf6ffaaa8272bc2bf92484d3be077d2",
+                "SAMPLE2_PE.sorted.bam.stats:md5,32bfb3d967b100796d1a132421815ab9",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.flagstat:md5,6a2d2647c43aa48506d8d1536e498dc5",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.idxstats:md5,6be1ee32c50c77d6a853f02cd42307ba",
-                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,398a4f332098cabfdd7aeb71f067b038",
+                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,31560fde30eae4f0559c7ee2c3028276",
                 "SAMPLE3_SE.sorted.bam.flagstat:md5,0ae9908cf4840b0ec4ae74afbd395244",
                 "SAMPLE3_SE.sorted.bam.idxstats:md5,184d8ad417ee4242377f18880675165b",
-                "SAMPLE3_SE.sorted.bam.stats:md5,f017c5a5b5921846bd999b332ba0aecf",
+                "SAMPLE3_SE.sorted.bam.stats:md5,f5f529e4ce6e707ab9b37b5ff54b558a",
                 "SAMPLE1_PE.tsv:md5,d11ff38b97ad069639067037f2f00e6a",
                 "SAMPLE2_PE.tsv:md5,81285393974428d2fed60b398aa9a6d7",
                 "SAMPLE3_SE.tsv:md5,4ae3bc88a5952e78344d98d46fecdd55",
@@ -10650,12 +10657,12 @@
                 "SAMPLE2_PE.consensus.base_counts.tsv:md5,5866fd117630fa6af0a1491c0e2c8893",
                 "SAMPLE3_SE.consensus.N_run.tsv:md5,aea98ed2c53723c984486525de3cac6f",
                 "SAMPLE3_SE.consensus.base_counts.tsv:md5,83a4a3acc605baf224a2a74b9bf435c7",
-                "SAMPLE1_PE.csv:md5,96932d121f6b0af5a3eb039a009046a2",
-                "SAMPLE2_PE.csv:md5,52acedb39ac55afd71b4ece2b8146e8e",
-                "SAMPLE3_SE.csv:md5,74b13ff6f79fc1871a9a4718eb63b9e4",
-                "SAMPLE1_PE.pangolin.csv:md5,0963ba15d2b4ad4e205968abc814dd31",
-                "SAMPLE2_PE.pangolin.csv:md5,e2dc755865027ff88b0d0fcc11b4ef05",
-                "SAMPLE3_SE.pangolin.csv:md5,a7230337a83859b01b045067685f5cfa",
+                "SAMPLE1_PE.csv:md5,8814b9da347323c344e03af6110016ad",
+                "SAMPLE2_PE.csv:md5,0ec5a13840c5283872a2507cab47862c",
+                "SAMPLE3_SE.csv:md5,9aab100a31611b5c98c0be8670f17fa9",
+                "SAMPLE1_PE.pangolin.csv:md5,05e4940bf602aab91a18905109cc23d9",
+                "SAMPLE2_PE.pangolin.csv:md5,96f1815aefcc805c30d4c2fe911729bb",
+                "SAMPLE3_SE.pangolin.csv:md5,bee429498943fd5c471536eebec25281",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SAMPLE1_PE.variant_counts.log:md5,dca67b678c8fb1ff819c6e2549bd526d",
                 "SAMPLE2_PE.variant_counts.log:md5,3e36a199838f298a5db0e86f360d394e",
@@ -10673,7 +10680,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T11:08:53.247140018"
+        "timestamp": "2026-09-17T16:23:39.885956821"
     },
     "-profile test --skip_assembly": {
         "content": [
@@ -10682,6 +10689,9 @@
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_FILTER": {
+                    "bcftools": "1.23.1"
+                },
+                "BCFTOOLS_INDEX": {
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_QUERY": {
@@ -10714,7 +10724,7 @@
                     "python": "3.13.2"
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -10736,6 +10746,10 @@
                 },
                 "GUNZIP_GFF": {
                     "gunzip": 1.13
+                },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
                 },
                 "IVAR_TRIM": {
                     "ivar": "1.4.4"
@@ -10766,10 +10780,10 @@
                     "mosdepth": "0.3.14"
                 },
                 "PANGOLIN_RUN": {
-                    "pangolin": "4.3.1"
+                    "pangolin": 4.4
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_AMPLICON": {
                     "r-base": "4.2.0"
@@ -10784,22 +10798,22 @@
                     "sed": 4.9
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -10809,12 +10823,6 @@
                 },
                 "SNPSIFT_EXTRACTFIELDS": {
                     "snpsift": 4.3
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNTAR_KRAKEN2_DB": {
                     "untar": 1.34
@@ -11236,9 +11244,9 @@
                 "variants/ivar/variants_long_table.csv"
             ],
             [
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
                 "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
                 "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc",
@@ -11250,7 +11258,7 @@
                 "bcftools_stats_vqc_Count_Transversions.yaml:md5,c2b352ef9c37d443e29f2d9c1ababcb4",
                 "bowtie2_pe_plot.yaml:md5,10cecac4c6aa438ab9438b64e2817afd",
                 "bowtie2_se_plot.yaml:md5,6a04c9b4fceae4a74aeb95bf9f7d1e01",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -11291,15 +11299,15 @@
                 "multiqc_bcftools_stats.yaml:md5,c7402841eba05c426d0375ee1b0c6740",
                 "multiqc_bowtie2.yaml:md5,5060f240b4210f8cf0cc7718748a6f9b",
                 "multiqc_citations.yaml:md5,99f30b0065520c10671a0c6c4b86d39d",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_ivar_variants.yaml:md5,22a1b3904671b16aace3b5f73a907614",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_nextclade_clade.yaml:md5,15ccc4848ada72c96c9b39606517a9bb",
-                "multiqc_pangolin.yaml:md5,fc7af8a7b55ba7b484757b0799208301",
+                "multiqc_pangolin.yaml:md5,0827c1034f39b03efb643dafbcde39ae",
                 "multiqc_quast_quast_variants.yaml:md5,1465f3600b1643497310946af66d0618",
                 "multiqc_snpeff.yaml:md5,42d92c43058c25ce03620a2add521006",
-                "pangolin_run_table.yaml:md5,16f4616675164243c67439101defe45e",
+                "pangolin_run_table.yaml:md5,5a009661193e3c3dc9620af31069d198",
                 "snpeff_effects.yaml:md5,43533ac29b261ab7132c69c7034648ad",
                 "snpeff_variant_effects_class.yaml:md5,5f31369f0e087d4fe7eddc14d908f11f",
                 "snpeff_variant_effects_impact.yaml:md5,ab3b8b418a47185b61d19a06f2a8e846",
@@ -11325,22 +11333,22 @@
                 "SAMPLE3_SE.mosdepth.summary.txt:md5,27f7f5f8a2caef36dcc1dd504dd4f581",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.flagstat:md5,175a8826b10890b304fd7a30335b98a0",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.idxstats:md5,461869ebfe660675af9e5b2b30bec52c",
-                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,cd580a5ea6402dbc30cbf6f1d7ca8a49",
+                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,1a70745269d81ff3cbba13fb44b9caa7",
                 "SAMPLE1_PE.sorted.bam.flagstat:md5,b71fa417d19a1c64e53a7a4bbb9a66a3",
                 "SAMPLE1_PE.sorted.bam.idxstats:md5,d3f51babb7c8757456be63c9b75ee3d0",
-                "SAMPLE1_PE.sorted.bam.stats:md5,af3b213b55439503167be5c552675999",
+                "SAMPLE1_PE.sorted.bam.stats:md5,9d0c1cf989168ab817626684b8ba0aff",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.flagstat:md5,47616687e389589e8fe1d596bbe4a332",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.idxstats:md5,5f9def3fdb732d1da43650235b5e00e2",
-                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,1fb3b3364c0c1bd3349ce9f512b68dae",
+                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,c831719b0e9f1b74cdd525433b01a108",
                 "SAMPLE2_PE.sorted.bam.flagstat:md5,041ab8f42dae5f155ee9d7d2a2f23442",
                 "SAMPLE2_PE.sorted.bam.idxstats:md5,72e323cef6b90aea7741eb88cfa843ee",
-                "SAMPLE2_PE.sorted.bam.stats:md5,aaf6ffaaa8272bc2bf92484d3be077d2",
+                "SAMPLE2_PE.sorted.bam.stats:md5,32bfb3d967b100796d1a132421815ab9",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.flagstat:md5,6a2d2647c43aa48506d8d1536e498dc5",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.idxstats:md5,6be1ee32c50c77d6a853f02cd42307ba",
-                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,398a4f332098cabfdd7aeb71f067b038",
+                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,31560fde30eae4f0559c7ee2c3028276",
                 "SAMPLE3_SE.sorted.bam.flagstat:md5,0ae9908cf4840b0ec4ae74afbd395244",
                 "SAMPLE3_SE.sorted.bam.idxstats:md5,184d8ad417ee4242377f18880675165b",
-                "SAMPLE3_SE.sorted.bam.stats:md5,f017c5a5b5921846bd999b332ba0aecf",
+                "SAMPLE3_SE.sorted.bam.stats:md5,f5f529e4ce6e707ab9b37b5ff54b558a",
                 "SAMPLE1_PE.tsv:md5,d11ff38b97ad069639067037f2f00e6a",
                 "SAMPLE2_PE.tsv:md5,81285393974428d2fed60b398aa9a6d7",
                 "SAMPLE3_SE.tsv:md5,4ae3bc88a5952e78344d98d46fecdd55",
@@ -11356,12 +11364,12 @@
                 "SAMPLE2_PE.consensus.base_counts.tsv:md5,849837547485915dd5cb4efa7c8cfe9d",
                 "SAMPLE3_SE.consensus.N_run.tsv:md5,8fc26eab2393cfde6daf0212d18d58f9",
                 "SAMPLE3_SE.consensus.base_counts.tsv:md5,ecdec402d1e7a094dd26c3d2b906e690",
-                "SAMPLE1_PE.csv:md5,2d907beef116676a177200301bca4e7c",
-                "SAMPLE2_PE.csv:md5,610fb1a8df7fe7e18598237ebe9db36a",
-                "SAMPLE3_SE.csv:md5,1f129eab464674e6b2c404c809d0146b",
-                "SAMPLE1_PE.pangolin.csv:md5,93ad34cfc22d3c7a1bb9fe60c51e166f",
-                "SAMPLE2_PE.pangolin.csv:md5,151e8da109924024f0501e44c1798592",
-                "SAMPLE3_SE.pangolin.csv:md5,677f4e275cfb91cf5948d57a3f717412",
+                "SAMPLE1_PE.csv:md5,5e40958478d114bc16af8f121eabb7dd",
+                "SAMPLE2_PE.csv:md5,4d0aa4cf7bf41f4023ca6ec9a29411cc",
+                "SAMPLE3_SE.csv:md5,5208a92c30cfb23996cf6689cbb0a4ab",
+                "SAMPLE1_PE.pangolin.csv:md5,f86666cdf29f625ff8650d8ce7bc69cc",
+                "SAMPLE2_PE.pangolin.csv:md5,2769897eb0ad2cad9e00eab1e7a45e9f",
+                "SAMPLE3_SE.pangolin.csv:md5,9fee48a23dd3799f5c03f79ce0d633f6",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SAMPLE1_PE.variant_counts.log:md5,dca67b678c8fb1ff819c6e2549bd526d",
                 "SAMPLE2_PE.variant_counts.log:md5,3e36a199838f298a5db0e86f360d394e",
@@ -11379,7 +11387,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T14:14:06.343590106"
+        "timestamp": "2026-09-17T17:02:16.740213369"
     },
     "-profile test --spades_mode corona --skip_variants": {
         "content": [
@@ -11406,7 +11414,7 @@
                     "cutadapt": 5.2
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -11443,7 +11451,7 @@
                     "quast": "5.3.0"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SPADES": {
                     "spades": "4.1.0"
@@ -11879,16 +11887,16 @@
             [
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
                 "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
                 "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc",
                 "cutadapt_filtered_reads_plot.yaml:md5,d6d8c27798e7ed6434cb96c19847a148",
                 "cutadapt_trimmed_sequences_plot_default_Counts.yaml:md5,68220582d40423ff8e60ad0d6705d795",
                 "cutadapt_trimmed_sequences_plot_default_Obs_Exp.yaml:md5,403f19ed34112994146dfb1f97c5a8a1",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -11922,7 +11930,7 @@
                 "kraken-top-n-plot_Unclassified.yaml:md5,ba45c76e7733a0c21151bcea30cf2598",
                 "multiqc_citations.yaml:md5,38fb6cdab5d5ddca3a95c8c2522c80c6",
                 "multiqc_cutadapt.yaml:md5,2471bb372409a815d6e869a03daea482",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_quast_quast_spades.yaml:md5,ec740ef0ff76eeada46968abb1850534"
@@ -11932,7 +11940,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T11:50:39.38436259"
+        "timestamp": "2026-09-17T17:06:17.618288919"
     },
     "-profile test --bowtie2_index 'https://github.com/nf-core/test-datasets/raw/refs/heads/viralrecon/genome/MN908947.3/GCA_009858895.3_ASM985889v3_genomic.200409.bt2.index.tar.gz'": {
         "content": [
@@ -11947,6 +11955,9 @@
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_FILTER": {
+                    "bcftools": "1.23.1"
+                },
+                "BCFTOOLS_INDEX": {
                     "bcftools": "1.23.1"
                 },
                 "BCFTOOLS_QUERY": {
@@ -11988,7 +11999,7 @@
                     "cutadapt": 5.2
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC": {
                     "fastqc": "0.12.1"
@@ -12023,6 +12034,10 @@
                 "GUNZIP_SCAFFOLDS": {
                     "gunzip": 1.13
                 },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
+                },
                 "IVAR_TRIM": {
                     "ivar": "1.4.4"
                 },
@@ -12052,10 +12067,10 @@
                     "mosdepth": "0.3.14"
                 },
                 "PANGOLIN_RUN": {
-                    "pangolin": "4.3.1"
+                    "pangolin": 4.4
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_AMPLICON": {
                     "r-base": "4.2.0"
@@ -12073,22 +12088,22 @@
                     "sed": 4.9
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -12101,12 +12116,6 @@
                 },
                 "SPADES": {
                     "spades": "4.1.0"
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -12872,9 +12881,9 @@
                 "SAMPLE3_SE.contigs.fa.gz:md5,deea55f084df8fc24e3e70662b59af12",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SAMPLE1_PE.fastp.json:md5,b10cb1ed47642e828e9ec0d9decfcc0f",
-                "SAMPLE2_PE.fastp.json:md5,b341616a9d1d07fd0be631cec3c80770",
-                "SAMPLE3_SE.fastp.json:md5,3632ee68ad09ff7a0101cddc4de9bf16",
+                "SAMPLE1_PE.fastp.json:md5,5ec0ea70b0bbea4912b3ec14944b4dbb",
+                "SAMPLE2_PE.fastp.json:md5,a8953bc0814a2f5e956cc735229993d9",
+                "SAMPLE3_SE.fastp.json:md5,bcdf83ed5fabc3c5c0453e39c3b4260f",
                 "SAMPLE1_PE.kraken2.report.txt:md5,fcf2d80b7af884ba09932056fc47601a",
                 "SAMPLE2_PE.kraken2.report.txt:md5,7d3f755a8ebf2e9280226fde73306e79",
                 "SAMPLE3_SE.kraken2.report.txt:md5,a880da38f8777aa24c9b557dc24ebfbc",
@@ -12889,7 +12898,7 @@
                 "cutadapt_filtered_reads_plot.yaml:md5,d6d8c27798e7ed6434cb96c19847a148",
                 "cutadapt_trimmed_sequences_plot_default_Counts.yaml:md5,68220582d40423ff8e60ad0d6705d795",
                 "cutadapt_trimmed_sequences_plot_default_Obs_Exp.yaml:md5,403f19ed34112994146dfb1f97c5a8a1",
-                "fastp-insert-size-plot.yaml:md5,3018ee9a079b9d0c1e04408995d06c42",
+                "fastp-insert-size-plot.yaml:md5,f9505c3f90f5e4074f4bda5eab42599e",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,250f14349a47b34433075ec694abc922",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,43147980d3994ca83b27b5abf05b93f0",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,901bdb0690cff43ab82b6a5caa545eff",
@@ -12931,16 +12940,16 @@
                 "multiqc_bowtie2.yaml:md5,5060f240b4210f8cf0cc7718748a6f9b",
                 "multiqc_citations.yaml:md5,6604be3c186cd954ce9a4bdd68c0aa8c",
                 "multiqc_cutadapt.yaml:md5,2471bb372409a815d6e869a03daea482",
-                "multiqc_fastp.yaml:md5,0258b4d2a11a2aa61ca60bf9e303f859",
+                "multiqc_fastp.yaml:md5,48d2641d5626551ccaca847f31304ca2",
                 "multiqc_fastqc.yaml:md5,7b74e5229b298fac53ec73b7194bb2f0",
                 "multiqc_ivar_variants.yaml:md5,22a1b3904671b16aace3b5f73a907614",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_nextclade_clade.yaml:md5,15ccc4848ada72c96c9b39606517a9bb",
-                "multiqc_pangolin.yaml:md5,fc7af8a7b55ba7b484757b0799208301",
+                "multiqc_pangolin.yaml:md5,0827c1034f39b03efb643dafbcde39ae",
                 "multiqc_quast_quast_spades.yaml:md5,cb9b2122a8d6fd4aef51da97bdc5180d",
                 "multiqc_quast_quast_variants.yaml:md5,1465f3600b1643497310946af66d0618",
                 "multiqc_snpeff.yaml:md5,42d92c43058c25ce03620a2add521006",
-                "pangolin_run_table.yaml:md5,16f4616675164243c67439101defe45e",
+                "pangolin_run_table.yaml:md5,5a009661193e3c3dc9620af31069d198",
                 "snpeff_effects.yaml:md5,43533ac29b261ab7132c69c7034648ad",
                 "snpeff_variant_effects_class.yaml:md5,5f31369f0e087d4fe7eddc14d908f11f",
                 "snpeff_variant_effects_impact.yaml:md5,ab3b8b418a47185b61d19a06f2a8e846",
@@ -12966,22 +12975,22 @@
                 "SAMPLE3_SE.mosdepth.summary.txt:md5,27f7f5f8a2caef36dcc1dd504dd4f581",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.flagstat:md5,175a8826b10890b304fd7a30335b98a0",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.idxstats:md5,461869ebfe660675af9e5b2b30bec52c",
-                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,cd580a5ea6402dbc30cbf6f1d7ca8a49",
+                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,1a70745269d81ff3cbba13fb44b9caa7",
                 "SAMPLE1_PE.sorted.bam.flagstat:md5,b71fa417d19a1c64e53a7a4bbb9a66a3",
                 "SAMPLE1_PE.sorted.bam.idxstats:md5,d3f51babb7c8757456be63c9b75ee3d0",
-                "SAMPLE1_PE.sorted.bam.stats:md5,af3b213b55439503167be5c552675999",
+                "SAMPLE1_PE.sorted.bam.stats:md5,9d0c1cf989168ab817626684b8ba0aff",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.flagstat:md5,47616687e389589e8fe1d596bbe4a332",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.idxstats:md5,5f9def3fdb732d1da43650235b5e00e2",
-                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,1fb3b3364c0c1bd3349ce9f512b68dae",
+                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,c831719b0e9f1b74cdd525433b01a108",
                 "SAMPLE2_PE.sorted.bam.flagstat:md5,041ab8f42dae5f155ee9d7d2a2f23442",
                 "SAMPLE2_PE.sorted.bam.idxstats:md5,72e323cef6b90aea7741eb88cfa843ee",
-                "SAMPLE2_PE.sorted.bam.stats:md5,aaf6ffaaa8272bc2bf92484d3be077d2",
+                "SAMPLE2_PE.sorted.bam.stats:md5,32bfb3d967b100796d1a132421815ab9",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.flagstat:md5,6a2d2647c43aa48506d8d1536e498dc5",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.idxstats:md5,6be1ee32c50c77d6a853f02cd42307ba",
-                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,398a4f332098cabfdd7aeb71f067b038",
+                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,31560fde30eae4f0559c7ee2c3028276",
                 "SAMPLE3_SE.sorted.bam.flagstat:md5,0ae9908cf4840b0ec4ae74afbd395244",
                 "SAMPLE3_SE.sorted.bam.idxstats:md5,184d8ad417ee4242377f18880675165b",
-                "SAMPLE3_SE.sorted.bam.stats:md5,f017c5a5b5921846bd999b332ba0aecf",
+                "SAMPLE3_SE.sorted.bam.stats:md5,f5f529e4ce6e707ab9b37b5ff54b558a",
                 "SAMPLE1_PE.tsv:md5,d11ff38b97ad069639067037f2f00e6a",
                 "SAMPLE2_PE.tsv:md5,81285393974428d2fed60b398aa9a6d7",
                 "SAMPLE3_SE.tsv:md5,4ae3bc88a5952e78344d98d46fecdd55",
@@ -12997,12 +13006,12 @@
                 "SAMPLE2_PE.consensus.base_counts.tsv:md5,849837547485915dd5cb4efa7c8cfe9d",
                 "SAMPLE3_SE.consensus.N_run.tsv:md5,8fc26eab2393cfde6daf0212d18d58f9",
                 "SAMPLE3_SE.consensus.base_counts.tsv:md5,ecdec402d1e7a094dd26c3d2b906e690",
-                "SAMPLE1_PE.csv:md5,2d907beef116676a177200301bca4e7c",
-                "SAMPLE2_PE.csv:md5,610fb1a8df7fe7e18598237ebe9db36a",
-                "SAMPLE3_SE.csv:md5,1f129eab464674e6b2c404c809d0146b",
-                "SAMPLE1_PE.pangolin.csv:md5,93ad34cfc22d3c7a1bb9fe60c51e166f",
-                "SAMPLE2_PE.pangolin.csv:md5,151e8da109924024f0501e44c1798592",
-                "SAMPLE3_SE.pangolin.csv:md5,677f4e275cfb91cf5948d57a3f717412",
+                "SAMPLE1_PE.csv:md5,5e40958478d114bc16af8f121eabb7dd",
+                "SAMPLE2_PE.csv:md5,4d0aa4cf7bf41f4023ca6ec9a29411cc",
+                "SAMPLE3_SE.csv:md5,5208a92c30cfb23996cf6689cbb0a4ab",
+                "SAMPLE1_PE.pangolin.csv:md5,f86666cdf29f625ff8650d8ce7bc69cc",
+                "SAMPLE2_PE.pangolin.csv:md5,2769897eb0ad2cad9e00eab1e7a45e9f",
+                "SAMPLE3_SE.pangolin.csv:md5,9fee48a23dd3799f5c03f79ce0d633f6",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SAMPLE1_PE.variant_counts.log:md5,dca67b678c8fb1ff819c6e2549bd526d",
                 "SAMPLE2_PE.variant_counts.log:md5,3e36a199838f298a5db0e86f360d394e",
@@ -13020,6 +13029,6 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T12:22:20.811241157"
+        "timestamp": "2026-09-17T17:35:11.441338573"
     }
 }
