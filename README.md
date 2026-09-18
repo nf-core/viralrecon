@@ -7,7 +7,7 @@
 
 [![Open in GitHub Codespaces](https://img.shields.io/badge/Open_In_GitHub_Codespaces-black?labelColor=grey&logo=github)](https://github.com/codespaces/new/nf-core/viralrecon)
 [![GitHub Actions CI Status](https://github.com/nf-core/viralrecon/actions/workflows/nf-test.yml/badge.svg)](https://github.com/nf-core/viralrecon/actions/workflows/nf-test.yml)
-[![GitHub Actions Linting Status](https://github.com/nf-core/viralrecon/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/viralrecon/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/viralrecon/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.3901628-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.3901628)  
+[![GitHub Actions Linting Status](https://github.com/nf-core/viralrecon/actions/workflows/linting.yml/badge.svg)](https://github.com/nf-core/viralrecon/actions/workflows/linting.yml)[![AWS CI](https://img.shields.io/badge/CI%20tests-full%20size-FF9900?labelColor=000000&logo=Amazon%20AWS)](https://nf-co.re/viralrecon/results)[![Cite with Zenodo](http://img.shields.io/badge/DOI-10.5281/zenodo.3901628-1073c8?labelColor=000000)](https://doi.org/10.5281/zenodo.3901628)
 [![nf-test](https://img.shields.io/badge/unit_tests-nf--test-337ab7.svg)](https://www.nf-test.com)
 
 [![Nextflow](https://img.shields.io/badge/version-%E2%89%A525.10.4-green?style=flat&logo=nextflow&logoColor=white&color=%230DC09D&link=https%3A%2F%2Fnextflow.io)](https://www.nextflow.io/)
@@ -37,7 +37,7 @@ A number of improvements were made to the pipeline recently, mainly with regard 
 
 ### Illumina
 
-![nf-core/viralrecon Illumina metro map](docs/images/nf-core-viralrecon_metro_map_illumina.png)
+![nf-core/viralrecon Illumina metro map](docs/images/nf-core-viralrecon_metro_map_illumina.svg)
 
 1. Merge re-sequenced FastQ files ([`cat`](http://www.linfo.org/cat.html))
 2. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
@@ -73,7 +73,7 @@ A number of improvements were made to the pipeline recently, mainly with regard 
 
 ### Nanopore
 
-![nf-core/viralrecon Nanopore metro map](docs/images/nf-core-viralrecon_metro_map_nanopore.png)
+![nf-core/viralrecon Nanopore metro map](docs/images/nf-core-viralrecon_metro_map_nanopore.svg)
 
 1. Sequencing QC ([`pycoQC`](https://github.com/a-slide/pycoQC))
 2. Aggregate pre-demultiplexed reads from MinKNOW/Guppy ([`artic guppyplex`](https://artic.readthedocs.io/en/latest/commands/))
