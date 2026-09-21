@@ -3,7 +3,7 @@
 //
 
 include { BCFTOOLS_FILTER     } from '../../../modules/nf-core/bcftools/filter/main'
-include { TABIX_TABIX         } from '../../../modules/nf-core/tabix/tabix/main'
+include { BCFTOOLS_INDEX      } from '../../../modules/nf-core/bcftools/index/main'
 include { BEDTOOLS_MERGE      } from '../../../modules/nf-core/bedtools/merge/main'
 include { BEDTOOLS_MASKFASTA  } from '../../../modules/nf-core/bedtools/maskfasta/main'
 include { BCFTOOLS_CONSENSUS  } from '../../../modules/nf-core/bcftools/consensus/main'
@@ -22,8 +22,6 @@ workflow CONSENSUS_BCFTOOLS {
 
     main:
 
-    ch_versions = channel.empty()
-
     //
     // Filter variants by allele frequency, zip and index
     //
@@ -31,8 +29,8 @@ workflow CONSENSUS_BCFTOOLS {
         vcf.join(tbi, by: [0])
     )
 
-    TABIX_TABIX (
-        BCFTOOLS_FILTER.out.vcf.map { meta, vcf_file -> [ meta, vcf_file, [], [] ] }
+    BCFTOOLS_INDEX (
+        BCFTOOLS_FILTER.out.vcf
     )
 
     //
@@ -64,7 +62,7 @@ workflow CONSENSUS_BCFTOOLS {
     //
     BCFTOOLS_CONSENSUS (
         BCFTOOLS_FILTER.out.vcf
-            .join(TABIX_TABIX.out.index, by: [0])
+            .join(BCFTOOLS_INDEX.out.index, by: [0])
             .join(BEDTOOLS_MASKFASTA.out.fasta, by: [0])
             .map { _meta, vcf_file, tbi_file, fasta_file -> tuple(_meta, vcf_file, tbi_file, fasta_file, []) }
     )
@@ -85,7 +83,6 @@ workflow CONSENSUS_BCFTOOLS {
         gff,
         nextclade_db
     )
-    ch_versions = ch_versions.mix(CONSENSUS_QC.out.versions)
 
     emit:
     consensus        = RENAME_FASTA_HEADER.out.fasta     // channel: [ val(meta), [ fasta ] ]
@@ -99,6 +96,4 @@ workflow CONSENSUS_BCFTOOLS {
 
     bases_tsv        = CONSENSUS_QC.out.bases_tsv        // channel: [ val(meta), [ tsv ] ]
     bases_pdf        = CONSENSUS_QC.out.bases_pdf        // channel: [ val(meta), [ pdf ] ]
-
-    versions         = ch_versions                       // channel: versions.yml
 }

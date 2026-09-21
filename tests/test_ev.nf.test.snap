@@ -15,7 +15,7 @@
                     "cat": 9.5
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -46,7 +46,7 @@
                     "quast": "5.3.0"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SPADES": {
                     "spades": "4.1.0"
@@ -248,9 +248,9 @@
                 "SRR13266665.contigs.fa.gz:md5,d6fb919c8683a3025cf6c5fd512f5245",
                 "gc.icarus.txt:md5,3f5e959947cbc0d2744053261dbf77c4",
                 "gc.icarus.txt:md5,3f5e959947cbc0d2744053261dbf77c4",
-                "SRR13266665.fastp.json:md5,365cd8099c91d57ce07c0615d4899128",
+                "SRR13266665.fastp.json:md5,db51a5cab07b494034e2e1276ede3a65",
                 "SRR13266665.kraken2.report.txt:md5,ba7c54a91f0a60efe950bed82f8d6e87",
-                "fastp-insert-size-plot.yaml:md5,f24342085c60ebe502748e94858075d8",
+                "fastp-insert-size-plot.yaml:md5,66dbb19d2a1ed93fdc5012105cd0faae",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,ae0da8f82bc6727c525f78e537d86b6b",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,e4b5137096615cc53d70c8ecdcefe634",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,a002ca3ce3a55b5b86349ad43b8dfdc7",
@@ -283,7 +283,7 @@
                 "kraken-top-n-plot_Phylum.yaml:md5,aa0974a3cf61cd5a9abe0e4b02994b38",
                 "kraken-top-n-plot_Unclassified.yaml:md5,aa0974a3cf61cd5a9abe0e4b02994b38",
                 "multiqc_citations.yaml:md5,db2447b791e1f71a3b42cc5957febf64",
-                "multiqc_fastp.yaml:md5,a4918c922739495f9e994b452043b802",
+                "multiqc_fastp.yaml:md5,554736b8ed11640badc531c4bb617a1c",
                 "multiqc_fastqc.yaml:md5,739201476016f8db8752a42e43782b5f",
                 "multiqc_kraken.yaml:md5,b5b6612a16dd78f1f0a096fc7fe424bb",
                 "multiqc_quast_quast_spades.yaml:md5,d8d4dd92149a983cddaaa3bb10cd8b0c"
@@ -293,6 +293,6 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-06T13:15:36.357602835"
+        "timestamp": "2026-09-17T13:27:23.058750622"
     }
 }

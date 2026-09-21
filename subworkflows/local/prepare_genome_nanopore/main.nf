@@ -25,8 +25,6 @@ workflow PREPARE_GENOME_NANOPORE {
 
     main:
 
-    ch_versions = channel.empty()
-
     //
     // Uncompress genome fasta file if required
     //
@@ -119,7 +117,6 @@ workflow PREPARE_GENOME_NANOPORE {
     // Prepare Nextclade dataset
     //
     ch_nextclade_db = channel.empty()
-    ch_versions = channel.empty()
     if (!params.skip_consensus && !params.skip_nextclade) {
         if (nextclade_dataset) {
             if (nextclade_dataset.endsWith('.tar.gz')) {
@@ -136,7 +133,6 @@ workflow PREPARE_GENOME_NANOPORE {
                 nextclade_dataset_tag
             )
             ch_nextclade_db = NEXTCLADE_DATASETGET.out.dataset
-            ch_versions     = ch_versions.mix(NEXTCLADE_DATASETGET.out.versions)
         }
     }
 
@@ -178,6 +174,4 @@ workflow PREPARE_GENOME_NANOPORE {
     kraken2_db           = ch_reference_kraken2_db           // path: kraken2_db/
     snpeff_db            = ch_reference_snpeff_db            // path: snpeff_db
     snpeff_config        = ch_reference_snpeff_config        // path: snpeff.config
-
-    versions             = ch_versions                       // channel: versions.yml
 }
