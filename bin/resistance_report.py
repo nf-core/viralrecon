@@ -3,7 +3,6 @@
 
 import os
 import re
-import csv
 import json
 import argparse
 import base64
@@ -22,7 +21,7 @@ def parser_args(args=None):
     Epilog = """Example usage:
     python resistance_report.py --sierralocal_json SAMPLE_resistance.json --mutation_csv SAMPLE_mutation_table.csv
         --resistance_csv SAMPLE_resistance_table.csv --nextclade_csv SAMPLE_nextclade.csv
-        --consensus_fasta SAMPLE.fa --gff SAMPLE.gff --ivar_consensus_params "-t 0.8 -q 30 -m 50 -n N"
+        --consensus_fasta SAMPLE.fa --ivar_consensus_params "-t 0.8 -q 30 -m 50 -n N"
         --ivar_variant_maf 0.01 --output_html SAMPLE_resistance_report.html
     """
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
@@ -63,20 +62,6 @@ def parser_args(args=None):
         help="Consensus FASTA file.",
     )
     parser.add_argument(
-        "-gf",
-        "--gff",
-        type=str,
-        required=True,
-        help="GFF file with gene coordinates.",
-    )
-    parser.add_argument(
-        "-ig",
-        "--interest_genes",
-        type=str,
-        required=True,
-        help="List of genes to extract, organized into groups. Genes separated by commas (',') will be included in the same output FASTA file. Gene groups separated by semicolons (';') will produce separate FASTA files.",
-    )
-    parser.add_argument(
         "-ic",
         "--ivar_consensus_params",
         type=str,
@@ -104,12 +89,6 @@ def parser_args(args=None):
         help="Full path to the sample HTML report file."
     )
     parser.add_argument(
-        "--ivar_tsv",
-        type=str,
-        required=True,
-        help="iVar variants TSV file used to estimate polymorphic site proportion."
-    )
-    parser.add_argument(
         "--nextclade_dataset_name",
         type=str,
         default="",
@@ -130,53 +109,68 @@ def parser_args(args=None):
 
     return parser.parse_args(args)
 
-def count_non_n_consensus_sites(consensus_fasta):
-    seq_record = next(SeqIO.parse(consensus_fasta, "fasta"))
-    return sum(1 for base in seq_record.seq if base.upper() != "N")
+def read_consensus_records(consensus_fasta):
+    records = {}
 
-def estimate_polymorphism_proportion(ivar_tsv, consensus_fasta, min_af, max_af):
+    for record in SeqIO.parse(consensus_fasta, "fasta"):
+        _, separator, region = record.id.rpartition("|")
+        if not separator or not region:
+            raise ValueError(
+                f"Consensus record ID must end with '|REGION': {record.id}"
+            )
+        records[region] = record
+
+    return records
+
+def estimate_ambiguous_site_proportion(consensus_records):
     """
-    Estimate the proportion of within-sample polymorphic sites.
+    Estimate the proportion of ambiguous sites across POL gene.
 
-    Polymorphic sites are defined as unique iVar PASS positions with ALT_FREQ
-    between min_af and max_af, inclusive. The denominator is the number of
-    non-N bases in the sample consensus FASTA.
+    Ambiguous sites are IUPAC mixed-base codes (R, Y, S, W, K, M, B, D, H, and V).
+    The denominator is the number of non-N sites in both PR_RT and IN.
     """
-    polymorphic_positions = set()
 
-    with open(ivar_tsv, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f, delimiter="\t")
-        for row in reader:
-            try:
-                is_pass = row.get("PASS", "").upper() == "TRUE"
-                alt_freq = float(row.get("ALT_FREQ", 0))
-                pos = row.get("POS")
-            except ValueError:
-                continue
+    ambiguous_codes = set("RYSWKMBDHV")
+    regions = ("PR_RT", "IN")
 
-            if is_pass and min_af <= alt_freq <= max_af and pos:
-                polymorphic_positions.add(pos)
+    ambiguous_sites = 0
+    non_n_sites = 0
 
-    non_n_sites = count_non_n_consensus_sites(consensus_fasta)
-    proportion = len(polymorphic_positions) / non_n_sites if non_n_sites else None
+    for region in regions:
+        sequence = consensus_records[region].seq.upper()
+        ambiguous_sites += sum(base in ambiguous_codes for base in sequence)
+        non_n_sites += sum(base != "N" for base in sequence)
+
+    proportion = ambiguous_sites / non_n_sites if non_n_sites else 0.0
 
     return {
-        "polymorphic_sites": len(polymorphic_positions),
+        "ambiguous_sites": ambiguous_sites,
         "non_n_consensus_sites": non_n_sites,
         "proportion": proportion,
-        "min_af": min_af,
-        "max_af": max_af,
     }
 
-def parse_sequence_summary(json_path, subtype_info=None,
+def get_nextclade_subtypes(nextclade_file, consensus_records):
+    df_next = pd.read_csv(nextclade_file, sep=";")
+    clades = df_next.set_index("seqName")["clade"]
+
+    return [
+        {
+            "region": region,
+            "label": region,
+            "subtype": clades.loc[record.id],
+        }
+        for region, record in consensus_records.items()
+        if region in ("PR_RT", "IN")
+    ]
+
+def parse_sequence_summary(json_path,
                            ivar_consensus_params=None, ivar_variant_maf=None,
-                           polymorphism_summary=None):
+                           ambiguous_site_summary=None):
     """
     Extract sequence summary information from Sierra-local JSON.
     - Lists each gene present (PR, RT, IN)
     - Detects missing nucleotide ranges from warnings
     - Detects missing codons at the start if firstAA != 1
-    - Integrates subtype from Nextclade if available
     """
 
     with open(json_path, "r", encoding="utf-8") as f:
@@ -269,13 +263,10 @@ def parse_sequence_summary(json_path, subtype_info=None,
 
         summary_lines.append(line)
 
-    # --- Add subtype info from Nextclade if provided
-    summary_lines.append(("subtype", subtype_info))
-
-    # -- Add proportion of polymorphic sites
+    # --- Add proportion of ambiguous consensus sites
     summary_lines.append(
-        f"Supported mixed-site proportion (from iVar nucleotide variants): "
-        f"{polymorphism_summary['proportion'] * 100:.2f}%"
+        f"% pol polymorphisms (ambiguous sites): "
+        f"{ambiguous_site_summary['proportion'] * 100:.2f}%"
     )
 
     # --- Parse ivar consensus parameters if provided
@@ -295,23 +286,6 @@ def parse_sequence_summary(json_path, subtype_info=None,
 
     return summary_lines
 
-def get_nextclade_subtype(nextclade_file, sample_name):
-    """
-    Extract the subtype (clade) assigned by Nextclade for the given sample.
-    """
-    if not nextclade_file or not os.path.exists(nextclade_file):
-        return None
-    try:
-        df_next = pd.read_csv(nextclade_file, sep=';')
-        # Attempt to find matching sample
-        row = df_next[df_next["seqName"].str.contains(sample_name, case=False, na=False)]
-        if not row.empty:
-            subtype = row.iloc[0]["clade"]
-            return subtype
-    except Exception as e:
-        print(f"⚠️ Could not parse Nextclade file for {sample_name}: {e}")
-    return None
-
 def extract_triggered_mutations (mutation):
     """Return the mutation lable using only amino acids that triggered sierra scoring"""
     text = mutation.get("text", "")
@@ -322,8 +296,6 @@ def extract_triggered_mutations (mutation):
         return text
 
     mutation_prefix = match.group(1)
-    if len(triggered_aas) == 1:
-        return f"{mutation_prefix}{triggered_aas}"
     return f"{mutation_prefix}{triggered_aas}"
 
 def extract_mutation_scoring(json_path):
@@ -443,158 +415,6 @@ def parse_resistance_table(resistance_file, deprecated_drugs=None):
         df_res = df_res[~df_res["Drug_abbr"].isin(deprecated_drugs)]
     return df_res
 
-def parse_interest_groups(interest_string):
-    """
-    Parse interest genes string into groups.
-    Example:
-        "PR,RT;IN" -> [["PR", "RT"], ["IN"]]
-        "PR;RT;IN" -> [["PR"], ["RT"], ["IN"]]
-        "PR,RT,IN" -> [["PR", "RT", "IN"]]
-    """
-    groups = []
-    for group in interest_string.split(";"):
-        genes = [g.strip() for g in group.split(",")]
-        groups.append(genes)
-    return groups
-
-
-def read_gff_coordinates(gff_file):
-    """
-    Read GFF file and return a dict with gene_name -> (start, end, strand)
-    Only parse entries with type 'gene'.
-    """
-    coords = {}
-
-    with open(gff_file) as fh:
-        for line in fh:
-            if line.startswith("#"):
-                continue
-
-            fields = line.strip().split("\t")
-            if len(fields) < 9:
-                continue
-
-            feature_type = fields[2]
-            if feature_type != "gene":
-                continue
-
-            start = int(fields[3])
-            end = int(fields[4])
-            strand = fields[6]
-            attributes = fields[8]
-
-            # Extract gene name from attributes (Name=XXXX)
-            gene_name = None
-            for attr in attributes.split(";"):
-                if attr.startswith("Name="):
-                    gene_name = attr.replace("Name=", "")
-                    break
-
-            if gene_name:
-                coords[gene_name] = (start, end, strand)
-
-    return coords
-
-
-def extract_sequence(seq_record, start, end, strand):
-    """
-    Extract subsequence from a SeqRecord considering strand.
-    GFF is 1-based inclusive.
-    """
-    subseq = seq_record.seq[start - 1:end]
-
-    if strand == "-":
-        subseq = subseq.reverse_complement()
-
-    return subseq
-
-def extract_protein_sequences(seq_record, coordinates, gene_groups, sample_name):
-    """
-    Extract sequences for groups of genes defined in gene_groups.
-
-    Parameters
-    ----------
-    seq_record : Bio.SeqRecord
-        Reference genome sequence loaded from FASTA.
-
-    coordinates : dict
-        Mapping of gene -> (start, end, strand) extracted from GFF.
-
-    gene_groups : list of list
-        List where each element is a group of genes to be extracted together.
-        Example: [["PR","RT"], ["IN"]]
-
-    Returns
-    -------
-    list of dicts
-        [
-            {
-                "group_index": int,
-                "genes": [list of genes],
-                "fasta": "fasta block as string",
-            },
-            ...
-        ]
-    """
-
-    protein_sequences = []
-
-    for group_index, group in enumerate(gene_groups, start=1):
-
-        # --- 1. Obtener coordenadas ordenadas del grupo ---
-        valid_genes = [g for g in group if g in coordinates]
-
-        if not valid_genes:
-            continue
-
-        coords = [(g, *coordinates[g]) for g in valid_genes]
-        # ordenar por start
-        coords.sort(key=lambda x: x[1])
-
-        # --- 2. Verificar si son contiguas (end de uno == start del siguiente) ---
-        merged = []
-        current_genes = [coords[0][0]]
-        current_start = coords[0][1]
-        current_end = coords[0][2]
-        current_strand = coords[0][3]
-
-        for i in range(1, len(coords)):
-            gene, start, end, strand = coords[i]
-
-            # misma cadena y contiguos
-            if strand == current_strand and start == current_end + 1:
-                current_genes.append(gene)
-                current_end = end
-            else:
-                # cerrar intervalo anterior
-                merged.append((current_genes, current_start, current_end, current_strand))
-                # iniciar uno nuevo
-                current_genes = [gene]
-                current_start = start
-                current_end = end
-                current_strand = strand
-
-        # agregar el último intervalo
-        merged.append((current_genes, current_start, current_end, current_strand))
-
-        # --- 3. Extraer secuencias fusionadas ---
-        fasta_lines = []
-
-        for genes_list, start, end, strand in merged:
-            seq = extract_sequence(seq_record, start, end, strand)
-
-            fasta_lines.append(f">{sample_name}\n{seq}")
-
-        fasta_block = "\n".join(fasta_lines)
-
-        protein_sequences.append({
-            "group_index": group_index,
-            "genes": group,
-            "fasta": fasta_block
-        })
-
-    return protein_sequences
-
 # ---------------------------------------------------------------------
 # Batch processing
 # ---------------------------------------------------------------------
@@ -641,29 +461,28 @@ def main():
     json_file = args.sierralocal_json
     nextclade_file = args.nextclade_csv
     consensus_file = args.consensus_fasta
-    gff_file = args.gff
 
-    consensus_seq = None
-    if os.path.exists(consensus_file):
-        with open(consensus_file, "r", encoding="utf-8") as f:
-            consensus_seq = f.read().strip()
-
-    polymorphism_summary = estimate_polymorphism_proportion(
-        args.ivar_tsv,
-        consensus_file,
-        min_af=args.ivar_variant_maf,
-        max_af=1.0 - args.ivar_variant_maf,
-    )
-
-    subtype = get_nextclade_subtype(nextclade_file, sample_name)
+    consensus_records = read_consensus_records(consensus_file)
+    full_record = consensus_records["FULL"]
+    ambiguous_site_summary = estimate_ambiguous_site_proportion(consensus_records)
+    subtypes = get_nextclade_subtypes(nextclade_file, consensus_records)
 
     seq_summary = parse_sequence_summary(
         json_file,
-        subtype_info=subtype,
         ivar_consensus_params=args.ivar_consensus_params,
         ivar_variant_maf=args.ivar_variant_maf,
-        polymorphism_summary=polymorphism_summary,
+        ambiguous_site_summary=ambiguous_site_summary,
     )
+
+    regional_consensus_sequences = [
+        {
+            "region": region,
+            "genes": region.split("_"),
+            "fasta": record.format("fasta").strip(),
+        }
+        for region, record in consensus_records.items()
+        if region != "FULL"
+    ]
 
     df_res = parse_resistance_table(res_file, deprecated_drugs)
 
@@ -671,19 +490,15 @@ def main():
     mutation_scores = sort_mutation_scores(mutation_scores_raw)
     mutation_scores = remove_deprecated_drugs(mutation_scores, deprecated_drugs)
 
-    gene_groups = parse_interest_groups(args.interest_genes)
-    coordinates = read_gff_coordinates(gff_file)
-    seq_record = next(SeqIO.parse(consensus_file, "fasta"))
-    protein_sequences = extract_protein_sequences(seq_record, coordinates, gene_groups, sample_name)
-
     sample_data = {
         "sample_name": sample_name,
         "sequence_summary": seq_summary,
+        "subtypes": subtypes,
         "mutation_data": df_mut.to_dict(orient="records"),
         "resistance_data": df_res.to_dict(orient="records"),
-        "consensus_genome": consensus_seq,
+        "consensus_genome": full_record.format("fasta").strip(),
         "mutation_scores": mutation_scores,
-        "protein_sequences": protein_sequences,
+        "regional_consensus_sequences": regional_consensus_sequences
     }
 
     # --- Render one HTML report for this sample

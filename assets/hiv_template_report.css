@@ -98,6 +98,24 @@ body {
   color: #1b2f40;
 }
 
+.quality-check-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 28px;
+  row-gap: 4px;
+}
+
+.subtype-line,
+.mixed-site-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.mixed-site-line {
+  grid-column: 1 / -1;
+}
+
 /* Collapsible report blocks */
 .report-details {
   width: 95%;
@@ -141,15 +159,25 @@ body {
     flex-direction: column;
     gap: 8px;
   }
+
+  .quality-check-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mixed-site-line {
+    grid-column: auto;
+  }
+
+  details:not(.report-details) summary {
+    line-height: 1.6;
+  }
+
+  .copy-button {
+    margin-left: 6px;
+  }
 }
 
 /* Subtype info icon styles */
-.subtype-line {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
 .info-icon {
   display: inline-flex;
   align-items: center;
@@ -161,6 +189,26 @@ body {
   font-size: 12px;
   line-height: 1;
   vertical-align: middle;
+}
+
+.help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #5d7c95;
+  border-radius: 50%;
+  color: #0c3c57;
+  cursor: help;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.mixed-site-value-high {
+  color: #b42318;
+  font-weight: bold;
 }
 
 /* Color legend */
@@ -384,6 +432,7 @@ details pre {
 .copy-button {
   font-size: 0.8em;
   padding: 2px 6px;
+  margin-left: 10px;
   border: 1px solid #1b2f40;
   border-radius: 4px;
   background-color: #97b5cf;

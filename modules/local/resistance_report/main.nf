@@ -8,7 +8,7 @@ process RESISTANCE_REPORT {
         'community.wave.seqera.io/library/biopython_jinja2_pandas_python:bf9cf8457c0990de' }"
 
     input:
-    tuple val(meta), path(sierralocal_json), path(mutation_csv), path(resistance_csv), path(nextclade_csv), path(consensus), path(annotation), path(ivar_tsv)
+    tuple val(meta), path(sierralocal_json), path(mutation_csv), path(resistance_csv), path(nextclade_csv), path(consensus)
     val nextclade_dataset_name
     val nextclade_dataset_tag
 
@@ -32,8 +32,6 @@ process RESISTANCE_REPORT {
         --resistance_csv $resistance_csv \\
         --nextclade_csv $nextclade_csv \\
         --consensus_fasta $consensus \\
-        --gff $annotation \\
-        --ivar_tsv $ivar_tsv \\
         --ivar_consensus_params "'${ivar_consensus_params}'" \\
         --output_html ${prefix}.html \\
         --nextclade_dataset_name $nextclade_dataset_name \\

@@ -44,20 +44,39 @@
         <h2>Quality Check</h2>
       </div>
       <div class="sequence-summary-info">
-        <ul>
-          {% for line in sample.sequence_summary %} {% if line is iterable and line[0] == "subtype" %}
+        <ul class="quality-check-list">
+          {% for subtype in sample.subtypes %}
           <li class="subtype-line">
-            <span class="meta-label">Subtype:</span>&nbsp;{{ line[1] }}
+            <span class="meta-label">Subtype ({{ subtype.label | replace("_", "-") }}):</span>
+            <span>{{ subtype.subtype }}</span>
             <span
               class="info-icon"
-              title="This subtype was obtained using Nextclade software (https://clades.nextstrain.org) with the complete consensus sequence. It can be visualized in the Nextclade web app when copy/pasting the consensus at the end of the sample."
+              title="This subtype was assigned by Nextclade using the {{ subtype.label | replace('_', '-') }} regional consensus sequence."
             >
               ⓘ
             </span>
           </li>
-          {% elif line is string and line.startswith("Supported mixed-site proportion") %}
-          <li>{{ labeled_line(line) }}</li>
-          {% endif %} {% endfor %}
+          {% endfor %}
+          {% for line in sample.sequence_summary %}
+            {% if line is string and line.startswith("% pol polymorphisms (ambiguous sites)") %}
+              {% set proportion_text = line.split(":", 1)[1] | trim %}
+              {% set proportion_value = proportion_text | replace("%", "") | float %}
+          <li class="mixed-site-line">
+            <span class="meta-label">% pol polymorphisms (ambiguous sites):</span>
+            <span
+              class="help-icon"
+              title="Percentage of ambiguous sites across pol gene. Values above 5% are highlighted for potential contamination."
+              aria-label="Explanation of pol polymorphism proportion"
+              tabindex="0"
+            >
+              ?
+            </span>
+            <span class="mixed-site-value{% if proportion_value > 5 %} mixed-site-value-high{% endif %}">
+              {{ proportion_text }}
+            </span>
+          </li>
+            {% endif %}
+          {% endfor %}
         </ul>
       </div>
 
@@ -278,7 +297,6 @@
             type="button"
             class="copy-button"
             onclick="navigator.clipboard.writeText(`{{ sample.consensus_genome | replace('`', '\\`') }}`)"
-            style="margin-left: 10px"
           >
             Copy to clipboard
           </button>
@@ -291,27 +309,26 @@
     {% endif %}
     </details>
 
-    <!-- PROTEIN SEQUENCES -->
-    {% if sample.protein_sequences %}
+    <!-- REGIONAL CONSENSUS SEQUENCES -->
+    {% if sample.regional_consensus_sequences %}
     <details class="report-details" open>
-      <summary>Protein Sequences</summary>
+      <summary>Regional Consensus Sequences</summary>
 
-    {% for protein in sample.protein_sequences %}
+    {% for regional_consensus in sample.regional_consensus_sequences %}
     <div class="content-block">
       <details>
         <summary>
-          Gene(s): {{ protein.genes | join(", ") }}
+          Gene(s): {{ regional_consensus.genes | join(", ") }}
           <button
             type="button"
             class="copy-button"
-            onclick="navigator.clipboard.writeText(`{{ protein.fasta | replace('`', '\\`') }}`)"
-            style="margin-left: 10px"
+            onclick="navigator.clipboard.writeText(`{{ regional_consensus.fasta | replace('`', '\\`') }}`)"
           >
             Copy to clipboard
           </button>
         </summary>
 
-        <pre>{{ protein.fasta }}</pre>
+        <pre>{{ regional_consensus.fasta }}</pre>
       </details>
     </div>
     {% endfor %}

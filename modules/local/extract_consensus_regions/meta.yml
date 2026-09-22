@@ -1,0 +1,63 @@
+name: extract_consensus_regions
+description: Extract selected gene regions from a consensus FASTA using GFF coordinates
+keywords:
+  - consensus
+  - fasta
+  - gff
+  - hiv
+tools:
+  - extract_consensus_regions:
+      description: Extract grouped gene regions from a consensus nucleotide sequence
+      licence: ["MIT"]
+input:
+  - - meta:
+        type: map
+        description: Groovy Map containing sample information
+    - consensus:
+        type: file
+        description: Whole-genome consensus FASTA file
+        pattern: "*.{fa,fasta}"
+        ontologies:
+          - edam: http://edamontology.org/format_1929
+    - annotation:
+        type: file
+        description: GFF annotation containing sample-specific gene coordinates
+        pattern: "*.{gff,gff3}"
+        ontologies:
+          - edam: http://edamontology.org/format_1975
+output:
+  consensus_regions:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - "*.all_consensus.fa":
+          type: file
+          description: Multi-FASTA containing the full and regional consensus sequences
+          pattern: "*.all_consensus.fa"
+          ontologies:
+            - edam: http://edamontology.org/format_1929
+  versions_python:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - python:
+          type: string
+          description: The tool name
+      - python --version | sed "s/Python //g":
+          type: eval
+          description: The expression used to obtain the Python version
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The name of the process
+      - python:
+          type: string
+          description: The tool name
+      - python --version | sed "s/Python //g":
+          type: eval
+          description: The expression used to obtain the Python version
+authors:
+  - "@LilyAnderssonLee"
+maintainers:
+  - "@LilyAnderssonLee"

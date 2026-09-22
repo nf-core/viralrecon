@@ -10,18 +10,19 @@ include { RESISTANCE_TABLES                                  } from '../../../mo
 include { RESISTANCE_REPORT                                  } from '../../../modules/local/resistance_report'
 include { ADDITIONAL_ANNOTATION as HIV_RESISTANCE_ANNOTATION } from '../additional_annotation'
 include { LIFTOFF as CONSENSUS_LIFTOFF                       } from '../../../modules/nf-core/liftoff'
+include { EXTRACT_CONSENSUS_REGIONS                          } from '../../../modules/local/extract_consensus_regions'
+include { NEXTCLADE_RUN                                      } from '../../../modules/nf-core/nextclade/run/main'
 
 workflow HIV_RESISTANCE {
     take:
-    consensus        // channel: [ val(meta), [ consensus ] ]
-    bam              // channel: [ val(meta), [ bam ], [bai] ]
-    fasta            // path   : genome.fasta
-    gff              // path   : genome.gff
-    vcf              // channel: [ val(meta), [ vcf ] ]
-    tbi              // channel: [ val(meta), [ tbi ] ]
-    ivar_tsv         // channel: [ val(meta), [ ivar_tsv ] ]
-    pangolin         // channel: [ val(meta), [ csv ] ]
-    nextclade_report // channel: [ val(meta), [ csv ] ]
+    consensus               // channel: [ val(meta), [ consensus ] ]
+    bam                     // channel: [ val(meta), [ bam ], [bai] ]
+    fasta                   // path   : genome.fasta
+    gff                     // path   : genome.gff
+    vcf                     // channel: [ val(meta), [ vcf ] ]
+    tbi                     // channel: [ val(meta), [ tbi ] ]
+    pangolin                // channel: [ val(meta), [ csv ] ]
+    nextclade_db            // path   : genome.nextclade_db
     nextclade_dataset_name
     nextclade_dataset_tag
 
@@ -87,24 +88,24 @@ workflow HIV_RESISTANCE {
         []
     )
 
+    ch_extract_consensus_input = consensus
+        .join(CONSENSUS_LIFTOFF.out.gff3, by: [0])
+    EXTRACT_CONSENSUS_REGIONS( ch_extract_consensus_input )
+
     RESISTANCE_TABLES(
         SIERRALOCAL.out.json.join(BAM2CODFREQ.out.codfreq, by: [0])
     )
 
-    SIERRALOCAL.out.json.dump(tag:"SIERRALOCAL.out.json")
-    RESISTANCE_TABLES.out.mutation_csv.dump(tag:"RESISTANCE_TABLES.out.mutation_csv")
-    RESISTANCE_TABLES.out.resistance_csv.dump(tag:"RESISTANCE_TABLES.out.resistance_csv")
-    nextclade_report.dump(tag:"nextclade_report")
-    consensus.dump(tag:"consensus")
-    CONSENSUS_LIFTOFF.out.gff3.dump(tag:"CONSENSUS_LIFTOFF.out.gff3")
+    NEXTCLADE_RUN(
+        EXTRACT_CONSENSUS_REGIONS.out.consensus_regions,
+        nextclade_db
+    )
 
     ch_resistance_report_input = SIERRALOCAL.out.json
         .join(RESISTANCE_TABLES.out.mutation_csv, by: [0])
         .join(RESISTANCE_TABLES.out.resistance_csv, by: [0])
-        .join(nextclade_report, by: [0])
-        .join(consensus, by: [0])
-        .join(CONSENSUS_LIFTOFF.out.gff3, by: [0])
-        .join(ivar_tsv, by: [0])
+        .join(NEXTCLADE_RUN.out.csv, by: [0])
+        .join(EXTRACT_CONSENSUS_REGIONS.out.consensus_regions, by: [0])
 
     RESISTANCE_REPORT(
         ch_resistance_report_input,
