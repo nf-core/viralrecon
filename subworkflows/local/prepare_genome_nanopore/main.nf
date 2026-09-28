@@ -19,14 +19,11 @@ workflow PREPARE_GENOME_NANOPORE {
     fasta
     gff
     primer_bed
-    bowtie2_index
     nextclade_dataset
     nextclade_dataset_name
     nextclade_dataset_tag
 
     main:
-
-    ch_versions = channel.empty()
 
     //
     // Uncompress genome fasta file if required
@@ -35,7 +32,7 @@ workflow PREPARE_GENOME_NANOPORE {
         GUNZIP_FASTA (
             [ [:], fasta ]
         )
-        ch_fasta    = GUNZIP_FASTA.out.gunzip.map { it[1] }
+        ch_fasta    = GUNZIP_FASTA.out.gunzip.map { _meta, gunzip -> gunzip }
     } else {
         ch_fasta = channel.value(file(fasta))
     }
@@ -49,7 +46,7 @@ workflow PREPARE_GENOME_NANOPORE {
             GUNZIP_GFF (
                 [ [:], gff ]
             )
-            ch_gff      = GUNZIP_GFF.out.gunzip.map { it[1] }
+            ch_gff      = GUNZIP_GFF.out.gunzip.map { _meta, gunzip -> gunzip }
         } else {
             ch_gff = channel.value(file(gff))
         }
@@ -59,11 +56,12 @@ workflow PREPARE_GENOME_NANOPORE {
     // Create chromosome sizes file
     //
     SAMTOOLS_FAIDX (
-        ch_fasta.map { [ [:], it, [] ] },
+        ch_fasta.map { fasta_file ->
+            [ [:], fasta_file, [] ] },
         true
     )
-    ch_fai         = SAMTOOLS_FAIDX.out.fai.map { it[1] }
-    ch_chrom_sizes = SAMTOOLS_FAIDX.out.sizes.map { it[1] }
+    ch_fai         = SAMTOOLS_FAIDX.out.fai.map { _meta, fai -> fai  }
+    ch_chrom_sizes = SAMTOOLS_FAIDX.out.sizes.map { _meta, sizes -> sizes }
 
     //
     // Prepare reference files required for variant calling
@@ -75,7 +73,7 @@ workflow PREPARE_GENOME_NANOPORE {
                 UNTAR_KRAKEN2_DB (
                     [ [:], params.kraken2_db ]
                 )
-                ch_kraken2_db = UNTAR_KRAKEN2_DB.out.untar.map { it[1] }
+                ch_kraken2_db = UNTAR_KRAKEN2_DB.out.untar.map { _meta, kraken2_db -> kraken2_db }
             } else {
                 ch_kraken2_db = channel.value(file(params.kraken2_db))
             }
@@ -96,7 +94,7 @@ workflow PREPARE_GENOME_NANOPORE {
             GUNZIP_PRIMER_BED (
                 [ [:], primer_bed ]
             )
-            ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { it[1] }
+            ch_primer_bed = GUNZIP_PRIMER_BED.out.gunzip.map { _meta, gunzip -> gunzip }
         } else {
             ch_primer_bed = channel.value(file(primer_bed))
         }
@@ -119,14 +117,13 @@ workflow PREPARE_GENOME_NANOPORE {
     // Prepare Nextclade dataset
     //
     ch_nextclade_db = channel.empty()
-    ch_versions = channel.empty()
     if (!params.skip_consensus && !params.skip_nextclade) {
         if (nextclade_dataset) {
             if (nextclade_dataset.endsWith('.tar.gz')) {
                 UNTAR (
                     [ [:], nextclade_dataset ]
                 )
-                ch_nextclade_db = UNTAR.out.untar.map { it[1] }
+                ch_nextclade_db = UNTAR.out.untar.map { _meta, untar -> untar }
             } else {
                 ch_nextclade_db = channel.value(file(nextclade_dataset))
             }
@@ -136,7 +133,6 @@ workflow PREPARE_GENOME_NANOPORE {
                 nextclade_dataset_tag
             )
             ch_nextclade_db = NEXTCLADE_DATASETGET.out.dataset
-            ch_versions     = ch_versions.mix(NEXTCLADE_DATASETGET.out.versions)
         }
     }
 
@@ -178,6 +174,4 @@ workflow PREPARE_GENOME_NANOPORE {
     kraken2_db           = ch_reference_kraken2_db           // path: kraken2_db/
     snpeff_db            = ch_reference_snpeff_db            // path: snpeff_db
     snpeff_config        = ch_reference_snpeff_config        // path: snpeff.config
-
-    versions             = ch_versions                       // channel: versions.yml
 }

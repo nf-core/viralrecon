@@ -20,8 +20,6 @@ workflow ASSEMBLY_QC {
 
     main:
 
-    ch_versions = channel.empty()
-
     //
     // Run blastn on assembly scaffolds
     //
@@ -52,13 +50,14 @@ workflow ASSEMBLY_QC {
     ch_quast_tsv     = channel.empty()
     if (!params.skip_assembly_quast) {
         scaffolds
-            .collect{ it[1] }
+            .collect{ _meta, scaffolds_file -> scaffolds_file }
             .map { scaffolds_collect -> tuple([id: "quast"], scaffolds_collect) }
             .set { ch_to_quast }
 
         QUAST (
             ch_to_quast,
-            fasta.map { [ [:], it ] },
+            fasta.map { fasta_files ->
+                [ [:], fasta_files ] },
             gff
         )
         ch_quast_results = QUAST.out.results
@@ -72,7 +71,8 @@ workflow ASSEMBLY_QC {
     if (!params.skip_abacas) {
         ABACAS (
             scaffolds,
-            fasta.map { [ [:], it ] }
+            fasta.map { fasta_files ->
+                [ [:], fasta_files ] }
         )
         ch_abacas_results = ABACAS.out.results
     }
@@ -88,7 +88,6 @@ workflow ASSEMBLY_QC {
     ch_plasmidid_database = channel.empty()
     ch_plasmidid_fasta    = channel.empty()
     ch_plasmidid_kmer     = channel.empty()
-    ch_versions           = channel.empty()
     if (!params.skip_plasmidid) {
         PLASMIDID (
             scaffolds,
@@ -102,7 +101,6 @@ workflow ASSEMBLY_QC {
         ch_plasmidid_database = PLASMIDID.out.database
         ch_plasmidid_fasta    = PLASMIDID.out.fasta_files
         ch_plasmidid_kmer     = PLASMIDID.out.kmer
-        ch_versions           = PLASMIDID.out.versions
     }
 
     emit:
@@ -123,5 +121,4 @@ workflow ASSEMBLY_QC {
     plasmidid_fasta    = ch_plasmidid_fasta    // channel: [ val(meta), [ fasta_files/ ] ]
     plasmidid_kmer     = ch_plasmidid_kmer     // channel: [ val(meta), [ kmer/ ] ]
 
-    versions           = ch_versions           // channel: versions.yml
 }

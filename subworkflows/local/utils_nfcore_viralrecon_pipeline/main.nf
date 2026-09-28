@@ -86,7 +86,8 @@ workflow PIPELINE_INITIALISATION {
         show_hidden,
         before_text,
         after_text,
-        command
+        command,
+        false
     )
 
     //
@@ -103,7 +104,7 @@ workflow PIPELINE_INITIALISATION {
         channel
             .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
             .map {
-                meta, fastq_1, fastq_2, barcode->
+                meta, fastq_1, fastq_2, _barcode->
                     if (!fastq_2) {
                         return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
                     } else {
@@ -111,9 +112,7 @@ workflow PIPELINE_INITIALISATION {
                     }
             }
             .groupTuple()
-            .map {
-                validateInputSamplesheet(it)
-            }
+            .map { sample_group -> validateInputSamplesheet(sample_group) }
             .map {
                 meta, fastqs ->
                     return [ meta, fastqs.flatten() ]
@@ -125,7 +124,7 @@ workflow PIPELINE_INITIALISATION {
             channel
                 .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
                 .map {
-                    meta, fastq_1, fastq_2, barcode->
+                    meta, _fastq_1, _fastq_2, barcode->
                         tuple( "barcode"+ String.format('%02d', barcode).toString(), meta.id)
                 }
                 .set { ch_samplesheet }
@@ -345,7 +344,7 @@ def getColFromFile(input_file, col=0, uniqify=false, sep='\t') {
 //
 def getNumLinesInFile(input_file) {
     def num_lines = 0
-    input_file.eachLine { line ->
+    input_file.eachLine { _line ->
         num_lines += 1
     }
     return num_lines
@@ -354,7 +353,7 @@ def getNumLinesInFile(input_file) {
 //
 // Function to generate an error if contigs in BED file do not match those in reference genome
 //
-def checkContigsInBED(fai_contigs, bed_contigs, log) {
+def checkContigsInBED(fai_contigs, bed_contigs, _log) {
     def intersect = bed_contigs.intersect(fai_contigs)
     if (intersect.size() != bed_contigs.size()) {
         def diff = bed_contigs.minus(intersect).sort()
@@ -381,7 +380,7 @@ def getNextcladeFieldMapFromCsv(nextclade_report) {
         if (row_index == 0) {
             headers = vals
         } else {
-            def cells = headers.eachWithIndex { header, header_index ->
+            headers.eachWithIndex { header, header_index ->
                 def val = (header_index <= vals.size()-1) ? vals[header_index] : ''
                 field_map[header] = val ?: 'NA'
             }
@@ -414,7 +413,6 @@ def getFlagstatMappedReads(flagstat_file, params) {
     }
 
     def pass = false
-    def logname = flagstat_file.getBaseName() - 'flagstat'
     if (mapped_reads > params.min_mapped_reads.toInteger()) {
         pass = true
     }

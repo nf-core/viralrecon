@@ -8,7 +8,7 @@ keywords:
 components:
   - bcftools/mpileup
   - bcftools/norm
-  - vcf_tabix_stats
+  - vcf_bgzip_tabix_stats
   - variants_qc
 input:
   - bam:

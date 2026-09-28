@@ -8,6 +8,9 @@
                 "ARTIC_MINION": {
                     "artic": "1.6.2"
                 },
+                "BCFTOOLS_INDEX": {
+                    "bcftools": "1.23.1"
+                },
                 "BCFTOOLS_QUERY": {
                     "bcftools": "1.23.1"
                 },
@@ -32,6 +35,10 @@
                 "GUNZIP_GFF": {
                     "gunzip": 1.13
                 },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
+                },
                 "KRAKEN2_KRAKEN2": {
                     "kraken2": "2.1.6",
                     "pigz": 2.8
@@ -48,10 +55,10 @@
                     "mosdepth": "0.3.14"
                 },
                 "NANOPLOT": {
-                    "nanoplot": "1.46.1"
+                    "NanoPlot": "1.47.0"
                 },
                 "PANGOLIN_RUN": {
-                    "pangolin": "4.3.1"
+                    "pangolin": 4.4
                 },
                 "PLOT_MOSDEPTH_REGIONS_AMPLICON": {
                     "r-base": "4.2.0"
@@ -66,22 +73,22 @@
                     "quast": "5.3.0"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_VIEW": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -91,12 +98,6 @@
                 },
                 "SNPSIFT_EXTRACTFIELDS": {
                     "snpsift": 4.3
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNTAR": {
                     "untar": 1.34
@@ -776,6 +777,7 @@
                 "multiqc/multiqc_data/mosdepth_perchrom.yaml",
                 "multiqc/multiqc_data/multiqc.log",
                 "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_amplicon_heatmap.yaml",
                 "multiqc/multiqc_data/multiqc_bcftools_stats.yaml",
                 "multiqc/multiqc_data/multiqc_citations.yaml",
                 "multiqc/multiqc_data/multiqc_data.json",
@@ -985,17 +987,18 @@
                 "mosdepth_cov_dist.yaml:md5,eca5b56c9660fc68bc8d5055c8c91cfe",
                 "mosdepth_cumcov_dist.yaml:md5,eca5b56c9660fc68bc8d5055c8c91cfe",
                 "mosdepth_perchrom.yaml:md5,ced2580d593ef240d12312d1ab13335d",
+                "multiqc_amplicon_heatmap.yaml:md5,d61d51f694aa88aff6811157fc2ce9dc",
                 "multiqc_bcftools_stats.yaml:md5,4cbfd6ce6a5071ec628f4fc3d643e4cc",
                 "multiqc_citations.yaml:md5,f6a5976bbb1dbb8a839f64b168d37b37",
                 "multiqc_fail_mapped_samples_nanopore.yaml:md5,60ac646e6d248e9fd52c687e2adb9f1d",
                 "multiqc_fail_no_barcode_samples_table.yaml:md5,a2068fd5931030a8d949a29c63c3fadf",
                 "multiqc_kraken.yaml:md5,7396b17b46925e178581dd7c25bc1420",
                 "multiqc_nextclade_clade.yaml:md5,cf5a1379e07f4414d64414738dfd2b16",
-                "multiqc_pangolin.yaml:md5,99b13cbe1975345678da242d8f276708",
+                "multiqc_pangolin.yaml:md5,084250ab4cee8c591212517a64c03af4",
                 "multiqc_quast.yaml:md5,8cadb76521768c3ad7c1d6cc05033b49",
                 "multiqc_snpeff.yaml:md5,af6465b4dd08db7020e7f5569da9162e",
                 "multiqc_summary_variants_metrics_plot_table.yaml:md5,1d43187c88e4ea455778e01c3158a6e5",
-                "pangolin_run_table.yaml:md5,9a4d14095f8dac4f9ca55c99c677df1d",
+                "pangolin_run_table.yaml:md5,837bf50f8200a0a9df68c3cf98b6069b",
                 "pycoqc_count_plot_Bases.yaml:md5,7d2db959e6f191000642d17d29326b1e",
                 "pycoqc_count_plot_Reads.yaml:md5,647ee3cee55375c44fffb6887e8a38a1",
                 "pycoqc_read_qual_plot_All_Reads.yaml:md5,ca731aa52ca76ea80002fc8cf2c55030",
@@ -1011,6 +1014,6 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-27T11:14:19.739426176"
+        "timestamp": "2026-09-17T12:59:33.225205784"
     }
 }

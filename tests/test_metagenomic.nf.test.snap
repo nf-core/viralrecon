@@ -14,6 +14,9 @@
                 "BCFTOOLS_FILTER": {
                     "bcftools": "1.23.1"
                 },
+                "BCFTOOLS_INDEX": {
+                    "bcftools": "1.23.1"
+                },
                 "BCFTOOLS_MPILEUP": {
                     "bcftools": "1.23.1"
                 },
@@ -50,7 +53,7 @@
                     "cat": 9.5
                 },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -85,6 +88,10 @@
                 "GUNZIP_SCAFFOLDS": {
                     "gunzip": 1.13
                 },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
+                },
                 "KRAKEN2_KRAKEN2": {
                     "kraken2": "2.1.6",
                     "pigz": 2.8
@@ -101,10 +108,10 @@
                     "mosdepth": "0.3.14"
                 },
                 "PANGOLIN_RUN": {
-                    "pangolin": "4.3.1"
+                    "pangolin": 4.4
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_GENOME": {
                     "r-base": "4.2.0"
@@ -116,22 +123,22 @@
                     "sed": 4.9
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -144,12 +151,6 @@
                 },
                 "SPADES": {
                     "spades": "4.1.0"
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNICYCLER": {
                     "unicycler": "0.5.1"
@@ -1116,17 +1117,17 @@
                 "SRR11140750.contigs.fa.gz:md5,4ffe40588e6cb22964710c9face29a10",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SRR11140744.fastp.json:md5,eeef4cc7bbf2d826576c1f5002710763",
-                "SRR11140746.fastp.json:md5,4a80e51d6f16c82f2fce9ee5e780a0f0",
-                "SRR11140748.fastp.json:md5,6f1310a5949e0137f9c314a1f5e24a3e",
-                "SRR11140750.fastp.json:md5,7586a8f3b97c3fa2a6d62b26e9dee3bb",
+                "SRR11140744.fastp.json:md5,79f95b57073a55dc3b9ee56b92456e55",
+                "SRR11140746.fastp.json:md5,8377218239bc71ce20b88aab0fb8e1d7",
+                "SRR11140748.fastp.json:md5,0f6f0ba2731cc30ecfca96c7beca6bb4",
+                "SRR11140750.fastp.json:md5,95cc91af7b3177dbd8f6f2b08a590e8d",
                 "SRR11140744.kraken2.report.txt:md5,8af6d6b36473056da22d0a01e65a468a",
                 "SRR11140746.kraken2.report.txt:md5,f0f4463333187c4d5d14b16f1cafc999",
                 "SRR11140748.kraken2.report.txt:md5,dcb606266fa1e1b47b4ef5d275159490",
                 "SRR11140750.kraken2.report.txt:md5,980edcdd341cbd5ae3bcaff214d8eb5d",
                 "bcftools-stats-subtypes.yaml:md5,759a5282c411d9d5203874115a2d9564",
                 "bowtie2_pe_plot.yaml:md5,8b559908ec7f12c308d36c3942ad5b12",
-                "fastp-insert-size-plot.yaml:md5,4d26b67ad0bde628204c99855bebdeba",
+                "fastp-insert-size-plot.yaml:md5,5dd07067dc2e48808f63554d1913ca0f",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,fc508e630de1c929a233eae1735d9c95",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,28e2d372104dae37d8c15d4926c20bd4",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,cabdd08c36d1cd29a4ba3c7f8df7d7d0",
@@ -1167,16 +1168,16 @@
                 "multiqc_bowtie2.yaml:md5,79da4033d4c14f7659ef2628b6632eaa",
                 "multiqc_citations.yaml:md5,99f30b0065520c10671a0c6c4b86d39d",
                 "multiqc_fail_mapped_samples_table.yaml:md5,f2ad02c19741b85103893b98fb48f2ac",
-                "multiqc_fastp.yaml:md5,3c3aba448f12dcc2cfd32b2db5df826a",
+                "multiqc_fastp.yaml:md5,a2f4eec08caff9b8dfaf047a92abee6c",
                 "multiqc_fastqc.yaml:md5,901de4dd3a3e2dd5d1c2f0029290b2f7",
                 "multiqc_kraken.yaml:md5,8355afff337993f7bd71d9a4671fcac9",
                 "multiqc_nextclade_clade.yaml:md5,8cea6e2cb0edc3025e69e6ed13522238",
-                "multiqc_pangolin.yaml:md5,2eed6a0b1abded6d342d51c9857390cb",
+                "multiqc_pangolin.yaml:md5,00bf3300498050eb5febdb4572717814",
                 "multiqc_quast_quast_minia.yaml:md5,87124e7b3ddc0c96fd6715f13113f096",
                 "multiqc_quast_quast_spades.yaml:md5,b576c73d248f89766f36106c9b1bded7",
                 "multiqc_quast_quast_variants.yaml:md5,7b6469c29501678f461dd328a1770625",
                 "multiqc_snpeff.yaml:md5,9fc21a22464521276884e66aea8d23ea",
-                "pangolin_run_table.yaml:md5,d64433a2458cbb5680418118ada56578",
+                "pangolin_run_table.yaml:md5,20603e4b8c8aecb6600d45f6c12e772f",
                 "snpeff_effects.yaml:md5,b4d81ab8982624a4d6332f31cf3616b0",
                 "snpeff_qualities.yaml:md5,fad625bbfe4f770ace8b139206a6dd33",
                 "snpeff_variant_effects_class.yaml:md5,62eaf9b9f12a1f620b869451e90b7888",
@@ -1191,12 +1192,12 @@
                 "SRR11140746.consensus.base_counts.tsv:md5,648e735d433e0b2334752e268485184b",
                 "SRR11140748.consensus.N_run.tsv:md5,a2f9bda6f4bb412813b34d8850d23479",
                 "SRR11140748.consensus.base_counts.tsv:md5,fd729bf0246f9888a0c9c22894ee9b1e",
-                "SRR11140744.csv:md5,afb3bebfab9f26ae23c16214a93f6d76",
-                "SRR11140746.csv:md5,762cf1896e3073eefb1205df304f1e4d",
-                "SRR11140748.csv:md5,0f22551cbd401be0d000182ab468a1ee",
-                "SRR11140744.pangolin.csv:md5,a906881665a5b2e1339f6e1d586eb547",
-                "SRR11140746.pangolin.csv:md5,19200c32a772817636935da971a3ed42",
-                "SRR11140748.pangolin.csv:md5,2efe28dc3ee2543be42d3838659dca70",
+                "SRR11140744.csv:md5,4d76c2b9a1469e5212c7a1f95c27fce5",
+                "SRR11140746.csv:md5,71d91c71df421a1d1e38e35262ffa31f",
+                "SRR11140748.csv:md5,bfc684722955b956c62d0ecb42b3bfdc",
+                "SRR11140744.pangolin.csv:md5,95ffd8b8bc8eb4a8715ef1b8d9b77a7c",
+                "SRR11140746.pangolin.csv:md5,d65dfa3b2a0b472dfddabc6b14302990",
+                "SRR11140748.pangolin.csv:md5,9da8e0bab0d7c91f630ef959db8397a4",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SRR11140744.snpsift.txt:md5,366bbbac9b8b7fcc170061d6ddd20410",
                 "SRR11140746.snpsift.txt:md5,366bbbac9b8b7fcc170061d6ddd20410",
@@ -1213,22 +1214,22 @@
                 "SRR11140748.mosdepth.summary.txt:md5,4e90f1b7be568381a2d626f66006d3dd",
                 "SRR11140744.sorted.bam.flagstat:md5,c8b455397e9f088c9ebcdb00d551fa7a",
                 "SRR11140744.sorted.bam.idxstats:md5,45a753bbdd38e656e84de27ae6f2803b",
-                "SRR11140744.sorted.bam.stats:md5,337aeec3af47bae6220b3472b8704bd4",
+                "SRR11140744.sorted.bam.stats:md5,5767f7d8c6facda75e473699ae875c8f",
                 "SRR11140746.sorted.bam.flagstat:md5,f5cdc8e2c34917ee50ea0f28fa08098c",
                 "SRR11140746.sorted.bam.idxstats:md5,48033acbc0bf0021c39b7e6f64509d32",
-                "SRR11140746.sorted.bam.stats:md5,782baca9e61c8a90f09883b2594c6f44",
+                "SRR11140746.sorted.bam.stats:md5,7f5addbc378c7b0478677d3a5fbc109d",
                 "SRR11140748.sorted.bam.flagstat:md5,e4126ed4ccfa2e3e23b501413eb7cecc",
                 "SRR11140748.sorted.bam.idxstats:md5,26976ca645c7e5e843d5e5ae3ec71242",
-                "SRR11140748.sorted.bam.stats:md5,e2f7a79f089858fc33cec5199d91b805",
+                "SRR11140748.sorted.bam.stats:md5,617660a71e6107158626d700d46c2e71",
                 "SRR11140750.sorted.bam.flagstat:md5,b3dd1cba348c0f22fe71245d6289df63",
                 "SRR11140750.sorted.bam.idxstats:md5,afb83ab4932278c2b98bea310f53ce17",
-                "SRR11140750.sorted.bam.stats:md5,576f79afced69017ddeb397e06ac8791"
+                "SRR11140750.sorted.bam.stats:md5,50947064568bec9f1def4bb1a23fe268"
             ]
         ],
         "meta": {
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-05-11T11:40:25.108205891"
+        "timestamp": "2026-09-17T13:07:25.933545955"
     }
 }

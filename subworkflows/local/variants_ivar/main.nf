@@ -5,7 +5,7 @@
 include { IVAR_VARIANTS         } from '../../../modules/nf-core/ivar/variants/main'
 include { IVAR_VARIANTS_TO_VCF  } from '../../../modules/local/ivar_variants_to_vcf'
 include { BCFTOOLS_SORT         } from '../../../modules/nf-core/bcftools/sort/main'
-include { VCF_TABIX_STATS       } from '../vcf_tabix_stats'
+include { VCF_BGZIP_TABIX_STATS } from '../vcf_bgzip_tabix_stats'
 include { VARIANTS_QC           } from '../variants_qc'
 include { getNumLinesInFile     } from '../../../subworkflows/local/utils_nfcore_viralrecon_pipeline'
 
@@ -15,16 +15,12 @@ workflow VARIANTS_IVAR {
     bam                 // channel: [ val(meta), [ bam ] ]
     fasta               // channel: /path/to/genome.fasta
     fai                 // channel: /path/to/genome.fai
-    sizes               // channel: /path/to/genome.sizes
     gff                 // channel: /path/to/genome.gff
-    bed                 // channel: /path/to/primers.bed
     snpeff_db           // channel: /path/to/snpeff_db/
     snpeff_config       // channel: /path/to/snpeff.config
     ivar_multiqc_header // channel: /path/to/multiqc_header for ivar variants
 
     main:
-
-    ch_versions = channel.empty()
 
     //
     // Call variants
@@ -36,13 +32,12 @@ workflow VARIANTS_IVAR {
         gff,
         params.save_mpileup
     )
-    ch_versions = ch_versions.mix(IVAR_VARIANTS.out.versions)
 
     // Filter out samples with 0 variants
     IVAR_VARIANTS
         .out
         .tsv
-        .filter { meta, tsv -> getNumLinesInFile(tsv) > 1 }
+        .filter { _meta, tsv -> getNumLinesInFile(tsv) > 1 }
         .set { ch_ivar_tsv }
 
     //
@@ -58,7 +53,7 @@ workflow VARIANTS_IVAR {
         IVAR_VARIANTS_TO_VCF.out.vcf
     )
 
-    VCF_TABIX_STATS (
+    VCF_BGZIP_TABIX_STATS (
         BCFTOOLS_SORT.out.vcf,
         [ [:], [] ],
         [ [:], [] ],
@@ -69,13 +64,9 @@ workflow VARIANTS_IVAR {
     // Run downstream tools for variants QC
     //
     VARIANTS_QC (
-        bam,
         BCFTOOLS_SORT.out.vcf,
-        VCF_TABIX_STATS.out.stats,
         fasta,
-        sizes,
         gff,
-        bed,
         snpeff_db,
         snpeff_config
     )
@@ -88,8 +79,8 @@ workflow VARIANTS_IVAR {
     multiqc_tsv     = IVAR_VARIANTS_TO_VCF.out.tsv    // channel: [ val(meta), [ tsv ] ]
 
     vcf             = BCFTOOLS_SORT.out.vcf           // channel: [ val(meta), [ vcf ] ]
-    tbi             = VCF_TABIX_STATS.out.tbi         // channel: [ val(meta), [ tbi ] ]
-    stats           = VCF_TABIX_STATS.out.stats       // channel: [ val(meta), [ txt ] ]
+    tbi             = VCF_BGZIP_TABIX_STATS.out.tbi   // channel: [ val(meta), [ tbi ] ]
+    stats           = VCF_BGZIP_TABIX_STATS.out.stats // channel: [ val(meta), [ txt ] ]
 
     snpeff_vcf      = VARIANTS_QC.out.snpeff_vcf      // channel: [ val(meta), [ vcf.gz ] ]
     snpeff_tbi      = VARIANTS_QC.out.snpeff_tbi      // channel: [ val(meta), [ tbi ] ]
@@ -98,5 +89,4 @@ workflow VARIANTS_IVAR {
     snpeff_txt      = VARIANTS_QC.out.snpeff_txt      // channel: [ val(meta), [ txt ] ]
     snpeff_html     = VARIANTS_QC.out.snpeff_html     // channel: [ val(meta), [ html ] ]
     snpsift_txt     = VARIANTS_QC.out.snpsift_txt     // channel: [ val(meta), [ txt ] ]
-    versions        = ch_versions                     // channel: versions.yml
 }
