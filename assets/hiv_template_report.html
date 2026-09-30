@@ -43,18 +43,17 @@
       <div class="summary-title summary-title-compact">
         <h2>Quality Check</h2>
       </div>
+      {% for line in sample.sequence_summary %}
+        {% if line is string and line.startswith("Mutation detection threshold (MDT):") %}
+      <div class="quality-check-note">Notes: Minimum mutation frequency: {{ line.split(":", 1)[1] | trim | replace("≥", "") | trim }}</div>
+        {% endif %}
+      {% endfor %}
       <div class="sequence-summary-info">
         <ul class="quality-check-list">
           {% for subtype in sample.subtypes %}
           <li class="subtype-line">
             <span class="meta-label">Subtype ({{ subtype.label | replace("_", "-") }}):</span>
             <span>{{ subtype.subtype }}</span>
-            <span
-              class="info-icon"
-              title="This subtype was assigned by Nextclade using the {{ subtype.label | replace('_', '-') }} regional consensus sequence."
-            >
-              ⓘ
-            </span>
           </li>
           {% endfor %}
           {% for line in sample.sequence_summary %}
