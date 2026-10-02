@@ -36,6 +36,19 @@
     <!-- HEADER -->
     <div class="sample-strip">{{ sample.sample_name }}</div>
 
+    <details class="report-details metadata-details" open>
+      <summary>Settings</summary>
+      <div class="metadata-grid metadata-grid-compact settings-grid">
+        {% for setting_name in ["Minimum read depth", "Nucleotide mixture threshold", "Minimum quality threshold", "Mutation detection threshold"] %}
+          {% for line in sample.sequence_summary %}
+            {% if line is string and line.startswith(setting_name) %}
+              <div>{{ labeled_line(line) }}</div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </details>
+
     <details class="report-details overview-details" open>
       <summary>Sample Overview</summary>
 
@@ -43,11 +56,6 @@
       <div class="summary-title summary-title-compact">
         <h2>Quality Check</h2>
       </div>
-      {% for line in sample.sequence_summary %}
-        {% if line is string and line.startswith("Mutation detection threshold (MDT):") %}
-      <div class="quality-check-note">Notes: Minimum mutation frequency: {{ line.split(":", 1)[1] | trim | replace("≥", "") | trim }}</div>
-        {% endif %}
-      {% endfor %}
       <div class="sequence-summary-info">
         <ul class="quality-check-list">
           {% for subtype in sample.subtypes %}
@@ -64,7 +72,7 @@
             <span class="meta-label">% pol polymorphisms (ambiguous sites):</span>
             <span
               class="help-icon"
-              title="Percentage of ambiguous sites across pol gene. Values above 5% are highlighted for potential contamination."
+              title="Percentage of ambiguous sites across pol gene. Mutation detection threshold (MDT) ≥10%. Values above 5% are highlighted for potential contamination."
               aria-label="Explanation of pol polymorphism proportion"
               tabindex="0"
             >
@@ -333,19 +341,6 @@
     {% endfor %}
     </details>
     {% endif %}
-
-    <details class="report-details metadata-details" open>
-      <summary>Settings</summary>
-      <div class="metadata-grid metadata-grid-compact">
-        {% for setting_name in ["Minimum read depth", "Nucleotide mixture threshold", "Minimum quality threshold", "Mutation detection threshold"] %}
-          {% for line in sample.sequence_summary %}
-            {% if line is string and line.startswith(setting_name) %}
-              <div>{{ labeled_line(line) }}</div>
-            {% endif %}
-          {% endfor %}
-        {% endfor %}
-      </div>
-    </details>
 
     <details class="report-details metadata-details" open>
       <summary>Versions</summary>
