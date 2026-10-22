@@ -22,6 +22,7 @@ process IVAR_VARIANTS_TO_VCF {
 
     script:  // This script is bundled with the pipeline, in nf-core/viralrecon/bin/
     def args = task.ext.args ?: ''
+    def args2 = task.ext.args2 ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     ivar_variants_to_vcf.py \\
@@ -29,6 +30,7 @@ process IVAR_VARIANTS_TO_VCF {
         ${prefix}.vcf \\
         --fasta $fasta \\
         $args \\
+        $args2 \\
         > ${prefix}.variant_counts.log
 
     cat $header ${prefix}.variant_counts.log > ${prefix}.variant_counts_mqc.tsv
