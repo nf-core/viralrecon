@@ -70,31 +70,30 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 
 | Dependency          | Old version | New version      |
 | ------------------- | ----------- | ---------------- |
-| `blast`             | 2.16.0      | 2.17.0           |
-| `Freyja`            | 2.0.1       | 2.0.6            |
-| `sierra-local`      |             | 0.4.3            |
-| `liftoff`           |             | 1.6.3            |
-| `pysam`             |             | 0.23.3           |
+| `artic/aligntrim`   | 1.0.2       | 1.2.0            |
 | `bcftools`          | 1.22        | 1.23.1           |
-| `htslib`            | 1.22        | 1.24             |
+| `blast`             | 2.16.0      | 2.17.0           |
+| `clair3`            |             | 2.0.0            |
 | `cutadapt`          | 5.0         | 5.2              |
 | `fastp`             | 1.0.1       | 1.3.6            |
+| `Freyja`            | 2.0.1       | 2.0.6            |
+| `htslib`            | 1.22        | 1.24             |
+| `liftoff`           |             | 1.6.3            |
 | `minia`             | 3.2.6       | 3.2.6=h22625ea_6 |
-| `mosdepth`          | 0.3.11      | 0.3.14           |
-| `samtools`          | 1.22.1      | 1.24             |
-| `cutadapt`          | 5.0         | 5.2              |
-| `multiqc`           | 1.34        | 1.35             |
-| `artic/aligntrim`   | 1.0.2       | 1.2.0            |
-| `clair3`            |             | 2.0.0            |
 | `minimap2`          |             | 2.30             |
+| `mosdepth`          | 0.3.11      | 0.3.14           |
+| `multiqc`           | 1.34        | 1.35             |
 | `nanoplot`          | 1.46.1      | 1.47.0           |
 | `nextclade`         | 3.11.0      | 3.21.2           |
-| `pangolin-data`     | 1.32        | 1.39             |
 | `pangolin`          | 4.3.1       | 4.4              |
+| `pangolin-data`     | 1.32        | 1.39             |
+| `parallel`          |             | 20210222         |
+| `picard`            | 3.4.0       | 3.5.0            |
+| `pysam`             |             | 0.23.3           |
+| `samtools`          | 1.22.1      | 1.24             |
+| `sierra-local`      |             | 0.4.3            |
 | `snakemake`         | 7.32.4      |                  |
 | `snakemake-minimal` |             | 9.21.1           |
-| `picard`            | 3.4.0       | 3.5.0            |
-| `parallel`          |             | 20210222         |
 | `tabix`             | 1.21        |                  |
 | `xz`                |             | 5.8.3            |
 
