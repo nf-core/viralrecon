@@ -9,7 +9,7 @@ components:
   - ivar/variants
   - ivar/variants/to/vcf
   - bcftools/sort
-  - vcf_tabix_stats
+  - vcf_bgzip_tabix_stats
   - variants_qc
 input:
   - bam:

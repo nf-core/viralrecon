@@ -31,13 +31,13 @@ body {
 }
 
 .metadata-grid {
-  width: 90%;
-  margin: 0 auto 20px auto;
+  width: 96%;
+  margin: 10px auto 12px auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 6px 28px;
   color: #1b2f40;
-  font-size: 0.95em;
+  font-size: 0.9em;
   line-height: 1.35;
 }
 
@@ -61,16 +61,11 @@ body {
 .summary-title {
   background-color: #f0f6fc;
   border: 1px solid #97b5cf;
-  padding: 12px 25px;
-  margin: 20px auto 5px auto;
+  padding: 8px 18px;
+  margin: 12px auto 5px auto;
   border-radius: 3px;
   width: 95%;
   box-sizing: border-box;
-}
-
-.summary-title-compact {
-  padding: 8px 18px;
-  margin-top: 12px;
 }
 
 .summary-title h2 {
@@ -98,10 +93,36 @@ body {
   color: #1b2f40;
 }
 
+.sequence-summary-info .missing-codons,
+.sequence-warning-box {
+  color: #c62828;
+}
+
+.subtype-difference {
+  color: #c62828;
+  font-weight: bold;
+}
+
+.sequence-warning-box {
+  background-color: #f5f5f5;
+  border-radius: 5px;
+  padding: 12px 25px;
+  margin-top: 12px;
+}
+
+.sequence-warning-box ul {
+  list-style-type: disc;
+  padding-left: 18px;
+  margin: 0;
+}
+
+.sequence-summary-info .sequence-warning-box li {
+  color: inherit;
+}
+
 .quality-check-list {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  column-gap: 28px;
   row-gap: 4px;
 }
 
@@ -110,10 +131,6 @@ body {
   display: flex;
   align-items: center;
   gap: 4px;
-}
-
-.mixed-site-line {
-  grid-column: 1 / -1;
 }
 
 /* Collapsible report blocks */
@@ -142,13 +159,6 @@ body {
   margin-top: 22px;
 }
 
-.metadata-grid-compact {
-  width: 96%;
-  margin-top: 10px;
-  margin-bottom: 12px;
-  font-size: 0.9em;
-}
-
 .metadata-full-row {
   grid-column: 1 / -1;
 }
@@ -160,14 +170,6 @@ body {
     gap: 8px;
   }
 
-  .quality-check-list {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .mixed-site-line {
-    grid-column: auto;
-  }
-
   details:not(.report-details) summary {
     line-height: 1.6;
   }
@@ -175,20 +177,6 @@ body {
   .copy-button {
     margin-left: 6px;
   }
-}
-
-/* Subtype info icon styles */
-.info-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 8px;
-  height: 8px;
-  color: #1b2f40;
-  cursor: help;
-  font-size: 12px;
-  line-height: 1;
-  vertical-align: middle;
 }
 
 .help-icon {
@@ -207,7 +195,7 @@ body {
 }
 
 .mixed-site-value-high {
-  color: #b42318;
+  color: #c62828;
   font-weight: bold;
 }
 
@@ -247,8 +235,7 @@ body {
 .table-scroll {
   display: inline-block;
   max-height: 400px;
-  overflow-y: auto;
-  overflow-x: auto;
+  overflow: auto;
   margin: 10px 0 20px 0;
   border: 1px solid #97b5cf;
 }
@@ -304,7 +291,6 @@ th.sorted-desc::after {
 table thead th {
   position: sticky;
   top: 0;
-  background-color: #d6e4f2;
   z-index: 5;
 }
 
@@ -320,8 +306,8 @@ table thead th {
 }
 
 .unusual-row {
-  background-color: #d5f5ff !important;
-  border-left: 4px solid #00ccff;
+  background-color: #d8b4fe !important;
+  border-left: 4px solid #6b21a8;
 }
 
 .apobec-drm-row.sdrm-row.unusual-row {
@@ -375,16 +361,15 @@ table thead th {
 .mutation-comments {
   background-color: #e3effa;
   padding: 10px 15px;
-  margin: 15px 0 20px 0;
+  margin: 15px auto 20px;
   border-radius: 4px;
   width: 90%;
-  margin-left: auto;
-  margin-right: auto;
   box-sizing: border-box;
   border: 1px solid #97b5cf;
 }
 
-.mutation-comments strong {
+.mutation-comments > strong,
+.mutation-comments h4 {
   display: block;
   margin-bottom: 8px;
   font-size: 1em;

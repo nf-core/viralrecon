@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
+import sys
+from pathlib import Path
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 
@@ -20,6 +22,9 @@ def parse_args():
         "--interest_genes",
         default="PR,RT;IN",
         help='Gene groups separated by semicolons (default: "PR,RT;IN").',
+    )
+    parser.add_argument(
+        "--sample_id", required=True, help="Sample ID for separate fragment FASTA files."
     )
     parser.add_argument(
         "-o",
@@ -71,14 +76,12 @@ def read_gff_coordinates(gff_file):
             attributes = fields[8]
 
             # Extract gene name from attributes (Name=XXXX)
-            gene_name = None
             for attr in attributes.split(";"):
                 if attr.startswith("Name="):
                     gene_name = attr.replace("Name=", "")
+                    if gene_name:
+                        coords[gene_name] = (start, end, strand)
                     break
-
-            if gene_name:
-                coords[gene_name] = (start, end, strand)
 
     return coords
 
@@ -97,12 +100,18 @@ def extract_sequence(seq_record, start, end, strand):
 
 
 def extract_regions(seq_record, coordinates, gene_groups):
+    """Extract complete gene groups, skipping groups absent from the annotation."""
     regions = []
 
     for genes in gene_groups:
         missing = [gene for gene in genes if gene not in coordinates]
         if missing:
-            raise ValueError(f"Genes not found in GFF: {', '.join(missing)}")
+            print(
+                f"WARNING: Skipping gene group {','.join(genes)}; "
+                f"genes not found in GFF: {', '.join(missing)}",
+                file=sys.stderr,
+            )
+            continue
 
         gene_coordinates = sorted(
             [(gene, *coordinates[gene]) for gene in genes], key=lambda item: item[1]
@@ -125,6 +134,7 @@ def main():
     coordinates = read_gff_coordinates(args.gff)
     gene_groups = parse_interest_groups(args.interest_genes)
     regions = extract_regions(seq_record, coordinates, gene_groups)
+    output_dir = Path(args.output).parent
 
     output_records = [
         SeqRecord(
@@ -136,6 +146,11 @@ def main():
 
     for genes, sequence in regions:
         region_name = "_".join(genes)
+        SeqIO.write(
+            SeqRecord(sequence, id=args.sample_id, description=""),
+            output_dir / f"{args.sample_id}.{region_name}.fa",
+            "fasta",
+        )
         output_records.append(
             SeqRecord(
                 sequence,

@@ -127,7 +127,7 @@ def estimate_ambiguous_site_proportion(consensus_records):
     Estimate the proportion of ambiguous sites across POL gene.
 
     Ambiguous sites are IUPAC mixed-base codes (R, Y, S, W, K, M, B, D, H, and V).
-    The denominator is the number of non-N sites in both PR_RT and IN.
+    The denominator is the number of non-N sites in the available PR_RT and IN regions.
     """
 
     ambiguous_codes = set("RYSWKMBDHV")
@@ -137,6 +137,8 @@ def estimate_ambiguous_site_proportion(consensus_records):
     non_n_sites = 0
 
     for region in regions:
+        if region not in consensus_records:
+            continue
         sequence = consensus_records[region].seq.upper()
         ambiguous_sites += sum(base in ambiguous_codes for base in sequence)
         non_n_sites += sum(base != "N" for base in sequence)
@@ -163,13 +165,89 @@ def get_nextclade_subtypes(nextclade_file, consensus_records):
         if region in ("PR_RT", "IN")
     ]
 
+def parse_mutation_comments(json_path):
+    """Group gene comments by their Sierralocal comment type, avoiding repeats."""
+    with open(json_path, encoding="utf-8") as handle:
+        data = json.load(handle)[0]
+
+    comments = {}
+    entries = [
+        (entry["gene"]["name"], entry.get("mutations", []))
+        for entry in data.get("alignedGeneSequences", [])
+    ]
+    for entry in data.get("drugResistance", []):
+        mutations = [
+            mutation
+            for score in entry.get("drugScores", [])
+            for partial in score.get("partialScores", [])
+            for mutation in partial.get("mutations", [])
+        ]
+        entries.append((entry["gene"]["name"], mutations))
+
+    for gene, mutations in entries:
+        if gene not in ("PR", "RT", "IN"):
+            continue
+        for mutation in mutations:
+            if mutation["text"].endswith("X"):
+                continue
+            for comment in mutation.get("comments", []):
+                text = comment.get("text", "").strip()
+                if not text:
+                    continue
+                def mutation_list(match):
+                    position, excluded = match.groups()
+                    # Drug-score mutations may omit AAs; their text still contains the call.
+                    called_aas = mutation.get("AAs") or re.sub(
+                        r"^[A-Z*]\d+", "", mutation["text"]
+                    )
+                    amino_acids = "".join(
+                        aa for aa in called_aas
+                        if aa not in excluded and aa != mutation["text"][0]
+                    )
+                    return f"{mutation['text'][0]}{position}{amino_acids}"
+
+                text = re.sub(
+                    r"\$listMutsIn\{(\d+)\(NOT ([A-Z]+)\)\}", mutation_list, text
+                )
+                texts = comments.setdefault(gene, {}).setdefault(comment["type"], [])
+                if text not in texts:
+                    texts.append(text)
+    return comments
+
+
+def parse_sequence_warnings(json_path):
+    """Return validation messages displayed in the report's warning box."""
+    with open(json_path, encoding="utf-8") as handle:
+        data = json.load(handle)[0]
+
+    messages = []
+    for entry in data.get("alignedGeneSequences", []):
+        gene = entry["gene"]["name"]
+        if gene not in ("PR", "RT", "IN"):
+            continue
+        stops = list(dict.fromkeys(
+            f"{gene}:{mutation['consensus']}{mutation['position']}*"
+            for mutation in entry.get("mutations", [])
+            if mutation.get("hasStop") and not mutation["text"].endswith("X")
+        ))
+        if stops:
+            subject = "There is 1 stop codon" if len(stops) == 1 else f"There are {len(stops)} stop codons"
+            messages.append(f"{subject} in {gene}: {', '.join(stops)}.")
+
+    messages.extend(
+        result["message"].strip()
+        for result in data.get("validationResults", [])
+        if result["level"] in ("WARNING", "NOTE") and result["message"].strip()
+    )
+    return messages
+
+
 def parse_sequence_summary(json_path,
                            ivar_consensus_params=None, ivar_variant_maf=None,
                            ambiguous_site_summary=None):
     """
     Extract sequence summary information from Sierra-local JSON.
     - Lists each gene present (PR, RT, IN)
-    - Detects missing nucleotide ranges from warnings
     - Detects missing codons at the start if firstAA != 1
     """
 
@@ -177,7 +255,6 @@ def parse_sequence_summary(json_path,
         data = json.load(f)[0]
 
     summary_lines = []
-    warnings = {}
     not_sequenced = {}
 
     # --- Define expected protein lengths
@@ -186,16 +263,6 @@ def parse_sequence_summary(json_path,
         "RT": 560,
         "IN": 288
     }
-
-    # --- Parse validation warnings to find missing nucleotide ranges
-    for warning in data.get("validationResults", []):
-        msg = warning.get("message", "")
-        match = re.search(r"\('([A-Z]{2})'.*?,\s*(\d+),\s*(\d+)\)", msg)
-        if match:
-            gene = match.group(1)
-            start_nt = match.group(2)
-            end_nt = match.group(3)
-            warnings[gene] = (start_nt, end_nt)
 
     # --- Parse alignedGeneSequences
     for gene_entry in data.get("alignedGeneSequences", []):
@@ -214,6 +281,9 @@ def parse_sequence_summary(json_path,
         # --- Build list of contiguous missing intervals
         missing_positions = sorted(not_sequenced.get(gene, []))
         missing_parts = []
+
+        if isinstance(first_aa, int) and first_aa > 1:
+            missing_parts.append("1" if first_aa == 2 else f"1-{first_aa - 1}")
 
         # --- Adjust start
         adjusted_first = first_aa
@@ -493,8 +563,10 @@ def main():
     sample_data = {
         "sample_name": sample_name,
         "sequence_summary": seq_summary,
+        "sequence_warnings": parse_sequence_warnings(json_file),
         "subtypes": subtypes,
         "mutation_data": df_mut.to_dict(orient="records"),
+        "mutation_comments": parse_mutation_comments(json_file),
         "resistance_data": df_res.to_dict(orient="records"),
         "consensus_genome": full_record.format("fasta").strip(),
         "mutation_scores": mutation_scores,

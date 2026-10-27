@@ -97,7 +97,7 @@ workflow HIV_RESISTANCE {
     )
 
     NEXTCLADE_RUN(
-        EXTRACT_CONSENSUS_REGIONS.out.consensus_regions,
+        EXTRACT_CONSENSUS_REGIONS.out.all_consensus,
         nextclade_db
     )
 
@@ -105,7 +105,7 @@ workflow HIV_RESISTANCE {
         .join(RESISTANCE_TABLES.out.mutation_csv, by: [0])
         .join(RESISTANCE_TABLES.out.resistance_csv, by: [0])
         .join(NEXTCLADE_RUN.out.csv, by: [0])
-        .join(EXTRACT_CONSENSUS_REGIONS.out.consensus_regions, by: [0])
+        .join(EXTRACT_CONSENSUS_REGIONS.out.all_consensus, by: [0])
 
     RESISTANCE_REPORT(
         ch_resistance_report_input,

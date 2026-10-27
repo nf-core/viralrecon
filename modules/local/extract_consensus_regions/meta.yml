@@ -26,7 +26,7 @@ input:
         ontologies:
           - edam: http://edamontology.org/format_1975
 output:
-  consensus_regions:
+  all_consensus:
     - - meta:
           type: map
           description: Groovy Map containing sample information

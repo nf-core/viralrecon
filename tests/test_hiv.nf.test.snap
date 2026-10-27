@@ -28,8 +28,11 @@
                 "CONSENSUS_LIFTOFF": {
                     "liftoff": "1.6.3"
                 },
+                "EXTRACT_CONSENSUS_REGIONS": {
+                    "python": "3.13.2"
+                },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -39,6 +42,10 @@
                 },
                 "GFF2JSON": {
                     "python": "3.13.2"
+                },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
                 },
                 "IVAR_CONSENSUS": {
                     "ivar": "1.4.4"
@@ -67,11 +74,11 @@
                     "mosdepth": "0.3.14"
                 },
                 "NEXTCLADE_DATASETGET": {
-                    "nextclade": "3.11.0",
-                    "nextclade-tag": "2025-09-09--12-13-13Z"
+                    "nextclade-dataset": "2025-09-09--12-13-13Z",
+                    "nextclade": "3.21.2"
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_GENOME": {
                     "r-base": "4.2.0"
@@ -86,22 +93,22 @@
                     "python": "3.13.2"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SIERRALOCAL": {
                     "sierra-local": "0.4.3"
@@ -114,12 +121,6 @@
                 },
                 "SNPSIFT_EXTRACTFIELDS": {
                     "snpsift": 4.3
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNTAR_KRAKEN2_DB": {
                     "untar": 1.34
@@ -342,10 +343,17 @@
                 "variants/ivar/bcftools_stats/SRR6937100.bcftools_stats.txt",
                 "variants/ivar/consensus",
                 "variants/ivar/consensus/ivar",
+                "variants/ivar/consensus/ivar/DRR030302.IN.fa",
+                "variants/ivar/consensus/ivar/DRR030302.PR_RT.fa",
+                "variants/ivar/consensus/ivar/DRR030302.all_consensus.fa",
                 "variants/ivar/consensus/ivar/DRR030302.consensus.fa",
                 "variants/ivar/consensus/ivar/DRR030302.consensus.qual.txt",
+                "variants/ivar/consensus/ivar/SRR4071760.PR_RT.fa",
+                "variants/ivar/consensus/ivar/SRR4071760.all_consensus.fa",
                 "variants/ivar/consensus/ivar/SRR4071760.consensus.fa",
                 "variants/ivar/consensus/ivar/SRR4071760.consensus.qual.txt",
+                "variants/ivar/consensus/ivar/SRR6937100.IN.fa",
+                "variants/ivar/consensus/ivar/SRR6937100.all_consensus.fa",
                 "variants/ivar/consensus/ivar/SRR6937100.consensus.fa",
                 "variants/ivar/consensus/ivar/SRR6937100.consensus.qual.txt",
                 "variants/ivar/consensus/ivar/base_qc",
@@ -500,9 +508,9 @@
                 "variants/ivar/variants_long_table.csv"
             ],
             [
-                "DRR030302.fastp.json:md5,3a7c674a43a9e7f13d980b588d5cd15c",
-                "SRR4071760.fastp.json:md5,770bd2ad5d7329b9c7af34f6ba0152d6",
-                "SRR6937100.fastp.json:md5,ae81fd26678275d3b430f773a65448c6",
+                "DRR030302.fastp.json:md5,fa9a19f51b36ba421e9242dea4de7e9b",
+                "SRR4071760.fastp.json:md5,04affbd47fee2af387e3e35400b47a8c",
+                "SRR6937100.fastp.json:md5,373158a2a6259ff2feca200bf8779c34",
                 "DRR030302.kraken2.report.txt:md5,5ab2ed70334d4061fb82f8d91475c761",
                 "SRR4071760.kraken2.report.txt:md5,c26f91bfafe58ba451f7d05f0b9b5611",
                 "SRR6937100.kraken2.report.txt:md5,6f5c455f6efd9fa807fefdbba83ba960",
@@ -513,7 +521,7 @@
                 "bcftools_stats_vqc_Count_Transitions.yaml:md5,d66c48c598160aa373354e640280d665",
                 "bcftools_stats_vqc_Count_Transversions.yaml:md5,ed8015cccd1080a84346f754a3ce8bd2",
                 "bowtie2_pe_plot.yaml:md5,1b002829da6f647a8f4efc33e96da568",
-                "fastp-insert-size-plot.yaml:md5,de26ba49b8a6cb43a6e9fc9c58c13708",
+                "fastp-insert-size-plot.yaml:md5,10b9da66b846b3f92a32438bff14a7da",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,6c4222897b9db16fcdf2ef82209a4c09",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,60a4eefbe7c07a67553b5458b3ce1402",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,69dc43d2d4cead054e7e184607f2dff7",
@@ -554,17 +562,17 @@
                 "multiqc_bcftools_stats.yaml:md5,24a88a270740d3a4efd1332749d6d121",
                 "multiqc_bowtie2.yaml:md5,4daf8885acd63fc61f20e24cfe2102c4",
                 "multiqc_citations.yaml:md5,f564e5526b36c9a583e0af5ca7a34b64",
-                "multiqc_fastp.yaml:md5,d865c1a4601364fb62886202b501a88e",
+                "multiqc_fastp.yaml:md5,cf8313deeccb8f8f6c12ebb271c29fcd",
                 "multiqc_fastqc.yaml:md5,444824ecaca1d11e9920430e6b06ddd3",
                 "multiqc_ivar_variants.yaml:md5,c0eb1e73e4ec11c252b2476108d4a560",
                 "multiqc_kraken.yaml:md5,bbacecf8e782bb601be23351c164dd6b",
                 "multiqc_nextclade_clade.yaml:md5,9acf3d4a4b35cf58df39ffbcef25f9e8",
                 "multiqc_quast_quast_variants.yaml:md5,1ae4462a9f07a70f5f03fa4dc5d001b8",
-                "multiqc_snpeff.yaml:md5,2c56cbafc893b319a42876130eda894e",
-                "snpeff_effects.yaml:md5,e37a0732eeaeb13c212a8ea797ae9ebc",
+                "multiqc_snpeff.yaml:md5,9e82cc6cac68db071ae2b0640c94f322",
+                "snpeff_effects.yaml:md5,0503d006001515b4ed66d4546cd0d198",
                 "snpeff_variant_effects_class.yaml:md5,af26a9b0e18603e6a23bc0158c7c7769",
-                "snpeff_variant_effects_impact.yaml:md5,f3bc789e46e9d09d5fa25d0ad9b9d1b3",
-                "snpeff_variant_effects_region.yaml:md5,0a7398c22916098f7c3a13a028d3fb4c",
+                "snpeff_variant_effects_impact.yaml:md5,238b1dd0d12ef8ea22238d7321754246",
+                "snpeff_variant_effects_region.yaml:md5,d3e5a8918f5ca5bac6795c296df867a5",
                 "CHANGELOG.md:md5,e51168eee0bc2a213a7382c198f44893",
                 "README.md:md5,e029ded293961c99d1a5d58f34a70017",
                 "genome_annotation.gff3:md5,dbc49e5f16a70495bdfec06407fe192b",
@@ -583,27 +591,34 @@
                 "SRR6937100.mosdepth.summary.txt:md5,654bbc44b5946cfc199a75c223ebda9b",
                 "DRR030302.sorted.bam.flagstat:md5,b929bff546cbd88b865f2fb02dc9a3e1",
                 "DRR030302.sorted.bam.idxstats:md5,e2d55694ce41df30abab7c6e28e0b368",
-                "DRR030302.sorted.bam.stats:md5,cd2ef8250052132abb59d447a534798c",
+                "DRR030302.sorted.bam.stats:md5,40f0f5d498087f14838e1b43d960ab42",
                 "SRR4071760.sorted.bam.flagstat:md5,ba1f3c5310ef514b6326ac611444da0e",
                 "SRR4071760.sorted.bam.idxstats:md5,292e1509673ce1f3aedfffdf4c339b64",
-                "SRR4071760.sorted.bam.stats:md5,710d3e0d6738af9f776e852c7666af45",
+                "SRR4071760.sorted.bam.stats:md5,fdb0181e4f875bbce1d78691153c4585",
                 "SRR6937100.sorted.bam.flagstat:md5,b88b08adf1023728068d0d7b7a10facf",
                 "SRR6937100.sorted.bam.idxstats:md5,622095b9a86cb608aac5da2d268c4d55",
-                "SRR6937100.sorted.bam.stats:md5,1894b5f527cb8889b3f011950323c42e",
+                "SRR6937100.sorted.bam.stats:md5,23808ed6194968c1c87327fbebc6c77e",
                 "DRR030302.tsv:md5,3b89bf1591279da145149d0fa06c53a8",
                 "DRR030302.vcf.gz:md5,206bad41b9473b742d2cbae7d77ed6aa",
                 "DRR030302.vcf.gz.tbi:md5,ad624dbc79f44aec2e091383054a57e0",
                 "SRR4071760.tsv:md5,e72ec656741cdfc64d784d10071c1fdc",
                 "SRR4071760.vcf.gz:md5,df896498850750387fa7f044b783d3b4",
                 "SRR4071760.vcf.gz.tbi:md5,9f5b2147ff0060a7326f327c694bc353",
-                "SRR6937100.tsv:md5,88959acb06039ff822525f2cbf63f959",
-                "SRR6937100.vcf.gz:md5,ed21ee943d2087b4153e481c15f59071",
-                "SRR6937100.vcf.gz.tbi:md5,6b999b677f98b02384517241a84bef71",
+                "SRR6937100.tsv:md5,f7523ee0da63e9babae2f4e4cc4299f6",
+                "SRR6937100.vcf.gz:md5,21a542080da642ed5018434dcda31f5b",
+                "SRR6937100.vcf.gz.tbi:md5,48a3a7e518c8442178fd5851d95923bb",
                 "DRR030302.bcftools_stats.txt:md5,6518944903313be197a5b009006932dd",
                 "SRR4071760.bcftools_stats.txt:md5,56c1e08cfe81e4a6e4e6bff4b5dbc9b2",
                 "SRR6937100.bcftools_stats.txt:md5,6a07bfe20cb40e81b2177cc24a060fc5",
+                "DRR030302.IN.fa:md5,9a4d9aefa34811588275eccacdb848fd",
+                "DRR030302.PR_RT.fa:md5,cb91daa79282eea6cc93dfecbd91e571",
+                "DRR030302.all_consensus.fa:md5,7f89023415cdcf5086b9b79a819290c7",
                 "DRR030302.consensus.fa:md5,9f628ab2c1f2347aa8a176429d10c112",
+                "SRR4071760.PR_RT.fa:md5,d55d4f293b4a629e5bd2814423602206",
+                "SRR4071760.all_consensus.fa:md5,0875dcfe5afe6ec271559a79aa8c30ff",
                 "SRR4071760.consensus.fa:md5,776a2d42ce259e818397a47eae1a66b3",
+                "SRR6937100.IN.fa:md5,14c4269e28ae63a3f47c3d505d99536f",
+                "SRR6937100.all_consensus.fa:md5,9c8cdb23441dfe1a209199fc9f0634c6",
                 "SRR6937100.consensus.fa:md5,62daddd34a35e441deac3be654fd47c8",
                 "DRR030302.consensus.N_run.tsv:md5,8b04a52d7c23e129fb38d9ef125eabeb",
                 "DRR030302.consensus.base_counts.tsv:md5,f9acbf56202cb2616d950ebbf36d1ef2",
@@ -613,25 +628,25 @@
                 "SRR6937100.consensus.base_counts.tsv:md5,42b33f68b1dc03687bcb531c769056ed",
                 "NC_001802.1.gff:md5,5276e4d0f63cf78f1acc99b0bde673f1",
                 "NC_001802.1.unmapped.txt:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "liftoff_variants_long_table.csv:md5,44eed2c5f72a35515375884730df41f5",
+                "liftoff_variants_long_table.csv:md5,c4ee2cb0f6c12c364fd54bd656ff164d",
                 "DRR030302_mutation_table.csv:md5,2f9d8f4a2761370e4f478c57e31f76f0",
                 "DRR030302_mutation_table_short.csv:md5,df7b10a3937198f6a5591dcf03ef1725",
-                "DRR030302_resistance_report.html:md5,3a3289ff1ab7d7a3f769b794c43d9fca",
+                "DRR030302_resistance_report.html:md5,5485f126976f74bc0a0660e85d790f86",
                 "DRR030302_resistance_table.csv:md5,c5e435805207f3ccf86cd98e4e0e235c",
                 "SRR4071760_mutation_table.csv:md5,d4ce4229a826950c134d465bb78e6c91",
                 "SRR4071760_mutation_table_short.csv:md5,0feec908d6db1197275dd19b892145ae",
-                "SRR4071760_resistance_report.html:md5,63df6f6fba815e60d6449c922015ea57",
+                "SRR4071760_resistance_report.html:md5,cac510d83d3483d6f7af1f9294ea90d9",
                 "SRR4071760_resistance_table.csv:md5,402f4bdb6933c6cc2243b771b2587867",
                 "SRR6937100_mutation_table.csv:md5,c83235f2973d81928d3d702a8fc7f2e7",
                 "SRR6937100_mutation_table_short.csv:md5,c7e2236ba3e4b59a95c68cadfc72262d",
-                "SRR6937100_resistance_report.html:md5,24e9aadf9054c4935dc1225bce220351",
+                "SRR6937100_resistance_report.html:md5,c86a89785d373414be06e3df830a1772",
                 "SRR6937100_resistance_table.csv:md5,695009d53d79f0648ef62524b97f0538",
                 "DRR030302_resistance.json:md5,1fdfd03ee587a38a356942c3ec82d08d",
                 "SRR4071760_resistance.json:md5,00d5130c19aa7d8909df48383eff6b9f",
                 "SRR6937100_resistance.json:md5,51689a45b50c07ddb1b54dedf8ce7043",
-                "DRR030302.csv:md5,1a9b758b80aac691d1890e4f51ffd580",
-                "SRR4071760.csv:md5,6d2a42c9d871306c2d8789fbb9613f32",
-                "SRR6937100.csv:md5,8dccbab1381f382bd23bd7a9bf1c6072",
+                "DRR030302.csv:md5,719583fc29e9f9492d7cb89c74f1da8b",
+                "SRR4071760.csv:md5,6625ae9289858da0cffd47a84ec53478",
+                "SRR6937100.csv:md5,2b0375e3de7228abe03687c68b02544a",
                 "gc.icarus.txt:md5,19276775d96d211b053f1a3976d6a669",
                 "DRR030302.variant_counts.log:md5,870132c7920b47c3ef6a6e8a2f3a417a",
                 "SRR4071760.variant_counts.log:md5,66a253121f15c8920921671c869d8714",
@@ -642,16 +657,16 @@
                 "SRR4071760.snpeff.vcf.gz:md5,aa5789e7b611368cee014ba3a74ee6b4",
                 "SRR4071760.snpeff.vcf.gz.tbi:md5,9ce20aebbbc3494146bc9ce06da331f1",
                 "SRR4071760.snpsift.txt:md5,80350ff4eb25d344398e2817250a0b98",
-                "SRR6937100.snpeff.vcf.gz:md5,1b135e857e605242845e19bd036ddf02",
-                "SRR6937100.snpeff.vcf.gz.tbi:md5,2da4de46b1a230e0732c89c4540e363e",
-                "SRR6937100.snpsift.txt:md5,a2eb92ab039ae5f5b34ae2cd9a1a5cf6",
+                "SRR6937100.snpeff.vcf.gz:md5,315e5e8bec0d3b4d06c387a7d17c0ec8",
+                "SRR6937100.snpeff.vcf.gz.tbi:md5,2bec8fdcaef9b39b70502c2153b30744",
+                "SRR6937100.snpsift.txt:md5,311b89da27e027bc123a89add4d23271",
                 "DRR030302.snpeff.bcftools_stats.txt:md5,44503aab15900268a657d064c38d2d27",
                 "SRR4071760.snpeff.bcftools_stats.txt:md5,f92e3d7183e3db36dc926119ffbd7ca4",
                 "SRR6937100.snpeff.bcftools_stats.txt:md5,1bda3e5aa2df383a000d7962f8fe96b0",
-                "variants_long_table.csv:md5,713642fcb91b5ac71841d723888ad59d"
+                "variants_long_table.csv:md5,595b79b0466b0a91a73f88701b73c8d5"
             ]
         ],
-        "timestamp": "2026-09-07T20:45:02.15514",
+        "timestamp": "2026-10-27T13:19:17.044217",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"
@@ -686,8 +701,11 @@
                 "CONSENSUS_LIFTOFF": {
                     "liftoff": "1.6.3"
                 },
+                "EXTRACT_CONSENSUS_REGIONS": {
+                    "python": "3.13.2"
+                },
                 "FASTP": {
-                    "fastp": "1.1.0"
+                    "fastp": "1.3.6"
                 },
                 "FASTQC_RAW": {
                     "fastqc": "0.12.1"
@@ -697,6 +715,10 @@
                 },
                 "GFF2JSON": {
                     "python": "3.13.2"
+                },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
                 },
                 "IVAR_CONSENSUS": {
                     "ivar": "1.4.4"
@@ -719,11 +741,11 @@
                     "mosdepth": "0.3.14"
                 },
                 "NEXTCLADE_DATASETGET": {
-                    "nextclade": "3.11.0",
-                    "nextclade-tag": "2025-09-09--12-13-13Z"
+                    "nextclade-dataset": "2025-09-09--12-13-13Z",
+                    "nextclade": "3.21.2"
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
-                    "picard": "3.4.0"
+                    "picard": "3.5.0"
                 },
                 "PLOT_MOSDEPTH_REGIONS_GENOME": {
                     "r-base": "4.2.0"
@@ -738,22 +760,22 @@
                     "python": "3.13.2"
                 },
                 "SAMTOOLS_FAIDX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": "1.23.1"
+                    "samtools": 1.24
                 },
                 "SIERRALOCAL": {
                     "sierra-local": "0.4.3"
@@ -766,12 +788,6 @@
                 },
                 "SNPSIFT_EXTRACTFIELDS": {
                     "snpsift": 4.3
-                },
-                "TABIX_BGZIP": {
-                    "tabix": 1.21
-                },
-                "TABIX_TABIX": {
-                    "tabix": 1.21
                 },
                 "UNTAR_KRAKEN2_DB": {
                     "untar": 1.34
@@ -994,10 +1010,17 @@
                 "variants/ivar/bcftools_stats/SRR6937100.bcftools_stats.txt",
                 "variants/ivar/consensus",
                 "variants/ivar/consensus/ivar",
+                "variants/ivar/consensus/ivar/DRR030302.IN.fa",
+                "variants/ivar/consensus/ivar/DRR030302.PR_RT.fa",
+                "variants/ivar/consensus/ivar/DRR030302.all_consensus.fa",
                 "variants/ivar/consensus/ivar/DRR030302.consensus.fa",
                 "variants/ivar/consensus/ivar/DRR030302.consensus.qual.txt",
+                "variants/ivar/consensus/ivar/SRR4071760.PR_RT.fa",
+                "variants/ivar/consensus/ivar/SRR4071760.all_consensus.fa",
                 "variants/ivar/consensus/ivar/SRR4071760.consensus.fa",
                 "variants/ivar/consensus/ivar/SRR4071760.consensus.qual.txt",
+                "variants/ivar/consensus/ivar/SRR6937100.IN.fa",
+                "variants/ivar/consensus/ivar/SRR6937100.all_consensus.fa",
                 "variants/ivar/consensus/ivar/SRR6937100.consensus.fa",
                 "variants/ivar/consensus/ivar/SRR6937100.consensus.qual.txt",
                 "variants/ivar/consensus/ivar/base_qc",
@@ -1148,9 +1171,9 @@
                 "variants/ivar/variants_long_table.csv"
             ],
             [
-                "DRR030302.fastp.json:md5,3a7c674a43a9e7f13d980b588d5cd15c",
-                "SRR4071760.fastp.json:md5,770bd2ad5d7329b9c7af34f6ba0152d6",
-                "SRR6937100.fastp.json:md5,cfe934875f19031cd661db3dc7c00b21",
+                "DRR030302.fastp.json:md5,fa9a19f51b36ba421e9242dea4de7e9b",
+                "SRR4071760.fastp.json:md5,04affbd47fee2af387e3e35400b47a8c",
+                "SRR6937100.fastp.json:md5,373158a2a6259ff2feca200bf8779c34",
                 "DRR030302.kraken2.report.txt:md5,5ab2ed70334d4061fb82f8d91475c761",
                 "SRR4071760.kraken2.report.txt:md5,c26f91bfafe58ba451f7d05f0b9b5611",
                 "SRR6937100.kraken2.report.txt:md5,6f5c455f6efd9fa807fefdbba83ba960",
@@ -1161,7 +1184,7 @@
                 "bcftools_stats_vqc_Count_Transitions.yaml:md5,dc4e1856617f414a65ea2cec0ede7971",
                 "bcftools_stats_vqc_Count_Transversions.yaml:md5,f9e0533d48d495637e9c12c0f29d79e7",
                 "bowtie2_pe_plot.yaml:md5,e0f7a3f55b45307ecfd9a005f9e4bf43",
-                "fastp-insert-size-plot.yaml:md5,de26ba49b8a6cb43a6e9fc9c58c13708",
+                "fastp-insert-size-plot.yaml:md5,10b9da66b846b3f92a32438bff14a7da",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,6c4222897b9db16fcdf2ef82209a4c09",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,60a4eefbe7c07a67553b5458b3ce1402",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,69dc43d2d4cead054e7e184607f2dff7",
@@ -1202,17 +1225,17 @@
                 "multiqc_bcftools_stats.yaml:md5,675d4e41cc92af9381006d9dafcc5503",
                 "multiqc_bowtie2.yaml:md5,bb7fe62e1ee3c986e3afc4c6480ac9cf",
                 "multiqc_citations.yaml:md5,f564e5526b36c9a583e0af5ca7a34b64",
-                "multiqc_fastp.yaml:md5,9b021036c696d436ddf900bd81c9de5d",
+                "multiqc_fastp.yaml:md5,cf8313deeccb8f8f6c12ebb271c29fcd",
                 "multiqc_fastqc.yaml:md5,444824ecaca1d11e9920430e6b06ddd3",
                 "multiqc_ivar_variants.yaml:md5,92e053dd68158082d67218932751c0b8",
                 "multiqc_kraken.yaml:md5,bbacecf8e782bb601be23351c164dd6b",
                 "multiqc_nextclade_clade.yaml:md5,9acf3d4a4b35cf58df39ffbcef25f9e8",
                 "multiqc_quast_quast_variants.yaml:md5,0099b6f7d114d93ed03630ea03bfb50c",
-                "multiqc_snpeff.yaml:md5,f2884edd8cc7e54e43e0f8c9c978ed61",
-                "snpeff_effects.yaml:md5,7e07b5e16d5b394f38067aa6e2a06dc2",
+                "multiqc_snpeff.yaml:md5,1224c7d1dc904d7c6ad1233a894335f9",
+                "snpeff_effects.yaml:md5,78a760e9d308cd573c4a0f488b35947b",
                 "snpeff_variant_effects_class.yaml:md5,648eb23e1ee9e601a7c8433aeab532fd",
-                "snpeff_variant_effects_impact.yaml:md5,b1b7bd73327d057fe880237ff5e852ed",
-                "snpeff_variant_effects_region.yaml:md5,cd8de1135943f6ca43c42717bc6e3a50",
+                "snpeff_variant_effects_impact.yaml:md5,dfd9adccd37e8d292bc734c6ffc145b8",
+                "snpeff_variant_effects_region.yaml:md5,c654ab57c205becde68c6707972836a0",
                 "CHANGELOG.md:md5,e51168eee0bc2a213a7382c198f44893",
                 "README.md:md5,e029ded293961c99d1a5d58f34a70017",
                 "genome_annotation.gff3:md5,dbc49e5f16a70495bdfec06407fe192b",
@@ -1231,18 +1254,18 @@
                 "SRR6937100.mosdepth.summary.txt:md5,a66e374b8e2b73fb1bdc891107b05ade",
                 "DRR030302.sorted.bam.flagstat:md5,18da52dab55ff5a7188f3ad4ce94e0b0",
                 "DRR030302.sorted.bam.idxstats:md5,98f598f60dc0e29dda191c3a6732279e",
-                "DRR030302.sorted.bam.stats:md5,3a4adaeae717a2718a93ea9a61d844fd",
+                "DRR030302.sorted.bam.stats:md5,03401e4afb48856490f244535eb3947e",
                 "SRR4071760.sorted.bam.flagstat:md5,e8dd8d26adb2fd985da16242771960af",
                 "SRR4071760.sorted.bam.idxstats:md5,21d5a8100902fd96ade6abba61e37886",
-                "SRR4071760.sorted.bam.stats:md5,df9ab5d3b445b133e928574784673bac",
+                "SRR4071760.sorted.bam.stats:md5,5dc2fa1e59a9469d040df1fad565cbae",
                 "SRR6937100.sorted.bam.flagstat:md5,884eda3ffcbee5c84a59a71ae138e6b2",
                 "SRR6937100.sorted.bam.idxstats:md5,e224704bd96b929c0a93d60c871ffaee",
-                "SRR6937100.sorted.bam.stats:md5,e7c1a052272143530529f1d018059acb",
-                "DRR030302.tsv:md5,69a122f2bc41e0e3ca9807d913b46bca",
-                "DRR030302.vcf.gz:md5,e463c3c9ca5a6ca2f43c64bc63fa7ef1",
-                "DRR030302.vcf.gz.tbi:md5,84eb742a97d690b78e5b36a396b3d0c5",
-                "SRR4071760.tsv:md5,74da9c99b44fe64b349e0d11342273e4",
-                "SRR4071760.vcf.gz:md5,fc902a3e115cd9593859a178bbc128f9",
+                "SRR6937100.sorted.bam.stats:md5,4b7d088eed0b1b1d8cccddb8c2d249ed",
+                "DRR030302.tsv:md5,548d37bd5e3c5d14efddbe549fb20d12",
+                "DRR030302.vcf.gz:md5,392cab52080a618a40ba7abd368aacd5",
+                "DRR030302.vcf.gz.tbi:md5,08c0fbd34868709256e917d7b3b9d772",
+                "SRR4071760.tsv:md5,af8c3fc62cdb132bfcb2e8a4d8cdd29f",
+                "SRR4071760.vcf.gz:md5,706b764405a447dcf2eddafd2ce891a7",
                 "SRR4071760.vcf.gz.tbi:md5,7c43bcfb99d14498870c8c75dbddf431",
                 "SRR6937100.tsv:md5,bd43fc4c2b2842b339d15f1efe01194e",
                 "SRR6937100.vcf.gz:md5,55b3a0c8e137b05d2cbfc9fe33a41694",
@@ -1250,8 +1273,15 @@
                 "DRR030302.bcftools_stats.txt:md5,99b5cf822427df2657b2e1009bcd3f28",
                 "SRR4071760.bcftools_stats.txt:md5,043c77012f8107e9da9d9dad232ed1f3",
                 "SRR6937100.bcftools_stats.txt:md5,7e339cd492aa69984060bee7d07d1b79",
+                "DRR030302.IN.fa:md5,9a4d9aefa34811588275eccacdb848fd",
+                "DRR030302.PR_RT.fa:md5,cb91daa79282eea6cc93dfecbd91e571",
+                "DRR030302.all_consensus.fa:md5,b365f1cef31712840198b34565a81efd",
                 "DRR030302.consensus.fa:md5,f4a41360a6aef9eb450a0387b77a742d",
+                "SRR4071760.PR_RT.fa:md5,6321f3f5f50ff84e8e895944d058f6cf",
+                "SRR4071760.all_consensus.fa:md5,cc323aa279c5daac73f95ed3ac20bd81",
                 "SRR4071760.consensus.fa:md5,12ed4b25ae57de9c577a79cd88169cc2",
+                "SRR6937100.IN.fa:md5,14c4269e28ae63a3f47c3d505d99536f",
+                "SRR6937100.all_consensus.fa:md5,815e0cadb9da25639795864dde2798ed",
                 "SRR6937100.consensus.fa:md5,4871c6fc43180b64b6935bcbd31c25ab",
                 "DRR030302.consensus.N_run.tsv:md5,1e4ab2beb124b241ed7a054dc7e4f107",
                 "DRR030302.consensus.base_counts.tsv:md5,e0e32793c0e00a82a467656caade1c3e",
@@ -1261,42 +1291,42 @@
                 "SRR6937100.consensus.base_counts.tsv:md5,16e9570ba89684ad60e5c88aa86c509b",
                 "DRR030302_mutation_table.csv:md5,6a53bc250b4a6e1920db591687749b23",
                 "DRR030302_mutation_table_short.csv:md5,df7b10a3937198f6a5591dcf03ef1725",
-                "DRR030302_resistance_report.html:md5,fdb301cc3cad4d41be095ee370243d1e",
+                "DRR030302_resistance_report.html:md5,27cf4d4d1146d9bfbe0e1052048284f7",
                 "DRR030302_resistance_table.csv:md5,c5e435805207f3ccf86cd98e4e0e235c",
                 "SRR4071760_mutation_table.csv:md5,810d3543c21354dd7cc73210ce1380a8",
                 "SRR4071760_mutation_table_short.csv:md5,654229d827ed326925f30d97c1363c0d",
-                "SRR4071760_resistance_report.html:md5,92ea1b01e0ed376a59c32c9930770c2f",
+                "SRR4071760_resistance_report.html:md5,d7b623e5234dd3c37b87c3da0dd13e93",
                 "SRR4071760_resistance_table.csv:md5,402f4bdb6933c6cc2243b771b2587867",
                 "SRR6937100_mutation_table.csv:md5,812ab056414a6176bc34bc5b2d281832",
                 "SRR6937100_mutation_table_short.csv:md5,c7e2236ba3e4b59a95c68cadfc72262d",
-                "SRR6937100_resistance_report.html:md5,9d45af5f65475d5d81352f55b4dd8bc6",
+                "SRR6937100_resistance_report.html:md5,09b4cc913254ee4d3d8ffe9750c3c806",
                 "SRR6937100_resistance_table.csv:md5,695009d53d79f0648ef62524b97f0538",
                 "DRR030302_resistance.json:md5,33e7335a07432498d2d9e357d206bf0b",
                 "SRR4071760_resistance.json:md5,87d92a7208761e9d89600159499d9e49",
                 "SRR6937100_resistance.json:md5,51689a45b50c07ddb1b54dedf8ce7043",
-                "DRR030302.csv:md5,33c59afa2b86b87d2305cab6d9c9e488",
-                "SRR4071760.csv:md5,bf9b8691f1df4b0fc7b461c8e3a7fbbb",
-                "SRR6937100.csv:md5,895ef34bbeac6c0080ed27c800246258",
+                "DRR030302.csv:md5,ba4868b3aa92e314258e0d84a7b7270b",
+                "SRR4071760.csv:md5,d829511a05183284237d48dc43467ee9",
+                "SRR6937100.csv:md5,6ad76f9aa3648f3775d832f2db8a9b97",
                 "gc.icarus.txt:md5,326ce93821a2c908dc84c940d70812ec",
                 "DRR030302.variant_counts.log:md5,63145bddb440c9ec91677c4148d99b25",
                 "SRR4071760.variant_counts.log:md5,f0d877c9022632eb41004166bb14b8bf",
                 "SRR6937100.variant_counts.log:md5,236b6e11ca54612af5e22c6ce9f63355",
-                "DRR030302.snpeff.vcf.gz:md5,3d37dc375d588237f4150d325f89da72",
-                "DRR030302.snpeff.vcf.gz.tbi:md5,d23aea2ec1e858a4d776f09cfd1ff917",
-                "DRR030302.snpsift.txt:md5,26c92dfd026bb603d90d71b354e83c81",
-                "SRR4071760.snpeff.vcf.gz:md5,58efd85584b5a891194ce8051de4fe41",
-                "SRR4071760.snpeff.vcf.gz.tbi:md5,ae32aa3128c28adf21e4002c35a39ae4",
-                "SRR4071760.snpsift.txt:md5,0ce73d59e420030db81fdc01ac59d7e6",
+                "DRR030302.snpeff.vcf.gz:md5,2ab60d6a8312eef1cc9f612a9ee66211",
+                "DRR030302.snpeff.vcf.gz.tbi:md5,544bd72319237a08c7d1e76ba5855e12",
+                "DRR030302.snpsift.txt:md5,fc7d64eb8df3e98e8ac99fa44e137570",
+                "SRR4071760.snpeff.vcf.gz:md5,689b782db2c9993e0be5ee90ee8662a4",
+                "SRR4071760.snpeff.vcf.gz.tbi:md5,a248c76190c6085b3d000c27700d211a",
+                "SRR4071760.snpsift.txt:md5,0378e9ea9001673e8f2bc59172a23d76",
                 "SRR6937100.snpeff.vcf.gz:md5,56699e8726389acd77a29628eae1156c",
                 "SRR6937100.snpeff.vcf.gz.tbi:md5,94486a86bcac9ba3438f87cf75d7d6ad",
                 "SRR6937100.snpsift.txt:md5,25431b3217d364719b2c925788808516",
                 "DRR030302.snpeff.bcftools_stats.txt:md5,7313aafba216715ebbbf1612f087324d",
                 "SRR4071760.snpeff.bcftools_stats.txt:md5,6f5cb9efcbcacb68ce976d22285cfce3",
                 "SRR6937100.snpeff.bcftools_stats.txt:md5,a242a628ced53f56bcdfa63d46084451",
-                "variants_long_table.csv:md5,4b9f03d230178f217b6d5e00b76406e2"
+                "variants_long_table.csv:md5,4240c8c34d373a29484868e13aa45e0f"
             ]
         ],
-        "timestamp": "2026-09-07T20:33:04.20162",
+        "timestamp": "2026-10-27T13:09:33.021624",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"

@@ -13,17 +13,6 @@
       <span>HIV Drug Resistance and Mutation Report</span>
       <span class="report-date"><strong>Generated:</strong> {{ date }}</span>
     </div>
-    <!-- VERSIONS -->
-    {% macro versions_block() -%}
-      <div class="metadata-grid metadata-grid-compact">
-        <div class="metadata-full-row"><span class="meta-label">nf-core/viralrecon:</span> {{ pipeline_version }}</div>
-        <div><span class="meta-label">HIVDB:</span> {{ hivdb_version.db_version }}</div>
-        <div><span class="meta-label">HIVDB publish date:</span> {{ hivdb_version.publish_date }}</div>
-        <div><span class="meta-label">nextclade_dataset_name:</span> {{ nextclade_dataset_name }}</div>
-        <div><span class="meta-label">nextclade_dataset_tag:</span> {{ nextclade_dataset_tag }}</div>
-      </div>
-    {%- endmacro %}
-
     {% macro labeled_line(line) -%}
       {% set parts = line.split(":", 1) %}
       {% if parts | length > 1 %}
@@ -38,7 +27,7 @@
 
     <details class="report-details metadata-details" open>
       <summary>Settings</summary>
-      <div class="metadata-grid metadata-grid-compact settings-grid">
+      <div class="metadata-grid settings-grid">
         {% for setting_name in ["Minimum read depth", "Nucleotide mixture threshold", "Minimum quality threshold", "Mutation detection threshold"] %}
           {% for line in sample.sequence_summary %}
             {% if line is string and line.startswith(setting_name) %}
@@ -53,15 +42,18 @@
       <summary>Sample Overview</summary>
 
       <!-- QUALITY CHECK -->
-      <div class="summary-title summary-title-compact">
+      <div class="summary-title">
         <h2>Quality Check</h2>
       </div>
       <div class="sequence-summary-info">
         <ul class="quality-check-list">
+          {% set pr_rt = sample.subtypes | selectattr("region", "equalto", "PR_RT") | list %}
+          {% set integrase = sample.subtypes | selectattr("region", "equalto", "IN") | list %}
+          {% set subtypes_differ = pr_rt and integrase and pr_rt[0].subtype != integrase[0].subtype %}
           {% for subtype in sample.subtypes %}
           <li class="subtype-line">
             <span class="meta-label">Subtype ({{ subtype.label | replace("_", "-") }}):</span>
-            <span>{{ subtype.subtype }}</span>
+            <span{% if subtypes_differ %} class="subtype-difference" title="PR–RT and IN subtypes differ"{% endif %}>{{ subtype.subtype }}</span>
           </li>
           {% endfor %}
           {% for line in sample.sequence_summary %}
@@ -78,7 +70,7 @@
             >
               ?
             </span>
-            <span class="mixed-site-value{% if proportion_value > 5 %} mixed-site-value-high{% endif %}">
+            <span {% if proportion_value > 5 %}class="mixed-site-value-high"{% endif %}>
               {{ proportion_text }}
             </span>
           </li>
@@ -88,17 +80,35 @@
       </div>
 
       <!-- SEQUENCE SUMMARY -->
-      <div class="summary-title summary-title-compact">
+      <div class="summary-title">
         <h2>Sequence Summary</h2>
       </div>
       <div class="sequence-summary-info">
         <ul>
-          {% for line in sample.sequence_summary %} {% if line is string and line.startswith("Sequence includes") %}
-          <li>{{ labeled_line(line) }}</li>
+          {% for line in sample.sequence_summary %} {% if line is string and line.startswith(("Sequence includes PR:", "Sequence includes RT:", "Sequence includes IN:")) %}
+          {% set codon_parts = line.split(" (missing:", 1) %}
+          <li>{{ labeled_line(codon_parts[0]) }}{% if codon_parts | length > 1 %} <span class="missing-codons">(missing:{{ codon_parts[1] }}</span>{% endif %}</li>
           {% endif %} {% endfor %}
         </ul>
+        {% if sample.sequence_warnings %}
+        <div class="sequence-warning-box" role="note" aria-label="Sequence warnings">
+          <strong>Warnings</strong>
+          <ul>
+            {% for warning in sample.sequence_warnings %}
+            <li>{{ warning }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
       </div>
     </details>
+
+    {% set drug_classes = [
+      ("PI", "Protease Inhibitors (PI)"),
+      ("NRTI", "Nucleoside Reverse Transcriptase Inhibitors (NRTI)"),
+      ("NNRTI", "Non-nucleoside Reverse Transcriptase Inhibitors (NNRTI)"),
+      ("INSTI", "Integrase Strand Transfer Inhibitors (INSTI)")
+    ] %}
 
     {% for gene in ["PR", "RT", "IN"] %} {% set gene_mutations = sample.mutation_data | selectattr("Gene_name",
     "equalto", gene) | list %} {% set gene_resistances = sample.resistance_data | selectattr("Gene_name", "equalto",
@@ -107,13 +117,13 @@
       <summary>Drug resistance interpretation: {{ gene }}</summary>
     <div class="color-legend">
       <strong>Color legend:</strong>
-      <span style="background-color: #ffcccc; padding: 2px 8px; margin: 0 5px; border-left: 3px solid #ff0000"
-        >APOBEC DRM</span
-      >
       <span style="background-color: #ffedd5; padding: 2px 8px; margin: 0 5px; border-left: 3px solid #ff8c00"
         >SDRM</span
       >
-      <span style="background-color: #d5f5ff; padding: 2px 8px; margin: 0 5px; border-left: 3px solid #00ccff"
+      <span style="background-color: #ffcccc; padding: 2px 8px; margin: 0 5px; border-left: 3px solid #ff0000"
+        >APOBEC DRM</span
+      >
+      <span style="background-color: #d8b4fe; padding: 2px 8px; margin: 0 5px; border-left: 3px solid #6b21a8"
         >Unusual</span
       >
       <div class="coverage-note">
@@ -196,9 +206,7 @@
       {% endif %} {% endfor %}
 
       <!-- RESISTANCE -->
-      {% if gene_resistances %} {% for drug_class, class_label in [ ("PI", "Protease Inhibitors (PI)"), ("NRTI",
-      "Nucleoside Reverse Transcriptase Inhibitor (NRTI)"), ("NNRTI", "Non-nucleoside Reverse Transcriptase Inhibitors
-      (NNRTI)"), ("INSTI", "Integrase Strand Transfer Inhibitors (INSTI)") ] %} {% set class_drugs = gene_resistances |
+      {% if gene_resistances %} {% for drug_class, class_label in drug_classes %} {% set class_drugs = gene_resistances |
       selectattr("Drug_class", "equalto", drug_class) | list %} {% if class_drugs %}
       <h3>{{ class_label }}</h3>
       <hr />
@@ -227,16 +235,19 @@
       {% endif %} {% endfor %} {% endif %}
     </div>
     <!-- COMMENTS -->
-    {% set comment_list = [] %} {% for m in gene_mutations %} {% if m.Mutations_comments and
-    m.Mutations_comments|string|lower not in ["nan", "none", ""] %} {% set _ = comment_list.append(m) %} {% endif %} {%
-    endfor %} {% if comment_list %}
+    {% set comment_groups = sample.mutation_comments.get(gene, {}) %}
+    {% if comment_groups %}
     <div class="mutation-comments">
       <strong>{{ gene }} comments</strong>
+      {% for group, comments in comment_groups | dictsort %}
+      <h4>{{ group }}</h4>
       <ul>
-        {% for row in comment_list %}
-        <li>{{ row.Mutations }}: {{ row.Mutations_comments }}</li>
+        {% for comment in comments %}
+        {% set mutation, separator, text = comment.partition(" ") %}
+        <li><b>{{ mutation }}</b>{{ separator }}{{ text }}</li>
         {% endfor %}
       </ul>
+      {% endfor %}
     </div>
     {% endif %}
     </details>
@@ -248,9 +259,7 @@
       <summary>Mutation scoring: {{ gene }}</summary>
 
     <div class="content-block">
-      {% for drug_class, class_label in [ ("PI", "Protease Inhibitors (PI)"), ("NRTI", "Nucleoside Reverse Transcriptase
-      Inhibitors (NRTI)"), ("NNRTI", "Non-nucleoside Reverse Transcriptase Inhibitors (NNRTI)"), ("INSTI", "Integrase
-      Strand Transfer Inhibitors (INSTI)") ] %} {# Filtrar mutaciones que tienen al menos un fármaco de esta clase #} {%
+      {% for drug_class, class_label in drug_classes %} {%
       set mutations_in_class = {} %} {% set all_drugs = [] %} {% for mutation, drug_scores in mutation_scores.items() %}
       {% set drugs_for_mutation = {} %} {% for drug, info in drug_scores.items() %} {% if info.drug_class == drug_class
       %} {% set _ = drugs_for_mutation.update({drug: info}) %} {% if drug not in all_drugs %} {% set _ =
@@ -344,7 +353,13 @@
 
     <details class="report-details metadata-details" open>
       <summary>Versions</summary>
-      {{ versions_block() }}
+      <div class="metadata-grid">
+        <div class="metadata-full-row"><span class="meta-label">nf-core/viralrecon:</span> {{ pipeline_version }}</div>
+        <div><span class="meta-label">HIVDB:</span> {{ hivdb_version.db_version }}</div>
+        <div><span class="meta-label">HIVDB publish date:</span> {{ hivdb_version.publish_date }}</div>
+        <div><span class="meta-label">nextclade_dataset_name:</span> {{ nextclade_dataset_name }}</div>
+        <div><span class="meta-label">nextclade_dataset_tag:</span> {{ nextclade_dataset_tag }}</div>
+      </div>
     </details>
 
     <p style="margin-top: 10px; font-size: 0.9em; color: #003366">
@@ -415,7 +430,6 @@
       }
 
       document.addEventListener("DOMContentLoaded", makeMutationScoringSortable);
-
     </script>
   </body>
 </html>

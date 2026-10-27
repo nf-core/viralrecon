@@ -23,8 +23,6 @@ workflow ASSEMBLY_SPADES {
 
     main:
 
-    ch_versions = channel.empty()
-
     //
     // Filter for paired-end samples if running metaSPAdes / metaviralSPAdes / metaplasmidSPAdes
     //
@@ -99,7 +97,6 @@ workflow ASSEMBLY_SPADES {
         blast_filtered_header,
         ch_taxidlist
     )
-    ch_versions = ch_versions.mix(ASSEMBLY_QC.out.versions)
 
     emit:
     scaffolds          = SPADES.out.scaffolds               // channel: [ val(meta), [ scaffolds ] ]
@@ -128,6 +125,4 @@ workflow ASSEMBLY_SPADES {
     plasmidid_database = ASSEMBLY_QC.out.plasmidid_database // channel: [ val(meta), [ database/ ] ]
     plasmidid_fasta    = ASSEMBLY_QC.out.plasmidid_fasta    // channel: [ val(meta), [ fasta_files/ ] ]
     plasmidid_kmer     = ASSEMBLY_QC.out.plasmidid_kmer     // channel: [ val(meta), [ kmer/ ] ]
-
-    versions           = ch_versions                       // channel: versions.yml
 }
