@@ -73,9 +73,10 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `artic/aligntrim`   | 1.0.2       | 1.2.0            |
 | `bcftools`          | 1.22        | 1.23.1           |
 | `blast`             | 2.16.0      | 2.17.0           |
+| `bowtie2`           | 2.5.4       | 2.5.5            |
 | `clair3`            |             | 2.0.0            |
 | `cutadapt`          | 5.0         | 5.2              |
-| `fastp`             | 1.0.1       | 1.3.6            |
+| `fastp`             | 1.0.1       | 1.4.0            |
 | `Freyja`            | 2.0.1       | 2.0.6            |
 | `htslib`            | 1.22        | 1.24             |
 | `liftoff`           |             | 1.6.3            |
@@ -83,7 +84,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `minimap2`          |             | 2.30             |
 | `mosdepth`          | 0.3.11      | 0.3.14           |
 | `multiqc`           | 1.34        | 1.35             |
-| `nanoplot`          | 1.46.1      | 1.47.0           |
+| `nanoplot`          | 1.46.1      | 1.48.0           |
 | `nextclade`         | 3.11.0      | 3.21.2           |
 | `pangolin`          | 4.3.1       | 4.4              |
 | `pangolin-data`     | 1.32        | 1.39             |
