@@ -3,11 +3,9 @@
 
 import os
 import re
-import glob
 import json
 import argparse
 import base64
-import functools
 import pandas as pd
 from datetime import date
 from Bio import SeqIO
@@ -19,102 +17,244 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 # ---------------------------------------------------------------------
 
 def parser_args(args=None):
-    Description = "Parse Sierra-local JSON reports and corresponding resistance and mutation tables to generate an HTML report."
+    Description = "Parse Sierra-local JSON reports and corresponding resistance and mutation tables to generate an HTML report per sample."
     Epilog = """Example usage:
-    python resistance_report.py --sierralocal_folder resistance_jsons --mutation_folder mutation_tables --resistance_folder resistance_tables --nextclade_folder nextclade_folder  --consensus_folder consensus --ivar_consensus_params "-t 0.8 -q 30 -m 50 -n N" --output_html resistance_report.html
+    python resistance_report.py --sierralocal_json SAMPLE_resistance.json --mutation_csv SAMPLE_mutation_table.csv
+        --resistance_csv SAMPLE_resistance_table.csv --nextclade_csv SAMPLE_nextclade.csv
+        --consensus_fasta SAMPLE.fa --ivar_consensus_params "-t 0.8 -q 30 -m 50 -n N"
+        --ivar_variant_maf 0.01 --output_html SAMPLE_resistance_report.html
     """
     parser = argparse.ArgumentParser(description=Description, epilog=Epilog)
 
     parser.add_argument(
         "-s",
-        "--sierralocal_folder",
+        "--sierralocal_json",
         type=str,
-        default="./sierralocal_json",
-        help="Folder containing sierra-local JSON reports (default: ./sierralocal_json)",
+        required=True,
+        help="Sierra-local JSON report.",
     )
     parser.add_argument(
         "-m",
-        "--mutation_folder",
+        "--mutation_csv",
         type=str,
-        default="./mutation_tables",
-        help="Folder containing mutation CSV files (default: ./mutation_tables)",
+        required=True,
+        help="Mutation CSV file.",
     )
     parser.add_argument(
         "-r",
-        "--resistance_folder",
+        "--resistance_csv",
         type=str,
-        default="./resistance_tables",
-        help="Folder containing resistance CSV files (default: ./resistance_tables)",
+        required=True,
+        help="Resistance CSV file for one sample.",
     )
     parser.add_argument(
         "-n",
-        "--nextclade_folder",
+        "--nextclade_csv",
         type=str,
-        default="./nextclade_reports",
-        help="Folder containing nextclade CSV files (default: ./nextclade_reports)",
+        required=True,
+        help="Nextclade CSV file.",
     )
     parser.add_argument(
         "-cn",
-        "--consensus_folder",
-        type=str,
-        default="./consensus",
-        help="Folder containing consensus files (default: ./consensus)",
-    )
-    parser.add_argument(
-        "-gf",
-        "--gff_folder",
+        "--consensus_fasta",
         type=str,
         required=True,
-        help="Folder containing GFF files with gene coordinates (required).",
+        help="Consensus FASTA file.",
     )
     parser.add_argument(
-        "-ig",
-        "--interest_genes",
-        type=str,
-        required=True,
-        help="List of genes to extract, organized into groups. Genes separated by commas (',') will be included in the same output FASTA file. Gene groups separated by semicolons (';') will produce separate FASTA files.",
-    )
-    parser.add_argument(
-        "-i",
+        "-ic",
         "--ivar_consensus_params",
         type=str,
         help="Parameters used for ivar consensus calling",
     )
     parser.add_argument(
+        "-iv",
+        "--ivar_variant_maf",
+        type=float,
+        default=0.01,
+        help="Minor allele frequency threshold used for ivar variant calling",
+    )
+    parser.add_argument(
         "-d",
         "--deprecated_drugs",
         type=str,
-        default="D4T,DDI,DPV,FPV/r,IDV/r,NFV,SQV/r,TPV/r",
-        help="Comma-separated list of deprecated drugs that should be removed from the final report (default: D4T,DDI,DPV,FPV/r,IDV/r,NFV,SQV/r,TPV/r)",
+        default="",
+        help="Comma-separated list of deprecated drugs that should be removed from the final report (for example: D4T,DDI,DPV,FPV/r,IDV/r,NFV,SQV/r,TPV/r)",
     )
     parser.add_argument(
         "-o",
         "--output_html",
         type=str,
-        help="Full path to output HTML report file.",
+        required=True,
+        help="Full path to the sample HTML report file."
     )
+    parser.add_argument(
+        "--nextclade_dataset_name",
+        type=str,
+        default="",
+        help="Nextclade dataset name, for example neherlab/hiv-1",
+    )
+    parser.add_argument(
+        "--nextclade_dataset_tag",
+        type=str,
+        default="",
+        help="Nextclade dataset tag, for example 2025-09-09--12-13-13Z",
+    )
+    parser.add_argument(
+        "--pipeline_version",
+        type=str,
+        default="dev",
+        help="nf-core/viralrecon pipeline version",
+    )
+
     return parser.parse_args(args)
 
-def get_sample_number(sample_name, all_samples):
-    """Return the sample index based on alphabetical order."""
-    sorted_samples = sorted(all_samples)
-    return sorted_samples.index(sample_name) + 1
+def read_consensus_records(consensus_fasta):
+    records = {}
+
+    for record in SeqIO.parse(consensus_fasta, "fasta"):
+        _, separator, region = record.id.rpartition("|")
+        if not separator or not region:
+            raise ValueError(
+                f"Consensus record ID must end with '|REGION': {record.id}"
+            )
+        records[region] = record
+
+    return records
+
+def estimate_ambiguous_site_proportion(consensus_records):
+    """
+    Estimate the proportion of ambiguous sites across POL gene.
+
+    Ambiguous sites are IUPAC mixed-base codes (R, Y, S, W, K, M, B, D, H, and V).
+    The denominator is the number of non-N sites in the available PR_RT and IN regions.
+    """
+
+    ambiguous_codes = set("RYSWKMBDHV")
+    regions = ("PR_RT", "IN")
+
+    ambiguous_sites = 0
+    non_n_sites = 0
+
+    for region in regions:
+        if region not in consensus_records:
+            continue
+        sequence = consensus_records[region].seq.upper()
+        ambiguous_sites += sum(base in ambiguous_codes for base in sequence)
+        non_n_sites += sum(base != "N" for base in sequence)
+
+    proportion = ambiguous_sites / non_n_sites if non_n_sites else 0.0
+
+    return {
+        "ambiguous_sites": ambiguous_sites,
+        "non_n_consensus_sites": non_n_sites,
+        "proportion": proportion,
+    }
+
+def get_nextclade_subtypes(nextclade_file, consensus_records):
+    df_next = pd.read_csv(nextclade_file, sep=";")
+    clades = df_next.set_index("seqName")["clade"]
+
+    return [
+        {
+            "region": region,
+            "label": region,
+            "subtype": clades.loc[record.id],
+        }
+        for region, record in consensus_records.items()
+        if region in ("PR_RT", "IN")
+    ]
+
+def parse_mutation_comments(json_path):
+    """Group gene comments by their Sierralocal comment type, avoiding repeats."""
+    with open(json_path, encoding="utf-8") as handle:
+        data = json.load(handle)[0]
+
+    comments = {}
+    entries = [
+        (entry["gene"]["name"], entry.get("mutations", []))
+        for entry in data.get("alignedGeneSequences", [])
+    ]
+    for entry in data.get("drugResistance", []):
+        mutations = [
+            mutation
+            for score in entry.get("drugScores", [])
+            for partial in score.get("partialScores", [])
+            for mutation in partial.get("mutations", [])
+        ]
+        entries.append((entry["gene"]["name"], mutations))
+
+    for gene, mutations in entries:
+        if gene not in ("PR", "RT", "IN"):
+            continue
+        for mutation in mutations:
+            if mutation["text"].endswith("X"):
+                continue
+            for comment in mutation.get("comments", []):
+                text = comment.get("text", "").strip()
+                if not text:
+                    continue
+                def mutation_list(match):
+                    position, excluded = match.groups()
+                    # Drug-score mutations may omit AAs; their text still contains the call.
+                    called_aas = mutation.get("AAs") or re.sub(
+                        r"^[A-Z*]\d+", "", mutation["text"]
+                    )
+                    amino_acids = "".join(
+                        aa for aa in called_aas
+                        if aa not in excluded and aa != mutation["text"][0]
+                    )
+                    return f"{mutation['text'][0]}{position}{amino_acids}"
+
+                text = re.sub(
+                    r"\$listMutsIn\{(\d+)\(NOT ([A-Z]+)\)\}", mutation_list, text
+                )
+                texts = comments.setdefault(gene, {}).setdefault(comment["type"], [])
+                if text not in texts:
+                    texts.append(text)
+    return comments
 
 
-def parse_sequence_summary(json_path, subtype_info=None, ivar_params=None):
+def parse_sequence_warnings(json_path):
+    """Return validation messages displayed in the report's warning box."""
+    with open(json_path, encoding="utf-8") as handle:
+        data = json.load(handle)[0]
+
+    messages = []
+    for entry in data.get("alignedGeneSequences", []):
+        gene = entry["gene"]["name"]
+        if gene not in ("PR", "RT", "IN"):
+            continue
+        stops = list(dict.fromkeys(
+            f"{gene}:{mutation['consensus']}{mutation['position']}*"
+            for mutation in entry.get("mutations", [])
+            if mutation.get("hasStop") and not mutation["text"].endswith("X")
+        ))
+        if stops:
+            subject = "There is 1 stop codon" if len(stops) == 1 else f"There are {len(stops)} stop codons"
+            messages.append(f"{subject} in {gene}: {', '.join(stops)}.")
+
+    messages.extend(
+        result["message"].strip()
+        for result in data.get("validationResults", [])
+        if result["level"] in ("WARNING", "NOTE") and result["message"].strip()
+    )
+    return messages
+
+
+def parse_sequence_summary(json_path,
+                           ivar_consensus_params=None, ivar_variant_maf=None,
+                           ambiguous_site_summary=None):
     """
     Extract sequence summary information from Sierra-local JSON.
     - Lists each gene present (PR, RT, IN)
-    - Detects missing nucleotide ranges from warnings
     - Detects missing codons at the start if firstAA != 1
-    - Integrates subtype from Nextclade if available
     """
 
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)[0]
 
     summary_lines = []
-    warnings = {}
     not_sequenced = {}
 
     # --- Define expected protein lengths
@@ -123,16 +263,6 @@ def parse_sequence_summary(json_path, subtype_info=None, ivar_params=None):
         "RT": 560,
         "IN": 288
     }
-
-    # --- Parse validation warnings to find missing nucleotide ranges
-    for warning in data.get("validationResults", []):
-        msg = warning.get("message", "")
-        match = re.search(r"\('([A-Z]{2})'.*?,\s*(\d+),\s*(\d+)\)", msg)
-        if match:
-            gene = match.group(1)
-            start_nt = match.group(2)
-            end_nt = match.group(3)
-            warnings[gene] = (start_nt, end_nt)
 
     # --- Parse alignedGeneSequences
     for gene_entry in data.get("alignedGeneSequences", []):
@@ -151,6 +281,9 @@ def parse_sequence_summary(json_path, subtype_info=None, ivar_params=None):
         # --- Build list of contiguous missing intervals
         missing_positions = sorted(not_sequenced.get(gene, []))
         missing_parts = []
+
+        if isinstance(first_aa, int) and first_aa > 1:
+            missing_parts.append("1" if first_aa == 2 else f"1-{first_aa - 1}")
 
         # --- Adjust start
         adjusted_first = first_aa
@@ -200,41 +333,40 @@ def parse_sequence_summary(json_path, subtype_info=None, ivar_params=None):
 
         summary_lines.append(line)
 
-    # --- Add subtype info from Nextclade if provided
-    summary_lines.append(("subtype", subtype_info))
+    # --- Add proportion of ambiguous consensus sites
+    summary_lines.append(
+        f"% pol polymorphisms (ambiguous sites): "
+        f"{ambiguous_site_summary['proportion'] * 100:.2f}%"
+    )
 
     # --- Parse ivar consensus parameters if provided
     # Extract numeric values with regex
-    match_t = re.search(r"-t\s*([\d.]+)", ivar_params)
-    match_q = re.search(r"-q\s*(\d+)", ivar_params)
-    match_m = re.search(r"-m\s*(\d+)", ivar_params)
+    match_t = re.search(r"-t\s*([\d.]+)", ivar_consensus_params)
+    match_q = re.search(r"-q\s*(\d+)", ivar_consensus_params)
+    match_m = re.search(r"-m\s*(\d+)", ivar_consensus_params)
 
     t_val = float(match_t.group(1))
     q_val = int(match_q.group(1))
     m_val = int(match_m.group(1))
 
     summary_lines.append(f"Minimum read depth: ≥{m_val}")
+    summary_lines.append(f"Nucleotide mixture threshold (NMT): ≥{ ivar_variant_maf * 100:.0f}%")
     summary_lines.append(f"Mutation detection threshold (MDT): ≥{ (1-t_val) * 100:.0f}%")
     summary_lines.append(f"Minimum quality threshold: {q_val}")
 
     return summary_lines
 
-def get_nextclade_subtype(nextclade_file, sample_name):
-    """
-    Extract the subtype (clade) assigned by Nextclade for the given sample.
-    """
-    if not nextclade_file or not os.path.exists(nextclade_file):
-        return None
-    try:
-        df_next = pd.read_csv(nextclade_file, sep=';')
-        # Attempt to find matching sample
-        row = df_next[df_next["seqName"].str.contains(sample_name, case=False, na=False)]
-        if not row.empty:
-            subtype = row.iloc[0]["clade"]
-            return subtype
-    except Exception as e:
-        print(f"⚠️ Could not parse Nextclade file for {sample_name}: {e}")
-    return None
+def extract_triggered_mutations (mutation):
+    """Return the mutation lable using only amino acids that triggered sierra scoring"""
+    text = mutation.get("text", "")
+    triggered_aas = mutation.get("triggeredAAs", "")
+
+    match = re.match(r"^([A-Z*_-]\d+)", text)
+    if not match or not triggered_aas:
+        return text
+
+    mutation_prefix = match.group(1)
+    return f"{mutation_prefix}{triggered_aas}"
 
 def extract_mutation_scoring(json_path):
     mutation_scores = {}
@@ -254,7 +386,7 @@ def extract_mutation_scoring(json_path):
                 score = mutation_block.get("score")
 
                 # Extract all mutation names
-                mutation_ids = [m.get("text") for m in mutations]
+                mutation_ids = [extract_triggered_mutations(m) for m in mutations]
 
                 # CASE 1 → single mutation: "M41L"
                 if len(mutation_ids) == 1:
@@ -353,159 +485,6 @@ def parse_resistance_table(resistance_file, deprecated_drugs=None):
         df_res = df_res[~df_res["Drug_abbr"].isin(deprecated_drugs)]
     return df_res
 
-def parse_interest_groups(interest_string):
-    """
-    Parse interest genes string into groups.
-    Example:
-        "PR,RT;IN" -> [["PR", "RT"], ["IN"]]
-        "PR;RT;IN" -> [["PR"], ["RT"], ["IN"]]
-        "PR,RT,IN" -> [["PR", "RT", "IN"]]
-    """
-    groups = []
-    for group in interest_string.split(";"):
-        genes = [g.strip() for g in group.split(",")]
-        groups.append(genes)
-    return groups
-
-
-def read_gff_coordinates(gff_file):
-    """
-    Read GFF file and return a dict with gene_name -> (start, end, strand)
-    Only parse entries with type 'gene'.
-    """
-    coords = {}
-
-    with open(gff_file) as fh:
-        for line in fh:
-            if line.startswith("#"):
-                continue
-
-            fields = line.strip().split("\t")
-            if len(fields) < 9:
-                continue
-
-            feature_type = fields[2]
-            if feature_type != "gene":
-                continue
-
-            start = int(fields[3])
-            end = int(fields[4])
-            strand = fields[6]
-            attributes = fields[8]
-
-            # Extract gene name from attributes (Name=XXXX)
-            gene_name = None
-            for attr in attributes.split(";"):
-                if attr.startswith("Name="):
-                    gene_name = attr.replace("Name=", "")
-                    break
-
-            if gene_name:
-                coords[gene_name] = (start, end, strand)
-
-    return coords
-
-
-def extract_sequence(seq_record, start, end, strand):
-    """
-    Extract subsequence from a SeqRecord considering strand.
-    GFF is 1-based inclusive.
-    """
-    subseq = seq_record.seq[start - 1:end]
-
-    if strand == "-":
-        subseq = subseq.reverse_complement()
-
-    return subseq
-
-def extract_protein_sequences(seq_record, coordinates, gene_groups, sample_name):
-    """
-    Extract sequences for groups of genes defined in gene_groups.
-
-    Parameters
-    ----------
-    seq_record : Bio.SeqRecord
-        Reference genome sequence loaded from FASTA.
-
-    coordinates : dict
-        Mapping of gene -> (start, end, strand) extracted from GFF.
-
-    gene_groups : list of list
-        List where each element is a group of genes to be extracted together.
-        Example: [["PR","RT"], ["IN"]]
-
-    Returns
-    -------
-    list of dicts
-        [
-            {
-                "group_index": int,
-                "genes": [list of genes],
-                "fasta": "fasta block as string",
-            },
-            ...
-        ]
-    """
-
-    protein_sequences = []
-
-    for group_index, group in enumerate(gene_groups, start=1):
-
-        # --- 1. Obtener coordenadas ordenadas del grupo ---
-        valid_genes = [g for g in group if g in coordinates]
-
-        if not valid_genes:
-            continue
-
-        coords = [(g, *coordinates[g]) for g in valid_genes]
-        # ordenar por start
-        coords.sort(key=lambda x: x[1])
-
-        # --- 2. Verificar si son contiguas (end de uno == start del siguiente) ---
-        merged = []
-        current_genes = [coords[0][0]]
-        current_start = coords[0][1]
-        current_end = coords[0][2]
-        current_strand = coords[0][3]
-
-        for i in range(1, len(coords)):
-            gene, start, end, strand = coords[i]
-
-            # misma cadena y contiguos
-            if strand == current_strand and start == current_end + 1:
-                current_genes.append(gene)
-                current_end = end
-            else:
-                # cerrar intervalo anterior
-                merged.append((current_genes, current_start, current_end, current_strand))
-                # iniciar uno nuevo
-                current_genes = [gene]
-                current_start = start
-                current_end = end
-                current_strand = strand
-
-        # agregar el último intervalo
-        merged.append((current_genes, current_start, current_end, current_strand))
-
-        # --- 3. Extraer secuencias fusionadas ---
-        fasta_lines = []
-
-        for genes_list, start, end, strand in merged:
-            seq = extract_sequence(seq_record, start, end, strand)
-
-            gene_name = "_".join(genes_list)
-            fasta_lines.append(f">{sample_name}_{gene_name}\n{seq}")
-
-        fasta_block = "\n".join(fasta_lines)
-
-        protein_sequences.append({
-            "group_index": group_index,
-            "genes": group,
-            "fasta": fasta_block
-        })
-
-    return protein_sequences
-
 # ---------------------------------------------------------------------
 # Batch processing
 # ---------------------------------------------------------------------
@@ -515,14 +494,6 @@ def main():
 
     # Remove from the report drugs that are deprecated or not used anymore
     deprecated_drugs = {d.strip() for d in args.deprecated_drugs.split(",")}
-
-    # Detect all files
-    mutation_files = sorted(glob.glob(os.path.join(args.mutation_folder, "*_mutation_table.csv")))
-    resistance_files = sorted(glob.glob(os.path.join(args.resistance_folder, "*_resistance_table.csv")))
-    json_files = sorted(glob.glob(os.path.join(args.sierralocal_folder, "*_resistance.json")))
-    nextclade_files = sorted(glob.glob(os.path.join(args.nextclade_folder, "*.csv")))
-    consensus_files = sorted(glob.glob(os.path.join(args.consensus_folder, "*.fa")))
-    gff_files = sorted(glob.glob(os.path.join(args.gff_folder, "*.gff")))
 
     # Build paths
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -549,87 +520,75 @@ def main():
         logo_bytes = f.read()
         logo_b64 = base64.b64encode(logo_bytes).decode("utf-8")
 
-    hivdb_version_info = extract_hivdb_version(json_files[0]) if json_files else {"db_version": "HIVDB version unknown", "publish_date": "unknown"}
+    hivdb_version_info = extract_hivdb_version(args.sierralocal_json)
 
-    all_samples_data = []
+    df_mut = pd.read_csv(args.mutation_csv)
+    if df_mut.empty:
+        raise ValueError(f"No mutation data found in {args.mutation_csv}")
 
-    for mut_file in mutation_files:
-        df_mut = pd.read_csv(mut_file)
-        if df_mut.empty:
-            continue
-        sample_name = df_mut["Sample_name"].iloc[0]
+    sample_name = df_mut["Sample_name"].iloc[0]
+    res_file = args.resistance_csv
+    json_file = args.sierralocal_json
+    nextclade_file = args.nextclade_csv
+    consensus_file = args.consensus_fasta
 
-        # search corresponding resistance and JSON files
-        res_file = next((r for r in resistance_files if sample_name in r), None)
-        json_file = next((j for j in json_files if sample_name in j), None)
-        nextclade_file = next((n for n in nextclade_files if sample_name in n), None)
-        consensus_file = next((c for c in consensus_files if sample_name in c), None)
-        gff_file = next((g for g in gff_files if sample_name in g), None)
+    consensus_records = read_consensus_records(consensus_file)
+    full_record = consensus_records["FULL"]
+    ambiguous_site_summary = estimate_ambiguous_site_proportion(consensus_records)
+    subtypes = get_nextclade_subtypes(nextclade_file, consensus_records)
 
-        consensus_seq = None
-        if consensus_file and os.path.exists(consensus_file):
-            with open(consensus_file, "r", encoding="utf-8") as f:
-                consensus_seq = f.read().strip()
-
-        if not res_file or not json_file:
-            print(f"⚠️ Skipping {sample_name}: missing resistance or JSON file")
-            continue
-
-        # --- Extract subtype from Nextclade
-        subtype = get_nextclade_subtype(nextclade_file, sample_name)
-
-        # --- Parse sequence summary
-        seq_summary = parse_sequence_summary(json_file, subtype_info=subtype, ivar_params=args.ivar_consensus_params)
-
-        # --- Parse resistance table
-        df_res = parse_resistance_table(res_file, deprecated_drugs)
-
-        # --- Extract mutation scoring from JSON
-        mutation_scores_raw = extract_mutation_scoring(json_file)
-        mutation_scores = sort_mutation_scores(mutation_scores_raw)
-
-        # Remove deprecated drugs from mutation_scores
-        mutation_scores = remove_deprecated_drugs(mutation_scores, deprecated_drugs)
-
-        # Parse gene groups
-        gene_groups = parse_interest_groups(args.interest_genes)
-
-        # Read GFF coordinates
-        coordinates = read_gff_coordinates(gff_file)
-
-        # Read FASTA
-        seq_record = next(SeqIO.parse(consensus_file, "fasta"))
-
-        protein_sequences = extract_protein_sequences(seq_record, coordinates, gene_groups, sample_name)
-
-        # Guardar toda la info en un dict
-        all_samples_data.append({
-            "sample_name": sample_name,
-            "sequence_summary": seq_summary,
-            "mutation_data": df_mut.to_dict(orient="records"),
-            "resistance_data": df_res.to_dict(orient="records"),
-            "consensus_genome": consensus_seq,
-            "mutation_scores": mutation_scores,
-            "protein_sequences": protein_sequences
-        })
-
-    # Ordenar alfabéticamente por nombre de muestra
-    all_samples_data.sort(key=lambda x: x["sample_name"])
-
-    # --- Render full HTML report
-    html_content = template.render(
-        all_samples=all_samples_data,
-        hivdb_version=hivdb_version_info,
-        date=date.today().strftime("%Y-%m-%d"),
-        css_content=css_content,
-        logo_b64=logo_b64
+    seq_summary = parse_sequence_summary(
+        json_file,
+        ivar_consensus_params=args.ivar_consensus_params,
+        ivar_variant_maf=args.ivar_variant_maf,
+        ambiguous_site_summary=ambiguous_site_summary,
     )
 
-    output_html = args.output_html or "all_samples_report.html"
-    with open(output_html, "w", encoding="utf-8") as f:
+    regional_consensus_sequences = [
+        {
+            "region": region,
+            "genes": region.split("_"),
+            "fasta": record.format("fasta").strip(),
+        }
+        for region, record in consensus_records.items()
+        if region != "FULL"
+    ]
+
+    df_res = parse_resistance_table(res_file, deprecated_drugs)
+
+    mutation_scores_raw = extract_mutation_scoring(json_file)
+    mutation_scores = sort_mutation_scores(mutation_scores_raw)
+    mutation_scores = remove_deprecated_drugs(mutation_scores, deprecated_drugs)
+
+    sample_data = {
+        "sample_name": sample_name,
+        "sequence_summary": seq_summary,
+        "sequence_warnings": parse_sequence_warnings(json_file),
+        "subtypes": subtypes,
+        "mutation_data": df_mut.to_dict(orient="records"),
+        "mutation_comments": parse_mutation_comments(json_file),
+        "resistance_data": df_res.to_dict(orient="records"),
+        "consensus_genome": full_record.format("fasta").strip(),
+        "mutation_scores": mutation_scores,
+        "regional_consensus_sequences": regional_consensus_sequences
+    }
+
+    # --- Render one HTML report for this sample
+    html_content = template.render(
+        sample = sample_data,
+        hivdb_version = hivdb_version_info,
+        nextclade_dataset_name = args.nextclade_dataset_name,
+        nextclade_dataset_tag = args.nextclade_dataset_tag,
+        pipeline_version = args.pipeline_version,
+        date = date.today().strftime("%Y-%m-%d"),
+        css_content = css_content,
+        logo_b64 = logo_b64
+    )
+
+    with open(args.output_html, "w", encoding="utf-8") as f:
         f.write(html_content)
 
-    print(f"✅ Report generated: {output_html}")
+    print(f"✅ Report generated for {sample_name}: {args.output_html}")
 
 if __name__ == "__main__":
     main()

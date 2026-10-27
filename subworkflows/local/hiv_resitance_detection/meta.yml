@@ -14,6 +14,8 @@ components:
   - gff2json
   - liftoff
   - resistance/report
+  - extract_consensus_regions
+  - nextclade/run
 input:
   - consensus:
       description: |
@@ -43,10 +45,10 @@ input:
       description: |
         CSV file with pangolin results
         Structure: [ val(meta), [ csv ] ]
-  - nextclade_report:
+  - nextclade_db:
       description: |
-        CSV file with nextclade results
-        Structure: [ val(meta), [ csv ] ]
+        Path containing the dataset files obtained by running nextclade dataset
+        Structure: [ path(dataset) ]
 output:
   - sierralocal_results:
       description: |
@@ -70,5 +72,7 @@ output:
         Structure: [ path(versions.yml) ]
 authors:
   - "@svarona"
+  - "@LilyAnderssonLee"
 maintainers:
   - "@svarona"
+  - "@LilyAnderssonLee"
