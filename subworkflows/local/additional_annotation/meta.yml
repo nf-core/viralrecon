@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "additional_annotation"
+description: Perform variants long table with additional annotation file
+keywords:
+  - annotation
+  - gtf
+  - gff
+  - vcf
+components:
+  - gunzip
+  - snpeff/build
+  - snpeff/ann
+  - snpsift/extractfields
+  - vcf_bgzip_tabix_stats
+  - bcftools/query
+  - make/variants/long/table
+input:
+  - vcf:
+      description: |
+        VCF file from variant calling
+        Structure: [ val(meta), [ vcf ] ]
+  - tbi:
+      description: |
+        tabix index file
+        Structure: [ val(meta), [ tbi ] ]
+  - fasta:
+      description: |
+        Index of the reference genome fasta file
+        Structure: [ path(fasta) ]
+  - annot:
+      description: |
+        Index of the reference genome fasta file
+        Structure: [ path(additional_annotation) ]
+  - pangolin:
+      description: |
+        Index of the reference genome fasta file
+        Structure: [ val(meta), [ csv ] ]
+output:
+  - long_table:
+      description: |
+        Long table CSV with additional annotated variants
+        Structure: [ val(meta), [ csv ] ]
+  - versions:
+      description: |
+        Files containing software versions
+        Structure: [ path(versions.yml) ]
+authors:
+  - "@svarona"
+maintainers:
+  - "@svarona"
+  - "@saramonzon"

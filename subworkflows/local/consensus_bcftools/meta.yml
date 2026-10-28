@@ -1,0 +1,90 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "consensus_bcftools"
+description: Generate consensus sequences from mapped reads using bcftools
+keywords:
+  - consensus
+  - bcftools
+  - fasta
+components:
+  - bcftools/filter
+  - tabix/tabix
+  - bedtools/merge
+  - bedtools/maskfasta
+  - bcftools/consensus
+  - make/bed/mask
+  - rename/fasta/header
+  - consensus_qc
+input:
+  - bam:
+      description: |
+        Mapping BAM files and their index files
+        Structure: [ val(meta), [ bam ] ]
+  - vcf:
+      description: |
+        VCF file with variants called
+        Structure: [ val(meta), [ vcf ] ]
+  - tbi:
+      description: |
+        tabix index file
+        Structure: [ val(meta), [ tbi ] ]
+  - fasta:
+      description: |
+        Reference genome fasta file
+        Structure: [ path(fasta) ]
+  - gff:
+      description: |
+        GFF file of the reference genome
+        Structure: [ path(gff) ]
+  - nextclade_db:
+      description: |
+        Nextclade database to use
+        Structure: [ path(nextclade_db) ]
+output:
+  - consensus:
+      type: file
+      description: |
+        Fasta file with genome consensus
+        Structure: [ val(meta), [ fasta ] ]
+  - quast_results:
+      description: |
+        Results from Quast quality control on consensus
+        Structure: [ val(meta), [ results ] ]
+  - quast_tsv:
+      type: file
+      description: |
+        TSV file with Quast results report
+        Structure: [ val(meta), [ tsv ] ]
+      pattern: "*.{tsv}"
+  - pangolin_report:
+      type: file
+      description: |
+        CSV file with pangolin report
+        Structure: [ val(meta), [ csv ] ]
+      pattern: "*.{csv}"
+  - nextclade_report:
+      type: file
+      description: |
+        CSV file with nextclade report
+        Structure: [ val(meta), [ csv ] ]
+      pattern: "*.{csv}"
+  - bases_tsv:
+      type: file
+      description: |
+        TSV file with bases
+        Structure: [ val(meta), [ tsv ] ]
+      pattern: "*.{tsv}"
+  - bases_pdf:
+      type: file
+      description: |
+        PDF file with bases
+        Structure: [ val(meta), [ pdf ] ]
+      pattern: "*.{pdf}"
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@drpatelh"
+maintainers:
+  - "@svarona"
+  - "@saramonzon"

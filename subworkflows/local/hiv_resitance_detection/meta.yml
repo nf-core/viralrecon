@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "hiv_resistance"
+description: HIV resistance detecton
+keywords:
+  - hiv
+  - resistance
+  - fasta
+  - consensus
+components:
+  - sierralocal
+  - resistance_tables
+  - additional_annotation
+  - bam2codfreq
+  - gff2json
+  - liftoff
+  - resistance/report
+input:
+  - consensus:
+      description: |
+        Consensus fasta file
+        Structure: [ val(meta), [ consensus ] ]
+  - bam:
+      description: |
+        Mapping BAM files and their index files
+        Structure: [ val(meta), [ bam ], [bai] ]
+  - fasta:
+      description: |
+        Reference genome fasta file
+        Structure: [ path(fasta) ]
+  - gff:
+      description: |
+        Reference genome annotation gff file
+        Structure: [ path(gff) ]
+  - vcf:
+      description: |
+        VCF file with variants called
+        Structure: [ val(meta), [ vcf ] ]
+  - tbi:
+      description: |
+        tabix index file
+        Structure: [ val(meta), [ tbi ] ]
+  - pangolin:
+      description: |
+        CSV file with pangolin results
+        Structure: [ val(meta), [ csv ] ]
+  - nextclade_report:
+      description: |
+        CSV file with nextclade results
+        Structure: [ val(meta), [ csv ] ]
+output:
+  - sierralocal_results:
+      description: |
+        HIV resistance json file from sierralocal
+        Structure: [ val(meta), [ json ] ]
+  - bam2codfreq_results:
+      description: |
+        Codfreq files generated from BAM files
+        Structure: [ val(meta), [ codfreq ] ]
+  - mutation_table:
+      description: |
+        HIV mutations report table integrating sierralocal and codfreq data
+        Structure: [ val(meta), [ csv ] ]
+  - resistance_table:
+      description: |
+        HIV resistance report table from sierralocal
+        Structure: [ val(meta), [ csv ] ]
+  - versions:
+      description: |
+        Files containing software versions
+        Structure: [ path(versions.yml) ]
+authors:
+  - "@svarona"
+maintainers:
+  - "@svarona"

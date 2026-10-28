@@ -1,0 +1,140 @@
+nextflow_pipeline {
+
+    name "Test pipeline"
+    script "../main.nf"
+    tag "pipeline"
+    profile "test"
+
+    // Define scenarios
+    def test_scenario = [
+        [
+            name: "-profile test --consensus_caller ivar",
+            params: [
+                consensus_caller: 'ivar'
+            ]
+        ],
+        [
+            name: "-profile test --variant_caller bcftools --consensus_caller ivar --skip_assembly",
+            params: [
+                variant_caller: 'bcftools',
+                consensus_caller: 'ivar',
+                skip_assembly: true
+            ]
+        ],
+        [
+            name: "-profile test --skip_fastp --skip_pangolin",
+            params: [
+                skip_fastp: true,
+                skip_pangolin: true
+            ]
+        ],
+        [
+            name: "-profile test --skip_variants",
+            params: [
+                skip_variants: true
+            ]
+        ],
+        [
+            name: "-profile test --skip_cutadapt --skip_snpeff",
+            params: [
+                skip_cutadapt: true,
+                skip_snpeff: true
+            ]
+        ],
+        [
+            name: "-profile test --skip_kraken2",
+            params: [
+                skip_kraken2: true
+            ]
+        ],
+        [
+            name: "-profile test --skip_assembly",
+            params: [
+                skip_assembly: true
+            ]
+        ],
+        [
+            name: "-profile test --spades_mode corona --skip_variants",
+            params: [
+                spades_mode: 'corona',
+                skip_variants: true
+            ]
+        ],
+        [
+            name: "-profile test --spades_mode metaviral --skip_variants",
+            params: [
+                spades_mode: 'metaviral',
+                skip_variants: true
+            ]
+        ],
+        [
+            name: "-profile test --skip_plasmidid false",
+            params: [
+                skip_plasmidid: false
+            ]
+        ],
+        [
+            name: "-profile test --additional_annotation 'https://github.com/nf-core/test-datasets/raw/refs/heads/viralrecon/genome/MN908947.3/GCA_009858895.3_ASM985889v3_genomic.200409.gtf.gz'",
+            params: [
+                additional_annotation: 'https://github.com/nf-core/test-datasets/raw/refs/heads/viralrecon/genome/MN908947.3/GCA_009858895.3_ASM985889v3_genomic.200409.gtf.gz'
+            ]
+        ],
+        [
+            name: "-profile test --bowtie2_index 'https://github.com/nf-core/test-datasets/raw/refs/heads/viralrecon/genome/MN908947.3/GCA_009858895.3_ASM985889v3_genomic.200409.bt2.index.tar.gz'",
+            params: [
+                bowtie2_index: 'https://github.com/nf-core/test-datasets/raw/refs/heads/viralrecon/genome/MN908947.3/GCA_009858895.3_ASM985889v3_genomic.200409.bt2.index.tar.gz'
+            ]
+        ],
+        [
+            name: "-profile test --skip_noninternal_primers --threeprime_adapters",
+            params: [
+                skip_noninternal_primers: true,
+                threeprime_adapters: true
+            ]
+        ],
+        [
+            name: "-profile test --primer_set_version 5.3.2",
+            params: [
+                primer_set_version: '5.3.2'
+            ]
+        ]
+    ]
+
+    // Loop through scenarios and generate tests dynamically
+    // Run all tests
+    test_scenario.each { scenario ->
+        test(scenario.name) {
+
+            when {
+                params {
+                    outdir = "$outputDir"
+                    scenario.params.each { key, value ->
+                        delegate."$key" = value
+                    }
+                }
+            }
+
+            then {
+                // stable_name: All files + folders in ${params.outdir}/ with a stable name
+                def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignoreFile: 'tests/.nftignore_stable_name', ignore: ['pipeline_info/*.{html,json,txt}', 'assembly/**/plasmidid/**/mashclust_*.log'])
+                // stable_path: All files in ${params.outdir}/ with stable content
+                def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore', ignore: ['**/*.consensus.qual.txt', '**/snpeff/*.snpeff.{vcf.gz,vcf.gx.tbi}', 'variants/**/*.{vcf.gz,vcf.gz.tbi}', 'assembly/spades/corona/**.scaffolds.fa.gz', 'assembly/spades/corona/abacas/*.abacas.{nucmer.tiling,tab}', 'assembly/spades/corona/blastn/*.blastn.txt'])
+                def softwareYaml = removeNextflowVersion("$outputDir/pipeline_info/nf_core_viralrecon_software_mqc_versions.yml")
+                softwareYaml.remove('NEXTCLADE_RUN')
+                softwareYaml.remove('PLOT_BASE_DENSITY')
+
+                assertAll(
+                    { assert workflow.success},
+                    { assert snapshot(
+                        // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                        softwareYaml,
+                        // All stable path name, with a relative path
+                        stable_name,
+                        // All files with stable contents
+                        stable_path
+                    ).match() }
+                )
+            }
+        }
+    }
+}

@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "fastq_trim_fastp_fastqc"
+description: Perform quality control on FASTQ files using Fastp and FastQC
+keywords:
+  - reads
+  - qc
+  - fastp
+  - fastqc
+components:
+  - fastqc
+  - fastp
+input:
+  - reads:
+      description: |
+        FASTQ sequencing reads
+        Structure: [ val(meta), [ reads ] ]
+  - adapter_fasta:
+      description: |
+        Fasta file with adapter sequences to be removed
+        Structure: [ path(adapter_fasta) ]
+  - discard_trimmed_pass:
+      type: boolean
+      description: Whether to discard reads that were trimmed
+  - save_trimmed_fail:
+      type: boolean
+      description: Whether to save reads that failed trimming
+  - save_merged:
+      type: boolean
+      description: Whether to save merged reads
+output:
+  - reads:
+      description: |
+        Trimmed reads in fastq format
+        Structure: [ val(meta), [ reads ] ]
+  - trim_json:
+      description: |
+        Json file with the statistical reports from fastp
+        Structure: [ val(meta), [ json ] ]
+  - trim_html:
+      description: |
+        Html file with the statistical reports from fastp
+        Structure: [ val(meta), [ html ] ]
+  - trim_log:
+      description: |
+        Log file from fastp
+        Structure: [ val(meta), [ log ] ]
+  - trim_reads_fail:
+      description: |
+        Fastq files with trimmed reads that failed processing
+        Structure: [ val(meta), [ fastq.gz ] ]
+  - trim_reads_merged:
+      description: |
+        Fastq files with trimmed reads that were merged
+        Structure: [ val(meta), [ fastq.gz ] ]
+  - fastqc_raw_html:
+      description: |
+        Html file with the statistical reports from fastqc of the raw reads
+        Structure: [ val(meta), [ html ] ]
+  - fastqc_raw_zip:
+      description: |
+        Zip file with the statistical reports from fastqc of the raw reads
+        Structure: [ val(meta), [ zip ] ]
+  - fastqc_trim_html:
+      description: |
+        Html file with the statistical reports from fastqc of the trimmed reads
+        Structure: [ val(meta), [ html ] ]
+  - fastqc_trim_zip:
+      description: |
+        Zip file with the statistical reports from fastqc of the trimmed reads
+        Structure: [ val(meta), [ zip ] ]
+  - versions:
+      description: |
+        Files containing software versions
+        Structure: [ path(versions.yml) ]
+authors:
+  - "@drpatelh"
+maintainers:
+  - "@svarona"
+  - "@saramonzon"

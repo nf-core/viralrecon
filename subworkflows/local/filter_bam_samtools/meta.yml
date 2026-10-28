@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "filter_bam_samtools"
+description: Filter co-ordinate sorted BAM, index and run samtools stats, flagstat and idxstats
+keywords:
+  - statistics
+  - counts
+  - bam
+components:
+  - samtools/view
+  - samtools/index
+  - bam_stats_samtools
+input:
+  - bam_bai:
+      description: |
+        The input channel containing the BAM and it's index
+        Structure: [ val(meta), [ bam ], [ bai ] ]
+  - fasta:
+      description: |
+        Reference genome fasta file
+        Structure: [ path(fasta) ]
+output:
+  - bam:
+      description: |
+        Filtered BAM file
+        Structure: [ val(meta), [ bam ] ]
+  - bai:
+      description: |
+        Index of the filtered BAM file
+        Structure: [ val(meta), [ bai ] ]
+  - stats:
+      description: |
+        File containing samtools stats output
+        Structure: [ val(meta), [ stats ] ]
+  - flagstat:
+      description: |
+        File containing samtools flagstat output
+        Structure: [ val(meta), [ flagstat ] ]
+  - idxstats:
+      description: |
+        File containing samtools idxstats output
+        Structure: [ val(meta), [ idxstats ] ]
+  - versions:
+      description: |
+        Files containing software versions
+        Structure: [ path(versions.yml) ]
+authors:
+  - "@drpatelh"
+maintainers:
+  - "@svarona"
+  - "@saramonzon"
