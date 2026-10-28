@@ -1,0 +1,99 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "prepare_genome_nanopore"
+description: Uncompress and prepare reference genome files for nanopore platform pipeline
+keywords:
+  - fasta
+  - reference
+  - genome
+components:
+  - gunzip
+  - untar
+  - samtools/faidx
+  - nextclade/datasetget
+  - collapse/primers
+  - kraken2/build
+  - snpeff/build
+input:
+  - fasta:
+      description: |
+        Reference genome fasta file
+        Structure: [ path(fasta) ]
+  - gff:
+      description: |
+        GFF file of the reference genome
+        Structure: [ path(gff) ]
+  - primer_bed:
+      description: |
+        BED file with amplicon primer positions
+        Structure: [ path(primer_bed) ]
+  - nextclade_dataset:
+      description: |
+        Full path to Nextclade dataset required for 'nextclade run' command.
+        Structure: [ path(nextclade_dataset) ]
+  - nextclade_dataset_name:
+      type: string
+      description: Name of Nextclade dataset to retrieve
+  - nextclade_dataset_tag:
+      type: string
+      description: Version tag of the dataset to download
+output:
+  - fasta:
+      type: file
+      description: |
+        Reference fasta file
+        Structure: [ path(fasta) ]
+  - gff:
+      type: file
+      description: |
+        Reference gff file
+        Structure: [ path(gff) ]
+  - fai:
+      type: file
+      description: |
+        Reference genome fasta index
+        Structure: [ path(fai) ]
+  - chrom_sizes:
+      type: file
+      description: |
+        Chromosome sizes file
+        Structure: [ path(chrom_sizes) ]
+  - bowtie2_index:
+      description: |
+        Reference genome Bowtie2 index files
+        Structure: [ [:], bowtie2/index/ ]
+  - primer_bed:
+      type: file
+      description: |
+        Amplicon primers bed file
+        Structure: [ path(primer_bed) ]
+  - primer_collapsed_bed:
+      type: file
+      description: |
+        Amplicon primers collapsed bed file
+        Structure: [ path(primer_collapsed_bed) ]
+  - nextclade_db:
+      description: |
+        Path to nextclade database
+        Structure: [ path(nextclade_db) ]
+  - kraken2_db:
+      description: |
+        Path to Kraken2 database folder
+        Structure: [ path(kraken2_db) ]
+  - snpeff_db:
+      description: |
+        Path to SnpEff database folder
+        Structure: [ path(snpeff_db) ]
+  - snpeff_config:
+      type: file
+      description: |
+        Path to SnpEff config file
+        Structure: [ path(snpeff_config) ]
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@drpatelh"
+maintainers:
+  - "@svarona"
+  - "@saramonzon"

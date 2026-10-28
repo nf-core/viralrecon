@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "artic_minion_protocol"
+description: Perform mapping, primer trimming, variant calling and consensus genome generation.
+keywords:
+  - nanopore
+  - artic
+  - mapping
+  - variants
+  - consensus
+components:
+  - artic/minion
+  - vcflib/vcfuniq
+  - tabix/tabix
+input:
+  - reads:
+      description: |
+        Read files for de novo assembly
+        Structure: [ val(meta), [ reads ] ]
+  - model_dir:
+      description: |
+        Directory of the Clair3 model
+        Structure: [ path(model_dir) ]
+  - model:
+      description: |
+        Name of the model file to be used
+        Structure: [ va(model) ]
+  - fasta:
+      description: |
+        Reference genome fasta file
+        Structure: [ path(fasta) ]
+  - bed:
+      description: |
+        BED file with amplicon primer positions
+        Structure: [ path(bed) ]
+output:
+  - bam:
+      type: file
+      description: |
+        Sorted BAM file with primers positions softclipped
+        Structure: [ val(meta), [ bam ] ]
+      pattern: "*.{bam}"
+  - bam:
+      type: file
+      description: |
+        Index of the sorted BAM file with primers positions softclipped
+        Structure: [ val(meta), [ bam ] ]
+      pattern: "*.{bai}"
+  - vcf:
+      type: file
+      description: |
+        Variant calling file
+        Structure: [ val(meta), [ vcf.gz ] ]
+  - tbi:
+      type: file
+      description: |
+        tabix index file
+        Structure: [ val(meta), [ tbi ] ]
+  - consensus:
+      description: |
+        Fasta file with genome consensus
+        Structure: [ val(meta), [ consensus ] ]
+  - versions:
+      description: |
+        Files containing software versions
+        Structure: [ path(versions.yml) ]
+authors:
+  - "@svarona"
+maintainers:
+  - "@svarona"

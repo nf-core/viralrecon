@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>HIV Drug Resistance and Mutation Report</title>
+    <style>
+      {{ css_content | safe }}
+    </style>
+  </head>
+  <body>
+    <!-- TITLE -->
+    <div class="report-title">HIV Drug Resistance and Mutation Report</div>
+    <p style="margin-top: 10px; font-size: 0.9em; color: #003366">
+      ⚠️ Disclaimer: This report is
+      <strong>not generated with <a href="https://hivdb.stanford.edu/hivdb/" target="_blank">HIVdb</a></strong
+      >, but it is inspired by it.
+    </p>
+    <!-- ADDITIONAL INFORMATION -->
+    <div class="report-subtitle">
+      Database version: {{ hivdb_version.db_version }}<br />
+      Database publish date: {{ hivdb_version.publish_date }}<br />
+      Report generation date: {{ date }}
+    </div>
+    <!-- Fixed dropdown for sample navigation -->
+    <select id="sample-selector" onchange="scrollToSample(this.value)">
+      <option value="">Select sample</option>
+      {% for sample in all_samples %}
+      <option value="sample_{{ loop.index }}">{{ loop.index }}. {{ sample.sample_name }}</option>
+      {% endfor %}
+    </select>
+
+    {% for sample in all_samples %}
+    <!-- HEADER -->
+    <div class="header" id="sample_{{ loop.index }}">{{ loop.index }}. {{ sample.sample_name }}</div>
+
+    <!-- SEQUENCE SUMMARY -->
+    <div class="summary-title">
+      <h2>Sequence Summary</h2>
+    </div>
+
+    <div class="sequence-summary-info">
+      <ul>
+        {% for line in sample.sequence_summary %} {% if line is iterable and line[0] == "subtype" %}
+        <li class="subtype-line">
+          Subtype: <strong>{{ line[1] }}</strong>
+          <span
+            class="info-icon"
+            title="This subtype was obtained using Nextclade software (https://clades.nextstrain.org) with the complete consensus sequence. It can be visualized in the Nextclade web app when copy/pasting the consensus at the end of the sample."
+          >
+            ⓘ
+          </span>
+        </li>
+        {% else %}
+        <li>{{ line }}</li>
+        {% endif %} {% endfor %}
+      </ul>
+    </div>
+
+    {% for gene in ["PR", "RT", "IN"] %} {% set gene_mutations = sample.mutation_data | selectattr("Gene_name",
+    "equalto", gene) | list %} {% set gene_resistances = sample.resistance_data | selectattr("Gene_name", "equalto",
+    gene) | list %} {% if gene_mutations or gene_resistances %}
+    <div class="summary-title">
+      <h2>Drug resistance interpretation: {{ gene }}</h2>
+    </div>
+    <div class="color-legend">
+      <strong>Color legend:</strong>
+      <span style="background-color: #ffcccc; padding: 2px 8px; margin: 0 5px; border-left: 3px solid #ff0000"
+        >APOBEC DRM</span
+      >
+      <span style="background-color: #ffedd5; padding: 2px 8px; margin: 0 5px; border-left: 3px solid #ff8c00"
+        >SDRM</span
+      >
+      <span style="background-color: #d5f5ff; padding: 2px 8px; margin: 0 5px; border-left: 3px solid #00ccff"
+        >Unusual</span
+      >
+      <div class="coverage-note">
+        📝 Note: Mutations at the first/last sequenced codon with coverage ≤ Minimum read depth (default 50) may arise
+        from partial codon coverage. Nucleotide-level depth is filtered, but codon-level depth is not, therefore these
+        positions may represent potential false positives.
+      </div>
+    </div>
+    <div class="content-block">
+      <!-- MUTATIONS -->
+      {% set mutation_labels = [] %} {% if gene == "PR" %} {% set mutation_labels = [ ("Major", "PI Major Mutations"),
+      ("Accessory", "PI Accessory Mutations"), ("Other", "PR Other Mutations") ] %} {% elif gene == "RT" %} {% set
+      mutation_labels = [ ("NRTI", "NRTI Mutations"), ("NNRTI", "NNRTI Mutations"), ("Other", "RT Other Mutations") ] %}
+      {% elif gene == "IN" %} {% set mutation_labels = [ ("Major", "INSTI Major Mutations"), ("Accessory", "INSTI
+      Accessory Mutations"), ("Other", "IN Other Mutations") ] %} {% endif %} {% for mut_type, mut_label in
+      mutation_labels %} {% set mut_list = gene_mutations | selectattr("Mutations_type", "equalto", mut_type) | list %}
+      <p><strong>{{ mut_label }}:</strong> {% if not mut_list %}None{% endif %}</p>
+
+      {% if mut_list %}
+      <button
+        class="expand-btn"
+        onclick="
+            const table = document.getElementById('table-{{ sample.sample_name | replace(' ', '_') }}-{{ gene }}-{{ mut_type | lower }}');
+            table.classList.toggle('expand');
+            this.textContent = table.classList.contains('expand') ? 'Collapse' : 'Expand';
+          "
+      >
+        Expand
+      </button>
+      <div class="table-container">
+        <div class="table-scroll">
+          <table
+            class="mutation-table"
+            id="table-{{ sample.sample_name | replace(' ', '_') }}-{{ gene }}-{{ mut_type | lower }}"
+          >
+            <thead>
+              <tr>
+                <th>Mutation</th>
+                <th>AF (%)</th>
+                <th>Coverage</th>
+                <th>Type</th>
+                <th>Comments</th>
+                <th>Insertion</th>
+                <th>Deletion</th>
+                <th>APOBEC Mutation</th>
+                <th>APOBEC DRM</th>
+                <th>Unusual</th>
+                <th>SDRM</th>
+                <th>Has Stop</th>
+                <th>INDEL>5%</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in mut_list %}
+              <tr
+                class="{% if row.isApobecDRM %}apobec-drm-row{% endif %} {% if row.isSDRM %}sdrm-row{% endif %} {% if row.isUnusual %}unusual-row{% endif %}"
+              >
+                <td>{{ row.Mutations }}</td>
+                <td>{{ (row.Mutation_AF | float * 100) | round(2) }}</td>
+                <td>{{ row.Coverage }}</td>
+                <td>{{ row.Mutations_type }}</td>
+                <td>
+                  {{ row.Mutations_comments if row.Mutations_comments and row.Mutations_comments|string|lower not in
+                  ["nan", "none", ""] else "-" }}
+                </td>
+                <td>{{ "Yes" if row.isInsertion else "No" }}</td>
+                <td>{{ "Yes" if row.isDeletion else "No" }}</td>
+                <td>{{ "Yes" if row.isApobecMutation else "No" }}</td>
+                <td>{{ "Yes" if row.isApobecDRM else "No" }}</td>
+                <td>{{ "Yes" if row.isUnusual else "No" }}</td>
+                <td>{{ "Yes" if row.isSDRM else "No" }}</td>
+                <td>{{ "Yes" if row.hasStop else "No" }}</td>
+                <td>{{ "Yes" if row['INDEL>5%'] else "No" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %} {% endfor %}
+
+      <!-- RESISTANCE -->
+      {% if gene_resistances %} {% for drug_class, class_label in [ ("PI", "Protease Inhibitors (PI)"), ("NRTI",
+      "Nucleoside Reverse Transcriptase Inhibitor (NRTI)"), ("NNRTI", "Non-nucleoside Reverse Transcriptase Inhibitors
+      (NNRTI)"), ("INSTI", "Integrase Strand Transfer Inhibitors (INSTI)") ] %} {% set class_drugs = gene_resistances |
+      selectattr("Drug_class", "equalto", drug_class) | list %} {% if class_drugs %}
+      <h3>{{ class_label }}</h3>
+      <hr />
+      <div class="table-scroll">
+        <table class="resistance-table">
+          <thead>
+            <tr>
+              <th>Drug Name</th>
+              <th>Drug Abbreviation</th>
+              <th>Resistance Status</th>
+              <th>Resistance Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in class_drugs %}
+            <tr>
+              <td>{{ row.Drug_name }}</td>
+              <td>{{ row.Drug_abbr }}</td>
+              <td>{{ row.Res_status }}</td>
+              <td>{{ row.Total_score }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %} {% endfor %} {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- COMMENTS -->
+    {% set comment_list = [] %} {% for m in gene_mutations %} {% if m.Mutations_comments and
+    m.Mutations_comments|string|lower not in ["nan", "none", ""] %} {% set _ = comment_list.append(m) %} {% endif %} {%
+    endfor %} {% if comment_list %}
+    <div class="mutation-comments">
+      <strong>{{ gene }} comments</strong>
+      <ul>
+        {% for row in comment_list %}
+        <li>{{ row.Mutations }}: {{ row.Mutations_comments }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- MUTATION SCORING -->
+    {% set mutation_scores = sample.mutation_scores.get(gene, {}) %} {% if mutation_scores %}
+    <div class="summary-title">
+      <h2>Mutation scoring: {{ gene }}</h2>
+    </div>
+
+    <div class="content-block">
+      {% for drug_class, class_label in [ ("PI", "Protease Inhibitors (PI)"), ("NRTI", "Nucleoside Reverse Transcriptase
+      Inhibitors (NRTI)"), ("NNRTI", "Non-nucleoside Reverse Transcriptase Inhibitors (NNRTI)"), ("INSTI", "Integrase
+      Strand Transfer Inhibitors (INSTI)") ] %} {# Filtrar mutaciones que tienen al menos un fármaco de esta clase #} {%
+      set mutations_in_class = {} %} {% set all_drugs = [] %} {% for mutation, drug_scores in mutation_scores.items() %}
+      {% set drugs_for_mutation = {} %} {% for drug, info in drug_scores.items() %} {% if info.drug_class == drug_class
+      %} {% set _ = drugs_for_mutation.update({drug: info}) %} {% if drug not in all_drugs %} {% set _ =
+      all_drugs.append(drug) %} {% endif %} {% endif %} {% endfor %} {% if drugs_for_mutation %} {% set _ =
+      mutations_in_class.update({mutation: drugs_for_mutation}) %} {% endif %} {% endfor %} {% if mutations_in_class %}
+      <h3>{{ class_label }}</h3>
+      <hr />
+      <div class="table-scroll">
+        <table class="mutation-scoring">
+          <thead>
+            <tr>
+              <th>Mutation</th>
+              {% for drug in all_drugs | sort %}
+              <th>{{ drug }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for mutation, drugs in mutations_in_class.items() %}
+            <tr>
+              <td>{{ mutation }}</td>
+              {% for drug in all_drugs | sort %}
+              <td>{% if drugs.get(drug) %}{{ drugs.get(drug).score }}{% else %}-{% endif %}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %} {% endfor %}
+    </div>
+    {% endif %} {% endfor %}
+
+    <!-- Buttons to external resources -->
+    <div class="external-buttons">
+      <a href="https://hivdb.stanford.edu/hivdb/" target="_blank" class="link-button">Go to HIVdb</a>
+      <a href="https://clades.nextstrain.org/" target="_blank" class="link-button">Go to Nextclade</a>
+    </div>
+
+    <!-- CONSENSUS GENOME -->
+    <div class="summary-title">
+      <h2>Consensus Genome</h2>
+    </div>
+
+    {% if sample.consensus_genome %}
+    <div class="content-block">
+      <details>
+        <summary>
+          Show full consensus genome
+          <button
+            type="button"
+            class="copy-button"
+            onclick="navigator.clipboard.writeText(`{{ sample.consensus_genome | replace('`', '\\`') }}`)"
+            style="margin-left: 10px"
+          >
+            Copy to clipboard
+          </button>
+        </summary>
+        <pre>{{- sample.consensus_genome -}}</pre>
+      </details>
+      {% else %}
+      <p>No consensus genome available</p>
+      {% endif %}
+    </div>
+
+    <!-- PROTEIN SEQUENCES -->
+    {% if sample.protein_sequences %}
+    <div class="summary-title">
+      <h2>Protein Sequences</h2>
+    </div>
+
+    {% for protein in sample.protein_sequences %}
+    <div class="content-block">
+      <details>
+        <summary>
+          Gene(s): {{ protein.genes | join(", ") }}
+          <button
+            type="button"
+            class="copy-button"
+            onclick="navigator.clipboard.writeText(`{{ protein.fasta | replace('`', '\\`') }}`)"
+            style="margin-left: 10px"
+          >
+            Copy to clipboard
+          </button>
+        </summary>
+
+        <pre>{{ protein.fasta }}</pre>
+      </details>
+    </div>
+    {% endfor %} {% endif %} {% endfor %}
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <div style="margin-top: 40px; text-align: left">
+        <img src="data:image/png;base64,{{ logo_b64 }}" style="height: 60px" />
+      </div>
+      <p>
+        Generated automatically from <a href="https://github.com/nf-core/viralrecon">nf-core/viralrecon</a> using data
+        obtained from <a href="https://github.com/PoonLab/sierra-local">sierra-local</a> and a modified version of
+        <a href="https://github.com/hivdb/codfreq">codfreq</a>. This report was created during a collaboration between
+        the
+        <a href="https://www.isciii.es/ub/unidad">Bioinformatics Unit of Instituto de Salud Carlos III (BU-ISCIII)</a>
+        and both <a href="https://ki.se/">Karolinska Institutet (KI)</a> and
+        <a href="https://www.karolinska.se/lab">Karolinska University Laboratory (KUL)</a>.
+      </p>
+    </div>
+
+    <script>
+      function makeMutationScoringSortable() {
+        const tables = document.querySelectorAll("table.mutation-scoring");
+
+        tables.forEach((table) => {
+          const headers = table.querySelectorAll("th");
+
+          headers.forEach((th, index) => {
+            // Skip first column ("Mutation")
+            if (index === 0) return;
+
+            th.classList.add("sortable");
+
+            th.addEventListener("click", () => {
+              const tbody = table.querySelector("tbody");
+              const rows = Array.from(tbody.querySelectorAll("tr"));
+              const isAsc = th.classList.contains("sorted-asc");
+
+              // Remove sort classes from all headers
+              headers.forEach((h) => h.classList.remove("sorted-asc", "sorted-desc"));
+
+              const sortedRows = rows.sort((a, b) => {
+                const cellA = a.children[index].innerText.trim();
+                const cellB = b.children[index].innerText.trim();
+
+                // Check if numeric
+                const numA = parseFloat(cellA.replace(",", "."));
+                const numB = parseFloat(cellB.replace(",", "."));
+
+                if (!isNaN(numA) && !isNaN(numB)) {
+                  return isAsc ? numA - numB : numB - numA;
+                }
+
+                return isAsc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+              });
+
+              th.classList.add(isAsc ? "sorted-desc" : "sorted-asc");
+
+              tbody.innerHTML = "";
+              sortedRows.forEach((row) => tbody.appendChild(row));
+            });
+          });
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", makeMutationScoringSortable);
+
+      function scrollToSample(id) {
+        if (id) {
+          const element = document.getElementById(id);
+          if (element) element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+
+      // Highlight current sample dynamically while scrolling
+      document.addEventListener("DOMContentLoaded", () => {
+        const sections = Array.from(document.querySelectorAll("[id^='sample_']"));
+        const selector = document.getElementById("sample-selector");
+
+        function updateActiveSample() {
+          let current = sections[0].id;
+          const scrollPosition = window.scrollY + window.innerHeight / 3; // offset to trigger earlier
+
+          for (const section of sections) {
+            const rect = section.getBoundingClientRect();
+            const sectionTop = rect.top + window.scrollY;
+            if (scrollPosition >= sectionTop) {
+              current = section.id;
+            } else {
+              break;
+            }
+          }
+          if (selector.value !== current) {
+            selector.value = current;
+          }
+        }
+
+        window.addEventListener("scroll", updateActiveSample);
+        updateActiveSample(); // run once on load
+      });
+    </script>
+  </body>
+</html>
