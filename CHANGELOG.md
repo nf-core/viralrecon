@@ -38,6 +38,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #607](https://github.com/nf-core/viralrecon/pull/607)] - Updated the multiqc module and fixed nextlfow lingting warnings
 - [[PR #615](https://github.com/nf-core/viralrecon/pull/615)] - Fixed collapse_primer_bed.py to support 7-column primer BED files and updated docs
 - [[PR #620](https://github.com/nf-core/viralrecon/pull/620)] - Template and nf-core modules & subworkflows update
+- [[PR #622](https://github.com/nf-core/viralrecon/pull/622)] - Freyja version bump to 2.0.6
 
 ### Parameters
 
@@ -70,7 +71,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | Dependency          | Old version | New version      |
 | ------------------- | ----------- | ---------------- |
 | `blast`             | 2.16.0      | 2.17.0           |
-| `Freyja`            | 2.0.1       | 2.0.3            |
+| `Freyja`            | 2.0.1       | 2.0.6            |
 | `sierra-local`      |             | 0.4.3            |
 | `liftoff`           |             | 1.6.3            |
 | `pysam`             |             | 0.23.3           |
