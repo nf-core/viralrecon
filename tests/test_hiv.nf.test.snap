@@ -15,12 +15,12 @@
                     "bcftools": "1.23.1"
                 },
                 "BOWTIE2_ALIGN": {
-                    "bowtie2": "2.5.4",
+                    "bowtie2": "2.5.5",
                     "pigz": 2.8,
-                    "samtools": 1.21
+                    "samtools": 1.24
                 },
                 "BOWTIE2_BUILD": {
-                    "bowtie2": "2.5.4"
+                    "bowtie2": "2.5.5"
                 },
                 "CAT_FASTQ": {
                     "cat": 9.5
@@ -29,13 +29,13 @@
                     "liftoff": "1.6.3"
                 },
                 "FASTP": {
-                    "fastp": "1.3.6"
+                    "fastp": "1.4.0"
                 },
                 "FASTQC_RAW": {
-                    "fastqc": "0.12.1"
+                    "fastqc": "0.13.0"
                 },
                 "FASTQC_TRIM": {
-                    "fastqc": "0.12.1"
+                    "fastqc": "0.13.0"
                 },
                 "GFF2JSON": {
                     "python": "3.13.2"
@@ -71,8 +71,8 @@
                     "mosdepth": "0.3.14"
                 },
                 "NEXTCLADE_DATASETGET": {
-                    "nextclade-dataset": "2025-09-09--12-13-13Z",
-                    "nextclade": "3.21.2"
+                    "nextclade": "3.21.2",
+                    "nextclade-dataset": "2025-09-09--12-13-13Z"
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
                     "picard": "3.5.0"
@@ -496,9 +496,9 @@
                 "variants/ivar/variants_long_table.csv"
             ],
             [
-                "DRR030302.fastp.json:md5,fa9a19f51b36ba421e9242dea4de7e9b",
-                "SRR4071760.fastp.json:md5,04affbd47fee2af387e3e35400b47a8c",
-                "SRR6937100.fastp.json:md5,373158a2a6259ff2feca200bf8779c34",
+                "DRR030302.fastp.json:md5,0e3bd4cef11bc9ae27d0b5420a4739b4",
+                "SRR4071760.fastp.json:md5,65eb6f4f0da859ac23b9af21c5bfb334",
+                "SRR6937100.fastp.json:md5,cb303a191d325f2083c03f301b65557a",
                 "DRR030302.kraken2.report.txt:md5,5ab2ed70334d4061fb82f8d91475c761",
                 "SRR4071760.kraken2.report.txt:md5,c26f91bfafe58ba451f7d05f0b9b5611",
                 "SRR6937100.kraken2.report.txt:md5,6f5c455f6efd9fa807fefdbba83ba960",
@@ -509,7 +509,7 @@
                 "bcftools_stats_vqc_Count_Transitions.yaml:md5,d66c48c598160aa373354e640280d665",
                 "bcftools_stats_vqc_Count_Transversions.yaml:md5,ed8015cccd1080a84346f754a3ce8bd2",
                 "bowtie2_pe_plot.yaml:md5,1b002829da6f647a8f4efc33e96da568",
-                "fastp-insert-size-plot.yaml:md5,10b9da66b846b3f92a32438bff14a7da",
+                "fastp-insert-size-plot.yaml:md5,c23e263877151fee5fb7e2f16008d7a3",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,6c4222897b9db16fcdf2ef82209a4c09",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,60a4eefbe7c07a67553b5458b3ce1402",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,69dc43d2d4cead054e7e184607f2dff7",
@@ -525,7 +525,7 @@
                 "fastp_filtered_reads_plot.yaml:md5,94235b4ad306d22ef24cf218167e72b2",
                 "fastqc-status-check-heatmap.yaml:md5,2c08f0a35e3873e813c1c4e170d1396b",
                 "fastqc_adapter_content_plot.yaml:md5,a4552316a37ebbf4dd3701129bf4a34a",
-                "fastqc_overrepresented_sequences_plot.yaml:md5,d6b471696abf3b0dd4b8cd53175f1e64",
+                "fastqc_overrepresented_sequences_plot.yaml:md5,21d01f359bd330f250c6231153f72f17",
                 "fastqc_per_base_n_content_plot.yaml:md5,8628eb45b7f1337e55119b390109f373",
                 "fastqc_per_base_sequence_quality_plot.yaml:md5,a84c6e3c4b89e5327b244f915d46468f",
                 "fastqc_per_sequence_gc_content_plot_Counts.yaml:md5,70072e0276358009bd152044dc56ecb3",
@@ -550,8 +550,8 @@
                 "multiqc_bcftools_stats.yaml:md5,24a88a270740d3a4efd1332749d6d121",
                 "multiqc_bowtie2.yaml:md5,4daf8885acd63fc61f20e24cfe2102c4",
                 "multiqc_citations.yaml:md5,f564e5526b36c9a583e0af5ca7a34b64",
-                "multiqc_fastp.yaml:md5,cf8313deeccb8f8f6c12ebb271c29fcd",
-                "multiqc_fastqc.yaml:md5,444824ecaca1d11e9920430e6b06ddd3",
+                "multiqc_fastp.yaml:md5,254bf696c9aafdf55990a2f9deae2d11",
+                "multiqc_fastqc.yaml:md5,49eadab2a52d211ff095333bf2904baf",
                 "multiqc_ivar_variants.yaml:md5,c0eb1e73e4ec11c252b2476108d4a560",
                 "multiqc_kraken.yaml:md5,bbacecf8e782bb601be23351c164dd6b",
                 "multiqc_nextclade_clade.yaml:md5,9acf3d4a4b35cf58df39ffbcef25f9e8",
@@ -568,9 +568,9 @@
                 "reference.fasta:md5,0a750989cc2a2139104453cdcd173acc",
                 "sequences.fasta:md5,b7d8f3f19115e6668d4d4b16084c80c8",
                 "tree.json:md5,3fdf0843196b31e4f47802604fb5beab",
-                "DRR030302.bowtie2.log:md5,9333859bea34f09b39c6ab30a6acf4b3",
-                "SRR4071760.bowtie2.log:md5,08b0019272ed758e78922d9378911e38",
-                "SRR6937100.bowtie2.log:md5,8bdbb752563033b9e73fd4a62d677440",
+                "DRR030302.bowtie2.log:md5,769cab8fa2c61f83df6502825e69d95b",
+                "SRR4071760.bowtie2.log:md5,86381cae3c9a06a1c4b3f294715fd33c",
+                "SRR6937100.bowtie2.log:md5,99f35302379e2cb59a0fb8ea24c43094",
                 "DRR030302.mosdepth.coverage.tsv:md5,a818b04d79660383a28593b456878613",
                 "DRR030302.mosdepth.summary.txt:md5,e123648e4b9a813ebd47e2be0dd28224",
                 "SRR4071760.mosdepth.coverage.tsv:md5,017eeb8f17fdcf5e2460233ed6d9252e",
@@ -648,7 +648,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-09-17T13:24:33.0596663"
+        "timestamp": "2026-10-28T16:37:27.070065175"
     },
     "-profile test_hiv": {
         "content": [
@@ -666,12 +666,12 @@
                     "bcftools": "1.23.1"
                 },
                 "BOWTIE2_ALIGN": {
-                    "bowtie2": "2.5.4",
+                    "bowtie2": "2.5.5",
                     "pigz": 2.8,
-                    "samtools": 1.21
+                    "samtools": 1.24
                 },
                 "BOWTIE2_BUILD": {
-                    "bowtie2": "2.5.4"
+                    "bowtie2": "2.5.5"
                 },
                 "CAT_FASTQ": {
                     "cat": 9.5
@@ -680,13 +680,13 @@
                     "liftoff": "1.6.3"
                 },
                 "FASTP": {
-                    "fastp": "1.3.6"
+                    "fastp": "1.4.0"
                 },
                 "FASTQC_RAW": {
-                    "fastqc": "0.12.1"
+                    "fastqc": "0.13.0"
                 },
                 "FASTQC_TRIM": {
-                    "fastqc": "0.12.1"
+                    "fastqc": "0.13.0"
                 },
                 "GFF2JSON": {
                     "python": "3.13.2"
@@ -716,8 +716,8 @@
                     "mosdepth": "0.3.14"
                 },
                 "NEXTCLADE_DATASETGET": {
-                    "nextclade-dataset": "2025-09-09--12-13-13Z",
-                    "nextclade": "3.21.2"
+                    "nextclade": "3.21.2",
+                    "nextclade-dataset": "2025-09-09--12-13-13Z"
                 },
                 "PICARD_COLLECTMULTIPLEMETRICS": {
                     "picard": "3.5.0"
@@ -1137,9 +1137,9 @@
                 "variants/ivar/variants_long_table.csv"
             ],
             [
-                "DRR030302.fastp.json:md5,fa9a19f51b36ba421e9242dea4de7e9b",
-                "SRR4071760.fastp.json:md5,04affbd47fee2af387e3e35400b47a8c",
-                "SRR6937100.fastp.json:md5,373158a2a6259ff2feca200bf8779c34",
+                "DRR030302.fastp.json:md5,0e3bd4cef11bc9ae27d0b5420a4739b4",
+                "SRR4071760.fastp.json:md5,65eb6f4f0da859ac23b9af21c5bfb334",
+                "SRR6937100.fastp.json:md5,cb303a191d325f2083c03f301b65557a",
                 "DRR030302.kraken2.report.txt:md5,5ab2ed70334d4061fb82f8d91475c761",
                 "SRR4071760.kraken2.report.txt:md5,c26f91bfafe58ba451f7d05f0b9b5611",
                 "SRR6937100.kraken2.report.txt:md5,6f5c455f6efd9fa807fefdbba83ba960",
@@ -1150,7 +1150,7 @@
                 "bcftools_stats_vqc_Count_Transitions.yaml:md5,dc4e1856617f414a65ea2cec0ede7971",
                 "bcftools_stats_vqc_Count_Transversions.yaml:md5,f9e0533d48d495637e9c12c0f29d79e7",
                 "bowtie2_pe_plot.yaml:md5,e0f7a3f55b45307ecfd9a005f9e4bf43",
-                "fastp-insert-size-plot.yaml:md5,10b9da66b846b3f92a32438bff14a7da",
+                "fastp-insert-size-plot.yaml:md5,c23e263877151fee5fb7e2f16008d7a3",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,6c4222897b9db16fcdf2ef82209a4c09",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,60a4eefbe7c07a67553b5458b3ce1402",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,69dc43d2d4cead054e7e184607f2dff7",
@@ -1166,7 +1166,7 @@
                 "fastp_filtered_reads_plot.yaml:md5,94235b4ad306d22ef24cf218167e72b2",
                 "fastqc-status-check-heatmap.yaml:md5,2c08f0a35e3873e813c1c4e170d1396b",
                 "fastqc_adapter_content_plot.yaml:md5,a4552316a37ebbf4dd3701129bf4a34a",
-                "fastqc_overrepresented_sequences_plot.yaml:md5,d6b471696abf3b0dd4b8cd53175f1e64",
+                "fastqc_overrepresented_sequences_plot.yaml:md5,21d01f359bd330f250c6231153f72f17",
                 "fastqc_per_base_n_content_plot.yaml:md5,8628eb45b7f1337e55119b390109f373",
                 "fastqc_per_base_sequence_quality_plot.yaml:md5,a84c6e3c4b89e5327b244f915d46468f",
                 "fastqc_per_sequence_gc_content_plot_Counts.yaml:md5,70072e0276358009bd152044dc56ecb3",
@@ -1191,8 +1191,8 @@
                 "multiqc_bcftools_stats.yaml:md5,675d4e41cc92af9381006d9dafcc5503",
                 "multiqc_bowtie2.yaml:md5,bb7fe62e1ee3c986e3afc4c6480ac9cf",
                 "multiqc_citations.yaml:md5,f564e5526b36c9a583e0af5ca7a34b64",
-                "multiqc_fastp.yaml:md5,cf8313deeccb8f8f6c12ebb271c29fcd",
-                "multiqc_fastqc.yaml:md5,444824ecaca1d11e9920430e6b06ddd3",
+                "multiqc_fastp.yaml:md5,254bf696c9aafdf55990a2f9deae2d11",
+                "multiqc_fastqc.yaml:md5,49eadab2a52d211ff095333bf2904baf",
                 "multiqc_ivar_variants.yaml:md5,92e053dd68158082d67218932751c0b8",
                 "multiqc_kraken.yaml:md5,bbacecf8e782bb601be23351c164dd6b",
                 "multiqc_nextclade_clade.yaml:md5,9acf3d4a4b35cf58df39ffbcef25f9e8",
@@ -1209,9 +1209,9 @@
                 "reference.fasta:md5,0a750989cc2a2139104453cdcd173acc",
                 "sequences.fasta:md5,b7d8f3f19115e6668d4d4b16084c80c8",
                 "tree.json:md5,3fdf0843196b31e4f47802604fb5beab",
-                "DRR030302.bowtie2.log:md5,d5f0407c09649797bb0732acca84ba0f",
-                "SRR4071760.bowtie2.log:md5,d8407ef3e4af28858ea8081273c9cdca",
-                "SRR6937100.bowtie2.log:md5,7aad58fe913919972b6db310553103fd",
+                "DRR030302.bowtie2.log:md5,93cb697e77a17c5a9438f2ece2ef2d80",
+                "SRR4071760.bowtie2.log:md5,2f035fc7f7bf423019a5ac5ed07d0ae5",
+                "SRR6937100.bowtie2.log:md5,65313aa30c4e61da7b88dee699f0df03",
                 "DRR030302.mosdepth.coverage.tsv:md5,4445645711e28ecd07ca0cf4f864d568",
                 "DRR030302.mosdepth.summary.txt:md5,34f75af3fdd00110c9569c3491d3e0ae",
                 "SRR4071760.mosdepth.coverage.tsv:md5,606b13635a4e13a5d8171a950fd6b212",
@@ -1286,6 +1286,6 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-09-17T13:10:34.633744416"
+        "timestamp": "2026-10-28T16:35:32.382107096"
     }
 }
