@@ -63,6 +63,18 @@ workflow NFCORE_VIRALRECON {
         error "Invalid value for --platform: '${params.platform}'. Allowed values: ${valid_platforms.join(', ')}"
     }
 
+    if (params.consensus_caller == 'bcftools' && params.min_allele_freq_consensus < 0.5) {
+        error "Parameter --min_allele_freq_consensus cannot be less than 0.5 when --consensus_caller is 'bcftools' (current value: ${params.min_allele_freq_consensus}). BCFtools consensus cannot use this threshold to call ambiguous positions; it can only selects the major allele. The minimum possible value is 0.5."
+    }
+
+    if (params.consensus_caller == 'ivar' && params.min_allele_freq_consensus == 0.75) {
+        log.warn "The default value of --min_allele_freq_consensus (0.75) works differently with iVar than with BCFtools consensus: iVar will introduce ambiguous nucleotides when no single base reaches this threshold. Consider changing the default value depending on your analysis needs."
+    }
+
+    if (params.platform == 'illumina' && params.consensus_caller == 'ivar' && params.variant_caller == 'ivar' && !params.skip_variants) {
+        log.warn "IVAR_VARIANTS_TO_VCF uses a fixed --consensus_af 0.75 when --consensus_caller is 'ivar'. --min_allele_freq_consensus does not change the threshold used by this conversion step as it needs more testing."
+    }
+
     if (params.platform == 'illumina' && params.trim_primers) {
         primer_set         = params.primer_set
         primer_set_version = params.primer_set_version

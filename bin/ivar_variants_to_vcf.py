@@ -27,13 +27,6 @@ def parse_args(args=None):
         help="Only output variants that PASS filters.",
     )
     parser.add_argument(
-        "-af",
-        "--allele_freq_threshold",
-        type=float,
-        default=0,
-        help="Only output variants where allele frequency is greater than this number (default: 0).",
-    )
-    parser.add_argument(
         "-bq",
         "--bad_quality_threshold",
         type=int,
@@ -822,7 +815,6 @@ def main(args=None):
         file_in=args.file_in,
         file_out=args.file_out,
         pass_only=args.pass_only,
-        freq_threshold=args.allele_freq_threshold,
         bad_qual_threshold=args.bad_quality_threshold,
         merge_af_threshold=args.merge_af_threshold,
         consensus_af=args.consensus_af,
