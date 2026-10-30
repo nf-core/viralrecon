@@ -162,7 +162,18 @@ def bcftools_bcftools_query_to_table(bcftools_query_file):
     table.rename(columns=dict(zip(old_colnames, new_colnames)), inplace=True)
 
     if not table.empty:
-        table[["REF_DP", "ALT_DP"]] = table["AD"].str.split(",", expand=True)
+        ## Cast AD to string before splitting: when every AD value is a single
+        ## integer (e.g. clair3 records carrying only the alt depth) pandas
+        ## infers a numeric dtype and the .str accessor raises. Splitting on a
+        ## single-value column yields only one output column, so reindex to
+        ## guarantee REF_DP/ALT_DP both exist.
+        ad_split = table["AD"].astype(str).str.split(",", expand=True)
+        if ad_split.shape[1] == 1:
+            ## Only the alt allele depth is present; ref depth is unknown.
+            table["REF_DP"] = pd.NA
+            table["ALT_DP"] = ad_split[0]
+        else:
+            table[["REF_DP", "ALT_DP"]] = ad_split.iloc[:, :2]
         table[["ALT_DP", "DP"]] = table[["ALT_DP", "DP"]].apply(pd.to_numeric)
         table["AF"] = table["ALT_DP"] / table["DP"]
         table["AF"] = table["AF"].round(2)
