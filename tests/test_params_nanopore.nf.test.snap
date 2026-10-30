@@ -42,7 +42,7 @@
                     "mosdepth": "0.3.14"
                 },
                 "NANOPLOT": {
-                    "NanoPlot": "1.47.0"
+                    "NanoPlot": "1.48.0"
                 },
                 "PANGOLIN_RUN": {
                     "pangolin": 4.4
@@ -904,7 +904,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-09-17T13:35:51.465700932"
+        "timestamp": "2026-10-28T15:46:20.623662825"
     },
     "-profile test_nanopore --additional_annotation 'https://github.com/nf-core/test-datasets/raw/refs/heads/viralrecon/genome/MN908947.3/GCA_009858895.3_ASM985889v3_genomic.200409.gtf.gz'": {
         "content": [
@@ -965,7 +965,7 @@
                     "mosdepth": "0.3.14"
                 },
                 "NANOPLOT": {
-                    "NanoPlot": "1.47.0"
+                    "NanoPlot": "1.48.0"
                 },
                 "PANGOLIN_RUN": {
                     "pangolin": 4.4
@@ -1925,7 +1925,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-09-17T13:43:28.043258838"
+        "timestamp": "2026-10-28T15:54:21.366226344"
     },
     "-profile test_nanopore --mapper_nanopore 'minimap2'": {
         "content": [
@@ -2014,7 +2014,7 @@
                     "mosdepth": "0.3.14"
                 },
                 "NANOPLOT": {
-                    "NanoPlot": "1.47.0"
+                    "NanoPlot": "1.48.0"
                 },
                 "PANGOLIN_RUN": {
                     "pangolin": 4.4
@@ -2918,7 +2918,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-09-17T15:35:11.426906393"
+        "timestamp": "2026-10-28T16:10:25.948591653"
     },
     "-profile test_nanopore --min_guppyplex_reads 10000": {
         "content": [
@@ -2943,7 +2943,7 @@
                     "pigz": 2.8
                 },
                 "NANOPLOT": {
-                    "NanoPlot": "1.47.0"
+                    "NanoPlot": "1.48.0"
                 },
                 "PYCOQC": {
                     "pycoqc": "2.5.2"
@@ -3181,7 +3181,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-09-17T13:46:00.658079731"
+        "timestamp": "2026-10-28T15:57:17.300181695"
     },
     "-profile test_nanopore --sequencing_summary false": {
         "content": [
@@ -3239,7 +3239,7 @@
                     "mosdepth": "0.3.14"
                 },
                 "NANOPLOT": {
-                    "NanoPlot": "1.47.0"
+                    "NanoPlot": "1.48.0"
                 },
                 "PANGOLIN_RUN": {
                     "pangolin": 4.4
@@ -4179,7 +4179,7 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-09-17T13:53:03.784777947"
+        "timestamp": "2026-10-28T16:04:46.444489555"
     },
     "-profile test_nanopore --min_barcode_reads 10000": {
         "content": [

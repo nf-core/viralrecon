@@ -42,24 +42,24 @@
                     "makeblastdb": "2.17.0+"
                 },
                 "BOWTIE2_ALIGN": {
-                    "bowtie2": "2.5.4",
+                    "bowtie2": "2.5.5",
                     "pigz": 2.8,
-                    "samtools": 1.21
+                    "samtools": 1.24
                 },
                 "BOWTIE2_BUILD": {
-                    "bowtie2": "2.5.4"
+                    "bowtie2": "2.5.5"
                 },
                 "CAT_FASTQ": {
                     "cat": 9.5
                 },
                 "FASTP": {
-                    "fastp": "1.3.6"
+                    "fastp": "1.4.0"
                 },
                 "FASTQC_RAW": {
-                    "fastqc": "0.12.1"
+                    "fastqc": "0.13.0"
                 },
                 "FASTQC_TRIM": {
-                    "fastqc": "0.12.1"
+                    "fastqc": "0.13.0"
                 },
                 "FILTER_BLASTN": {
                     "sed": 4.9
@@ -861,10 +861,13 @@
                 "variants/bcftools",
                 "variants/bcftools/SRR11140744.vcf.gz",
                 "variants/bcftools/SRR11140744.vcf.gz.tbi",
+                "variants/bcftools/SRR11140744_norm.vcf.gz",
                 "variants/bcftools/SRR11140746.vcf.gz",
                 "variants/bcftools/SRR11140746.vcf.gz.tbi",
+                "variants/bcftools/SRR11140746_norm.vcf.gz",
                 "variants/bcftools/SRR11140748.vcf.gz",
                 "variants/bcftools/SRR11140748.vcf.gz.tbi",
+                "variants/bcftools/SRR11140748_norm.vcf.gz",
                 "variants/bcftools/bcftools_stats",
                 "variants/bcftools/bcftools_stats/SRR11140744.bcftools_stats.txt",
                 "variants/bcftools/bcftools_stats/SRR11140746.bcftools_stats.txt",
@@ -1117,17 +1120,17 @@
                 "SRR11140750.contigs.fa.gz:md5,4ffe40588e6cb22964710c9face29a10",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
-                "SRR11140744.fastp.json:md5,79f95b57073a55dc3b9ee56b92456e55",
-                "SRR11140746.fastp.json:md5,8377218239bc71ce20b88aab0fb8e1d7",
-                "SRR11140748.fastp.json:md5,0f6f0ba2731cc30ecfca96c7beca6bb4",
-                "SRR11140750.fastp.json:md5,95cc91af7b3177dbd8f6f2b08a590e8d",
+                "SRR11140744.fastp.json:md5,073f57d5e76461e6d8a6b22b4ab12829",
+                "SRR11140746.fastp.json:md5,6567c9b934b228f9883fe5da78c51dd8",
+                "SRR11140748.fastp.json:md5,a16c30949728d8cdca64b332d6b1b2df",
+                "SRR11140750.fastp.json:md5,e06ca4b5c26c1b717557a8e7d03489aa",
                 "SRR11140744.kraken2.report.txt:md5,8af6d6b36473056da22d0a01e65a468a",
                 "SRR11140746.kraken2.report.txt:md5,f0f4463333187c4d5d14b16f1cafc999",
                 "SRR11140748.kraken2.report.txt:md5,dcb606266fa1e1b47b4ef5d275159490",
                 "SRR11140750.kraken2.report.txt:md5,980edcdd341cbd5ae3bcaff214d8eb5d",
                 "bcftools-stats-subtypes.yaml:md5,759a5282c411d9d5203874115a2d9564",
                 "bowtie2_pe_plot.yaml:md5,8b559908ec7f12c308d36c3942ad5b12",
-                "fastp-insert-size-plot.yaml:md5,5dd07067dc2e48808f63554d1913ca0f",
+                "fastp-insert-size-plot.yaml:md5,c8db9fdae27821e95b780aab9136dfed",
                 "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,fc508e630de1c929a233eae1735d9c95",
                 "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,28e2d372104dae37d8c15d4926c20bd4",
                 "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,cabdd08c36d1cd29a4ba3c7f8df7d7d0",
@@ -1142,7 +1145,7 @@
                 "fastp-seq-quality-plot_Read_2_Before_filtering.yaml:md5,9d4f906f715b510dab360eea25ae09a5",
                 "fastp_filtered_reads_plot.yaml:md5,1a72a1900cd7b99cc4fca51e2db71adf",
                 "fastqc-status-check-heatmap.yaml:md5,bdaa6ff6c96a05036b2b4a91c17a795c",
-                "fastqc_overrepresented_sequences_plot.yaml:md5,11c02411e0babf7b68bed4ad2ee7e7dc",
+                "fastqc_overrepresented_sequences_plot.yaml:md5,ef27a28b5fcccd46ff18b7240e3f3578",
                 "fastqc_per_base_n_content_plot.yaml:md5,f23cfe5c6c3a57cffd4df111ed67380f",
                 "fastqc_per_base_sequence_quality_plot.yaml:md5,e93301a0690c4b6a12d06917c49f1542",
                 "fastqc_per_sequence_gc_content_plot_Counts.yaml:md5,1e44c8f20029bfd92ff20627743a35a7",
@@ -1168,8 +1171,8 @@
                 "multiqc_bowtie2.yaml:md5,79da4033d4c14f7659ef2628b6632eaa",
                 "multiqc_citations.yaml:md5,99f30b0065520c10671a0c6c4b86d39d",
                 "multiqc_fail_mapped_samples_table.yaml:md5,f2ad02c19741b85103893b98fb48f2ac",
-                "multiqc_fastp.yaml:md5,a2f4eec08caff9b8dfaf047a92abee6c",
-                "multiqc_fastqc.yaml:md5,901de4dd3a3e2dd5d1c2f0029290b2f7",
+                "multiqc_fastp.yaml:md5,7bb4ff4215e1a80c19841d2c0eba1209",
+                "multiqc_fastqc.yaml:md5,be95ef7ef18240505f9e77eeeb8e6017",
                 "multiqc_kraken.yaml:md5,8355afff337993f7bd71d9a4671fcac9",
                 "multiqc_nextclade_clade.yaml:md5,8cea6e2cb0edc3025e69e6ed13522238",
                 "multiqc_pangolin.yaml:md5,00bf3300498050eb5febdb4572717814",
@@ -1202,10 +1205,10 @@
                 "SRR11140744.snpsift.txt:md5,366bbbac9b8b7fcc170061d6ddd20410",
                 "SRR11140746.snpsift.txt:md5,366bbbac9b8b7fcc170061d6ddd20410",
                 "SRR11140748.snpsift.txt:md5,366bbbac9b8b7fcc170061d6ddd20410",
-                "SRR11140744.bowtie2.log:md5,9a1130e952fee63fc55693e8f7bd8e68",
-                "SRR11140746.bowtie2.log:md5,0198cb871169eeaf98649c2e9e150b39",
-                "SRR11140748.bowtie2.log:md5,2544f6945a64020985706a9af72dab4f",
-                "SRR11140750.bowtie2.log:md5,e885492960cf52936980d59732e9d42b",
+                "SRR11140744.bowtie2.log:md5,0542904c5a4dfb69defb15931303be3a",
+                "SRR11140746.bowtie2.log:md5,994ea3cfb0fef1e90fe03a554ec23daf",
+                "SRR11140748.bowtie2.log:md5,2552988b2f0bad210babe6300c816b4e",
+                "SRR11140750.bowtie2.log:md5,16331c5e6be2d08bcbcee6e8fd849742",
                 "SRR11140744.mosdepth.coverage.tsv:md5,efe22e496eb5bb94a4cec6e30843ff5e",
                 "SRR11140744.mosdepth.summary.txt:md5,520d82608f315a470835eecace96bdb1",
                 "SRR11140746.mosdepth.coverage.tsv:md5,6b56704ad2b5e86500ecef7f3eff30dc",
@@ -1230,6 +1233,6 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-09-17T13:07:25.933545955"
+        "timestamp": "2026-10-27T14:41:08.61260723"
     }
 }

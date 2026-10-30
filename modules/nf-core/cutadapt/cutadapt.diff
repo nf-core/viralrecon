@@ -1,5 +1,5 @@
 Changes in component 'nf-core/cutadapt'
-'modules/nf-core/cutadapt/environment.yml' is unchanged
+'modules/nf-core/cutadapt/meta.yml' is unchanged
 Changes in 'cutadapt/main.nf':
 --- modules/nf-core/cutadapt/main.nf
 +++ modules/nf-core/cutadapt/main.nf
@@ -37,7 +37,9 @@ Changes in 'cutadapt/main.nf':
          $reads \\
          > ${prefix}.cutadapt.log
 
-'modules/nf-core/cutadapt/meta.yml' is unchanged
+'modules/nf-core/cutadapt/environment.yml' is unchanged
+'modules/nf-core/cutadapt/.conda-lock/linux_amd64-bd-efafca34ac3f6c8a_1.txt' is unchanged
+'modules/nf-core/cutadapt/.conda-lock/linux_arm64-bd-fc40a7a42722a5ae_1.txt' is unchanged
 'modules/nf-core/cutadapt/tests/main.nf.test' is unchanged
 'modules/nf-core/cutadapt/tests/main.nf.test.snap' is unchanged
 'modules/nf-core/cutadapt/tests/nextflow.config' is unchanged
