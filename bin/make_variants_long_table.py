@@ -8,7 +8,6 @@ import shutil
 import logging
 import argparse
 import pandas as pd
-from matplotlib import table
 
 
 logger = logging.getLogger()
@@ -171,6 +170,30 @@ def bcftools_bcftools_query_to_table(bcftools_query_file):
     return table
 
 
+def lofreq_bcftools_query_to_table(bcftools_query_file):
+    """Convert a header-bearing LoFreq bcftools query into a variant table.
+
+    Preserve INFO/DP and INFO/AF without rounding or recalculating AF.
+    Replace INFO/DP4 with REF_DP and ALT_DP by summing each allele's
+    forward/reverse counts.
+    """
+    table = pd.read_table(bcftools_query_file, header="infer", na_values=["."])
+    table.rename(columns={col: col.split("]")[-1].split(":")[-1] for col in table.columns}, inplace=True)
+    table["DP"] = pd.to_numeric(table["DP"], errors="coerce")
+    # Keep LoFreq's reported AF precision, including low-frequency variants.
+    table["AF"] = pd.to_numeric(table["AF"], errors="coerce")
+    # DP4 is ref-forward, ref-reverse, alt-forward, alt-reverse.
+    # Its sum need not equal DP: other alleles, ambiguous/filtered bases,
+    # and deletion-spanning reads can contribute to the difference for SNVs.
+    # Do not infer REF_DP as DP - ALT_DP or recompute AF from sum(DP4).
+    depths = table["DP4"].astype("string").str.split(",", expand=True).reindex(columns=range(4))
+    depths = depths.apply(pd.to_numeric, errors="coerce")
+    table["REF_DP"] = depths[0] + depths[1]
+    table["ALT_DP"] = depths[2] + depths[3]
+    table.drop("DP4", axis=1, inplace=True)
+    return table
+
+
 ## Returns a pandas dataframe in the format:
 #         CHROM   POS REF ALT FILTER  DP  REF_DP  ALT_DP    AF
 # 0  MN908947.3   241   C   T   PASS  30       1      29  0.97
@@ -301,7 +324,7 @@ def main(args=None):
     make_dir(out_dir)
 
     ## Check correct variant caller has been provided
-    variant_callers = ["ivar", "bcftools", "artic", "clair3"]
+    variant_callers = ["ivar", "bcftools", "lofreq", "artic", "clair3"]
     if args.variant_caller not in variant_callers:
         logger.error(
             f"Invalid option '--variant_caller {args.variant_caller}'. Valid options: " + ", ".join(variant_callers)
@@ -334,6 +357,8 @@ def main(args=None):
         bcftools_table = None
         if args.variant_caller == "ivar":
             bcftools_table = ivar_bcftools_query_to_table(bcftools_files[sample])
+        elif args.variant_caller == "lofreq":
+            bcftools_table = lofreq_bcftools_query_to_table(bcftools_files[sample])
         elif args.variant_caller in ["bcftools", "artic", "clair3"]:
             bcftools_table = bcftools_bcftools_query_to_table(bcftools_files[sample])
 
