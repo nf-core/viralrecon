@@ -55,7 +55,7 @@
                     "mosdepth": "0.3.14"
                 },
                 "NANOPLOT": {
-                    "NanoPlot": "1.47.0"
+                    "NanoPlot": "1.48.0"
                 },
                 "PANGOLIN_RUN": {
                     "pangolin": 4.4
@@ -1014,6 +1014,6 @@
             "nf-test": "0.9.3",
             "nextflow": "26.04.0"
         },
-        "timestamp": "2026-09-17T12:59:33.225205784"
+        "timestamp": "2026-10-27T14:56:58.110686684"
     }
 }
