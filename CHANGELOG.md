@@ -41,6 +41,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #620](https://github.com/nf-core/viralrecon/pull/620)] - Template and nf-core modules & subworkflows update
 - [[PR #622](https://github.com/nf-core/viralrecon/pull/622)] - Freyja version bump to 2.0.6
 - [[PR #626](https://github.com/nf-core/viralrecon/pull/626)] - Add `--no-same-owner` to nanopore `UNTAR` on Azure Batch
+- [[PR #625](https://github.com/nf-core/viralrecon/pull/625)] - Fix `.str` accessor crash on single-value `AD` in `make_variants_long_table.py`
 
 ### Parameters
 
