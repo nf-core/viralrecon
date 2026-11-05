@@ -27,13 +27,6 @@ def parse_args(args=None):
         help="Only output variants that PASS filters.",
     )
     parser.add_argument(
-        "-af",
-        "--allele_freq_threshold",
-        type=float,
-        default=0,
-        help="Only output variants where allele frequency is greater than this number (default: 0).",
-    )
-    parser.add_argument(
         "-bq",
         "--bad_quality_threshold",
         type=int,
@@ -82,7 +75,6 @@ class IvarVariants:
         file_in=None,
         file_out=None,
         pass_only=None,
-        freq_threshold=None,
         bad_qual_threshold=None,
         merge_af_threshold=None,
         consensus_af=None,
@@ -96,11 +88,6 @@ class IvarVariants:
         self.filename = os.path.splitext(os.path.basename(self.file_in))[0]
 
         self.pass_only = pass_only
-        try:
-            self.freq_threshold = float(freq_threshold)
-        except Exception:
-            print("Invalid allele frequency threshold. Setting it to 0")
-            self.freq_threshold = 0
         try:
             self.bad_qual_threshold = float(bad_qual_threshold)
         except Exception:
@@ -196,7 +183,6 @@ class IvarVariants:
         ivar_df = ivar_df.dropna(thresh=2)
         if self.pass_only:
             ivar_df = ivar_df[ivar_df["PASS"] is True]
-        ivar_df = ivar_df[ivar_df["ALT_FREQ"] >= self.freq_threshold]
         vcf_dict = {}
         vcf_dict["REGION"] = ivar_df["REGION"]
         vcf_dict["POS"] = ivar_df["POS"]
@@ -822,7 +808,6 @@ def main(args=None):
         file_in=args.file_in,
         file_out=args.file_out,
         pass_only=args.pass_only,
-        freq_threshold=args.allele_freq_threshold,
         bad_qual_threshold=args.bad_quality_threshold,
         merge_af_threshold=args.merge_af_threshold,
         consensus_af=args.consensus_af,
