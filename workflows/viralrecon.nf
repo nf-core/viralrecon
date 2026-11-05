@@ -40,6 +40,7 @@ include { PREPARE_GENOME_ILLUMINA } from '../subworkflows/local/prepare_genome_i
 include { PREPARE_GENOME_NANOPORE } from '../subworkflows/local/prepare_genome_nanopore'
 
 include { VARIANTS_IVAR           } from '../subworkflows/local/variants_ivar'
+include { VARIANTS_LOFREQ         } from '../subworkflows/local/variants_lofreq'
 include { VARIANTS_BCFTOOLS       } from '../subworkflows/local/variants_bcftools'
 include { CONSENSUS_IVAR          } from '../subworkflows/local/consensus_ivar'
 include { CONSENSUS_BCFTOOLS      } from '../subworkflows/local/consensus_bcftools'
@@ -514,6 +515,25 @@ workflow VIRALRECON {
             ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_BCFTOOLS.out.stats.collect{_meta, stats -> stats}.ifEmpty([]))
             ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_BCFTOOLS.out.snpeff_csv.collect{_meta, snpeff_csv -> snpeff_csv}.ifEmpty([]))
             ch_snpsift_txt   = VARIANTS_BCFTOOLS.out.snpsift_txt
+        }
+
+        //
+        // SUBWORKFLOW: Call SNPs and indels with LoFreq
+        //
+        if (!params.skip_variants && variant_caller == 'lofreq') {
+            VARIANTS_LOFREQ (
+                ch_bam,
+                genome.fasta,
+                genome.fai,
+                ch_genome_gff ? genome.gff : [],
+                genome.snpeff_db,
+                genome.snpeff_config
+            )
+            ch_vcf           = VARIANTS_LOFREQ.out.vcf
+            ch_tbi           = VARIANTS_LOFREQ.out.tbi
+            ch_snpsift_txt   = VARIANTS_LOFREQ.out.snpsift_txt
+            ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_LOFREQ.out.stats.collect{_meta, stats -> stats}.ifEmpty([]))
+            ch_multiqc_files = ch_multiqc_files.mix(VARIANTS_LOFREQ.out.snpeff_csv.collect{_meta, snpeff_csv -> snpeff_csv}.ifEmpty([]))
         }
 
         //
