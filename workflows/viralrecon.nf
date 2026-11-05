@@ -101,7 +101,7 @@ workflow VIRALRECON {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
-    outdir
+    _outdir        // unused: pipeline uses params.outdir directly
     ch_genome_fasta
     ch_genome_gff
     ch_primer_bed
