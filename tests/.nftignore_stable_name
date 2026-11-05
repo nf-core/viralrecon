@@ -1,2 +1,4 @@
 nanoplot/*/*.png
 **/plasmidid/*/kmer/*.njs
+nextclade/neherlab
+nextclade/neherlab/**

@@ -12,6 +12,9 @@ multiqc/multiqc_data/pycoqc.yaml
 multiqc/multiqc_data/pycoqc_read_len_plot*.yaml
 multiqc/multiqc_data/multiqc_freyja.yaml
 multiqc/multiqc_data/Freyja_plot.yaml
+multiqc/multiqc_data/multiqc_nextclade_clade.yaml
+nextclade/neherlab/**
+**/nextclade/*.csv
 multiqc/multiqc_data/multiqc_samtools_flagstat_samtools_*.yaml
 multiqc/multiqc_data/multiqc_summary_variants_metrics_plot.yaml
 multiqc/multiqc_data/samtools-flagstat*table.yaml
