@@ -8,14 +8,26 @@
     </style>
   </head>
   <body>
+    {# Collapsible FASTA viewer with a button that copies its sequence text #} {% macro fasta_block(summary, fasta) %}
+    <div class="content-block">
+      <details>
+        <summary>
+          {{ summary }}
+          <button type="button" class="copy-button" onclick="copyFasta(this)">Copy to clipboard</button>
+        </summary>
+        <pre>{{ fasta }}</pre>
+      </details>
+    </div>
+    {% endmacro %} {# Boolean columns of the mutation tables: (header, key in the mutation CSV) #} {% set flag_columns =
+    [ ("Insertion", "isInsertion"), ("Deletion", "isDeletion"), ("APOBEC Mutation", "isApobecMutation"), ("APOBEC DRM",
+    "isApobecDRM"), ("Unusual", "isUnusual"), ("SDRM", "isSDRM"), ("Has Stop", "hasStop"), ("INDEL>5%", "INDEL>5%"), ]
+    %}
+
     <!-- TITLE -->
     <div class="report-title">
       <span>HIV Drug Resistance and Mutation Report</span>
       <span class="report-date"><strong>Generated:</strong> {{ date }}</span>
     </div>
-    {% macro labeled_line(line) -%} {% set parts = line.split(":", 1) %} {% if parts | length > 1 %}
-    <span class="meta-label">{{ parts[0] }}:</span> {{ parts[1] | trim }} {% else %} {{ line }} {% endif %} {%- endmacro
-    %}
 
     <!-- HEADER -->
     <div class="sample-strip">{{ sample.sample_name }}</div>
@@ -23,11 +35,9 @@
     <details class="report-details metadata-details" open>
       <summary>Settings</summary>
       <div class="metadata-grid settings-grid">
-        {% for setting_name in ["Minimum read depth", "Nucleotide mixture threshold", "Minimum quality threshold",
-        "Mutation detection threshold"] %} {% for line in sample.sequence_summary %} {% if line is string and
-        line.startswith(setting_name) %}
-        <div>{{ labeled_line(line) }}</div>
-        {% endif %} {% endfor %} {% endfor %}
+        {% for setting in sample.settings %}
+        <div><span class="meta-label">{{ setting.label }}:</span> {{ setting.value }}</div>
+        {% endfor %}
       </div>
     </details>
 
@@ -40,20 +50,16 @@
       </div>
       <div class="sequence-summary-info">
         <ul class="quality-check-list">
-          {% set pr_rt = sample.subtypes | selectattr("region", "equalto", "PR_RT") | list %} {% set integrase =
-          sample.subtypes | selectattr("region", "equalto", "IN") | list %} {% set subtypes_differ = pr_rt and integrase
-          and pr_rt[0].subtype != integrase[0].subtype %} {% for subtype in sample.subtypes %}
+          {% for subtype in sample.subtypes %}
           <li class="subtype-line">
-            <span class="meta-label">Subtype ({{ subtype.label | replace("_", "-") }}):</span>
+            <span class="meta-label">Subtype ({{ subtype.region | replace("_", "-") }}):</span>
             <span
-              class="{{ 'subtype-difference' if subtypes_differ else '' }}"
-              title="{{ 'PR–RT and IN subtypes differ' if subtypes_differ else '' }}"
+              class="{{ 'subtype-difference' if sample.subtypes_differ else '' }}"
+              title="{{ 'PR–RT and IN subtypes differ' if sample.subtypes_differ else '' }}"
               >{{ subtype.subtype }}</span
             >
           </li>
-          {% endfor %} {% for line in sample.sequence_summary %} {% if line is string and line.startswith("% pol
-          polymorphisms (ambiguous sites)") %} {% set proportion_text = line.split(":", 1)[1] | trim %} {% set
-          proportion_value = proportion_text | replace("%", "") | float %}
+          {% endfor %}
           <li class="mixed-site-line">
             <span class="meta-label">% pol polymorphisms (ambiguous sites):</span>
             <span
@@ -61,12 +67,12 @@
               title="Percentage of ambiguous sites across pol gene. Mutation detection threshold (MDT) ≥10%. Values above 5% are highlighted for potential contamination."
               aria-label="Explanation of pol polymorphism proportion"
               tabindex="0"
+              >?</span
             >
-              ?
-            </span>
-            <span class="{{ 'mixed-site-value-high' if proportion_value > 5 else '' }}"> {{ proportion_text }} </span>
+            <span class="{{ 'mixed-site-value-high' if sample.ambiguous_site_percent > 5 else '' }}"
+              >{{ "%.2f" | format(sample.ambiguous_site_percent) }}%</span
+            >
           </li>
-          {% endif %} {% endfor %}
         </ul>
       </div>
 
@@ -76,13 +82,14 @@
       </div>
       <div class="sequence-summary-info">
         <ul>
-          {% for line in sample.sequence_summary %} {% if line is string and line.startswith(("Sequence includes PR:",
-          "Sequence includes RT:", "Sequence includes IN:")) %} {% set codon_parts = line.split(" (missing:", 1) %}
+          {% for coverage in sample.gene_coverage %}
           <li>
-            {{ labeled_line(codon_parts[0]) }}{% if codon_parts | length > 1 %}
-            <span class="missing-codons">(missing:{{ codon_parts[1] }}</span>{% endif %}
+            <span class="meta-label">Sequence includes {{ coverage.gene }}:</span>
+            codons {{ coverage.first_codon }} - {{ coverage.last_codon }} {%- if coverage.missing %}
+            <span class="missing-codons">(missing: {{ coverage.missing }})</span>
+            {%- endif %}
           </li>
-          {% endif %} {% endfor %}
+          {% endfor %}
         </ul>
         {% if sample.sequence_warnings or sample.gene_stop_codons or sample.gene_apobec_drms %}
         <div class="sequence-warning-box" role="note" aria-label="Sequence warnings">
@@ -90,11 +97,9 @@
           <ul>
             {% if sample.gene_stop_codons %}
             <li>Stop codon(s) have been detected in this sample.</li>
-            {% endif %}
-            {% if sample.gene_apobec_drms %}
+            {% endif %} {% if sample.gene_apobec_drms %}
             <li>APOBEC DRM(s) have been detected in this sample.</li>
-            {% endif %}
-            {% for warning in sample.sequence_warnings %}
+            {% endif %} {% for warning in sample.sequence_warnings %}
             <li>{{ warning }}</li>
             {% endfor %}
           </ul>
@@ -103,13 +108,10 @@
       </div>
     </details>
 
-    {% set drug_classes = [ ("PI", "Protease Inhibitors (PI)"), ("NRTI", "Nucleoside Reverse Transcriptase Inhibitors
-    (NRTI)"), ("NNRTI", "Non-nucleoside Reverse Transcriptase Inhibitors (NNRTI)"), ("INSTI", "Integrase Strand Transfer
-    Inhibitors (INSTI)") ] %} {% for gene in ["PR", "RT", "IN"] %} {% set gene_mutations = sample.mutation_data |
-    selectattr("Gene_name", "equalto", gene) | list %} {% set gene_resistances = sample.resistance_data |
-    selectattr("Gene_name", "equalto", gene) | list %}
-    {% set gene_stop_codons = sample.gene_stop_codons.get(gene, []) %}
-    {% if gene_mutations or gene_resistances or gene_stop_codons %}
+    {% for gene in genes %} {% set gene_mutations = sample.mutation_data | selectattr("Gene_name", "equalto", gene) |
+    list %} {% set gene_resistances = sample.resistance_data | selectattr("Gene_name", "equalto", gene) | list %} {% set
+    gene_stop_codons = sample.gene_stop_codons.get(gene, []) %} {% if gene_mutations or gene_resistances or
+    gene_stop_codons %}
     <details class="report-details" open>
       <summary>Drug resistance interpretation: {{ gene }}</summary>
       <div class="color-legend">
@@ -121,94 +123,66 @@
         </div>
         <div class="coverage-note">
           <strong>Notes</strong>
-          <p>Mutations at the first/last sequenced codon with coverage ≤ Minimum read depth (default 50) may arise
-            from partial codon coverage.</p>
+          <p>
+            Mutations at the first/last sequenced codon with coverage ≤ Minimum read depth (default 50) may arise from
+            partial codon coverage.
+          </p>
           <p>Unusual means rare amino acid changes in HIV sequences that may require further investigation.</p>
           <p>APOBEC-mediated G-to-A hypermutation may reflect sequencing artifacts.</p>
         </div>
-        {% set gene_apobec_drms = sample.gene_apobec_drms.get(gene, []) %}
-        {% if gene_apobec_drms or gene_stop_codons %}
+        {% set gene_apobec_drms = sample.gene_apobec_drms.get(gene, []) %} {% if gene_apobec_drms or gene_stop_codons %}
         <div class="gene-warnings">
           <strong>Warnings</strong>
           {% if gene_stop_codons %}
-          <div class="gene-warning-line">
-            <strong>Stop codons:</strong> {{ gene_stop_codons | join('; ') }}.
-          </div>
-          {% endif %}
-          {% if gene_apobec_drms %}
-          <div class="gene-warning-line">
-            <strong>APOBEC DRMs:</strong>
-            {{ gene_apobec_drms | join('; ') }}.
-          </div>
+          <div class="gene-warning-line"><strong>Stop codons:</strong> {{ gene_stop_codons | join('; ') }}.</div>
+          {% endif %} {% if gene_apobec_drms %}
+          <div class="gene-warning-line"><strong>APOBEC DRMs:</strong> {{ gene_apobec_drms | join('; ') }}.</div>
           {% endif %}
         </div>
         {% endif %}
       </div>
       <div class="content-block">
         <!-- MUTATIONS -->
-        {% if gene == "PR" %} {% set mutation_labels = [ ("Major", "PI Major Mutations"), ("Accessory", "PI Accessory
-        Mutations"), ("Other", "PR Other Mutations") ] %} {% elif gene == "RT" %} {% set mutation_labels = [ ("NRTI",
-        "NRTI Mutations"), ("NNRTI", "NNRTI Mutations"), ("Other", "RT Other Mutations") ] %} {% elif gene == "IN" %} {%
-        set mutation_labels = [ ("Major", "INSTI Major Mutations"), ("Accessory", "INSTI Accessory Mutations"),
-        ("Other", "IN Other Mutations") ] %} {% endif %} {% for mut_type, mut_label in mutation_labels %} {% set
-        mut_list = gene_mutations | selectattr("Mutations_type", "equalto", mut_type) | list %}
+        {% for mut_type, mut_label in mutation_sections[gene] %} {% set mut_list = gene_mutations |
+        selectattr("Mutations_type", "equalto", mut_type) | list %}
         <p><strong>{{ mut_label }}:</strong> {% if not mut_list %}None{% endif %}</p>
 
         {% if mut_list %}
-        <button
-          class="expand-btn"
-          onclick="
-            const table = document.getElementById('table-{{ sample.sample_name | replace(' ', '_') }}-{{ gene }}-{{ mut_type | lower }}');
-            table.classList.toggle('expand');
-            this.textContent = table.classList.contains('expand') ? 'Collapse' : 'Expand';
-          "
-        >
-          Expand
-        </button>
+        <button type="button" class="expand-btn" onclick="toggleMutationTable(this)">Expand</button>
         <div class="table-container">
           <div class="table-scroll">
-            <table
-              class="mutation-table"
-              id="table-{{ sample.sample_name | replace(' ', '_') }}-{{ gene }}-{{ mut_type | lower }}"
-            >
+            <table class="mutation-table">
               <thead>
                 <tr>
                   <th>Mutation</th>
                   <th>AF (%)</th>
                   <th>Coverage</th>
-                  <th>Type</th>
+                  <th>Mutation_Type</th>
                   <th>Comments</th>
-                  <th>Insertion</th>
-                  <th>Deletion</th>
-                  <th>APOBEC Mutation</th>
-                  <th>APOBEC DRM</th>
-                  <th>Unusual</th>
-                  <th>SDRM</th>
-                  <th>Has Stop</th>
-                  <th>INDEL>5%</th>
+                  {% for header, _ in flag_columns %}
+                  <th>{{ header }}</th>
+                  {% endfor %}
                 </tr>
               </thead>
               <tbody>
                 {% for row in mut_list %}
                 <tr
-                  class="{% if row.isSDRM %}sdrm-row{% endif %} {% if row.isUnusual %}unusual-row{% endif %}"
+                  class="{% if not row.unchanged_aa %}{% if row.isSDRM %}sdrm-row{% endif %} {% if row.isUnusual %}unusual-row{% endif %}{% endif %}"
                 >
                   <td>{{ row.Mutations }}</td>
                   <td>{{ (row.Mutation_AF | float * 100) | round(2) }}</td>
                   <td>{{ row.Coverage }}</td>
+                  {% if row.unchanged_aa %} {% for _ in range(2 + flag_columns | length) %}
+                  <td></td>
+                  {% endfor %} {% else %}
                   <td>{{ row.Mutations_type }}</td>
                   <td>
-                    {{ row.Mutations_comments if row.Mutations_comments and row.Mutations_comments|string|lower not in
-                    ["nan", "none", ""] else "-" }}
+                    {{ row.Mutations_comments if row.Mutations_comments and row.Mutations_comments | string | lower not
+                    in ["nan", "none", ""] else "-" }}
                   </td>
-                  <td>{{ "Yes" if row.isInsertion else "No" }}</td>
-                  <td>{{ "Yes" if row.isDeletion else "No" }}</td>
-                  <td>{{ "Yes" if row.isApobecMutation else "No" }}</td>
-                  <td>{{ "Yes" if row.isApobecDRM else "No" }}</td>
-                  <td>{{ "Yes" if row.isUnusual else "No" }}</td>
-                  <td>{{ "Yes" if row.isSDRM else "No" }}</td>
-                  <td>{{ "Yes" if row.hasStop else "No" }}</td>
-                  <td>{{ "Yes" if row['INDEL>5%'] else "No" }}</td>
+                  {% for _, key in flag_columns %}
+                  <td>{{ "Yes" if row[key] else "No" }}</td>
+                  {% endfor %} {% endif %}
                 </tr>
                 {% endfor %}
               </tbody>
@@ -218,8 +192,8 @@
         {% endif %} {% endfor %}
 
         <!-- RESISTANCE -->
-        {% for drug_class, class_label in drug_classes %} {% set class_drugs =
-        gene_resistances | selectattr("Drug_class", "equalto", drug_class) | list %} {% if class_drugs %}
+        {% for drug_class, class_label in drug_classes %} {% set class_drugs = gene_resistances |
+        selectattr("Drug_class", "equalto", drug_class) | list %} {% if class_drugs %}
         <h3>{{ class_label }}</h3>
         <hr />
         <div class="table-scroll">
@@ -246,6 +220,7 @@
         </div>
         {% endif %} {% endfor %}
       </div>
+
       <!-- COMMENTS -->
       {% set comment_groups = sample.mutation_comments.get(gene, {}) %} {% if comment_groups %}
       <div class="mutation-comments">
@@ -264,17 +239,12 @@
     {% endif %}
 
     <!-- MUTATION SCORING -->
-    {% set mutation_scores = sample.mutation_scores.get(gene, {}) %} {% if mutation_scores %}
+    {% set gene_scores = sample.mutation_scores.get(gene) %} {% if gene_scores %}
     <details class="report-details" open>
       <summary>Mutation scoring: {{ gene }}</summary>
 
       <div class="content-block">
-        {% for drug_class, class_label in drug_classes %} {% set mutations_in_class = {} %} {% set all_drugs = [] %} {%
-        for mutation, drug_scores in mutation_scores.items() %} {% set drugs_for_mutation = {} %} {% for drug, info in
-        drug_scores.items() %} {% if info.drug_class == drug_class %} {% set _ = drugs_for_mutation.update({drug: info})
-        %} {% if drug not in all_drugs %} {% set _ = all_drugs.append(drug) %} {% endif %} {% endif %} {% endfor %} {%
-        if drugs_for_mutation %} {% set _ = mutations_in_class.update({mutation: drugs_for_mutation}) %} {% endif %} {%
-        endfor %} {% if mutations_in_class %}
+        {% for drug_class, class_label in drug_classes %} {% set table = gene_scores.get(drug_class) %} {% if table %}
         <h3>{{ class_label }}</h3>
         <hr />
         <div class="table-scroll">
@@ -282,17 +252,17 @@
             <thead>
               <tr>
                 <th>Mutation</th>
-                {% for drug in all_drugs | sort %}
+                {% for drug in table.drugs %}
                 <th>{{ drug }}</th>
                 {% endfor %}
               </tr>
             </thead>
             <tbody>
-              {% for mutation, drugs in mutations_in_class.items() %}
+              {% for row in table.rows %}
               <tr>
-                <td>{{ mutation }}</td>
-                {% for drug in all_drugs | sort %}
-                <td>{% if drugs.get(drug) %}{{ drugs.get(drug).score }}{% else %}-{% endif %}</td>
+                <td>{{ row.mutation }}</td>
+                {% for drug in table.drugs %}
+                <td>{{ row.scores.get(drug, "-") }}</td>
                 {% endfor %}
               </tr>
               {% endfor %}
@@ -306,31 +276,19 @@
 
     <!-- Buttons to external resources -->
     <div class="external-buttons">
-      <a href="https://hivdb.stanford.edu/hivdb/" target="_blank" class="link-button">Go to HIVdb</a>
-      <a href="https://clades.nextstrain.org/" target="_blank" class="link-button">Go to Nextclade</a>
+      <a href="https://hivdb.stanford.edu/hivdb/" target="_blank" rel="noopener noreferrer" class="link-button"
+        >Go to HIVdb</a
+      >
+      <a href="https://clades.nextstrain.org/" target="_blank" rel="noopener noreferrer" class="link-button"
+        >Go to Nextclade</a
+      >
     </div>
 
     <!-- CONSENSUS GENOME -->
     <details class="report-details" open>
       <summary>Consensus Genome</summary>
-
-      {% if sample.consensus_genome %}
-      <div class="content-block">
-        <details>
-          <summary>
-            Show full consensus genome
-            <button
-              type="button"
-              class="copy-button"
-              onclick="navigator.clipboard.writeText(`{{ sample.consensus_genome | replace('`', '\\`') }}`)"
-            >
-              Copy to clipboard
-            </button>
-          </summary>
-          <pre>{{- sample.consensus_genome -}}</pre>
-        </details>
-      </div>
-      {% else %}
+      {% if sample.consensus_genome %} {{ fasta_block("Show full consensus genome", sample.consensus_genome) }} {% else
+      %}
       <p>No consensus genome available</p>
       {% endif %}
     </details>
@@ -339,25 +297,8 @@
     {% if sample.regional_consensus_sequences %}
     <details class="report-details" open>
       <summary>Regional Consensus Sequences</summary>
-
-      {% for regional_consensus in sample.regional_consensus_sequences %}
-      <div class="content-block">
-        <details>
-          <summary>
-            Gene(s): {{ regional_consensus.genes | join(", ") }}
-            <button
-              type="button"
-              class="copy-button"
-              onclick="navigator.clipboard.writeText(`{{ regional_consensus.fasta | replace('`', '\\`') }}`)"
-            >
-              Copy to clipboard
-            </button>
-          </summary>
-
-          <pre>{{ regional_consensus.fasta }}</pre>
-        </details>
-      </div>
-      {% endfor %}
+      {% for regional_consensus in sample.regional_consensus_sequences %} {{ fasta_block("Gene(s): " ~
+      regional_consensus.genes | join(", "), regional_consensus.fasta) }} {% endfor %}
     </details>
     {% endif %}
 
@@ -372,16 +313,18 @@
       </div>
     </details>
 
-    <p style="margin-top: 10px; font-size: 0.9em; color: #003366">
+    <p class="disclaimer">
       ⚠️ Disclaimer: This report is
-      <strong>not generated with <a href="https://hivdb.stanford.edu/hivdb/" target="_blank">HIVdb</a></strong
+      <strong
+        >not generated with
+        <a href="https://hivdb.stanford.edu/hivdb/" target="_blank" rel="noopener noreferrer">HIVdb</a></strong
       >, but it is inspired by it.
     </p>
 
     <!-- FOOTER -->
     <div class="footer">
-      <div style="margin-top: 40px; text-align: left">
-        <img src="data:image/png;base64,{{ logo_b64 }}" />
+      <div class="footer-logo">
+        <img src="data:image/png;base64,{{ logo_b64 }}" alt="nf-core/viralrecon logo" />
       </div>
       <p>
         Generated automatically from <a href="https://github.com/nf-core/viralrecon">nf-core/viralrecon</a> using data
@@ -395,10 +338,18 @@
     </div>
 
     <script>
-      function makeMutationScoringSortable() {
-        const tables = document.querySelectorAll("table.mutation-scoring");
+      function copyFasta(button) {
+        navigator.clipboard.writeText(button.closest("details").querySelector("pre").textContent);
+      }
 
-        tables.forEach((table) => {
+      function toggleMutationTable(button) {
+        const table = button.nextElementSibling.querySelector("table");
+        table.classList.toggle("expand");
+        button.textContent = table.classList.contains("expand") ? "Collapse" : "Expand";
+      }
+
+      function makeMutationScoringSortable() {
+        document.querySelectorAll("table.mutation-scoring").forEach((table) => {
           const headers = table.querySelectorAll("th");
 
           headers.forEach((th, index) => {
@@ -409,37 +360,29 @@
 
             th.addEventListener("click", () => {
               const tbody = table.querySelector("tbody");
-              const rows = Array.from(tbody.querySelectorAll("tr"));
               const isAsc = th.classList.contains("sorted-asc");
 
-              // Remove sort classes from all headers
-              headers.forEach((h) => h.classList.remove("sorted-asc", "sorted-desc"));
-
-              const sortedRows = rows.sort((a, b) => {
+              const sortedRows = Array.from(tbody.querySelectorAll("tr")).sort((a, b) => {
                 const cellA = a.children[index].innerText.trim();
                 const cellB = b.children[index].innerText.trim();
-
-                // Check if numeric
                 const numA = parseFloat(cellA.replace(",", "."));
                 const numB = parseFloat(cellB.replace(",", "."));
 
                 if (!isNaN(numA) && !isNaN(numB)) {
                   return isAsc ? numA - numB : numB - numA;
                 }
-
                 return isAsc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
               });
 
+              headers.forEach((h) => h.classList.remove("sorted-asc", "sorted-desc"));
               th.classList.add(isAsc ? "sorted-desc" : "sorted-asc");
-
-              tbody.innerHTML = "";
-              sortedRows.forEach((row) => tbody.appendChild(row));
+              tbody.append(...sortedRows);
             });
           });
         });
       }
 
-      document.addEventListener("DOMContentLoaded", makeMutationScoringSortable);
+      makeMutationScoringSortable();
     </script>
   </body>
 </html>
