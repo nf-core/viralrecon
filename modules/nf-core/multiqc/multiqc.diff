@@ -1,0 +1,136 @@
+Changes in component 'nf-core/multiqc'
+'modules/nf-core/multiqc/environment.yml' is unchanged
+Changes in 'multiqc/meta.yml':
+--- modules/nf-core/multiqc/meta.yml
++++ modules/nf-core/multiqc/meta.yml
+@@ -87,6 +87,12 @@
+           description: Plots created by MultiQC
+           pattern: "*_plots"
+           ontologies: []
++  csv_reports:
++    - "*.csv":
++        type: file
++        description: Summary CSV files created by MultiQC
++        pattern: "*.csv"
++        ontologies: []
+   versions:
+     - - ${task.process}:
+           type: string
+
+Changes in 'multiqc/main.nf':
+--- modules/nf-core/multiqc/main.nf
++++ modules/nf-core/multiqc/main.nf
+@@ -8,12 +8,13 @@
+         : 'community.wave.seqera.io/library/multiqc:1.35--c17fb751507e9dfc'}"
+ 
+     input:
+-    tuple val(meta), path(multiqc_files, stageAs: "?/*"), path(multiqc_config, stageAs: "?/*"), path(multiqc_logo), path(replace_names), path(sample_names)
++    tuple val(meta), path(multiqc_files, stageAs: "?/*"), path(multiqc_config, stageAs: "?/*"), path(multiqc_logo), path(replace_names), path(sample_names), path(extra_multiqc_config)
+ 
+     output:
+-    tuple val(meta), path("*.html"), emit: report
++    path "*multiqc_report.html", emit: report
+     tuple val(meta), path("*_data"), emit: data
+     tuple val(meta), path("*_plots"), emit: plots, optional: true
++    tuple val(meta), path("*.csv"), emit: csv_reports, optional: true
+     // MultiQC should not push its versions to the `versions` topic. Its input depends on the versions topic to be resolved thus outputting to the topic will let the pipeline hang forever
+     tuple val("${task.process}"), val('multiqc'), eval('multiqc --version | sed "s/.* //g"'), emit: versions
+ 
+@@ -22,17 +23,53 @@
+ 
+     script:
+     def args = task.ext.args ?: ''
++    def args2 = task.ext.args2 ?: ''
+     def prefix = task.ext.prefix ? "--filename ${task.ext.prefix}.html" : ''
+     def config = multiqc_config ? multiqc_config instanceof List ? "--config ${multiqc_config.join(' --config ')}" : "--config ${multiqc_config}" : ""
++    def extra_config = extra_multiqc_config ? "--config ${extra_multiqc_config}" : ''
+     def logo = multiqc_logo ? "--cl-config 'custom_logo: \"${multiqc_logo}\"'" : ''
+     def replace = replace_names ? "--replace-names ${replace_names}" : ''
+     def samples = sample_names ? "--sample-names ${sample_names}" : ''
++    def platform = params.platform
+     """
+     multiqc \\
+         --force \\
+         ${args} \\
+         ${config} \\
+         ${prefix} \\
++        ${logo} \\
++        ${replace} \\
++        ${samples} \\
++        ${extra_config} \\
++        .
++
++    ## Parse YAML files dumped by MultiQC to obtain metrics
++    multiqc_to_custom_csv.py --platform $platform
++
++    ## Manually remove files that we don't want in the report
++    if grep -q ">skip_assembly<" multiqc_report.html; then
++        rm -f *assembly_metrics_mqc.csv
++    fi
++
++    if grep -q ">skip_variants<" multiqc_report.html; then
++        rm -f *variants_metrics_mqc.csv
++    fi
++
++    if [ "$platform" = "illumina" ]; then
++        rm -f variants/report.tsv
++    fi
++
++    if [ "$platform" = "nanopore" ]; then
++        rm -rf quast
++    fi
++
++    ## Run MultiQC a second time
++        multiqc \\
++        --force \\
++        ${args2} \\
++        ${config} \\
++        ${prefix} \\
++        ${extra_config} \\
+         ${logo} \\
+         ${replace} \\
+         ${samples} \\
+
+'modules/nf-core/multiqc/tests/main.nf.test.snap' is unchanged
+'modules/nf-core/multiqc/tests/nextflow.config' is unchanged
+Changes in 'multiqc/tests/main.nf.test':
+--- modules/nf-core/multiqc/tests/main.nf.test
++++ modules/nf-core/multiqc/tests/main.nf.test
+@@ -93,6 +93,32 @@
+                     }
+             ).match()
+         }
++    }
++
++    test("sarscov2 single-end [fastqc] - custom prefix") {
++        config "./custom_prefix.config"
++
++        when {
++            process {
++                """
++                input[0] = Channel.of(file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastqc/test_fastqc.zip', checkIfExists: true))
++                input[1] = []
++                input[2] = []
++                input[3] = []
++                input[4] = []
++                input[5] = []
++                """
++            }
++        }
++
++        then {
++            assertAll(
++                { assert process.success },
++                { assert process.out.report[0] ==~ ".*/custom_prefix.html" },
++                { assert process.out.data[0] ==~ ".*/custom_prefix_data" }
++            )
++        }
++
+     }
+ 
+     test("sarscov2 single-end [fastqc] [config]") {
+
+'modules/nf-core/multiqc/tests/custom_prefix.config' is unchanged
+'modules/nf-core/multiqc/.conda-lock/linux_amd64-bd-c17fb751507e9dfc_1.txt' is unchanged
+'modules/nf-core/multiqc/.conda-lock/linux_arm64-bd-5c84a5000a226ab5_1.txt' is unchanged
+************************************************************

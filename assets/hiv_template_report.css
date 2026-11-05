@@ -1,0 +1,415 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 60px 30px 30px 30px;
+  background-color: #f7faff;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Dropdown menu */
+#sample-selector {
+  position: fixed;
+  top: 15px;
+  right: 20px;
+  z-index: 1000;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #97b5cf;
+  background-color: #f0f6fc;
+  box-shadow: 0 2px 6px rgba(17, 163, 222, 0.25);
+  font-size: 14px;
+}
+
+/* Report Title */
+.report-title {
+  font-size: 2.5em;
+  font-weight: bold;
+  text-align: left;
+  margin: 20px 0;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: #0e86b7;
+  padding: 25px 20px;
+  border-radius: 12px;
+  box-shadow: 0 5px 10px rgba(17, 163, 222, 0.25);
+}
+
+/* Subtitle under report title */
+.report-subtitle {
+  font-size: 1.1em;
+  font-weight: normal;
+  color: #0e5f82;
+  background-color: #dbe7f2;
+  padding: 12px 18px;
+  border-radius: 8px;
+  margin: 10px 0 25px 0;
+  box-shadow: 0 3px 6px rgba(17, 163, 222, 0.2);
+  line-height: 1.4;
+}
+
+/* Header */
+.header {
+  background-color: #11a3de;
+  color: white;
+  padding: 15px 25px;
+  font-weight: bold;
+  font-size: 1.8em;
+  border-radius: 4px;
+  margin-bottom: 30px;
+}
+
+/* Section titles */
+.summary-title {
+  background-color: #f0f6fc;
+  border: 1px solid #97b5cf;
+  padding: 12px 25px;
+  margin: 20px auto 5px auto;
+  border-radius: 3px;
+  width: 95%;
+  box-sizing: border-box;
+}
+
+.summary-title h2 {
+  margin: 0;
+  color: #0c3c57;
+  font-size: 1.2em;
+  font-weight: normal;
+}
+
+/* Summary content */
+.sequence-summary-info {
+  width: 90%;
+  margin: 0 auto 20px auto;
+}
+
+.sequence-summary-info ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 10px;
+}
+
+.sequence-summary-info li {
+  padding: 3px 0;
+  font-size: 0.95em;
+  color: #1b2f40;
+}
+
+/* Subtype info icon styles */
+.subtype-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 8px;
+  height: 8px;
+  color: #1b2f40;
+  cursor: help;
+  position: relative;
+  font-size: 12px;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Color legend */
+.color-legend {
+  background-color: #f5f5f5;
+  border-radius: 5px;
+  padding: 12px 25px;
+  margin: 20px auto 5px auto;
+  width: 95%;
+  box-sizing: border-box;
+  font-size: 0.9em;
+  display: block;
+  overflow: hidden;
+}
+
+.color-legend span {
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.coverage-note {
+  font-size: 0.9em;
+  color: #444;
+  margin-top: 8px;
+  display: block;
+}
+
+/* Content block */
+.content-block {
+  width: 90%;
+  margin: 0 auto 20px auto;
+}
+
+/* Table styles */
+.table-container {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.table-scroll {
+  display: inline-block;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: auto;
+  margin: 10px 0 20px 0;
+  border: 1px solid #97b5cf;
+}
+
+table {
+  width: auto;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #c4d4e3;
+  padding: 8px;
+  text-align: left;
+  font-size: 0.95em;
+}
+
+th {
+  background-color: #d6e4f2;
+  font-weight: bold;
+  color: #083a57;
+}
+
+tr:nth-child(even) {
+  background-color: #eef5fc;
+}
+
+/* Sortable headers */
+th.sortable {
+  cursor: pointer;
+  position: relative;
+  padding-right: 18px;
+}
+
+th.sortable::after {
+  content: "⇅";
+  font-size: 0.7em;
+  position: absolute;
+  right: 6px;
+  color: #5d7c95;
+}
+
+th.sorted-asc::after {
+  content: "▲";
+  color: #083a57;
+}
+
+th.sorted-desc::after {
+  content: "▼";
+  color: #083a57;
+}
+
+/* Make header row sticky */
+table thead th {
+  position: sticky;
+  top: 0;
+  background-color: #d6e4f2;
+  z-index: 5;
+}
+
+/* Row highlighting */
+.apobec-drm-row {
+  background-color: #ffcccc !important;
+  border-left: 4px solid #ff0000;
+}
+
+.sdrm-row {
+  background-color: #ffedd5 !important;
+  border-left: 4px solid #ff8c00;
+}
+
+.unusual-row {
+  background-color: #d5f5ff !important;
+  border-left: 4px solid #00ccff;
+}
+
+.apobec-drm-row.sdrm-row.unusual-row {
+  background-color: #ffcccc !important;
+  border-left: 4px solid #ff0000;
+}
+
+/* Expand button for mutation tables */
+.expand-btn {
+  display: inline-block;
+  padding: 5px 12px;
+  font-size: 0.85em;
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  border: 1px solid #0c3c57;
+  background: #0e86b7;
+  box-shadow: 0 3px 6px rgba(17, 163, 222, 0.3);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 5px;
+}
+
+.expand-btn:hover {
+  background: #0c3c57;
+  box-shadow: 0 4px 8px rgba(17, 163, 222, 0.4);
+}
+
+.mutation-table tr > :nth-child(n + 4) {
+  display: none;
+}
+.mutation-table.expand tr > :nth-child(n + 4) {
+  display: table-cell;
+}
+
+/* Drug class headings */
+.content-block h3 {
+  margin-top: 25px;
+  margin-bottom: 5px;
+  color: #0e5f82;
+}
+
+.content-block hr {
+  border: none;
+  border-top: 1px solid #97b5cf;
+  margin-bottom: 10px;
+}
+
+/* Mutation comments */
+.mutation-comments {
+  background-color: #e3effa;
+  padding: 10px 15px;
+  margin: 15px 0 20px 0;
+  border-radius: 4px;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  border: 1px solid #97b5cf;
+}
+
+.mutation-comments strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 1em;
+  color: #0c3c57;
+}
+
+.mutation-comments ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin: 0;
+}
+
+.mutation-comments li {
+  margin-bottom: 5px;
+  font-size: 0.95em;
+  color: #1b2f40;
+}
+
+/* Consensus genome */
+details {
+  margin-bottom: 20px;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: bold;
+  padding: 5px 10px;
+  background-color: #e0edf9;
+  border-radius: 4px;
+  border: 1px solid #97b5cf;
+  color: #083a57;
+}
+
+details pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #97b5cf;
+  padding: 10px;
+  background-color: #f7faff;
+  margin-top: 5px;
+}
+
+.copy-button {
+  font-size: 0.8em;
+  padding: 2px 6px;
+  border: 1px solid #1b2f40;
+  border-radius: 4px;
+  background-color: #97b5cf;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.copy-button:hover {
+  background-color: #e0e0e0;
+}
+
+.copy-button:active {
+  background-color: #11a3de;
+}
+
+.external-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: flex-end;
+}
+
+.link-button {
+  display: inline-block;
+  padding: 6px 12px;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #11a3de, #0e86b7);
+  box-shadow: 0 3px 6px rgba(17, 163, 222, 0.3);
+  transition: all 0.2s;
+}
+
+.link-button:hover {
+  background: linear-gradient(135deg, #0e86b7, #0c3c57);
+  box-shadow: 0 4px 8px rgba(17, 163, 222, 0.4);
+}
+
+.link-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(17, 163, 222, 0.3);
+}
+
+/* Footer */
+.footer {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #97b5cf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.footer img {
+  height: 60px;
+  margin-right: auto;
+}
+
+.footer p {
+  text-align: center;
+  flex: 1;
+  color: #4f6b82;
+  font-size: 0.9em;
+  margin-top: 50px;
+}

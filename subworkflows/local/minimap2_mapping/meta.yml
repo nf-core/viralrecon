@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "minimap2_mapping"
+description: Perform mapping, primer trimming, variant calling and consensus genome generation.
+keywords:
+  - nanopore
+  - mapping
+  - variants
+  - consensus
+
+components:
+  - minimap2/align
+  - minimap2/index
+  - artic/aligntrim
+  - clair3
+  - bcftools/filter
+  - bcftools/norm
+  - bcftools/index
+  - bcftools/consensus
+  - bedtools/merge
+  - bedtools/maskfasta
+
+input:
+  - reads:
+      description: |
+        Read files for de novo assembly
+        Structure: [ val(meta), [ reads ] ]
+  - fasta:
+      description: |
+        Reference genome fasta file
+        Structure: [ path(fasta) ]
+  - fai:
+      type: file
+      description: Reference genome fasta index
+      pattern: "*.{fai}"
+      ontologies: []
+  - bed:
+      description: |
+        BED file with amplicon primer positions
+        Structure: [ path(bed) ]
+output:
+  - bam:
+      type: file
+      description: |
+        Sorted BAM file with primers positions softclipped
+        Structure: [ val(meta), [ bam ] ]
+      pattern: "*.bam"
+  - bai:
+      type: file
+      description: |
+        Index of the sorted BAM file with primers positions softclipped
+        Structure: [ val(meta), [ bam ] ]
+      pattern: "*.bai"
+  - vcf:
+      type: file
+      description: |
+        Variant calling file
+        Structure: [ val(meta), [ vcf.gz ] ]
+  - tbi:
+      type: file
+      description: |
+        tabix index file
+        Structure: [ val(meta), [ tbi ] ]
+  - consensus:
+      description: |
+        Fasta file with genome consensus
+        Structure: [ val(meta), [ consensus ] ]
+  - multiqc_files:
+      description: |
+        Reports for the multiqc
+  - versions:
+      description: |
+        Files containing software versions
+        Structure: [ path(versions.yml) ]
+authors:
+  - "@svarona"
+maintainers:
+  - "@svarona"

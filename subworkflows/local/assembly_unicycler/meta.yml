@@ -1,0 +1,119 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "assembly_unicycler"
+description: Perform de novo assembly using unicycler software
+keywords:
+  - assembly
+  - unicycler
+  - fasta
+components:
+  - unicycler
+  - bandage/image
+  - gunzip
+  - assembly_qc
+input:
+  - reads:
+      description: |
+        Read files for de novo assembly
+        Structure: [ val(meta), [ reads ] ]
+  - fasta:
+      description: |
+        Reference genome fasta file
+        Structure: [ path(fasta) ]
+  - gff:
+      description: |
+        GFF file of the reference genome
+        Structure: [ path(gff) ]
+  - blast_db:
+      description: |
+        BLAST database to perform the alignment
+        Structure: [ path(blast_db) ]
+  - blast_header:
+      description: |
+        Header for the BLAST results
+        Structure: [ path(blast_header) ]
+  - blast_filtered_header:
+      description: |
+        Header for the filtered BLAST results
+        Structure: [ path(blast_filtered_header) ]
+output:
+  - scaffolds:
+      description: |
+        de novo assembly fasta file with scaffolds
+        Structure: [ val(meta), [ scaffolds ] ]
+  - gfa:
+      description: |
+        de novo assembly file file with gfa
+        Structure: [ val(meta), [ gfa ] ]
+  - log_out:
+      description: |
+        de novo assembly log file
+        Structure: [ val(meta), [ log ] ]
+  - bandage_png:
+      description: |
+        de novo assembly bandage PNG image
+        Structure: [ val(meta), [ png ] ]
+  - bandage_svg:
+      description: |
+        de novo assembly bandage SVG image
+        Structure: [ val(meta), [ svg ] ]
+  - blast_txt:
+      description: |
+        Results of the BLAST alignment
+        Structure: [ val(meta), [ txt ] ]
+  - blast_filter_txt:
+      description: |
+        Filtered results of the  BLAST alignment
+        Structure: [ val(meta), [ txt ] ]
+  - quast_results:
+      description: |
+        Results of the quast quality control
+        Structure: [ val(meta), [ results ] ]
+  - quast_tsv:
+      description: |
+        TSV report with QUAST results
+        Structure: [ val(meta), [ tsv ] ]
+  - abacas_results:
+      description: |
+        Sequence fasta file of ABACAS contiguation analysis
+        Structure: [ val(meta), [ results ] ]
+  - plasmidid_html:
+      description: |
+        HTML report with PlasmidID results
+        Structure: [ val(meta), [ html ] ]
+  - plasmidid_tab:
+      description: |
+        TAB report with PlasmidID results
+        Structure:  [ val(meta), [ tab ] ]
+  - plasmidid_images:
+      description: |
+        Circos images of PlasmidID results
+        Structure: [ val(meta), [ images/ ] ]
+  - plasmidid_logs:
+      description: |
+        Logs from PlasmidID analysis
+        Structure: [ val(meta), [ logs/ ] ]
+  - plasmidid_data:
+      description: |
+        Data files from PlasmidID analysis
+        Structure: [ val(meta), [ data/ ] ]
+  - plasmidid_database:
+      description: |
+        Database data from PlasmidID analysis
+        Structure:  [ val(meta), [ database/ ] ]
+  - plasmidid_fasta:
+      description: |
+        Fasta files from PlasmidID analysis
+        Structure: [ val(meta), [ fasta_files/ ] ]
+  - plasmidid_kmer:
+      description: |
+        Kmer folder from PlasmidID analysis
+        Structure: [ val(meta), [ kmer/ ] ]
+  - versions:
+      description: |
+        Files containing software versions
+        Structure: [ path(versions.yml) ]
+authors:
+  - "@drpatelh"
+maintainers:
+  - "@svarona"
+  - "@saramonzon"

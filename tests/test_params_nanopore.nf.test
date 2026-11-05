@@ -1,0 +1,88 @@
+nextflow_pipeline {
+
+    name "Test pipeline"
+    script "../main.nf"
+    tag "pipeline"
+    profile "test_nanopore"
+
+    // Define scenarios
+    def test_scenario = [
+        [
+            name: "-profile test_nanopore --gff false",
+            params: [
+                gff: false
+            ]
+        ],
+        [
+            name: "-profile test_nanopore --additional_annotation 'https://github.com/nf-core/test-datasets/raw/refs/heads/viralrecon/genome/MN908947.3/GCA_009858895.3_ASM985889v3_genomic.200409.gtf.gz'",
+            params: [
+                additional_annotation: "https://github.com/nf-core/test-datasets/raw/refs/heads/viralrecon/genome/MN908947.3/GCA_009858895.3_ASM985889v3_genomic.200409.gtf.gz"
+            ]
+        ],
+        [
+            name: "-profile test_nanopore --min_barcode_reads 10000",
+            params: [
+                min_barcode_reads: 10000
+            ]
+        ],
+        [
+            name: "-profile test_nanopore --min_guppyplex_reads 10000",
+            params: [
+                min_guppyplex_reads: 10000
+            ]
+        ],
+        [
+            name: "-profile test_nanopore --sequencing_summary false",
+            params: [
+                artic_minion_caller: 'medaka',
+                sequencing_summary: false
+            ]
+        ],
+        [
+            name: "-profile test_nanopore --mapper_nanopore 'minimap2'",
+            params: [
+                mapper_nanopore: 'minimap2'
+            ]
+        ]
+    ]
+
+    // Loop through scenarios and generate tests dynamically
+    // Run all tests
+    test_scenario.each { scenario ->
+        test(scenario.name) {
+
+            when {
+                params {
+                    outdir = "$outputDir"
+                    scenario.params.each { key, value ->
+                        delegate."$key" = value
+                    }
+                }
+            }
+
+            then {
+                def outdir = params.outdir
+
+                // stable_name: All files + folders in ${params.outdir}/ with a stable name
+                def stable_name = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignoreFile: 'tests/.nftignore_stable_name', ignore: ['pipeline_info/*.{html,json,txt}', 'nanoplot/*/NanoPlot*.log'])
+                // stable_path: All files in ${params.outdir}/ with stable content
+                def stable_path = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore', ignore: ['**/*.sorted.bam', '**/*.sorted.bam.bai', 'kraken2/*.kraken2.classifiedreads.txt', 'kraken2/*.unclassified.fastq.gz', '**/multiqc_data/bcftools_stats_vqc_*.yaml', '**/multiqc_data/snpeff_qualities.yaml'])
+                def softwareYaml = removeNextflowVersion("$outputDir/pipeline_info/nf_core_viralrecon_software_mqc_versions.yml")
+                softwareYaml.remove('NEXTCLADE_RUN')
+                softwareYaml.remove('PLOT_BASE_DENSITY')
+
+                assertAll(
+                    { assert workflow.success},
+                    { assert snapshot(
+                        // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
+                        softwareYaml,
+                        // All stable path name, with a relative path
+                        stable_name,
+                        // All files with stable contents
+                        stable_path
+                    ).match() }
+                )
+            }
+        }
+    }
+}

@@ -50,7 +50,7 @@ jobs:
         env:
           NFT_VER: ${{ env.NFT_VER }}
         with:
-          max_shards: 7
+          max_shards: 15
 
       - name: debug
         run: |
@@ -64,6 +64,7 @@ jobs:
     runs-on: # use self-hosted runners
       - runs-on=${{ github.run_id }}-nf-test
       - runner=4cpu-linux-x64
+      - volume=80gb
     strategy:
       fail-fast: false
       matrix:
@@ -88,7 +89,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
-
+      - name: Set NFT_WORKDIR dynamically
+        run: echo "NFT_WORKDIR=$HOME" >> $GITHUB_ENV
       - name: Run nf-test
         id: run_nf_test
         uses: ./.github/actions/nf-test

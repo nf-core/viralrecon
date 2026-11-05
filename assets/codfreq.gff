@@ -1,0 +1,33 @@
+##gff-version 3
+#!gff-spec-version 1.21
+#!processor NCBI annotwriter
+##sequence-region HXB2_x_ConsensusB 1 9719
+##species https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=32630
+##generated from codfreq using this json file https://github.com/hivdb/codfreq/blob/main/profiles/HIV1.json
+HXB2_x_ConsensusB	Codfreq	region	1	9719	.	+	.	ID=HXB2_x_ConsensusB:1..9719;Dbxref=taxon:32630
+HXB2_x_ConsensusB	Codfreq	gene	790	2289	.	+	.	ID=gene-gag;Name=gag;gbkey=Gene;gene=gag
+HXB2_x_ConsensusB	Codfreq	CDS	790	2289	.	+	0	ID=cds-gag;Parent=gene-gag;gbkey=CDS;gene=gag;product=gag protein;transl_table=11
+HXB2_x_ConsensusB	Codfreq	gene	1186	1878	.	+	.	ID=gene-CA;Name=CA;gbkey=Gene;gene=CA
+HXB2_x_ConsensusB	Codfreq	CDS	1186	1878	.	+	0	ID=cds-CA;Parent=gene-CA;gbkey=CDS;gene=CA;product=CA protein;transl_table=11
+HXB2_x_ConsensusB	Codfreq	gene	2088	5093	.	+	.	ID=gene-pol;Name=pol;gbkey=Gene;gene=pol;partial=true
+HXB2_x_ConsensusB	Codfreq	CDS	2088	5093	.	+	0	ID=cds-pol;Parent=gene-pol;gbkey=CDS;gene=pol;partial=true;product=pol protein;transl_table=11
+HXB2_x_ConsensusB	Codfreq	gene	2253	2549	.	+	.	ID=gene-PR;Name=PR;gbkey=Gene;gene=PR
+HXB2_x_ConsensusB	Codfreq	CDS	2253	2549	.	+	0	ID=cds-PR;Parent=gene-PR;Name=PR;gbkey=CDS;gene=PR;product=protease;transl_table=11
+HXB2_x_ConsensusB	Codfreq	gene	2550	4229	.	+	.	ID=gene-RT;Name=RT;gbkey=Gene;gene=RT
+HXB2_x_ConsensusB	Codfreq	CDS	2550	4229	.	+	0	ID=cds-RT;Parent=gene-RT;Name=RT;gbkey=CDS;gene=RT;product=reverse transcriptase;transl_table=11
+HXB2_x_ConsensusB	Codfreq	gene	4230	5093	.	+	.	ID=gene-IN;Name=IN;gbkey=Gene;gene=IN
+HXB2_x_ConsensusB	Codfreq	CDS	4230	5093	.	+	0	ID=cds-IN;Parent=gene-IN;Name=IN;gbkey=CDS;gene=IN;product=integrase;transl_table=11
+HXB2_x_ConsensusB	Codfreq	gene	5041	5616	.	+	.	ID=gene-vif;Name=vif;gbkey=Gene;gene=vif
+HXB2_x_ConsensusB	Codfreq	CDS	5041	5616	.	+	0	ID=cds-vif;Parent=gene-vif;gbkey=CDS;gene=vif;product=vif protein;transl_table=11
+HXB2_x_ConsensusB	Codfreq	gene	5559	5847	.	+	.	ID=gene-vpr;Name=vpr;gbkey=Gene;gene=vpr
+HXB2_x_ConsensusB	Codfreq	sequence_feature	5559	5847	.	+	.	ID=id-vpr;Note=similar to vpr protein;gbkey=misc_feature;gene=vpr
+HXB2_x_ConsensusB	Codfreq	gene	5831	8466	.	+	.	ID=gene-tat;Name=tat;gbkey=Gene;gene=tat
+HXB2_x_ConsensusB	Codfreq	sequence_feature	5831	8466	.	+	.	ID=id-tat;Note=similar to tat protein;gbkey=misc_feature;gene=tat
+HXB2_x_ConsensusB	Codfreq	gene	5970	8650	.	+	.	ID=gene-rev;Name=rev;gbkey=Gene;gene=rev
+HXB2_x_ConsensusB	Codfreq	CDS	5970	8650	.	+	0	ID=cds-rev;Parent=gene-rev;gbkey=CDS;gene=rev;product=rev protein;transl_table=11
+HXB2_x_ConsensusB	Codfreq	gene	6062	6307	.	+	.	ID=gene-vpu;Name=vpu;gbkey=Gene;gene=vpu
+HXB2_x_ConsensusB	Codfreq	sequence_feature	6062	6307	.	+	.	ID=id-vpu;Note=similar to vpu protein;gbkey=misc_feature;gene=vpu
+HXB2_x_ConsensusB	Codfreq	gene	6225	8792	.	+	.	ID=gene-env;Name=env;gbkey=Gene;gene=env
+HXB2_x_ConsensusB	Codfreq	CDS	6225	8792	.	+	0	ID=cds-env;Parent=gene-env;gbkey=CDS;gene=env;product=envelope glycoprotein;transl_table=11
+HXB2_x_ConsensusB	Codfreq	gene	8797	9414	.	+	.	ID=gene-nef;Name=nef;gbkey=Gene;gene=nef
+HXB2_x_ConsensusB	Codfreq	sequence_feature	8797	9414	.	+	.	ID=id-nef;Note=similar to nef protein;gbkey=misc_feature;gene=nef

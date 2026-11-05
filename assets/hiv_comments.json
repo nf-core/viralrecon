@@ -1,0 +1,1823 @@
+{
+    "L56I": {
+        "gene": "CA",
+        "drug_class": "CAI",
+        "comments": {
+            "CA56I": "L56I has been selected in vitro by LEN. It is associated with ~200-fold reduced LEN susceptibility. It has an RC of 3%-9%. It has not been selected in a patient."
+        }
+    },
+    "N57S": {
+        "gene": "CA",
+        "drug_class": "CAI",
+        "comments": {
+            "CA57S": "N57S had been selected in vitro by GS-CA1 and is associated with ~25-fold reduced GS-CA1 susceptibility."
+        }
+    },
+    "M66I": {
+        "gene": "CA",
+        "drug_class": "CAI",
+        "comments": {
+            "CA66I": "M66I has been selected in vitro by LEN. It is associated with >1000-fold reduced LEN susceptibility. It has an RC of 1%-6%. It occurred in 6 patients in the CAPELLA study usually in combination with other mutations."
+        }
+    },
+    "Q67H": {
+        "gene": "CA",
+        "drug_class": "CAI",
+        "comments": {
+            "CA67HYNK": "Q67H has been selected in vitro by LEN. It is associated with ~5-fold reduced LEN susceptibility and an RC of ~60%. Q67H+K70R were selected in 2 patients receiving LEN. The combination is associated with 15-20-fold reduced LEN susceptibility. Q67Y, Q67N, and Q67K have been reported in vitro or in vivo as subdominant variants. Q67Y has been selected in vitro by GS-CA1. It is associated with 10-20-fold reduced LEN acitivity."
+        }
+    },
+    "K70H": {
+        "gene": "CA",
+        "drug_class": "CAI",
+        "comments": {
+            "CA70NHRS": "K70HNRS have been selected in patients receiving LEN. K70H alone is associated with about 100-fold reduced LEN susceptibility. K70N alone is associated with about 25-fold reduced LEN susceptibility. K70R has little or no affect on LEN susceptibility but in combination with Q67H it reduces susceptibility about 20-fold.  Susceptibility data are not available for K70S."
+        }
+    },
+    "K70N": {
+        "gene": "CA",
+        "drug_class": "CAI",
+        "comments": {
+            "CA70NHRS": "K70HNRS have been selected in patients receiving LEN. K70H alone is associated with about 100-fold reduced LEN susceptibility. K70N alone is associated with about 25-fold reduced LEN susceptibility. K70R has little or no affect on LEN susceptibility but in combination with Q67H it reduces susceptibility about 20-fold.  Susceptibility data are not available for K70S.",
+            "RT70EGQNST": "K70/E/Q/N/T/S/G cause low-leve resistance to ABC and TDF."
+        }
+    },
+    "K70R": {
+        "gene": "CA",
+        "drug_class": "CAI",
+        "comments": {
+            "CA70NHRS": "K70HNRS have been selected in patients receiving LEN. K70H alone is associated with about 100-fold reduced LEN susceptibility. K70N alone is associated with about 25-fold reduced LEN susceptibility. K70R has little or no affect on LEN susceptibility but in combination with Q67H it reduces susceptibility about 20-fold.  Susceptibility data are not available for K70S.",
+            "RT70ACDFHILMPVWYi": "K70R is a TAM that confers intermediate resistance to AZT and contributes to reduced ABC and TDF susceptibility in combination with other TAMs. K70/E/Q/N/T/S/G cause low-leve resistance to ABC and TDF. $listMutsIn{70(NOT REGQNSTd)} is an unusual mutation at this position.",
+            "RT70R": "K70R is a TAM that confers intermediate resistance to AZT and contributes to reduced ABC and TDF susceptibility in combination with other TAMs."
+        }
+    },
+    "K70S": {
+        "gene": "CA",
+        "drug_class": "CAI",
+        "comments": {
+            "CA70NHRS": "K70HNRS have been selected in patients receiving LEN. K70H alone is associated with about 100-fold reduced LEN susceptibility. K70N alone is associated with about 25-fold reduced LEN susceptibility. K70R has little or no affect on LEN susceptibility but in combination with Q67H it reduces susceptibility about 20-fold.  Susceptibility data are not available for K70S.",
+            "RT70EGQNST": "K70/E/Q/N/T/S/G cause low-leve resistance to ABC and TDF."
+        }
+    },
+    "N74D": {
+        "gene": "CA",
+        "drug_class": "CAI",
+        "comments": {
+            "CA74D": "N74D has been selected in vitro by LEN both alone and in combination with Q67H. It has also been selected alone in four persons receiving LEN including two persons  receiving LEN as PrEP. Alone, it is associated with ~20-fold reduced LEN susceptibility and an RC of ~50%.  In combination with Q67H, it is associated with >1000 reduced LEN susceptibility."
+        }
+    },
+    "N74S": {
+        "gene": "CA",
+        "drug_class": "CAI",
+        "comments": {
+            "CA74SK": "N74S has been selected in vitro by LEN in combination with Q67H. In combination with Q67H, it is associated with 20-fold reduced susceptibility. N74K has been selected in combination K70H in one person."
+        }
+    },
+    "A105T": {
+        "gene": "CA",
+        "drug_class": "CAI",
+        "comments": {
+            "CA105TSE": "A105T has been selected in 4 patients receiving LEN always in combination with other capsid mutations. Alone it is associated with 3-fold reduced LEN susceptibility and an RC of ~60%. A105E has been selected in vitro by GS-CA1. It is associated with ~4-fold reduced LEN susceptibility. A105S has been reported as a subdominant variant in one patient receiving LEN. Its effect on susceptibility has not been reported."
+        }
+    },
+    "T107N": {
+        "gene": "CA",
+        "drug_class": "CAI",
+        "comments": {
+            "CA107NSAC": "T107N has been selected in vitro and in vivo by LEN. Alone it is associated with 4-fold reduced LEN susceptibility. In combination with Q67H, it is associated with ~90-fold reduced LEN susceptibility. T107A/S are polymorphic mutations that have been reported in combination with other LEN-associated mutations. T107C is a nonpolymorphic mutation. The effects of T107A/S/C on susceptibility are not known."
+        }
+    },
+    "INSTI comments": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "CABIntermediate": "This virus is predicted to have intermediate-level reduced susceptibility to CAB. The use of the combination of CAB/RPV should be considered to be contraindicated.",
+            "CABLow": "This virus is predicted to have low-level reduced susceptibility to CAB. The use of the combination of CAB/RPV should be considered to be relatively contraindicated.",
+            "DTGHigh": "There is evidence for high-level DTG resistance. If DTG is used, it should be administered twice daily.",
+            "DTGIntermediate": "There is evidence for intermediate DTG resistance. If DTG is used, it should be administered twice daily.",
+            "DTGLow": "There is evidence for low-level DTG resistance. If DTG is used, it should be administered twice daily."
+        }
+    },
+    "G118R": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN118ACDEFHIKLMNPQSTVWYid": "G118R is a nonpolymorphic mutation reported in a significant proportion of persons with VF and emergent HIVDR in persons receiving a DTG-containing regimen. It has occasionally been reported in persons receiving other INSTIs. It is associated with greater than 10-fold reduced susceptibility to DTG, 5-10-fold reduced susceptibility to RAL, EVG, and CAB, and about 3 fold reduced susceptibility to BIC. However, the data for BIC are based on the results of a single site-directed mutant. $listMutsIn{118(NOT R)} is an unusual mutation at this position.",
+            "IN118R": "G118R is a nonpolymorphic mutation reported in a significant proportion of persons with VF and emergent HIVDR in persons receiving a DTG-containing regimen. It has occasionally been reported in persons receiving other INSTIs. It is associated with greater than 10-fold reduced susceptibility to DTG, 5-10-fold reduced susceptibility to RAL, EVG, and CAB, and about 3 fold reduced susceptibility to BIC. However, the data for BIC are based on the results of a single site-directed mutant."
+        }
+    },
+    "S119R": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN119R": "S119R is a polymorphic mutation that is weakly selected by INSTIs usually in combination with several major INSTI-associated DRMs. Alone, it has little, if any effect, on INSTI susceptibility."
+        }
+    },
+    "F121Y": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN121ADEGHIKLMNPQRSTVWid": "F121Y is a rare nonpolymorphic mutation selected primarily by RAL. It is associated with >10-fold reduced susceptibility to RAL but has minimal if any effect on susceptibility to CAB, DTG, and BIC. F121C is an extremely rare mutation. Preliminary data suggests it may confers high level phenotypic resistance to RAL, EVG, and possibly CAB. $listMutsIn{121(NOT CY)} is an unusual mutation at this position.",
+            "IN121Y": "F121Y is a rare nonpolymorphic mutation selected primarily by RAL. It is associated with >10-fold reduced susceptibility to RAL but has minimal if any effect on susceptibility to CAB, DTG, and BIC."
+        }
+    },
+    "F121C": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN121C": "F121C is an extremely rare mutation. Preliminary data suggests it may confers high level phenotypic resistance to RAL, EVG, and possibly CAB."
+        }
+    },
+    "T122N": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN122N": "T122N is a nonpolymorphic mutation selected in vitro by CAB. Based on limited data, it possibly contributes reduced susceptibility to each of the INSTIs in combination with other DRMs."
+        }
+    },
+    "A128T": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN128T": "A128T is a relatively nonpolymorphic possible INSTI-selected mutation, which does not appear to reduce INSTI susceptibility."
+        }
+    },
+    "E138K": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN138CFGHILMNPQRSVWYid": "E138K/A/T are common nonpolymorphic accessory resistance mutations selected in patients receiving RAL, EVG, CAB, and DTG. Alone they do not reduce INSTI susceptibility. However, they contribute to reduced susceptibility in combination with other mutations particularly those at position 148. E138D is a polymorphism that occurs in 1% to 2% of viruses from INSTI-naïve patients. It does not appear to be selected by INSTIs or to reduce INSTI susceptibility. $listMutsIn{138(NOT KATD)} is an unusual mutation at this position.",
+            "IN138KAT": "E138K/A/T are common nonpolymorphic accessory resistance mutations selected in patients receiving RAL, EVG, CAB, and DTG. Alone they do not reduce INSTI susceptibility. However, they contribute to reduced susceptibility in combination with other mutations particularly those at position 148.",
+            "RT138CDFHILMNPSTVWYid": "E138K is a non-polymorphic mutation selected in a high proportion of persons receiving RPV. E138K causes low-level cross-resistance to ETR. E138A is a common polymorphic accessory mutation weakly selected in persons receiving ETR and RPV. E138R is an extremely rare non-polymorphic accessory mutation selected in vitro by RPV. $listMutsIn{138(NOT AGKQR)} is an unusual mutation at this position.",
+            "RT138K": "E138K is a non-polymorphic mutation selected in a high proportion of persons receiving RPV. It reduces RPV susceptibility 2 to 3-fold. In combination with K101E or the NRTI-resistance mutation M184I, it is sufficient to cause VF on a first-line RPV-containing regimen. E138K causes low-level cross-resistance to ETR."
+        }
+    },
+    "E138A": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN138CFGHILMNPQRSVWYid": "E138K/A/T are common nonpolymorphic accessory resistance mutations selected in patients receiving RAL, EVG, CAB, and DTG. Alone they do not reduce INSTI susceptibility. However, they contribute to reduced susceptibility in combination with other mutations particularly those at position 148. E138D is a polymorphism that occurs in 1% to 2% of viruses from INSTI-naïve patients. It does not appear to be selected by INSTIs or to reduce INSTI susceptibility. $listMutsIn{138(NOT KATD)} is an unusual mutation at this position.",
+            "IN138KAT": "E138K/A/T are common nonpolymorphic accessory resistance mutations selected in patients receiving RAL, EVG, CAB, and DTG. Alone they do not reduce INSTI susceptibility. However, they contribute to reduced susceptibility in combination with other mutations particularly those at position 148.",
+            "RT138A": "E138A is a common polymorphic accessory mutation weakly selected in persons receiving ETR and RPV. It reduces ETR and RPV susceptibility ~2-fold. Its effect on ETR- and RPV-containing regimens is likely to be minimal."
+        }
+    },
+    "E138T": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN138CFGHILMNPQRSVWYid": "E138K/A/T are common nonpolymorphic accessory resistance mutations selected in patients receiving RAL, EVG, CAB, and DTG. Alone they do not reduce INSTI susceptibility. However, they contribute to reduced susceptibility in combination with other mutations particularly those at position 148. E138D is a polymorphism that occurs in 1% to 2% of viruses from INSTI-naïve patients. It does not appear to be selected by INSTIs or to reduce INSTI susceptibility. $listMutsIn{138(NOT KATD)} is an unusual mutation at this position.",
+            "IN138KAT": "E138K/A/T are common nonpolymorphic accessory resistance mutations selected in patients receiving RAL, EVG, CAB, and DTG. Alone they do not reduce INSTI susceptibility. However, they contribute to reduced susceptibility in combination with other mutations particularly those at position 148."
+        }
+    },
+    "E138D": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN138D": "E138D is a polymorphism that occurs in 1% to 2% of viruses from INSTI-naïve patients. It does not appear to be selected by INSTIs or to reduce INSTI susceptibility."
+        }
+    },
+    "G140S": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN140DEFHIKLMNPQTVWYid": "G140S/A/C are non-polymorphic mutations that usually occur with Q148 mutations. Alone, they have minimal effects on INSTI susceptibility. However, in combination with Q148 mutations they are associated with high-level resistance to RAL and EVG and intermediate reductions in DTG, BIC, and CAB susceptibility. G140R is a nonpolymorphic mutation reported in n macaques receiving CAB pre-exposure prophylaxis and in a person receiving simplification therapy with RPV/CAB. It can reduce CAB susceptibility up to 7-fold. $listMutsIn{140(NOT SACR)} is an unusual mutation at this position.",
+            "IN140SAC": "G140S/A/C are non-polymorphic mutations that usually occur with Q148 mutations. Alone, they have minimal effects on INSTI susceptibility. However, in combination with Q148 mutations they are associated with high-level resistance to RAL and EVG and intermediate reductions in DTG, BIC, and CAB susceptibility."
+        }
+    },
+    "G140A": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN140DEFHIKLMNPQTVWYid": "G140S/A/C are non-polymorphic mutations that usually occur with Q148 mutations. Alone, they have minimal effects on INSTI susceptibility. However, in combination with Q148 mutations they are associated with high-level resistance to RAL and EVG and intermediate reductions in DTG, BIC, and CAB susceptibility. G140R is a nonpolymorphic mutation reported in n macaques receiving CAB pre-exposure prophylaxis and in a person receiving simplification therapy with RPV/CAB. It can reduce CAB susceptibility up to 7-fold. $listMutsIn{140(NOT SACR)} is an unusual mutation at this position.",
+            "IN140SAC": "G140S/A/C are non-polymorphic mutations that usually occur with Q148 mutations. Alone, they have minimal effects on INSTI susceptibility. However, in combination with Q148 mutations they are associated with high-level resistance to RAL and EVG and intermediate reductions in DTG, BIC, and CAB susceptibility."
+        }
+    },
+    "G140C": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN140DEFHIKLMNPQTVWYid": "G140S/A/C are non-polymorphic mutations that usually occur with Q148 mutations. Alone, they have minimal effects on INSTI susceptibility. However, in combination with Q148 mutations they are associated with high-level resistance to RAL and EVG and intermediate reductions in DTG, BIC, and CAB susceptibility. G140R is a nonpolymorphic mutation reported in n macaques receiving CAB pre-exposure prophylaxis and in a person receiving simplification therapy with RPV/CAB. It can reduce CAB susceptibility up to 7-fold. $listMutsIn{140(NOT SACR)} is an unusual mutation at this position.",
+            "IN140SAC": "G140S/A/C are non-polymorphic mutations that usually occur with Q148 mutations. Alone, they have minimal effects on INSTI susceptibility. However, in combination with Q148 mutations they are associated with high-level resistance to RAL and EVG and intermediate reductions in DTG, BIC, and CAB susceptibility."
+        }
+    },
+    "G140R": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN140R": "G140R is a nonpolymorphic mutation reported in n macaques receiving CAB pre-exposure prophylaxis and in a person receiving simplification therapy with RPV/CAB. It can reduce CAB susceptibility up to 7-fold."
+        }
+    },
+    "Y143C": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN143CRH": "Y143C/R/H are non-polymorphic mutations associated with high-level RAL resistance. Alone, they have minimal effects on EVG susceptibility. However, they are associated with intermediate reductions in EVG susceptibility when they occur in combination with one or more accessory INSTI-resistance mutations. Y143 mutations do not reduce susceptibility to DTG, BIC, or CAB.",
+            "IN143DEFILMNPQTVWid": "Y143C/R/H are non-polymorphic mutations associated with high-level RAL resistance. Alone, they have minimal effects on EVG susceptibility. However, they are associated with intermediate reductions in EVG susceptibility when they occur in combination with one or more accessory INSTI-resistance mutations. Y143 mutations do not reduce susceptibility to DTG, BIC, or CAB. $listMutsIn{143(NOT CRHKGSA)} is an unusual mutation at this position."
+        }
+    },
+    "Y143R": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN143CRH": "Y143C/R/H are non-polymorphic mutations associated with high-level RAL resistance. Alone, they have minimal effects on EVG susceptibility. However, they are associated with intermediate reductions in EVG susceptibility when they occur in combination with one or more accessory INSTI-resistance mutations. Y143 mutations do not reduce susceptibility to DTG, BIC, or CAB.",
+            "IN143DEFILMNPQTVWid": "Y143C/R/H are non-polymorphic mutations associated with high-level RAL resistance. Alone, they have minimal effects on EVG susceptibility. However, they are associated with intermediate reductions in EVG susceptibility when they occur in combination with one or more accessory INSTI-resistance mutations. Y143 mutations do not reduce susceptibility to DTG, BIC, or CAB. $listMutsIn{143(NOT CRHKGSA)} is an unusual mutation at this position."
+        }
+    },
+    "Y143H": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN143CRH": "Y143C/R/H are non-polymorphic mutations associated with high-level RAL resistance. Alone, they have minimal effects on EVG susceptibility. However, they are associated with intermediate reductions in EVG susceptibility when they occur in combination with one or more accessory INSTI-resistance mutations. Y143 mutations do not reduce susceptibility to DTG, BIC, or CAB.",
+            "IN143DEFILMNPQTVWid": "Y143C/R/H are non-polymorphic mutations associated with high-level RAL resistance. Alone, they have minimal effects on EVG susceptibility. However, they are associated with intermediate reductions in EVG susceptibility when they occur in combination with one or more accessory INSTI-resistance mutations. Y143 mutations do not reduce susceptibility to DTG, BIC, or CAB. $listMutsIn{143(NOT CRHKGSA)} is an unusual mutation at this position."
+        }
+    },
+    "Y143K": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN143KGSA": "Y143K/G/S/A are rare mutations that cause intermediate reductions in RAL susceptibility. When they occur in combination with other accessory mutations, they may also cause low-level reductions in EVG susceptibility."
+        }
+    },
+    "Y143G": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN143KGSA": "Y143K/G/S/A are rare mutations that cause intermediate reductions in RAL susceptibility. When they occur in combination with other accessory mutations, they may also cause low-level reductions in EVG susceptibility."
+        }
+    },
+    "Y143S": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN143KGSA": "Y143K/G/S/A are rare mutations that cause intermediate reductions in RAL susceptibility. When they occur in combination with other accessory mutations, they may also cause low-level reductions in EVG susceptibility."
+        }
+    },
+    "Y143A": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN143KGSA": "Y143K/G/S/A are rare mutations that cause intermediate reductions in RAL susceptibility. When they occur in combination with other accessory mutations, they may also cause low-level reductions in EVG susceptibility."
+        }
+    },
+    "P145S": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN145ACDEFGHIKLMNQRTVWYid": "P145S is a rare non-polymorphic mutation selected in vitro by EVG and rarely in patients receiving EVG. It causes high-level resistance to EVG but not to any other INSTI. $listMutsIn{145(NOT S)} is an unusual mutation at this position.",
+            "IN145S": "P145S is a rare non-polymorphic mutation selected in vitro by EVG and rarely in patients receiving EVG. It causes high-level resistance to EVG but not to any other INSTI."
+        }
+    },
+    "Q146P": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN146ACDEFGHIKMNSTVWYid": "Q146P/R/L are rare mutations that have been selected in vitro by EVG, DTG, BIC, and CAB. Q146P/L have been associated with 5-15-fold reduced EVG susceptibility and minimally reduced susceptibility to CAB. $listMutsIn{146(NOT PRL)} is an unusual mutation at this position.",
+            "IN146PRL": "Q146P/R/L are rare mutations that have been selected in vitro by EVG, DTG, BIC, and CAB. Q146P/L have been associated with 5-15-fold reduced EVG susceptibility and minimally reduced susceptibility to CAB."
+        }
+    },
+    "Q146R": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN146ACDEFGHIKMNSTVWYid": "Q146P/R/L are rare mutations that have been selected in vitro by EVG, DTG, BIC, and CAB. Q146P/L have been associated with 5-15-fold reduced EVG susceptibility and minimally reduced susceptibility to CAB. $listMutsIn{146(NOT PRL)} is an unusual mutation at this position.",
+            "IN146PRL": "Q146P/R/L are rare mutations that have been selected in vitro by EVG, DTG, BIC, and CAB. Q146P/L have been associated with 5-15-fold reduced EVG susceptibility and minimally reduced susceptibility to CAB."
+        }
+    },
+    "Q146L": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN146ACDEFGHIKMNSTVWYid": "Q146P/R/L are rare mutations that have been selected in vitro by EVG, DTG, BIC, and CAB. Q146P/L have been associated with 5-15-fold reduced EVG susceptibility and minimally reduced susceptibility to CAB. $listMutsIn{146(NOT PRL)} is an unusual mutation at this position.",
+            "IN146PRL": "Q146P/R/L are rare mutations that have been selected in vitro by EVG, DTG, BIC, and CAB. Q146P/L have been associated with 5-15-fold reduced EVG susceptibility and minimally reduced susceptibility to CAB."
+        }
+    },
+    "S147G": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN147ACDEFHIKLMNPQRTVWYid": "S147G is a nonpolymorphic mutation selected in patients receiving RAL, EVG, and DTG. Alone it reduces EVG susceptibility about 5-fold and appears to contribute reduced susceptibility to the remaining INSTIs. $listMutsIn{147(NOT G)} is an unusual mutation at this position.",
+            "IN147G": "S147G is a nonpolymorphic mutation selected in patients receiving RAL, EVG, and DTG. Alone it reduces EVG susceptibility about 5-fold and appears to contribute reduced susceptibility to the remaining INSTIs."
+        }
+    },
+    "Q148H": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN148ACDEFGILMPSTVWYid": "Q148H/K/R are nonpolymorphic mutations reported in persons receiving RAL, EVG, CAB, and DTG. They nearly always occur in combination with G140A/S or E138K. In this setting they are associated with high-level resistance to RAL, EVG, and CAB, and low-to-intermediate reductions in DTG and BIC susceptibility. Q148N is a very rare INSTI-selected mutation that causes ~3-fold reduced EVG susceptibility and may represent a reversion from Q148H or Q148K. $listMutsIn{148(NOT HKRN)} is an unusual mutation at this position.",
+            "IN148HKR": "Q148H/K/R are nonpolymorphic mutations reported in persons receiving RAL, EVG, CAB, and DTG. They nearly always occur in combination with G140A/S or E138K. In this setting they are associated with high-level resistance to RAL, EVG, and CAB, and low-to-intermediate reductions in DTG and BIC susceptibility."
+        }
+    },
+    "Q148K": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN148ACDEFGILMPSTVWYid": "Q148H/K/R are nonpolymorphic mutations reported in persons receiving RAL, EVG, CAB, and DTG. They nearly always occur in combination with G140A/S or E138K. In this setting they are associated with high-level resistance to RAL, EVG, and CAB, and low-to-intermediate reductions in DTG and BIC susceptibility. Q148N is a very rare INSTI-selected mutation that causes ~3-fold reduced EVG susceptibility and may represent a reversion from Q148H or Q148K. $listMutsIn{148(NOT HKRN)} is an unusual mutation at this position.",
+            "IN148HKR": "Q148H/K/R are nonpolymorphic mutations reported in persons receiving RAL, EVG, CAB, and DTG. They nearly always occur in combination with G140A/S or E138K. In this setting they are associated with high-level resistance to RAL, EVG, and CAB, and low-to-intermediate reductions in DTG and BIC susceptibility."
+        }
+    },
+    "Q148R": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN148ACDEFGILMPSTVWYid": "Q148H/K/R are nonpolymorphic mutations reported in persons receiving RAL, EVG, CAB, and DTG. They nearly always occur in combination with G140A/S or E138K. In this setting they are associated with high-level resistance to RAL, EVG, and CAB, and low-to-intermediate reductions in DTG and BIC susceptibility. Q148N is a very rare INSTI-selected mutation that causes ~3-fold reduced EVG susceptibility and may represent a reversion from Q148H or Q148K. $listMutsIn{148(NOT HKRN)} is an unusual mutation at this position.",
+            "IN148HKR": "Q148H/K/R are nonpolymorphic mutations reported in persons receiving RAL, EVG, CAB, and DTG. They nearly always occur in combination with G140A/S or E138K. In this setting they are associated with high-level resistance to RAL, EVG, and CAB, and low-to-intermediate reductions in DTG and BIC susceptibility."
+        }
+    },
+    "Q148N": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN148N": "Q148N is a very rare INSTI-selected mutation that causes ~3-fold reduced EVG susceptibility and may represent a reversion from Q148H or Q148K."
+        }
+    },
+    "G149A": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN149A": "G149A is an accessory nonpolymorphic mutation that has been reported primarily in combination with Q148 mutations. It appears to have no effect by itself but in combination with mutations at positions 140 and 148, it leads to contributes reduced susceptibility to DTG, CAB, and BIC."
+        }
+    },
+    "V151A": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN151A": "V151A is an extremely rare mutation associated with minimally reduced susceptibility to RAL and EVG."
+        }
+    },
+    "V151I": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN151CDEFGHKMNPQRSTWYid": "V151I is an accessory INSTI selected mutation that occurs in 1% to 3% of viruses from ART-naïve persons depending on subtype. Alone, it appears to have little or no effect on INSTI susceptibility. V151L is an extremely rare mutation that reduces susceptibility to RAL and EVG by 15 to 20-fold and to CAB and DTG by about 3-fold. V151A is an extremely rare mutation associated with minimally reduced susceptibility to RAL and EVG. $listMutsIn{151(NOT IAL)} is an unusual mutation at this position.",
+            "IN151I": "V151I is an accessory INSTI selected mutation that occurs in 1% to 3% of viruses from ART-naïve persons depending on subtype. Alone, it appears to have little or no effect on INSTI susceptibility."
+        }
+    },
+    "V151L": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN151L": "V151L is an extremely rare mutation that reduces susceptibility to RAL and EVG by 15 to 20-fold and to CAB and DTG by about 3-fold."
+        }
+    },
+    "S153Y": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN153CDEGHIKLMNPQRTVWid": "S153Y/F are very rare mutations selected in vitro by EVG, DTG, BIC, and CAB. Alone they reduce EVG susceptibility about 5-fold and DTG, CAB, and BIC susceptibility about 2-fold. S153A is a rare mutation that alone does not appear to reduce INSTI susceptibility. $listMutsIn{153(NOT YFA)} is an unusual mutation at this position.",
+            "IN153YFA": "S153Y/F are very rare mutations selected in vitro by EVG, DTG, BIC, and CAB. Alone they reduce EVG susceptibility about 5-fold and DTG, CAB, and BIC susceptibility about 2-fold. S153A is a rare mutation that alone does not appear to reduce INSTI susceptibility."
+        }
+    },
+    "S153F": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN153CDEGHIKLMNPQRTVWid": "S153Y/F are very rare mutations selected in vitro by EVG, DTG, BIC, and CAB. Alone they reduce EVG susceptibility about 5-fold and DTG, CAB, and BIC susceptibility about 2-fold. S153A is a rare mutation that alone does not appear to reduce INSTI susceptibility. $listMutsIn{153(NOT YFA)} is an unusual mutation at this position.",
+            "IN153YFA": "S153Y/F are very rare mutations selected in vitro by EVG, DTG, BIC, and CAB. Alone they reduce EVG susceptibility about 5-fold and DTG, CAB, and BIC susceptibility about 2-fold. S153A is a rare mutation that alone does not appear to reduce INSTI susceptibility."
+        }
+    },
+    "N155H": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN155ACDEFGIKLMPQRVWYid": "N155H is a common nonpolymorphic INSTI-resistance mutations. It has been reported in a high proportion of persons developing VF and HIVDR while receiving RAL, EVG, DTG, and CAB. Alone, it reduces RAL and EVG susceptibility about 10 and 30-fold, respectively. It has minimal effect on susceptibility to DTG, BIC, and CAB. However, it likely significantly reduces the genetic barrier to resistance of CAB. N155S/T are extremely rare nonpolymorphic mutations that reduce RAL and EVG susceptibility about 5-fold and greater than 30-fold respectively but have little effect on CAB, DTG, and BIC.  $listMutsIn{155(NOT HST)} is an unusual mutation at this position.",
+            "IN155H": "N155H is a common nonpolymorphic INSTI-resistance mutations. It has been reported in a high proportion of persons developing VF and HIVDR while receiving RAL, EVG, DTG, and CAB. Alone, it reduces RAL and EVG susceptibility about 10 and 30-fold, respectively. It has minimal effect on susceptibility to DTG, BIC, and CAB. However, it likely significantly reduces the genetic barrier to resistance of CAB."
+        }
+    },
+    "N155S": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN155ST": "N155S/T are extremely rare nonpolymorphic mutations that reduce RAL and EVG susceptibility about 5-fold and greater than 30-fold respectively but have little effect on CAB, DTG, and BIC."
+        }
+    },
+    "N155T": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN155ST": "N155S/T are extremely rare nonpolymorphic mutations that reduce RAL and EVG susceptibility about 5-fold and greater than 30-fold respectively but have little effect on CAB, DTG, and BIC."
+        }
+    },
+    "E157Q": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN157Q": "E157Q is a polymorphic mutation selected in persons receiving RAL, EVG, and possibly the second generation INSTIs. Alone, it appears to have little effect on INSTI susceptibility. It is uncertain whether it contributes to reduced susceptibility in combination with R263K."
+        }
+    },
+    "G163R": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN163RK": "G163R/K are nonpolymorphic in all subtypes except subtype F. They are accessory resistance mutations as they usually occur in combination with other INSTI-resistance mutations particularly N155H."
+        }
+    },
+    "G163K": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN163RK": "G163R/K are nonpolymorphic in all subtypes except subtype F. They are accessory resistance mutations as they usually occur in combination with other INSTI-resistance mutations particularly N155H."
+        }
+    },
+    "S230N": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN230N": "S230N is a polymorphism that is not associated with reduced INSTI susceptibility."
+        }
+    },
+    "S230R": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN230R": "S230R is a nonpolymorphic INSTI-selected mutation that primarily occurs in combination with other INSTI-resistance mutations. By itself, it appears to have minimal effect on susceptibility to available INSTIs."
+        }
+    },
+    "D232N": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN232N": "D232N is a common nonpolymorphic accessory mutation selected in persons receiving RAL and EVG. Alone, it has little effect on INSTI susceptibility."
+        }
+    },
+    "R263K": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN263ACDEFGHILMNPQSTVWYid": "R263K is a nonpolymorphic mutation selected in vitro by EVG, DTG, BIC, and CAB. It occurs in a high proportion of persons who develop VF and emergent HIVDR while receiving DTG. Alone, it reduces DTG, BIC, and CAB susceptibility about 2-fold and EVG susceptibility about 5-fold. It remains uncertain whether this mutation is a contraindication to continued treatment with DTG or BIC. $listMutsIn{263(NOT K)} is an unusual mutation at this position.",
+            "IN263K": "R263K is a nonpolymorphic mutation selected in vitro by EVG, DTG, BIC, and CAB. It occurs in a high proportion of persons who develop VF and emergent HIVDR while receiving DTG. Alone, it reduces DTG, BIC, and CAB susceptibility about 2-fold and EVG susceptibility about 5-fold. It remains uncertain whether this mutation is a contraindication to continued treatment with DTG or BIC."
+        }
+    },
+    "A49G": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN49G": "A49G is a rare nonpolymorphic accessory INSTI-selected mutation with uncertain effects on INSTI susceptibility."
+        }
+    },
+    "M50I": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN50I": "M50I is a highly polymorphic mutation, which has a prevalence of 3% to 34% in INSTI-naïve persons depending on subtype. It has been selected in vitro by DTG and BIC in combination with R263K. It also appears to frequently occur in combination with R263K in patients receiving DTG and BIC. It is uncertain whether it contributes to reduced DTG and CAB susceptibility in combination with R263K."
+        }
+    },
+    "H51Y": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN51ACDEFGIKLMNPQRSTVWid": "H51Y is an uncommon nonpolymorphic accessory mutation selected in vitro by EVG, DTG, and CAB. Alone, it has minimal if any effect on INSTI susceptibility. $listMutsIn{51(NOT Y)} is an unusual mutation at this position.",
+            "IN51Y": "H51Y is an uncommon nonpolymorphic accessory mutation selected in vitro by EVG, DTG, and CAB. Alone, it has minimal if any effect on INSTI susceptibility."
+        }
+    },
+    "T66A": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN66AI": "T66A/I are non-polymorphic mutations selected in persons receiving EVG, RAL, and DTG usually in combination with other INSTI-resistance mutations. They cause moderate reductions in EVG susceptibility but do not appear to reduce susceptibility to other INSTIs.",
+            "IN66CDEFGHLMNPQRSVWYid": "T66A/I are non-polymorphic mutations selected in persons receiving EVG, RAL, and DTG usually in combination with other INSTI-resistance mutations. They cause moderate reductions in EVG susceptibility but do not appear to reduce susceptibility to other INSTIs. T66K is an uncommon non-polymorphic INSTI-selected mutation. It is associated with high-level EVG resistance, intermediate/high-level RAL resistance, and low-level DTG and CAB resistance. Its effect on BIC is not known. $listMutsIn{66(NOT IAK)} is an unusual mutation at this position."
+        }
+    },
+    "T66I": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN66AI": "T66A/I are non-polymorphic mutations selected in persons receiving EVG, RAL, and DTG usually in combination with other INSTI-resistance mutations. They cause moderate reductions in EVG susceptibility but do not appear to reduce susceptibility to other INSTIs.",
+            "IN66CDEFGHLMNPQRSVWYid": "T66A/I are non-polymorphic mutations selected in persons receiving EVG, RAL, and DTG usually in combination with other INSTI-resistance mutations. They cause moderate reductions in EVG susceptibility but do not appear to reduce susceptibility to other INSTIs. T66K is an uncommon non-polymorphic INSTI-selected mutation. It is associated with high-level EVG resistance, intermediate/high-level RAL resistance, and low-level DTG and CAB resistance. Its effect on BIC is not known. $listMutsIn{66(NOT IAK)} is an unusual mutation at this position."
+        }
+    },
+    "T66K": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN66K": "T66K is an uncommon non-polymorphic INSTI-selected mutation. It is associated with high-level EVG resistance, intermediate/high-level RAL resistance, and low-level DTG and CAB resistance. Its effect on BIC is not known."
+        }
+    },
+    "L74F": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN74F": "L74F is an extremely rare nonpolymorphic mutation which contributes to reduced INSTI susceptibility when it occurs with other INSTI-resistance mutations."
+        }
+    },
+    "L74I": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN74I": "L74I is a highly polymorphic mutation with a prevalence of 3% to 30% depending on subtype. It is the consensus amino acid in subtype A viruses belonging to the A6 clade. It does not appear to be selected by any of the INSTIs or to reduce their susceptibility."
+        }
+    },
+    "L74M": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN74M": "L74M is a common polymorphic INSTI-resistance mutation. It has a prevalence between 1% and 5% among INSTI-naïve persons depending on subtype. It appears to be selected by each of the INSTIs. Alone it does not reduce INSTI susceptibility. However, in combination with other INSTI-resistance mutations, it contributes reduced susceptibility to each of the INSTIs."
+        }
+    },
+    "V75A": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN75A": "V75A is a nonpolymorphic mutation selected in vitro by CAB. Based on limited data, it appears to contribute to reduced susceptibility to other INSTIs in combination with Q148 mutations or G118R.",
+            "RT75MTAS": "V75T/M/A/S are nonpolymorphic accessory NRTI-selected mutations. They appear to have minimal phenotypic effects on AZT, ABC, and TDF."
+        }
+    },
+    "E92Q": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN92ACDFHIKLMNPRSTWYid": "E92Q is a common non-polymorphic mutation selected in persons receiving RAL and EVG. It reduces RAL susceptibility 5 to 10-fold and EVG susceptibility ~30-fold. It does not reduce susceptibility to BIC, CAB, and DTG. E92G/V are rare nonpolymorphic mutations that reduce EVG susceptibility >=10-fold but do not appear to reduce susceptibility to other INSTIs. $listMutsIn{92(NOT GQV)} is an unusual mutation at this position.",
+            "IN92Q": "E92Q is a common non-polymorphic mutation selected in persons receiving RAL and EVG. It reduces RAL susceptibility 5 to 10-fold and EVG susceptibility ~30-fold. It does not reduce susceptibility to BIC, CAB, and DTG."
+        }
+    },
+    "E92G": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN92GV": "E92G/V are rare nonpolymorphic mutations that reduce EVG susceptibility >=10-fold but do not appear to reduce susceptibility to other INSTIs."
+        }
+    },
+    "E92V": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN92GV": "E92G/V are rare nonpolymorphic mutations that reduce EVG susceptibility >=10-fold but do not appear to reduce susceptibility to other INSTIs."
+        }
+    },
+    "Q95K": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN95K": "Q95K is a non-polymorphic INSTI-selected mutation. Alone, it has little if any effect on INSTI susceptibility."
+        }
+    },
+    "T97A": {
+        "gene": "IN",
+        "drug_class": "INSTI",
+        "comments": {
+            "IN97A": "T97A is a polymorphic INSTI-selected mutation that, depending on subtype, occurs in 1% to 5% of viruses from untreated persons. Alone, it has minimal effects on INSTI susceptibility but in combination with other major resistance mutations, it synergistically reduces susceptibility to each of the INSTIs."
+        }
+    },
+    "PI comments": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "DRVHigh": "There is evidence for high-level DRV resistance. If DRV is administered it should be used twice daily.",
+            "DRVHighAndTPVIntermediate": "There is high-level DRV resistance and intermediate TPV resistance. Phenotypic testing and/or expert consultation may be useful. To see the precise TPV report re-run the program after adding TPV to the results being displayed.",
+            "DRVHighAndTPVLow": "There is high-level DRV resistance and low-level TPV resistance. Phenotypic testing and/or expert consultation may be useful. To see the precise TPV report re-run the program after adding TPV to the results being displayed.",
+            "DRVHighAndTPVPotentialLow": "There is high-level DRV resistance and potential low-level TPV resistance. Phenotypic testing and/or expert consultation may be useful. To see the precise TPV report re-run the program after adding TPV to the results being displayed.",
+            "DRVHighAndTPVSusceptible": "There is high-level DRV resistance and TPV susceptibility. Phenotypic testing and/or expert consultation may be useful. To see the precise TPV report re-run the program after adding TPV to the results being displayed.",
+            "DRVIntermediate": "There is evidence for intermediate DRV resistance. If DRV is administered it should be used twice daily.",
+            "DRVLow": "There is evidence for low-level DRV resistance. If DRV is administered it should be used twice daily.",
+            "PR33-41i": "Insertions between positions 33 and 41 do not appear to be selected by PIs or to reduce PI susceptibility."
+        }
+    },
+    "L10F": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR10ACDEGHKMNPQSTWid": "L10F is a common non-polymorphic, PI-selected accessory mutation associated with reduced in vitro susceptibility to ATV, LPV, and DRV. L10I/V are polymorphic, PI-selected accessory mutations that increase the replication of viruses with other PI-resistance mutations. L10R/Y are rare, non-polymorphic PI-selected mutations. Their effects on PI susceptibility have not been well studied. $listMutsIn{10(NOT FIVRY)} is a highly unusual mutation at this position.",
+            "PR10F": "L10F is a common non-polymorphic, PI-selected accessory mutation associated with reduced in vitro susceptibility to ATV, LPV, and DRV."
+        }
+    },
+    "L10I": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR10IV": "L10I/V are polymorphic, PI-selected accessory mutations that increase the replication of viruses with other PI-resistance mutations."
+        }
+    },
+    "L10V": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR10IV": "L10I/V are polymorphic, PI-selected accessory mutations that increase the replication of viruses with other PI-resistance mutations."
+        }
+    },
+    "L10R": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR10RY": "L10R/Y are rare, non-polymorphic PI-selected mutations. Their effects on PI susceptibility have not been well studied."
+        }
+    },
+    "L10Y": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR10RY": "L10R/Y are rare, non-polymorphic PI-selected mutations. Their effects on PI susceptibility have not been well studied."
+        }
+    },
+    "V11I": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR11IL": "V11I/L are relatively non-polymorphic accessory mutation selected in persons receiving DRV. V11L is a nonpolymorphic PI-selected mutation associated with reduced in vitro DRV susceptibility when it occurs in combination with other PI-resistance mutations."
+        }
+    },
+    "V11L": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR11IL": "V11I/L are relatively non-polymorphic accessory mutation selected in persons receiving DRV. V11L is a nonpolymorphic PI-selected mutation associated with reduced in vitro DRV susceptibility when it occurs in combination with other PI-resistance mutations."
+        }
+    },
+    "K20I": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR20I": "K20I is the consensus amino acid in subtype G and CRF02_AG. In subtypes B and C, K20I is a PI-selected mutation of uncertain effects on currently used PIs."
+        }
+    },
+    "K20M": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR20MV": "K20M/V are uncommonrelatively non-polymorphic PI-selected mutations that have not been well studied."
+        }
+    },
+    "K20V": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR20MV": "K20M/V are uncommonrelatively non-polymorphic PI-selected mutations that have not been well studied."
+        }
+    },
+    "K20R": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR20R": "K20R is a highly polymorphic PI-selected accessory mutation that increases replication fitness in viruses with PI-resistance mutations."
+        }
+    },
+    "K20T": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR20T": "K20T is a non-polymorphic accessory PI-selected mutation associated with reduced susceptibility to ATV and LPV."
+        }
+    },
+    "L23I": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR23I": "L23I is an uncommon non-polymorphic mutation selected primarily by NFV. It appears to have minimal if any effects on the susceptibility to other PIs."
+        }
+    },
+    "L24I": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR24ACDEGHKNPQRSTVWYid": "L24I is a non-polymorphic mutation selected by IDV and LPV. It contributes reduced susceptibility to ATV and LPV. L24F/M are uncommon non-polymorphic PI-selected mutations. L24F has a susceptibility profile similar to L24I. $listMutsIn{24(NOT FIM)} is a highly unusual mutation at this position.",
+            "PR24FM": "L24I is a non-polymorphic mutation selected by IDV and LPV. It contributes reduced susceptibility to ATV and LPV. L24F/M are uncommon non-polymorphic PI-selected mutations. L24F has a susceptibility profile similar to L24I.",
+            "PR24I": "L24I is a non-polymorphic mutation selected by IDV and LPV. It contributes reduced susceptibility to ATV and LPV."
+        }
+    },
+    "D30N": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR30ACEFGHIKLMPQRSTVWYid": "D30N is a non-polymorphic mutation NFV-selected mutation that causes high-level resistance to NFV but not to other PIs. $listMutsIn{30(NOT N)} is a highly unusual mutation at this position.",
+            "PR30N": "D30N is a non-polymorphic mutation NFV-selected mutation that causes high-level resistance to NFV but not to other PIs."
+        }
+    },
+    "V32I": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR32ACDEFGHKLMNPQRSTWYid": "V32I is a non-polymorphic mutation selected by LPV, ATV, and DRV which is associated with reduced susceptibility to each of these PIs. $listMutsIn{32(NOT I)} is a highly unusual mutation at this position.",
+            "PR32I": "V32I is a non-polymorphic mutation selected by LPV, ATV, and DRV which is associated with reduced susceptibility to each of these PIs."
+        }
+    },
+    "L33F": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR33F": "L33F is a relatively non-polymorphic accessory mutation selected by each of the PIs. In combination with other PI-resistance mutations, it is associated with reduced susceptibility to LPV, ATV, and DRV."
+        }
+    },
+    "L33I": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR33IV": "L33I/V are minimally polymorphic mutations that do not appear to be selected by PIs or to reduce their susceptibility."
+        }
+    },
+    "L33V": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR33IV": "L33I/V are minimally polymorphic mutations that do not appear to be selected by PIs or to reduce their susceptibility."
+        }
+    },
+    "K43T": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR43T": "K43T is a nonpolymorphic accessory mutation selected by ATV and LPV. Its phenotypic effect on currently used PIs is uncertain."
+        }
+    },
+    "M46I": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR46ACDEFGHKNPQRSTWYid": "M46I/L are relatively non-polymorphic PI-selected mutations. In combination with other PI-resistance mutations, they are associated with reduced susceptibility to each of the PIs except DRV. $listMutsIn{46(NOT ILV)} is a highly unusual mutation at this position.",
+            "PR46IL": "M46I/L are relatively non-polymorphic PI-selected mutations. In combination with other PI-resistance mutations, they are associated with reduced susceptibility to each of the PIs except DRV.",
+            "PR46V": "M46I/L are relatively non-polymorphic PI-selected mutations. In combination with other PI-resistance mutations, they are associated with reduced susceptibility to each of the PIs except DRV. M46V is a rare non-polymorphic PI-selected mutation that has not been well studied."
+        }
+    },
+    "M46L": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR46ACDEFGHKNPQRSTWYid": "M46I/L are relatively non-polymorphic PI-selected mutations. In combination with other PI-resistance mutations, they are associated with reduced susceptibility to each of the PIs except DRV. $listMutsIn{46(NOT ILV)} is a highly unusual mutation at this position.",
+            "PR46IL": "M46I/L are relatively non-polymorphic PI-selected mutations. In combination with other PI-resistance mutations, they are associated with reduced susceptibility to each of the PIs except DRV.",
+            "PR46V": "M46I/L are relatively non-polymorphic PI-selected mutations. In combination with other PI-resistance mutations, they are associated with reduced susceptibility to each of the PIs except DRV. M46V is a rare non-polymorphic PI-selected mutation that has not been well studied."
+        }
+    },
+    "I47A": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR47A": "I47A is a non-polymorphic mutation selected by LPV. It usually occurs in combination with V32I and in this context it confers high-level resistance to LPV and low-level resistance to DRV."
+        }
+    },
+    "I47V": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR47CDEFGHKLMNPQRSTWYid": "I47V is a non-polymorphic PI-selected mutation associated with reduced susceptibility to LPV and DRV. $listMutsIn{47(NOT AV)} is a highly unusual mutation at this position.",
+            "PR47V": "I47V is a non-polymorphic PI-selected mutation associated with reduced susceptibility to LPV and DRV."
+        }
+    },
+    "G48V": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR48ASTQL": "G48V is a nonpolymorphic mutation selected by SQV and less often by IDV and LPV. It confers intermediate resistance to ATV but has little if any effect on LPV susceptibility. G48M is an uncommon 2-base-pair nonpolymorphic substrate-cleft mutation nearly always selected in viruses with multiple PI-resistance mutations. It has a resistance profile similar to G48V. G48A/S/T/Q/L are extremely rare nonpolymorphic PI-selected mutations nearly always selected in viruses with multiple PI-resistance mutations.",
+            "PR48CDEFHIKNPRWYid": "G48V is a nonpolymorphic mutation selected by SQV and less often by IDV and LPV. It confers intermediate resistance to ATV but has little if any effect on LPV susceptibility. G48M is an uncommon 2-base-pair nonpolymorphic substrate-cleft mutation nearly always selected in viruses with multiple PI-resistance mutations. It has a resistance profile similar to G48V. G48A/S/T/Q/L are extremely rare nonpolymorphic PI-selected mutations nearly always selected in viruses with multiple PI-resistance mutations. $listMutsIn{48(NOT VMALSTQL)} is a highly unusual mutation at this position.",
+            "PR48M": "G48V is a nonpolymorphic mutation selected by SQV and less often by IDV and LPV. It confers intermediate resistance to ATV but has little if any effect on LPV susceptibility. G48M is an uncommon 2-base-pair nonpolymorphic substrate-cleft mutation nearly always selected in viruses with multiple PI-resistance mutations. It has a resistance profile similar to G48V.",
+            "PR48V": "G48V is a nonpolymorphic mutation selected by SQV and less often by IDV and LPV. It confers intermediate resistance to ATV but has little if any effect on LPV susceptibility."
+        }
+    },
+    "I50V": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR50ACDEFGHKMNPQRSTWYid": "I50V is a nonpolymorphic mutation selected by FPV, LPV and DRV. It reduces susceptibility to LPV and DRV. I50L is a non-polymorphic mutation selected by ATV. It causes high-level resistance to ATV and increases susceptibility to LPV and DRV. $listMutsIn{50(NOT LV)} is a highly unusual mutation at this position.",
+            "PR50V": "I50V is a nonpolymorphic mutation selected by FPV, LPV and DRV. It reduces susceptibility to LPV and DRV."
+        }
+    },
+    "I50L": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR50L": "I50L is a non-polymorphic mutation selected by ATV. It causes high-level resistance to ATV and increases susceptibility to LPV and DRV."
+        }
+    },
+    "F53L": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR53LY": "F53L is a nonpolymorphic accessory mutation selected primarily by SQV, IDV, ATV and LPV. In combination with other mutations, It is associated with reduced susceptibility to ATV and possibly LPV. F53Y is an uncommon nonpolymorphic accessory PI-selected mutation that has not been well studied."
+        }
+    },
+    "I54A": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR54ATS": "I54A/T/S are non-polymorphic PI-selected mutations that occur almost exclusively in viruses with multiple PI-resistance mutations. I54A/T/S are associated with reduced susceptibility to each of the PIs except DRV."
+        }
+    },
+    "I54T": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR54ATS": "I54A/T/S are non-polymorphic PI-selected mutations that occur almost exclusively in viruses with multiple PI-resistance mutations. I54A/T/S are associated with reduced susceptibility to each of the PIs except DRV."
+        }
+    },
+    "I54S": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR54ATS": "I54A/T/S are non-polymorphic PI-selected mutations that occur almost exclusively in viruses with multiple PI-resistance mutations. I54A/T/S are associated with reduced susceptibility to each of the PIs except DRV."
+        }
+    },
+    "I54V": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR54CDEFGHKNPQRWYid": "I54V is a non-polymorphic PI-selected mutation that contributes reduced susceptibility to each of the PIs except DRV. I54A/T/S are non-polymorphic PI-selected mutations that occur almost exclusively in viruses with multiple PI-resistance mutations. I54A/T/S are associated with reduced susceptibility to each of the PIs except DRV. I54M/L are non-polymorphic mutations selected primarily by FPV and DRV. I54M/L reduce susceptibility to LPV, ATV, and DRV. $listMutsIn{54(NOT ALMSTV)} is a highly unusual mutation at this position.",
+            "PR54V": "I54V is a non-polymorphic PI-selected mutation that contributes reduced susceptibility to each of the PIs except DRV."
+        }
+    },
+    "I54M": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR54LM": "I54M/L are non-polymorphic mutations selected primarily by FPV and DRV. I54M/L reduce susceptibility to LPV, ATV, and DRV."
+        }
+    },
+    "I54L": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR54LM": "I54M/L are non-polymorphic mutations selected primarily by FPV and DRV. I54M/L reduce susceptibility to LPV, ATV, and DRV."
+        }
+    },
+    "Q58E": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR58E": "Q58E is a minimally polymorphic accessory mutation selected by each of the PIs except DRV. In combination with other PI-resistance mutations, it may contribute to low-level ATV resistance."
+        }
+    },
+    "A71I": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR71IL": "A71I/L are non-polymorphic, PI-selected accessory mutations that appear to increase the replication of viruses with other PI-resistance mutations."
+        }
+    },
+    "A71L": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR71IL": "A71I/L are non-polymorphic, PI-selected accessory mutations that appear to increase the replication of viruses with other PI-resistance mutations."
+        }
+    },
+    "A71V": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR71TV": "A71V/T are polymorphic, PI-selected accessory mutations that increase the replication of viruses with other PI-resistance mutations."
+        }
+    },
+    "A71T": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR71TV": "A71V/T are polymorphic, PI-selected accessory mutations that increase the replication of viruses with other PI-resistance mutations."
+        }
+    },
+    "G73S": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR73EFHIKLMNPQRWYid": "G73S/T/C/A are common non-polymorphic accessory mutations selected primarily by most PIs. They are associated with minimally reduced susceptibility to each of the PIs. $listMutsIn{73(NOT ACDSTV)} is an unusual mutation at this position that has not been well studied.",
+            "PR73STCA": "G73S/T/C/A are common non-polymorphic accessory mutations selected primarily by most PIs. They are associated with minimally reduced susceptibility to each of the PIs."
+        }
+    },
+    "G73T": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR73EFHIKLMNPQRWYid": "G73S/T/C/A are common non-polymorphic accessory mutations selected primarily by most PIs. They are associated with minimally reduced susceptibility to each of the PIs. $listMutsIn{73(NOT ACDSTV)} is an unusual mutation at this position that has not been well studied.",
+            "PR73STCA": "G73S/T/C/A are common non-polymorphic accessory mutations selected primarily by most PIs. They are associated with minimally reduced susceptibility to each of the PIs."
+        }
+    },
+    "G73C": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR73EFHIKLMNPQRWYid": "G73S/T/C/A are common non-polymorphic accessory mutations selected primarily by most PIs. They are associated with minimally reduced susceptibility to each of the PIs. $listMutsIn{73(NOT ACDSTV)} is an unusual mutation at this position that has not been well studied.",
+            "PR73STCA": "G73S/T/C/A are common non-polymorphic accessory mutations selected primarily by most PIs. They are associated with minimally reduced susceptibility to each of the PIs."
+        }
+    },
+    "G73A": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR73EFHIKLMNPQRWYid": "G73S/T/C/A are common non-polymorphic accessory mutations selected primarily by most PIs. They are associated with minimally reduced susceptibility to each of the PIs. $listMutsIn{73(NOT ACDSTV)} is an unusual mutation at this position that has not been well studied.",
+            "PR73STCA": "G73S/T/C/A are common non-polymorphic accessory mutations selected primarily by most PIs. They are associated with minimally reduced susceptibility to each of the PIs."
+        }
+    },
+    "T74P": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR74P": "T74P is a nonpolymorphic PI-selected accessory mutation that occurs primarily in viruses from persons who have received multiple PIs. In combination with other mutations, It is associated with reduced susceptibility to ATV and DRV."
+        }
+    },
+    "T74S": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR74S": "T74S is a PI-selected accessory mutation that is polymorphic in most non-B subtypes."
+        }
+    },
+    "L76V": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR76ACDEFGHIKMNPQRSTWYid": "L76V is a non-polymorphic mutation selected by IDV, LPV and DRV and reduces susceptibility to LPV and DRV. $listMutsIn{76(NOT V)} is a highly unusual mutation at this position.",
+            "PR76V": "L76V is a non-polymorphic mutation selected by IDV, LPV and DRV and reduces susceptibility to LPV and DRV."
+        }
+    },
+    "V82A": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR82A": "V82A is a non-polymorphic mutation selected primarily by IDV and LPV. It is associated with reduced susceptibility to LPV and to a lesser extent ATV. It increases DRV susceptibility.",
+            "PR82DEGHKNPQRWYid": "V82A is a non-polymorphic mutation selected primarily by IDV and LPV. It is associated with reduced susceptibility to LPV and to a lesser extent ATV. It increases DRV susceptibility. V82T/S are nonpolymorphic mutations selected primarily by IDV and LPV. They are associated with reduced susceptibility to LPV and ATV, and increased susceptibility to DRV. V82F is a nonpolymorphic mutation selected primarily by IDV and LPV.  It reduces LPV and DRV susceptibility. V82C is an uncommon nonpolymorphic 2-base-pair PI-selected mutation that occurs in viruses with multiple PI-resistance mutations. Its effect on PI susceptibility has not been well studied. V82M is an uncommon nonpolymorphic PI-selected mutation. Its effect on currently used PIs is not well defined. $listMutsIn{82(NOT ATIFLMSC)} is a highly unusual mutation at this position."
+        }
+    },
+    "V82C": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR82C": "V82C is an uncommon nonpolymorphic 2-base-pair PI-selected mutation that occurs in viruses with multiple PI-resistance mutations. Its effect on PI susceptibility has not been well studied."
+        }
+    },
+    "V82F": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR82F": "V82F is a nonpolymorphic mutation selected primarily by IDV and LPV. It reduces LPV and DRV susceptibility."
+        }
+    },
+    "V82I": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR82I": "V82I is a highly polymorphic mutation that is not selected by PIs. It is the consensus amino acid in subtype G viruses."
+        }
+    },
+    "V82L": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR82L": "V82L is a rare nonpolymorphic mutation selected primarily by TPV. Its effect on other PIs is not well characterized."
+        }
+    },
+    "V82M": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR82M": "V82M is an uncommon nonpolymorphic PI-selected mutation. Its effect on currently used PIs is not well defined."
+        }
+    },
+    "V82T": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR82TS": "V82T/S are nonpolymorphic mutations selected primarily by IDV and LPV. They are associated with reduced susceptibility to LPV and ATV, and increased susceptibility to DRV."
+        }
+    },
+    "V82S": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR82TS": "V82T/S are nonpolymorphic mutations selected primarily by IDV and LPV. They are associated with reduced susceptibility to LPV and ATV, and increased susceptibility to DRV."
+        }
+    },
+    "N83D": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR83D": "N83D is a nonpolymorphic PI-selected accessory mutation which possibly contributes to reduced ATV susceptibility in combination with other PI-resistance mutations."
+        }
+    },
+    "I84A": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR84AC": "I84A/C are extremely rare non-polymorphic mutations selected primarily by SQV. I84A is associated with markedly reduced susceptibility to each of the PIs. I84C has a less-marked effect on PI susceptibility compared with I84A."
+        }
+    },
+    "I84C": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR84AC": "I84A/C are extremely rare non-polymorphic mutations selected primarily by SQV. I84A is associated with markedly reduced susceptibility to each of the PIs. I84C has a less-marked effect on PI susceptibility compared with I84A."
+        }
+    },
+    "I84V": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR84DEFGHKLMNPQRSTWYid": "I84V is a nonpolymorphic substrate-cleft mutation selected by each of the PIs. I84V reduces susceptibility to LPV, ATV, and DRV. I84A/C are extremely rare non-polymorphic mutations selected primarily by SQV. I84A is associated with markedly reduced susceptibility to each of the PIs. I84C has a less-marked effect on PI susceptibility compared with I84A. $listMutsIn{84(NOT ACV)} is a highly unusual mutation at this position.",
+            "PR84V": "I84V is a nonpolymorphic substrate-cleft mutation selected by each of the PIs. I84V reduces susceptibility to LPV, ATV, and DRV."
+        }
+    },
+    "I85V": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR85V": "I85V is a non-polymorphic PI-selected mutation. It has minimal, if any, effects on PI susceptibility."
+        }
+    },
+    "N88S": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR88ACEFHIKLMPQRVWYid": "N88S is a non-polymorphic mutation usually selected by NFV, ATV, and IDV. It confers high-level resistance to ATV and increases susceptibility to DRV. N88D is a nonpolymorphic mutation selected by NFV, usually in combination with D30N. It is associated with potential low-level cross-resistance to ATV. $listMutsIn{88(NOT DGST)} is a highly unusual mutation at this position.",
+            "PR88S": "N88S is a non-polymorphic mutation usually selected by NFV, ATV, and IDV. It confers high-level resistance to ATV and increases susceptibility to DRV."
+        }
+    },
+    "N88D": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR88D": "N88D is a nonpolymorphic mutation selected by NFV, usually in combination with D30N. It is associated with potential low-level cross-resistance to ATV."
+        }
+    },
+    "N88G": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR88TG": "N88G/T are extremely rare non-polymorphic PI-selected mutations that reduce susceptibility to ATV."
+        }
+    },
+    "N88T": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR88TG": "N88G/T are extremely rare non-polymorphic PI-selected mutations that reduce susceptibility to ATV."
+        }
+    },
+    "L89V": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR89VT": "L89V is a nonpolymorphic accessory mutation weakly selected by each of the PIs. It appears to be minimally associated with reduced PI susceptibility. L89T is an uncommon non-polymorphic PI-selected mutation selected primarily by ATV."
+        }
+    },
+    "L90M": {
+        "gene": "PR",
+        "drug_class": "PI",
+        "comments": {
+            "PR90ACDEFGHIKNPQRSTVWYid": "L90M is a non-polymorphic PI-selected mutation that reduces susceptibility to ATV and to a lesser extent LPV. $listMutsIn{90(NOT M)} is a highly unusual mutation at this position.",
+            "PR90M": "L90M is a non-polymorphic PI-selected mutation that reduces susceptibility to ATV and to a lesser extent LPV."
+        }
+    },
+    "NNRTI comments": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RPVIntermediate": "This virus is predicted to have intermediate-level reduced susceptibility to RPV. The use of the combination of CAB/RPV should be considered to be contraindicated.",
+            "RPVLow": "This virus is predicted to have low-level reduced susceptibility to RPV. The use of the combination of CAB/RPV should be considered to be relatively contraindicated."
+        }
+    },
+    "L100I": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT100ACDEFGHKMNPQRSTWYid": "L100I is a non-polymorphic mutation that usually occurs in combination with K103N. In this setting it confers high-level resistance to NVP, EFV, and RPV and intermediate resistance to ETR and DOR. L100V is a rare mutations that likely has effects similar to L100I. $listMutsIn{100(NOT IV)} is a highly unusual mutation at this position.",
+            "RT100I": "L100I is a non-polymorphic mutation that usually occurs in combination with K103N. In this setting it confers high-level resistance to NVP, EFV, and RPV and intermediate resistance to ETR and DOR.",
+            "RT100V": "L100I is a non-polymorphic mutation that usually occurs in combination with K103N. In this setting it confers high-level resistance to NVP, EFV, and RPV and intermediate resistance to ETR and DOR. L100V is a rare mutations that likely has effects similar to L100I."
+        }
+    },
+    "K101E": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT101CDFGILMSVWYid": "K101E is a non-polymorphic accessory mutation that confers intermediate resistance to NVP and RPV and low-level reductions in susceptibility to EFV, ETR, and DOR when it occurs with other NNRTI-resistance mutations. K101H is a non-polymorphic accessory mutation selected by NVP, EFV and ETR. K101P is a non-polymorphic mutation that confers high-level resistance to NVP, EFV, RPV, and ETR. Its does not appear to reduce DOR susceptibility. K101Q is a relatively non-polymorphic mutation that is weakly selected in persons receiving NVP and EFV. $listMutsIn{101(NOT AEHNPQRT)} is a highly unusual mutation at this position.",
+            "RT101E": "K101E is a non-polymorphic accessory mutation that confers intermediate resistance to NVP and RPV and low-level reductions in susceptibility to EFV, ETR, and DOR when it occurs with other NNRTI-resistance mutations."
+        }
+    },
+    "K101H": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT101H": "K101H is a non-polymorphic accessory mutation selected by NVP, EFV and ETR. When present with other NNRTI-resistance mutations, it contributes reduces susceptibility to these NNRTIs."
+        }
+    },
+    "K101N": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT101NAT": "K101N/A/T are uncommon non-polymorphic NNRTI-selected mutation of uncertain phenotypic and clinical significance."
+        }
+    },
+    "K101A": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT101NAT": "K101N/A/T are uncommon non-polymorphic NNRTI-selected mutation of uncertain phenotypic and clinical significance."
+        }
+    },
+    "K101T": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT101NAT": "K101N/A/T are uncommon non-polymorphic NNRTI-selected mutation of uncertain phenotypic and clinical significance."
+        }
+    },
+    "K101P": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT101P": "K101P is a non-polymorphic mutation that confers high-level resistance to NVP, EFV, RPV, and ETR. Its does not appear to reduce DOR susceptibility."
+        }
+    },
+    "K101Q": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT101Q": "K101Q is a relatively non-polymorphic mutation that is weakly selected in persons receiving NVP and EFV. It is of uncertain phenotypic and clinical significance."
+        }
+    },
+    "K103N": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT103ACDFGILMPVWYid": "K103N is a non-polymorphic mutation that confers high-level reductions in NVP and EFV susceptibility. It is the most commonly transmitted DRM. K103S is a non-polymorphic mutation that causes high-level reductions in NVP susceptibility but intermediate reductions in EFV susceptibility. K103H is a rare non-polymorphic mutation that confers high-level resistance to NVP and EFV. K103E/Q are rare mutations that have not been associated with reduced NNRTI susceptibility. $listMutsIn{103(NOT EHNQRST)} is a highly unusual mutation at this position.",
+            "RT103N": "K103N is a non-polymorphic mutation that confers high-level reductions in NVP and EFV susceptibility. It is the most commonly transmitted DRM."
+        }
+    },
+    "K103E": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT103EQ": "K103E/Q are rare mutations that have not been associated with reduced NNRTI susceptibility."
+        }
+    },
+    "K103Q": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT103EQ": "K103E/Q are rare mutations that have not been associated with reduced NNRTI susceptibility."
+        }
+    },
+    "K103H": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT103H": "K103H is a rare non-polymorphic mutation that confers high-level resistance to NVP and EFV."
+        }
+    },
+    "K103R": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT103R": "K103R is a polymorphic mutation that alone has no effect on NNRTI susceptibility. However, in combination with V179D, it reduces NVP and EFV susceptibility about 15-fold."
+        }
+    },
+    "K103S": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT103S": "K103S is a non-polymorphic mutation that causes high-level reductions in NVP susceptibility but intermediate reductions in EFV susceptibility. Because K103S is a 2-bp change from the wildtype K and a 1-bp change from K103N, persons with K103S may be likely to have once had K103N."
+        }
+    },
+    "K103T": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT103T": "K103T is an extremely rare non-polymorphic mutation that appears to confer intermediate/high-level resistance to NVP but it has little if any effect on EFV susceptibility."
+        }
+    },
+    "V106A": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT106A": "V106A is a non-polymorphic mutation that confers high-level resistance to NVP and DOR, and intermediate resistance to EFV. It is commonly selected in vitro and in vivo by DOR.",
+            "RT106CDEFGHKNPQRSTWYid": "V106A is a non-polymorphic mutation that confers high-level resistance to NVP and DOR, and intermediate resistance to EFV. V106M is a non-polymorphic mutation that confers high-level resistance to NVP and EFV. V106L is a non-polymorphic mutation occasionally selected by NNRTIs. V106I occurs in 1% to 2% of viruses from untreated persons. $listMutsIn{106(NOT AIML)} is a highly unusual mutation at this position."
+        }
+    },
+    "V106I": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT106I": "V106I occurs in 1% to 2% of viruses from untreated persons. It contributes to reduced NNRTI susceptibility only in combination with other NNRTI-resistance mutations. It is commonly selected in persons receiving DOR in combination with mutations at position 227."
+        }
+    },
+    "V106M": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT106M": "V106M is a non-polymorphic mutation that confers high-level resistance to NVP and EFV. It is selected in vitro and in vivo by DOR and preliminary data suggests it reduces DOR susceptibility about 3-fold."
+        }
+    },
+    "V106L": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT106L": "V106L is a non-polymorphic mutation occasionally selected by NNRTIs. It was reported in an isolate from one of the patients with VF on a DOR-containing regimen that had an approximately 15-fold reduced DOR susceptibility. Additional confirmatory phenotypic data are required."
+        }
+    },
+    "V108I": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT108ACDEFGHKLMNPQRSTWYid": "V108I is a relatively non-polymorphic accessory mutation selected in vitro and/or in vivo with each of the NNRTIs. It appears to contribute to reduced susceptibility to most NNRTIs only in combination with other NNRTI-resistance mutations. $listMutsIn{108(NOT I)} is a highly unusual mutation at this position.",
+            "RT108I": "V108I is a relatively non-polymorphic accessory mutation selected in vitro and/or in vivo with each of the NNRTIs. It appears to contribute to reduced susceptibility to most NNRTIs only in combination with other NNRTI-resistance mutations."
+        }
+    },
+    "Y115F": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT115ACDEGHIKLMNPQRSTVWid": "Y115F causes intermediate resistance to ABC and low-level resistance to TDF. $listMutsIn{115(NOT F)} is a highly unusual mutation at this position.",
+            "RT115F": "Y115F causes intermediate resistance to ABC and low-level resistance to TDF."
+        }
+    },
+    "F116Y": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT116ACDEGHIKLMNPQRSTVWid": "F116Y usually occurs in combination with the multi-NRTI resistance mutation Q151M. When it occurs alone, its clinical significance is unknown. $listMutsIn{116(NOT Y)} is a highly unusual mutation at this position.",
+            "RT116Y": "F116Y usually occurs in combination with the multi-NRTI resistance mutation Q151M. When it occurs alone, its clinical significance is unknown."
+        }
+    },
+    "V118I": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT118I": "V118I is a polymorphic accessory NRTI-resistance mutation that often occurs in combination with multiple TAMs."
+        }
+    },
+    "I132M": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT132ML": "I132M is an extremely rare non-polymorphic mutation associated with uncertain amount of reduced NVP and EFV susceptibility. I132L is a more common, non-polymorphic NNRTI-selected mutation that has not been well studied."
+        }
+    },
+    "E138Q": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT138QG": "E138Q/G are non-polymorphic accessory mutations selected by ETR occasionally NVP and EFV. They cause low-level reductions in susceptibility to NVP, RPV, and ETR."
+        }
+    },
+    "E138G": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT138QG": "E138Q/G are non-polymorphic accessory mutations selected by ETR occasionally NVP and EFV. They cause low-level reductions in susceptibility to NVP, RPV, and ETR."
+        }
+    },
+    "E138R": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT138R": "E138R is an extremely rare non-polymorphic accessory mutation selected in vitro by RPV. Its effect on NNRTI susceptibility has not been well studied."
+        }
+    },
+    "Q151M": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT151ACDEFGHIKNPRSTVWYid": "Q151M causes intermediate/high-level resistance to AZT and ABC, and low-level resistance to TDF, 3TC and FTC. In combination with two or more accessory mutations at positions 62, 75, 77, and 116, it confers high-level resistance to AZT and ABC and intermediate resistance to TDF, 3TC and FTC. Q151L is an extremely rare transitional mutation that may precede the emergence of the Q151M. $listMutsIn{151(NOT ML)} is a highly unusual mutation at this position.",
+            "RT151L": "Q151M causes intermediate/high-level resistance to AZT and ABC, and low-level resistance to TDF, 3TC and FTC. In combination with two or more accessory mutations at positions 62, 75, 77, and 116, it confers high-level resistance to AZT and ABC and intermediate resistance to TDF, 3TC and FTC. Q151L is an extremely rare transitional mutation that may precede the emergence of the Q151M.",
+            "RT151M": "Q151M causes intermediate/high-level resistance to AZT and ABC, and low-level resistance to TDF, 3TC and FTC. In combination with two or more accessory mutations at positions 62, 75, 77, and 116, it confers high-level resistance to AZT and ABC and intermediate resistance to TDF, 3TC and FTC."
+        }
+    },
+    "V179D": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT179ACGHKMNPQRSWYid": "V179D/E are somewhat polymorphic accessory NNRTI-selected mutation. V179F is a non-polymorphic mutation selected in combination with Y181C in persons receiving ETR. V179T is a rare non-polymorphic mutation occasionally selected in persons receiving NNRTIs. V179L is a rare non-polymorphic mutation listed as a RPV-associated resistance mutation by the FDA package insert. $listMutsIn{179(NOT DEFILT)} is an unusual mutation at this position.",
+            "RT179DE": "V179D/E are somewhat polymorphic accessory NNRTI-selected mutation. In combination with other NNRTI DRMs, they appear to contribute low-levels of reduced susceptibility to each of the NNRTIs. In particular, the combinations of K103R/V179D and V106I/V179D act synergistically to reduce NVP and EFV susceptibility."
+        }
+    },
+    "V179E": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT179ACGHKMNPQRSWYid": "V179D/E are somewhat polymorphic accessory NNRTI-selected mutation. V179F is a non-polymorphic mutation selected in combination with Y181C in persons receiving ETR. V179T is a rare non-polymorphic mutation occasionally selected in persons receiving NNRTIs. V179L is a rare non-polymorphic mutation listed as a RPV-associated resistance mutation by the FDA package insert. $listMutsIn{179(NOT DEFILT)} is an unusual mutation at this position.",
+            "RT179DE": "V179D/E are somewhat polymorphic accessory NNRTI-selected mutation. In combination with other NNRTI DRMs, they appear to contribute low-levels of reduced susceptibility to each of the NNRTIs. In particular, the combinations of K103R/V179D and V106I/V179D act synergistically to reduce NVP and EFV susceptibility."
+        }
+    },
+    "V179F": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT179F": "V179F is a non-polymorphic mutation selected in combination with Y181C in persons receiving ETR. Alone it has little effect on NNRTI susceptibility, however in combination with Y181C it is associated with high-level reductions in ETR and RPV susceptibility."
+        }
+    },
+    "V179I": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT179I": "V179I is a polymorphic mutation that is frequently selected in persons receiving ETR and RPV. However, it has little, if any, direct effect on NNRTI susceptibility."
+        }
+    },
+    "V179L": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT179L": "V179L is a rare non-polymorphic mutation listed as a RPV-associated resistance mutation by the FDA package insert. Its effects on NNRTI susceptibility have not been well studied."
+        }
+    },
+    "V179T": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT179T": "V179T is a rare non-polymorphic mutation occasionally selected in persons receiving NNRTIs. It is associated with minimal, if any, reduction in ETR and RPV susceptibility."
+        }
+    },
+    "Y181C": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT181ADEHKLMNPQRTWid": "Y181C is a non-polymorphic mutation selected in persons receiving NVP, ETR and RPV. It confers high-level resistance to NVP, intermediate resistance to ETR and RPV, and low-level resistance to EFV. Y181I/V are 2-base pair non-polymorphic mutations selected by NVP and ETR. $listMutsIn{181(NOT CIVFSG)} is a highly unusual mutation at this position.",
+            "RT181C": "Y181C is a non-polymorphic mutation selected in persons receiving NVP, ETR and RPV. It confers high-level resistance to NVP, intermediate resistance to ETR and RPV, and low-level resistance to EFV. Alone, it does not significantly reduce DOR susceptibility."
+        }
+    },
+    "Y181F": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT181FSG": "Y181F/S/G are rare non-polymorphic NNRTI-associated mutations that are usually present as part of an electrophoretic mixture. They are likely to represent transitional mutations between Y and I or V."
+        }
+    },
+    "Y181S": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT181FSG": "Y181F/S/G are rare non-polymorphic NNRTI-associated mutations that are usually present as part of an electrophoretic mixture. They are likely to represent transitional mutations between Y and I or V."
+        }
+    },
+    "Y181G": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT181FSG": "Y181F/S/G are rare non-polymorphic NNRTI-associated mutations that are usually present as part of an electrophoretic mixture. They are likely to represent transitional mutations between Y and I or V."
+        }
+    },
+    "Y181I": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT181IV": "Y181I/V are 2-base pair non-polymorphic mutations selected by NVP and ETR. They cause high-level resistance to NVP, ETR, and RPV but not EFV. Their effects on DOR have not been well-characterized."
+        }
+    },
+    "Y181V": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT181IV": "Y181I/V are 2-base pair non-polymorphic mutations selected by NVP and ETR. They cause high-level resistance to NVP, ETR, and RPV but not EFV. Their effects on DOR have not been well-characterized."
+        }
+    },
+    "M184V": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT184ACDEFGHKLNPQRSTWYid": "M184V/I cause high-level in vitro resistance to 3TC and FTC and low/intermediate resistance to ABC (3-fold reduced susceptibility). M184V/I are not contraindications to continued treatment with 3TC or FTC because they increase susceptibility to AZT and TDF and are associated with clinically significant reductions in HIV-1 replication. $listMutsIn{184(NOT VI)} is a highly unusual mutation at this position.",
+            "RT184VI": "M184V/I cause high-level in vitro resistance to 3TC and FTC and low/intermediate resistance to ABC (3-fold reduced susceptibility). M184V/I are not contraindications to continued treatment with 3TC or FTC because they increase susceptibility to AZT and TDF and are associated with clinically significant reductions in HIV-1 replication."
+        }
+    },
+    "M184I": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT184ACDEFGHKLNPQRSTWYid": "M184V/I cause high-level in vitro resistance to 3TC and FTC and low/intermediate resistance to ABC (3-fold reduced susceptibility). M184V/I are not contraindications to continued treatment with 3TC or FTC because they increase susceptibility to AZT and TDF and are associated with clinically significant reductions in HIV-1 replication. $listMutsIn{184(NOT VI)} is a highly unusual mutation at this position.",
+            "RT184VI": "M184V/I cause high-level in vitro resistance to 3TC and FTC and low/intermediate resistance to ABC (3-fold reduced susceptibility). M184V/I are not contraindications to continued treatment with 3TC or FTC because they increase susceptibility to AZT and TDF and are associated with clinically significant reductions in HIV-1 replication."
+        }
+    },
+    "Y188L": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT188ADEGIKMNPQRSTVWid": "Y188L is a non-polymorphic mutation that confers high-level resistance to NVP, EFV, RPV, and DOR, and potentially low-level resistance to ETR. Y188H is a non-polymorphic mutation selected in persons receiving NVP and EFV. Y188C is a non-polymorphic mutation selected in persons receiving NVP and EFV. Y188F is a rare non-polymorphic NNRTI-associated mutation that is usually present as part of an electrophoretic mixture. $listMutsIn{188(NOT CFHL)} is a highly unusual mutation at this position.",
+            "RT188L": "Y188L is a non-polymorphic mutation that confers high-level resistance to NVP, EFV, RPV, and DOR, and potentially low-level resistance to ETR."
+        }
+    },
+    "Y188C": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT188C": "Y188C is a non-polymorphic mutation selected in persons receiving NVP and EFV. It confers high-level resistance to NVP and variable levels of reduced susceptibility to EFV. It appears to cause little if any reduction in susceptibility to RPV, ETR, or DOR."
+        }
+    },
+    "Y188F": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT188F": "Y188F is a rare non-polymorphic NNRTI-associated mutation that is usually present as part of an electrophoretic mixture. It appears to represent a transitional mutation between Y and L."
+        }
+    },
+    "Y188H": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT188H": "Y188H is a non-polymorphic mutation selected in persons receiving NVP and EFV. It causes about 5 to 10-fold reduced susceptibility to NVP and EFV. It appears to cause little if any reduction in susceptibility to RPV, ETR, or DOR."
+        }
+    },
+    "G190A": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT190A": "G190A is a non-polymorphic mutation that causes high-level resistance to NVP and intermediate resistance to EFV. It does not significantly reduce susceptibility to RPV, ETR, or DOR.",
+            "RT190DFHIKLMNPWYid": "G190A is a non-polymorphic mutation that causes high-level resistance to NVP and intermediate resistance to EFV. G190S is a non-polymorphic mutation that confers high-level resistance to NVP and EFV. It may also be associated low-levels reductions in DOR susceptibility. G190E is an uncommon non-polymorphic mutation associated with reduced replication capacity that confers intermediate to high-level resistance to each of the NNRTIs. G190Q is a rare NNRTI-selected mutation that confers high-level NVP and EFV resistance. G190C/T/V are rare non-polymorphic mutations that confer high-level resistance to NVP and EFV. $listMutsIn{190(NOT ACEQRSTV)} is a highly unusual mutation at this position."
+        }
+    },
+    "G190C": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT190CTV": "G190C/T/V are rare non-polymorphic mutations that confer high-level resistance to NVP and EFV. Their effects on ETR, RPV, and DOR susceptibility are not known."
+        }
+    },
+    "G190T": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT190CTV": "G190C/T/V are rare non-polymorphic mutations that confer high-level resistance to NVP and EFV. Their effects on ETR, RPV, and DOR susceptibility are not known."
+        }
+    },
+    "G190V": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT190CTV": "G190C/T/V are rare non-polymorphic mutations that confer high-level resistance to NVP and EFV. Their effects on ETR, RPV, and DOR susceptibility are not known."
+        }
+    },
+    "G190E": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT190EQ": "G190E is an uncommon non-polymorphic mutation associated with reduced replication capacity that confers intermediate to high-level resistance to each of the NNRTIs. G190Q is a rare NNRTI-selected mutation that confers high-level NVP and EFV resistance. Its effects on RPV, ETR, and DOR susceptibility is not known."
+        }
+    },
+    "G190S": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT190S": "G190S is a non-polymorphic mutation that confers high-level resistance to NVP and EFV. It may also be associated low-levels reductions in DOR susceptibility. It does not appear to be selected by ETR or RPV or to reduce their in vitro susceptibility."
+        }
+    },
+    "L210W": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT210W": "L210W is a TAM that usually occurs in combination with M41L and T215Y. The combination of M41, L210W and T215Y causes high-level resistance to AZT and intermediate resistance to ABC and TDF."
+        }
+    },
+    "T215Y": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT215GHKMPQRWid": "T215Y/F are TAMs that causes intermediate/high-level resistance to AZT and potentially low-level resistance to ABC and TDF. T215S/C/D/E/I/V/N/A/L do not reduce NRTI susceptibility but arise from viruses that once contained T215Y/F. The presence of one of these revertant mutations suggests that the patient may have once been infected with a virus containing T215Y/F. $listMutsIn{215(NOT YFSCDEIVALN)} is a highly unusual mutation at this position.",
+            "RT215SCDEIVALN": "T215Y/F are TAMs that causes intermediate/high-level resistance to AZT and potentially low-level resistance to ABC and TDF. T215S/C/D/E/I/V/N/A/L do not reduce NRTI susceptibility but arise from viruses that once contained T215Y/F. The presence of one of these revertant mutations suggests that the patient may have once been infected with a virus containing T215Y/F.",
+            "RT215YF": "T215Y/F are TAMs that causes intermediate/high-level resistance to AZT and potentially low-level resistance to ABC and TDF."
+        }
+    },
+    "T215F": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT215GHKMPQRWid": "T215Y/F are TAMs that causes intermediate/high-level resistance to AZT and potentially low-level resistance to ABC and TDF. T215S/C/D/E/I/V/N/A/L do not reduce NRTI susceptibility but arise from viruses that once contained T215Y/F. The presence of one of these revertant mutations suggests that the patient may have once been infected with a virus containing T215Y/F. $listMutsIn{215(NOT YFSCDEIVALN)} is a highly unusual mutation at this position.",
+            "RT215SCDEIVALN": "T215Y/F are TAMs that causes intermediate/high-level resistance to AZT and potentially low-level resistance to ABC and TDF. T215S/C/D/E/I/V/N/A/L do not reduce NRTI susceptibility but arise from viruses that once contained T215Y/F. The presence of one of these revertant mutations suggests that the patient may have once been infected with a virus containing T215Y/F.",
+            "RT215YF": "T215Y/F are TAMs that causes intermediate/high-level resistance to AZT and potentially low-level resistance to ABC and TDF."
+        }
+    },
+    "K219E": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT219ACDFGHILMPSTVYid": "K219E/Q/N/R are accessory TAMS that usually occur in combination with multiple other TAMs. K219W is an uncommon NRTI-selected mutation. $listMutsIn{219(NOT QENRW)} is an unusual mutation at this position.",
+            "RT219EQNR": "K219E/Q/N/R are accessory TAMS that usually occur in combination with multiple other TAMs.",
+            "RT219W": "K219E/Q/N/R are accessory TAMS that usually occur in combination with multiple other TAMs. K219W is an uncommon NRTI-selected mutation."
+        }
+    },
+    "K219Q": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT219ACDFGHILMPSTVYid": "K219E/Q/N/R are accessory TAMS that usually occur in combination with multiple other TAMs. K219W is an uncommon NRTI-selected mutation. $listMutsIn{219(NOT QENRW)} is an unusual mutation at this position.",
+            "RT219EQNR": "K219E/Q/N/R are accessory TAMS that usually occur in combination with multiple other TAMs.",
+            "RT219W": "K219E/Q/N/R are accessory TAMS that usually occur in combination with multiple other TAMs. K219W is an uncommon NRTI-selected mutation."
+        }
+    },
+    "K219N": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT219ACDFGHILMPSTVYid": "K219E/Q/N/R are accessory TAMS that usually occur in combination with multiple other TAMs. K219W is an uncommon NRTI-selected mutation. $listMutsIn{219(NOT QENRW)} is an unusual mutation at this position.",
+            "RT219EQNR": "K219E/Q/N/R are accessory TAMS that usually occur in combination with multiple other TAMs.",
+            "RT219W": "K219E/Q/N/R are accessory TAMS that usually occur in combination with multiple other TAMs. K219W is an uncommon NRTI-selected mutation."
+        }
+    },
+    "K219R": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT219ACDFGHILMPSTVYid": "K219E/Q/N/R are accessory TAMS that usually occur in combination with multiple other TAMs. K219W is an uncommon NRTI-selected mutation. $listMutsIn{219(NOT QENRW)} is an unusual mutation at this position.",
+            "RT219EQNR": "K219E/Q/N/R are accessory TAMS that usually occur in combination with multiple other TAMs.",
+            "RT219W": "K219E/Q/N/R are accessory TAMS that usually occur in combination with multiple other TAMs. K219W is an uncommon NRTI-selected mutation."
+        }
+    },
+    "H221Y": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT221Y": "H221Y is a non-polymorphic accessory mutation selected primarily by NVP, RPV, and DOR. It frequently occurs in combination with Y181C."
+        }
+    },
+    "P225H": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT225ACDEFGIKLMNQRSTVWYid": "P225H is a non-polymorphic EFV-selected mutation that usually occurs in combination with K103N. The combination of P225H and K103N synergistically reduces NVP, EFV and DOR susceptibility. $listMutsIn{225(NOT H)} is a highly unusual mutation at this position.",
+            "RT225H": "P225H is a non-polymorphic EFV-selected mutation that usually occurs in combination with K103N. The combination of P225H and K103N synergistically reduces NVP, EFV and DOR susceptibility."
+        }
+    },
+    "F227C": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT227ADEGHKMNPQRSTWYid": "F227C is a nonpolymorphic mutation selected in persons receiving DOR and rarely in persons receiving ETR and RPV. F227L is a non-polymorphic mutation that usually occurs in combination with V106A. F227I/V are extremely rare mutations that have been selected in vitro by DOR. $listMutsIn{227(NOT CILV)} is a highly unusual mutation at this position.",
+            "RT227C": "F227C is a nonpolymorphic mutation selected in persons receiving DOR and rarely in persons receiving ETR and RPV. It usually occurs in combination with other DRMs and in this setting has consistently been associated with the highest possible levels of DOR resistance. It is also usually associated with intermediate or high-level reductions in susceptibility to NVP, EFV, ETR, and RPV."
+        }
+    },
+    "F227L": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT227ILV": "F227L is a non-polymorphic mutation that usually occurs in combination with V106A. It is selected in vivo and in vitro with both NVP and DOR. In this context it is associated with high-level reductions in NVP and DOR susceptibility and intermediate reductions in EFV susceptibility. F227I/V are extremely rare mutations that have been selected in vitro by DOR."
+        }
+    },
+    "M230L": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT230ACDEFGHKNPQRSTVWYid": "M230L is an uncommon non-polymorphic mutation selected in persons receiving EFV, NVP, and RPV. It causes intermediate to high-level resistance to each of the NNRTIs. M230I is a rare mutation selected by RPV. $listMutsIn{230(NOT IL)} is a highly unusual mutation at this position.",
+            "RT230L": "M230L is an uncommon non-polymorphic mutation selected in persons receiving EFV, NVP, and RPV. It causes intermediate to high-level resistance to each of the NNRTIs."
+        }
+    },
+    "M230I": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT230I": "M230I is a rare mutation selected by RPV. Its effects on NNRTI susceptibility have not been well studied. It also often occurs as a result of APOBEC-mediated G-to-A hypermutation resulting in viruses that are likely to be noninfectious."
+        }
+    },
+    "L234I": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT234ACDEFGHKMNPQRSTWYid": "L234I is a nonpolymorphic mutation selected in persons receiving NVP and EFV. It is also selected in vitro by ETR and DOR. In combination with V106A, it is associated with high-level DOR resistance. Its effect on susceptibility when it occurs alone has not been well characterized. $listMutsIn{234(NOT I)} is a highly unusual mutation at this position.",
+            "RT234I": "L234I is a nonpolymorphic mutation selected in persons receiving NVP and EFV. It is also selected in vitro by ETR and DOR. In combination with V106A, it is associated with high-level DOR resistance. Its effect on susceptibility when it occurs alone has not been well characterized."
+        }
+    },
+    "P236L": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT236ACDEFGHIKMNQRSTVWYid": "P236L is a rare mutation selected commonly by DLV, which appears to have little if any effect on current NNRTIs. $listMutsIn{236(NOT L)} is a highly unusual mutation at this position.",
+            "RT236L": "P236L is a rare mutation selected commonly by DLV, which appears to have little if any effect on current NNRTIs."
+        }
+    },
+    "K238T": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT238ACDEFGHILMPQSVWYid": "K238T/N are uncommon non-polymorphic mutations selected in persons receiving NVP and EFV usually in combination with K103N. Alone, K238T/N appear to have minimal effects on NNRTI susceptibility. $listMutsIn{238(NOT NRT)} is a highly unusual mutation at this position.",
+            "RT238TN": "K238T/N are uncommon non-polymorphic mutations selected in persons receiving NVP and EFV usually in combination with K103N. Alone, K238T/N appear to have minimal effects on NNRTI susceptibility."
+        }
+    },
+    "K238N": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT238ACDEFGHILMPQSVWYid": "K238T/N are uncommon non-polymorphic mutations selected in persons receiving NVP and EFV usually in combination with K103N. Alone, K238T/N appear to have minimal effects on NNRTI susceptibility. $listMutsIn{238(NOT NRT)} is a highly unusual mutation at this position.",
+            "RT238TN": "K238T/N are uncommon non-polymorphic mutations selected in persons receiving NVP and EFV usually in combination with K103N. Alone, K238T/N appear to have minimal effects on NNRTI susceptibility."
+        }
+    },
+    "Y318F": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT318ACDEGHIKLMNPQRSTVWid": "Y318F is a nonpolymorphic mutation that occurred in 2 of 10 persons with VF and HIVDR while receiving DOR. It confers about 11-fold reduced susceptibility to DOR but otherwise has minimal if any effect on NVP, EFV, and ETR. $listMutsIn{318(NOT F)} is a highly unusual mutation at this position.",
+            "RT318F": "Y318F is a nonpolymorphic mutation that occurred in 2 of 10 persons with VF and HIVDR while receiving DOR. It confers about 11-fold reduced susceptibility to DOR but otherwise has minimal if any effect on NVP, EFV, and ETR."
+        }
+    },
+    "N348I": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT348ACDEFGHKLMPQRSTVWYid": "N348I is a non-polymorphic accessory mutation selected by NVP and EFV and the NRTIs AZT and D4T. Alone it reduces AZT and NVP susceptibility by about 3-fold and EFV susceptibility by 2-fold. $listMutsIn{348(NOT I)} is an unusual mutation at this position.",
+            "RT348I": "N348I is a non-polymorphic accessory mutation selected by NVP and EFV and the NRTIs AZT and D4T. Alone it reduces AZT and NVP susceptibility by about 3-fold and EFV susceptibility by 2-fold."
+        }
+    },
+    "E40F": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT40F": "E40F is a non-polymorphic accessory mutation selected by AZT and d4T. It usually occurs in combination with M41L, L210W and T215Y. In this context it is associated with reduced susceptibility to each of the NRTIs."
+        }
+    },
+    "M41L": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT41L": "M41L is a TAM that usually occurs with T215Y. In combination, M41L plus T215Y confer intermediate / high-level resistance to AZT and d4T and contribute to reduced ddI, ABC and TDF susceptibility."
+        }
+    },
+    "E44D": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT44AD": "E44D is a relatively non-polymorphic accessory mutation; E44A is a nonpolymorphic accessory mutation. Each usually occurs with multiple TAMs."
+        }
+    },
+    "A62V": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT62V": "A62V is an accessory mutation that often occurs in combination with the multi-NRTI resistance mutations K65R or Q151M. A62V is widespread in subtype A viruses in former Soviet Union countries but A62 is otherwise non-polymorphic."
+        }
+    },
+    "K65R": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT65ACDFGHILMPQSTVWYid": "K65R confers intermediate reductions in susceptibility to TDF, ABC, and 3TC/FTC. It increases AZT susceptibility. K65N appears to have reduced replication compared with K65R. K65E is an extremely rare NRTI-selected mutation with markedly reduced replication fitness. Its effect on NRTI susceptibility is uncertain. $listMutsIn{65(NOT NRE)} is a highly unusual mutation at this position.",
+            "RT65E": "K65R confers intermediate reductions in susceptibility to TDF, ABC, and 3TC/FTC. It increases AZT susceptibility. K65E is an extremely rare NRTI-selected mutation with markedly reduced replication fitness. Its effect on NRTI susceptibility is uncertain.",
+            "RT65N": "K65R confers intermediate reductions in susceptibility to TDF, ABC, and 3TC/FTC. It increases AZT susceptibility. K65N appears to have reduced replication compared with K65R.",
+            "RT65R": "K65R confers intermediate reductions in susceptibility to TDF, ABC, and 3TC/FTC. Other than M184VI, it is the most common DRM emerging in patients receiving TDF/XTC. K65R increases AZT susceptibility. In NRTI-experienced, INSTI-naive patients with K65R, TDF/3TC/DTG is usually highly effective and more effective than AZT/3TC/DTG. However, in patients receiving TDF/3TC/DTG, there is a risk of emergent DTG resistance that does not arise in NRTI-naive patients receiving TDF/3TC/DTG."
+        }
+    },
+    "NRTI comments": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT67-70d": "Amino acid deletions between codons 67 and 70 are rare and usually occur in combination with multiple TAMs, K65R, or the Q151M mutation complex. Deletions at position 67 are more often associated with multiple TAMs. Deletions at positions 69 and 70 are more often associated with K65R or the Q151M mutation complex. Deletions at codon 68 are extremely rare and less well characterized.",
+            "RT69i": "Amino acid insertions between codons 67 and 70 are by convention assigned to codon 69. Together with TAMs, they are associated with high-level resistance to AZT, ABC and TDF, and intermediate to 3TC and FTC."
+        }
+    },
+    "D67N": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT67ACFIKLMPQRVWYi": "D67N is a non-polymorphic TAM associated with low-level resistance to AZT. D67G/E/S/T/H are non-polymorphic NRTI-selected mutations that generally occur in viruses with multiple TAMs. $listMutsIn{67(NOT NGESTHd)} is a highly unusual mutation at this position.",
+            "RT67GESTH": "D67N is a non-polymorphic TAM associated with low-level resistance to AZT. D67G/E/S/T/H are non-polymorphic NRTI-selected mutations that generally occur in viruses with multiple TAMs.",
+            "RT67N": "D67N is a non-polymorphic TAM associated with low-level resistance to AZT."
+        }
+    },
+    "S68G": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT68G": "S68G is a polymorphic mutation that is often selected in combination with K65R. It partially restores the replication defect associated with K65R."
+        }
+    },
+    "S68D": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT68DNR": "S68DNR are nonpolymorphic mutations that are selected by TDF. They appear to increase viral fitness and/or further reduce TDF susceptibility when they occur in combination with K65R."
+        }
+    },
+    "S68N": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT68DNR": "S68DNR are nonpolymorphic mutations that are selected by TDF. They appear to increase viral fitness and/or further reduce TDF susceptibility when they occur in combination with K65R."
+        }
+    },
+    "S68R": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT68DNR": "S68DNR are nonpolymorphic mutations that are selected by TDF. They appear to increase viral fitness and/or further reduce TDF susceptibility when they occur in combination with K65R."
+        }
+    },
+    "T69D": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT69CFHKLMPQRVWY": "T69D is a nonpolymorphic mutation selected by early NRTIs that does not appear to reduce AZT, ABC, or TDF susceptibility. T69G is a rare non-polymorphic mutation that usually occurs in viruses with a deletion at codon 67 and multiple other NRTI-resistance mutations. T69N/S/A/I/E are relatively non-polymorphic mutations weakly selected in persons receiving NRTIs. They may minimally contribute reduced AZT susceptibility. $listMutsIn{69(NOT DNGSAIEid)} is a highly unusual mutation at this position.",
+            "RT69D": "T69D is a nonpolymorphic mutation selected by early NRTIs that does not appear to reduce AZT, ABC, or TDF susceptibility."
+        }
+    },
+    "T69G": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT69G": "T69G is a rare non-polymorphic mutation that usually occurs in viruses with a deletion at codon 67 and multiple other NRTI-resistance mutations."
+        }
+    },
+    "T69N": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT69NSAIE": "T69N/S/A/I/E are relatively non-polymorphic mutations weakly selected in persons receiving NRTIs. They may minimally contribute reduced AZT susceptibility."
+        }
+    },
+    "T69S": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT69NSAIE": "T69N/S/A/I/E are relatively non-polymorphic mutations weakly selected in persons receiving NRTIs. They may minimally contribute reduced AZT susceptibility."
+        }
+    },
+    "T69A": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT69NSAIE": "T69N/S/A/I/E are relatively non-polymorphic mutations weakly selected in persons receiving NRTIs. They may minimally contribute reduced AZT susceptibility."
+        }
+    },
+    "T69I": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT69NSAIE": "T69N/S/A/I/E are relatively non-polymorphic mutations weakly selected in persons receiving NRTIs. They may minimally contribute reduced AZT susceptibility."
+        }
+    },
+    "T69E": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT69NSAIE": "T69N/S/A/I/E are relatively non-polymorphic mutations weakly selected in persons receiving NRTIs. They may minimally contribute reduced AZT susceptibility."
+        }
+    },
+    "K70": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT70EGQNST": "K70/E/Q/N/T/S/G cause low-leve resistance to ABC and TDF."
+        }
+    },
+    "K70E": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT70EGQNST": "K70/E/Q/N/T/S/G cause low-leve resistance to ABC and TDF."
+        }
+    },
+    "K70Q": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT70EGQNST": "K70/E/Q/N/T/S/G cause low-leve resistance to ABC and TDF."
+        }
+    },
+    "K70T": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT70EGQNST": "K70/E/Q/N/T/S/G cause low-leve resistance to ABC and TDF."
+        }
+    },
+    "K70G": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT70EGQNST": "K70/E/Q/N/T/S/G cause low-leve resistance to ABC and TDF."
+        }
+    },
+    "L74V": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT74ACDEFGHKMNPQRSTWYid": "L74V causes intermediate ABC resistance. L74I causes low-level ABC resistance. $listMutsIn{74(NOT VI)} is a highly unusual mutation at this position.",
+            "RT74VI": "L74V causes intermediate ABC resistance. L74I causes low-level ABC resistance."
+        }
+    },
+    "V75I": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT75CDEFGHKNPQRWYid": "V75I is a relatively non-polymorphic accessory mutation that often occurs in combination with the multi-NRTI resistance mutation Q151M. When it occurs alone, its clinical significance is uncertain. V75T/M/A/S are nonpolymorphic accessory NRTI-selected mutations. They appear to have minimal phenotypic effects on AZT, ABC, and TDF. $listMutsIn{75(NOT MTISAL)} is a highly unusual mutation at this position.",
+            "RT75I": "V75I is a relatively non-polymorphic accessory mutation that often occurs in combination with the multi-NRTI resistance mutation Q151M. When it occurs alone, its clinical significance is uncertain."
+        }
+    },
+    "V75T": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT75MTAS": "V75T/M/A/S are nonpolymorphic accessory NRTI-selected mutations. They appear to have minimal phenotypic effects on AZT, ABC, and TDF."
+        }
+    },
+    "V75M": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT75MTAS": "V75T/M/A/S are nonpolymorphic accessory NRTI-selected mutations. They appear to have minimal phenotypic effects on AZT, ABC, and TDF."
+        }
+    },
+    "V75S": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT75MTAS": "V75T/M/A/S are nonpolymorphic accessory NRTI-selected mutations. They appear to have minimal phenotypic effects on AZT, ABC, and TDF."
+        }
+    },
+    "F77L": {
+        "gene": "RT",
+        "drug_class": "NRTI",
+        "comments": {
+            "RT77ACDEGHIKMNPQRSTVWYid": "F77L usually occurs in combination with the multi-NRTI resistance mutation Q151M. When it occurs alone, its clinical significance is uncertain. $listMutsIn{77(NOT L)} is a highly unusual mutation at this position.",
+            "RT77L": "F77L usually occurs in combination with the multi-NRTI resistance mutation Q151M. When it occurs alone, its clinical significance is uncertain."
+        }
+    },
+    "V90I": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT90I": "V90I is a polymorphic accessory mutation weakly selected by each of the NNRTIs. It is associated with minimal, if any, detectable reduction in NNRTI susceptibility."
+        }
+    },
+    "A98G": {
+        "gene": "RT",
+        "drug_class": "NNRTI",
+        "comments": {
+            "RT98G": "A98G is a non-polymorphic accessory mutation associated with low-level reduced susceptibility to each of the NNRTIs."
+        }
+    }
+}

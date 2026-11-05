@@ -1,0 +1,91 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: "variants_qc"
+description: Variant calling QC
+keywords:
+  - annotation
+  - variants
+  - qc
+components:
+  - snpeff_snpsift
+input:
+  - bam:
+      description: |
+        Mapping BAM files and their index files
+        Structure: [ val(meta), [ bam ], [bai] ]
+  - vcf:
+      description: |
+        VCF file with variants called
+        Structure: [ val(meta), [ vcf ] ]
+  - stats:
+      description: |
+        Text output file containing stats
+        Structure: [ val(meta), [ bcftools_stats ] ]
+  - fasta:
+      description: |
+        Reference genome fasta file
+        Structure: [ path(fasta) ]
+  - sizes:
+      description: |
+        File containing chromosome lengths
+        Structure: [ path(sizes) ]
+  - gff:
+      description: |
+        GFF file of the reference genome
+        Structure: [ path(gff) ]
+  - bed:
+      description: |
+        BED file with amplicon primer positions
+        Structure: [ path(bed) ]
+  - snpeff_db:
+      description: |
+        Path to SnpEff database folder
+        Structure: [ path(snpeff_db) ]
+  - snpeff_config:
+      description: |
+        Path to SnpEff config file
+        Structure: [ path(snpeff_config) ]
+output:
+  - snpeff_vcf:
+      type: file
+      description: |
+        Annotated variant calling file from SnpEff
+        Structure: [ val(meta), [ vcf.gz ] ]
+  - snpeff_tbi:
+      type: file
+      description: |
+        tabix index file
+        Structure: [ val(meta), [ tbi ] ]
+  - snpeff_stats:
+      type: file
+      description: |
+        Text output file containing stats
+        Structure: [ val(meta), [ txt ] ]
+  - snpeff_csv:
+      type: file
+      description: |
+        Variant annotation CSV file
+        Structure: [ val(meta), [ csv ] ]
+  - snpeff_txt:
+      type: file
+      description: |
+        Variant annotation text file
+        Structure: [ val(meta), [ txt ] ]
+  - snpeff_html:
+      type: file
+      description: |
+        Variant annotation HTML report
+        Structure: [ val(meta), [ html ] ]
+  - snpsift_txt:
+      type: file
+      description: |
+        Variant annotation text file from SnpSift
+        Structure:  [ val(meta), [ txt ] ]
+  - versions:
+      type: file
+      description: File containing software versions
+      pattern: "versions.yml"
+authors:
+  - "@drpatelh"
+maintainers:
+  - "@svarona"
+  - "@saramonzon"

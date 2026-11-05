@@ -1,0 +1,54 @@
+{
+    "sarscov2 - illumina - test_paired_end_sorted - bam": {
+        "content": [
+            {
+                "versions_freyja": [
+                    [
+                        "FREYJA_BOOT",
+                        "freyja",
+                        "2.0.6"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-10-21T13:19:03.79221",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.03.1"
+        }
+    },
+    "sarscov2 - illumina - test_paired_end_sorted - bam - stub": {
+        "content": [
+            {
+                "lineages": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_lineages.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "summarized": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test_summarized.csv:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "versions_freyja": [
+                    [
+                        "FREYJA_BOOT",
+                        "freyja",
+                        "2.0.6"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-10-21T13:19:37.251782",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.03.1"
+        }
+    }
+}
