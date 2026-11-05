@@ -166,27 +166,21 @@ def get_nextclade_subtypes(nextclade_file, consensus_records):
     ]
 
 def parse_mutation_comments(json_path):
-    """Group gene comments by their Sierralocal comment type, avoiding repeats."""
+    """Group drug-score mutation comments by primaryType, avoiding repeats."""
     with open(json_path, encoding="utf-8") as handle:
         data = json.load(handle)[0]
 
     comments = {}
-    entries = [
-        (entry["gene"]["name"], entry.get("mutations", []))
-        for entry in data.get("alignedGeneSequences", [])
-    ]
     for entry in data.get("drugResistance", []):
-        mutations = [
+        gene = entry["gene"]["name"]
+        if gene not in ("PR", "RT", "IN"):
+            continue
+        mutations = (
             mutation
             for score in entry.get("drugScores", [])
             for partial in score.get("partialScores", [])
             for mutation in partial.get("mutations", [])
-        ]
-        entries.append((entry["gene"]["name"], mutations))
-
-    for gene, mutations in entries:
-        if gene not in ("PR", "RT", "IN"):
-            continue
+        )
         for mutation in mutations:
             if mutation["text"].endswith("X"):
                 continue
@@ -209,10 +203,37 @@ def parse_mutation_comments(json_path):
                 text = re.sub(
                     r"\$listMutsIn\{(\d+)\(NOT ([A-Z]+)\)\}", mutation_list, text
                 )
-                texts = comments.setdefault(gene, {}).setdefault(comment["type"], [])
+                texts = comments.setdefault(gene, {}).setdefault(mutation["primaryType"], [])
                 if text not in texts:
                     texts.append(text)
     return comments
+
+
+def group_apobec_drms(mutation_rows):
+    """Combine flagged, filtered substitutions by gene and position for warnings."""
+    grouped = {}
+    for row in mutation_rows:
+        if not row.get("isApobecDRM"):
+            continue
+        gene = row["Gene_name"]
+        text = row["Mutations"]
+        match = re.fullmatch(r"([A-Z])(\d+)([A-Z*]+)", text)
+        calls = grouped.setdefault(gene, {})
+        if match and not row.get("isInsertion") and not row.get("isDeletion"):
+            consensus, position, amino_acids = match.groups()
+            key = (consensus, position)
+            calls.setdefault(key, set()).update(amino_acids)
+        else:
+            # Preserve non-substitution notation without merging its characters.
+            calls.setdefault(text, None)
+    return {
+        gene: [
+            f"{key[0]}{key[1]}{''.join(sorted(amino_acids))}"
+            if amino_acids is not None else key
+            for key, amino_acids in calls.items()
+        ]
+        for gene, calls in grouped.items()
+    }
 
 
 def parse_sequence_warnings(json_path):
@@ -220,26 +241,31 @@ def parse_sequence_warnings(json_path):
     with open(json_path, encoding="utf-8") as handle:
         data = json.load(handle)[0]
 
-    messages = []
+    return [
+        result["message"].strip()
+        for result in data.get("validationResults", [])
+        if result["level"] in ("WARNING", "NOTE") and result["message"].strip()
+    ]
+
+
+def parse_gene_stop_codons(json_path):
+    """Return stop-codon lists for each gene's warning area."""
+    with open(json_path, encoding="utf-8") as handle:
+        data = json.load(handle)[0]
+
+    gene_stops = {}
     for entry in data.get("alignedGeneSequences", []):
         gene = entry["gene"]["name"]
         if gene not in ("PR", "RT", "IN"):
             continue
-        stops = list(dict.fromkeys(
-            f"{gene}:{mutation['consensus']}{mutation['position']}*"
+        stops = [
+            f"{mutation['consensus']}{mutation['position']}*"
             for mutation in entry.get("mutations", [])
             if mutation.get("hasStop") and not mutation["text"].endswith("X")
-        ))
+        ]
         if stops:
-            subject = "There is 1 stop codon" if len(stops) == 1 else f"There are {len(stops)} stop codons"
-            messages.append(f"{subject} in {gene}: {', '.join(stops)}.")
-
-    messages.extend(
-        result["message"].strip()
-        for result in data.get("validationResults", [])
-        if result["level"] in ("WARNING", "NOTE") and result["message"].strip()
-    )
-    return messages
+            gene_stops[gene] = list(dict.fromkeys(gene_stops.get(gene, []) + stops))
+    return gene_stops
 
 
 def parse_sequence_summary(json_path,
@@ -385,16 +411,7 @@ def extract_mutation_scoring(json_path):
                 mutations = mutation_block.get("mutations", [])
                 score = mutation_block.get("score")
 
-                # Extract all mutation names
-                mutation_ids = [extract_triggered_mutations(m) for m in mutations]
-
-                # CASE 1 → single mutation: "M41L"
-                if len(mutation_ids) == 1:
-                    mutation_key = mutation_ids[0]
-
-                # CASE 2 → combo mutation: "M41L+L210W"
-                else:
-                    mutation_key = "+".join(mutation_ids)
+                mutation_key = "+".join(extract_triggered_mutations(m) for m in mutations)
 
                 # Ensure gene and mutation entry exist
                 if mutation_key not in mutation_scores[gene]:
@@ -560,12 +577,15 @@ def main():
     mutation_scores = sort_mutation_scores(mutation_scores_raw)
     mutation_scores = remove_deprecated_drugs(mutation_scores, deprecated_drugs)
 
+    mutation_rows = df_mut.to_dict(orient="records")
     sample_data = {
         "sample_name": sample_name,
         "sequence_summary": seq_summary,
         "sequence_warnings": parse_sequence_warnings(json_file),
+        "gene_stop_codons": parse_gene_stop_codons(json_file),
         "subtypes": subtypes,
-        "mutation_data": df_mut.to_dict(orient="records"),
+        "mutation_data": mutation_rows,
+        "gene_apobec_drms": group_apobec_drms(mutation_rows),
         "mutation_comments": parse_mutation_comments(json_file),
         "resistance_data": df_res.to_dict(orient="records"),
         "consensus_genome": full_record.format("fasta").strip(),

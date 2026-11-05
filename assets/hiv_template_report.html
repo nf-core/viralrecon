@@ -84,10 +84,16 @@
           </li>
           {% endif %} {% endfor %}
         </ul>
-        {% if sample.sequence_warnings %}
+        {% if sample.sequence_warnings or sample.gene_stop_codons or sample.gene_apobec_drms %}
         <div class="sequence-warning-box" role="note" aria-label="Sequence warnings">
           <strong>Warnings</strong>
           <ul>
+            {% if sample.gene_stop_codons %}
+            <li>Stop codon(s) have been detected in this sample.</li>
+            {% endif %}
+            {% if sample.gene_apobec_drms %}
+            <li>APOBEC DRM(s) have been detected in this sample.</li>
+            {% endif %}
             {% for warning in sample.sequence_warnings %}
             <li>{{ warning }}</li>
             {% endfor %}
@@ -101,25 +107,42 @@
     (NRTI)"), ("NNRTI", "Non-nucleoside Reverse Transcriptase Inhibitors (NNRTI)"), ("INSTI", "Integrase Strand Transfer
     Inhibitors (INSTI)") ] %} {% for gene in ["PR", "RT", "IN"] %} {% set gene_mutations = sample.mutation_data |
     selectattr("Gene_name", "equalto", gene) | list %} {% set gene_resistances = sample.resistance_data |
-    selectattr("Gene_name", "equalto", gene) | list %} {% if gene_mutations or gene_resistances %}
+    selectattr("Gene_name", "equalto", gene) | list %}
+    {% set gene_stop_codons = sample.gene_stop_codons.get(gene, []) %}
+    {% if gene_mutations or gene_resistances or gene_stop_codons %}
     <details class="report-details" open>
       <summary>Drug resistance interpretation: {{ gene }}</summary>
       <div class="color-legend">
-        <strong>Color legend:</strong>
-        <span style="background-color: #ffedd5; padding: 2px 8px; margin: 0 5px; border-left: 3px solid #ff8c00"
-          >SDRM</span
-        >
-        <span style="background-color: #ffcccc; padding: 2px 8px; margin: 0 5px; border-left: 3px solid #ff0000"
-          >APOBEC DRM</span
-        >
-        <span style="background-color: #d8b4fe; padding: 2px 8px; margin: 0 5px; border-left: 3px solid #6b21a8"
-          >Unusual</span
-        >
-        <div class="coverage-note">
-          📝 Note: Mutations at the first/last sequenced codon with coverage ≤ Minimum read depth (default 50) may arise
-          from partial codon coverage. Nucleotide-level depth is filtered, but codon-level depth is not, therefore these
-          positions may represent potential false positives.
+        <div class="legend-items">
+          <strong>Color legend</strong>
+          <span class="legend-badge legend-sdrm">SDRM</span>
+          <span class="legend-badge legend-unusual">Unusual</span>
+          <span class="legend-badge legend-combined">SDRM + Unusual</span>
         </div>
+        <div class="coverage-note">
+          <strong>Notes</strong>
+          <p>Mutations at the first/last sequenced codon with coverage ≤ Minimum read depth (default 50) may arise
+            from partial codon coverage.</p>
+          <p>Unusual means rare amino acid changes in HIV sequences that may require further investigation.</p>
+          <p>APOBEC-mediated G-to-A hypermutation may reflect sequencing artifacts.</p>
+        </div>
+        {% set gene_apobec_drms = sample.gene_apobec_drms.get(gene, []) %}
+        {% if gene_apobec_drms or gene_stop_codons %}
+        <div class="gene-warnings">
+          <strong>Warnings</strong>
+          {% if gene_stop_codons %}
+          <div class="gene-warning-line">
+            <strong>Stop codons:</strong> {{ gene_stop_codons | join('; ') }}.
+          </div>
+          {% endif %}
+          {% if gene_apobec_drms %}
+          <div class="gene-warning-line">
+            <strong>APOBEC DRMs:</strong>
+            {{ gene_apobec_drms | join('; ') }}.
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
       </div>
       <div class="content-block">
         <!-- MUTATIONS -->
@@ -168,7 +191,7 @@
               <tbody>
                 {% for row in mut_list %}
                 <tr
-                  class="{% if row.isApobecDRM %}apobec-drm-row{% endif %} {% if row.isSDRM %}sdrm-row{% endif %} {% if row.isUnusual %}unusual-row{% endif %}"
+                  class="{% if row.isSDRM %}sdrm-row{% endif %} {% if row.isUnusual %}unusual-row{% endif %}"
                 >
                   <td>{{ row.Mutations }}</td>
                   <td>{{ (row.Mutation_AF | float * 100) | round(2) }}</td>
@@ -195,7 +218,7 @@
         {% endif %} {% endfor %}
 
         <!-- RESISTANCE -->
-        {% if gene_resistances %} {% for drug_class, class_label in drug_classes %} {% set class_drugs =
+        {% for drug_class, class_label in drug_classes %} {% set class_drugs =
         gene_resistances | selectattr("Drug_class", "equalto", drug_class) | list %} {% if class_drugs %}
         <h3>{{ class_label }}</h3>
         <hr />
@@ -221,7 +244,7 @@
             </tbody>
           </table>
         </div>
-        {% endif %} {% endfor %} {% endif %}
+        {% endif %} {% endfor %}
       </div>
       <!-- COMMENTS -->
       {% set comment_groups = sample.mutation_comments.get(gene, {}) %} {% if comment_groups %}

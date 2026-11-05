@@ -12,7 +12,7 @@ process EXTRACT_CONSENSUS_REGIONS {
 
     output:
     tuple val(meta), path("*.all_consensus.fa"), emit: all_consensus
-    tuple val(meta), path("${meta.id}.*.fa"), emit: consensus_fragments
+    tuple val(meta), path("${meta.id}.*.fa"), emit: consensus_fragments, optional: true
     tuple val("${task.process}"), val('python'), eval('python --version | sed "s/Python //g"'), emit: versions_python, topic: versions
 
     when:
