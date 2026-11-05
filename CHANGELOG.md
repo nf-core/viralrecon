@@ -19,6 +19,7 @@ Special thanks to the following for their code contributions to the release:
 - [Jordan Speizer](https://github.com/speizerj)
 - [LilyAnderssonLee](https://github.com/LilyAnderssonLee)
 - [Víctor López](https://github.com/victor5lm)
+- [CJ Jossart] (https://github.com/cjjossart)
 
 Thank you to everyone else that has contributed by reporting bugs, enhancements or in any other way, shape or form.
 
@@ -39,6 +40,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #615](https://github.com/nf-core/viralrecon/pull/615)] - Fixed collapse_primer_bed.py to support 7-column primer BED files and updated docs
 - [[PR #620](https://github.com/nf-core/viralrecon/pull/620)] - Template and nf-core modules & subworkflows update
 - [[PR #622](https://github.com/nf-core/viralrecon/pull/622)] - Freyja version bump to 2.0.6
+- [[PR #613](https://github.com/nf-core/viralrecon/pull/613)] - Addition of variant and consensus frequency and depth thresholds
 
 ### Parameters
 
@@ -59,6 +61,10 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 | `--artic_minion_model`     | `--clair3_model`             |
 |                            | `--mapper_nanopore`          |
 | `--skip_multiqc`           |                              |
+|                            | `--min_allele_freq_variants` |
+|                            | `--min_depth_variants`       |
+|                            | `--min_allele_freq_consensus`|
+|                            | `--min_depth_consensus`      |
 
 > **NB:** Parameter has been **updated** if both old and new parameter information is present.
 > **NB:** Parameter has been **added** if just the new parameter information is present.
@@ -115,7 +121,7 @@ Special thanks to the following for their code contributions to the release:
 - [Sara Monzon](https://github.com/saramonzon)
 - [Matthias Hörtenhuber](https://github.com/mashehu)
 - [Anna Norén](https://github.com/AnnaNoren)
-- [JC Jossart](https://github.com/cjjossart)
+- [CJ Jossart](https://github.com/cjjossart)
 - [Leo Caparica](https://github.com/CaparicaLeo)
 - [Michael L Heuer](https://github.com/heuermh)
 
