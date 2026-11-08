@@ -18,19 +18,13 @@ def parse_args():
         "-gf", "--gff", required=True, help="GFF file with gene coordinates."
     )
     parser.add_argument(
-        "-ig",
-        "--interest_genes",
-        default="PR,RT;IN",
-        help='Gene groups separated by semicolons (default: "PR,RT;IN").',
+        "-ig", "--interest_genes", required=True, help='Gene groups separated by semicolons.',
     )
     parser.add_argument(
         "--sample_id", required=True, help="Sample ID for separate fragment FASTA files."
     )
     parser.add_argument(
-        "-o",
-        "--output",
-        required=True,
-        help="Output multi-FASTA containing the full and regional consensus sequences.",
+        "-o", "--output", required=True, help="Output multi-FASTA containing the full and regional consensus sequences.",
     )
     return parser.parse_args()
 

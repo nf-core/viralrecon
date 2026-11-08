@@ -191,7 +191,6 @@ def get_nextclade_subtypes(nextclade_csv: Path, consensus_records: dict[str, Seq
     return [
         {"region": region, "subtype": clades.loc[record.id]}
         for region, record in consensus_records.items()
-        if region in POL_REGIONS
     ]
 
 
@@ -407,7 +406,8 @@ def summarize_gene_coverage(data: dict[str, Any]) -> list[dict[str, Any]]:
             missing_parts.extend(_format_ranges(missing_positions))
 
         if adjusted_last < true_end:
-            tail_range = f"{adjusted_last + 1}-{true_end}"
+            tail_start = adjusted_last + 1
+            tail_range = ( str(tail_start) if tail_start == true_end else f"{tail_start}-{true_end}" )
             if tail_range not in missing_parts:
                 missing_parts.append(tail_range)
 
