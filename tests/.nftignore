@@ -1,4 +1,3 @@
-.DS_Store
 multiqc/multiqc_data/fastqc_top_overrepresented_sequences_table.txt
 multiqc/multiqc_data/multiqc.parquet
 multiqc/multiqc_data/multiqc.log
@@ -19,6 +18,9 @@ multiqc/multiqc_data/multiqc_quast_quast_unicycler.yaml
 multiqc/multiqc_data/multiqc_summary_assembly_metrics_plot.yaml
 multiqc/multiqc_data/quast_num_contigs.yaml
 multiqc/multiqc_data/quast_table.yaml
+multiqc/multiqc_data/multiqc_snpeff.yaml
+multiqc/multiqc_data/snpeff_effects.yaml
+multiqc/multiqc_data/snpeff_variant_effects_{impact,region}.yaml
 multiqc/summary_variants_metrics_mqc.csv
 multiqc/summary_assembly_metrics_mqc.csv
 fastqc/{raw,trim}/*_fastqc.{html,zip}
@@ -55,6 +57,9 @@ variants/*/consensus/*/base_qc/*.pdf
 variants/*/consensus/*/*filtered.{vcf.gz,vcf.gz.tbi}
 variants/bowtie2/picard_metrics/**
 variants/bowtie2/*.{bam,bam.bai}
+variants/*/*.{tsv,vcf.gz,vcf.gz.tbi}
+variants/*/snpeff/*.{snpeff.vcf.gz,snpeff.vcf.gz.tbi,snpsift.txt}
+variants/*/variants_long_table.csv
 nanoplot/*/NanoPlot*.log
 nanoplot/*/*.html
 nanoplot/*/*.png
