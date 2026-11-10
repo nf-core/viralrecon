@@ -43,8 +43,8 @@ workflow VARIANTS_LOFREQ {
         fai.map { fai_file -> [ [:], fai_file ] }
     )
 
-    //Filter out samples with 0 variants
-    ch_raw_vcf_tbi =  LOFREQ_CALLPARALLEL.out.vcf
+    // Filter out samples with 0 variants
+    ch_raw_vcf_tbi = LOFREQ_CALLPARALLEL.out.vcf
         .join(LOFREQ_CALLPARALLEL.out.tbi)
         .map { meta, vcf, tbi -> [meta, vcf, tbi] }
 
