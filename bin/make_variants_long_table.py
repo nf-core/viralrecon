@@ -200,7 +200,6 @@ def lofreq_bcftools_query_to_table(bcftools_query_file):
     table["REF_DP"] = depths[0] + depths[1]
     table["ALT_DP"] = depths[2] + depths[3]
     table.drop("DP4", axis=1, inplace=True)
-    # Match the iVar and bcftools column order while keeping LoFreq's reported AF precision.
     table["AF"] = pd.to_numeric(table.pop("AF"), errors="coerce")
     return table
 
