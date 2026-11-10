@@ -47,27 +47,27 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 
 ### Parameters
 
-| Old parameter              | New parameter                |
-| -------------------------- | ---------------------------- |
-|                            | `--taxidlist`                |
-|                            | `--perform_hiv_resistance`   |
-|                            | `--hivdb_xml`                |
-|                            | `--apobec_drm`               |
-|                            | `--apobec_csv`               |
-|                            | `--unusual_csv`              |
-|                            | `--sdrms_csv`                |
-|                            | `--mutation_csv`             |
-| `--freyja_lineages`        | `--freyja_lineages_meta`     |
-|                            | `--freyja_lineages_topology` |
-| `--protocol`               | `--trim_primers`             |
-| `--artic_minion_model_dir` | `--clair3_model_dir`         |
-| `--artic_minion_model`     | `--clair3_model`             |
-|                            | `--mapper_nanopore`          |
-| `--skip_multiqc`           |                              |
-|                            | `--min_allele_freq_variants` |
-|                            | `--min_depth_variants`       |
-|                            | `--min_allele_freq_consensus`|
-|                            | `--min_depth_consensus`      |
+| Old parameter              | New parameter                 |
+| -------------------------- | ----------------------------- |
+|                            | `--taxidlist`                 |
+|                            | `--perform_hiv_resistance`    |
+|                            | `--hivdb_xml`                 |
+|                            | `--apobec_drm`                |
+|                            | `--apobec_csv`                |
+|                            | `--unusual_csv`               |
+|                            | `--sdrms_csv`                 |
+|                            | `--mutation_csv`              |
+| `--freyja_lineages`        | `--freyja_lineages_meta`      |
+|                            | `--freyja_lineages_topology`  |
+| `--protocol`               | `--trim_primers`              |
+| `--artic_minion_model_dir` | `--clair3_model_dir`          |
+| `--artic_minion_model`     | `--clair3_model`              |
+|                            | `--mapper_nanopore`           |
+| `--skip_multiqc`           |                               |
+|                            | `--min_allele_freq_variants`  |
+|                            | `--min_depth_variants`        |
+|                            | `--min_allele_freq_consensus` |
+|                            | `--min_depth_consensus`       |
 
 > **NB:** Parameter has been **updated** if both old and new parameter information is present.
 > **NB:** Parameter has been **added** if just the new parameter information is present.
