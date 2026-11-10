@@ -188,11 +188,9 @@ def lofreq_bcftools_query_to_table(bcftools_query_file):
     Replace INFO/DP4 with REF_DP and ALT_DP by summing each allele's
     forward/reverse counts.
     """
-    table = pd.read_table(bcftools_query_file, header="infer", na_values=["."])
+    table = pd.read_table(bcftools_query_file, header="infer")
     table.rename(columns={col: col.split("]")[-1].split(":")[-1] for col in table.columns}, inplace=True)
     table["DP"] = pd.to_numeric(table["DP"], errors="coerce")
-    # Keep LoFreq's reported AF precision, including low-frequency variants.
-    table["AF"] = pd.to_numeric(table["AF"], errors="coerce")
     # DP4 is ref-forward, ref-reverse, alt-forward, alt-reverse.
     # Its sum need not equal DP: other alleles, ambiguous/filtered bases,
     # and deletion-spanning reads can contribute to the difference for SNVs.
@@ -202,6 +200,8 @@ def lofreq_bcftools_query_to_table(bcftools_query_file):
     table["REF_DP"] = depths[0] + depths[1]
     table["ALT_DP"] = depths[2] + depths[3]
     table.drop("DP4", axis=1, inplace=True)
+    # Match the iVar and bcftools column order while keeping LoFreq's reported AF precision.
+    table["AF"] = pd.to_numeric(table.pop("AF"), errors="coerce")
     return table
 
 
