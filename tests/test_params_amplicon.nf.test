@@ -14,6 +14,12 @@ nextflow_pipeline {
             ]
         ],
         [
+            name: "-profile test --variant_caller lofreq",
+            params: [
+                variant_caller: 'lofreq'
+            ]
+        ],
+        [
             name: "-profile test --variant_caller bcftools --consensus_caller ivar --skip_assembly",
             params: [
                 variant_caller: 'bcftools',
