@@ -17,7 +17,7 @@ Special thanks to the following for their code contributions to the release:
 - [Sara Monzon](https://github.com/saramonzon)
 - [Magdalena Matito](https://github.com/magdasmat)
 - [Jordan Speizer](https://github.com/speizerj)
-- [LilyAnderssonLee](https://github.com/LilyAnderssonLee)
+- [Lili Andersson-Li](https://github.com/LilyAnderssonLee)
 - [Víctor López](https://github.com/victor5lm)
 - [Stefano Boriero](https://github.com/stefanoboriero)
 
@@ -42,6 +42,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #622](https://github.com/nf-core/viralrecon/pull/622)] - Freyja version bump to 2.0.6
 - [[PR #626](https://github.com/nf-core/viralrecon/pull/626)] - Add `--no-same-owner` to nanopore `UNTAR` on Azure Batch
 - [[PR #625](https://github.com/nf-core/viralrecon/pull/625)] - Fix `.str` accessor crash on single-value `AD` in `make_variants_long_table.py`
+- [[PR #629](https://github.com/nf-core/viralrecon/pull/629)] - Added a new variant calling tool `lofreq` for Illumina data
 
 ### Parameters
 
@@ -100,6 +101,7 @@ Note, since the pipeline is now using Nextflow DSL2, each process will be run wi
 | `snakemake-minimal` |             | 9.21.1           |
 | `tabix`             | 1.21        |                  |
 | `xz`                |             | 5.8.3            |
+| `lofreq`            |             | 2.1.5            |
 
 > **NB:** Dependency has been **updated** if both old and new version information is present.
 > **NB:** Dependency has been **added** if just the new version information is present.

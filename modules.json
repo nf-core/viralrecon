@@ -188,6 +188,21 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/liftoff/liftoff.diff"
                     },
+                    "lofreq/callparallel": {
+                        "branch": "master",
+                        "git_sha": "9707facbacc9c5c02ecf0b192f0604a29351b00a",
+                        "installed_by": ["modules"]
+                    },
+                    "lofreq/filter": {
+                        "branch": "master",
+                        "git_sha": "9707facbacc9c5c02ecf0b192f0604a29351b00a",
+                        "installed_by": ["modules"]
+                    },
+                    "lofreq/indelqual": {
+                        "branch": "master",
+                        "git_sha": "4dd270e412e2a7e78761be38aafa5cfa1dcdf891",
+                        "installed_by": ["modules"]
+                    },
                     "minia": {
                         "branch": "master",
                         "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",

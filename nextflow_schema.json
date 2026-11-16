@@ -415,8 +415,8 @@
                 "variant_caller": {
                     "type": "string",
                     "fa_icon": "fas fa-phone-volume",
-                    "description": "Specify which variant calling algorithm you would like to use. Available options are 'ivar' (default for '--protocol amplicon') and 'bcftools' (default for '--protocol metagenomic').",
-                    "enum": ["ivar", "bcftools"]
+                    "description": "Specify which variant calling algorithm you would like to use. Available options are 'ivar' (default for '--protocol amplicon') 'bcftools' (default for '--protocol metagenomic') and 'lofreq' (SNPs and indels, Illumina only).",
+                    "enum": ["ivar", "bcftools", "lofreq"]
                 },
                 "consensus_caller": {
                     "type": "string",
