@@ -102,7 +102,7 @@
             },
             "mentions": [
                 {
-                    "@id": "#58d87a73-5838-4ce3-979a-72907c3e73da"
+                    "@id": "#a9e63ed2-48fd-4c68-8792-8ed8c3231ed0"
                 }
             ],
             "name": "nf-core/viralrecon"
@@ -126,14 +126,14 @@
             ],
             "author": [
                 {
-                    "@id": "#f64e245b-c1f4-49b9-aec0-90021147ea57"
+                    "@id": "#cc4e7296-d303-4083-a982-bc6a6755c637"
                 },
                 {
-                    "@id": "#374b1aad-ccba-4311-9531-02b3faa9d80a"
+                    "@id": "#4279eedf-9995-43aa-8096-ec41db7c7f43"
                 }
             ],
             "dateCreated": "",
-            "dateModified": "2026-10-26T16:08:37Z",
+            "dateModified": "2026-11-11T13:45:21Z",
             "dct:conformsTo": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE/",
             "image": {
                 "@id": "docs/images/nf-core-viralrecon_illumina_metro_map_Calque%201.png"
@@ -207,11 +207,11 @@
             "version": "1.1"
         },
         {
-            "@id": "#58d87a73-5838-4ce3-979a-72907c3e73da",
+            "@id": "#a9e63ed2-48fd-4c68-8792-8ed8c3231ed0",
             "@type": "TestSuite",
             "instance": [
                 {
-                    "@id": "#a39130fa-3a92-425f-8dd5-ba6a1cd0f050"
+                    "@id": "#8d1ecf73-24bc-4dbe-a86c-cbd7bb4fd68f"
                 }
             ],
             "mainEntity": {
@@ -229,7 +229,7 @@
             "version": "0.2"
         },
         {
-            "@id": "#a39130fa-3a92-425f-8dd5-ba6a1cd0f050",
+            "@id": "#8d1ecf73-24bc-4dbe-a86c-cbd7bb4fd68f",
             "@type": "TestInstance",
             "name": "GitHub Actions workflow for testing nf-core/viralrecon",
             "resource": "repos/nf-core/viralrecon/actions/workflows/nf-test.yml",
@@ -621,7 +621,7 @@
             "url": "https://github.com/stevekm"
         },
         {
-            "@id": "#374b1aad-ccba-4311-9531-02b3faa9d80a",
+            "@id": "#4279eedf-9995-43aa-8096-ec41db7c7f43",
             "@type": "Person",
             "affiliation": "Quadram Institute, UK",
             "name": "Thanh Le Viet",
