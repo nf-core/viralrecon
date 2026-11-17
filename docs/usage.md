@@ -10,63 +10,66 @@ Please provide pipeline parameters via the CLI or Nextflow `-params-file` option
 
 ## Samplesheet format
 
-### Illumina
-
-You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
+The pipeline uses a single samplesheet format for all sequencing platforms. It has to be a comma-separated file with a header row and the following 4 columns. Columns that do not apply to your data can be left empty.
 
 ```bash
 --input '[path to samplesheet file]'
 ```
 
-### Multiple runs of the same sample
-
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
-
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-SAMPLE_1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-SAMPLE_1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-SAMPLE_2,AEG588A2_S4_L003_R1_001.fastq.gz,
-```
-
-| Column    | Description                                                                                                                |
-| --------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample.              |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz". |
+| Column    | Description                                                                                                                                                                                                |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs/FastQ files from the same sample, which are then merged.                                                           |
+| `fastq_1` | Full path to a FastQ file with extension ".fastq", ".fq", ".fastq.gz" or ".fq.gz". Illumina: reads 1 (required). Nanopore: the sample's FastQ file (file names must be unique within a sample).            |
+| `fastq_2` | Illumina only: full path to FastQ file for reads 2 (leave empty for single-end data). Must be empty for Nanopore.                                                                                          |
+| `barcode` | Nanopore only: barcode identifier (integer) attributed to the sample during multiplexing. Requires `--fastq_dir`. Use either `fastq_1` or `barcode` for a Nanopore sample, not both. Ignored for Illumina. |
 
 > **NB:** Dashes (`-`) and spaces in sample names are automatically converted to underscores (`_`) to avoid downstream issues in the pipeline.
+
+### Illumina
+
+Only `sample` and the reads (`fastq_1`, and `fastq_2` for paired-end data) need to be provided. When the same sample has been re-sequenced more than once e.g. to increase sequencing depth, use the same `sample` and the pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 2 lanes plus a single-end sample:
+
+```csv title="samplesheet.csv"
+sample,fastq_1,fastq_2,barcode
+SAMPLE_1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,
+SAMPLE_1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz,
+SAMPLE_2,AEG588A2_S4_L003_R1_001.fastq.gz,,
+```
 
 ### Nanopore
 
-You have the option to provide a samplesheet to the pipeline that maps sample ids to barcode ids. This allows you to associate barcode ids to clinical/public database identifiers that can be used to QC or pre-process the data with more appropriate sample names.
+Each sample is provided either with the path to its basecalled and demultiplexed FastQ file(s) in `fastq_1`, or with its `barcode` number. Barcodes are resolved to the `barcodeXX` sub-directories of the folder given with `--fastq_dir`. If a sample has several FastQ files, add one row per file with the same `sample`; they are merged by `artic guppyplex`.
 
-```console
---input '[path to samplesheet file]'
+```csv title="samplesheet.csv"
+sample,fastq_1,fastq_2,barcode
+21X983255,/path/to/21X983255.fastq.gz,,
+70H209408,/path/to/70H209408_0.fastq.gz,,
+70H209408,/path/to/70H209408_1.fastq.gz,,
+49Y807476,,,3
+70N209581,,,4
 ```
 
-It has to be a comma-separated file with 2 columns. A final samplesheet file may look something like the one below:
-
-```console
-sample,barcode
-21X983255,1
-70H209408,2
-49Y807476,3
-70N209581,4
-```
-
-| Column    | Description                                                                           |
-| --------- | ------------------------------------------------------------------------------------- |
-| `sample`  | Custom sample name, one per barcode.                                                  |
-| `barcode` | Barcode identifier attributed to that sample during multiplexing. Must be an integer. |
-
-> **NB:** Dashes (`-`) and spaces in sample names are automatically converted to underscores (`_`) to avoid downstream issues in the pipeline.
+In the example above, samples `49Y807476` and `70N209581` are given as barcodes, so `--fastq_dir` must also be provided. If all samples are given with `fastq_1`, `--fastq_dir` is not needed.
 
 ## Nanopore input format
 
 For Nanopore data the pipeline only supports amplicon-based analysis obtained from primer sets created and maintained by the [ARTIC Network](https://artic.network/). The [artic minion](https://artic.readthedocs.io/en/latest/commands/) tool from the [ARTIC field bioinformatics pipeline](https://github.com/artic-network/fieldbioinformatics) is used to align reads, call variants and to generate the consensus sequence.
 
-Artic minion requires that you provide `*.fastq` files as input to the pipeline. These files can typically be obtained after demultiplexing and basecalling the sequencing data using [Guppy](https://nanoporetech.com/nanopore-sequencing-data-analysis) (see [ARTIC SOP docs](https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html)). This pipeline requires that the files are organised in the format outlined below and gzip compressed files are also accepted:
+Artic minion requires that you provide `*.fastq` files as input to the pipeline. These files can typically be obtained after demultiplexing and basecalling the sequencing data using [Guppy](https://nanoporetech.com/nanopore-sequencing-data-analysis) (see [ARTIC SOP docs](https://artic.network/ncov-2019/ncov2019-bioinformatics-sop.html)). The recommended way is to list the FastQ files per sample in the `--input` samplesheet (see [Nanopore samplesheet](#nanopore)) with `fastq_1`:
+
+```console
+nextflow run nf-core/viralrecon \
+    --input samplesheet.csv \
+    --outdir <OUTDIR> \
+    --platform nanopore \
+    --genome 'MN908947.3' \
+    --primer_set 'artic' \
+    --primer_set_version 3 \
+    --sequencing_summary sequencing_summary.txt \
+    -profile <docker/singularity/podman/conda/institute>
+```
+
+Alternatively, you can give samples a `barcode` in the samplesheet and provide the run's `fastq_pass` directory with `--fastq_dir`. The files then have to be organised in the format outlined below and gzip compressed files are also accepted:
 
 ```console
 .

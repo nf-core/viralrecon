@@ -2,7 +2,7 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://raw.githubusercontent.com/nf-core/viralrecon/master/assets/schema_input.json",
     "title": "nf-core/viralrecon pipeline - params.input schema",
-    "description": "Schema for the file provided with params.input",
+    "description": "Schema for the file provided with params.input. The same 4-column samplesheet (sample or sample_id,fastq_1,fastq_2,barcode) is used for all platforms; columns that do not apply can be left empty.",
     "type": "array",
     "items": {
         "type": "object",
@@ -18,7 +18,7 @@
                 "format": "file-path",
                 "exists": true,
                 "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q(\\.gz)?$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq', '.fastq', '.fq.gz' or '.fastq.gz'"
+                "errorMessage": "FastQ file for reads 1 must be provided for illumina, as for nanopore is mandatory only when no barcode is provided; files cannot contain spaces and must have extension '.fq', '.fastq', '.fq.gz' or '.fastq.gz'"
             },
             "fastq_2": {
                 "type": "string",
@@ -29,9 +29,13 @@
             },
             "barcode": {
                 "type": "integer",
-                "errorMessage": "Barcode must be provided and must be an integer"
+                "errorMessage": "Barcode must be provided for nanopore when no FastQ files are provided; must be an integer"
             }
         },
-        "required": ["sample"]
+        "required": ["sample"],
+        "anyOf": [{ "required": ["fastq_1"] }, { "required": ["barcode"] }],
+        "dependentRequired": {
+            "fastq_2": ["fastq_1"]
+        }
     }
 }
