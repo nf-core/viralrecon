@@ -10,7 +10,7 @@ Please provide pipeline parameters via the CLI or Nextflow `-params-file` option
 
 ## Samplesheet format
 
-The pipeline uses a single samplesheet format for all sequencing platforms. It has to be a comma-separated file with a header row and the following 4 columns. Columns that do not apply to your data can be left empty.
+You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. The pipeline uses a single samplesheet format for all sequencing platforms. It has to be a comma-separated file with a header row and the following 4 columns. Columns that do not apply to your data can be left empty.
 
 ```bash
 --input '[path to samplesheet file]'
