@@ -1007,7 +1007,6 @@
                 "multiqc_quast_quast_variants.yaml:md5,1465f3600b1643497310946af66d0618",
                 "pangolin_run_table.yaml:md5,091b2cfd81d51516c84ae3476b216c2a",
                 "snpeff_variant_effects_class.yaml:md5,5f31369f0e087d4fe7eddc14d908f11f",
-                "snpeff_variant_effects_region.yaml:md5,212498fd3cc6647f127fa65d7afcf754",
                 "SAMPLE1_PE.bowtie2.log:md5,87f27874c25146987ccd51210ec66d27",
                 "SAMPLE1_PE.ivar_trim.ivar.log:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "SAMPLE2_PE.bowtie2.log:md5,032755a770b3d02d46781adcc9187874",
