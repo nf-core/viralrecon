@@ -2754,7 +2754,7 @@
                 "SAMPLE3_SE.variant_counts.log:md5,bff4c9669df21990ba1eb566a9e6682d",
                 "SAMPLE1_PE.snpeff.bcftools_stats.txt:md5,f60e68e48fc0bca588a2fb1bb9576b85",
                 "SAMPLE2_PE.snpeff.bcftools_stats.txt:md5,63e2ca3cd6372f95362e6bf3c5622601",
-                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2",
+                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2"
             ]
         ],
         "meta": {
@@ -4740,7 +4740,7 @@
                 "SAMPLE3_SE.variant_counts.log:md5,bff4c9669df21990ba1eb566a9e6682d",
                 "SAMPLE1_PE.snpeff.bcftools_stats.txt:md5,f60e68e48fc0bca588a2fb1bb9576b85",
                 "SAMPLE2_PE.snpeff.bcftools_stats.txt:md5,63e2ca3cd6372f95362e6bf3c5622601",
-                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2",
+                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2"
             ]
         ],
         "meta": {
@@ -5860,7 +5860,7 @@
                 "SAMPLE3_SE.variant_counts.log:md5,bff4c9669df21990ba1eb566a9e6682d",
                 "SAMPLE1_PE.snpeff.bcftools_stats.txt:md5,f60e68e48fc0bca588a2fb1bb9576b85",
                 "SAMPLE2_PE.snpeff.bcftools_stats.txt:md5,63e2ca3cd6372f95362e6bf3c5622601",
-                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2",
+                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2"
             ]
         ],
         "meta": {
@@ -6909,7 +6909,7 @@
                 "SAMPLE3_SE.variant_counts.log:md5,bff4c9669df21990ba1eb566a9e6682d",
                 "SAMPLE1_PE.snpeff.bcftools_stats.txt:md5,f60e68e48fc0bca588a2fb1bb9576b85",
                 "SAMPLE2_PE.snpeff.bcftools_stats.txt:md5,63e2ca3cd6372f95362e6bf3c5622601",
-                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2",
+                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2"
             ]
         ],
         "meta": {
@@ -11313,7 +11313,7 @@
                 "SAMPLE3_SE.variant_counts.log:md5,bff4c9669df21990ba1eb566a9e6682d",
                 "SAMPLE1_PE.snpeff.bcftools_stats.txt:md5,f60e68e48fc0bca588a2fb1bb9576b85",
                 "SAMPLE2_PE.snpeff.bcftools_stats.txt:md5,63e2ca3cd6372f95362e6bf3c5622601",
-                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2",
+                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2"
             ]
         ],
         "meta": {
@@ -12945,7 +12945,7 @@
                 "SAMPLE3_SE.variant_counts.log:md5,bff4c9669df21990ba1eb566a9e6682d",
                 "SAMPLE1_PE.snpeff.bcftools_stats.txt:md5,f60e68e48fc0bca588a2fb1bb9576b85",
                 "SAMPLE2_PE.snpeff.bcftools_stats.txt:md5,63e2ca3cd6372f95362e6bf3c5622601",
-                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2",
+                "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2"
             ]
         ],
         "meta": {
