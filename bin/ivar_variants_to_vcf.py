@@ -470,7 +470,7 @@ class IvarVariants:
             # If all af between 04 and 0.6 keep just this combination and return.
             # Note: All other combinations are going to be valid considering distance
             # but we've empirically checked that only ALT combination is found in real bams.
-            if all(af > 0.4 or af < 0.6 for af in af_list):
+            if all(0.4 < af < 0.6 for af in af_list):
                 consec_series = [altdict]
                 return consec_series
 
