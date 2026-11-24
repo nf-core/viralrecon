@@ -15,7 +15,7 @@ nextflow_pipeline {
             params: [
                 genome: "NC_001802.1"
             ]
-        ]
+        ],
         [
             name: "-profile test_hiv --split_hiv_fragments false",
             params: [
