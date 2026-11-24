@@ -68,6 +68,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 |                            | `--min_depth_variants`        |
 |                            | `--min_allele_freq_consensus` |
 |                            | `--min_depth_consensus`       |
+|                            | `--split_hiv_fragments`       |
 
 > **NB:** Parameter has been **updated** if both old and new parameter information is present.
 > **NB:** Parameter has been **added** if just the new parameter information is present.
