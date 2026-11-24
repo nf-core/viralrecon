@@ -996,7 +996,6 @@
                 "multiqc_nextclade_clade.yaml:md5,cf5a1379e07f4414d64414738dfd2b16",
                 "multiqc_pangolin.yaml:md5,084250ab4cee8c591212517a64c03af4",
                 "multiqc_quast.yaml:md5,8cadb76521768c3ad7c1d6cc05033b49",
-                "multiqc_snpeff.yaml:md5,af6465b4dd08db7020e7f5569da9162e",
                 "multiqc_summary_variants_metrics_plot_table.yaml:md5,1d43187c88e4ea455778e01c3158a6e5",
                 "pangolin_run_table.yaml:md5,837bf50f8200a0a9df68c3cf98b6069b",
                 "pycoqc_count_plot_Bases.yaml:md5,7d2db959e6f191000642d17d29326b1e",
@@ -1004,10 +1003,7 @@
                 "pycoqc_read_qual_plot_All_Reads.yaml:md5,ca731aa52ca76ea80002fc8cf2c55030",
                 "pycoqc_read_qual_plot_Passing_Reads.yaml:md5,5097786e1462e40ea98740b5be038136",
                 "pycoqc_stats_table.yaml:md5,7e91d1025c519911af28386064444b9a",
-                "snpeff_effects.yaml:md5,403ee3307e1d42ef949f7de4d78df534",
-                "snpeff_variant_effects_class.yaml:md5,8cfbab9e218fafb203bdf718e312141b",
-                "snpeff_variant_effects_impact.yaml:md5,1228a5825c8501090f9c5efcbdac0e8c",
-                "snpeff_variant_effects_region.yaml:md5,9f06790f32040f4d1156ef3be14e8dd8"
+                "snpeff_variant_effects_class.yaml:md5,8cfbab9e218fafb203bdf718e312141b"
             ]
         ],
         "meta": {

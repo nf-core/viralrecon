@@ -1,0 +1,27 @@
+Changes in component 'nf-core/artic/guppyplex'
+'modules/nf-core/artic/guppyplex/main.nf' is changed
+--- modules/nf-core/artic/guppyplex/main.nf
++++ modules/nf-core/artic/guppyplex/main.nf
+@@ -8,7 +8,7 @@
+         'community.wave.seqera.io/library/artic:1.6.2--d4956cdc155b8612' }"
+ 
+     input:
+-    tuple val(meta), path(fastq_dir)
++    tuple val(meta), path(fastqs, stageAs: 'input_fastq/*')
+ 
+     output:
+     tuple val(meta), path("*.fastq.gz"), emit: fastq
+@@ -24,7 +24,7 @@
+     artic \\
+         guppyplex \\
+         ${args} \\
+-        --directory ${fastq_dir} \\
++        --directory input_fastq \\
+         --output ${prefix}.fastq
+ 
+     pigz -p ${task.cpus} *.fastq
+
+'modules/nf-core/artic/guppyplex/meta.yml' is unchanged
+'modules/nf-core/artic/guppyplex/environment.yml' is unchanged
+'modules/nf-core/artic/guppyplex/tests/main.nf.test' is unchanged
+************************************************************
