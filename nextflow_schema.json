@@ -426,9 +426,9 @@
                     "enum": ["ivar", "bcftools"]
                 },
                 "min_mapped_reads": {
-                    "type": "integer",
-                    "default": 1000,
-                    "description": "Minimum number of mapped reads below which samples are removed from further processing. Some downstream steps in the pipeline will fail if this threshold is too low.",
+                    "type": ["integer", "null"],
+                    "default": null,
+                    "description": "Minimum number of mapped reads below which samples are removed from further processing. If unset, an estimate is calculated per sample from the reference length, mean read length, and minimum consensus depth.",
                     "fa_icon": "fas fa-hand-paper"
                 },
                 "min_depth_variants": {

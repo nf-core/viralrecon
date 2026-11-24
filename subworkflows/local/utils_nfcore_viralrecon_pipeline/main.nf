@@ -404,7 +404,7 @@ def getNumVariantsFromBCFToolsStats(bcftools_stats) {
 //
 // Function that parses and returns the number of mapped reads from flagstat files
 //
-def getFlagstatMappedReads(flagstat_file, params) {
+def getFlagstatMappedReads(flagstat_file, min_mapped_reads) {
     def mapped_reads = 0
     flagstat_file.eachLine { line ->
         if (line.contains(' mapped (')) {
@@ -413,10 +413,70 @@ def getFlagstatMappedReads(flagstat_file, params) {
     }
 
     def pass = false
-    if (mapped_reads > params.min_mapped_reads.toInteger()) {
+    if (mapped_reads > min_mapped_reads.toInteger()) {
         pass = true
     }
     return [ mapped_reads, pass ]
+}
+
+//
+// Calculate the mean read length from one or more FASTQ files
+//
+def getMeanReadLength(fastq_files) {
+    long total_bases = 0
+    long total_reads = 0
+    def files = fastq_files instanceof Collection ? fastq_files : [fastq_files]
+
+    files.each { fastq ->
+        def input_stream = new File(fastq.toString()).newInputStream()
+        if (fastq.toString().endsWith('.gz')) {
+            input_stream = new java.util.zip.GZIPInputStream(input_stream)
+        }
+        def reader = new java.io.BufferedReader(new java.io.InputStreamReader(input_stream))
+        def line_number = [0]
+        reader.lines().forEach { line ->
+            if (line_number[0] % 4 == 1) {
+                total_bases += line.length()
+                total_reads = total_reads + 1
+            }
+            line_number[0] = line_number[0] + 1
+        }
+        reader.close()
+    }
+
+    if (total_reads == 0) {
+        error('Cannot estimate minimum mapped reads from empty FASTQ files')
+    }
+
+    return total_bases / total_reads.toDouble()
+}
+
+//
+// Get the mean read length reported by fastp for read 1
+//
+def getFastpRead1MeanLength(json_file) {
+    def json = new groovy.json.JsonSlurper().parseText(json_file.text)
+    def summary = json.summary
+    def read_length = summary.after_filtering?.read1_mean_length ?: summary.before_filtering?.read1_mean_length
+    if (!read_length) {
+        error("Could not find read1_mean_length in fastp JSON file: ${json_file}")
+    }
+    return read_length as double
+}
+
+//
+// Calculate the total nucleotide length of a reference from its FAI index
+//
+def getReferenceLength(fai_file) {
+    return new File(fai_file.toString()).readLines().sum { line -> line.split('\t')[1].toLong() }
+}
+
+//
+// Estimate the minimum mapped-read count needed to reach the requested depth
+//
+def estimateMinMappedReads(read_length, fai_file, min_depth, reads_per_fragment) {
+    def reference_length = getReferenceLength(fai_file)
+    return Math.ceil((reference_length * min_depth) / (reads_per_fragment * read_length)).toLong()
 }
 
 

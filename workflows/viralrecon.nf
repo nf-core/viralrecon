@@ -10,6 +10,9 @@ include { paramsSummaryMultiqc         } from '../subworkflows/nf-core/utils_nfc
 include { softwareVersionsToYAML       } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText       } from '../subworkflows/local/utils_nfcore_viralrecon_pipeline'
 include { getFlagstatMappedReads       } from '../subworkflows/local/utils_nfcore_viralrecon_pipeline'
+include { estimateMinMappedReads       } from '../subworkflows/local/utils_nfcore_viralrecon_pipeline'
+include { getFastpRead1MeanLength       } from '../subworkflows/local/utils_nfcore_viralrecon_pipeline'
+include { getMeanReadLength             } from '../subworkflows/local/utils_nfcore_viralrecon_pipeline'
 include { multiqcTsvFromList           } from '../subworkflows/local/utils_nfcore_viralrecon_pipeline'
 include { checkPrimerSuffixes          } from '../subworkflows/local/utils_nfcore_viralrecon_pipeline'
 include { getColFromFile               } from '../subworkflows/local/utils_nfcore_viralrecon_pipeline'
@@ -302,7 +305,7 @@ workflow VIRALRECON {
                 .map {
                     meta, _reads, json, pass ->
                     if (!pass) {
-                        fail_mapped_reads[meta.id] = 0
+                        fail_mapped_reads[meta.id] = '0 reads after trimming (not mapped)'
                         def num_reads = getFastpReadsBeforeFiltering(json)
                         return [ "$meta.id\t$num_reads" ]
                     }
@@ -347,6 +350,31 @@ workflow VIRALRECON {
         ch_bam = channel.empty()
         ch_bai = channel.empty()
         if (!params.skip_variants) {
+            if (params.min_mapped_reads == null) {
+                if (!params.skip_fastp) {
+                    ch_min_mapped_reads = ch_variants_fastq
+                        .join(FASTQ_TRIM_FASTP_FASTQC.out.trim_json, by: [0])
+                        .combine(genome.fai)
+                        .map { entry ->
+                            def meta = entry[0][0]
+                            def json = entry[0][2]
+                            def fai = entry[1]
+                            tuple(meta, estimateMinMappedReads(getFastpRead1MeanLength(json), fai, params.min_depth_consensus, meta.single_end ? 1 : 2))
+                        }
+                } else {
+                    ch_min_mapped_reads = ch_variants_fastq
+                        .combine(genome.fai)
+                        .map { entry ->
+                            def meta = entry[0][0]
+                            def reads = entry[0][1]
+                            def fai = entry[1]
+                            tuple(meta, estimateMinMappedReads(getMeanReadLength(reads), fai, params.min_depth_consensus, meta.single_end ? 1 : 2))
+                        }
+                }
+            } else {
+                ch_min_mapped_reads = ch_variants_fastq.map { meta, _reads -> tuple(meta, params.min_mapped_reads) }
+            }
+
             FASTQ_ALIGN_BOWTIE2 (
                 ch_variants_fastq,
                 genome.bowtie2_index,
@@ -366,27 +394,31 @@ workflow VIRALRECON {
         ch_fail_mapping_multiqc = channel.empty()
         if (!params.skip_variants) {
             FASTQ_ALIGN_BOWTIE2.out.flagstat
-                .map { meta, flagstat -> [ meta ] + getFlagstatMappedReads(flagstat, params) }
+                .join(ch_min_mapped_reads, by: [0])
+                .map { meta, flagstat, min_mapped_reads ->
+                    def (mapped, pass) = getFlagstatMappedReads(flagstat, min_mapped_reads)
+                    [ meta, mapped, min_mapped_reads, pass ]
+                }
                 .set { ch_mapped_reads }
 
             ch_bam
                 .join(ch_mapped_reads, by: [0])
-                .map { meta, ofile, _mapped, pass -> if (pass) [ meta, ofile ] }
+                .map { meta, ofile, _mapped, _min_mapped_reads, pass -> if (pass) [ meta, ofile ] }
                 .set { ch_bam }
 
             ch_bai
                 .join(ch_mapped_reads, by: [0])
-                .map { meta, ofile, _mapped, pass -> if (pass) [ meta, ofile ] }
+                .map { meta, ofile, _mapped, _min_mapped_reads, pass -> if (pass) [ meta, ofile ] }
                 .set { ch_bai }
 
             ch_mapped_reads
-                .branch { meta, mapped, pass ->
+                .branch { meta, mapped, min_mapped_reads, pass ->
                     pass: pass
                         pass_mapped_reads[meta.id] = mapped
                         return [ "$meta.id\t$mapped" ]
                     fail: !pass
-                        fail_mapped_reads[meta.id] = mapped
-                        return [ "$meta.id\t$mapped" ]
+                        fail_mapped_reads[meta.id] = "$mapped mapped reads (minimum: $min_mapped_reads)"
+                        return [ "$meta.id\t$mapped\t$min_mapped_reads" ]
                 }
                 .set { ch_pass_fail_mapped }
 
@@ -395,7 +427,7 @@ workflow VIRALRECON {
                 .collect()
                 .map {
                     tsv_data ->
-                        def header = ['Sample', 'Mapped reads']
+                        def header = ['Sample', 'Mapped reads', 'Minimum mapped reads']
                         multiqcTsvFromList(tsv_data, header)
                 }
                 .collectFile(name: 'fail_mapped_samples_mqc.tsv')
@@ -970,6 +1002,22 @@ workflow VIRALRECON {
 
         if (params.mapper_nanopore == 'artic') {
 
+            if (params.min_mapped_reads == null) {
+                ch_min_mapped_reads_nanopore = ARTIC_GUPPYPLEX.out.fastq
+                    .filter { _meta, fastq -> fastq.countFastq() > min_guppyplex_reads }
+                    .combine(genome.fai)
+                    .map { entry ->
+                        def meta = entry[0][0]
+                        def reads = entry[0][1]
+                        def fai = entry[1]
+                        tuple(meta, estimateMinMappedReads(getMeanReadLength(reads), fai, params.min_depth_consensus, 1))
+                    }
+            } else {
+                ch_min_mapped_reads_nanopore = ARTIC_GUPPYPLEX.out.fastq
+                    .filter { _meta, fastq -> fastq.countFastq() > min_guppyplex_reads }
+                    .map { meta, _reads -> tuple(meta, params.min_mapped_reads) }
+            }
+
             ARTIC_MINION_PROTOCOL (
                 ARTIC_GUPPYPLEX.out.fastq.filter { _meta, fastq -> fastq.countFastq() > min_guppyplex_reads },
                 ch_clair3_model,
@@ -988,6 +1036,22 @@ workflow VIRALRECON {
                 .collect{_meta, artic_minion_report -> artic_minion_report}.ifEmpty([]))
 
         } else if (params.mapper_nanopore == 'minimap2') {
+
+            if (params.min_mapped_reads == null) {
+                ch_min_mapped_reads_nanopore = ARTIC_GUPPYPLEX.out.fastq
+                    .filter { _meta, fastq -> fastq.countFastq() > min_guppyplex_reads }
+                    .combine(genome.fai)
+                    .map { entry ->
+                        def meta = entry[0][0]
+                        def reads = entry[0][1]
+                        def fai = entry[1]
+                        tuple(meta, estimateMinMappedReads(getMeanReadLength(reads), fai, params.min_depth_consensus, 1))
+                    }
+            } else {
+                ch_min_mapped_reads_nanopore = ARTIC_GUPPYPLEX.out.fastq
+                    .filter { _meta, fastq -> fastq.countFastq() > min_guppyplex_reads }
+                    .map { meta, _reads -> tuple(meta, params.min_mapped_reads) }
+            }
 
             MINIMAP2_MAPPING(
                 ARTIC_GUPPYPLEX.out.fastq.filter { _meta, fastq ->
@@ -1038,16 +1102,17 @@ workflow VIRALRECON {
         //
         ch_fail_mapping_multiqc_nanopore = channel.empty()
         FILTER_BAM_SAMTOOLS.out.flagstat
-            .map { meta, flagstat ->
-                def (mapped_reads, pass) = getFlagstatMappedReads(flagstat, params)
-                [ meta, mapped_reads, pass ]
+            .join(ch_min_mapped_reads_nanopore, by: [0])
+            .map { meta, flagstat, min_mapped_reads ->
+                def (mapped_reads, pass) = getFlagstatMappedReads(flagstat, min_mapped_reads)
+                [ meta, mapped_reads, min_mapped_reads, pass ]
             }
             .set { ch_mapped_reads_nanopore }
 
         // Filter BAM files based on mapping threshold
         ch_bam
             .join(ch_mapped_reads_nanopore, by: [0])
-            .map { meta, bam, _mapped, pass ->
+            .map { meta, bam, _mapped, _min_mapped_reads, pass ->
                 if (pass) [ meta, bam ]
             }
             .set { ch_filtered_bam_nanopore }
@@ -1055,7 +1120,7 @@ workflow VIRALRECON {
         // Filter BAI files based on mapping threshold
         ch_bai
             .join(ch_mapped_reads_nanopore, by: [0])
-            .map { meta, bai, _mapped, pass ->
+            .map { meta, bai, _mapped, _min_mapped_reads, pass ->
                 if (pass) [ meta, bai ]
             }
             .set { ch_filtered_bai_nanopore }
@@ -1063,20 +1128,20 @@ workflow VIRALRECON {
         // Filter FASTA files based on mapping threshold
         ch_consensus
             .join(ch_mapped_reads_nanopore, by: [0])
-            .map { meta, fasta, _mapped_reads, pass ->
+            .map { meta, fasta, _mapped_reads, _min_mapped_reads, pass ->
                 if (pass) [ meta, fasta ]
             }
             .set { ch_filtered_fasta_nanopore }
 
         // Track passed/failed samples for MultiQC
         ch_mapped_reads_nanopore
-            .branch { meta, mapped, pass ->
+            .branch { meta, mapped, min_mapped_reads, pass ->
                 pass: pass
                     pass_mapped_reads[meta.id] = mapped
                     return [ "$meta.id\t$mapped" ]
                 fail: !pass
-                    fail_mapped_reads[meta.id] = mapped
-                    return [ "$meta.id\t$mapped" ]
+                    fail_mapped_reads[meta.id] = "$mapped mapped reads (minimum: $min_mapped_reads)"
+                    return [ "$meta.id\t$mapped\t$min_mapped_reads" ]
             }
             .set { ch_pass_fail_mapped_nanopore }
 
@@ -1086,7 +1151,7 @@ workflow VIRALRECON {
             .collect()
             .map {
                 tsv_data ->
-                    def header = ['Sample', 'Mapped reads']
+                    def header = ['Sample', 'Mapped reads', 'Minimum mapped reads']
                     multiqcTsvFromList(tsv_data, header)
             }
             .collectFile(name: 'fail_mapped_samples_nanopore_mqc.tsv')
