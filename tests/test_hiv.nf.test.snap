@@ -658,6 +658,117 @@
     "-profile test_hiv --split_hiv_fragments false": {
         "content": [
             {
+                "BAM2CODFREQ": {
+                    "python": "3.9.23"
+                },
+                "BCFTOOLS_QUERY": {
+                    "bcftools": "1.23.1"
+                },
+                "BCFTOOLS_SORT": {
+                    "bcftools": "1.23.1"
+                },
+                "BCFTOOLS_STATS": {
+                    "bcftools": "1.23.1"
+                },
+                "BOWTIE2_ALIGN": {
+                    "bowtie2": "2.5.5",
+                    "pigz": 2.8,
+                    "samtools": 1.24
+                },
+                "BOWTIE2_BUILD": {
+                    "bowtie2": "2.5.5"
+                },
+                "CAT_FASTQ": {
+                    "cat": 9.5
+                },
+                "FASTP": {
+                    "fastp": "1.4.0"
+                },
+                "FASTQC_RAW": {
+                    "fastqc": "0.13.0"
+                },
+                "FASTQC_TRIM": {
+                    "fastqc": "0.13.0"
+                },
+                "GFF2JSON": {
+                    "python": "3.13.2"
+                },
+                "HTSLIB_BGZIPTABIX": {
+                    "htslib": 1.24,
+                    "xz": "5.8.3"
+                },
+                "IVAR_CONSENSUS": {
+                    "ivar": "1.4.4"
+                },
+                "IVAR_VARIANTS": {
+                    "ivar": "1.4.4"
+                },
+                "IVAR_VARIANTS_TO_VCF": {
+                    "python": "3.13.2"
+                },
+                "KRAKEN2_KRAKEN2": {
+                    "kraken2": "2.1.6",
+                    "pigz": 2.8
+                },
+                "MAKE_VARIANTS_LONG_TABLE": {
+                    "python": "3.13.2"
+                },
+                "MOSDEPTH_GENOME": {
+                    "gzip": 1.14,
+                    "mosdepth": "0.3.14"
+                },
+                "NEXTCLADE_DATASETGET": {
+                    "nextclade": "3.21.2",
+                    "nextclade-dataset": "2025-09-09--12-13-13Z"
+                },
+                "PICARD_COLLECTMULTIPLEMETRICS": {
+                    "picard": "3.5.0"
+                },
+                "PLOT_MOSDEPTH_REGIONS_GENOME": {
+                    "r-base": "4.2.0"
+                },
+                "QUAST": {
+                    "quast": "5.3.0"
+                },
+                "RESISTANCE_REPORT": {
+                    "python": "3.13.2"
+                },
+                "RESISTANCE_TABLES": {
+                    "python": "3.13.2"
+                },
+                "SAMTOOLS_FAIDX": {
+                    "samtools": 1.24
+                },
+                "SAMTOOLS_FLAGSTAT": {
+                    "samtools": 1.24
+                },
+                "SAMTOOLS_IDXSTATS": {
+                    "samtools": 1.24
+                },
+                "SAMTOOLS_INDEX": {
+                    "samtools": 1.24
+                },
+                "SAMTOOLS_SORT": {
+                    "samtools": 1.24
+                },
+                "SAMTOOLS_STATS": {
+                    "samtools": 1.24
+                },
+                "SIERRALOCAL": {
+                    "sierra-local": "0.4.3"
+                },
+                "SNPEFF_ANN": {
+                    "snpeff": "5.0e"
+                },
+                "SNPEFF_BUILD": {
+                    "snpeff": "5.0e"
+                },
+                "SNPSIFT_EXTRACTFIELDS": {
+                    "snpsift": 4.3
+                },
+                "UNTAR_KRAKEN2_DB": {
+                    "untar": 1.34
+                },
                 "Workflow": {
                     "nf-core/viralrecon": "v3.1.0dev"
                 }
@@ -705,6 +816,83 @@
                 "kraken2/DRR030302.kraken2.report.txt",
                 "kraken2/SRR4071760.kraken2.report.txt",
                 "kraken2/SRR6937100.kraken2.report.txt",
+                "multiqc",
+                "multiqc/multiqc_data",
+                "multiqc/multiqc_data/bcftools-stats-subtypes.yaml",
+                "multiqc/multiqc_data/bcftools_stats_indel-lengths.yaml",
+                "multiqc/multiqc_data/bcftools_stats_vqc_Count_Indels.yaml",
+                "multiqc/multiqc_data/bcftools_stats_vqc_Count_SNP.yaml",
+                "multiqc/multiqc_data/bcftools_stats_vqc_Count_Transitions.yaml",
+                "multiqc/multiqc_data/bcftools_stats_vqc_Count_Transversions.yaml",
+                "multiqc/multiqc_data/bowtie2_pe_plot.yaml",
+                "multiqc/multiqc_data/fastp-insert-size-plot.yaml",
+                "multiqc/multiqc_data/fastp-seq-content-gc-plot_Read_1_After_filtering.yaml",
+                "multiqc/multiqc_data/fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml",
+                "multiqc/multiqc_data/fastp-seq-content-gc-plot_Read_2_After_filtering.yaml",
+                "multiqc/multiqc_data/fastp-seq-content-gc-plot_Read_2_Before_filtering.yaml",
+                "multiqc/multiqc_data/fastp-seq-content-n-plot_Read_1_After_filtering.yaml",
+                "multiqc/multiqc_data/fastp-seq-content-n-plot_Read_1_Before_filtering.yaml",
+                "multiqc/multiqc_data/fastp-seq-content-n-plot_Read_2_After_filtering.yaml",
+                "multiqc/multiqc_data/fastp-seq-content-n-plot_Read_2_Before_filtering.yaml",
+                "multiqc/multiqc_data/fastp-seq-quality-plot_Read_1_After_filtering.yaml",
+                "multiqc/multiqc_data/fastp-seq-quality-plot_Read_1_Before_filtering.yaml",
+                "multiqc/multiqc_data/fastp-seq-quality-plot_Read_2_After_filtering.yaml",
+                "multiqc/multiqc_data/fastp-seq-quality-plot_Read_2_Before_filtering.yaml",
+                "multiqc/multiqc_data/fastp_filtered_reads_plot.yaml",
+                "multiqc/multiqc_data/fastqc-status-check-heatmap.yaml",
+                "multiqc/multiqc_data/fastqc_adapter_content_plot.yaml",
+                "multiqc/multiqc_data/fastqc_overrepresented_sequences_plot.yaml",
+                "multiqc/multiqc_data/fastqc_per_base_n_content_plot.yaml",
+                "multiqc/multiqc_data/fastqc_per_base_sequence_quality_plot.yaml",
+                "multiqc/multiqc_data/fastqc_per_sequence_gc_content_plot_Counts.yaml",
+                "multiqc/multiqc_data/fastqc_per_sequence_gc_content_plot_Percentages.yaml",
+                "multiqc/multiqc_data/fastqc_per_sequence_quality_scores_plot.yaml",
+                "multiqc/multiqc_data/fastqc_sequence_counts_plot.yaml",
+                "multiqc/multiqc_data/fastqc_sequence_duplication_levels_plot.yaml",
+                "multiqc/multiqc_data/fastqc_sequence_length_distribution_plot.yaml",
+                "multiqc/multiqc_data/fastqc_top_overrepresented_sequences_table.yaml",
+                "multiqc/multiqc_data/kraken-top-n-plot_Class.yaml",
+                "multiqc/multiqc_data/kraken-top-n-plot_Domain.yaml",
+                "multiqc/multiqc_data/kraken-top-n-plot_Family.yaml",
+                "multiqc/multiqc_data/kraken-top-n-plot_Genus.yaml",
+                "multiqc/multiqc_data/kraken-top-n-plot_Order.yaml",
+                "multiqc/multiqc_data/kraken-top-n-plot_Phylum.yaml",
+                "multiqc/multiqc_data/kraken-top-n-plot_Unclassified.yaml",
+                "multiqc/multiqc_data/llms-full.txt",
+                "multiqc/multiqc_data/mosdepth-coverage-per-contig-single.yaml",
+                "multiqc/multiqc_data/mosdepth-cumcoverage-dist-id.yaml",
+                "multiqc/multiqc_data/mosdepth_cov_dist.yaml",
+                "multiqc/multiqc_data/mosdepth_cumcov_dist.yaml",
+                "multiqc/multiqc_data/mosdepth_perchrom.yaml",
+                "multiqc/multiqc_data/multiqc.log",
+                "multiqc/multiqc_data/multiqc.parquet",
+                "multiqc/multiqc_data/multiqc_bcftools_stats.yaml",
+                "multiqc/multiqc_data/multiqc_bowtie2.yaml",
+                "multiqc/multiqc_data/multiqc_citations.yaml",
+                "multiqc/multiqc_data/multiqc_data.json",
+                "multiqc/multiqc_data/multiqc_fastp.yaml",
+                "multiqc/multiqc_data/multiqc_fastqc.yaml",
+                "multiqc/multiqc_data/multiqc_ivar_variants.yaml",
+                "multiqc/multiqc_data/multiqc_kraken.yaml",
+                "multiqc/multiqc_data/multiqc_nextclade_clade.yaml",
+                "multiqc/multiqc_data/multiqc_quast_quast_variants.yaml",
+                "multiqc/multiqc_data/multiqc_samtools_flagstat_samtools_bowtie2.yaml",
+                "multiqc/multiqc_data/multiqc_samtools_flagstat_samtools_ivar.yaml",
+                "multiqc/multiqc_data/multiqc_samtools_flagstat_samtools_markduplicates.yaml",
+                "multiqc/multiqc_data/multiqc_snpeff.yaml",
+                "multiqc/multiqc_data/multiqc_software_versions.yaml",
+                "multiqc/multiqc_data/multiqc_sources.yaml",
+                "multiqc/multiqc_data/multiqc_summary_variants_metrics_plot.yaml",
+                "multiqc/multiqc_data/quast_num_contigs.yaml",
+                "multiqc/multiqc_data/quast_table.yaml",
+                "multiqc/multiqc_data/samtools-flagstat-pct-table.yaml",
+                "multiqc/multiqc_data/samtools-flagstat-table.yaml",
+                "multiqc/multiqc_data/snpeff_effects.yaml",
+                "multiqc/multiqc_data/snpeff_variant_effects_class.yaml",
+                "multiqc/multiqc_data/snpeff_variant_effects_impact.yaml",
+                "multiqc/multiqc_data/snpeff_variant_effects_region.yaml",
+                "multiqc/multiqc_report.html",
+                "multiqc/summary_variants_metrics_mqc.csv",
                 "nextclade",
                 "nextclade/neherlab",
                 "nextclade/neherlab/hiv-1",
@@ -933,17 +1121,24 @@
                 "variants/ivar/snpeff/DRR030302.snpeff.summary.html",
                 "variants/ivar/snpeff/DRR030302.snpeff.vcf.gz",
                 "variants/ivar/snpeff/DRR030302.snpeff.vcf.gz.tbi",
+                "variants/ivar/snpeff/DRR030302.snpsift.txt",
                 "variants/ivar/snpeff/SRR4071760.snpeff.csv",
                 "variants/ivar/snpeff/SRR4071760.snpeff.genes.txt",
                 "variants/ivar/snpeff/SRR4071760.snpeff.summary.html",
+                "variants/ivar/snpeff/SRR4071760.snpeff.vcf.gz",
+                "variants/ivar/snpeff/SRR4071760.snpeff.vcf.gz.tbi",
+                "variants/ivar/snpeff/SRR4071760.snpsift.txt",
                 "variants/ivar/snpeff/SRR6937100.snpeff.csv",
                 "variants/ivar/snpeff/SRR6937100.snpeff.genes.txt",
                 "variants/ivar/snpeff/SRR6937100.snpeff.summary.html",
                 "variants/ivar/snpeff/SRR6937100.snpeff.vcf.gz",
                 "variants/ivar/snpeff/SRR6937100.snpeff.vcf.gz.tbi",
+                "variants/ivar/snpeff/SRR6937100.snpsift.txt",
                 "variants/ivar/snpeff/bcftools_stats",
                 "variants/ivar/snpeff/bcftools_stats/DRR030302.snpeff.bcftools_stats.txt",
-                "variants/ivar/snpeff/bcftools_stats/SRR6937100.snpeff.bcftools_stats.txt"
+                "variants/ivar/snpeff/bcftools_stats/SRR4071760.snpeff.bcftools_stats.txt",
+                "variants/ivar/snpeff/bcftools_stats/SRR6937100.snpeff.bcftools_stats.txt",
+                "variants/ivar/variants_long_table.csv"
             ],
             [
                 "DRR030302.fastp.json:md5,0e3bd4cef11bc9ae27d0b5420a4739b4",
@@ -952,6 +1147,61 @@
                 "DRR030302.kraken2.report.txt:md5,5ab2ed70334d4061fb82f8d91475c761",
                 "SRR4071760.kraken2.report.txt:md5,c26f91bfafe58ba451f7d05f0b9b5611",
                 "SRR6937100.kraken2.report.txt:md5,6f5c455f6efd9fa807fefdbba83ba960",
+                "bcftools-stats-subtypes.yaml:md5,39823030b199b74b5c484d1ecfc31402",
+                "bcftools_stats_indel-lengths.yaml:md5,b97ee0b5c0225812a2edea3dcb4f3211",
+                "bcftools_stats_vqc_Count_Indels.yaml:md5,336c51fc0b2902c0d65cca3327d136fb",
+                "bcftools_stats_vqc_Count_SNP.yaml:md5,14e6b945dd99e9f124206a5e3074227c",
+                "bcftools_stats_vqc_Count_Transitions.yaml:md5,dc4e1856617f414a65ea2cec0ede7971",
+                "bcftools_stats_vqc_Count_Transversions.yaml:md5,f9e0533d48d495637e9c12c0f29d79e7",
+                "bowtie2_pe_plot.yaml:md5,e0f7a3f55b45307ecfd9a005f9e4bf43",
+                "fastp-insert-size-plot.yaml:md5,c23e263877151fee5fb7e2f16008d7a3",
+                "fastp-seq-content-gc-plot_Read_1_After_filtering.yaml:md5,6c4222897b9db16fcdf2ef82209a4c09",
+                "fastp-seq-content-gc-plot_Read_1_Before_filtering.yaml:md5,60a4eefbe7c07a67553b5458b3ce1402",
+                "fastp-seq-content-gc-plot_Read_2_After_filtering.yaml:md5,69dc43d2d4cead054e7e184607f2dff7",
+                "fastp-seq-content-gc-plot_Read_2_Before_filtering.yaml:md5,dcf18674271dc415f8ce145fb36775f6",
+                "fastp-seq-content-n-plot_Read_1_After_filtering.yaml:md5,0d3bb7a21591b7a267a312452e811b86",
+                "fastp-seq-content-n-plot_Read_1_Before_filtering.yaml:md5,0d3bb7a21591b7a267a312452e811b86",
+                "fastp-seq-content-n-plot_Read_2_After_filtering.yaml:md5,0d3bb7a21591b7a267a312452e811b86",
+                "fastp-seq-content-n-plot_Read_2_Before_filtering.yaml:md5,0d3bb7a21591b7a267a312452e811b86",
+                "fastp-seq-quality-plot_Read_1_After_filtering.yaml:md5,870758c291698af908cec0acb0a08036",
+                "fastp-seq-quality-plot_Read_1_Before_filtering.yaml:md5,dd5b62334755a8b0373050c5cbddf552",
+                "fastp-seq-quality-plot_Read_2_After_filtering.yaml:md5,7d0d05c8d398cd0587dd57ac268d874a",
+                "fastp-seq-quality-plot_Read_2_Before_filtering.yaml:md5,ea043d1815f5ed1b80a7bb775abbc5c3",
+                "fastp_filtered_reads_plot.yaml:md5,94235b4ad306d22ef24cf218167e72b2",
+                "fastqc-status-check-heatmap.yaml:md5,2c08f0a35e3873e813c1c4e170d1396b",
+                "fastqc_adapter_content_plot.yaml:md5,a4552316a37ebbf4dd3701129bf4a34a",
+                "fastqc_overrepresented_sequences_plot.yaml:md5,21d01f359bd330f250c6231153f72f17",
+                "fastqc_per_base_n_content_plot.yaml:md5,8628eb45b7f1337e55119b390109f373",
+                "fastqc_per_base_sequence_quality_plot.yaml:md5,a84c6e3c4b89e5327b244f915d46468f",
+                "fastqc_per_sequence_gc_content_plot_Counts.yaml:md5,70072e0276358009bd152044dc56ecb3",
+                "fastqc_per_sequence_gc_content_plot_Percentages.yaml:md5,9aa0ae1847e8faaf97628699bc181468",
+                "fastqc_per_sequence_quality_scores_plot.yaml:md5,b4c1fd1174bc162d535d7c072d256ef1",
+                "fastqc_sequence_counts_plot.yaml:md5,7979d2b445f6840815230e20c0145cc2",
+                "fastqc_sequence_duplication_levels_plot.yaml:md5,e04cedc1daae9e55400c1da159226198",
+                "fastqc_sequence_length_distribution_plot.yaml:md5,0f51208590a7fab0e91167c8dc199b7d",
+                "fastqc_top_overrepresented_sequences_table.yaml:md5,b0acea45ac4dbda2f2f42fb0bbad43b4",
+                "kraken-top-n-plot_Class.yaml:md5,7c0469a3822f971d340dcc58cf063eaf",
+                "kraken-top-n-plot_Domain.yaml:md5,7c0469a3822f971d340dcc58cf063eaf",
+                "kraken-top-n-plot_Family.yaml:md5,7c0469a3822f971d340dcc58cf063eaf",
+                "kraken-top-n-plot_Genus.yaml:md5,7c0469a3822f971d340dcc58cf063eaf",
+                "kraken-top-n-plot_Order.yaml:md5,7c0469a3822f971d340dcc58cf063eaf",
+                "kraken-top-n-plot_Phylum.yaml:md5,7c0469a3822f971d340dcc58cf063eaf",
+                "kraken-top-n-plot_Unclassified.yaml:md5,7c0469a3822f971d340dcc58cf063eaf",
+                "mosdepth-coverage-per-contig-single.yaml:md5,2c92507750d8cb480c983ce4bb2cd44f",
+                "mosdepth-cumcoverage-dist-id.yaml:md5,0f45ab2b438f73f13ae6ccb2f478bc49",
+                "mosdepth_cov_dist.yaml:md5,eda47c603a9c2c464825707829c728c5",
+                "mosdepth_cumcov_dist.yaml:md5,eda47c603a9c2c464825707829c728c5",
+                "mosdepth_perchrom.yaml:md5,481a2ec6903dadadb8f9610f37a01724",
+                "multiqc_bcftools_stats.yaml:md5,675d4e41cc92af9381006d9dafcc5503",
+                "multiqc_bowtie2.yaml:md5,bb7fe62e1ee3c986e3afc4c6480ac9cf",
+                "multiqc_citations.yaml:md5,f564e5526b36c9a583e0af5ca7a34b64",
+                "multiqc_fastp.yaml:md5,254bf696c9aafdf55990a2f9deae2d11",
+                "multiqc_fastqc.yaml:md5,49eadab2a52d211ff095333bf2904baf",
+                "multiqc_ivar_variants.yaml:md5,92e053dd68158082d67218932751c0b8",
+                "multiqc_kraken.yaml:md5,bbacecf8e782bb601be23351c164dd6b",
+                "multiqc_nextclade_clade.yaml:md5,9acf3d4a4b35cf58df39ffbcef25f9e8",
+                "multiqc_quast_quast_variants.yaml:md5,0099b6f7d114d93ed03630ea03bfb50c",
+                "snpeff_variant_effects_class.yaml:md5,648eb23e1ee9e601a7c8433aeab532fd",
                 "CHANGELOG.md:md5,e51168eee0bc2a213a7382c198f44893",
                 "README.md:md5,e029ded293961c99d1a5d58f34a70017",
                 "genome_annotation.gff3:md5,dbc49e5f16a70495bdfec06407fe192b",
@@ -1012,10 +1262,11 @@
                 "SRR4071760.variant_counts.log:md5,f0d877c9022632eb41004166bb14b8bf",
                 "SRR6937100.variant_counts.log:md5,236b6e11ca54612af5e22c6ce9f63355",
                 "DRR030302.snpeff.bcftools_stats.txt:md5,7313aafba216715ebbbf1612f087324d",
+                "SRR4071760.snpeff.bcftools_stats.txt:md5,6f5cb9efcbcacb68ce976d22285cfce3",
                 "SRR6937100.snpeff.bcftools_stats.txt:md5,a242a628ced53f56bcdfa63d46084451"
             ]
         ],
-        "timestamp": "2026-11-24T16:54:36.833614959",
+        "timestamp": "2026-11-24T17:25:49.353876368",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.10.7"
@@ -1644,7 +1895,7 @@
                 "SRR4071760_resistance.json:md5,87d92a7208761e9d89600159499d9e49",
                 "SRR6937100_resistance.json:md5,51689a45b50c07ddb1b54dedf8ce7043",
                 "DRR030302.csv:md5,940399f052c8ce2084b99fc83ac2389f",
-                "DRR030302.fragments.csv:md5,2cb9669bf34d942710a91f2b15e1308b",
+                "DRR030302.fragments.csv:md5,37c689ebc6392e3191dd83bd8e4dd48b",
                 "SRR4071760.csv:md5,317eafc82d3e2bfd1da3a64434238cce",
                 "SRR4071760.fragments.csv:md5,602ce97875218435b1b550cf68f62be8",
                 "SRR6937100.csv:md5,3d208099f2c9c2f37a238e9f7668c7a1",
@@ -1658,7 +1909,7 @@
                 "SRR6937100.snpeff.bcftools_stats.txt:md5,a242a628ced53f56bcdfa63d46084451"
             ]
         ],
-        "timestamp": "2026-11-24T16:42:07.225841703",
+        "timestamp": "2026-11-24T17:16:51.506511025",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.10.7"
