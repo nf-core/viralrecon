@@ -16,6 +16,12 @@ nextflow_pipeline {
                 genome: "NC_001802.1"
             ]
         ]
+        [
+            name: "-profile test_hiv --split_hiv_fragments false",
+            params: [
+                split_hiv_fragments: false
+            ]
+        ]
     ]
 
     // Loop through scenarios and generate tests dynamically
