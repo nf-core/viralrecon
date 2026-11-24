@@ -91,8 +91,8 @@ def parse_args(args: list[str] | None = None) -> argparse.Namespace:
         required=True,
         help="Resistance CSV file for one sample.",
     )
-    parser.add_argument("-n", "--nextclade_csv", type=Path, required=True, help="Nextclade CSV file.")
-    parser.add_argument("-cn", "--consensus_fasta", type=Path, required=True, help="Consensus FASTA file.")
+    parser.add_argument("-n", "--nextclade_csv", type=Path, nargs="+", required=True, help="Nextclade CSV file(s).")
+    parser.add_argument("-cn", "--consensus_fasta", type=Path, nargs="+", required=True, help="Consensus FASTA file(s).")
     parser.add_argument(
         "-ic",
         "--ivar_consensus_params",
@@ -143,14 +143,14 @@ def load_sierra_json(json_path: Path) -> dict[str, Any]:
         return json.load(handle)[0]
 
 
-def read_consensus_records(consensus_fasta: Path) -> dict[str, SeqRecord]:
-    """Read the consensus FASTA into a dict keyed by the region after the last '|'."""
+def read_consensus_records(consensus_fastas: list[Path]) -> dict[str, SeqRecord]:
+    """Read consensus FASTAs keyed by their region or as the whole genome."""
     records = {}
-    for record in SeqIO.parse(consensus_fasta, "fasta"):
-        _, separator, region = record.id.rpartition("|")
-        if not separator or not region:
-            raise ValueError(f"Consensus record ID must end with '|REGION': {record.id}")
-        records[region] = record
+    for consensus_fasta in consensus_fastas:
+        for record in SeqIO.parse(consensus_fasta, "fasta"):
+            _, separator, region = record.id.rpartition("|")
+            # Whole-genome records have no region suffix; extracted fragments do.
+            records[region if separator and region else "FULL"] = record
     return records
 
 
@@ -185,9 +185,12 @@ def estimate_ambiguous_site_percent(consensus_records: dict[str, SeqRecord]) -> 
     return float(f"{proportion * 100:.2f}")
 
 
-def get_nextclade_subtypes(nextclade_csv: Path, consensus_records: dict[str, SeqRecord]) -> list[dict[str, str]]:
+def get_nextclade_subtypes(nextclade_csv: list[Path], consensus_records: dict[str, SeqRecord]) -> list[dict[str, str]]:
     """Return the Nextclade clade of each pol region present in the consensus."""
-    clades = pd.read_csv(nextclade_csv, sep=";").set_index("seqName")["clade"]
+    clades = pd.concat(
+        [pd.read_csv(csv_path, sep=";") for csv_path in nextclade_csv],
+        ignore_index=True,
+    ).set_index("seqName")["clade"]
     return [
         {"region": region, "subtype": clades.loc[record.id]}
         for region, record in consensus_records.items()

@@ -11,7 +11,7 @@ process EXTRACT_CONSENSUS_REGIONS {
     tuple val(meta), path(consensus), path(annotation)
 
     output:
-    tuple val(meta), path("*.all_consensus.fa"), emit: all_consensus
+    tuple val(meta), path("*.fragments.fa"), emit: consensus_fragments_fasta
     tuple val(meta), path("${meta.id}.*.fa"), emit: consensus_fragments, optional: true
     tuple val("${task.process}"), val('python'), eval('python --version | sed "s/Python //g"'), emit: versions_python, topic: versions
 
@@ -27,7 +27,7 @@ process EXTRACT_CONSENSUS_REGIONS {
         --consensus_fasta $consensus \
         --gff $annotation \
         --sample_id ${meta.id} \
-        --output ${prefix}.all_consensus.fa \
+        --output ${prefix}.fragments.fa \
         $args
 
     """
