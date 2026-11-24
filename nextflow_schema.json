@@ -171,7 +171,7 @@
                 "fastq_dir": {
                     "type": "string",
                     "format": "directory-path",
-                    "description": "Path to a folder containing fastq files from the Nanopore run.",
+                    "description": "Path to a folder containing barcodeXX sub-directories with fastq files from the Nanopore run. Required only for samples defined via the 'barcode' column of --input; not needed if FastQ paths are provided in the 'fastq_1' column.",
                     "help_text": "e.g. '--fastq_dir ./20191023_1522_MC-110615_0_FAO93606_12bf9b4f/fastq_pass/'.",
                     "fa_icon": "fas fa-folder-open"
                 },

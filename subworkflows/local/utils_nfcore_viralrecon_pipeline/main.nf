@@ -104,7 +104,13 @@ workflow PIPELINE_INITIALISATION {
         channel
             .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
             .map {
-                meta, fastq_1, fastq_2, _barcode->
+                meta, fastq_1, fastq_2, barcode->
+                    if (!fastq_1) {
+                        error("Please check input samplesheet -> 'fastq_1' must be provided for Illumina sample '${meta.id}'.")
+                    }
+                    if (barcode) {
+                        log.warn("Ignoring 'barcode' column for Illumina sample '${meta.id}'.")
+                    }
                     if (!fastq_2) {
                         return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
                     } else {
@@ -119,13 +125,43 @@ workflow PIPELINE_INITIALISATION {
             }
             .set { ch_samplesheet }
     } else if (params.platform == 'nanopore') {
+        //
+        // Each sample is provided either with FastQ file(s) in 'fastq_1' or with a 'barcode' found in --fastq_dir
+        // Emits: [ meta, [ fastq, ... ], barcode ] where fastqs is empty for barcode samples and barcode is null for FastQ samples
+        // Multiple rows for the same sample are merged together
+        //
         ch_samplesheet = channel.empty()
-        if (input){
+        if (input) {
             channel
                 .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
                 .map {
-                    meta, _fastq_1, _fastq_2, barcode->
-                        tuple( "barcode"+ String.format('%02d', barcode).toString(), meta.id)
+                    meta, fastq_1, fastq_2, barcode ->
+                        if (fastq_2) {
+                            error("Please check input samplesheet -> 'fastq_2' is not supported for Nanopore sample '${meta.id}'. Leave the column empty.")
+                        }
+                        if (fastq_1 && barcode) {
+                            error("Please check input samplesheet -> provide either 'fastq_1' or 'barcode' for Nanopore sample '${meta.id}', not both.")
+                        }
+                        if (!fastq_1 && !barcode) {
+                            error("Please check input samplesheet -> provide either 'fastq_1' or 'barcode' for Nanopore sample '${meta.id}'.")
+                        }
+                        if (barcode && !params.fastq_dir) {
+                            error("Please check input samplesheet -> Nanopore sample '${meta.id}' uses a 'barcode', so '--fastq_dir' must be provided.")
+                        }
+                        def barcode_id = barcode ? "barcode" + String.format('%02d', barcode as Integer) : null
+                        [ meta.id, meta + [ single_end:true ], fastq_1 ?: null, barcode_id ]
+                }
+                .groupTuple()
+                .map { _id, metas, fastqs, barcodes ->
+                    def fastq_list   = fastqs.findAll { fastq -> fastq }
+                    def barcode_list = barcodes.findAll { barcode -> barcode }.unique()
+                    if (fastq_list && barcode_list) {
+                        error("Please check input samplesheet -> Nanopore sample '${metas[0].id}' mixes 'fastq_1' and 'barcode' rows. Use one or the other per sample.")
+                    }
+                    if (barcode_list.size() > 1) {
+                        error("Please check input samplesheet -> Nanopore sample '${metas[0].id}' has multiple barcodes: ${barcode_list.join(', ')}.")
+                    }
+                    [ metas[0], fastq_list, barcode_list ? barcode_list[0] : null ]
                 }
                 .set { ch_samplesheet }
         }

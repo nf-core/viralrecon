@@ -8,7 +8,7 @@ process ARTIC_GUPPYPLEX {
         'community.wave.seqera.io/library/artic:1.6.2--d4956cdc155b8612' }"
 
     input:
-    tuple val(meta), path(fastq_dir)
+    tuple val(meta), path(fastqs, stageAs: 'input_fastq/*')
 
     output:
     tuple val(meta), path("*.fastq.gz"), emit: fastq
@@ -24,7 +24,7 @@ process ARTIC_GUPPYPLEX {
     artic \\
         guppyplex \\
         ${args} \\
-        --directory ${fastq_dir} \\
+        --directory input_fastq \\
         --output ${prefix}.fastq
 
     pigz -p ${task.cpus} *.fastq
