@@ -1469,21 +1469,7 @@
        sodipodi:nodetypes="ccsscccccccccc"
        inkscape:connector-curvature="0"
        d="m -66.366083,-58.899471 h 2.896688 v 1.279504 c 0,0.06909 0.05605,0.125035 0.125038,0.125035 h 1.104607 v 0.626447 h -4.126333 z m 4.126345,5.809144 h -4.126345 v -1.204682 h 4.126333 v 1.204682 z"
-       id="path2501" /><flowRoot
-       transform="matrix(0.06093338,0,0,0.06093338,-95.394634,-169.07065)"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:21.7364px;line-height:0.01%;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro Bold';letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       id="flowRoot2511"
-       xml:space="preserve"><flowRegion
-         id="flowRegion2507"><rect
-           transform="scale(1,-1)"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro Bold';fill:#ffffff"
-           y="-1904.0004"
-           x="474.39999"
-           height="53.599998"
-           width="112"
-           id="rect2505" /></flowRegion><flowPara
-         id="flowPara2509"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:21.7364px;line-height:1.25;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro Bold'">FASTQ</flowPara></flowRoot><text
+       id="path2501" /><text id="flowRoot2511" transform="matrix(0.06093338,0,0,0.06093338,-95.394634,-169.07065)" x="474.4" y="1872" xml:space="preserve" style="font-family:'Maven Pro',sans-serif;font-size:21.7364px;font-weight:bold;fill:#ffffff;stroke:none;text-anchor:start">FASTQ</text><text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.40813px;line-height:1.25;font-family:'DejaVu Sans Mono';-inkscape-font-specification:'DejaVu Sans Mono Bold';letter-spacing:0px;stroke-width:0.0903045"
        x="-47.922039"
@@ -1778,7 +1764,7 @@
          d="m 524.39681,1938.4637 h 47.5386 v -20.9983 c 0,-1.1338 0.91983,-2.0521 2.05208,-2.0521 h 18.12807 v -10.2809 h -67.71875 z m 67.71894,-95.336 h -67.71894 v 19.7705 h 67.71875 v -19.7705 z"
          id="path8526" /></g><text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1.22px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke:none"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1.22px;font-family:'Maven Pro',sans-serif;-inkscape-font-specification:'Maven Pro Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke:none"
        x="174.95000"
        y="-45.65000"
        id="text-variants-long-table-tsv">TSV</text><path
@@ -1823,7 +1809,7 @@
        d="m 153.21554,-39.764705 h 2.89669 v 1.279497 c 0,0.0691 0.0561,0.125036 0.12504,0.125036 h 1.1046 v 0.626448 h -4.12633 z m 4.12635,5.809143 h -4.12635 v -1.204679 h 4.12633 v 1.204679 z"
        id="path38225" /><text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1.22px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke:none"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1.22px;font-family:'Maven Pro',sans-serif;-inkscape-font-specification:'Maven Pro Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke:none"
        x="155.28000"
        y="-35.83500"
        id="text-finalqc-multiqc-html-inline">HTML</text><g
@@ -1840,7 +1826,7 @@
          d="m 206.01077,-117.09908 h 2.89669 v 1.2795 c 0,0.0691 0.0561,0.12503 0.12504,0.12503 h 1.1046 v 0.62645 h -4.12633 z m 4.12635,5.80914 h -4.12635 v -1.20468 h 4.12633 v 1.20468 z"
          id="path38225-3" /><text
          xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1.22px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke:none"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1.22px;font-family:'Maven Pro',sans-serif;-inkscape-font-specification:'Maven Pro Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke:none"
          x="208.08000"
          y="-113.17000"
          id="text-box6-html">HTML</text></g><g
@@ -2036,7 +2022,7 @@
          d="m 118.8887,-37.977204 h 2.89669 v 1.279497 c 0,0.0691 0.0561,0.125036 0.12504,0.125036 h 1.1046 v 0.626448 h -4.12633 z m 4.12634,5.809143 h -4.12634 v -1.204679 h 4.12633 v 1.204679 z"
          id="path4489" /><text
          xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1.22px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke:none"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1.22px;font-family:'Maven Pro',sans-serif;-inkscape-font-specification:'Maven Pro Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke:none"
          x="121.00039"
          y="-34.249882"
          id="text-finalqc-multiqc-html">HTML</text></g><g
@@ -2661,7 +2647,7 @@
          d="m 524.39681,1938.4637 h 47.5386 v -20.9983 c 0,-1.1338 0.91983,-2.0521 2.05208,-2.0521 h 18.12807 v -10.2809 h -67.71875 z m 67.71894,-95.336 h -67.71894 v 19.7705 h 67.71875 v -19.7705 z"
          id="path8526-6" /></g><text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1.22px;font-family:'Maven Pro';-inkscape-font-specification:'Maven Pro Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke:none"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1.22px;font-family:'Maven Pro',sans-serif;-inkscape-font-specification:'Maven Pro Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke:none"
        x="207.91228"
        y="-123.4655"
        id="text-box6-csv">CSV</text><g
