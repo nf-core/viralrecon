@@ -104,11 +104,11 @@ First, prepare a samplesheet with your input data that looks as follows:
 `samplesheet.csv`:
 
 ```csv
-sample,fastq_1,fastq_2
-SAMPLE_1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
+sample,fastq_1,fastq_2,barcode
+SAMPLE_1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz,
 ```
 
-Each row represents a fastq file (single-end) or a pair of fastq files (paired end). Rows with the same sample identifier are considered technical replicates and merged automatically.
+Each row represents a fastq file (single-end / Nanopore) or a pair of fastq files (paired end). Rows with the same sample identifier are considered technical replicates and merged automatically. For Nanopore data, a sample can alternatively be given by its `barcode` together with `--fastq_dir` (see the [usage documentation](https://nf-co.re/viralrecon/usage)).
 
 ### Typical commands
 
