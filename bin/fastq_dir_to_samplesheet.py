@@ -112,14 +112,14 @@ def fastq_dir_to_samplesheet(
             os.makedirs(out_dir)
 
         with open(samplesheet_file, "w") as fout:
-            header = ["sample", "fastq_1", "fastq_2"]
+            header = ["sample", "fastq_1", "fastq_2", "barcode"]
             fout.write(",".join(header) + "\n")
             for sample, reads in sorted(read_dict.items()):
                 for idx, read_1 in enumerate(reads["R1"]):
                     read_2 = ""
                     if idx < len(reads["R2"]):
                         read_2 = reads["R2"][idx]
-                    sample_info = ",".join([sample, read_1, read_2])
+                    sample_info = ",".join([sample, read_1, read_2, ""])
                     fout.write(f"{sample_info}\n")
     else:
         error_str = "\nWARNING: No FastQ files found so samplesheet has not been created!\n\n"

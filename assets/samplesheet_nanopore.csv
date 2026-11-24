@@ -1,6 +1,6 @@
-sample,barcode
-21X983255,1
-70H209408,2
-49Y807476,3
-70N209581,4
-CONTROL,5
+sample,fastq_1,fastq_2,barcode
+21X983255,/path/to/fastq_pass/barcode01/21X983255.fastq.gz,,
+70H209408,/path/to/fastq_pass/barcode02/70H209408.fastq.gz,,
+49Y807476,,,3
+70N209581,,,4
+CONTROL,,,5
