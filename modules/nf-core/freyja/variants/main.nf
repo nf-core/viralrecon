@@ -1,3 +1,6 @@
+// Copyright (c) the nf-core community under an open-source MIT license.
+// See https://github.com/nf-core/modules for full license, file patching instructions and upstream contributing.
+
 process FREYJA_VARIANTS {
     tag "$meta.id"
     label 'process_medium'
@@ -10,7 +13,7 @@ process FREYJA_VARIANTS {
 
     input:
     tuple val(meta), path(bam)
-    path fasta
+    tuple val(meta2), path(fasta), path(fai)
 
     output:
     tuple val(meta), path("*.variants.tsv"), path("*.depth.tsv"), emit: variants
