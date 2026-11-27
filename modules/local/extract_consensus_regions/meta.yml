@@ -26,14 +26,24 @@ input:
         ontologies:
           - edam: http://edamontology.org/format_1975
 output:
-  all_consensus:
+  consensus_fragments_fasta:
     - - meta:
           type: map
           description: Groovy Map containing sample information
-      - "*.all_consensus.fa":
+      - "*.fragments.fa":
           type: file
-          description: Multi-FASTA containing the full and regional consensus sequences
-          pattern: "*.all_consensus.fa"
+          description: Multi-FASTA containing extracted consensus regions only
+          pattern: "*.fragments.fa"
+          ontologies:
+            - edam: http://edamontology.org/format_1929
+  consensus_fragments:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information
+      - "${meta.id}.*.fa":
+          type: file
+          description: Individual FASTA files for each extracted consensus fragment
+          pattern: "${meta.id}.*.fa"
           ontologies:
             - edam: http://edamontology.org/format_1929
   versions_python:

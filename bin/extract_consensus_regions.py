@@ -24,7 +24,7 @@ def parse_args():
         "--sample_id", required=True, help="Sample ID for separate fragment FASTA files."
     )
     parser.add_argument(
-        "-o", "--output", required=True, help="Output multi-FASTA containing the full and regional consensus sequences.",
+        "-o", "--output", required=True, help="Output multi-FASTA containing regional consensus sequences.",
     )
     return parser.parse_args()
 
@@ -129,14 +129,7 @@ def main():
     gene_groups = parse_interest_groups(args.interest_genes)
     regions = extract_regions(seq_record, coordinates, gene_groups)
     output_dir = Path(args.output).parent
-
-    output_records = [
-        SeqRecord(
-            seq_record.seq,
-            id=f"{seq_record.id}|FULL",
-            description=""
-        )
-    ]
+    output_records = []
 
     for genes, sequence in regions:
         region_name = "_".join(genes)
@@ -153,7 +146,8 @@ def main():
             )
         )
 
-    SeqIO.write(output_records, args.output, "fasta")
+    if output_records:
+        SeqIO.write(output_records, args.output, "fasta")
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ workflow HIV_RESISTANCE {
     vcf                     // channel: [ val(meta), [ vcf ] ]
     tbi                     // channel: [ val(meta), [ tbi ] ]
     pangolin                // channel: [ val(meta), [ csv ] ]
+    nextclade_report        // channel: [ val(meta), [ csv ] ]
     nextclade_db            // path   : genome.nextclade_db
     nextclade_dataset_name
     nextclade_dataset_tag
@@ -81,31 +82,41 @@ workflow HIV_RESISTANCE {
         GFF2JSON.out.profile_json
     )
 
-    CONSENSUS_LIFTOFF (
-        consensus,
-        codfreq_sequence,
-        codfreq_annotation,
-        []
-    )
-
-    ch_extract_consensus_input = consensus
-        .join(CONSENSUS_LIFTOFF.out.gff3, by: [0])
-    EXTRACT_CONSENSUS_REGIONS( ch_extract_consensus_input )
-
     RESISTANCE_TABLES(
         SIERRALOCAL.out.json.join(BAM2CODFREQ.out.codfreq, by: [0])
     )
 
-    NEXTCLADE_RUN(
-        EXTRACT_CONSENSUS_REGIONS.out.all_consensus,
-        nextclade_db
-    )
+    ch_report_nextclade = nextclade_report
+    ch_report_consensus = consensus
+    if (params.split_hiv_fragments) {
+        CONSENSUS_LIFTOFF (
+            consensus,
+            codfreq_sequence,
+            codfreq_annotation,
+            []
+        )
+
+        ch_extract_consensus_input = consensus
+            .join(CONSENSUS_LIFTOFF.out.gff3, by: [0])
+        EXTRACT_CONSENSUS_REGIONS(ch_extract_consensus_input)
+
+        NEXTCLADE_RUN(
+            EXTRACT_CONSENSUS_REGIONS.out.consensus_fragments_fasta,
+            nextclade_db
+        )
+        ch_report_nextclade = nextclade_report
+            .join(NEXTCLADE_RUN.out.csv, by: [0])
+            .map { meta, whole_csv, fragments_csv -> tuple(meta, [whole_csv, fragments_csv]) }
+        ch_report_consensus = consensus
+            .join(EXTRACT_CONSENSUS_REGIONS.out.consensus_fragments_fasta, by: [0])
+            .map { meta, whole_fasta, fragments_fasta -> tuple(meta, [whole_fasta, fragments_fasta]) }
+    }
 
     ch_resistance_report_input = SIERRALOCAL.out.json
         .join(RESISTANCE_TABLES.out.mutation_csv, by: [0])
         .join(RESISTANCE_TABLES.out.resistance_csv, by: [0])
-        .join(NEXTCLADE_RUN.out.csv, by: [0])
-        .join(EXTRACT_CONSENSUS_REGIONS.out.all_consensus, by: [0])
+        .join(ch_report_nextclade, by: [0])
+        .join(ch_report_consensus, by: [0])
 
     RESISTANCE_REPORT(
         ch_resistance_report_input,
