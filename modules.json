@@ -222,12 +222,12 @@
                     },
                     "nextclade/datasetget": {
                         "branch": "master",
-                        "git_sha": "bf8d32b65d51e0de16b35f3915b360a4dfb9f347",
+                        "git_sha": "ea78fd31bf13ad817a5b1e3ae95c6946dc79986b",
                         "installed_by": ["modules"]
                     },
                     "nextclade/run": {
                         "branch": "master",
-                        "git_sha": "c302a1ab2512b6791535e1fe971b8cc52efe411d",
+                        "git_sha": "ea78fd31bf13ad817a5b1e3ae95c6946dc79986b",
                         "installed_by": ["modules"]
                     },
                     "pangolin/run": {
