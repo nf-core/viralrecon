@@ -297,18 +297,19 @@ workflow VIRALRECON {
                 }
                 .set { ch_pass_fail_reads }
 
-            ch_pass_fail_reads
-                .map { meta, reads, _json, pass -> if (pass) [ meta, reads ] }
+            ch_pass_reads = ch_pass_fail_reads
+                .filter { meta, _reads, _json, pass -> pass }
+
+            ch_pass_reads
+                .map { meta, reads, _json, _pass -> [ meta, reads ] }
                 .set { ch_variants_fastq }
 
             ch_pass_fail_reads
-                .map {
-                    meta, _reads, json, pass ->
-                    if (!pass) {
+                .filter { meta, _reads, _json, pass -> !pass }
+                .map { meta, _reads, json, _pass ->
                     fail_mapped_reads[meta.id] = '0 reads after trimming (not mapped)'
                     def num_reads = getFastpReadsBeforeFiltering(json)
-                        return [ "$meta.id\t$num_reads" ]
-                    }
+                    [ "$meta.id\t$num_reads" ]
                 }
                 .collect()
                 .map {
@@ -352,22 +353,15 @@ workflow VIRALRECON {
         if (!params.skip_variants) {
             if (params.min_mapped_reads == null) {
                 if (!params.skip_fastp) {
-                    ch_min_mapped_reads = ch_variants_fastq
-                        .join(FASTQ_TRIM_FASTP_FASTQC.out.trim_json, by: [0])
+                    ch_min_mapped_reads = ch_pass_reads
                         .combine(genome.fai)
-                        .map { entry ->
-                            def meta = entry[0][0]
-                            def json = entry[0][2]
-                            def fai = entry[1]
+                        .map { meta, _reads, json, _pass, fai ->
                             tuple(meta, estimateMinMappedReads(getFastpRead1MeanLength(json), fai, params.min_depth_consensus, meta.single_end ? 1 : 2))
                         }
                 } else {
                     ch_min_mapped_reads = ch_variants_fastq
                         .combine(genome.fai)
-                        .map { entry ->
-                            def meta = entry[0][0]
-                            def reads = entry[0][1]
-                            def fai = entry[1]
+                        .map { meta, reads, fai ->
                             tuple(meta, estimateMinMappedReads(getMeanReadLength(reads), fai, params.min_depth_consensus, meta.single_end ? 1 : 2))
                         }
                 }
@@ -554,7 +548,7 @@ workflow VIRALRECON {
         if (!params.skip_variants && !params.skip_freyja) {
             BAM_VARIANT_DEMIX_BOOT_FREYJA(
                 ch_bam,
-                genome.fasta,
+                ch_reference_fasta_fai,
                 params.skip_freyja_boot,
                 params.freyja_repeats,
                 params.freyja_db_name,
@@ -1041,10 +1035,7 @@ workflow VIRALRECON {
                 ch_min_mapped_reads_nanopore = ARTIC_GUPPYPLEX.out.fastq
                     .filter { _meta, fastq -> fastq.countFastq() > min_guppyplex_reads }
                     .combine(genome.fai)
-                    .map { entry ->
-                        def meta = entry[0][0]
-                        def reads = entry[0][1]
-                        def fai = entry[1]
+                    .map { meta, reads, fai ->
                         tuple(meta, estimateMinMappedReads(getMeanReadLength(reads), fai, params.min_depth_consensus, 1))
                     }
             } else {
@@ -1076,10 +1067,7 @@ workflow VIRALRECON {
                 ch_min_mapped_reads_nanopore = ARTIC_GUPPYPLEX.out.fastq
                     .filter { _meta, fastq -> fastq.countFastq() > min_guppyplex_reads }
                     .combine(genome.fai)
-                    .map { entry ->
-                        def meta = entry[0][0]
-                        def reads = entry[0][1]
-                        def fai = entry[1]
+                    .map { meta, reads, fai ->
                         tuple(meta, estimateMinMappedReads(getMeanReadLength(reads), fai, params.min_depth_consensus, 1))
                     }
             } else {
@@ -1296,7 +1284,7 @@ workflow VIRALRECON {
         if (!params.skip_freyja) {
             BAM_VARIANT_DEMIX_BOOT_FREYJA(
                 ch_filtered_bam_nanopore,
-                genome.fasta,
+                ch_fasta_fai_nanopore,
                 params.skip_freyja_boot,
                 params.freyja_repeats,
                 params.freyja_db_name,
