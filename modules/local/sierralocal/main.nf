@@ -4,8 +4,8 @@ process SIERRALOCAL {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/sierra-local:0.4.3--py310hdfd78af_0' :
-        'biocontainers/sierra-local:0.4.3--py310hdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/sierra-local:0.4.4--py310hdfd78af_0' :
+        'biocontainers/sierra-local:0.4.4--py310hdfd78af_0' }"
 
     input:
     tuple val(meta), path(fasta)
