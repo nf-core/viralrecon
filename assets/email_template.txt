@@ -22,7 +22,8 @@ ${errorReport}
 ## nf-core/viralrecon completed with warnings!    ##
 ####################################################\n
 The pipeline finished successfully, but the following samples were skipped
-due to failing the minimum mapped read threshold (less than ${min_mapped_reads}):
+because they had no reads after trimming or did not pass their per-sample
+minimum mapped-read thresholds:
 
   - ${fail_mapped_reads.sort().join("\n  - ")}
 """

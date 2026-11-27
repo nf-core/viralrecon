@@ -19,7 +19,6 @@ params.fasta         = getGenomeAttribute('fasta')
 params.gff           = getGenomeAttribute('gff')
 params.bowtie2_index = getGenomeAttribute('bowtie2')
 
-params.nextclade_dataset           = getGenomeAttribute('nextclade_dataset_v3pl')
 params.nextclade_dataset_name      = getGenomeAttribute('nextclade_dataset_name')
 params.nextclade_dataset_tag       = getGenomeAttribute('nextclade_dataset_tag_v3pl')
 

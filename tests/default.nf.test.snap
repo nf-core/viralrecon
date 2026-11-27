@@ -151,19 +151,19 @@
                     "samtools": 1.24
                 },
                 "SAMTOOLS_FLAGSTAT": {
-                    "samtools": 1.24
+                    "samtools": 1.25
                 },
                 "SAMTOOLS_IDXSTATS": {
-                    "samtools": 1.24
+                    "samtools": 1.25
                 },
                 "SAMTOOLS_INDEX": {
-                    "samtools": 1.24
+                    "samtools": 1.25
                 },
                 "SAMTOOLS_SORT": {
-                    "samtools": 1.24
+                    "samtools": 1.25
                 },
                 "SAMTOOLS_STATS": {
-                    "samtools": 1.24
+                    "samtools": 1.25
                 },
                 "SNPEFF_ANN": {
                     "snpeff": "5.0e"
@@ -1002,16 +1002,16 @@
                 "multiqc_ivar_variants.yaml:md5,22a1b3904671b16aace3b5f73a907614",
                 "multiqc_kraken.yaml:md5,7b5c5eae926f38e7326941d1e38db40b",
                 "multiqc_nextclade_clade.yaml:md5,15ccc4848ada72c96c9b39606517a9bb",
-                "multiqc_pangolin.yaml:md5,ab58fb5d7fd3cced2e3d9ac01be105b8",
+                "multiqc_pangolin.yaml:md5,0827c1034f39b03efb643dafbcde39ae",
                 "multiqc_quast_quast_spades.yaml:md5,cb9b2122a8d6fd4aef51da97bdc5180d",
-                "multiqc_quast_quast_variants.yaml:md5,1465f3600b1643497310946af66d0618",
-                "pangolin_run_table.yaml:md5,091b2cfd81d51516c84ae3476b216c2a",
+                "multiqc_quast_quast_variants.yaml:md5,7adb7443101e88b33ebe329651b6ff15",
+                "pangolin_run_table.yaml:md5,5a009661193e3c3dc9620af31069d198",
                 "snpeff_variant_effects_class.yaml:md5,5f31369f0e087d4fe7eddc14d908f11f",
-                "SAMPLE1_PE.bowtie2.log:md5,87f27874c25146987ccd51210ec66d27",
+                "SAMPLE1_PE.bowtie2.log:md5,20e68f8b6b41da0dffeccbb49e867be2",
                 "SAMPLE1_PE.ivar_trim.ivar.log:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "SAMPLE2_PE.bowtie2.log:md5,032755a770b3d02d46781adcc9187874",
+                "SAMPLE2_PE.bowtie2.log:md5,2cc188d8003e49d74567b2f04c2f34b2",
                 "SAMPLE2_PE.ivar_trim.ivar.log:md5,d41d8cd98f00b204e9800998ecf8427e",
-                "SAMPLE3_SE.bowtie2.log:md5,0f15cf4a1d768bf30ed6a2253e36dd91",
+                "SAMPLE3_SE.bowtie2.log:md5,b385622109b303f70f77eb820b53f993",
                 "SAMPLE3_SE.ivar_trim.ivar.log:md5,d41d8cd98f00b204e9800998ecf8427e",
                 "SAMPLE1_PE.mosdepth.coverage.tsv:md5,c84ccf9896e25886b047f20a18ae67e0",
                 "SAMPLE1_PE.mosdepth.summary.txt:md5,e859adaf4e6a38b8a96f648ad33369ff",
@@ -1028,40 +1028,40 @@
                 "SAMPLE3_SE.mosdepth.summary.txt:md5,27f7f5f8a2caef36dcc1dd504dd4f581",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.flagstat:md5,175a8826b10890b304fd7a30335b98a0",
                 "SAMPLE1_PE.ivar_trim.sorted.bam.idxstats:md5,461869ebfe660675af9e5b2b30bec52c",
-                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,1a70745269d81ff3cbba13fb44b9caa7",
+                "SAMPLE1_PE.ivar_trim.sorted.bam.stats:md5,d5ca374f6051dffd920818da4a62c85d",
                 "SAMPLE1_PE.sorted.bam.flagstat:md5,b71fa417d19a1c64e53a7a4bbb9a66a3",
                 "SAMPLE1_PE.sorted.bam.idxstats:md5,d3f51babb7c8757456be63c9b75ee3d0",
-                "SAMPLE1_PE.sorted.bam.stats:md5,9d0c1cf989168ab817626684b8ba0aff",
+                "SAMPLE1_PE.sorted.bam.stats:md5,f90e9abb655a2e3aeee72f2cd4d4e115",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.flagstat:md5,47616687e389589e8fe1d596bbe4a332",
                 "SAMPLE2_PE.ivar_trim.sorted.bam.idxstats:md5,5f9def3fdb732d1da43650235b5e00e2",
-                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,c831719b0e9f1b74cdd525433b01a108",
+                "SAMPLE2_PE.ivar_trim.sorted.bam.stats:md5,aca5e2f9f4ec34706759622776e47558",
                 "SAMPLE2_PE.sorted.bam.flagstat:md5,041ab8f42dae5f155ee9d7d2a2f23442",
                 "SAMPLE2_PE.sorted.bam.idxstats:md5,72e323cef6b90aea7741eb88cfa843ee",
-                "SAMPLE2_PE.sorted.bam.stats:md5,32bfb3d967b100796d1a132421815ab9",
+                "SAMPLE2_PE.sorted.bam.stats:md5,88ae9a69b377c864ae831ecebc743d49",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.flagstat:md5,6a2d2647c43aa48506d8d1536e498dc5",
                 "SAMPLE3_SE.ivar_trim.sorted.bam.idxstats:md5,6be1ee32c50c77d6a853f02cd42307ba",
-                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,31560fde30eae4f0559c7ee2c3028276",
+                "SAMPLE3_SE.ivar_trim.sorted.bam.stats:md5,eed90e3f62b0e8ba5d09a3d2fc81dc1c",
                 "SAMPLE3_SE.sorted.bam.flagstat:md5,0ae9908cf4840b0ec4ae74afbd395244",
                 "SAMPLE3_SE.sorted.bam.idxstats:md5,184d8ad417ee4242377f18880675165b",
-                "SAMPLE3_SE.sorted.bam.stats:md5,f5f529e4ce6e707ab9b37b5ff54b558a",
+                "SAMPLE3_SE.sorted.bam.stats:md5,88e43b8fd363641d727a0eb74717ef3d",
                 "SAMPLE1_PE.bcftools_stats.txt:md5,dea48017f4cfd2d4b8560e2343cf6bd8",
                 "SAMPLE2_PE.bcftools_stats.txt:md5,ad3a8f84c4dfb2af18fbf2d512340bc1",
                 "SAMPLE3_SE.bcftools_stats.txt:md5,474e5dde3ce408bb36eb4b2452d46907",
-                "SAMPLE1_PE.consensus.fa:md5,c5e132e6eb734d77f729ff04f8350873",
-                "SAMPLE2_PE.consensus.fa:md5,8b9608797e3f74b335a721d2506906f7",
+                "SAMPLE1_PE.consensus.fa:md5,0024be27b4315b7f9b716cd993af04a2",
+                "SAMPLE2_PE.consensus.fa:md5,cd362c4a736702cc57d54ef047d6afcf",
                 "SAMPLE3_SE.consensus.fa:md5,9e9e92afafe787e7672a4e8e80245383",
-                "SAMPLE1_PE.consensus.N_run.tsv:md5,2313262f62f3cdbbb874d1baa1364bbc",
-                "SAMPLE1_PE.consensus.base_counts.tsv:md5,4ea4fd8c48169fa2eeebb4da8d85cdd3",
-                "SAMPLE2_PE.consensus.N_run.tsv:md5,1c74676bba1e12d640748ac51e731ae7",
-                "SAMPLE2_PE.consensus.base_counts.tsv:md5,849837547485915dd5cb4efa7c8cfe9d",
+                "SAMPLE1_PE.consensus.N_run.tsv:md5,6b0057cb2a4d54799cb8082ef5ef16ba",
+                "SAMPLE1_PE.consensus.base_counts.tsv:md5,28a0050db932889fb9b6193f41e23659",
+                "SAMPLE2_PE.consensus.N_run.tsv:md5,bd1fe953c41e9d76afb3c58c28906789",
+                "SAMPLE2_PE.consensus.base_counts.tsv:md5,4ab4fcbf26af15882ff9c4946d07bf94",
                 "SAMPLE3_SE.consensus.N_run.tsv:md5,8fc26eab2393cfde6daf0212d18d58f9",
                 "SAMPLE3_SE.consensus.base_counts.tsv:md5,ecdec402d1e7a094dd26c3d2b906e690",
-                "SAMPLE1_PE.csv:md5,5e40958478d114bc16af8f121eabb7dd",
-                "SAMPLE2_PE.csv:md5,4d0aa4cf7bf41f4023ca6ec9a29411cc",
+                "SAMPLE1_PE.csv:md5,1e0bfe06c4a75b8b964fdae7c02dce78",
+                "SAMPLE2_PE.csv:md5,2a7f3e0fda6dbb7e927a61f239a4a06d",
                 "SAMPLE3_SE.csv:md5,5208a92c30cfb23996cf6689cbb0a4ab",
                 "SAMPLE1_PE.pangolin.csv:md5,f86666cdf29f625ff8650d8ce7bc69cc",
-                "SAMPLE2_PE.pangolin.csv:md5,0955aa701783c4f989e82eff93c8f771",
-                "SAMPLE3_SE.pangolin.csv:md5,f2d5605d3c82d17bbd26bd3eb3f00306",
+                "SAMPLE2_PE.pangolin.csv:md5,2769897eb0ad2cad9e00eab1e7a45e9f",
+                "SAMPLE3_SE.pangolin.csv:md5,9fee48a23dd3799f5c03f79ce0d633f6",
                 "gc.icarus.txt:md5,f18a506ebd4e3630c7bb4cef61d30f21",
                 "SAMPLE1_PE.variant_counts.log:md5,dca67b678c8fb1ff819c6e2549bd526d",
                 "SAMPLE2_PE.variant_counts.log:md5,3e36a199838f298a5db0e86f360d394e",
@@ -1071,10 +1071,10 @@
                 "SAMPLE3_SE.snpeff.bcftools_stats.txt:md5,9e57202bccab4c194a98394545b313a2"
             ]
         ],
+        "timestamp": "2026-11-27T17:35:48.811678368",
         "meta": {
-            "nf-test": "0.9.3",
-            "nextflow": "26.04.0"
-        },
-        "timestamp": "2026-10-27T11:51:00.941888018"
+            "nf-test": "0.9.5",
+            "nextflow": "26.10.7"
+        }
     }
 }

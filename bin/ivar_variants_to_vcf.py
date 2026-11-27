@@ -5,6 +5,7 @@ import sys
 import errno
 import argparse
 import warnings
+from decimal import Decimal, InvalidOperation
 from itertools import product
 
 import numpy as np
@@ -70,6 +71,19 @@ def parse_args(args=None):
 
 
 class IvarVariants:
+    @staticmethod
+    def format_depth(value):
+        """Format an iVar read depth as the integer required by VCF."""
+        if pd.isna(value) or str(value).strip() in {"", "."}:
+            return "."
+        try:
+            depth = Decimal(str(value))
+        except InvalidOperation as error:
+            raise ValueError(f"Invalid read depth value: {value!r}") from error
+        if not depth.is_finite() or depth != depth.to_integral_value():
+            raise ValueError(f"Read depth must be a finite integer, got {value!r}")
+        return str(int(depth))
+
     def __init__(
         self,
         file_in=None,
@@ -220,7 +234,11 @@ class IvarVariants:
         # simple workaround by setting the genotype to a constant 1
         ivar_df["DP"] = ivar_df["TOTAL_DP"]
         ivar_df["GT"] = 1
-        vcf_dict["FILENAME"] = ivar_df[format_cols].astype(str).apply(":".join, axis=1)
+        depth_cols = {"DP", "REF_DP", "REF_RV", "ALT_DP", "ALT_RV"}
+        sample_values = ivar_df[format_cols].copy()
+        for column in depth_cols:
+            sample_values[column] = sample_values[column].map(self.format_depth)
+        vcf_dict["FILENAME"] = sample_values.astype(str).apply(":".join, axis=1)
         if not self.ignore_merge:
             # These columns are needed to merge codons. They will be deleted later
             vcf_dict["REF_CODON"] = ivar_df["REF_CODON"]
@@ -343,7 +361,9 @@ class IvarVariants:
         consec_rows.at[merged_index, "REF"] = "".join(consec_rows["REF"])
         consec_rows.at[merged_index, "ALT"] = "".join(consec_rows["ALT"])
         freqs_to_merge = ",".join(consec_rows["FILENAME"].str.split(":").str[8])
-        depths_to_merge = ",".join(consec_rows["FILENAME"].str.split(":").str[5])
+        depths_to_merge = ",".join(
+            consec_rows["FILENAME"].str.split(":").str[5].map(self.format_depth)
+        )
         stats_to_merge = ":".join([freqs_to_merge, depths_to_merge])
         consec_rows.at[merged_index, "FILENAME"] += f":{stats_to_merge}"
         consec_rows.at[merged_index, "FORMAT"] += ":MERGED_AF:MERGED_DP"
@@ -427,8 +447,18 @@ class IvarVariants:
             split_vals = row.split(":")
             ref_dp = split_vals[2]
             total_dp = split_vals[1]
-            split_vals[8] = str(round(int(ref_dp) / int(total_dp), 3))
+            ref_dp = self.format_depth(ref_dp)
+            total_dp = self.format_depth(total_dp)
+            ref_depth = int(ref_dp) if ref_dp != "." else 0
+            total_depth = int(total_dp) if total_dp != "." else 0
+            split_vals[8] = (
+                str(round(ref_depth / total_depth, 3)) if total_depth else "."
+            )
+            split_vals[1] = total_dp
+            split_vals[2] = ref_dp
+            split_vals[3] = self.format_depth(split_vals[3])
             split_vals[5] = ref_dp
+            split_vals[6] = self.format_depth(split_vals[6])
             ref_filecol.append(":".join(split_vals))
         ref_row_set["FILENAME"] = ref_filecol
         merged_ref_rows = (
@@ -470,7 +500,7 @@ class IvarVariants:
             # If all af between 04 and 0.6 keep just this combination and return.
             # Note: All other combinations are going to be valid considering distance
             # but we've empirically checked that only ALT combination is found in real bams.
-            if all(af > 0.4 or af < 0.6 for af in af_list):
+            if all(0.4 < af < 0.6 for af in af_list):
                 consec_series = [altdict]
                 return consec_series
 

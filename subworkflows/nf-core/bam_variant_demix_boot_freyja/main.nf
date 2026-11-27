@@ -1,3 +1,6 @@
+// Copyright (c) the nf-core community under an open-source MIT license.
+// See https://github.com/nf-core/modules for full license, file patching instructions and upstream contributing.
+
 include { FREYJA_VARIANTS   } from '../../../modules/nf-core/freyja/variants'
 include { FREYJA_UPDATE     } from '../../../modules/nf-core/freyja/update'
 include { FREYJA_DEMIX      } from '../../../modules/nf-core/freyja/demix'
@@ -7,7 +10,7 @@ workflow BAM_VARIANT_DEMIX_BOOT_FREYJA {
 
     take:
     ch_bam               // channel: [ val(meta), path(bam) ]
-    ch_fasta             // channel: [ path(fasta) ]
+    ch_fasta_fai         // channel: [ val(meta), path(fasta), path(fai) ]
     val_skip_boot        // value skip_boot
     val_repeats          // value repeats
     val_db_name          // string db_name
@@ -21,7 +24,7 @@ workflow BAM_VARIANT_DEMIX_BOOT_FREYJA {
     //
     FREYJA_VARIANTS (
         ch_bam,
-        ch_fasta
+        ch_fasta_fai
     )
     ch_freyja_variants = FREYJA_VARIANTS.out.variants
 

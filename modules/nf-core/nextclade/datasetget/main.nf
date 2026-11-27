@@ -1,11 +1,14 @@
+// Copyright (c) the nf-core community under an open-source MIT license.
+// See https://github.com/nf-core/modules for full license, file patching instructions and upstream contributing.
+
 process NEXTCLADE_DATASETGET {
     tag "$dataset"
     label 'process_low'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/7a/7acbe1c9567cd9e31fdf974b9fa1d8ed312ed9e1ae22cbe1c4c34d56096635af/data' :
-        'community.wave.seqera.io/library/nextclade:3.21.2--d3538cbe586c0f6c' }"
+        'https://community-cr-prod.seqera.io/docker/registry/v2/blobs/sha256/a2/a2e78f92daf0513c2c72dd8101d5280ceeb1feb53e164ed1268fee6513449b0c/data' :
+        'community.wave.seqera.io/library/nextclade:3.29.1--792e8bf7ff96aca1' }"
 
     input:
     val dataset

@@ -265,7 +265,7 @@ custom_data:
       format: "{:,.0f}"
   fail_mapped_samples:
     section_name: "WARNING: Fail Alignment Check"
-    description: "List of samples that failed the Bowtie2 minimum mapped reads threshold specified via the '--min_mapped_reads' parameter, and hence were ignored for the downstream processing steps."
+    description: "Samples that failed the minimum mapped reads threshold, with the observed and required read counts for each sample."
     plot_type: "table"
     pconfig:
       id: "fail_mapped_samples_table"

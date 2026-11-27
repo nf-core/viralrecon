@@ -41,6 +41,8 @@ report_section_order:
     after: summary_variants_metrics
   fail_guppyplex_count_samples:
     after: summary_variants_metrics
+  fail_mapped_samples_nanopore:
+    after: summary_variants_metrics
   amplicon_heatmap:
     before: summary_variants_metrics
   software_versions:
@@ -87,6 +89,15 @@ custom_data:
       id: "fail_guppyplex_count_samples_table"
       table_title: "Samples failed artic guppyplex read count threshold"
       namespace: "Samples failed artic guppyplex read count threshold"
+      format: "{:,.0f}"
+  fail_mapped_samples_nanopore:
+    section_name: "WARNING: Fail Alignment Check"
+    description: "Samples that failed the minimum mapped reads threshold, with the observed and required read counts for each sample."
+    plot_type: "table"
+    pconfig:
+      id: "fail_mapped_samples_nanopore_table"
+      table_title: "Samples failed mapped read threshold"
+      namespace: "Samples failed mapping read threshold"
       format: "{:,.0f}"
   amplicon_heatmap:
     section_name: "Amplicon coverage heatmap"
