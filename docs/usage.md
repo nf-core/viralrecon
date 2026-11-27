@@ -437,6 +437,7 @@ The following parameters have been added to handle **HIV resistance detection** 
 
 - General HIV resistance options:
   - **`perform_hiv_resistance`**: Whether to perform HIV resistance analysis or not.
+  - **`split_hiv_fragments`**: Split the consensus genome into the `PR_RT` and `IN` pol fragments before running a second Nextclade analysis for subtype comparison. The HIV profile enables this option by default. When disabled, the pipeline uses the whole-genome consensus and whole-genome Nextclade result only.
 - Options related with files required by `sierra-local` software for resistance detecton in HIV. If not provided, the files included with the software will be used.
   - **`hivdb_xml`**: Path to the HIVdb ASI2 XML file. Updated files can be found [here](https://github.com/hivdb/hivfacts/tree/main/data/algorithms), where the different algorithm versions are stored. The one included in the software is the one with `HIVDB_9.8.xml` name.
   - **`apobec_drm`**: Path to the JSON HIVdb APOBEC DRM file. Updated files can be found [here](https://github.com/hivdb/hivfacts/tree/main/data/apobecs) with the `apobec_drms.json` name.
