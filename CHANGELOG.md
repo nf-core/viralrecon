@@ -44,6 +44,7 @@ Thank you to everyone else that has contributed by reporting bugs, enhancements 
 - [[PR #626](https://github.com/nf-core/viralrecon/pull/626)] - Add `--no-same-owner` to nanopore `UNTAR` on Azure Batch
 - [[PR #625](https://github.com/nf-core/viralrecon/pull/625)] - Fix `.str` accessor crash on single-value `AD` in `make_variants_long_table.py`
 - [[PR #613](https://github.com/nf-core/viralrecon/pull/613)] - Addition of variant and consensus frequency and depth thresholds
+- [[PR #611](https://github.com/nf-core/viralrecon/pull/611)] - Improve the HIV drug resistance detection
 
 ### Parameters
 
