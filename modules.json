@@ -7,12 +7,12 @@
                 "nf-core": {
                     "abacas": {
                         "branch": "master",
-                        "git_sha": "6d46786420b4d7bc88eba026eb389c0c5535d120",
+                        "git_sha": "ac35fef0320e8573a69d858769537b562a8c6204",
                         "installed_by": ["modules"]
                     },
                     "artic/aligntrim": {
                         "branch": "master",
-                        "git_sha": "1c2df6eda26829e3025cb5a98a344a18ac55a706",
+                        "git_sha": "18dd4cf17ca626a307d1d55b34cb36ba834a8152",
                         "installed_by": ["modules"]
                     },
                     "artic/guppyplex": {
