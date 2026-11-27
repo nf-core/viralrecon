@@ -672,6 +672,10 @@ workflow VIRALRECON {
         //
 
         if (!params.skip_variants && params.perform_hiv_resistance) {
+            if (params.skip_nextclade) {
+                error("HIV resistance report generation requires Nextclade output. Please remove the '--skip_nextclade' flag.")
+            }
+
             HIV_RESISTANCE (
                 ch_consensus_genome,
                 ch_bam.join(ch_bai, by: [0]),
@@ -680,7 +684,10 @@ workflow VIRALRECON {
                 ch_vcf,
                 ch_tbi,
                 ch_pangolin_report,
-                ch_nextclade_report
+                ch_nextclade_report,
+                genome.nextclade_db,
+                ch_nextclade_dataset_name,
+                ch_nextclade_dataset_tag
             )
         }
 

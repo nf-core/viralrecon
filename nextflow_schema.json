@@ -698,6 +698,11 @@
                     "type": "boolean",
                     "fa_icon": "fas fa-fast-forward",
                     "description": "Whether to perform sierra local HIV resistance analysis."
+                },
+                "split_hiv_fragments": {
+                    "type": "boolean",
+                    "fa_icon": "fas fa-fast-forward",
+                    "description": "Split HIV consensus genome into the different pol fragments."
                 }
             }
         },
