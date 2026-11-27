@@ -305,8 +305,8 @@ workflow VIRALRECON {
                 .map {
                     meta, _reads, json, pass ->
                     if (!pass) {
-                        fail_mapped_reads[meta.id] = '0 reads after trimming (not mapped)'
-                        def num_reads = getFastpReadsBeforeFiltering(json)
+                    fail_mapped_reads[meta.id] = '0 reads after trimming (not mapped)'
+                    def num_reads = getFastpReadsBeforeFiltering(json)
                         return [ "$meta.id\t$num_reads" ]
                     }
                 }
@@ -1418,7 +1418,7 @@ workflow VIRALRECON {
     ch_multiqc_custom_config = params.multiqc_config ? [ file(params.multiqc_config, checkIfExists: true) ] : []
     ch_multiqc_logo          = params.multiqc_logo ? [ file(params.multiqc_logo, checkIfExists: true) ] : []
 
-    def ch_summary_params = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
+    def ch_summary_params = paramsSummaryMap(parameters_schema: "nextflow_schema.json")
     ch_workflow_summary = channel.value(paramsSummaryMultiqc(ch_summary_params))
     ch_multiqc_files = ch_multiqc_files.mix(
         ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
